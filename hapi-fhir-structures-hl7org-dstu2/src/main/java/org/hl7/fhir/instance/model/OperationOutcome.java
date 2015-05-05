@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A collection of error, warning or information messages that result from a system action.
@@ -147,7 +147,7 @@ public class OperationOutcome extends DomainResource {
     }
 
     @Block()
-    public static class OperationOutcomeIssueComponent extends BackboneElement {
+    public static class OperationOutcomeIssueComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates whether the issue indicates a variation from successful processing.
          */
@@ -178,10 +178,16 @@ public class OperationOutcome extends DomainResource {
 
         private static final long serialVersionUID = -869408333L;
 
+    /*
+     * Constructor
+     */
       public OperationOutcomeIssueComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public OperationOutcomeIssueComponent(Enumeration<IssueSeverity> severity, CodeableConcept code) {
         super();
         this.severity = severity;
@@ -420,6 +426,9 @@ public class OperationOutcome extends DomainResource {
 
     private static final long serialVersionUID = -152150052L;
 
+  /*
+   * Constructor
+   */
     public OperationOutcome() {
       super();
     }

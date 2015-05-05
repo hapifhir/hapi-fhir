@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Sample for analysis.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class Specimen extends DomainResource {
 
     @Block()
-    public static class SpecimenCollectionComponent extends BackboneElement {
+    public static class SpecimenCollectionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Person who collected the specimen.
          */
@@ -97,6 +97,9 @@ public class Specimen extends DomainResource {
 
         private static final long serialVersionUID = 2117268554L;
 
+    /*
+     * Constructor
+     */
       public SpecimenCollectionComponent() {
         super();
       }
@@ -378,7 +381,7 @@ public class Specimen extends DomainResource {
   }
 
     @Block()
-    public static class SpecimenTreatmentComponent extends BackboneElement {
+    public static class SpecimenTreatmentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Textual description of procedure.
          */
@@ -407,6 +410,9 @@ public class Specimen extends DomainResource {
 
         private static final long serialVersionUID = -373251521L;
 
+    /*
+     * Constructor
+     */
       public SpecimenTreatmentComponent() {
         super();
       }
@@ -594,7 +600,7 @@ public class Specimen extends DomainResource {
   }
 
     @Block()
-    public static class SpecimenContainerComponent extends BackboneElement {
+    public static class SpecimenContainerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances.
          */
@@ -639,6 +645,9 @@ public class Specimen extends DomainResource {
 
         private static final long serialVersionUID = -1608132325L;
 
+    /*
+     * Constructor
+     */
       public SpecimenContainerComponent() {
         super();
       }
@@ -972,10 +981,16 @@ public class Specimen extends DomainResource {
 
     private static final long serialVersionUID = -1070246507L;
 
+  /*
+   * Constructor
+   */
     public Specimen() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Specimen(Reference subject) {
       super();
       this.subject = subject;

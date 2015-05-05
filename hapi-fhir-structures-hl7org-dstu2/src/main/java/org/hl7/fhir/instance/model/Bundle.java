@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A container for a collection of resources.
@@ -362,7 +362,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     @Block()
-    public static class BundleLinkComponent extends BackboneElement {
+    public static class BundleLinkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
          */
@@ -379,10 +379,16 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -1010386066L;
 
+    /*
+     * Constructor
+     */
       public BundleLinkComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public BundleLinkComponent(StringType relation, UriType url) {
         super();
         this.relation = relation;
@@ -521,7 +527,7 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntryComponent extends BackboneElement {
+    public static class BundleEntryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The Base URL for the resource, if different to the base URL specified for the bundle as a whole.
          */
@@ -566,6 +572,9 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -1846898377L;
 
+    /*
+     * Constructor
+     */
       public BundleEntryComponent() {
         super();
       }
@@ -807,7 +816,7 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntrySearchComponent extends BackboneElement {
+    public static class BundleEntrySearchComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
          */
@@ -824,6 +833,9 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = 837739866L;
 
+    /*
+     * Constructor
+     */
       public BundleEntrySearchComponent() {
         super();
       }
@@ -968,7 +980,7 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntryTransactionComponent extends BackboneElement {
+    public static class BundleEntryTransactionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
          */
@@ -1013,10 +1025,16 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -769185862L;
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionComponent(Enumeration<HttpVerb> method, UriType url) {
         super();
         this.method = method;
@@ -1365,7 +1383,7 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntryTransactionResponseComponent extends BackboneElement {
+    public static class BundleEntryTransactionResponseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The status code returned by processing this entry.
          */
@@ -1396,10 +1414,16 @@ public class Bundle extends Resource implements IBaseBundle {
 
         private static final long serialVersionUID = -1526413234L;
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionResponseComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionResponseComponent(StringType status) {
         super();
         this.status = status;
@@ -1688,10 +1712,16 @@ public class Bundle extends Resource implements IBaseBundle {
 
     private static final long serialVersionUID = -1380125450L;
 
+  /*
+   * Constructor
+   */
     public Bundle() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Bundle(Enumeration<BundleType> type) {
       super();
       this.type = type;

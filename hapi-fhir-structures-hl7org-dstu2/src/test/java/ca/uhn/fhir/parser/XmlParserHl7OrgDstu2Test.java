@@ -571,11 +571,11 @@ public class XmlParserHl7OrgDstu2Test {
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+		assertEquals("#1", patient.getManagingOrganization().getReferenceElement().getValue());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId().getValue());
+		assertEquals("#1", org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -609,7 +609,7 @@ public class XmlParserHl7OrgDstu2Test {
 	 * Thanks to Alexander Kley!
 	 */
 	@Test
-	public void testParseContainedBinaryResource() {
+	public void testParseContainedBinaryResource() throws Exception {
 		byte[] bin = new byte[] { 0, 1, 2, 3, 4 };
 		final Binary binary = new Binary();
 		binary.setContentType("PatientConsent").setContent(bin);
@@ -621,7 +621,7 @@ public class XmlParserHl7OrgDstu2Test {
 		cc.addCoding().setSystem("mySystem").setCode("PatientDocument");
 		manifest.setType(cc);
 		manifest.setMasterIdentifier(new Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
-		manifest.addContent().setResource(binary);
+		manifest.addContent().setP(new Reference(binary));
 		manifest.setStatus(DocumentReferenceStatus.CURRENT);
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
@@ -631,7 +631,7 @@ public class XmlParserHl7OrgDstu2Test {
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());
 		assertEquals(1, actual.getContent().size());
-		assertNotNull(actual.getContent().get(0).getResource());
+		assertNotNull(actual.getContent().get(0).getPReference().getResource());
 
 	}
 
@@ -771,7 +771,7 @@ public class XmlParserHl7OrgDstu2Test {
 		rpt.getName().setText("Report");
 
 		Specimen spm = new Specimen();
-		spm.addIdentifier().setLabel("Report1ContainedSpecimen1");
+		spm.addIdentifier().setValue("Report1ContainedSpecimen1");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -839,7 +839,7 @@ public class XmlParserHl7OrgDstu2Test {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Reference ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
 	}
 
@@ -849,7 +849,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue(new Reference("Organization/123"));
+		patient.addExtension().setUrl("urn:foo").setValue(new Reference().setReference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -860,7 +860,7 @@ public class XmlParserHl7OrgDstu2Test {
 		List<Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
 	}
 
@@ -1084,7 +1084,7 @@ public class XmlParserHl7OrgDstu2Test {
 		//@formatter:off
 		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
 				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
 				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
 				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
@@ -1144,13 +1144,13 @@ public class XmlParserHl7OrgDstu2Test {
 				"		</extension>\n" + 
 				"	</extension>\n" + 
 				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<value value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
 				"</ResourceWithExtensionsA>";
 		//@formatter:on
 
 		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", resource.getFoo1().get(0).getValue());
 		assertEquals("Foo1Value2", resource.getFoo1().get(1).getValue());
 		assertEquals("Foo2Value1", resource.getFoo2().getValue());
@@ -1198,13 +1198,13 @@ public class XmlParserHl7OrgDstu2Test {
 				"		<valueString value=\"Foo2Value1\"/>\n" + 
 				"	</modifierExtension>\n" + 
 				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<value value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
 				"</Patient>";
 		//@formatter:on
 
 		Patient resource = (Patient) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", ((IPrimitiveType<?>) resource.getExtension().get(0).getValue()).getValueAsString());
 		assertEquals("Foo1Value2", ((IPrimitiveType<?>) resource.getExtension().get(1).getValue()).getValueAsString());
 		assertEquals("Foo2Value1", ((IPrimitiveType<?>) resource.getModifierExtension().get(0).getValue()).getValueAsString());
@@ -1228,7 +1228,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		//@formatter:off
 		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "</Patient>";
 		//@formatter:on
 
@@ -1472,13 +1472,13 @@ public class XmlParserHl7OrgDstu2Test {
 		String msg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 				"<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
 				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<value value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
 				"</Patient>";
 		//@formatter:on
 
 		Patient resource = (Patient) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 	}
 
 	@Test

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * The details of a Healthcare Service available at a location.
@@ -189,7 +189,7 @@ public class HealthcareService extends DomainResource {
     }
 
     @Block()
-    public static class ServiceTypeComponent extends BackboneElement {
+    public static class ServiceTypeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The specific type of service being delivered or performed.
          */
@@ -206,10 +206,16 @@ public class HealthcareService extends DomainResource {
 
         private static final long serialVersionUID = 1703986174L;
 
+    /*
+     * Constructor
+     */
       public ServiceTypeComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ServiceTypeComponent(CodeableConcept type) {
         super();
         this.type = type;
@@ -325,7 +331,7 @@ public class HealthcareService extends DomainResource {
   }
 
     @Block()
-    public static class HealthcareServiceAvailableTimeComponent extends BackboneElement {
+    public static class HealthcareServiceAvailableTimeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates which Days of the week are available between the Start and End Times.
          */
@@ -356,6 +362,9 @@ public class HealthcareService extends DomainResource {
 
         private static final long serialVersionUID = -2139510127L;
 
+    /*
+     * Constructor
+     */
       public HealthcareServiceAvailableTimeComponent() {
         super();
       }
@@ -610,7 +619,7 @@ public class HealthcareService extends DomainResource {
   }
 
     @Block()
-    public static class HealthcareServiceNotAvailableComponent extends BackboneElement {
+    public static class HealthcareServiceNotAvailableComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The reason that can be presented to the user as to why this time is not available.
          */
@@ -627,10 +636,16 @@ public class HealthcareService extends DomainResource {
 
         private static final long serialVersionUID = 310849929L;
 
+    /*
+     * Constructor
+     */
       public HealthcareServiceNotAvailableComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public HealthcareServiceNotAvailableComponent(StringType description) {
         super();
         this.description = description;
@@ -917,10 +932,16 @@ public class HealthcareService extends DomainResource {
 
     private static final long serialVersionUID = 543354370L;
 
+  /*
+   * Constructor
+   */
     public HealthcareService() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public HealthcareService(Reference location) {
       super();
       this.location = location;

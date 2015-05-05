@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
@@ -147,7 +147,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     @Block()
-    public static class ItemsComponent extends BackboneElement {
+    public static class ItemsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -157,10 +157,16 @@ public class ProcessRequest extends DomainResource {
 
         private static final long serialVersionUID = -1598360600L;
 
+    /*
+     * Constructor
+     */
       public ItemsComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ItemsComponent(IntegerType sequenceLinkId) {
         super();
         this.sequenceLinkId = sequenceLinkId;
@@ -388,10 +394,16 @@ public class ProcessRequest extends DomainResource {
 
     private static final long serialVersionUID = -1852083956L;
 
+  /*
+   * Constructor
+   */
     public ProcessRequest() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ProcessRequest(Enumeration<Actionlist> action) {
       super();
       this.action = action;

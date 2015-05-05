@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.
@@ -848,7 +848,7 @@ public class Conformance extends DomainResource {
     }
 
     @Block()
-    public static class ConformanceContactComponent extends BackboneElement {
+    public static class ConformanceContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the conformance.
          */
@@ -865,6 +865,9 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public ConformanceContactComponent() {
         super();
       }
@@ -1004,7 +1007,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceSoftwareComponent extends BackboneElement {
+    public static class ConformanceSoftwareComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Name software is known by.
          */
@@ -1028,10 +1031,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 1819769027L;
 
+    /*
+     * Constructor
+     */
       public ConformanceSoftwareComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceSoftwareComponent(StringType name) {
         super();
         this.name = name;
@@ -1226,7 +1235,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceImplementationComponent extends BackboneElement {
+    public static class ConformanceImplementationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Information about the specific installation that this conformance statement relates to.
          */
@@ -1243,10 +1252,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = -289238508L;
 
+    /*
+     * Constructor
+     */
       public ConformanceImplementationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceImplementationComponent(StringType description) {
         super();
         this.description = description;
@@ -1388,7 +1403,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceRestComponent extends BackboneElement {
+    public static class ConformanceRestComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies whether this portion of the statement is describing ability to initiate or receive restful operations.
          */
@@ -1447,10 +1462,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = -535980615L;
 
+    /*
+     * Constructor
+     */
       public ConformanceRestComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceRestComponent(Enumeration<RestfulConformanceMode> mode) {
         super();
         this.mode = mode;
@@ -1882,7 +1903,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceRestSecurityComponent extends BackboneElement {
+    public static class ConformanceRestSecurityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Server adds CORS headers when responding to requests - this enables javascript applications to use the server.
          */
@@ -1913,6 +1934,9 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 391663952L;
 
+    /*
+     * Constructor
+     */
       public ConformanceRestSecurityComponent() {
         super();
       }
@@ -2147,7 +2171,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceRestSecurityCertificateComponent extends BackboneElement {
+    public static class ConformanceRestSecurityCertificateComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Mime type for certificate.
          */
@@ -2164,6 +2188,9 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 2092655854L;
 
+    /*
+     * Constructor
+     */
       public ConformanceRestSecurityCertificateComponent() {
         super();
       }
@@ -2308,7 +2335,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceRestResourceComponent extends BackboneElement {
+    public static class ConformanceRestResourceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A type of resource exposed via the restful interface.
          */
@@ -2393,10 +2420,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 1477462605L;
 
+    /*
+     * Constructor
+     */
       public ConformanceRestResourceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceRestResourceComponent(CodeType type) {
         super();
         this.type = type;
@@ -2983,7 +3016,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ResourceInteractionComponent extends BackboneElement {
+    public static class ResourceInteractionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Coded identifier of the operation, supported by the system resource.
          */
@@ -3000,10 +3033,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = -437507806L;
 
+    /*
+     * Constructor
+     */
       public ResourceInteractionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ResourceInteractionComponent(Enumeration<TypeRestfulInteraction> code) {
         super();
         this.code = code;
@@ -3145,7 +3184,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceRestResourceSearchParamComponent extends BackboneElement {
+    public static class ConformanceRestResourceSearchParamComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of the search parameter used in the interface.
          */
@@ -3190,10 +3229,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 938312816L;
 
+    /*
+     * Constructor
+     */
       public ConformanceRestResourceSearchParamComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceRestResourceSearchParamComponent(StringType name, Enumeration<SearchParamType> type) {
         super();
         this.name = name;
@@ -3559,7 +3604,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class SystemInteractionComponent extends BackboneElement {
+    public static class SystemInteractionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A coded identifier of the operation, supported by the system.
          */
@@ -3576,10 +3621,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 510675287L;
 
+    /*
+     * Constructor
+     */
       public SystemInteractionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SystemInteractionComponent(Enumeration<SystemRestfulInteraction> code) {
         super();
         this.code = code;
@@ -3721,7 +3772,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceRestOperationComponent extends BackboneElement {
+    public static class ConformanceRestOperationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of a query, which is used in the _query parameter when the query is called.
          */
@@ -3743,10 +3794,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 122107272L;
 
+    /*
+     * Constructor
+     */
       public ConformanceRestOperationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceRestOperationComponent(StringType name, Reference definition) {
         super();
         this.name = name;
@@ -3884,7 +3941,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceMessagingComponent extends BackboneElement {
+    public static class ConformanceMessagingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An address to which messages and/or replies are to be sent.
          */
@@ -3915,6 +3972,9 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = -1356115534L;
 
+    /*
+     * Constructor
+     */
       public ConformanceMessagingComponent() {
         super();
       }
@@ -4155,7 +4215,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceMessagingEventComponent extends BackboneElement {
+    public static class ConformanceMessagingEventComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A coded identifier of a supported messaging event.
          */
@@ -4224,10 +4284,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = 1680159501L;
 
+    /*
+     * Constructor
+     */
       public ConformanceMessagingEventComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceMessagingEventComponent(Coding code, Enumeration<MessageConformanceEventMode> mode, CodeType focus, Reference request, Reference response) {
         super();
         this.code = code;
@@ -4641,7 +4707,7 @@ public class Conformance extends DomainResource {
   }
 
     @Block()
-    public static class ConformanceDocumentComponent extends BackboneElement {
+    public static class ConformanceDocumentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Mode of this document declaration - whether application is producer or consumer.
          */
@@ -4670,10 +4736,16 @@ public class Conformance extends DomainResource {
 
         private static final long serialVersionUID = -1059555053L;
 
+    /*
+     * Constructor
+     */
       public ConformanceDocumentComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConformanceDocumentComponent(Enumeration<DocumentMode> mode, Reference profile) {
         super();
         this.mode = mode;
@@ -5009,10 +5081,16 @@ public class Conformance extends DomainResource {
 
     private static final long serialVersionUID = 1631871430L;
 
+  /*
+   * Constructor
+   */
     public Conformance() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Conformance(DateTimeType date, IdType fhirVersion, BooleanType acceptUnknown) {
       super();
       this.date = date;

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An order for both supply of the medication and the instructions for administration of the medicine to a patient.
@@ -189,7 +189,7 @@ public class MedicationPrescription extends DomainResource {
     }
 
     @Block()
-    public static class MedicationPrescriptionDosageInstructionComponent extends BackboneElement {
+    public static class MedicationPrescriptionDosageInstructionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.
          */
@@ -262,6 +262,9 @@ public class MedicationPrescription extends DomainResource {
 
         private static final long serialVersionUID = -1144367815L;
 
+    /*
+     * Constructor
+     */
       public MedicationPrescriptionDosageInstructionComponent() {
         super();
       }
@@ -643,7 +646,7 @@ public class MedicationPrescription extends DomainResource {
   }
 
     @Block()
-    public static class MedicationPrescriptionDispenseComponent extends BackboneElement {
+    public static class MedicationPrescriptionDispenseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.
          */
@@ -686,6 +689,9 @@ public class MedicationPrescription extends DomainResource {
 
         private static final long serialVersionUID = -44233312L;
 
+    /*
+     * Constructor
+     */
       public MedicationPrescriptionDispenseComponent() {
         super();
       }
@@ -902,7 +908,7 @@ public class MedicationPrescription extends DomainResource {
   }
 
     @Block()
-    public static class MedicationPrescriptionSubstitutionComponent extends BackboneElement {
+    public static class MedicationPrescriptionSubstitutionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code signifying whether a different drug should be dispensed from what was prescribed.
          */
@@ -919,10 +925,16 @@ public class MedicationPrescription extends DomainResource {
 
         private static final long serialVersionUID = 1693602518L;
 
+    /*
+     * Constructor
+     */
       public MedicationPrescriptionSubstitutionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MedicationPrescriptionSubstitutionComponent(CodeableConcept type) {
         super();
         this.type = type;
@@ -1123,6 +1135,9 @@ public class MedicationPrescription extends DomainResource {
 
     private static final long serialVersionUID = 277504612L;
 
+  /*
+   * Constructor
+   */
     public MedicationPrescription() {
       super();
     }

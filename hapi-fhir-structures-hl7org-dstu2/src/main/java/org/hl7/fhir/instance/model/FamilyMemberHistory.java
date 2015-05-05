@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Significant health events and conditions for a person related to the patient relevant in the context of care for the patient.
@@ -147,7 +147,7 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     @Block()
-    public static class FamilyMemberHistoryConditionComponent extends BackboneElement {
+    public static class FamilyMemberHistoryConditionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system.
          */
@@ -178,10 +178,16 @@ public class FamilyMemberHistory extends DomainResource {
 
         private static final long serialVersionUID = -1664709272L;
 
+    /*
+     * Constructor
+     */
       public FamilyMemberHistoryConditionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public FamilyMemberHistoryConditionComponent(CodeableConcept type) {
         super();
         this.type = type;
@@ -460,10 +466,16 @@ public class FamilyMemberHistory extends DomainResource {
 
     private static final long serialVersionUID = 1785160836L;
 
+  /*
+   * Constructor
+   */
     public FamilyMemberHistory() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public FamilyMemberHistory(Reference patient, CodeableConcept relationship) {
       super();
       this.patient = patient;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.
@@ -218,7 +218,7 @@ public class ConceptMap extends DomainResource {
     }
 
     @Block()
-    public static class ConceptMapContactComponent extends BackboneElement {
+    public static class ConceptMapContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the concept map.
          */
@@ -235,6 +235,9 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public ConceptMapContactComponent() {
         super();
       }
@@ -374,7 +377,7 @@ public class ConceptMap extends DomainResource {
   }
 
     @Block()
-    public static class ConceptMapElementComponent extends BackboneElement {
+    public static class ConceptMapElementComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).
          */
@@ -405,6 +408,9 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = 2079040744L;
 
+    /*
+     * Constructor
+     */
       public ConceptMapElementComponent() {
         super();
       }
@@ -642,7 +648,7 @@ public class ConceptMap extends DomainResource {
   }
 
     @Block()
-    public static class OtherElementComponent extends BackboneElement {
+    public static class OtherElementComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A reference to a specific concept that holds a coded value. This can be an element in a FHIR resource, or a specific reference to a data element in a different specification (e.g. v2) or a general reference to a kind of data field, or a reference to a value set with an appropriately narrow definition.
          */
@@ -666,10 +672,16 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = 1488522448L;
 
+    /*
+     * Constructor
+     */
       public OtherElementComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public OtherElementComponent(UriType element, UriType codeSystem, StringType code) {
         super();
         this.element = element;
@@ -858,7 +870,7 @@ public class ConceptMap extends DomainResource {
   }
 
     @Block()
-    public static class ConceptMapElementMapComponent extends BackboneElement {
+    public static class ConceptMapElementMapComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
          */
@@ -896,10 +908,16 @@ public class ConceptMap extends DomainResource {
 
         private static final long serialVersionUID = 606421694L;
 
+    /*
+     * Constructor
+     */
       public ConceptMapElementMapComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConceptMapElementMapComponent(Enumeration<ConceptEquivalence> equivalence) {
         super();
         this.equivalence = equivalence;
@@ -1305,10 +1323,16 @@ public class ConceptMap extends DomainResource {
 
     private static final long serialVersionUID = 729155675L;
 
+  /*
+   * Constructor
+   */
     public ConceptMap() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ConceptMap(Enumeration<ConformanceResourceStatus> status, Type source, Type target) {
       super();
       this.status = status;

@@ -752,8 +752,8 @@ public class XmlParser extends BaseParser implements IParser {
 		} else {
 			// HL7 structs
 			IRefImplResource resource = (IRefImplResource) theResource;
-			if (StringUtils.isNotBlank(resource.getId().getIdPart())) {
-				resourceId = resource.getId().getIdPart();
+			if (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {
+				resourceId = resource.getIdElement().getIdPart();
 			}
 		}
 

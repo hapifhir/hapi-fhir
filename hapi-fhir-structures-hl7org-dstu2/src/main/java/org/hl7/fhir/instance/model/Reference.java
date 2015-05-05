@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A reference from one resource to another.
@@ -60,8 +61,38 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
 
     private static final long serialVersionUID = 22777321L;
 
+  /*
+   * Constructor
+   */
     public Reference() {
       super();
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param theReference The given reference string (e.g. "Patient/123" or "http://example.com/Patient/123")
+     */
+    public Reference(String theReference) {
+      super(theReference);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param theReference The given reference as an IdType (e.g. "Patient/123" or "http://example.com/Patient/123")
+     */
+    public Reference(IdType theReference) {
+      super(theReference);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param theResource The resource represented by this reference
+     */
+    public Reference(IRefImplResource theResource) {
+      super(theResource);
     }
 
     /**

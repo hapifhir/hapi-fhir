@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
@@ -245,7 +245,7 @@ public class DeviceComponent extends DomainResource {
     }
 
     @Block()
-    public static class DeviceComponentProductionSpecificationComponent extends BackboneElement {
+    public static class DeviceComponentProductionSpecificationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc.
          */
@@ -269,6 +269,9 @@ public class DeviceComponent extends DomainResource {
 
         private static final long serialVersionUID = -1476597516L;
 
+    /*
+     * Constructor
+     */
       public DeviceComponentProductionSpecificationComponent() {
         super();
       }
@@ -496,10 +499,16 @@ public class DeviceComponent extends DomainResource {
 
     private static final long serialVersionUID = 1179239259L;
 
+  /*
+   * Constructor
+   */
     public DeviceComponent() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DeviceComponent(CodeableConcept type, Identifier identifier, InstantType lastSystemChange) {
       super();
       this.type = type;

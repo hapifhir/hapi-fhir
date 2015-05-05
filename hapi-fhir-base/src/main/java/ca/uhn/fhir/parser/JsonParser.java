@@ -678,8 +678,8 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		} else if (theResource instanceof IRefImplResource) {
 			IRefImplResource res = (IRefImplResource) theResource;
-			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getId().getIdPart())) {
-				resourceId = res.getId().getIdPart();
+			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
+				resourceId = res.getIdElement().getIdPart();
 			}
 		}
 
@@ -1096,7 +1096,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (object instanceof IIdentifiableElement) {
 				((IIdentifiableElement) object).setElementSpecificId(elementId);
 			} else if (object instanceof IBaseResource) {
-				((IBaseResource) object).getId().setValue(elementId);
+				((IBaseResource) object).getIdElement().setValue(elementId);
 			}
 		}
 	}

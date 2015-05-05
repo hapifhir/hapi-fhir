@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A Search Parameter that defines a named search item that can be used to search/filter on a resource.
@@ -204,7 +204,7 @@ public class SearchParameter extends DomainResource {
     }
 
     @Block()
-    public static class SearchParameterContactComponent extends BackboneElement {
+    public static class SearchParameterContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the search parameter.
          */
@@ -221,6 +221,9 @@ public class SearchParameter extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public SearchParameterContactComponent() {
         super();
       }
@@ -452,10 +455,16 @@ public class SearchParameter extends DomainResource {
 
     private static final long serialVersionUID = 1984222207L;
 
+  /*
+   * Constructor
+   */
     public SearchParameter() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public SearchParameter(UriType url, StringType name, CodeType base, Enumeration<SearchParamType> type, StringType description) {
       super();
       this.url = url;

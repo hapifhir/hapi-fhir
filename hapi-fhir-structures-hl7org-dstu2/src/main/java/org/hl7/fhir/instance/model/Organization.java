@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class Organization extends DomainResource {
 
     @Block()
-    public static class OrganizationContactComponent extends BackboneElement {
+    public static class OrganizationContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates a purpose for which the contact can be reached.
          */
@@ -78,6 +78,9 @@ public class Organization extends DomainResource {
 
         private static final long serialVersionUID = 1831121305L;
 
+    /*
+     * Constructor
+     */
       public OrganizationContactComponent() {
         super();
       }
@@ -307,6 +310,9 @@ public class Organization extends DomainResource {
 
     private static final long serialVersionUID = 1766834739L;
 
+  /*
+   * Constructor
+   */
     public Organization() {
       super();
     }

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
@@ -233,7 +233,7 @@ public class Patient extends DomainResource {
     }
 
     @Block()
-    public static class ContactComponent extends BackboneElement {
+    public static class ContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The nature of the relationship between the patient and the contact person.
          */
@@ -290,6 +290,9 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = 364269017L;
 
+    /*
+     * Constructor
+     */
       public ContactComponent() {
         super();
       }
@@ -603,7 +606,7 @@ public class Patient extends DomainResource {
   }
 
     @Block()
-    public static class AnimalComponent extends BackboneElement {
+    public static class AnimalComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the high level taxonomic categorization of the kind of animal.
          */
@@ -627,10 +630,16 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = -549738382L;
 
+    /*
+     * Constructor
+     */
       public AnimalComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AnimalComponent(CodeableConcept species) {
         super();
         this.species = species;
@@ -753,7 +762,7 @@ public class Patient extends DomainResource {
   }
 
     @Block()
-    public static class PatientCommunicationComponent extends BackboneElement {
+    public static class PatientCommunicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case. E.g. "en" for English, or "en-US" for American English versus "en-EN" for England English.
          */
@@ -770,10 +779,16 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = 633792918L;
 
+    /*
+     * Constructor
+     */
       public PatientCommunicationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public PatientCommunicationComponent(CodeableConcept language) {
         super();
         this.language = language;
@@ -890,7 +905,7 @@ public class Patient extends DomainResource {
   }
 
     @Block()
-    public static class PatientLinkComponent extends BackboneElement {
+    public static class PatientLinkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The other patient resource that the link refers to.
          */
@@ -912,10 +927,16 @@ public class Patient extends DomainResource {
 
         private static final long serialVersionUID = -1942104050L;
 
+    /*
+     * Constructor
+     */
       public PatientLinkComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public PatientLinkComponent(Reference other, Enumeration<LinkType> type) {
         super();
         this.other = other;
@@ -1183,6 +1204,9 @@ public class Patient extends DomainResource {
 
     private static final long serialVersionUID = 2057666410L;
 
+  /*
+   * Constructor
+   */
     public Patient() {
       super();
     }

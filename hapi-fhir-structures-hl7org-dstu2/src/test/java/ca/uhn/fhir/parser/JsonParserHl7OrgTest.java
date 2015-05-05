@@ -224,7 +224,6 @@ public class JsonParserHl7OrgTest {
 		
 		dp.setId(("3"));
 		InstantType nowDt = InstantType.withCurrentTime();
-		dp.getMeta().setDeleted(true);
 		dp.getMeta().setLastUpdatedElement(nowDt);
 
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
@@ -248,8 +247,7 @@ public class JsonParserHl7OrgTest {
 			"\"resource\":{",
 			"\"id\":\"3\"",
 			"\"meta\":{",
-			"\"lastUpdated\":\"" + nowDt.getValueAsString() + "\"", 
-			"\"deleted\":true"
+			"\"lastUpdated\":\"" + nowDt.getValueAsString() + "\"" 
 		};
 		//@formatter:off
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
@@ -342,11 +340,11 @@ public class JsonParserHl7OrgTest {
 		
 		// Re-parse the bundle
 		patient = (Patient) jsonParser.parseResource(jsonParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+		assertEquals("#1", patient.getManagingOrganization().getReference());
 		
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId().getValue());
+		assertEquals("#1", org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 		
 		// And re-encode a second time
@@ -485,7 +483,7 @@ public class JsonParserHl7OrgTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Reference ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 
@@ -579,10 +577,10 @@ public class JsonParserHl7OrgTest {
 	public void testEncodeExtensionOnEmptyElement() throws Exception {
 
 		ValueSet valueSet = new ValueSet();
-		valueSet.addTelecom().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
+		valueSet.addUseContext().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
-		assertThat(encoded, containsString("\"telecom\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
+		assertThat(encoded, containsString("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
 
 	}
 
@@ -603,7 +601,7 @@ public class JsonParserHl7OrgTest {
 		List<Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 	
@@ -1078,7 +1076,7 @@ public class JsonParserHl7OrgTest {
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
 		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
-		assertEquals("Organization/1", parsed.getManagingOrganization().getReference().getValue());
+		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
 	}
 
 	@Test

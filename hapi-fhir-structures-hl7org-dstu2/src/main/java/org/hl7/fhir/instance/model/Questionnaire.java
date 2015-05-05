@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A structured set of questions intended to guide the collection of answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
@@ -387,7 +387,7 @@ public class Questionnaire extends DomainResource {
     }
 
     @Block()
-    public static class GroupComponent extends BackboneElement {
+    public static class GroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireAnswers resource.
          */
@@ -446,6 +446,9 @@ public class Questionnaire extends DomainResource {
 
         private static final long serialVersionUID = 494129548L;
 
+    /*
+     * Constructor
+     */
       public GroupComponent() {
         super();
       }
@@ -878,7 +881,7 @@ public class Questionnaire extends DomainResource {
   }
 
     @Block()
-    public static class QuestionComponent extends BackboneElement {
+    public static class QuestionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a [[[QuestionnaireAnswers]]] resource.
          */
@@ -942,6 +945,9 @@ public class Questionnaire extends DomainResource {
 
         private static final long serialVersionUID = 1655002985L;
 
+    /*
+     * Constructor
+     */
       public QuestionComponent() {
         super();
       }
@@ -1424,10 +1430,16 @@ public class Questionnaire extends DomainResource {
 
     private static final long serialVersionUID = -852096969L;
 
+  /*
+   * Constructor
+   */
     public Questionnaire() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Questionnaire(Enumeration<QuestionnaireStatus> status, GroupComponent group) {
       super();
       this.status = status;

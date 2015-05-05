@@ -29,21 +29,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A set of information summarized from a list of other resources.
  */
-@ResourceDef(name="List_", profile="http://hl7.org/fhir/Profile/List_")
+@ResourceDef(name="List", profile="http://hl7.org/fhir/Profile/List_")
 public class List_ extends DomainResource {
 
     public enum ListStatus {
@@ -219,7 +219,7 @@ public class List_ extends DomainResource {
     }
 
     @Block()
-    public static class ListEntryComponent extends BackboneElement {
+    public static class ListEntryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list.
          */
@@ -255,10 +255,16 @@ public class List_ extends DomainResource {
 
         private static final long serialVersionUID = -27973283L;
 
+    /*
+     * Constructor
+     */
       public ListEntryComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ListEntryComponent(Reference item) {
         super();
         this.item = item;
@@ -583,10 +589,16 @@ public class List_ extends DomainResource {
 
     private static final long serialVersionUID = -558571391L;
 
+  /*
+   * Constructor
+   */
     public List_() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public List_(Enumeration<ListStatus> status, Enumeration<ListMode> mode) {
       super();
       this.status = status;

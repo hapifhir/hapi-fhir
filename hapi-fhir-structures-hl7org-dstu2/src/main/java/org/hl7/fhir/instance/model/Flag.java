@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
@@ -193,10 +193,16 @@ public class Flag extends DomainResource {
 
     private static final long serialVersionUID = 1117780761L;
 
+  /*
+   * Constructor
+   */
     public Flag() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Flag(Enumeration<FlagStatus> status, Reference patient, CodeableConcept code) {
       super();
       this.status = status;

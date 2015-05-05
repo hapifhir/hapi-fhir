@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organisation.
@@ -320,10 +320,16 @@ public class ReferralRequest extends DomainResource {
 
     private static final long serialVersionUID = -1139252216L;
 
+  /*
+   * Constructor
+   */
     public ReferralRequest() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ReferralRequest(Enumeration<Referralstatus> status) {
       super();
       this.status = status;

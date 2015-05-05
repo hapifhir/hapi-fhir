@@ -23,7 +23,7 @@ package org.hl7.fhir.instance.model.api;
 
 public interface IRefImplResource extends IBaseResource {
 
-	IIdType getId();
+	String getId();
 
 	IRefImplResource setId(String theId);
 

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
@@ -361,7 +361,7 @@ public class Appointment extends DomainResource {
     }
 
     @Block()
-    public static class AppointmentParticipantComponent extends BackboneElement {
+    public static class AppointmentParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Role of participant in the appointment.
          */
@@ -397,10 +397,16 @@ public class Appointment extends DomainResource {
 
         private static final long serialVersionUID = -1009855227L;
 
+    /*
+     * Constructor
+     */
       public AppointmentParticipantComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AppointmentParticipantComponent(Enumeration<Participationstatus> status) {
         super();
         this.status = status;
@@ -725,10 +731,16 @@ public class Appointment extends DomainResource {
 
     private static final long serialVersionUID = -1809603254L;
 
+  /*
+   * Constructor
+   */
     public Appointment() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Appointment(Enumeration<Appointmentstatus> status, InstantType start, InstantType end) {
       super();
       this.status = status;

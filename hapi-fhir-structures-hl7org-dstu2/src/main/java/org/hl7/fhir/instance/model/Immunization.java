@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Immunization event information.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class Immunization extends DomainResource {
 
     @Block()
-    public static class ImmunizationExplanationComponent extends BackboneElement {
+    public static class ImmunizationExplanationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Reasons why a vaccine was administered.
          */
@@ -64,6 +64,9 @@ public class Immunization extends DomainResource {
 
         private static final long serialVersionUID = -539821866L;
 
+    /*
+     * Constructor
+     */
       public ImmunizationExplanationComponent() {
         super();
       }
@@ -199,7 +202,7 @@ public class Immunization extends DomainResource {
   }
 
     @Block()
-    public static class ImmunizationReactionComponent extends BackboneElement {
+    public static class ImmunizationReactionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Date of reaction to the immunization.
          */
@@ -228,6 +231,9 @@ public class Immunization extends DomainResource {
 
         private static final long serialVersionUID = -1297668556L;
 
+    /*
+     * Constructor
+     */
       public ImmunizationReactionComponent() {
         super();
       }
@@ -415,7 +421,7 @@ public class Immunization extends DomainResource {
   }
 
     @Block()
-    public static class ImmunizationVaccinationProtocolComponent extends BackboneElement {
+    public static class ImmunizationVaccinationProtocolComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Nominal position in a series.
          */
@@ -479,10 +485,16 @@ public class Immunization extends DomainResource {
 
         private static final long serialVersionUID = -783437472L;
 
+    /*
+     * Constructor
+     */
       public ImmunizationVaccinationProtocolComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ImmunizationVaccinationProtocolComponent(PositiveIntType doseSequence, CodeableConcept doseTarget, CodeableConcept doseStatus) {
         super();
         this.doseSequence = doseSequence;
@@ -1018,10 +1030,16 @@ public class Immunization extends DomainResource {
 
     private static final long serialVersionUID = -1610924217L;
 
+  /*
+   * Constructor
+   */
     public Immunization() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Immunization(DateTimeType date, CodeableConcept vaccineType, Reference patient, BooleanType wasNotGiven, BooleanType reported) {
       super();
       this.date = date;

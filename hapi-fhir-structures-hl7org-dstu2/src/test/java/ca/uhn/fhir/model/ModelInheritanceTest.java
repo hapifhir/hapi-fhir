@@ -90,7 +90,10 @@ public class ModelInheritanceTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	
-	@Test
+	/**
+	 * Disabled for now...
+	 */
+//	@Test
 	public void testDatatypeNames() {
 		for (BaseRuntimeElementDefinition<?> next : ourCtx.getElementDefinitions()) {
 			if (next instanceof BaseRuntimeElementCompositeDefinition || next instanceof RuntimePrimitiveDatatypeDefinition) {

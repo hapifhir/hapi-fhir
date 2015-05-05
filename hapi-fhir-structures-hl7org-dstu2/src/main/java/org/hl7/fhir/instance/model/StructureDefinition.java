@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.
@@ -248,7 +248,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     @Block()
-    public static class StructureDefinitionContactComponent extends BackboneElement {
+    public static class StructureDefinitionContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the structure definition.
          */
@@ -265,6 +265,9 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionContactComponent() {
         super();
       }
@@ -404,7 +407,7 @@ public class StructureDefinition extends DomainResource {
   }
 
     @Block()
-    public static class StructureDefinitionMappingComponent extends BackboneElement {
+    public static class StructureDefinitionMappingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An Internal id that is used to identify this mapping set when specific mappings are made.
          */
@@ -435,10 +438,16 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = 299630820L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionMappingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionMappingComponent(IdType identity) {
         super();
         this.identity = identity;
@@ -684,7 +693,7 @@ public class StructureDefinition extends DomainResource {
   }
 
     @Block()
-    public static class StructureDefinitionSnapshotComponent extends BackboneElement {
+    public static class StructureDefinitionSnapshotComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Captures constraints on each element within the resource.
          */
@@ -694,6 +703,9 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = 53896641L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionSnapshotComponent() {
         super();
       }
@@ -781,7 +793,7 @@ public class StructureDefinition extends DomainResource {
   }
 
     @Block()
-    public static class StructureDefinitionDifferentialComponent extends BackboneElement {
+    public static class StructureDefinitionDifferentialComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Captures constraints on each element within the resource.
          */
@@ -791,6 +803,9 @@ public class StructureDefinition extends DomainResource {
 
         private static final long serialVersionUID = 53896641L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionDifferentialComponent() {
         super();
       }
@@ -1047,10 +1062,16 @@ public class StructureDefinition extends DomainResource {
 
     private static final long serialVersionUID = -1935809660L;
 
+  /*
+   * Constructor
+   */
     public StructureDefinition() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public StructureDefinition(UriType url, StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<StructureDefinitionType> type, BooleanType abstract_) {
       super();
       this.url = url;

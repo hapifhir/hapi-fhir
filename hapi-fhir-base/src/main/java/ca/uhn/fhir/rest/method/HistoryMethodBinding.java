@@ -190,10 +190,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
 				int index = theFromIndex;
 				for (IBaseResource nextResource : retVal) {
-					if (nextResource.getId() == null || isBlank(nextResource.getId().getIdPart())) {
+					if (nextResource.getIdElement() == null || isBlank(nextResource.getIdElement().getIdPart())) {
 						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
 					}
-					if (isBlank(nextResource.getId().getVersionIdPart()) && nextResource instanceof IResource) {
+					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
 						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
 						if (versionId == null || versionId.isEmpty()) {
 							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");

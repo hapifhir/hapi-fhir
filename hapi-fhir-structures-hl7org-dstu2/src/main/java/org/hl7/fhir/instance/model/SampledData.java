@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.
@@ -96,10 +97,16 @@ public class SampledData extends Type implements ICompositeType {
 
     private static final long serialVersionUID = -1984181262L;
 
+  /*
+   * Constructor
+   */
     public SampledData() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public SampledData(Quantity origin, DecimalType period, PositiveIntType dimensions, StringType data) {
       super();
       this.origin = origin;

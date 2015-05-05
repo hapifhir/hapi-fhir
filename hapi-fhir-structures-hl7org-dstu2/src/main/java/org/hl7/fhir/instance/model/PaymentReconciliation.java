@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides payment details and claim references supporting a bulk payment.
@@ -119,7 +119,7 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     @Block()
-    public static class DetailsComponent extends BackboneElement {
+    public static class DetailsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code to indicate the nature of the payment, adjustment, funds advance, etc.
          */
@@ -191,10 +191,16 @@ public class PaymentReconciliation extends DomainResource {
 
         private static final long serialVersionUID = -1644048062L;
 
+    /*
+     * Constructor
+     */
       public DetailsComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DetailsComponent(Coding type) {
         super();
         this.type = type;
@@ -519,7 +525,7 @@ public class PaymentReconciliation extends DomainResource {
   }
 
     @Block()
-    public static class NotesComponent extends BackboneElement {
+    public static class NotesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The note purpose: Print/Display.
          */
@@ -536,6 +542,9 @@ public class PaymentReconciliation extends DomainResource {
 
         private static final long serialVersionUID = 129959202L;
 
+    /*
+     * Constructor
+     */
       public NotesComponent() {
         super();
       }
@@ -781,10 +790,16 @@ public class PaymentReconciliation extends DomainResource {
 
     private static final long serialVersionUID = 1602249640L;
 
+  /*
+   * Constructor
+   */
     public PaymentReconciliation() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public PaymentReconciliation(Money total) {
       super();
       this.total = total;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * The formal description of a single piece of information that can be gathered and reported.
@@ -176,7 +176,7 @@ public class DataElement extends DomainResource {
     }
 
     @Block()
-    public static class DataElementContactComponent extends BackboneElement {
+    public static class DataElementContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the data element.
          */
@@ -193,6 +193,9 @@ public class DataElement extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public DataElementContactComponent() {
         super();
       }
@@ -332,7 +335,7 @@ public class DataElement extends DomainResource {
   }
 
     @Block()
-    public static class DataElementMappingComponent extends BackboneElement {
+    public static class DataElementMappingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis.
          */
@@ -363,10 +366,16 @@ public class DataElement extends DomainResource {
 
         private static final long serialVersionUID = 299630820L;
 
+    /*
+     * Constructor
+     */
       public DataElementMappingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DataElementMappingComponent(IdType identity) {
         super();
         this.identity = identity;
@@ -711,10 +720,16 @@ public class DataElement extends DomainResource {
 
     private static final long serialVersionUID = -1444116299L;
 
+  /*
+   * Constructor
+   */
     public DataElement() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DataElement(Enumeration<ConformanceResourceStatus> status) {
       super();
       this.status = status;

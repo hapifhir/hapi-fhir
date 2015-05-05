@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An authorization for the supply of glasses and/or contact lenses to a patient.
@@ -220,7 +220,7 @@ public class VisionPrescription extends DomainResource {
     }
 
     @Block()
-    public static class VisionPrescriptionDispenseComponent extends BackboneElement {
+    public static class VisionPrescriptionDispenseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the type of Vision correction product which is required for the patient.
          */
@@ -328,10 +328,16 @@ public class VisionPrescription extends DomainResource {
 
         private static final long serialVersionUID = 548964753L;
 
+    /*
+     * Constructor
+     */
       public VisionPrescriptionDispenseComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public VisionPrescriptionDispenseComponent(Coding product) {
         super();
         this.product = product;
@@ -1164,6 +1170,9 @@ public class VisionPrescription extends DomainResource {
 
     private static final long serialVersionUID = -1108276057L;
 
+  /*
+   * Constructor
+   */
     public VisionPrescription() {
       super();
     }

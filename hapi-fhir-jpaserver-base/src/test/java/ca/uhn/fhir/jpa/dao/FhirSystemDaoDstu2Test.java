@@ -802,11 +802,11 @@ public class FhirSystemDaoDstu2Test {
 		List<IBaseResource> allRes = all.getResources(0, all.size());
 		for (IBaseResource iResource : allRes) {
 			if (ResourceMetadataKeyEnum.DELETED_AT.get((IResource) iResource) == null) {
-				ourLog.info("Deleting: {}", iResource.getId());
+				ourLog.info("Deleting: {}", iResource.getIdElement());
 				
 				Bundle b = new Bundle();
 				b.setType(BundleTypeEnum.TRANSACTION);
-				String url = iResource.getId().toVersionless().getValue();
+				String url = iResource.getIdElement().toVersionless().getValue();
 				b.addEntry().getTransaction().setMethod(HTTPVerbEnum.DELETE).setUrl(url);
 				systemDao.transaction(b);
 			}

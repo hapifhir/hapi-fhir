@@ -4,6 +4,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 
 public abstract class BaseReference extends Type implements IBaseReference, ICompositeType {
 
@@ -12,7 +13,26 @@ public abstract class BaseReference extends Type implements IBaseReference, ICom
      */
     private transient IBaseResource resource;
 
-    /**
+	public BaseReference(String theReference) {
+    	setReference(theReference);
+	}
+
+    public BaseReference(IdType theReference) {
+    	if (theReference != null) {
+    		setReference(theReference.getValue());
+    	} else {
+    		setReference(null);
+    	}
+    }
+
+	public BaseReference(IRefImplResource theResource) {
+		resource = theResource;
+	}
+
+	public BaseReference() {
+	}
+
+	/**
      * Retrieves the actual resource referenced by this reference. Note that the resource itself is not
      * a part of the FHIR "wire format" and is never transmitted or receieved inline, but this property
      * may be changed/accessed by parsers.
@@ -36,5 +56,10 @@ public abstract class BaseReference extends Type implements IBaseReference, ICom
     public void setResource(IBaseResource theResource) {
         resource = theResource;
     }
+
+    @Override
+	public boolean isEmpty() {
+		return resource == null && super.isEmpty();
+	}
 
 }

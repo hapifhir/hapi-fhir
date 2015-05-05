@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Dispensing a medication to a named patient.  This includes a description of the supply provided and the instructions for administering the medication.
@@ -161,7 +161,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     @Block()
-    public static class MedicationDispenseDosageInstructionComponent extends BackboneElement {
+    public static class MedicationDispenseDosageInstructionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Additional instructions such as "Swallow with plenty of water" which may or may not be coded.
          */
@@ -227,6 +227,9 @@ public class MedicationDispense extends DomainResource {
 
         private static final long serialVersionUID = -1523433515L;
 
+    /*
+     * Constructor
+     */
       public MedicationDispenseDosageInstructionComponent() {
         super();
       }
@@ -557,7 +560,7 @@ public class MedicationDispense extends DomainResource {
   }
 
     @Block()
-    public static class MedicationDispenseSubstitutionComponent extends BackboneElement {
+    public static class MedicationDispenseSubstitutionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code signifying whether a different drug was dispensed from what was prescribed.
          */
@@ -586,10 +589,16 @@ public class MedicationDispense extends DomainResource {
 
         private static final long serialVersionUID = 1218245830L;
 
+    /*
+     * Constructor
+     */
       public MedicationDispenseSubstitutionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MedicationDispenseSubstitutionComponent(CodeableConcept type) {
         super();
         this.type = type;
@@ -916,6 +925,9 @@ public class MedicationDispense extends DomainResource {
 
     private static final long serialVersionUID = -217601399L;
 
+  /*
+   * Constructor
+   */
     public MedicationDispense() {
       super();
     }

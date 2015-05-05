@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.
@@ -121,10 +121,16 @@ public class DeviceUseStatement extends DomainResource {
 
     private static final long serialVersionUID = -1668571635L;
 
+  /*
+   * Constructor
+   */
     public DeviceUseStatement() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DeviceUseStatement(Reference device, Reference subject) {
       super();
       this.device = device;

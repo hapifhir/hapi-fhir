@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.
@@ -219,7 +219,7 @@ public class Procedure extends DomainResource {
     }
 
     @Block()
-    public static class ProcedureBodySiteComponent extends BackboneElement {
+    public static class ProcedureBodySiteComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.
          */
@@ -229,10 +229,16 @@ public class Procedure extends DomainResource {
 
         private static final long serialVersionUID = 1429072605L;
 
+    /*
+     * Constructor
+     */
       public ProcedureBodySiteComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ProcedureBodySiteComponent(Type site) {
         super();
         this.site = site;
@@ -314,7 +320,7 @@ public class Procedure extends DomainResource {
   }
 
     @Block()
-    public static class ProcedurePerformerComponent extends BackboneElement {
+    public static class ProcedurePerformerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The practitioner who was involved in the procedure.
          */
@@ -336,6 +342,9 @@ public class Procedure extends DomainResource {
 
         private static final long serialVersionUID = -1975652413L;
 
+    /*
+     * Constructor
+     */
       public ProcedurePerformerComponent() {
         super();
       }
@@ -445,7 +454,7 @@ public class Procedure extends DomainResource {
   }
 
     @Block()
-    public static class ProcedureRelatedItemComponent extends BackboneElement {
+    public static class ProcedureRelatedItemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The nature of the relationship.
          */
@@ -467,6 +476,9 @@ public class Procedure extends DomainResource {
 
         private static final long serialVersionUID = 41929784L;
 
+    /*
+     * Constructor
+     */
       public ProcedureRelatedItemComponent() {
         super();
       }
@@ -601,7 +613,7 @@ public class Procedure extends DomainResource {
   }
 
     @Block()
-    public static class ProcedureDeviceComponent extends BackboneElement {
+    public static class ProcedureDeviceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The kind of change that happened to the device during the procedure.
          */
@@ -623,10 +635,16 @@ public class Procedure extends DomainResource {
 
         private static final long serialVersionUID = 1779937807L;
 
+    /*
+     * Constructor
+     */
       public ProcedureDeviceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ProcedureDeviceComponent(Reference manipulated) {
         super();
         this.manipulated = manipulated;
@@ -901,10 +919,16 @@ public class Procedure extends DomainResource {
 
     private static final long serialVersionUID = -1258770542L;
 
+  /*
+   * Constructor
+   */
     public Procedure() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Procedure(Reference patient, Enumeration<ProcedureStatus> status, CodeableConcept type) {
       super();
       this.patient = patient;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.
@@ -262,7 +262,7 @@ public class Claim extends DomainResource {
     }
 
     @Block()
-    public static class PayeeComponent extends BackboneElement {
+    public static class PayeeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Party to be reimbursed: Subscriber, provider, other.
          */
@@ -308,6 +308,9 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = -503108488L;
 
+    /*
+     * Constructor
+     */
       public PayeeComponent() {
         super();
       }
@@ -516,7 +519,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class DiagnosisComponent extends BackboneElement {
+    public static class DiagnosisComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Sequence of diagnosis which serves to order and provide a link.
          */
@@ -533,10 +536,16 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = -795010186L;
 
+    /*
+     * Constructor
+     */
       public DiagnosisComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DiagnosisComponent(PositiveIntType sequence, Coding diagnosis) {
         super();
         this.sequence = sequence;
@@ -654,7 +663,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class CoverageComponent extends BackboneElement {
+    public static class CoverageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line item.
          */
@@ -723,10 +732,16 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = 621250924L;
 
+    /*
+     * Constructor
+     */
       public CoverageComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public CoverageComponent(PositiveIntType sequence, BooleanType focal, Reference coverage, Coding relationship) {
         super();
         this.sequence = sequence;
@@ -1129,7 +1144,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class ItemsComponent extends BackboneElement {
+    public static class ItemsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -1256,10 +1271,16 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = -311028698L;
 
+    /*
+     * Constructor
+     */
       public ItemsComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ItemsComponent(PositiveIntType sequence, Coding type, Coding service) {
         super();
         this.sequence = sequence;
@@ -1971,7 +1992,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class DetailComponent extends BackboneElement {
+    public static class DetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -2044,10 +2065,16 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = -1641314433L;
 
+    /*
+     * Constructor
+     */
       public DetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DetailComponent(PositiveIntType sequence, Coding type, Coding service) {
         super();
         this.sequence = sequence;
@@ -2450,7 +2477,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class SubDetailComponent extends BackboneElement {
+    public static class SubDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -2516,10 +2543,16 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = -947666334L;
 
+    /*
+     * Constructor
+     */
       public SubDetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SubDetailComponent(PositiveIntType sequence, Coding type, Coding service) {
         super();
         this.sequence = sequence;
@@ -2876,7 +2909,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class ProsthesisComponent extends BackboneElement {
+    public static class ProsthesisComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates whether this is the initial placement of a fixed prosthesis.
          */
@@ -2900,6 +2933,9 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = 1739349641L;
 
+    /*
+     * Constructor
+     */
       public ProsthesisComponent() {
         super();
       }
@@ -3067,7 +3103,7 @@ public class Claim extends DomainResource {
   }
 
     @Block()
-    public static class MissingTeethComponent extends BackboneElement {
+    public static class MissingTeethComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The code identifying which tooth is missing.
          */
@@ -3091,10 +3127,16 @@ public class Claim extends DomainResource {
 
         private static final long serialVersionUID = 352913313L;
 
+    /*
+     * Constructor
+     */
       public MissingTeethComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MissingTeethComponent(Coding tooth) {
         super();
         this.tooth = tooth;
@@ -3491,10 +3533,16 @@ public class Claim extends DomainResource {
 
     private static final long serialVersionUID = 764017933L;
 
+  /*
+   * Constructor
+   */
     public Claim() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Claim(Enumeration<TypeLink> type, Reference patient) {
       super();
       this.type = type;

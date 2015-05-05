@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A manifest that defines a set of documents.
@@ -133,7 +133,7 @@ public class DocumentManifest extends DomainResource {
     }
 
     @Block()
-    public static class DocumentManifestContentComponent extends BackboneElement {
+    public static class DocumentManifestContentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The list of DocumentReference or Media Resources, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.
          */
@@ -143,10 +143,16 @@ public class DocumentManifest extends DomainResource {
 
         private static final long serialVersionUID = -347538500L;
 
+    /*
+     * Constructor
+     */
       public DocumentManifestContentComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DocumentManifestContentComponent(Type p) {
         super();
         this.p = p;
@@ -228,7 +234,7 @@ public class DocumentManifest extends DomainResource {
   }
 
     @Block()
-    public static class DocumentManifestRelatedComponent extends BackboneElement {
+    public static class DocumentManifestRelatedComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Related identifier to this DocumentManifest. If both id and ref are present they shall refer to the same thing.
          */
@@ -250,6 +256,9 @@ public class DocumentManifest extends DomainResource {
 
         private static final long serialVersionUID = -1670123330L;
 
+    /*
+     * Constructor
+     */
       public DocumentManifestRelatedComponent() {
         super();
       }
@@ -459,10 +468,16 @@ public class DocumentManifest extends DomainResource {
 
     private static final long serialVersionUID = -2056683927L;
 
+  /*
+   * Constructor
+   */
     public DocumentManifest() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DocumentManifest(Enumeration<DocumentReferenceStatus> status) {
       super();
       this.status = status;

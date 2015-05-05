@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A homogeneous material with a definite composition.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class Substance extends DomainResource {
 
     @Block()
-    public static class SubstanceInstanceComponent extends BackboneElement {
+    public static class SubstanceInstanceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifier associated with the package/container (usually a label affixed directly).
          */
@@ -71,6 +71,9 @@ public class Substance extends DomainResource {
 
         private static final long serialVersionUID = -1474380480L;
 
+    /*
+     * Constructor
+     */
       public SubstanceInstanceComponent() {
         super();
       }
@@ -217,7 +220,7 @@ public class Substance extends DomainResource {
   }
 
     @Block()
-    public static class SubstanceIngredientComponent extends BackboneElement {
+    public static class SubstanceIngredientComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The amount of the ingredient in the substance - a concentration ratio.
          */
@@ -239,10 +242,16 @@ public class Substance extends DomainResource {
 
         private static final long serialVersionUID = -1783242034L;
 
+    /*
+     * Constructor
+     */
       public SubstanceIngredientComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SubstanceIngredientComponent(Reference substance) {
         super();
         this.substance = substance;
@@ -387,10 +396,16 @@ public class Substance extends DomainResource {
 
     private static final long serialVersionUID = 1881086620L;
 
+  /*
+   * Constructor
+   */
     public Substance() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Substance(CodeableConcept type) {
       super();
       this.type = type;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
@@ -120,7 +120,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     @Block()
-    public static class ItemsComponent extends BackboneElement {
+    public static class ItemsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -151,10 +151,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1917866697L;
 
+    /*
+     * Constructor
+     */
       public ItemsComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ItemsComponent(PositiveIntType sequenceLinkId) {
         super();
         this.sequenceLinkId = sequenceLinkId;
@@ -400,7 +406,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class ItemAdjudicationComponent extends BackboneElement {
+    public static class ItemAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
          */
@@ -424,10 +430,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
+    /*
+     * Constructor
+     */
       public ItemAdjudicationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ItemAdjudicationComponent(Coding code) {
         super();
         this.code = code;
@@ -575,7 +587,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class ItemDetailComponent extends BackboneElement {
+    public static class ItemDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -599,10 +611,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1751018357L;
 
+    /*
+     * Constructor
+     */
       public ItemDetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ItemDetailComponent(PositiveIntType sequenceLinkId) {
         super();
         this.sequenceLinkId = sequenceLinkId;
@@ -786,7 +804,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class DetailAdjudicationComponent extends BackboneElement {
+    public static class DetailAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
          */
@@ -810,10 +828,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
+    /*
+     * Constructor
+     */
       public DetailAdjudicationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DetailAdjudicationComponent(Coding code) {
         super();
         this.code = code;
@@ -961,7 +985,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class SubDetailComponent extends BackboneElement {
+    public static class SubDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line number.
          */
@@ -978,10 +1002,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = 1780202110L;
 
+    /*
+     * Constructor
+     */
       public SubDetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SubDetailComponent(PositiveIntType sequenceLinkId) {
         super();
         this.sequenceLinkId = sequenceLinkId;
@@ -1119,7 +1149,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class SubdetailAdjudicationComponent extends BackboneElement {
+    public static class SubdetailAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
          */
@@ -1143,10 +1173,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
+    /*
+     * Constructor
+     */
       public SubdetailAdjudicationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SubdetailAdjudicationComponent(Coding code) {
         super();
         this.code = code;
@@ -1294,7 +1330,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class AddedItemComponent extends BackboneElement {
+    public static class AddedItemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * List of input service items which this service line is intended to replace.
          */
@@ -1339,10 +1375,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1675935854L;
 
+    /*
+     * Constructor
+     */
       public AddedItemComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AddedItemComponent(Coding service) {
         super();
         this.service = service;
@@ -1655,7 +1697,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class AddedItemAdjudicationComponent extends BackboneElement {
+    public static class AddedItemAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
          */
@@ -1679,10 +1721,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
+    /*
+     * Constructor
+     */
       public AddedItemAdjudicationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AddedItemAdjudicationComponent(Coding code) {
         super();
         this.code = code;
@@ -1830,7 +1878,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class AddedItemsDetailComponent extends BackboneElement {
+    public static class AddedItemsDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code to indicate the Professional Service or Product supplied.
          */
@@ -1854,10 +1902,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -2104242020L;
 
+    /*
+     * Constructor
+     */
       public AddedItemsDetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AddedItemsDetailComponent(Coding service) {
         super();
         this.service = service;
@@ -2000,7 +2054,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class AddedItemDetailAdjudicationComponent extends BackboneElement {
+    public static class AddedItemDetailAdjudicationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc.
          */
@@ -2024,10 +2078,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -949880587L;
 
+    /*
+     * Constructor
+     */
       public AddedItemDetailAdjudicationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AddedItemDetailAdjudicationComponent(Coding code) {
         super();
         this.code = code;
@@ -2175,7 +2235,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class ErrorsComponent extends BackboneElement {
+    public static class ErrorsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere.
          */
@@ -2206,10 +2266,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = -1893641175L;
 
+    /*
+     * Constructor
+     */
       public ErrorsComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ErrorsComponent(Coding code) {
         super();
         this.code = code;
@@ -2424,7 +2490,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class NotesComponent extends BackboneElement {
+    public static class NotesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An integer associated with each note which may be referred to from each service line item.
          */
@@ -2448,6 +2514,9 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = 1768923951L;
 
+    /*
+     * Constructor
+     */
       public NotesComponent() {
         super();
       }
@@ -2615,7 +2684,7 @@ public class ClaimResponse extends DomainResource {
   }
 
     @Block()
-    public static class CoverageComponent extends BackboneElement {
+    public static class CoverageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A service line item.
          */
@@ -2684,10 +2753,16 @@ public class ClaimResponse extends DomainResource {
 
         private static final long serialVersionUID = 621250924L;
 
+    /*
+     * Constructor
+     */
       public CoverageComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public CoverageComponent(PositiveIntType sequence, BooleanType focal, Reference coverage, Coding relationship) {
         super();
         this.sequence = sequence;
@@ -3293,6 +3368,9 @@ public class ClaimResponse extends DomainResource {
 
     private static final long serialVersionUID = -1720247756L;
 
+  /*
+   * Constructor
+   */
     public ClaimResponse() {
       super();
     }

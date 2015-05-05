@@ -246,7 +246,7 @@ public class FhirTerser {
 			IBaseReference resRefDt = (IBaseReference) theElement;
 			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
-				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
+				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 					visit(theResource, pathToElement, null, def, theCallback);
 				}
@@ -341,7 +341,7 @@ public class FhirTerser {
 			IBaseReference resRefDt = (IBaseReference) theElement;
 			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
-				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
+				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 					visit(theResource, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
 				}

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A supply - a  request for something, and provision of what is supplied.
@@ -247,7 +247,7 @@ public class Supply extends DomainResource {
     }
 
     @Block()
-    public static class SupplyDispenseComponent extends BackboneElement {
+    public static class SupplyDispenseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifier assigned by the dispensing facility when the item(s) is dispensed.
          */
@@ -340,6 +340,9 @@ public class Supply extends DomainResource {
 
         private static final long serialVersionUID = -1941592649L;
 
+    /*
+     * Constructor
+     */
       public SupplyDispenseComponent() {
         super();
       }
@@ -848,6 +851,9 @@ public class Supply extends DomainResource {
 
     private static final long serialVersionUID = 1122115505L;
 
+  /*
+   * Constructor
+   */
     public Supply() {
       super();
     }

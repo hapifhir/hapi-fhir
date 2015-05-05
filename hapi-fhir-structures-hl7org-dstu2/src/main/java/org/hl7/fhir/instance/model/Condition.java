@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a Diagnosis during an Encounter; populating a problem List or a Summary Statement, such as a Discharge Summary.
@@ -175,7 +175,7 @@ public class Condition extends DomainResource {
     }
 
     @Block()
-    public static class ConditionStageComponent extends BackboneElement {
+    public static class ConditionStageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A simple summary of the stage such as "Stage 3". The determination of the stage is disease-specific.
          */
@@ -197,6 +197,9 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = -1961530405L;
 
+    /*
+     * Constructor
+     */
       public ConditionStageComponent() {
         super();
       }
@@ -320,7 +323,7 @@ public class Condition extends DomainResource {
   }
 
     @Block()
-    public static class ConditionEvidenceComponent extends BackboneElement {
+    public static class ConditionEvidenceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A manifestation or symptom that led to the recording of this condition.
          */
@@ -342,6 +345,9 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = 945689926L;
 
+    /*
+     * Constructor
+     */
       public ConditionEvidenceComponent() {
         super();
       }
@@ -465,7 +471,7 @@ public class Condition extends DomainResource {
   }
 
     @Block()
-    public static class ConditionLocationComponent extends BackboneElement {
+    public static class ConditionLocationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code that identifies the structural location.
          */
@@ -475,6 +481,9 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = 1429072605L;
 
+    /*
+     * Constructor
+     */
       public ConditionLocationComponent() {
         super();
       }
@@ -555,7 +564,7 @@ public class Condition extends DomainResource {
   }
 
     @Block()
-    public static class ConditionDueToComponent extends BackboneElement {
+    public static class ConditionDueToComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code that identifies the target of this relationship. The code takes the place of a detailed instance target.
          */
@@ -577,6 +586,9 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = -660755940L;
 
+    /*
+     * Constructor
+     */
       public ConditionDueToComponent() {
         super();
       }
@@ -686,7 +698,7 @@ public class Condition extends DomainResource {
   }
 
     @Block()
-    public static class ConditionOccurredFollowingComponent extends BackboneElement {
+    public static class ConditionOccurredFollowingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code that identifies the target of this relationship. The code takes the place of a detailed instance target.
          */
@@ -708,6 +720,9 @@ public class Condition extends DomainResource {
 
         private static final long serialVersionUID = -660755940L;
 
+    /*
+     * Constructor
+     */
       public ConditionOccurredFollowingComponent() {
         super();
       }
@@ -952,10 +967,16 @@ public class Condition extends DomainResource {
 
     private static final long serialVersionUID = -1018838673L;
 
+  /*
+   * Constructor
+   */
     public Condition() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Condition(Reference patient, CodeableConcept code, Enumeration<ConditionStatus> clinicalStatus) {
       super();
       this.patient = patient;

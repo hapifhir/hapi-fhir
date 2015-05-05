@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
@@ -234,7 +234,7 @@ public class NamingSystem extends DomainResource {
     }
 
     @Block()
-    public static class NamingSystemUniqueIdComponent extends BackboneElement {
+    public static class NamingSystemUniqueIdComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the unique identifier scheme used for this particular identifier.
          */
@@ -265,10 +265,16 @@ public class NamingSystem extends DomainResource {
 
         private static final long serialVersionUID = -250649344L;
 
+    /*
+     * Constructor
+     */
       public NamingSystemUniqueIdComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public NamingSystemUniqueIdComponent(Enumeration<NamingsystemIdentifierType> type, StringType value) {
         super();
         this.type = type;
@@ -482,7 +488,7 @@ public class NamingSystem extends DomainResource {
   }
 
     @Block()
-    public static class NamingSystemContactComponent extends BackboneElement {
+    public static class NamingSystemContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the naming system.
          */
@@ -499,6 +505,9 @@ public class NamingSystem extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public NamingSystemContactComponent() {
         super();
       }
@@ -735,10 +744,16 @@ public class NamingSystem extends DomainResource {
 
     private static final long serialVersionUID = -241224889L;
 
+  /*
+   * Constructor
+   */
     public NamingSystem() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public NamingSystem(Enumeration<NamingsystemType> type, StringType name, DateTimeType date, Enumeration<ConformanceResourceStatus> status) {
       super();
       this.type = type;

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called "ClinicalImpression" rather than "ClinicalAssessment" to avoid confusion with the recording of assessment tools such as Apgar score.
@@ -133,7 +133,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     @Block()
-    public static class ClinicalImpressionInvestigationsComponent extends BackboneElement {
+    public static class ClinicalImpressionInvestigationsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.
          */
@@ -155,10 +155,16 @@ public class ClinicalImpression extends DomainResource {
 
         private static final long serialVersionUID = -301363326L;
 
+    /*
+     * Constructor
+     */
       public ClinicalImpressionInvestigationsComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ClinicalImpressionInvestigationsComponent(CodeableConcept code) {
         super();
         this.code = code;
@@ -283,7 +289,7 @@ public class ClinicalImpression extends DomainResource {
   }
 
     @Block()
-    public static class ClinicalImpressionFindingComponent extends BackboneElement {
+    public static class ClinicalImpressionFindingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Specific text of code for finding or diagnosis.
          */
@@ -300,10 +306,16 @@ public class ClinicalImpression extends DomainResource {
 
         private static final long serialVersionUID = -888590978L;
 
+    /*
+     * Constructor
+     */
       public ClinicalImpressionFindingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ClinicalImpressionFindingComponent(CodeableConcept item) {
         super();
         this.item = item;
@@ -424,7 +436,7 @@ public class ClinicalImpression extends DomainResource {
   }
 
     @Block()
-    public static class ClinicalImpressionRuledOutComponent extends BackboneElement {
+    public static class ClinicalImpressionRuledOutComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Specific text of code for diagnosis.
          */
@@ -441,10 +453,16 @@ public class ClinicalImpression extends DomainResource {
 
         private static final long serialVersionUID = -1001661243L;
 
+    /*
+     * Constructor
+     */
       public ClinicalImpressionRuledOutComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ClinicalImpressionRuledOutComponent(CodeableConcept item) {
         super();
         this.item = item;
@@ -715,10 +733,16 @@ public class ClinicalImpression extends DomainResource {
 
     private static final long serialVersionUID = 1650458630L;
 
+  /*
+   * Constructor
+   */
     public ClinicalImpression() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ClinicalImpression(Reference patient, Enumeration<ClinicalImpressionStatus> status) {
       super();
       this.patient = patient;

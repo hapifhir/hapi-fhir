@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
@@ -203,7 +203,7 @@ public class NutritionOrder extends DomainResource {
     }
 
     @Block()
-    public static class NutritionOrderOralDietComponent extends BackboneElement {
+    public static class NutritionOrderOralDietComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The kind of diet or dietary restriction such as fiber restricted diet or diabetic diet.
          */
@@ -248,6 +248,9 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = -1101476668L;
 
+    /*
+     * Constructor
+     */
       public NutritionOrderOralDietComponent() {
         super();
       }
@@ -554,7 +557,7 @@ public class NutritionOrder extends DomainResource {
   }
 
     @Block()
-    public static class NutritionOrderOralDietNutrientComponent extends BackboneElement {
+    public static class NutritionOrderOralDietNutrientComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The nutrient that is being modified such as carbohydrate or sodium.
          */
@@ -571,6 +574,9 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 1042462093L;
 
+    /*
+     * Constructor
+     */
       public NutritionOrderOralDietNutrientComponent() {
         super();
       }
@@ -665,7 +671,7 @@ public class NutritionOrder extends DomainResource {
   }
 
     @Block()
-    public static class NutritionOrderOralDietTextureComponent extends BackboneElement {
+    public static class NutritionOrderOralDietTextureComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Any texture modifications (for solid foods) that should be made, e.g. easy to chew, chopped, ground, and pureed.
          */
@@ -682,6 +688,9 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = -56402817L;
 
+    /*
+     * Constructor
+     */
       public NutritionOrderOralDietTextureComponent() {
         super();
       }
@@ -776,7 +785,7 @@ public class NutritionOrder extends DomainResource {
   }
 
     @Block()
-    public static class NutritionOrderSupplementComponent extends BackboneElement {
+    public static class NutritionOrderSupplementComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The kind of nutritional supplement product required such as a high protein or pediatric clear liquid supplement.
          */
@@ -814,6 +823,9 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = 952780616L;
 
+    /*
+     * Constructor
+     */
       public NutritionOrderSupplementComponent() {
         super();
       }
@@ -1039,7 +1051,7 @@ public class NutritionOrder extends DomainResource {
   }
 
     @Block()
-    public static class NutritionOrderEnteralFormulaComponent extends BackboneElement {
+    public static class NutritionOrderEnteralFormulaComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Free text formula administration, feeding instructions or additional instructions or information.
          */
@@ -1126,6 +1138,9 @@ public class NutritionOrder extends DomainResource {
 
         private static final long serialVersionUID = -1342980650L;
 
+    /*
+     * Constructor
+     */
       public NutritionOrderEnteralFormulaComponent() {
         super();
       }
@@ -1671,10 +1686,16 @@ public class NutritionOrder extends DomainResource {
 
     private static final long serialVersionUID = 1139624085L;
 
+  /*
+   * Constructor
+   */
     public NutritionOrder() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public NutritionOrder(Reference patient, DateTimeType dateTime) {
       super();
       this.patient = patient;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Captures constraints on each element within the resource, profile, or extension.
@@ -446,7 +447,8 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
     }
 
-    public static class ElementDefinitionSlicingComponent extends Element {
+    @Block()
+    public static class ElementDefinitionSlicingComponent extends Element implements IBaseDatatypeElement {
         /**
          * Designates which child elements are used to discriminate between the slices when processing an instance. If one or more discriminators are provided, the value of the child elements in the instance data SHALL completely distinguish which slice the element in the resource matches based on the allowed values for those elements in each of the slices.
          */
@@ -477,10 +479,16 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         private static final long serialVersionUID = -321298491L;
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionSlicingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionSlicingComponent(Enumeration<ResourceSlicingRules> rules) {
         super();
         this.rules = rules;
@@ -730,7 +738,8 @@ public class ElementDefinition extends Type implements ICompositeType {
 
   }
 
-    public static class TypeRefComponent extends Element {
+    @Block()
+    public static class TypeRefComponent extends Element implements IBaseDatatypeElement {
         /**
          * Name of Data type or Resource that is a(or the) type used for this element.
          */
@@ -754,10 +763,16 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         private static final long serialVersionUID = -1527133887L;
 
+    /*
+     * Constructor
+     */
       public TypeRefComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public TypeRefComponent(CodeType code) {
         super();
         this.code = code;
@@ -960,7 +975,8 @@ public class ElementDefinition extends Type implements ICompositeType {
 
   }
 
-    public static class ElementDefinitionConstraintComponent extends Element {
+    @Block()
+    public static class ElementDefinitionConstraintComponent extends Element implements IBaseDatatypeElement {
         /**
          * Allows identification of which elements have their cardinalities impacted by the constraint.  Will not be referenced for constraints that do not affect cardinality.
          */
@@ -998,10 +1014,16 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         private static final long serialVersionUID = -1195616532L;
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionConstraintComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionConstraintComponent(IdType key, Enumeration<ConstraintSeverity> severity, StringType human, StringType xpath) {
         super();
         this.key = key;
@@ -1289,7 +1311,8 @@ public class ElementDefinition extends Type implements ICompositeType {
 
   }
 
-    public static class ElementDefinitionBindingComponent extends Element {
+    @Block()
+    public static class ElementDefinitionBindingComponent extends Element implements IBaseDatatypeElement {
         /**
          * A descriptive name for this - can be useful for generating implementation artifacts.
          */
@@ -1320,10 +1343,16 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         private static final long serialVersionUID = 325485202L;
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionBindingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionBindingComponent(StringType name, Enumeration<BindingStrength> strength) {
         super();
         this.name = name;
@@ -1554,7 +1583,8 @@ public class ElementDefinition extends Type implements ICompositeType {
 
   }
 
-    public static class ElementDefinitionMappingComponent extends Element {
+    @Block()
+    public static class ElementDefinitionMappingComponent extends Element implements IBaseDatatypeElement {
         /**
          * An internal reference to the definition of a mapping.
          */
@@ -1578,10 +1608,16 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         private static final long serialVersionUID = -669205371L;
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionMappingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ElementDefinitionMappingComponent(IdType identity, StringType map) {
         super();
         this.identity = identity;
@@ -1970,10 +2006,16 @@ public class ElementDefinition extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 1149674414L;
 
+  /*
+   * Constructor
+   */
     public ElementDefinition() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ElementDefinition(StringType path) {
       super();
       this.path = path;

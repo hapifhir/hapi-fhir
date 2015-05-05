@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g., Document Completion - has the artifact been legally authenticated), all of which may impact Security, Privacy, and Trust policies.
@@ -147,7 +147,7 @@ public class Provenance extends DomainResource {
     }
 
     @Block()
-    public static class ProvenanceAgentComponent extends BackboneElement {
+    public static class ProvenanceAgentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The function of the agent with respect to the activity.
          */
@@ -178,10 +178,16 @@ public class Provenance extends DomainResource {
 
         private static final long serialVersionUID = -689391376L;
 
+    /*
+     * Constructor
+     */
       public ProvenanceAgentComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ProvenanceAgentComponent(Coding role, Coding type) {
         super();
         this.role = role;
@@ -369,7 +375,7 @@ public class Provenance extends DomainResource {
   }
 
     @Block()
-    public static class ProvenanceEntityComponent extends BackboneElement {
+    public static class ProvenanceEntityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * How the entity was used during the activity.
          */
@@ -407,10 +413,16 @@ public class Provenance extends DomainResource {
 
         private static final long serialVersionUID = 1533729633L;
 
+    /*
+     * Constructor
+     */
       public ProvenanceEntityComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ProvenanceEntityComponent(Enumeration<ProvenanceEntityRole> role, Coding type, UriType reference) {
         super();
         this.role = role;
@@ -730,10 +742,16 @@ public class Provenance extends DomainResource {
 
     private static final long serialVersionUID = 800452939L;
 
+  /*
+   * Constructor
+   */
     public Provenance() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Provenance(InstantType recorded) {
       super();
       this.recorded = recorded;

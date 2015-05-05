@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
@@ -209,10 +209,16 @@ public class Slot extends DomainResource {
 
     private static final long serialVersionUID = 1371243539L;
 
+  /*
+   * Constructor
+   */
     public Slot() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Slot(Reference schedule, Enumeration<Slotstatus> freeBusyType, InstantType start, InstantType end) {
       super();
       this.schedule = schedule;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -38,6 +38,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds.
@@ -427,7 +428,8 @@ public class Timing extends Type implements ICompositeType {
       }
     }
 
-    public static class TimingRepeatComponent extends Element {
+    @Block()
+    public static class TimingRepeatComponent extends Element implements IBaseDatatypeElement {
         /**
          * Outer bounds for start and/or end limits of the timing schedule.
          */
@@ -500,6 +502,9 @@ public class Timing extends Type implements ICompositeType {
 
         private static final long serialVersionUID = -960490812L;
 
+    /*
+     * Constructor
+     */
       public TimingRepeatComponent() {
         super();
       }
@@ -1046,6 +1051,9 @@ public class Timing extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 791565112L;
 
+  /*
+   * Constructor
+   */
     public Timing() {
       super();
     }

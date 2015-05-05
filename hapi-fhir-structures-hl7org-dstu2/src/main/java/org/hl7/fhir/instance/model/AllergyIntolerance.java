@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
@@ -577,7 +577,7 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     @Block()
-    public static class AllergyIntoleranceEventComponent extends BackboneElement {
+    public static class AllergyIntoleranceEventComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identification of the specific substance considered to be responsible for the Adverse Reaction event. Note: the substance for a specific reaction may be different to the substance identified as the cause of the risk, but must be consistent with it. For instance, it may be a more specific substance (e.g. a brand medication) or a composite substance that includes the identified substance. It must be clinically safe to only process the AllergyIntolerance.substance and ignore the AllergyIntolerance.event.substance.
          */
@@ -643,6 +643,9 @@ public class AllergyIntolerance extends DomainResource {
 
         private static final long serialVersionUID = -1773271720L;
 
+    /*
+     * Constructor
+     */
       public AllergyIntoleranceEventComponent() {
         super();
       }
@@ -1179,10 +1182,16 @@ public class AllergyIntolerance extends DomainResource {
 
     private static final long serialVersionUID = 410225544L;
 
+  /*
+   * Constructor
+   */
     public AllergyIntolerance() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public AllergyIntolerance(Reference patient, CodeableConcept substance) {
       super();
       this.patient = patient;

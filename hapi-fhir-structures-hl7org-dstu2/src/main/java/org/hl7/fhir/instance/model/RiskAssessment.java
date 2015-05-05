@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
@@ -48,7 +48,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class RiskAssessment extends DomainResource {
 
     @Block()
-    public static class RiskAssessmentPredictionComponent extends BackboneElement {
+    public static class RiskAssessmentPredictionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * One of the potential outcomes for the patient (e.g. remission, death,  a particular condition).
          */
@@ -86,10 +86,16 @@ public class RiskAssessment extends DomainResource {
 
         private static final long serialVersionUID = 647967428L;
 
+    /*
+     * Constructor
+     */
       public RiskAssessmentPredictionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public RiskAssessmentPredictionComponent(CodeableConcept outcome) {
         super();
         this.outcome = outcome;
@@ -435,6 +441,9 @@ public class RiskAssessment extends DomainResource {
 
     private static final long serialVersionUID = -1516167658L;
 
+  /*
+   * Constructor
+   */
     public RiskAssessment() {
       super();
     }

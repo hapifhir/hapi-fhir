@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
@@ -288,6 +289,9 @@ public class ContactPoint extends Type implements ICompositeType {
 
     private static final long serialVersionUID = 1972725348L;
 
+  /*
+   * Constructor
+   */
     public ContactPoint() {
       super();
     }

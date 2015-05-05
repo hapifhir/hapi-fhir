@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A set of DICOM SOP Instances of a patient, selected for some application purpose, e.g., quality assurance, teaching, conference, consulting, etc.  Objects selected can be from different studies, but must be of the same patient.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class ImagingObjectSelection extends DomainResource {
 
     @Block()
-    public static class StudyComponent extends BackboneElement {
+    public static class StudyComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Study instance uid of the SOP instances in the selection.
          */
@@ -71,10 +71,16 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = -1632673574L;
 
+    /*
+     * Constructor
+     */
       public StudyComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public StudyComponent(OidType uid) {
         super();
         this.uid = uid;
@@ -263,7 +269,7 @@ public class ImagingObjectSelection extends DomainResource {
   }
 
     @Block()
-    public static class SeriesComponent extends BackboneElement {
+    public static class SeriesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Series instance uid of the SOP instances in the selection.
          */
@@ -287,6 +293,9 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = 229247770L;
 
+    /*
+     * Constructor
+     */
       public SeriesComponent() {
         super();
       }
@@ -478,7 +487,7 @@ public class ImagingObjectSelection extends DomainResource {
   }
 
     @Block()
-    public static class InstanceComponent extends BackboneElement {
+    public static class InstanceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * SOP class uid of the selected instance.
          */
@@ -509,10 +518,16 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = 1641180916L;
 
+    /*
+     * Constructor
+     */
       public InstanceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public InstanceComponent(OidType sopClass, OidType uid, UriType url) {
         super();
         this.sopClass = sopClass;
@@ -747,7 +762,7 @@ public class ImagingObjectSelection extends DomainResource {
   }
 
     @Block()
-    public static class FramesComponent extends BackboneElement {
+    public static class FramesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The frame numbers in the frame set.
          */
@@ -764,10 +779,16 @@ public class ImagingObjectSelection extends DomainResource {
 
         private static final long serialVersionUID = -2068206970L;
 
+    /*
+     * Constructor
+     */
       public FramesComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public FramesComponent(UriType url) {
         super();
         this.url = url;
@@ -978,10 +999,16 @@ public class ImagingObjectSelection extends DomainResource {
 
     private static final long serialVersionUID = -1961832713L;
 
+  /*
+   * Constructor
+   */
     public ImagingObjectSelection() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ImagingObjectSelection(OidType uid, Reference patient, CodeableConcept title) {
       super();
       this.uid = uid;

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.
@@ -1109,7 +1109,7 @@ public class AuditEvent extends DomainResource {
     }
 
     @Block()
-    public static class AuditEventEventComponent extends BackboneElement {
+    public static class AuditEventEventComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifier for a family of the event.
          */
@@ -1161,10 +1161,16 @@ public class AuditEvent extends DomainResource {
 
         private static final long serialVersionUID = 339035171L;
 
+    /*
+     * Constructor
+     */
       public AuditEventEventComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AuditEventEventComponent(CodeableConcept type, InstantType dateTime) {
         super();
         this.type = type;
@@ -1532,7 +1538,7 @@ public class AuditEvent extends DomainResource {
   }
 
     @Block()
-    public static class AuditEventParticipantComponent extends BackboneElement {
+    public static class AuditEventParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context.
          */
@@ -1622,10 +1628,16 @@ public class AuditEvent extends DomainResource {
 
         private static final long serialVersionUID = -1555724321L;
 
+    /*
+     * Constructor
+     */
       public AuditEventParticipantComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AuditEventParticipantComponent(BooleanType requestor) {
         super();
         this.requestor = requestor;
@@ -2167,7 +2179,7 @@ public class AuditEvent extends DomainResource {
   }
 
     @Block()
-    public static class AuditEventParticipantNetworkComponent extends BackboneElement {
+    public static class AuditEventParticipantNetworkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An identifier for the network access point of the user device for the audit event.
          */
@@ -2184,6 +2196,9 @@ public class AuditEvent extends DomainResource {
 
         private static final long serialVersionUID = -1946856025L;
 
+    /*
+     * Constructor
+     */
       public AuditEventParticipantNetworkComponent() {
         super();
       }
@@ -2328,7 +2343,7 @@ public class AuditEvent extends DomainResource {
   }
 
     @Block()
-    public static class AuditEventSourceComponent extends BackboneElement {
+    public static class AuditEventSourceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Logical source location within the healthcare enterprise network.
          */
@@ -2352,10 +2367,16 @@ public class AuditEvent extends DomainResource {
 
         private static final long serialVersionUID = -382040480L;
 
+    /*
+     * Constructor
+     */
       public AuditEventSourceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AuditEventSourceComponent(StringType identifier) {
         super();
         this.identifier = identifier;
@@ -2544,7 +2565,7 @@ public class AuditEvent extends DomainResource {
   }
 
     @Block()
-    public static class AuditEventObjectComponent extends BackboneElement {
+    public static class AuditEventObjectComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies a specific instance of the participant object. The reference should always be version specific.
          */
@@ -2622,6 +2643,9 @@ public class AuditEvent extends DomainResource {
 
         private static final long serialVersionUID = 618775596L;
 
+    /*
+     * Constructor
+     */
       public AuditEventObjectComponent() {
         super();
       }
@@ -3116,7 +3140,7 @@ public class AuditEvent extends DomainResource {
   }
 
     @Block()
-    public static class AuditEventObjectDetailComponent extends BackboneElement {
+    public static class AuditEventObjectDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Name of the property.
          */
@@ -3133,10 +3157,16 @@ public class AuditEvent extends DomainResource {
 
         private static final long serialVersionUID = 11139504L;
 
+    /*
+     * Constructor
+     */
       public AuditEventObjectDetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public AuditEventObjectDetailComponent(StringType type, Base64BinaryType value) {
         super();
         this.type = type;
@@ -3304,10 +3334,16 @@ public class AuditEvent extends DomainResource {
 
     private static final long serialVersionUID = -1495151000L;
 
+  /*
+   * Constructor
+   */
     public AuditEvent() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public AuditEvent(AuditEventEventComponent event, AuditEventSourceComponent source) {
       super();
       this.event = event;

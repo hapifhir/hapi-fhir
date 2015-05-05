@@ -68,8 +68,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		Set<IdDt> addedResourceIds = new HashSet<IdDt>();
 	
 		for (IBaseResource next : theResult) {
-			if (next.getId().isEmpty() == false) {
-				addedResourceIds.add((IdDt) next.getId());
+			if (next.getIdElement().isEmpty() == false) {
+				addedResourceIds.add((IdDt) next.getIdElement());
 			}
 		}
 	
@@ -184,7 +184,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		}
 	
 		for (IBaseResource next : resourceList) {
-			if (next.getId() == null || next.getId().isEmpty()) {
+			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
@@ -271,8 +271,8 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
 	
 		for (IBaseResource next : theResult) {
-			if (next.getId().isEmpty() == false) {
-				addedResourceIds.add(next.getId());
+			if (next.getIdElement().isEmpty() == false) {
+				addedResourceIds.add(next.getIdElement());
 			}
 		}
 	
@@ -303,13 +303,13 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				for (BaseResourceReferenceDt nextRef : references) {
 					IBaseResource nextRefRes = (IBaseResource) nextRef.getResource();
 					if (nextRefRes != null) {
-						if (nextRefRes.getId().hasIdPart()) {
-							if (containedIds.contains(nextRefRes.getId().getValue())) {
+						if (nextRefRes.getIdElement().hasIdPart()) {
+							if (containedIds.contains(nextRefRes.getIdElement().getValue())) {
 								// Don't add contained IDs as top level resources
 								continue;
 							}
 	
-							IIdType id = nextRefRes.getId();
+							IIdType id = nextRefRes.getIdElement();
 							if (id.hasResourceType() == false) {
 								String resName = myContext.getResourceDefinition(nextRefRes).getName();
 								id = id.withResourceType(resName);

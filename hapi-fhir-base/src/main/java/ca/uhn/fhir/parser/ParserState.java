@@ -1383,12 +1383,12 @@ class ParserState<T> {
 		public void wereBack() {
 			IBaseResource res = getCurrentElement();
 			assert res != null;
-			if (res.getId() == null || res.getId().isEmpty()) {
+			if (res.getIdElement() == null || res.getIdElement().isEmpty()) {
 				ourLog.debug("Discarding contained resource with no ID!");
 			} else {
-				getPreResourceState().getContainedResources().put(res.getId().getValue(), res);
-				if (!res.getId().isLocal()) {
-					res.getId().setValue('#' + res.getId().getIdPart());
+				getPreResourceState().getContainedResources().put(res.getIdElement().getValue(), res);
+				if (!res.getIdElement().isLocal()) {
+					res.getIdElement().setValue('#' + res.getIdElement().getIdPart());
 				}
 			}
 
@@ -1955,12 +1955,12 @@ class ParserState<T> {
 				IDomainResource elem = (IDomainResource) getCurrentElement();
 				String resourceName = myContext.getResourceDefinition(elem).getName();
 				String versionId = elem.getMeta().getVersionId();
-				if (StringUtils.isBlank(elem.getId().getIdPart())) {
+				if (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
 					// Resource has no ID
 				} else if (StringUtils.isNotBlank(versionId)) {
-					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart() + "/_history/" + versionId);
+					elem.getIdElement().setValue(resourceName + "/" + elem.getIdElement().getIdPart() + "/_history/" + versionId);
 				} else {
-					elem.getIdElement().setValue(resourceName + "/" + elem.getId().getIdPart());
+					elem.getIdElement().setValue(resourceName + "/" + elem.getIdElement().getIdPart());
 				}
 			}
 		}

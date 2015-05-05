@@ -96,10 +96,10 @@ public class FhirSystemDaoDstu1Test {
         assertEquals(4, values.size());
 
         List<IBaseResource> res = values.getResources(0, 4);
-        assertEquals(newpid3, res.get(0).getId());
-        assertEquals(newpid2, res.get(1).getId());
-        assertEquals(newpid, res.get(2).getId());
-        assertEquals(pid.toUnqualifiedVersionless(), res.get(3).getId().toUnqualifiedVersionless());
+        assertEquals(newpid3, res.get(0).getIdElement());
+        assertEquals(newpid2, res.get(1).getIdElement());
+        assertEquals(newpid, res.get(2).getIdElement());
+        assertEquals(pid.toUnqualifiedVersionless(), res.get(3).getIdElement().toUnqualifiedVersionless());
 
         Location loc = new Location();
         loc.getAddress().addLine("AAA");
@@ -148,7 +148,7 @@ public class FhirSystemDaoDstu1Test {
         IBundleProvider patResults = ourPatientDao.search(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testPersistWithSimpleLinkP01"));
         assertEquals(1, obsResults.size());
 
-        IIdType foundPatientId = patResults.getResources(0, 1).get(0).getId();
+        IIdType foundPatientId = patResults.getResources(0, 1).get(0).getIdElement();
         ResourceReferenceDt subject = obs.getSubject();
         assertEquals(foundPatientId.getIdPart(), subject.getReference().getIdPart());
 
@@ -376,12 +376,12 @@ public class FhirSystemDaoDstu1Test {
         List<IBaseResource> existing = results.getResources(0, 3);
 
         p1 = new Patient();
-        p1.setId(existing.get(0).getId());
+        p1.setId(existing.get(0).getIdElement());
         ResourceMetadataKeyEnum.DELETED_AT.put(p1, InstantDt.withCurrentTime());
         res.add(p1);
 
         p2 = new Patient();
-        p2.setId(existing.get(1).getId());
+        p2.setId(existing.get(1).getIdElement());
         ResourceMetadataKeyEnum.DELETED_AT.put(p2, InstantDt.withCurrentTime());
         res.add(p2);
 
@@ -394,7 +394,7 @@ public class FhirSystemDaoDstu1Test {
         IBundleProvider results2 = ourPatientDao.search(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testTransactionWithDelete"));
         assertEquals(1, results2.size());
         List<IBaseResource> existing2 = results2.getResources(0, 1);
-        assertEquals(existing2.get(0).getId(), existing.get(2).getId());
+        assertEquals(existing2.get(0).getIdElement(), existing.get(2).getIdElement());
 
     }
 

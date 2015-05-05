@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of Series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A Series is of only one modality (e.g., X-ray, CT, MR, ultrasound), but a Study may have multiple Series of different modalities.
@@ -1481,7 +1481,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     @Block()
-    public static class ImagingStudySeriesComponent extends BackboneElement {
+    public static class ImagingStudySeriesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The Numeric identifier of this series in the study.
          */
@@ -1561,10 +1561,16 @@ public class ImagingStudy extends DomainResource {
 
         private static final long serialVersionUID = 1186612269L;
 
+    /*
+     * Constructor
+     */
       public ImagingStudySeriesComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ImagingStudySeriesComponent(Enumeration<Modality> modality, OidType uid, UnsignedIntType numberOfInstances) {
         super();
         this.modality = modality;
@@ -2110,7 +2116,7 @@ public class ImagingStudy extends DomainResource {
   }
 
     @Block()
-    public static class ImagingStudySeriesInstanceComponent extends BackboneElement {
+    public static class ImagingStudySeriesInstanceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The number of this image in the series.
          */
@@ -2155,10 +2161,16 @@ public class ImagingStudy extends DomainResource {
 
         private static final long serialVersionUID = 264997991L;
 
+    /*
+     * Constructor
+     */
       public ImagingStudySeriesInstanceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ImagingStudySeriesInstanceComponent(OidType uid, OidType sopclass) {
         super();
         this.uid = uid;
@@ -2636,10 +2648,16 @@ public class ImagingStudy extends DomainResource {
 
     private static final long serialVersionUID = 206272292L;
 
+  /*
+   * Constructor
+   */
     public ImagingStudy() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ImagingStudy(Reference patient, OidType uid, UnsignedIntType numberOfSeries, UnsignedIntType numberOfInstances) {
       super();
       this.patient = patient;

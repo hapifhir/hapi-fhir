@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A reference to a document.
@@ -233,7 +233,7 @@ public class DocumentReference extends DomainResource {
     }
 
     @Block()
-    public static class DocumentReferenceRelatesToComponent extends BackboneElement {
+    public static class DocumentReferenceRelatesToComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The type of relationship that this document has with anther document.
          */
@@ -255,10 +255,16 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = -347257495L;
 
+    /*
+     * Constructor
+     */
       public DocumentReferenceRelatesToComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DocumentReferenceRelatesToComponent(Enumeration<DocumentRelationshipType> code, Reference target) {
         super();
         this.code = code;
@@ -396,7 +402,7 @@ public class DocumentReference extends DomainResource {
   }
 
     @Block()
-    public static class DocumentReferenceContextComponent extends BackboneElement {
+    public static class DocumentReferenceContextComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.
          */
@@ -446,6 +452,9 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = -225578230L;
 
+    /*
+     * Constructor
+     */
       public DocumentReferenceContextComponent() {
         super();
       }
@@ -708,7 +717,7 @@ public class DocumentReference extends DomainResource {
   }
 
     @Block()
-    public static class DocumentReferenceContextRelatedComponent extends BackboneElement {
+    public static class DocumentReferenceContextRelatedComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Related identifier to this DocumentReference. If both id and ref are present they shall refer to the same thing.
          */
@@ -730,6 +739,9 @@ public class DocumentReference extends DomainResource {
 
         private static final long serialVersionUID = -1670123330L;
 
+    /*
+     * Constructor
+     */
       public DocumentReferenceContextRelatedComponent() {
         super();
       }
@@ -986,10 +998,16 @@ public class DocumentReference extends DomainResource {
 
     private static final long serialVersionUID = 1440270142L;
 
+  /*
+   * Constructor
+   */
     public DocumentReference() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DocumentReference(CodeableConcept type, InstantType indexed, Enumeration<DocumentReferenceStatus> status) {
       super();
       this.type = type;

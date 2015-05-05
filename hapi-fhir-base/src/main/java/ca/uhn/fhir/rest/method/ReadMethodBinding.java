@@ -209,8 +209,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				IBaseResource responseResource = responseResources.get(0);
 				
 				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
-				if (responseResource.getId() != null && responseResource.getId().hasVersionIdPart()) {
-					if (responseResource.getId().getVersionIdPart().equals(ifNoneMatch)) {
+				if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
+					if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
 						ourLog.debug("Returning HTTP 301 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
 						throw new NotModifiedException("Not Modified");
 					}

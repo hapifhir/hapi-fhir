@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A record of a request for a diagnostic investigation service to be performed.
@@ -373,7 +373,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     @Block()
-    public static class DiagnosticOrderEventComponent extends BackboneElement {
+    public static class DiagnosticOrderEventComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The status for the event.
          */
@@ -409,10 +409,16 @@ public class DiagnosticOrder extends DomainResource {
 
         private static final long serialVersionUID = -370793723L;
 
+    /*
+     * Constructor
+     */
       public DiagnosticOrderEventComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DiagnosticOrderEventComponent(Enumeration<DiagnosticOrderStatus> status, DateTimeType dateTime) {
         super();
         this.status = status;
@@ -619,7 +625,7 @@ public class DiagnosticOrder extends DomainResource {
   }
 
     @Block()
-    public static class DiagnosticOrderItemComponent extends BackboneElement {
+    public static class DiagnosticOrderItemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code that identifies a particular diagnostic investigation, or panel of investigations, that have been requested.
          */
@@ -662,10 +668,16 @@ public class DiagnosticOrder extends DomainResource {
 
         private static final long serialVersionUID = 1960490281L;
 
+    /*
+     * Constructor
+     */
       public DiagnosticOrderItemComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DiagnosticOrderItemComponent(CodeableConcept code) {
         super();
         this.code = code;
@@ -1043,10 +1055,16 @@ public class DiagnosticOrder extends DomainResource {
 
     private static final long serialVersionUID = 1028294242L;
 
+  /*
+   * Constructor
+   */
     public DiagnosticOrder() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DiagnosticOrder(Reference subject) {
       super();
       this.subject = subject;

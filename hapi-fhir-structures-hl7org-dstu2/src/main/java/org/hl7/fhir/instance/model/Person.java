@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Demographics and administrative information about a person independent of a specific health-related context.
@@ -247,7 +247,7 @@ public class Person extends DomainResource {
     }
 
     @Block()
-    public static class PersonLinkComponent extends BackboneElement {
+    public static class PersonLinkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The resource to which this actual person is associated.
          */
@@ -269,10 +269,16 @@ public class Person extends DomainResource {
 
         private static final long serialVersionUID = 508763647L;
 
+    /*
+     * Constructor
+     */
       public PersonLinkComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public PersonLinkComponent(Reference target) {
         super();
         this.target = target;
@@ -484,6 +490,9 @@ public class Person extends DomainResource {
 
     private static final long serialVersionUID = -2072707611L;
 
+  /*
+   * Constructor
+   */
     public Person() {
       super();
     }

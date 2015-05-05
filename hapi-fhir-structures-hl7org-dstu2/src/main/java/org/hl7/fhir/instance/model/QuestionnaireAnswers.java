@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
@@ -133,7 +133,7 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     @Block()
-    public static class GroupComponent extends BackboneElement {
+    public static class GroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.
          */
@@ -183,6 +183,9 @@ public class QuestionnaireAnswers extends DomainResource {
 
         private static final long serialVersionUID = -1045990435L;
 
+    /*
+     * Constructor
+     */
       public GroupComponent() {
         super();
       }
@@ -515,7 +518,7 @@ public class QuestionnaireAnswers extends DomainResource {
   }
 
     @Block()
-    public static class QuestionComponent extends BackboneElement {
+    public static class QuestionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.
          */
@@ -546,6 +549,9 @@ public class QuestionnaireAnswers extends DomainResource {
 
         private static final long serialVersionUID = -564009278L;
 
+    /*
+     * Constructor
+     */
       public QuestionComponent() {
         super();
       }
@@ -783,7 +789,7 @@ public class QuestionnaireAnswers extends DomainResource {
   }
 
     @Block()
-    public static class QuestionAnswerComponent extends BackboneElement {
+    public static class QuestionAnswerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The answer (or one of the answers) provided by the respondant to the question.
          */
@@ -793,6 +799,9 @@ public class QuestionnaireAnswers extends DomainResource {
 
         private static final long serialVersionUID = -732981989L;
 
+    /*
+     * Constructor
+     */
       public QuestionAnswerComponent() {
         super();
       }
@@ -1061,10 +1070,16 @@ public class QuestionnaireAnswers extends DomainResource {
 
     private static final long serialVersionUID = -949684393L;
 
+  /*
+   * Constructor
+   */
     public QuestionnaireAnswers() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public QuestionnaireAnswers(Enumeration<QuestionnaireAnswersStatus> status) {
       super();
       this.status = status;

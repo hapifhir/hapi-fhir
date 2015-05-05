@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretation, and formatted representation of diagnostic reports.
@@ -189,7 +189,7 @@ public class DiagnosticReport extends DomainResource {
     }
 
     @Block()
-    public static class DiagnosticReportImageComponent extends BackboneElement {
+    public static class DiagnosticReportImageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A comment about the image. Typically, this is used to provide an explanation for why the image is included, or to draw the viewer's attention to important features.
          */
@@ -211,10 +211,16 @@ public class DiagnosticReport extends DomainResource {
 
         private static final long serialVersionUID = 935791940L;
 
+    /*
+     * Constructor
+     */
       public DiagnosticReportImageComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public DiagnosticReportImageComponent(Reference link) {
         super();
         this.link = link;
@@ -510,10 +516,16 @@ public class DiagnosticReport extends DomainResource {
 
     private static final long serialVersionUID = 140402748L;
 
+  /*
+   * Constructor
+   */
     public DiagnosticReport() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DiagnosticReport(CodeableConcept name, Enumeration<DiagnosticReportStatus> status, DateTimeType issued, Reference subject, Reference performer, Type diagnostic) {
       super();
       this.name = name;

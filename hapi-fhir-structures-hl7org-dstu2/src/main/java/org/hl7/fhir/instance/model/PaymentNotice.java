@@ -29,15 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides the status of the payment for goods and services rendered, and the request and response resource references.
@@ -142,10 +142,16 @@ public class PaymentNotice extends DomainResource {
 
     private static final long serialVersionUID = -394826458L;
 
+  /*
+   * Constructor
+   */
     public PaymentNotice() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public PaymentNotice(Coding paymentStatus) {
       super();
       this.paymentStatus = paymentStatus;

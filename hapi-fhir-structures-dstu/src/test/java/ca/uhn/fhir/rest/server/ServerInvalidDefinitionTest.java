@@ -217,6 +217,11 @@ public class ServerInvalidDefinitionTest {
 				}
 
 				@Override
+				public IIdType getIdElement() {
+					return getId();
+				}
+
+				@Override
 				public ContainedDt getContained() {
 					return null;
 				}

@@ -81,8 +81,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
 
 		for (IBaseResource next : theResult) {
-			if (next.getId().isEmpty() == false) {
-				addedResourceIds.add(next.getId());
+			if (next.getIdElement().isEmpty() == false) {
+				addedResourceIds.add(next.getIdElement());
 			}
 		}
 
@@ -95,7 +95,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			Set<String> containedIds = new HashSet<String>();
 			for (IRefImplResource nextContained : next.getContained()) {
 				if (nextContained.getId().isEmpty() == false) {
-					containedIds.add(nextContained.getId().getValue());
+					containedIds.add(nextContained.getIdElement().getValue());
 				}
 			}
 
@@ -109,13 +109,13 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 					IBaseResource nextRes = (IBaseResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {
-						if (nextRes.getId().hasIdPart()) {
-							if (containedIds.contains(nextRes.getId().getValue())) {
+						if (nextRes.getIdElement().hasIdPart()) {
+							if (containedIds.contains(nextRes.getIdElement().getValue())) {
 								// Don't add contained IDs as top level resources
 								continue;
 							}
 
-							IdType id = (IdType) nextRes.getId();
+							IdType id = (IdType) nextRes.getIdElement();
 							if (id.hasResourceType() == false) {
 								String resName = myContext.getResourceDefinition(nextRes).getName();
 								id = id.withResourceType(resName);
@@ -227,7 +227,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		for (IBaseResource next : resourceList) {
-			if (next.getId() == null || next.getId().isEmpty()) {
+			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof OperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IBaseResource#setId(IdDt) must be called)");
 				}
@@ -294,15 +294,15 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 				BundleEntryComponent nextEntry = myBundle.addEntry();
 
 				nextEntry.setResource((Resource) next);
-				if (next.getId().isEmpty()) {
+				if (next.getIdElement().isEmpty()) {
 					nextEntry.getTransaction().setMethod(HttpVerb.POST);
 				} else {
 					nextEntry.getTransaction().setMethod(HttpVerb.PUT);
-					if (next.getId().isAbsolute()) {
-						nextEntry.getTransaction().setUrl(next.getId().getValue());
+					if (next.getIdElement().isAbsolute()) {
+						nextEntry.getTransaction().setUrl(next.getIdElement().getValue());
 					} else {
 						String resourceType = myContext.getResourceDefinition(next).getName();
-						nextEntry.getTransaction().setUrl(new IdType(theServerBase, resourceType, next.getId().getIdPart(), next.getId().getVersionIdPart()).getValue());
+						nextEntry.getTransaction().setUrl(new IdType(theServerBase, resourceType, next.getIdElement().getIdPart(), next.getIdElement().getVersionIdPart()).getValue());
 					}
 				}
 			}
@@ -318,8 +318,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
 
 		for (IBaseResource next : theResult) {
-			if (next.getId().isEmpty() == false) {
-				addedResourceIds.add(next.getId());
+			if (next.getIdElement().isEmpty() == false) {
+				addedResourceIds.add(next.getIdElement());
 			}
 		}
 
@@ -327,8 +327,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			IDomainResource next = (IDomainResource) nextBaseRes;
 			Set<String> containedIds = new HashSet<String>();
 			for (IBaseResource nextContained : next.getContained()) {
-				if (nextContained.getId().isEmpty() == false) {
-					containedIds.add(nextContained.getId().getValue());
+				if (nextContained.getIdElement().isEmpty() == false) {
+					containedIds.add(nextContained.getIdElement().getValue());
 				}
 			}
 
@@ -339,13 +339,13 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 				for (IBaseReference nextRef : references) {
 					IBaseResource nextRes = (IBaseResource) nextRef.getResource();
 					if (nextRes != null) {
-						if (nextRes.getId().hasIdPart()) {
-							if (containedIds.contains(nextRes.getId().getValue())) {
+						if (nextRes.getIdElement().hasIdPart()) {
+							if (containedIds.contains(nextRes.getIdElement().getValue())) {
 								// Don't add contained IDs as top level resources
 								continue;
 							}
 
-							IIdType id = nextRes.getId();
+							IIdType id = nextRes.getIdElement();
 							if (id.hasResourceType() == false) {
 								String resName = myContext.getResourceDefinition(nextRes).getName();
 								id = id.withResourceType(resName);

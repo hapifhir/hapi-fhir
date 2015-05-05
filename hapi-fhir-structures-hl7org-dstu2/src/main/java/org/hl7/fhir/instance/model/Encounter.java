@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
@@ -431,7 +431,7 @@ public class Encounter extends DomainResource {
     }
 
     @Block()
-    public static class EncounterStatusHistoryComponent extends BackboneElement {
+    public static class EncounterStatusHistoryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * planned | arrived | in-progress | onleave | finished | cancelled.
          */
@@ -448,10 +448,16 @@ public class Encounter extends DomainResource {
 
         private static final long serialVersionUID = 919229161L;
 
+    /*
+     * Constructor
+     */
       public EncounterStatusHistoryComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public EncounterStatusHistoryComponent(Enumeration<EncounterState> status, Period period) {
         super();
         this.status = status;
@@ -569,7 +575,7 @@ public class Encounter extends DomainResource {
   }
 
     @Block()
-    public static class EncounterParticipantComponent extends BackboneElement {
+    public static class EncounterParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Role of participant in encounter.
          */
@@ -598,6 +604,9 @@ public class Encounter extends DomainResource {
 
         private static final long serialVersionUID = 317095765L;
 
+    /*
+     * Constructor
+     */
       public EncounterParticipantComponent() {
         super();
       }
@@ -754,7 +763,7 @@ public class Encounter extends DomainResource {
   }
 
     @Block()
-    public static class EncounterHospitalizationComponent extends BackboneElement {
+    public static class EncounterHospitalizationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Pre-admission identifier.
          */
@@ -842,6 +851,9 @@ public class Encounter extends DomainResource {
 
         private static final long serialVersionUID = -990619663L;
 
+    /*
+     * Constructor
+     */
       public EncounterHospitalizationComponent() {
         super();
       }
@@ -1269,7 +1281,7 @@ public class Encounter extends DomainResource {
   }
 
     @Block()
-    public static class EncounterLocationComponent extends BackboneElement {
+    public static class EncounterLocationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The location where the encounter takes place.
          */
@@ -1298,10 +1310,16 @@ public class Encounter extends DomainResource {
 
         private static final long serialVersionUID = -322984880L;
 
+    /*
+     * Constructor
+     */
       public EncounterLocationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public EncounterLocationComponent(Reference location) {
         super();
         this.location = location;
@@ -1640,10 +1658,16 @@ The indication will typically be a Condition (with other resources referenced in
 
     private static final long serialVersionUID = 413573588L;
 
+  /*
+   * Constructor
+   */
     public Encounter() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Encounter(Enumeration<EncounterState> status) {
       super();
       this.status = status;

@@ -96,7 +96,7 @@ public abstract class BaseParser implements IParser {
 		} else if (theTarget instanceof IDomainResource) {
 			List<? extends IRefImplResource> containedResources = ((IDomainResource) theTarget).getContained();
 			for (IRefImplResource next : containedResources) {
-				String nextId = next.getId().getValue();
+				String nextId = next.getIdElement().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
 					if (!nextId.startsWith("#")) {
 						nextId = '#' + nextId;
@@ -117,7 +117,7 @@ public abstract class BaseParser implements IParser {
 			for (IBaseReference next : allElements) {
 				IBaseResource resource = next.getResource();
 				if (resource != null) {
-					if (resource.getId().isEmpty() || resource.getId().isLocal()) {
+					if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
 						theContained.addContained(resource);
 					} else {
 						continue;
@@ -156,11 +156,11 @@ public abstract class BaseParser implements IParser {
 					} else {
 						reference = "#" + containedId.getValue();
 					}
-				} else if (theRef.getResource().getId() != null && theRef.getResource().getId().hasIdPart()) {
+				} else if (theRef.getResource().getIdElement() != null && theRef.getResource().getIdElement().hasIdPart()) {
 					if (isStripVersionsFromReferences()) {
-						reference = theRef.getResource().getId().toVersionless().getValue();
+						reference = theRef.getResource().getIdElement().toVersionless().getValue();
 					} else {
-						reference = theRef.getResource().getId().getValue();
+						reference = theRef.getResource().getIdElement().getValue();
 					}
 				}
 			}
@@ -284,7 +284,7 @@ public abstract class BaseParser implements IParser {
 			if (base != null && base.size() > 0) {
 				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
 				IBaseResource res = ((IBaseResource) retVal);
-				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getId().getIdPart(), res.getId().getVersionIdPart()));
+				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getIdElement().getIdPart(), res.getIdElement().getVersionIdPart()));
 			}
 
 			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
@@ -305,12 +305,12 @@ public abstract class BaseParser implements IParser {
 						if (entryResources != null && entryResources.size() > 0) {
 							IBaseResource res = (IBaseResource) entryResources.get(0);
 							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
-							String versionIdPart = res.getId().getVersionIdPart();
+							String versionIdPart = res.getIdElement().getVersionIdPart();
 							if (isBlank(versionIdPart) && res instanceof IResource) {
 								versionIdPart = ResourceMetadataKeyEnum.VERSION.get((IResource) res);
 							}
 
-							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getId().getIdPart(), versionIdPart));
+							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getIdElement().getIdPart(), versionIdPart));
 						}
 
 					}
@@ -399,8 +399,8 @@ public abstract class BaseParser implements IParser {
 			}
 
 			IIdType newId;
-			if (theResource.getId().isLocal()) {
-				newId = theResource.getId();
+			if (theResource.getIdElement().isLocal()) {
+				newId = theResource.getIdElement();
 			} else {
 				// TODO: make this configurable between the two below (and something else?)
 				// newId = new IdDt(UUID.randomUUID().toString());

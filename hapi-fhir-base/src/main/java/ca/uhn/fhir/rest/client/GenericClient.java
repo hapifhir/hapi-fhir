@@ -283,7 +283,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (isNotBlank(theId)) {
 			return theId;
 		}
-		return theResource.getId().getIdPart();
+		return theResource.getIdElement().getIdPart();
 	}
 
 	@Override
@@ -1709,7 +1709,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
 			} else {
 				if (myId == null) {
-					myId = myResource.getId();
+					myId = myResource.getIdElement();
 				}
 				if (myId == null || myId.hasIdPart() == false) {
 					throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");

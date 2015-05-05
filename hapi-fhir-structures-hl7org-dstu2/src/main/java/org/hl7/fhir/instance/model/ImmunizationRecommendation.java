@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A patient's point-of-time immunization status and recommendation with optional supporting justification.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class ImmunizationRecommendation extends DomainResource {
 
     @Block()
-    public static class ImmunizationRecommendationRecommendationComponent extends BackboneElement {
+    public static class ImmunizationRecommendationRecommendationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The date the immunization recommendation was created.
          */
@@ -116,10 +116,16 @@ public class ImmunizationRecommendation extends DomainResource {
 
         private static final long serialVersionUID = 366360557L;
 
+    /*
+     * Constructor
+     */
       public ImmunizationRecommendationRecommendationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ImmunizationRecommendationRecommendationComponent(DateTimeType date, CodeableConcept vaccineType, CodeableConcept forecastStatus) {
         super();
         this.date = date;
@@ -511,7 +517,7 @@ public class ImmunizationRecommendation extends DomainResource {
   }
 
     @Block()
-    public static class ImmunizationRecommendationRecommendationDateCriterionComponent extends BackboneElement {
+    public static class ImmunizationRecommendationRecommendationDateCriterionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Date classification of recommendation - e.g. earliest date to give, latest date to give, etc.
          */
@@ -528,10 +534,16 @@ public class ImmunizationRecommendation extends DomainResource {
 
         private static final long serialVersionUID = 1036994566L;
 
+    /*
+     * Constructor
+     */
       public ImmunizationRecommendationRecommendationDateCriterionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ImmunizationRecommendationRecommendationDateCriterionComponent(CodeableConcept code, DateTimeType value) {
         super();
         this.code = code;
@@ -649,7 +661,7 @@ public class ImmunizationRecommendation extends DomainResource {
   }
 
     @Block()
-    public static class ImmunizationRecommendationRecommendationProtocolComponent extends BackboneElement {
+    public static class ImmunizationRecommendationRecommendationProtocolComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates the nominal position in a series of the next dose.  This is the recommended dose number as per a specified protocol.
          */
@@ -685,6 +697,9 @@ public class ImmunizationRecommendation extends DomainResource {
 
         private static final long serialVersionUID = -512702014L;
 
+    /*
+     * Constructor
+     */
       public ImmunizationRecommendationRecommendationProtocolComponent() {
         super();
       }
@@ -951,10 +966,16 @@ public class ImmunizationRecommendation extends DomainResource {
 
     private static final long serialVersionUID = 641058495L;
 
+  /*
+   * Constructor
+   */
     public ImmunizationRecommendation() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ImmunizationRecommendation(Reference patient) {
       super();
       this.patient = patient;

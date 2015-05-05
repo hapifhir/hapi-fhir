@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
@@ -589,7 +589,7 @@ public class DeviceMetric extends DomainResource {
     }
 
     @Block()
-    public static class DeviceMetricCalibrationComponent extends BackboneElement {
+    public static class DeviceMetricCalibrationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the type of the calibration method.
          */
@@ -613,6 +613,9 @@ public class DeviceMetric extends DomainResource {
 
         private static final long serialVersionUID = 407720126L;
 
+    /*
+     * Constructor
+     */
       public DeviceMetricCalibrationComponent() {
         super();
       }
@@ -896,10 +899,16 @@ period.
 
     private static final long serialVersionUID = -480554704L;
 
+  /*
+   * Constructor
+   */
     public DeviceMetric() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DeviceMetric(CodeableConcept type, Identifier identifier, Enumeration<MetricCategory> category) {
       super();
       this.type = type;

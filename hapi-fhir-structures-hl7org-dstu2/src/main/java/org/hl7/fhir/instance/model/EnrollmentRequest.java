@@ -29,15 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides the insurance Enrollment details to the insurer regarding a specified coverage.
@@ -142,10 +142,16 @@ public class EnrollmentRequest extends DomainResource {
 
     private static final long serialVersionUID = -1656505325L;
 
+  /*
+   * Constructor
+   */
     public EnrollmentRequest() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public EnrollmentRequest(Reference subject, Reference coverage, Coding relationship) {
       super();
       this.subject = subject;

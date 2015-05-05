@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.
@@ -161,7 +161,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     @Block()
-    public static class MedicationAdministrationDosageComponent extends BackboneElement {
+    public static class MedicationAdministrationDosageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.
          */
@@ -206,6 +206,9 @@ public class MedicationAdministration extends DomainResource {
 
         private static final long serialVersionUID = -358534919L;
 
+    /*
+     * Constructor
+     */
       public MedicationAdministrationDosageComponent() {
         super();
       }
@@ -561,10 +564,16 @@ public class MedicationAdministration extends DomainResource {
 
     private static final long serialVersionUID = 1898346148L;
 
+  /*
+   * Constructor
+   */
     public MedicationAdministration() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public MedicationAdministration(Enumeration<MedicationAdminStatus> status, Reference patient, Type effectiveTime) {
       super();
       this.status = status;

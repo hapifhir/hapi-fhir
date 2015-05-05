@@ -79,15 +79,15 @@ public class RestfulServerUtils {
 			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase, boolean theAddContentLocationHeader) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
-		if (theAddContentLocationHeader && theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
+		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			IIdType fullId = theResource.getId().withServerBase(theServerBase, resName);
+			IIdType fullId = theResource.getIdElement().withServerBase(theServerBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (theResource.getId().hasVersionIdPart()) {
-				theHttpResponse.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getId().getVersionIdPart() + '"');
+			if (theResource.getIdElement().hasVersionIdPart()) {
+				theHttpResponse.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getIdElement().getVersionIdPart() + '"');
 			}
 		}
 

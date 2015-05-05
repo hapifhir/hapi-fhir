@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
@@ -473,7 +473,7 @@ public class Observation extends DomainResource {
     }
 
     @Block()
-    public static class ObservationReferenceRangeComponent extends BackboneElement {
+    public static class ObservationReferenceRangeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.
          */
@@ -511,6 +511,9 @@ public class Observation extends DomainResource {
 
         private static final long serialVersionUID = 230621180L;
 
+    /*
+     * Constructor
+     */
       public ObservationReferenceRangeComponent() {
         super();
       }
@@ -710,7 +713,7 @@ public class Observation extends DomainResource {
   }
 
     @Block()
-    public static class ObservationRelatedComponent extends BackboneElement {
+    public static class ObservationRelatedComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code specifying the kind of relationship that exists with the target observation.
          */
@@ -732,10 +735,16 @@ public class Observation extends DomainResource {
 
         private static final long serialVersionUID = 1078793488L;
 
+    /*
+     * Constructor
+     */
       public ObservationRelatedComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ObservationRelatedComponent(Reference target) {
         super();
         this.target = target;
@@ -1037,10 +1046,16 @@ other observer (for example a relative or EMT), or any observation made about th
 
     private static final long serialVersionUID = 1157047775L;
 
+  /*
+   * Constructor
+   */
     public Observation() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Observation(CodeableConcept code, Enumeration<ObservationStatus> status) {
       super();
       this.code = code;

@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A request for a procedure to be performed. May be a proposal or an order.
@@ -331,7 +331,7 @@ public class ProcedureRequest extends DomainResource {
     }
 
     @Block()
-    public static class ProcedureRequestBodySiteComponent extends BackboneElement {
+    public static class ProcedureRequestBodySiteComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).
          */
@@ -341,10 +341,16 @@ public class ProcedureRequest extends DomainResource {
 
         private static final long serialVersionUID = 1429072605L;
 
+    /*
+     * Constructor
+     */
       public ProcedureRequestBodySiteComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ProcedureRequestBodySiteComponent(Type site) {
         super();
         this.site = site;
@@ -545,10 +551,16 @@ public class ProcedureRequest extends DomainResource {
 
     private static final long serialVersionUID = -1687850759L;
 
+  /*
+   * Constructor
+   */
     public ProcedureRequest() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ProcedureRequest(Reference subject, CodeableConcept type) {
       super();
       this.subject = subject;

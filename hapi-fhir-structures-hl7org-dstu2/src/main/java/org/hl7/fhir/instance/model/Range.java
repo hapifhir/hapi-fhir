@@ -29,13 +29,14 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A set of ordered Quantities defined by a low and high limit.
@@ -59,6 +60,9 @@ public class Range extends Type implements ICompositeType {
 
     private static final long serialVersionUID = -474933350L;
 
+  /*
+   * Constructor
+   */
     public Range() {
       super();
     }

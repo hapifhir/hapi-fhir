@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A value set specifies a set of codes drawn from one or more code systems.
@@ -176,7 +176,7 @@ public class ValueSet extends DomainResource {
     }
 
     @Block()
-    public static class ValueSetContactComponent extends BackboneElement {
+    public static class ValueSetContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the value set.
          */
@@ -193,6 +193,9 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public ValueSetContactComponent() {
         super();
       }
@@ -332,7 +335,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ValueSetDefineComponent extends BackboneElement {
+    public static class ValueSetDefineComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
          */
@@ -363,10 +366,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -1109401192L;
 
+    /*
+     * Constructor
+     */
       public ValueSetDefineComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ValueSetDefineComponent(UriType system) {
         super();
         this.system = system;
@@ -604,7 +613,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ConceptDefinitionComponent extends BackboneElement {
+    public static class ConceptDefinitionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Code that identifies concept.
          */
@@ -649,10 +658,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -318560292L;
 
+    /*
+     * Constructor
+     */
       public ConceptDefinitionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConceptDefinitionComponent(CodeType code) {
         super();
         this.code = code;
@@ -989,7 +1004,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ConceptDefinitionDesignationComponent extends BackboneElement {
+    public static class ConceptDefinitionDesignationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The language this designation is defined for.
          */
@@ -1013,10 +1028,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 1515662414L;
 
+    /*
+     * Constructor
+     */
       public ConceptDefinitionDesignationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConceptDefinitionDesignationComponent(StringType value) {
         super();
         this.value = value;
@@ -1185,7 +1206,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ValueSetComposeComponent extends BackboneElement {
+    public static class ValueSetComposeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.
          */
@@ -1209,6 +1230,9 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -703166694L;
 
+    /*
+     * Constructor
+     */
       public ValueSetComposeComponent() {
         super();
       }
@@ -1404,7 +1428,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ConceptSetComponent extends BackboneElement {
+    public static class ConceptSetComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI which is the code system from which the selected codes come from.
          */
@@ -1435,10 +1459,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -196054471L;
 
+    /*
+     * Constructor
+     */
       public ConceptSetComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConceptSetComponent(UriType system) {
         super();
         this.system = system;
@@ -1673,7 +1703,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ConceptReferenceComponent extends BackboneElement {
+    public static class ConceptReferenceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Specifies a code for the concept to be included or excluded.
          */
@@ -1697,10 +1727,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -1513912691L;
 
+    /*
+     * Constructor
+     */
       public ConceptReferenceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConceptReferenceComponent(CodeType code) {
         super();
         this.code = code;
@@ -1889,7 +1925,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ConceptSetFilterComponent extends BackboneElement {
+    public static class ConceptSetFilterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code that identifies a property defined in the code system.
          */
@@ -1913,10 +1949,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 1985515000L;
 
+    /*
+     * Constructor
+     */
       public ConceptSetFilterComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ConceptSetFilterComponent(CodeType property, Enumeration<FilterOperator> op, CodeType value) {
         super();
         this.property = property;
@@ -2105,7 +2147,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ValueSetExpansionComponent extends BackboneElement {
+    public static class ValueSetExpansionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so.
          */
@@ -2136,10 +2178,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 148339098L;
 
+    /*
+     * Constructor
+     */
       public ValueSetExpansionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ValueSetExpansionComponent(UriType identifier, DateTimeType timestamp) {
         super();
         this.identifier = identifier;
@@ -2373,7 +2421,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ValueSetExpansionParameterComponent extends BackboneElement {
+    public static class ValueSetExpansionParameterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of the parameter.
          */
@@ -2390,10 +2438,16 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = 1172641169L;
 
+    /*
+     * Constructor
+     */
       public ValueSetExpansionParameterComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ValueSetExpansionParameterComponent(StringType name) {
         super();
         this.name = name;
@@ -2559,7 +2613,7 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ValueSetExpansionContainsComponent extends BackboneElement {
+    public static class ValueSetExpansionContainsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI which is the code system in which the code for this item in the expansion is defined.
          */
@@ -2604,6 +2658,9 @@ public class ValueSet extends DomainResource {
 
         private static final long serialVersionUID = -2038349483L;
 
+    /*
+     * Constructor
+     */
       public ValueSetExpansionContainsComponent() {
         super();
       }
@@ -3081,10 +3138,16 @@ public class ValueSet extends DomainResource {
 
     private static final long serialVersionUID = 121117080L;
 
+  /*
+   * Constructor
+   */
     public ValueSet() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public ValueSet(Enumeration<ConformanceResourceStatus> status) {
       super();
       this.status = status;

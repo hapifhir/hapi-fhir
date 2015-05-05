@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
@@ -175,7 +175,7 @@ public class EpisodeOfCare extends DomainResource {
     }
 
     @Block()
-    public static class EpisodeOfCareStatusHistoryComponent extends BackboneElement {
+    public static class EpisodeOfCareStatusHistoryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * planned | waitlist | active | onhold | finished | cancelled.
          */
@@ -192,10 +192,16 @@ public class EpisodeOfCare extends DomainResource {
 
         private static final long serialVersionUID = -1192432864L;
 
+    /*
+     * Constructor
+     */
       public EpisodeOfCareStatusHistoryComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public EpisodeOfCareStatusHistoryComponent(Enumeration<EpisodeOfCareStatus> status, Period period) {
         super();
         this.status = status;
@@ -313,7 +319,7 @@ public class EpisodeOfCare extends DomainResource {
   }
 
     @Block()
-    public static class EpisodeOfCareCareTeamComponent extends BackboneElement {
+    public static class EpisodeOfCareCareTeamComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The practitioner (or Organization) within the team.
          */
@@ -342,6 +348,9 @@ public class EpisodeOfCare extends DomainResource {
 
         private static final long serialVersionUID = -2134086895L;
 
+    /*
+     * Constructor
+     */
       public EpisodeOfCareCareTeamComponent() {
         super();
       }
@@ -601,10 +610,16 @@ public class EpisodeOfCare extends DomainResource {
 
     private static final long serialVersionUID = -1251791864L;
 
+  /*
+   * Constructor
+   */
     public EpisodeOfCare() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public EpisodeOfCare(Enumeration<EpisodeOfCareStatus> status, Reference patient) {
       super();
       this.status = status;

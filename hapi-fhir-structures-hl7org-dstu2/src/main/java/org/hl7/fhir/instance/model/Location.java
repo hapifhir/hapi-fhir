@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated.
@@ -206,7 +206,7 @@ public class Location extends DomainResource {
     }
 
     @Block()
-    public static class LocationPositionComponent extends BackboneElement {
+    public static class LocationPositionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below).
          */
@@ -230,10 +230,16 @@ public class Location extends DomainResource {
 
         private static final long serialVersionUID = -74276134L;
 
+    /*
+     * Constructor
+     */
       public LocationPositionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public LocationPositionComponent(DecimalType longitude, DecimalType latitude) {
         super();
         this.longitude = longitude;
@@ -520,6 +526,9 @@ public class Location extends DomainResource {
 
     private static final long serialVersionUID = -520735603L;
 
+  /*
+   * Constructor
+   */
     public Location() {
       super();
     }

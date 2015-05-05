@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides processing status, errors and notes from the processing of a resource.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class ProcessResponse extends DomainResource {
 
     @Block()
-    public static class ProcessResponseNotesComponent extends BackboneElement {
+    public static class ProcessResponseNotesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The note purpose: Print/Display.
          */
@@ -64,6 +64,9 @@ public class ProcessResponse extends DomainResource {
 
         private static final long serialVersionUID = 129959202L;
 
+    /*
+     * Constructor
+     */
       public ProcessResponseNotesComponent() {
         super();
       }
@@ -295,6 +298,9 @@ public class ProcessResponse extends DomainResource {
 
     private static final long serialVersionUID = -1668062545L;
 
+  /*
+   * Constructor
+   */
     public ProcessResponse() {
       super();
     }

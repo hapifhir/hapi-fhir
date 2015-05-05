@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement.
@@ -261,7 +261,7 @@ public class Composition extends DomainResource {
     }
 
     @Block()
-    public static class CompositionAttesterComponent extends BackboneElement {
+    public static class CompositionAttesterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The type of attestation the authenticator offers.
          */
@@ -290,6 +290,9 @@ public class Composition extends DomainResource {
 
         private static final long serialVersionUID = -436604745L;
 
+    /*
+     * Constructor
+     */
       public CompositionAttesterComponent() {
         super();
       }
@@ -485,7 +488,7 @@ public class Composition extends DomainResource {
   }
 
     @Block()
-    public static class CompositionEventComponent extends BackboneElement {
+    public static class CompositionEventComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.
          */
@@ -514,6 +517,9 @@ public class Composition extends DomainResource {
 
         private static final long serialVersionUID = -1581379774L;
 
+    /*
+     * Constructor
+     */
       public CompositionEventComponent() {
         super();
       }
@@ -684,7 +690,7 @@ public class Composition extends DomainResource {
   }
 
     @Block()
-    public static class SectionComponent extends BackboneElement {
+    public static class SectionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents.
          */
@@ -720,6 +726,9 @@ public class Composition extends DomainResource {
 
         private static final long serialVersionUID = -1683518435L;
 
+    /*
+     * Constructor
+     */
       public SectionComponent() {
         super();
       }
@@ -1051,10 +1060,16 @@ public class Composition extends DomainResource {
 
     private static final long serialVersionUID = 2127852326L;
 
+  /*
+   * Constructor
+   */
     public Composition() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Composition(DateTimeType date, CodeableConcept type, Enumeration<CompositionStatus> status, Reference subject) {
       super();
       this.date = date;

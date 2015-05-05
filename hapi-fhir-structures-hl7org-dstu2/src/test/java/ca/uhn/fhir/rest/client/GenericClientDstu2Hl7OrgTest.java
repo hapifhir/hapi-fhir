@@ -629,11 +629,11 @@ public class GenericClientDstu2Hl7OrgTest {
 		assertEquals("Patient/2", requestBundle.getEntry().get(1).getTransaction().getUrl());
 
 		p1 = (Patient) response.get(0);
-		assertEquals(new IdType("Patient/1/_history/1"), p1.getId().toUnqualified());
+		assertEquals(new IdType("Patient/1/_history/1"), p1.getIdElement().toUnqualified());
 		// assertEquals("PATIENT1", p1.getName().get(0).getFamily().get(0).getValue());
 
 		p2 = (Patient) response.get(1);
-		assertEquals(new IdType("Patient/2/_history/2"), p2.getId().toUnqualified());
+		assertEquals(new IdType("Patient/2/_history/2"), p2.getIdElement().toUnqualified());
 		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
 	}
 

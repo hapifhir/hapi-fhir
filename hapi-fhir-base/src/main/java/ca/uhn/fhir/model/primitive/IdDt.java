@@ -560,7 +560,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		if (theResouce == null) {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IBaseResource) {
-			IIdType retVal = ((IBaseResource) theResouce).getId();
+			IIdType retVal = ((IBaseResource) theResouce).getIdElement();
 			if (retVal == null) {
 				return null;
 			} else if (retVal instanceof IdDt) {

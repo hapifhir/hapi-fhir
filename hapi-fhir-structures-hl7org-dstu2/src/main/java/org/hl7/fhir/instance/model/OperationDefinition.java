@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
@@ -192,7 +192,7 @@ public class OperationDefinition extends DomainResource {
     }
 
     @Block()
-    public static class OperationDefinitionContactComponent extends BackboneElement {
+    public static class OperationDefinitionContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of an individual to contact regarding the operation definition.
          */
@@ -209,6 +209,9 @@ public class OperationDefinition extends DomainResource {
 
         private static final long serialVersionUID = -1179697803L;
 
+    /*
+     * Constructor
+     */
       public OperationDefinitionContactComponent() {
         super();
       }
@@ -348,7 +351,7 @@ public class OperationDefinition extends DomainResource {
   }
 
     @Block()
-    public static class OperationDefinitionParameterComponent extends BackboneElement {
+    public static class OperationDefinitionParameterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of used to identify the parameter.
          */
@@ -412,10 +415,16 @@ public class OperationDefinition extends DomainResource {
 
         private static final long serialVersionUID = 633191560L;
 
+    /*
+     * Constructor
+     */
       public OperationDefinitionParameterComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public OperationDefinitionParameterComponent(CodeType name, Enumeration<OperationParameterUse> use, IntegerType min, StringType max) {
         super();
         this.name = name;
@@ -850,7 +859,7 @@ public class OperationDefinition extends DomainResource {
   }
 
     @Block()
-    public static class OperationDefinitionParameterPartComponent extends BackboneElement {
+    public static class OperationDefinitionParameterPartComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of used to identify the parameter.
          */
@@ -900,10 +909,16 @@ public class OperationDefinition extends DomainResource {
 
         private static final long serialVersionUID = -856151797L;
 
+    /*
+     * Constructor
+     */
       public OperationDefinitionParameterPartComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public OperationDefinitionParameterPartComponent(CodeType name, UnsignedIntType min, StringType max, CodeType type) {
         super();
         this.name = name;
@@ -1378,10 +1393,16 @@ public class OperationDefinition extends DomainResource {
 
     private static final long serialVersionUID = 1747303098L;
 
+  /*
+   * Constructor
+   */
     public OperationDefinition() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public OperationDefinition(StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<OperationKind> kind, CodeType code, BooleanType system, BooleanType instance) {
       super();
       this.name = name;

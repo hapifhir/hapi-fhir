@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,9 +37,9 @@ import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
@@ -48,7 +48,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class Contract extends DomainResource {
 
     @Block()
-    public static class ActorComponent extends BackboneElement {
+    public static class ActorComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Who or what actors are assigned roles in this Contract.
          */
@@ -70,10 +70,16 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1371245689L;
 
+    /*
+     * Constructor
+     */
       public ActorComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ActorComponent(Reference entity) {
         super();
         this.entity = entity;
@@ -204,7 +210,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class ValuedItemComponent extends BackboneElement {
+    public static class ValuedItemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Specific type of Contract Valued Item that may be priced.
          */
@@ -263,6 +269,9 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1311183770L;
 
+    /*
+     * Constructor
+     */
       public ValuedItemComponent() {
         super();
       }
@@ -606,7 +615,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class SignatoryComponent extends BackboneElement {
+    public static class SignatoryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Role of this Contract signer, e.g., notary, grantee.
          */
@@ -635,10 +644,16 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1870392043L;
 
+    /*
+     * Constructor
+     */
       public SignatoryComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SignatoryComponent(Coding type, Reference party, StringType signature) {
         super();
         this.type = type;
@@ -799,7 +814,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class TermComponent extends BackboneElement {
+    public static class TermComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Unique identifier for this particular Contract Provision.
          */
@@ -891,6 +906,9 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1137577465L;
 
+    /*
+     * Constructor
+     */
       public TermComponent() {
         super();
       }
@@ -1417,7 +1435,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class TermActorComponent extends BackboneElement {
+    public static class TermActorComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The actor assigned a role in this Contract Provision.
          */
@@ -1439,10 +1457,16 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1371245689L;
 
+    /*
+     * Constructor
+     */
       public TermActorComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public TermActorComponent(Reference entity) {
         super();
         this.entity = entity;
@@ -1573,7 +1597,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class TermValuedItemComponent extends BackboneElement {
+    public static class TermValuedItemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Specific type of Contract Provision Valued Item that may be priced.
          */
@@ -1632,6 +1656,9 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = 1311183770L;
 
+    /*
+     * Constructor
+     */
       public TermValuedItemComponent() {
         super();
       }
@@ -1975,7 +2002,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class FriendlyLanguageComponent extends BackboneElement {
+    public static class FriendlyLanguageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.
          */
@@ -1985,10 +2012,16 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
+    /*
+     * Constructor
+     */
       public FriendlyLanguageComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public FriendlyLanguageComponent(Type content) {
         super();
         this.content = content;
@@ -2070,7 +2103,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class LegalLanguageComponent extends BackboneElement {
+    public static class LegalLanguageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Contract legal text in human renderable form.
          */
@@ -2080,10 +2113,16 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
+    /*
+     * Constructor
+     */
       public LegalLanguageComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public LegalLanguageComponent(Type content) {
         super();
         this.content = content;
@@ -2165,7 +2204,7 @@ public class Contract extends DomainResource {
   }
 
     @Block()
-    public static class ComputableLanguageComponent extends BackboneElement {
+    public static class ComputableLanguageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).
          */
@@ -2175,10 +2214,16 @@ public class Contract extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
+    /*
+     * Constructor
+     */
       public ComputableLanguageComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ComputableLanguageComponent(Type content) {
         super();
         this.content = content;
@@ -2402,6 +2447,9 @@ public class Contract extends DomainResource {
 
     private static final long serialVersionUID = -1785608373L;
 
+  /*
+   * Constructor
+   */
     public Contract() {
       super();
     }

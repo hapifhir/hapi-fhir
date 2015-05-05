@@ -802,7 +802,7 @@ class ModelScanner {
 							}
 
 						} catch (ClassNotFoundException e) {
-							ourLog.error("Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
+							throw new ConfigurationException("Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
 						}
 					}
 				} else if (nextKey.startsWith("resource.")) {
@@ -812,16 +812,15 @@ class ModelScanner {
 						@SuppressWarnings("unchecked")
 						Class<? extends IBaseResource> nextClass = (Class<? extends IBaseResource>) Class.forName(nextValue);
 						if (!IBaseResource.class.isAssignableFrom(nextClass)) {
-							ourLog.warn("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
-							continue;
+							throw new ConfigurationException("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
 						}
 
 						theResourceTypes.put(resName, nextClass);
 					} catch (ClassNotFoundException e) {
-						ourLog.error("Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
+						throw new ConfigurationException("Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
 					}
 				} else {
-					ourLog.warn("Unexpected property in version property file: {}={}", nextKey, nextValue);
+					throw new ConfigurationException("Unexpected property in version property file: " + nextKey + "=" + nextValue);
 				}
 			}
 		} catch (IOException e) {

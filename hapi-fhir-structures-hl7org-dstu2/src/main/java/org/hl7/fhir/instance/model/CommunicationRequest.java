@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A request to convey information. E.g., the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.
@@ -231,7 +231,7 @@ public class CommunicationRequest extends DomainResource {
     }
 
     @Block()
-    public static class CommunicationRequestPayloadComponent extends BackboneElement {
+    public static class CommunicationRequestPayloadComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An individual message part for multi-part messages.
          */
@@ -241,10 +241,16 @@ public class CommunicationRequest extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
+    /*
+     * Constructor
+     */
       public CommunicationRequestPayloadComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public CommunicationRequestPayloadComponent(Type content) {
         super();
         this.content = content;
@@ -459,6 +465,9 @@ public class CommunicationRequest extends DomainResource {
 
     private static final long serialVersionUID = 431529355L;
 
+  /*
+   * Constructor
+   */
     public CommunicationRequest() {
       super();
     }

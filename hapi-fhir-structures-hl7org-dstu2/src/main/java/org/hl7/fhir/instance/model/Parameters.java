@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * This special resource type is used to represent [operation](operations.html] request and response. It has no other use, and there is no RESTful end=point associated with it.
  */
 @ResourceDef(name="Parameters", profile="http://hl7.org/fhir/Profile/Parameters")
-public class Parameters extends Resource {
+public class Parameters extends Resource implements IBaseParameters {
 
     @Block()
-    public static class ParametersParameterComponent extends BackboneElement {
+    public static class ParametersParameterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of the parameter (reference to the operation definition).
          */
@@ -78,10 +78,16 @@ public class Parameters extends Resource {
 
         private static final long serialVersionUID = 2101270343L;
 
+    /*
+     * Constructor
+     */
       public ParametersParameterComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ParametersParameterComponent(StringType name) {
         super();
         this.name = name;
@@ -261,7 +267,7 @@ public class Parameters extends Resource {
   }
 
     @Block()
-    public static class ParametersParameterPartComponent extends BackboneElement {
+    public static class ParametersParameterPartComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The name of the parameter (reference to the operation definition).
          */
@@ -285,10 +291,16 @@ public class Parameters extends Resource {
 
         private static final long serialVersionUID = 1120601371L;
 
+    /*
+     * Constructor
+     */
       public ParametersParameterPartComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ParametersParameterPartComponent(StringType name) {
         super();
         this.name = name;
@@ -430,6 +442,9 @@ public class Parameters extends Resource {
 
     private static final long serialVersionUID = -1495940293L;
 
+  /*
+   * Constructor
+   */
     public Parameters() {
       super();
     }

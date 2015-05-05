@@ -35,7 +35,6 @@
     "identifier":[
         {
             "use":"usual",
-            "label":"MRN",
             "system":"urn:oid:1.2.36.146.595.217.0.1",
             "value":"12345",
             "period":{

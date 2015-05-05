@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * An occurrence of information being transmitted. E.g., an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
@@ -161,7 +161,7 @@ public class Communication extends DomainResource {
     }
 
     @Block()
-    public static class CommunicationPayloadComponent extends BackboneElement {
+    public static class CommunicationPayloadComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An individual message part for multi-part messages.
          */
@@ -171,10 +171,16 @@ public class Communication extends DomainResource {
 
         private static final long serialVersionUID = -1763459053L;
 
+    /*
+     * Constructor
+     */
       public CommunicationPayloadComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public CommunicationPayloadComponent(Type content) {
         super();
         this.content = content;
@@ -370,6 +376,9 @@ public class Communication extends DomainResource {
 
     private static final long serialVersionUID = -744574729L;
 
+  /*
+   * Constructor
+   */
     public Communication() {
       super();
     }

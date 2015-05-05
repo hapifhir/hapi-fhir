@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle.
@@ -133,7 +133,7 @@ public class MessageHeader extends DomainResource {
     }
 
     @Block()
-    public static class MessageHeaderResponseComponent extends BackboneElement {
+    public static class MessageHeaderResponseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The id of the message that this message is a response to.
          */
@@ -162,10 +162,16 @@ public class MessageHeader extends DomainResource {
 
         private static final long serialVersionUID = 1419103693L;
 
+    /*
+     * Constructor
+     */
       public MessageHeaderResponseComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MessageHeaderResponseComponent(IdType identifier, Enumeration<ResponseCode> code) {
         super();
         this.identifier = identifier;
@@ -351,7 +357,7 @@ public class MessageHeader extends DomainResource {
   }
 
     @Block()
-    public static class MessageSourceComponent extends BackboneElement {
+    public static class MessageSourceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Human-readable name for the source system.
          */
@@ -389,10 +395,16 @@ public class MessageHeader extends DomainResource {
 
         private static final long serialVersionUID = -115878196L;
 
+    /*
+     * Constructor
+     */
       public MessageSourceComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MessageSourceComponent(UriType endpoint) {
         super();
         this.endpoint = endpoint;
@@ -665,7 +677,7 @@ public class MessageHeader extends DomainResource {
   }
 
     @Block()
-    public static class MessageDestinationComponent extends BackboneElement {
+    public static class MessageDestinationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Human-readable name for the target system.
          */
@@ -694,10 +706,16 @@ public class MessageHeader extends DomainResource {
 
         private static final long serialVersionUID = -2097633309L;
 
+    /*
+     * Constructor
+     */
       public MessageDestinationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MessageDestinationComponent(UriType endpoint) {
         super();
         this.endpoint = endpoint;
@@ -996,10 +1014,16 @@ public class MessageHeader extends DomainResource {
 
     private static final long serialVersionUID = 1866986127L;
 
+  /*
+   * Constructor
+   */
     public MessageHeader() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public MessageHeader(IdType identifier, InstantType timestamp, Coding event, MessageSourceComponent source) {
       super();
       this.identifier = identifier;

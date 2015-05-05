@@ -29,21 +29,20 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Base Resource for everything.
  */
-@ResourceDef(name="Resource", profile="http://hl7.org/fhir/Profile/Resource")
 public abstract class Resource extends BaseResource implements IRefImplResource {
 
     /**
@@ -76,6 +75,9 @@ public abstract class Resource extends BaseResource implements IRefImplResource 
 
     private static final long serialVersionUID = -559462759L;
 
+  /*
+   * Constructor
+   */
     public Resource() {
       super();
     }

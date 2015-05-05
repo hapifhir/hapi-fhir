@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient.  E.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
@@ -47,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 public class Contraindication extends DomainResource {
 
     @Block()
-    public static class ContraindicationMitigationComponent extends BackboneElement {
+    public static class ContraindicationMitigationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified contraindication.
          */
@@ -76,10 +76,16 @@ public class Contraindication extends DomainResource {
 
         private static final long serialVersionUID = -1994768436L;
 
+    /*
+     * Constructor
+     */
       public ContraindicationMitigationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public ContraindicationMitigationComponent(CodeableConcept action) {
         super();
         this.action = action;
@@ -333,6 +339,9 @@ public class Contraindication extends DomainResource {
 
     private static final long serialVersionUID = 528603336L;
 
+  /*
+   * Constructor
+   */
     public Contraindication() {
       super();
     }

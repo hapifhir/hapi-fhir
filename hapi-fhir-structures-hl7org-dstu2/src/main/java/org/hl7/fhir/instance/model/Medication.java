@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Primarily used for identification and definition of Medication, but also covers ingredients and packaging.
@@ -119,7 +119,7 @@ public class Medication extends DomainResource {
     }
 
     @Block()
-    public static class MedicationProductComponent extends BackboneElement {
+    public static class MedicationProductComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the form of the item.  Powder; tables; carton.
          */
@@ -143,6 +143,9 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = 1132853671L;
 
+    /*
+     * Constructor
+     */
       public MedicationProductComponent() {
         super();
       }
@@ -304,7 +307,7 @@ public class Medication extends DomainResource {
   }
 
     @Block()
-    public static class MedicationProductIngredientComponent extends BackboneElement {
+    public static class MedicationProductIngredientComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The actual ingredient - either a substance (simple ingredient) or another medication.
          */
@@ -326,10 +329,16 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = -1217232889L;
 
+    /*
+     * Constructor
+     */
       public MedicationProductIngredientComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MedicationProductIngredientComponent(Reference item) {
         super();
         this.item = item;
@@ -440,7 +449,7 @@ public class Medication extends DomainResource {
   }
 
     @Block()
-    public static class MedicationProductBatchComponent extends BackboneElement {
+    public static class MedicationProductBatchComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The assigned lot number of a batch of the specified product.
          */
@@ -457,6 +466,9 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = 1982738755L;
 
+    /*
+     * Constructor
+     */
       public MedicationProductBatchComponent() {
         super();
       }
@@ -603,7 +615,7 @@ public class Medication extends DomainResource {
   }
 
     @Block()
-    public static class MedicationPackageComponent extends BackboneElement {
+    public static class MedicationPackageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The kind of container that this package comes as.
          */
@@ -620,6 +632,9 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = 503772472L;
 
+    /*
+     * Constructor
+     */
       public MedicationPackageComponent() {
         super();
       }
@@ -734,7 +749,7 @@ public class Medication extends DomainResource {
   }
 
     @Block()
-    public static class MedicationPackageContentComponent extends BackboneElement {
+    public static class MedicationPackageContentComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies one of the items in the package.
          */
@@ -756,10 +771,16 @@ public class Medication extends DomainResource {
 
         private static final long serialVersionUID = -1385430192L;
 
+    /*
+     * Constructor
+     */
       public MedicationPackageContentComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public MedicationPackageContentComponent(Reference item) {
         super();
         this.item = item;
@@ -930,6 +951,9 @@ public class Medication extends DomainResource {
 
     private static final long serialVersionUID = 385691577L;
 
+  /*
+   * Constructor
+   */
     public Medication() {
       super();
     }

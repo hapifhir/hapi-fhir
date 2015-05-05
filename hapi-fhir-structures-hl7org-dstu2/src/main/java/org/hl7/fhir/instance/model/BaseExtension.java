@@ -8,10 +8,10 @@ public abstract class BaseExtension extends Type implements IBaseExtension<Exten
 
 	@Override
 	public Extension setValue(IBaseDatatype theValue) {
-		// TODO Auto-generated method stub
-		return null;
+		setValue((Type)theValue);
+		return (Extension) this;
 	}
-
 	
+	public abstract Extension setValue(Type theValue);
 	
 }

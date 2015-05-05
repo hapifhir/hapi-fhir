@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions.
@@ -403,7 +403,7 @@ public class CarePlan extends DomainResource {
     }
 
     @Block()
-    public static class CarePlanParticipantComponent extends BackboneElement {
+    public static class CarePlanParticipantComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates specific responsibility of an individual within the care plan.  E.g. "Primary physician", "Team coordinator", "Caregiver", etc.
          */
@@ -425,10 +425,16 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = -466811117L;
 
+    /*
+     * Constructor
+     */
       public CarePlanParticipantComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public CarePlanParticipantComponent(Reference member) {
         super();
         this.member = member;
@@ -539,7 +545,7 @@ public class CarePlan extends DomainResource {
   }
 
     @Block()
-    public static class CarePlanActivityComponent extends BackboneElement {
+    public static class CarePlanActivityComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc.
          */
@@ -580,6 +586,9 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = -1011983328L;
 
+    /*
+     * Constructor
+     */
       public CarePlanActivityComponent() {
         super();
       }
@@ -796,7 +805,7 @@ public class CarePlan extends DomainResource {
   }
 
     @Block()
-    public static class CarePlanActivityDetailComponent extends BackboneElement {
+    public static class CarePlanActivityDetailComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * High-level categorization of the type of activity in a care plan.
          */
@@ -917,10 +926,16 @@ public class CarePlan extends DomainResource {
 
         private static final long serialVersionUID = -1276666801L;
 
+    /*
+     * Constructor
+     */
       public CarePlanActivityDetailComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public CarePlanActivityDetailComponent(Enumeration<CarePlanActivityCategory> category, BooleanType prohibited) {
         super();
         this.category = category;
@@ -1687,10 +1702,16 @@ public class CarePlan extends DomainResource {
 
     private static final long serialVersionUID = -1877285959L;
 
+  /*
+   * Constructor
+   */
     public CarePlan() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public CarePlan(Enumeration<CarePlanStatus> status) {
       super();
       this.status = status;

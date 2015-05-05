@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Optional Extensions Element - found in all resources.
@@ -60,10 +61,16 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
 
     private static final long serialVersionUID = 86382982L;
 
+  /*
+   * Constructor
+   */
     public Extension() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Extension(UriType url) {
       super();
       this.url = url;

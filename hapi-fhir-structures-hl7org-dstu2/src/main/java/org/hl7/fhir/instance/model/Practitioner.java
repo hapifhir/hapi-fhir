@@ -29,16 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A person who is directly or indirectly involved in the provisioning of healthcare.
@@ -147,7 +147,7 @@ public class Practitioner extends DomainResource {
     }
 
     @Block()
-    public static class PractitionerPractitionerRoleComponent extends BackboneElement {
+    public static class PractitionerPractitionerRoleComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The Organization where the Practitioner performs the roles associated.
          */
@@ -207,6 +207,9 @@ public class Practitioner extends DomainResource {
 
         private static final long serialVersionUID = -2146177018L;
 
+    /*
+     * Constructor
+     */
       public PractitionerPractitionerRoleComponent() {
         super();
       }
@@ -530,7 +533,7 @@ public class Practitioner extends DomainResource {
   }
 
     @Block()
-    public static class PractitionerQualificationComponent extends BackboneElement {
+    public static class PractitionerQualificationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An identifier that applies to this person's qualification in this role.
          */
@@ -566,10 +569,16 @@ public class Practitioner extends DomainResource {
 
         private static final long serialVersionUID = 1095219071L;
 
+    /*
+     * Constructor
+     */
       public PractitionerQualificationComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public PractitionerQualificationComponent(CodeableConcept code) {
         super();
         this.code = code;
@@ -829,6 +838,9 @@ public class Practitioner extends DomainResource {
 
     private static final long serialVersionUID = 781100268L;
 
+  /*
+   * Constructor
+   */
     public Practitioner() {
       super();
     }

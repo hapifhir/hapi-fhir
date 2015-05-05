@@ -29,22 +29,22 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
 @ResourceDef(name="Binary", profile="http://hl7.org/fhir/Profile/Binary")
-public class Binary extends Resource {
+public class Binary extends BaseBinary implements IBaseBinary {
 
     /**
      * MimeType of the binary content represented as a standard MimeType (BCP 13).
@@ -62,10 +62,16 @@ public class Binary extends Resource {
 
     private static final long serialVersionUID = 974764407L;
 
+  /*
+   * Constructor
+   */
     public Binary() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Binary(CodeType contentType, Base64BinaryType content) {
       super();
       this.contentType = contentType;
