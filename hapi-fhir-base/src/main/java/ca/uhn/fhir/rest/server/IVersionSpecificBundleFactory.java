@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.server;
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;

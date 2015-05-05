@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Use to record detailed information about conditions, problems or diagnoses recognized by a clinician. There are many uses including: recording a Diagnosis during an Encounter; populating a problem List or a Summary Statement, such as a Discharge Summary.
  */
@@ -63,6 +64,14 @@ public class Condition extends DomainResource {
          */
         REFUTED, 
         /**
+         * The statement was entered in error and Is not valid.
+         */
+        ENTEREDINERROR, 
+        /**
+         * The condition status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -77,6 +86,10 @@ public class Condition extends DomainResource {
           return CONFIRMED;
         if ("refuted".equals(codeString))
           return REFUTED;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new Exception("Unknown ConditionStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -85,6 +98,8 @@ public class Condition extends DomainResource {
             case WORKING: return "working";
             case CONFIRMED: return "confirmed";
             case REFUTED: return "refuted";
+            case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -94,6 +109,8 @@ public class Condition extends DomainResource {
             case WORKING: return "";
             case CONFIRMED: return "";
             case REFUTED: return "";
+            case ENTEREDINERROR: return "";
+            case UNKNOWN: return "";
             default: return "?";
           }
         }
@@ -103,15 +120,19 @@ public class Condition extends DomainResource {
             case WORKING: return "The patient is being treated on the basis that this is the condition, but it is still not confirmed.";
             case CONFIRMED: return "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.";
             case REFUTED: return "This condition has been ruled out by diagnostic and clinical evidence.";
+            case ENTEREDINERROR: return "The statement was entered in error and Is not valid.";
+            case UNKNOWN: return "The condition status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PROVISIONAL: return "provisional";
-            case WORKING: return "working";
-            case CONFIRMED: return "confirmed";
-            case REFUTED: return "refuted";
+            case PROVISIONAL: return "Provisional";
+            case WORKING: return "Working";
+            case CONFIRMED: return "Confirmed";
+            case REFUTED: return "Refuted";
+            case ENTEREDINERROR: return "Entered In Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -130,6 +151,10 @@ public class Condition extends DomainResource {
           return ConditionStatus.CONFIRMED;
         if ("refuted".equals(codeString))
           return ConditionStatus.REFUTED;
+        if ("entered-in-error".equals(codeString))
+          return ConditionStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return ConditionStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown ConditionStatus code '"+codeString+"'");
         }
     public String toCode(ConditionStatus code) {
@@ -141,6 +166,10 @@ public class Condition extends DomainResource {
         return "confirmed";
       if (code == ConditionStatus.REFUTED)
         return "refuted";
+      if (code == ConditionStatus.ENTEREDINERROR)
+        return "entered-in-error";
+      if (code == ConditionStatus.UNKNOWN)
+        return "unknown";
       return "?";
       }
     }
@@ -150,14 +179,14 @@ public class Condition extends DomainResource {
         /**
          * A simple summary of the stage such as "Stage 3". The determination of the stage is disease-specific.
          */
-        @Child(name="summary", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "summary", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Simple summary (disease specific)", formalDefinition="A simple summary of the stage such as 'Stage 3'. The determination of the stage is disease-specific." )
         protected CodeableConcept summary;
 
         /**
          * Reference to a formal record of the evidence on which the staging assessment is based.
          */
-        @Child(name="assessment", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "assessment", type = {ClinicalImpression.class, DiagnosticReport.class, Observation.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Formal record of assessment", formalDefinition="Reference to a formal record of the evidence on which the staging assessment is based." )
         protected List<Reference> assessment;
         /**
@@ -226,6 +255,16 @@ public class Condition extends DomainResource {
           return t;
         }
 
+    // syntactic sugar
+        public ConditionStageComponent addAssessment(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.assessment == null)
+            this.assessment = new ArrayList<Reference>();
+          this.assessment.add(t);
+          return this;
+        }
+
         /**
          * @return {@link #assessment} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to a formal record of the evidence on which the staging assessment is based.)
          */
@@ -238,7 +277,7 @@ public class Condition extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("summary", "CodeableConcept", "A simple summary of the stage such as 'Stage 3'. The determination of the stage is disease-specific.", 0, java.lang.Integer.MAX_VALUE, summary));
-          childrenList.add(new Property("assessment", "Reference(Any)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment));
+          childrenList.add(new Property("assessment", "Reference(ClinicalImpression|DiagnosticReport|Observation)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment));
         }
 
       public ConditionStageComponent copy() {
@@ -285,14 +324,14 @@ public class Condition extends DomainResource {
         /**
          * A manifestation or symptom that led to the recording of this condition.
          */
-        @Child(name="code", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Manifestation/symptom", formalDefinition="A manifestation or symptom that led to the recording of this condition." )
         protected CodeableConcept code;
 
         /**
          * Links to other relevant information, including pathology reports.
          */
-        @Child(name="detail", type={}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "detail", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Supporting information found elsewhere", formalDefinition="Links to other relevant information, including pathology reports." )
         protected List<Reference> detail;
         /**
@@ -361,6 +400,16 @@ public class Condition extends DomainResource {
           return t;
         }
 
+    // syntactic sugar
+        public ConditionEvidenceComponent addDetail(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.detail == null)
+            this.detail = new ArrayList<Reference>();
+          this.detail.add(t);
+          return this;
+        }
+
         /**
          * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Links to other relevant information, including pathology reports.)
          */
@@ -420,107 +469,62 @@ public class Condition extends DomainResource {
         /**
          * Code that identifies the structural location.
          */
-        @Child(name="code", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Location - may include laterality", formalDefinition="Code that identifies the structural location." )
-        protected CodeableConcept code;
+        protected Type site;
 
-        /**
-         * Detailed anatomical location information.
-         */
-        @Child(name="detail", type={StringType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Precise location details", formalDefinition="Detailed anatomical location information." )
-        protected StringType detail;
-
-        private static final long serialVersionUID = -406205954L;
+        private static final long serialVersionUID = 1429072605L;
 
       public ConditionLocationComponent() {
         super();
       }
 
         /**
-         * @return {@link #code} (Code that identifies the structural location.)
+         * @return {@link #site} (Code that identifies the structural location.)
          */
-        public CodeableConcept getCode() { 
-          if (this.code == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConditionLocationComponent.code");
-            else if (Configuration.doAutoCreate())
-              this.code = new CodeableConcept(); // cc
-          return this.code;
-        }
-
-        public boolean hasCode() { 
-          return this.code != null && !this.code.isEmpty();
+        public Type getSite() { 
+          return this.site;
         }
 
         /**
-         * @param value {@link #code} (Code that identifies the structural location.)
+         * @return {@link #site} (Code that identifies the structural location.)
          */
-        public ConditionLocationComponent setCode(CodeableConcept value) { 
-          this.code = value;
-          return this;
+        public CodeableConcept getSiteCodeableConcept() throws Exception { 
+          if (!(this.site instanceof CodeableConcept))
+            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.site.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.site;
         }
 
         /**
-         * @return {@link #detail} (Detailed anatomical location information.). This is the underlying object with id, value and extensions. The accessor "getDetail" gives direct access to the value
+         * @return {@link #site} (Code that identifies the structural location.)
          */
-        public StringType getDetailElement() { 
-          if (this.detail == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConditionLocationComponent.detail");
-            else if (Configuration.doAutoCreate())
-              this.detail = new StringType(); // bb
-          return this.detail;
+        public Reference getSiteReference() throws Exception { 
+          if (!(this.site instanceof Reference))
+            throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
+          return (Reference) this.site;
         }
 
-        public boolean hasDetailElement() { 
-          return this.detail != null && !this.detail.isEmpty();
-        }
-
-        public boolean hasDetail() { 
-          return this.detail != null && !this.detail.isEmpty();
+        public boolean hasSite() { 
+          return this.site != null && !this.site.isEmpty();
         }
 
         /**
-         * @param value {@link #detail} (Detailed anatomical location information.). This is the underlying object with id, value and extensions. The accessor "getDetail" gives direct access to the value
+         * @param value {@link #site} (Code that identifies the structural location.)
          */
-        public ConditionLocationComponent setDetailElement(StringType value) { 
-          this.detail = value;
-          return this;
-        }
-
-        /**
-         * @return Detailed anatomical location information.
-         */
-        public String getDetail() { 
-          return this.detail == null ? null : this.detail.getValue();
-        }
-
-        /**
-         * @param value Detailed anatomical location information.
-         */
-        public ConditionLocationComponent setDetail(String value) { 
-          if (Utilities.noString(value))
-            this.detail = null;
-          else {
-            if (this.detail == null)
-              this.detail = new StringType();
-            this.detail.setValue(value);
-          }
+        public ConditionLocationComponent setSite(Type value) { 
+          this.site = value;
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "Code that identifies the structural location.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("detail", "string", "Detailed anatomical location information.", 0, java.lang.Integer.MAX_VALUE, detail));
+          childrenList.add(new Property("site[x]", "CodeableConcept|Reference(BodySite)", "Code that identifies the structural location.", 0, java.lang.Integer.MAX_VALUE, site));
         }
 
       public ConditionLocationComponent copy() {
         ConditionLocationComponent dst = new ConditionLocationComponent();
         copyValues(dst);
-        dst.code = code == null ? null : code.copy();
-        dst.detail = detail == null ? null : detail.copy();
+        dst.site = site == null ? null : site.copy();
         return dst;
       }
 
@@ -531,7 +535,7 @@ public class Condition extends DomainResource {
         if (!(other instanceof ConditionLocationComponent))
           return false;
         ConditionLocationComponent o = (ConditionLocationComponent) other;
-        return compareDeep(code, o.code, true) && compareDeep(detail, o.detail, true);
+        return compareDeep(site, o.site, true);
       }
 
       @Override
@@ -541,12 +545,11 @@ public class Condition extends DomainResource {
         if (!(other instanceof ConditionLocationComponent))
           return false;
         ConditionLocationComponent o = (ConditionLocationComponent) other;
-        return compareValues(detail, o.detail, true);
+        return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (code == null || code.isEmpty()) && (detail == null || detail.isEmpty())
-          ;
+        return super.isEmpty() && (site == null || site.isEmpty());
       }
 
   }
@@ -556,14 +559,14 @@ public class Condition extends DomainResource {
         /**
          * Code that identifies the target of this relationship. The code takes the place of a detailed instance target.
          */
-        @Child(name="codeableConcept", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Relationship target by means of a predefined code", formalDefinition="Code that identifies the target of this relationship. The code takes the place of a detailed instance target." )
-        protected CodeableConcept codeableConcept;
+        protected CodeableConcept code;
 
         /**
          * Target of the relationship.
          */
-        @Child(name="target", type={Condition.class, Procedure.class, MedicationAdministration.class, Immunization.class, MedicationStatement.class}, order=2, min=0, max=1)
+        @Child(name = "target", type = {Condition.class, Procedure.class, MedicationAdministration.class, Immunization.class, MedicationStatement.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Relationship target resource", formalDefinition="Target of the relationship." )
         protected Reference target;
 
@@ -572,33 +575,33 @@ public class Condition extends DomainResource {
          */
         protected Resource targetTarget;
 
-        private static final long serialVersionUID = -864422450L;
+        private static final long serialVersionUID = -660755940L;
 
       public ConditionDueToComponent() {
         super();
       }
 
         /**
-         * @return {@link #codeableConcept} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
+         * @return {@link #code} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
          */
-        public CodeableConcept getCodeableConcept() { 
-          if (this.codeableConcept == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConditionDueToComponent.codeableConcept");
+              throw new Error("Attempt to auto-create ConditionDueToComponent.code");
             else if (Configuration.doAutoCreate())
-              this.codeableConcept = new CodeableConcept(); // cc
-          return this.codeableConcept;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasCodeableConcept() { 
-          return this.codeableConcept != null && !this.codeableConcept.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #codeableConcept} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
+         * @param value {@link #code} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
          */
-        public ConditionDueToComponent setCodeableConcept(CodeableConcept value) { 
-          this.codeableConcept = value;
+        public ConditionDueToComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
@@ -643,14 +646,14 @@ public class Condition extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("codeableConcept", "CodeableConcept", "Code that identifies the target of this relationship. The code takes the place of a detailed instance target.", 0, java.lang.Integer.MAX_VALUE, codeableConcept));
+          childrenList.add(new Property("code", "CodeableConcept", "Code that identifies the target of this relationship. The code takes the place of a detailed instance target.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("target", "Reference(Condition|Procedure|MedicationAdministration|Immunization|MedicationStatement)", "Target of the relationship.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
       public ConditionDueToComponent copy() {
         ConditionDueToComponent dst = new ConditionDueToComponent();
         copyValues(dst);
-        dst.codeableConcept = codeableConcept == null ? null : codeableConcept.copy();
+        dst.code = code == null ? null : code.copy();
         dst.target = target == null ? null : target.copy();
         return dst;
       }
@@ -662,8 +665,7 @@ public class Condition extends DomainResource {
         if (!(other instanceof ConditionDueToComponent))
           return false;
         ConditionDueToComponent o = (ConditionDueToComponent) other;
-        return compareDeep(codeableConcept, o.codeableConcept, true) && compareDeep(target, o.target, true)
-          ;
+        return compareDeep(code, o.code, true) && compareDeep(target, o.target, true);
       }
 
       @Override
@@ -677,7 +679,7 @@ public class Condition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (codeableConcept == null || codeableConcept.isEmpty()) && (target == null || target.isEmpty())
+        return super.isEmpty() && (code == null || code.isEmpty()) && (target == null || target.isEmpty())
           ;
       }
 
@@ -688,14 +690,14 @@ public class Condition extends DomainResource {
         /**
          * Code that identifies the target of this relationship. The code takes the place of a detailed instance target.
          */
-        @Child(name="codeableConcept", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Relationship target by means of a predefined code", formalDefinition="Code that identifies the target of this relationship. The code takes the place of a detailed instance target." )
-        protected CodeableConcept codeableConcept;
+        protected CodeableConcept code;
 
         /**
          * Target of the relationship.
          */
-        @Child(name="target", type={Condition.class, Procedure.class, MedicationAdministration.class, Immunization.class, MedicationStatement.class}, order=2, min=0, max=1)
+        @Child(name = "target", type = {Condition.class, Procedure.class, MedicationAdministration.class, Immunization.class, MedicationStatement.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Relationship target resource", formalDefinition="Target of the relationship." )
         protected Reference target;
 
@@ -704,33 +706,33 @@ public class Condition extends DomainResource {
          */
         protected Resource targetTarget;
 
-        private static final long serialVersionUID = -864422450L;
+        private static final long serialVersionUID = -660755940L;
 
       public ConditionOccurredFollowingComponent() {
         super();
       }
 
         /**
-         * @return {@link #codeableConcept} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
+         * @return {@link #code} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
          */
-        public CodeableConcept getCodeableConcept() { 
-          if (this.codeableConcept == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConditionOccurredFollowingComponent.codeableConcept");
+              throw new Error("Attempt to auto-create ConditionOccurredFollowingComponent.code");
             else if (Configuration.doAutoCreate())
-              this.codeableConcept = new CodeableConcept(); // cc
-          return this.codeableConcept;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasCodeableConcept() { 
-          return this.codeableConcept != null && !this.codeableConcept.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #codeableConcept} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
+         * @param value {@link #code} (Code that identifies the target of this relationship. The code takes the place of a detailed instance target.)
          */
-        public ConditionOccurredFollowingComponent setCodeableConcept(CodeableConcept value) { 
-          this.codeableConcept = value;
+        public ConditionOccurredFollowingComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
@@ -775,14 +777,14 @@ public class Condition extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("codeableConcept", "CodeableConcept", "Code that identifies the target of this relationship. The code takes the place of a detailed instance target.", 0, java.lang.Integer.MAX_VALUE, codeableConcept));
+          childrenList.add(new Property("code", "CodeableConcept", "Code that identifies the target of this relationship. The code takes the place of a detailed instance target.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("target", "Reference(Condition|Procedure|MedicationAdministration|Immunization|MedicationStatement)", "Target of the relationship.", 0, java.lang.Integer.MAX_VALUE, target));
         }
 
       public ConditionOccurredFollowingComponent copy() {
         ConditionOccurredFollowingComponent dst = new ConditionOccurredFollowingComponent();
         copyValues(dst);
-        dst.codeableConcept = codeableConcept == null ? null : codeableConcept.copy();
+        dst.code = code == null ? null : code.copy();
         dst.target = target == null ? null : target.copy();
         return dst;
       }
@@ -794,8 +796,7 @@ public class Condition extends DomainResource {
         if (!(other instanceof ConditionOccurredFollowingComponent))
           return false;
         ConditionOccurredFollowingComponent o = (ConditionOccurredFollowingComponent) other;
-        return compareDeep(codeableConcept, o.codeableConcept, true) && compareDeep(target, o.target, true)
-          ;
+        return compareDeep(code, o.code, true) && compareDeep(target, o.target, true);
       }
 
       @Override
@@ -809,7 +810,7 @@ public class Condition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (codeableConcept == null || codeableConcept.isEmpty()) && (target == null || target.isEmpty())
+        return super.isEmpty() && (code == null || code.isEmpty()) && (target == null || target.isEmpty())
           ;
       }
 
@@ -818,26 +819,26 @@ public class Condition extends DomainResource {
     /**
      * This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this condition", formalDefinition="This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Indicates the patient who the condition record is associated with.
      */
-    @Child(name = "subject", type = {Patient.class}, order = 1, min = 1, max = 1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Who has the condition?", formalDefinition="Indicates the patient who the condition record is associated with." )
-    protected Reference subject;
+    protected Reference patient;
 
     /**
      * The actual object that is the target of the reference (Indicates the patient who the condition record is associated with.)
      */
-    protected Patient subjectTarget;
+    protected Patient patientTarget;
 
     /**
      * Encounter during which the condition was first asserted.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order = 2, min = 0, max = 1)
+    @Child(name = "encounter", type = {Encounter.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Encounter when condition first asserted", formalDefinition="Encounter during which the condition was first asserted." )
     protected Reference encounter;
 
@@ -849,7 +850,7 @@ public class Condition extends DomainResource {
     /**
      * Person who takes responsibility for asserting the existence of the condition as part of the electronic record.
      */
-    @Child(name = "asserter", type = {Practitioner.class, Patient.class}, order = 3, min = 0, max = 1)
+    @Child(name = "asserter", type = {Practitioner.class, Patient.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Person who asserts this condition", formalDefinition="Person who takes responsibility for asserting the existence of the condition as part of the electronic record." )
     protected Reference asserter;
 
@@ -861,112 +862,105 @@ public class Condition extends DomainResource {
     /**
      * Estimated or actual date the condition/problem/diagnosis was first detected/suspected.
      */
-    @Child(name = "dateAsserted", type = {DateType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "dateAsserted", type = {DateType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="When first detected/suspected/entered", formalDefinition="Estimated or actual date the condition/problem/diagnosis was first detected/suspected." )
     protected DateType dateAsserted;
 
     /**
      * Identification of the condition, problem or diagnosis.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order = 5, min = 1, max = 1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=5, min=1, max=1)
     @Description(shortDefinition="Identification of the condition, problem or diagnosis", formalDefinition="Identification of the condition, problem or diagnosis." )
     protected CodeableConcept code;
 
     /**
      * A category assigned to the condition. E.g. complaint | symptom | finding | diagnosis.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order = 6, min = 0, max = 1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=6, min=0, max=1)
     @Description(shortDefinition="E.g. complaint | symptom | finding | diagnosis", formalDefinition="A category assigned to the condition. E.g. complaint | symptom | finding | diagnosis." )
     protected CodeableConcept category;
 
     /**
      * The clinical status of the condition.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 7, min = 1, max = 1)
-    @Description(shortDefinition="provisional | working | confirmed | refuted", formalDefinition="The clinical status of the condition." )
-    protected Enumeration<ConditionStatus> status;
-
-    /**
-     * The degree of confidence that this condition is correct.
-     */
-    @Child(name = "certainty", type = {CodeableConcept.class}, order = 8, min = 0, max = 1)
-    @Description(shortDefinition="Degree of confidence", formalDefinition="The degree of confidence that this condition is correct." )
-    protected CodeableConcept certainty;
+    @Child(name = "clinicalStatus", type = {CodeType.class}, order=7, min=1, max=1)
+    @Description(shortDefinition="provisional | working | confirmed | refuted | entered-in-error | unknown", formalDefinition="The clinical status of the condition." )
+    protected Enumeration<ConditionStatus> clinicalStatus;
 
     /**
      * A subjective assessment of the severity of the condition as evaluated by the clinician.
      */
-    @Child(name = "severity", type = {CodeableConcept.class}, order = 9, min = 0, max = 1)
+    @Child(name = "severity", type = {CodeableConcept.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Subjective severity of condition", formalDefinition="A subjective assessment of the severity of the condition as evaluated by the clinician." )
     protected CodeableConcept severity;
 
     /**
      * Estimated or actual date or date-time  the condition began, in the opinion of the clinician.
      */
-    @Child(name = "onset", type = {DateTimeType.class, Age.class}, order = 10, min = 0, max = 1)
+    @Child(name = "onset", type = {DateTimeType.class, Age.class, Period.class, Range.class, StringType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Estimated or actual date,  date-time, or age", formalDefinition="Estimated or actual date or date-time  the condition began, in the opinion of the clinician." )
     protected Type onset;
 
     /**
      * The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.
      */
-    @Child(name = "abatement", type = {DateType.class, Age.class, BooleanType.class}, order = 11, min = 0, max = 1)
+    @Child(name = "abatement", type = {DateType.class, Age.class, BooleanType.class, Period.class, Range.class, StringType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="If/when in resolution/remission", formalDefinition="The date or estimated date that the condition resolved or went into remission. This is called 'abatement' because of the many overloaded connotations associated with 'remission' or 'resolution' - Conditions are never really resolved, but they can abate." )
     protected Type abatement;
 
     /**
      * Clinical stage or grade of a condition. May include formal severity assessments.
      */
-    @Child(name = "stage", type = {}, order = 12, min = 0, max = 1)
+    @Child(name = "stage", type = {}, order=11, min=0, max=1)
     @Description(shortDefinition="Stage/grade, usually assessed formally", formalDefinition="Clinical stage or grade of a condition. May include formal severity assessments." )
     protected ConditionStageComponent stage;
 
     /**
      * Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.
      */
-    @Child(name = "evidence", type = {}, order = 13, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "evidence", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Supporting evidence", formalDefinition="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed." )
     protected List<ConditionEvidenceComponent> evidence;
 
     /**
      * The anatomical location where this condition manifests itself.
      */
-    @Child(name = "location", type = {}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "location", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Anatomical location, if relevant", formalDefinition="The anatomical location where this condition manifests itself." )
     protected List<ConditionLocationComponent> location;
 
     /**
      * Further conditions, problems, diagnoses, procedures or events or the substance that caused/triggered this Condition.
      */
-    @Child(name = "dueTo", type = {}, order = 15, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "dueTo", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Causes for this Condition", formalDefinition="Further conditions, problems, diagnoses, procedures or events or the substance that caused/triggered this Condition." )
     protected List<ConditionDueToComponent> dueTo;
 
     /**
      * Further conditions, problems, diagnoses, procedures or events or the substance that preceded this Condition.
      */
-    @Child(name = "occurredFollowing", type = {}, order = 16, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "occurredFollowing", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Precedent for this Condition", formalDefinition="Further conditions, problems, diagnoses, procedures or events or the substance that preceded this Condition." )
     protected List<ConditionOccurredFollowingComponent> occurredFollowing;
 
     /**
      * Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.
      */
-    @Child(name = "notes", type = {StringType.class}, order = 17, min = 0, max = 1)
+    @Child(name = "notes", type = {StringType.class}, order=16, min=0, max=1)
     @Description(shortDefinition="Additional information about the Condition", formalDefinition="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis." )
     protected StringType notes;
 
-    private static final long serialVersionUID = -771013294L;
+    private static final long serialVersionUID = -1018838673L;
 
     public Condition() {
       super();
     }
 
-    public Condition(Reference subject, CodeableConcept code, Enumeration<ConditionStatus> status) {
+    public Condition(Reference patient, CodeableConcept code, Enumeration<ConditionStatus> clinicalStatus) {
       super();
-      this.subject = subject;
+      this.patient = patient;
       this.code = code;
-      this.status = status;
+      this.clinicalStatus = clinicalStatus;
     }
 
     /**
@@ -999,47 +993,57 @@ public class Condition extends DomainResource {
       return t;
     }
 
-    /**
-     * @return {@link #subject} (Indicates the patient who the condition record is associated with.)
-     */
-    public Reference getSubject() { 
-      if (this.subject == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Condition.subject");
-        else if (Configuration.doAutoCreate())
-          this.subject = new Reference(); // cc
-      return this.subject;
-    }
-
-    public boolean hasSubject() { 
-      return this.subject != null && !this.subject.isEmpty();
-    }
-
-    /**
-     * @param value {@link #subject} (Indicates the patient who the condition record is associated with.)
-     */
-    public Condition setSubject(Reference value) { 
-      this.subject = value;
+    // syntactic sugar
+    public Condition addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
       return this;
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the patient who the condition record is associated with.)
+     * @return {@link #patient} (Indicates the patient who the condition record is associated with.)
      */
-    public Patient getSubjectTarget() { 
-      if (this.subjectTarget == null)
+    public Reference getPatient() { 
+      if (this.patient == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Condition.subject");
+          throw new Error("Attempt to auto-create Condition.patient");
         else if (Configuration.doAutoCreate())
-          this.subjectTarget = new Patient(); // aa
-      return this.subjectTarget;
+          this.patient = new Reference(); // cc
+      return this.patient;
+    }
+
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the patient who the condition record is associated with.)
+     * @param value {@link #patient} (Indicates the patient who the condition record is associated with.)
      */
-    public Condition setSubjectTarget(Patient value) { 
-      this.subjectTarget = value;
+    public Condition setPatient(Reference value) { 
+      this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates the patient who the condition record is associated with.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Condition.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the patient who the condition record is associated with.)
+     */
+    public Condition setPatientTarget(Patient value) { 
+      this.patientTarget = value;
       return this;
     }
 
@@ -1224,71 +1228,47 @@ public class Condition extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (The clinical status of the condition.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #clinicalStatus} (The clinical status of the condition.). This is the underlying object with id, value and extensions. The accessor "getClinicalStatus" gives direct access to the value
      */
-    public Enumeration<ConditionStatus> getStatusElement() { 
-      if (this.status == null)
+    public Enumeration<ConditionStatus> getClinicalStatusElement() { 
+      if (this.clinicalStatus == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Condition.status");
+          throw new Error("Attempt to auto-create Condition.clinicalStatus");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ConditionStatus>(new ConditionStatusEnumFactory()); // bb
-      return this.status;
+          this.clinicalStatus = new Enumeration<ConditionStatus>(new ConditionStatusEnumFactory()); // bb
+      return this.clinicalStatus;
     }
 
-    public boolean hasStatusElement() { 
-      return this.status != null && !this.status.isEmpty();
+    public boolean hasClinicalStatusElement() { 
+      return this.clinicalStatus != null && !this.clinicalStatus.isEmpty();
     }
 
-    public boolean hasStatus() { 
-      return this.status != null && !this.status.isEmpty();
+    public boolean hasClinicalStatus() { 
+      return this.clinicalStatus != null && !this.clinicalStatus.isEmpty();
     }
 
     /**
-     * @param value {@link #status} (The clinical status of the condition.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #clinicalStatus} (The clinical status of the condition.). This is the underlying object with id, value and extensions. The accessor "getClinicalStatus" gives direct access to the value
      */
-    public Condition setStatusElement(Enumeration<ConditionStatus> value) { 
-      this.status = value;
+    public Condition setClinicalStatusElement(Enumeration<ConditionStatus> value) { 
+      this.clinicalStatus = value;
       return this;
     }
 
     /**
      * @return The clinical status of the condition.
      */
-    public ConditionStatus getStatus() { 
-      return this.status == null ? null : this.status.getValue();
+    public ConditionStatus getClinicalStatus() { 
+      return this.clinicalStatus == null ? null : this.clinicalStatus.getValue();
     }
 
     /**
      * @param value The clinical status of the condition.
      */
-    public Condition setStatus(ConditionStatus value) { 
-        if (this.status == null)
-          this.status = new Enumeration<ConditionStatus>(new ConditionStatusEnumFactory());
-        this.status.setValue(value);
-      return this;
-    }
-
-    /**
-     * @return {@link #certainty} (The degree of confidence that this condition is correct.)
-     */
-    public CodeableConcept getCertainty() { 
-      if (this.certainty == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Condition.certainty");
-        else if (Configuration.doAutoCreate())
-          this.certainty = new CodeableConcept(); // cc
-      return this.certainty;
-    }
-
-    public boolean hasCertainty() { 
-      return this.certainty != null && !this.certainty.isEmpty();
-    }
-
-    /**
-     * @param value {@link #certainty} (The degree of confidence that this condition is correct.)
-     */
-    public Condition setCertainty(CodeableConcept value) { 
-      this.certainty = value;
+    public Condition setClinicalStatus(ConditionStatus value) { 
+        if (this.clinicalStatus == null)
+          this.clinicalStatus = new Enumeration<ConditionStatus>(new ConditionStatusEnumFactory());
+        this.clinicalStatus.setValue(value);
       return this;
     }
 
@@ -1341,6 +1321,33 @@ public class Condition extends DomainResource {
       return (Age) this.onset;
     }
 
+    /**
+     * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
+     */
+    public Period getOnsetPeriod() throws Exception { 
+      if (!(this.onset instanceof Period))
+        throw new Exception("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
+      return (Period) this.onset;
+    }
+
+    /**
+     * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
+     */
+    public Range getOnsetRange() throws Exception { 
+      if (!(this.onset instanceof Range))
+        throw new Exception("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
+      return (Range) this.onset;
+    }
+
+    /**
+     * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
+     */
+    public StringType getOnsetStringType() throws Exception { 
+      if (!(this.onset instanceof StringType))
+        throw new Exception("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
+      return (StringType) this.onset;
+    }
+
     public boolean hasOnset() { 
       return this.onset != null && !this.onset.isEmpty();
     }
@@ -1385,6 +1392,33 @@ public class Condition extends DomainResource {
       if (!(this.abatement instanceof BooleanType))
         throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (BooleanType) this.abatement;
+    }
+
+    /**
+     * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
+     */
+    public Period getAbatementPeriod() throws Exception { 
+      if (!(this.abatement instanceof Period))
+        throw new Exception("Type mismatch: the type Period was expected, but "+this.abatement.getClass().getName()+" was encountered");
+      return (Period) this.abatement;
+    }
+
+    /**
+     * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
+     */
+    public Range getAbatementRange() throws Exception { 
+      if (!(this.abatement instanceof Range))
+        throw new Exception("Type mismatch: the type Range was expected, but "+this.abatement.getClass().getName()+" was encountered");
+      return (Range) this.abatement;
+    }
+
+    /**
+     * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
+     */
+    public StringType getAbatementStringType() throws Exception { 
+      if (!(this.abatement instanceof StringType))
+        throw new Exception("Type mismatch: the type StringType was expected, but "+this.abatement.getClass().getName()+" was encountered");
+      return (StringType) this.abatement;
     }
 
     public boolean hasAbatement() { 
@@ -1453,6 +1487,16 @@ public class Condition extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Condition addEvidence(ConditionEvidenceComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.evidence == null)
+        this.evidence = new ArrayList<ConditionEvidenceComponent>();
+      this.evidence.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #location} (The anatomical location where this condition manifests itself.)
      */
@@ -1481,6 +1525,16 @@ public class Condition extends DomainResource {
         this.location = new ArrayList<ConditionLocationComponent>();
       this.location.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Condition addLocation(ConditionLocationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.location == null)
+        this.location = new ArrayList<ConditionLocationComponent>();
+      this.location.add(t);
+      return this;
     }
 
     /**
@@ -1513,6 +1567,16 @@ public class Condition extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Condition addDueTo(ConditionDueToComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.dueTo == null)
+        this.dueTo = new ArrayList<ConditionDueToComponent>();
+      this.dueTo.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #occurredFollowing} (Further conditions, problems, diagnoses, procedures or events or the substance that preceded this Condition.)
      */
@@ -1541,6 +1605,16 @@ public class Condition extends DomainResource {
         this.occurredFollowing = new ArrayList<ConditionOccurredFollowingComponent>();
       this.occurredFollowing.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Condition addOccurredFollowing(ConditionOccurredFollowingComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.occurredFollowing == null)
+        this.occurredFollowing = new ArrayList<ConditionOccurredFollowingComponent>();
+      this.occurredFollowing.add(t);
+      return this;
     }
 
     /**
@@ -1595,17 +1669,16 @@ public class Condition extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("subject", "Reference(Patient)", "Indicates the patient who the condition record is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("patient", "Reference(Patient)", "Indicates the patient who the condition record is associated with.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "Encounter during which the condition was first asserted.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("asserter", "Reference(Practitioner|Patient)", "Person who takes responsibility for asserting the existence of the condition as part of the electronic record.", 0, java.lang.Integer.MAX_VALUE, asserter));
         childrenList.add(new Property("dateAsserted", "date", "Estimated or actual date the condition/problem/diagnosis was first detected/suspected.", 0, java.lang.Integer.MAX_VALUE, dateAsserted));
         childrenList.add(new Property("code", "CodeableConcept", "Identification of the condition, problem or diagnosis.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("category", "CodeableConcept", "A category assigned to the condition. E.g. complaint | symptom | finding | diagnosis.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("status", "code", "The clinical status of the condition.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("certainty", "CodeableConcept", "The degree of confidence that this condition is correct.", 0, java.lang.Integer.MAX_VALUE, certainty));
+        childrenList.add(new Property("clinicalStatus", "code", "The clinical status of the condition.", 0, java.lang.Integer.MAX_VALUE, clinicalStatus));
         childrenList.add(new Property("severity", "CodeableConcept", "A subjective assessment of the severity of the condition as evaluated by the clinician.", 0, java.lang.Integer.MAX_VALUE, severity));
-        childrenList.add(new Property("onset[x]", "dateTime|Age", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, java.lang.Integer.MAX_VALUE, onset));
-        childrenList.add(new Property("abatement[x]", "date|Age|boolean", "The date or estimated date that the condition resolved or went into remission. This is called 'abatement' because of the many overloaded connotations associated with 'remission' or 'resolution' - Conditions are never really resolved, but they can abate.", 0, java.lang.Integer.MAX_VALUE, abatement));
+        childrenList.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, java.lang.Integer.MAX_VALUE, onset));
+        childrenList.add(new Property("abatement[x]", "date|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called 'abatement' because of the many overloaded connotations associated with 'remission' or 'resolution' - Conditions are never really resolved, but they can abate.", 0, java.lang.Integer.MAX_VALUE, abatement));
         childrenList.add(new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, java.lang.Integer.MAX_VALUE, stage));
         childrenList.add(new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence));
         childrenList.add(new Property("location", "", "The anatomical location where this condition manifests itself.", 0, java.lang.Integer.MAX_VALUE, location));
@@ -1622,14 +1695,13 @@ public class Condition extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.subject = subject == null ? null : subject.copy();
+        dst.patient = patient == null ? null : patient.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
         dst.asserter = asserter == null ? null : asserter.copy();
         dst.dateAsserted = dateAsserted == null ? null : dateAsserted.copy();
         dst.code = code == null ? null : code.copy();
         dst.category = category == null ? null : category.copy();
-        dst.status = status == null ? null : status.copy();
-        dst.certainty = certainty == null ? null : certainty.copy();
+        dst.clinicalStatus = clinicalStatus == null ? null : clinicalStatus.copy();
         dst.severity = severity == null ? null : severity.copy();
         dst.onset = onset == null ? null : onset.copy();
         dst.abatement = abatement == null ? null : abatement.copy();
@@ -1669,9 +1741,9 @@ public class Condition extends DomainResource {
         if (!(other instanceof Condition))
           return false;
         Condition o = (Condition) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(asserter, o.asserter, true) && compareDeep(dateAsserted, o.dateAsserted, true) && compareDeep(code, o.code, true)
-           && compareDeep(category, o.category, true) && compareDeep(status, o.status, true) && compareDeep(certainty, o.certainty, true)
+           && compareDeep(category, o.category, true) && compareDeep(clinicalStatus, o.clinicalStatus, true)
            && compareDeep(severity, o.severity, true) && compareDeep(onset, o.onset, true) && compareDeep(abatement, o.abatement, true)
            && compareDeep(stage, o.stage, true) && compareDeep(evidence, o.evidence, true) && compareDeep(location, o.location, true)
            && compareDeep(dueTo, o.dueTo, true) && compareDeep(occurredFollowing, o.occurredFollowing, true)
@@ -1685,15 +1757,15 @@ public class Condition extends DomainResource {
         if (!(other instanceof Condition))
           return false;
         Condition o = (Condition) other;
-        return compareValues(dateAsserted, o.dateAsserted, true) && compareValues(status, o.status, true) && compareValues(notes, o.notes, true)
-          ;
+        return compareValues(dateAsserted, o.dateAsserted, true) && compareValues(clinicalStatus, o.clinicalStatus, true)
+           && compareValues(notes, o.notes, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (patient == null || patient.isEmpty())
            && (encounter == null || encounter.isEmpty()) && (asserter == null || asserter.isEmpty())
            && (dateAsserted == null || dateAsserted.isEmpty()) && (code == null || code.isEmpty()) && (category == null || category.isEmpty())
-           && (status == null || status.isEmpty()) && (certainty == null || certainty.isEmpty()) && (severity == null || severity.isEmpty())
+           && (clinicalStatus == null || clinicalStatus.isEmpty()) && (severity == null || severity.isEmpty())
            && (onset == null || onset.isEmpty()) && (abatement == null || abatement.isEmpty()) && (stage == null || stage.isEmpty())
            && (evidence == null || evidence.isEmpty()) && (location == null || location.isEmpty()) && (dueTo == null || dueTo.isEmpty())
            && (occurredFollowing == null || occurredFollowing.isEmpty()) && (notes == null || notes.isEmpty())
@@ -1705,40 +1777,42 @@ public class Condition extends DomainResource {
     return ResourceType.Condition;
    }
 
+  @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference" )
+  public static final String SP_ASSERTER = "asserter";
+  @SearchParamDefinition(name="following-code", path="Condition.occurredFollowing.code", description="Relationship target by means of a predefined code", type="token" )
+  public static final String SP_FOLLOWINGCODE = "following-code";
+  @SearchParamDefinition(name="dueto-code", path="Condition.dueTo.code", description="Relationship target by means of a predefined code", type="token" )
+  public static final String SP_DUETOCODE = "dueto-code";
+  @SearchParamDefinition(name="location", path="Condition.location.site[x]", description="Location - may include laterality", type="token" )
+  public static final String SP_LOCATION = "location";
+  @SearchParamDefinition(name="subject", path="Condition.patient", description="Who has the condition?", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="onset", path="Condition.onset[x]", description="Date related onsets (dateTime and Period)", type="date" )
+  public static final String SP_ONSET = "onset";
+  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
+  public static final String SP_EVIDENCE = "evidence";
+  @SearchParamDefinition(name="onset-info", path="Condition.onset[x]", description="Other onsets (boolean, age, range, string)", type="string" )
+  public static final String SP_ONSETINFO = "onset-info";
+  @SearchParamDefinition(name="following-item", path="Condition.occurredFollowing.target", description="Relationship target resource", type="reference" )
+  public static final String SP_FOLLOWINGITEM = "following-item";
   @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
   public static final String SP_SEVERITY = "severity";
   @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name = "evidence", path = "Condition.evidence.code", description = "Manifestation/symptom", type = "token")
-  public static final String SP_EVIDENCE = "evidence";
+  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="When first detected/suspected/entered", type="date" )
   public static final String SP_DATEASSERTED = "date-asserted";
-  @SearchParamDefinition(name = "subject", path = "Condition.subject", description = "Who has the condition?", type = "reference")
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name = "dueto-item", path = "Condition.dueTo.target", description = "Relationship target resource", type = "reference")
-  public static final String SP_DUETOITEM = "dueto-item";
-  @SearchParamDefinition(name = "encounter", path = "Condition.encounter", description = "Encounter when condition first asserted", type = "reference")
-  public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name = "onset", path = "Condition.onset[x]", description = "When the Condition started (if started on a date)", type = "date")
-  public static final String SP_ONSET = "onset";
-  @SearchParamDefinition(name = "asserter", path = "Condition.asserter", description = "Person who asserts this condition", type = "reference")
-  public static final String SP_ASSERTER = "asserter";
   @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
   public static final String SP_STAGE = "stage";
-  @SearchParamDefinition(name = "following-item", path = "Condition.occurredFollowing.target", description = "Relationship target resource", type = "reference")
-  public static final String SP_FOLLOWINGITEM = "following-item";
-  @SearchParamDefinition(name="patient", path="Condition.subject", description="Who has the condition?", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name = "dueto-code", path = "Condition.dueTo.codeableConcept", description = "Relationship target by means of a predefined code", type = "token")
-  public static final String SP_DUETOCODE = "dueto-code";
-  @SearchParamDefinition(name = "location", path = "Condition.location.code", description = "Location - may include laterality", type = "token")
-  public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name = "category", path = "Condition.category", description = "The category of the condition", type = "token")
+  @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
   public static final String SP_CATEGORY = "category";
-  @SearchParamDefinition(name = "following-code", path = "Condition.occurredFollowing.codeableConcept", description = "Relationship target by means of a predefined code", type = "token")
-  public static final String SP_FOLLOWINGCODE = "following-code";
-  @SearchParamDefinition(name = "status", path = "Condition.status", description = "The status of the condition", type = "token")
-  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="dueto-item", path="Condition.dueTo.target", description="Relationship target resource", type="reference" )
+  public static final String SP_DUETOITEM = "dueto-item";
+  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
+  public static final String SP_CLINICALSTATUS = "clinicalstatus";
 
 }
 

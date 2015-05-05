@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 
 public class RuntimeResourceBlockDefinition extends BaseRuntimeElementCompositeDefinition<IBase> {
 

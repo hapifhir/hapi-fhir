@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
  */
@@ -51,35 +52,35 @@ public class RiskAssessment extends DomainResource {
         /**
          * One of the potential outcomes for the patient (e.g. remission, death,  a particular condition).
          */
-        @Child(name="outcome", type={CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "outcome", type = {CodeableConcept.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Possible outcome for the subject", formalDefinition="One of the potential outcomes for the patient (e.g. remission, death,  a particular condition)." )
         protected CodeableConcept outcome;
 
         /**
          * How likely is the outcome (in the specified timeframe).
          */
-        @Child(name="probability", type={DecimalType.class, Range.class, CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "probability", type = {DecimalType.class, Range.class, CodeableConcept.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Likelihood of specified outcome", formalDefinition="How likely is the outcome (in the specified timeframe)." )
         protected Type probability;
 
         /**
          * Indicates the risk for this particular subject (with their specific characteristics) divided by the risk of the population in general.  (Numbers greater than 1 = higher risk than the population, numbers less than 1 = lower risk.).
          */
-        @Child(name="relativeRisk", type={DecimalType.class}, order=3, min=0, max=1)
+        @Child(name = "relativeRisk", type = {DecimalType.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Relative likelihood", formalDefinition="Indicates the risk for this particular subject (with their specific characteristics) divided by the risk of the population in general.  (Numbers greater than 1 = higher risk than the population, numbers less than 1 = lower risk.)." )
         protected DecimalType relativeRisk;
 
         /**
          * Indicates the period of time or age range of the subject to which the specified probability applies.
          */
-        @Child(name="when", type={Period.class, Range.class}, order=4, min=0, max=1)
+        @Child(name = "when", type = {Period.class, Range.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Timeframe or age range", formalDefinition="Indicates the period of time or age range of the subject to which the specified probability applies." )
         protected Type when;
 
         /**
          * Additional information explaining the basis for the prediction.
          */
-        @Child(name="rationale", type={StringType.class}, order=5, min=0, max=1)
+        @Child(name = "rationale", type = {StringType.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Explanation of prediction", formalDefinition="Additional information explaining the basis for the prediction." )
         protected StringType rationale;
 
@@ -352,7 +353,7 @@ public class RiskAssessment extends DomainResource {
     /**
      * The patient or group the risk assessment applies to.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order = 0, min = 0, max = 1)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Who/what does assessment apply to?", formalDefinition="The patient or group the risk assessment applies to." )
     protected Reference subject;
 
@@ -364,14 +365,14 @@ public class RiskAssessment extends DomainResource {
     /**
      * The date (and possibly time) the risk assessment was performed.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="When was assessment made?", formalDefinition="The date (and possibly time) the risk assessment was performed." )
     protected DateTimeType date;
 
     /**
      * For assessments or prognosis specific to a particular condition, indicates the condition being assessed.
      */
-    @Child(name = "condition", type = {Condition.class}, order = 2, min = 0, max = 1)
+    @Child(name = "condition", type = {Condition.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Condition assessed", formalDefinition="For assessments or prognosis specific to a particular condition, indicates the condition being assessed." )
     protected Reference condition;
 
@@ -383,7 +384,7 @@ public class RiskAssessment extends DomainResource {
     /**
      * The provider or software application that performed the assessment.
      */
-    @Child(name = "performer", type = {Practitioner.class, Device.class}, order = 3, min = 0, max = 1)
+    @Child(name = "performer", type = {Practitioner.class, Device.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Who did assessment?", formalDefinition="The provider or software application that performed the assessment." )
     protected Reference performer;
 
@@ -395,21 +396,21 @@ public class RiskAssessment extends DomainResource {
     /**
      * Business identifier assigned to the risk assessment.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 4, min = 0, max = 1)
+    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Unique identifier for the assessment", formalDefinition="Business identifier assigned to the risk assessment." )
     protected Identifier identifier;
 
     /**
      * The algorithm, processs or mechanism used to evaluate the risk.
      */
-    @Child(name = "method", type = {CodeableConcept.class}, order = 5, min = 0, max = 1)
+    @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Evaluation mechanism", formalDefinition="The algorithm, processs or mechanism used to evaluate the risk." )
     protected CodeableConcept method;
 
     /**
      * Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).
      */
-    @Child(name = "basis", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "basis", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Information used in assessment", formalDefinition="Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.)." )
     protected List<Reference> basis;
     /**
@@ -421,14 +422,14 @@ public class RiskAssessment extends DomainResource {
     /**
      * Describes the expected outcome for the subject.
      */
-    @Child(name = "prediction", type = {}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "prediction", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Outcome predicted", formalDefinition="Describes the expected outcome for the subject." )
     protected List<RiskAssessmentPredictionComponent> prediction;
 
     /**
      * A description of the steps that might be taken to reduce the identified risk(s).
      */
-    @Child(name = "mitigation", type = {StringType.class}, order = 8, min = 0, max = 1)
+    @Child(name = "mitigation", type = {StringType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="How to reduce risk", formalDefinition="A description of the steps that might be taken to reduce the identified risk(s)." )
     protected StringType mitigation;
 
@@ -687,6 +688,16 @@ public class RiskAssessment extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public RiskAssessment addBasis(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.basis == null)
+        this.basis = new ArrayList<Reference>();
+      this.basis.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #basis} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Indicates the source data considered as part of the assessment (FamilyHistory, Observations, Procedures, Conditions, etc.).)
      */
@@ -724,6 +735,16 @@ public class RiskAssessment extends DomainResource {
         this.prediction = new ArrayList<RiskAssessmentPredictionComponent>();
       this.prediction.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public RiskAssessment addPrediction(RiskAssessmentPredictionComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.prediction == null)
+        this.prediction = new ArrayList<RiskAssessmentPredictionComponent>();
+      this.prediction.add(t);
+      return this;
     }
 
     /**
@@ -851,20 +872,20 @@ public class RiskAssessment extends DomainResource {
     return ResourceType.RiskAssessment;
    }
 
-  @SearchParamDefinition(name = "date", path = "RiskAssessment.date", description = "When was assessment made?", type = "date")
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name = "identifier", path = "RiskAssessment.identifier", description = "Unique identifier for the assessment", type = "token")
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="condition", path="RiskAssessment.condition", description="Condition assessed", type="reference" )
   public static final String SP_CONDITION = "condition";
+  @SearchParamDefinition(name="subject", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference" )
+  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="performer", path="RiskAssessment.performer", description="Who did assessment?", type="reference" )
   public static final String SP_PERFORMER = "performer";
   @SearchParamDefinition(name="method", path="RiskAssessment.method", description="Evaluation mechanism", type="token" )
   public static final String SP_METHOD = "method";
-  @SearchParamDefinition(name = "subject", path = "RiskAssessment.subject", description = "Who/what does assessment apply to?", type = "reference")
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name = "patient", path = "RiskAssessment.subject", description = "Who/what does assessment apply to?", type = "reference")
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="date", path="RiskAssessment.date", description="When was assessment made?", type="date" )
+  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="identifier", path="RiskAssessment.identifier", description="Unique identifier for the assessment", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

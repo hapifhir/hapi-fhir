@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * An action that is or was performed on a patient. This can be a physical 'thing' like an operation, or less invasive like counseling or hypnotherapy.
  */
@@ -222,7 +223,7 @@ public class Procedure extends DomainResource {
         /**
          * Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.
          */
-        @Child(name ="site", type={CodeableConcept.class, BodySite.class}, order=1, min=1, max=1)
+        @Child(name = "site", type = {CodeableConcept.class, BodySite.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Precise location details", formalDefinition="Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion." )
         protected Type site;
 
@@ -317,7 +318,7 @@ public class Procedure extends DomainResource {
         /**
          * The practitioner who was involved in the procedure.
          */
-        @Child(name ="person", type={Practitioner.class, Patient.class, RelatedPerson.class}, order=1, min=0, max=1)
+        @Child(name = "person", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=1, min=0, max=1)
         @Description(shortDefinition="The reference to the practitioner", formalDefinition="The practitioner who was involved in the procedure." )
         protected Reference person;
 
@@ -329,7 +330,7 @@ public class Procedure extends DomainResource {
         /**
          * E.g. surgeon, anaethetist, endoscopist.
          */
-        @Child(name ="role", type={CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1)
         @Description(shortDefinition="The role the person was in", formalDefinition="E.g. surgeon, anaethetist, endoscopist." )
         protected CodeableConcept role;
 
@@ -448,14 +449,14 @@ public class Procedure extends DomainResource {
         /**
          * The nature of the relationship.
          */
-        @Child(name ="type", type={CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="caused-by | because-of", formalDefinition="The nature of the relationship." )
         protected Enumeration<ProcedureRelationshipType> type;
 
         /**
          * The related item - e.g. a procedure.
          */
-        @Child(name ="target", type={AllergyIntolerance.class, CarePlan.class, Condition.class, DiagnosticReport.class, FamilyMemberHistory.class, ImagingStudy.class, Immunization.class, ImmunizationRecommendation.class, MedicationAdministration.class, MedicationDispense.class, MedicationPrescription.class, MedicationStatement.class, Observation.class, Procedure.class}, order=2, min=0, max=1)
+        @Child(name = "target", type = {AllergyIntolerance.class, CarePlan.class, Condition.class, DiagnosticReport.class, FamilyMemberHistory.class, ImagingStudy.class, Immunization.class, ImmunizationRecommendation.class, MedicationAdministration.class, MedicationDispense.class, MedicationPrescription.class, MedicationStatement.class, Observation.class, Procedure.class}, order=2, min=0, max=1)
         @Description(shortDefinition="The related item - e.g. a procedure", formalDefinition="The related item - e.g. a procedure." )
         protected Reference target;
 
@@ -604,14 +605,14 @@ public class Procedure extends DomainResource {
         /**
          * The kind of change that happened to the device during the procedure.
          */
-        @Child(name ="action", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "action", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Kind of change to device", formalDefinition="The kind of change that happened to the device during the procedure." )
         protected CodeableConcept action;
 
         /**
          * The device that was manipulated (changed) during the procedure.
          */
-        @Child(name ="manipulated", type={Device.class}, order=2, min=1, max=1)
+        @Child(name = "manipulated", type = {Device.class}, order=2, min=1, max=1)
         @Description(shortDefinition="Device that was changed", formalDefinition="The device that was manipulated (changed) during the procedure." )
         protected Reference manipulated;
 
@@ -743,14 +744,14 @@ public class Procedure extends DomainResource {
     /**
      * This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name ="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this procedure", formalDefinition="This records identifiers associated with this procedure that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The person on whom the procedure was performed.
      */
-    @Child(name ="patient", type={Patient.class}, order=1, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Who procedure was performed on", formalDefinition="The person on whom the procedure was performed." )
     protected Reference patient;
 
@@ -762,56 +763,56 @@ public class Procedure extends DomainResource {
     /**
      * A code specifying the state of the procedure record. Generally this will be in-progress or completed state.
      */
-    @Child(name ="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="in-progress | aborted | completed | entered-in-error", formalDefinition="A code specifying the state of the procedure record. Generally this will be in-progress or completed state." )
     protected Enumeration<ProcedureStatus> status;
 
     /**
      * A code that classifies the procedure for searching, sorting and display purposes.
      */
-    @Child(name ="category", type={CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Classification of the procedure", formalDefinition="A code that classifies the procedure for searching, sorting and display purposes." )
     protected CodeableConcept category;
 
     /**
      * The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded.
      */
-    @Child(name ="type", type={CodeableConcept.class}, order=4, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=4, min=1, max=1)
     @Description(shortDefinition="Identification of the procedure", formalDefinition="The specific procedure that is performed. Use text if the exact nature of the procedure can't be coded." )
     protected CodeableConcept type;
 
     /**
      * Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion.
      */
-    @Child(name ="bodySite", type={}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "bodySite", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Precise location details", formalDefinition="Detailed and structured anatomical location information. Multiple locations are allowed - e.g. multiple punch biopsies of a lesion." )
     protected List<ProcedureBodySiteComponent> bodySite;
 
     /**
      * The reason why the procedure was performed. This may be due to a Condition, may be coded entity of some type, or may simply be present as text.
      */
-    @Child(name ="indication", type={CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "indication", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Reason procedure performed", formalDefinition="The reason why the procedure was performed. This may be due to a Condition, may be coded entity of some type, or may simply be present as text." )
     protected List<CodeableConcept> indication;
 
     /**
      * Limited to 'real' people rather than equipment.
      */
-    @Child(name ="performer", type={}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "performer", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="The people who performed the procedure", formalDefinition="Limited to 'real' people rather than equipment." )
     protected List<ProcedurePerformerComponent> performer;
 
     /**
      * The date(time)/period over which the procedure was performed. Allows a period to support complex procedures that span more than one date, and also allows for the length of the procedure to be captured.
      */
-    @Child(name ="performed", type={DateTimeType.class, Period.class}, order=8, min=0, max=1)
+    @Child(name = "performed", type = {DateTimeType.class, Period.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Date/Period the procedure was performed", formalDefinition="The date(time)/period over which the procedure was performed. Allows a period to support complex procedures that span more than one date, and also allows for the length of the procedure to be captured." )
     protected Type performed;
 
     /**
      * The encounter during which the procedure was performed.
      */
-    @Child(name ="encounter", type={Encounter.class}, order=9, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=9, min=0, max=1)
     @Description(shortDefinition="The encounter when procedure performed", formalDefinition="The encounter during which the procedure was performed." )
     protected Reference encounter;
 
@@ -823,7 +824,7 @@ public class Procedure extends DomainResource {
     /**
      * The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant.
      */
-    @Child(name ="location", type={Location.class}, order=10, min=0, max=1)
+    @Child(name = "location", type = {Location.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Where the procedure happened", formalDefinition="The location where the procedure actually happened.  e.g. a newborn at home, a tracheostomy at a restaurant." )
     protected Reference location;
 
@@ -835,14 +836,14 @@ public class Procedure extends DomainResource {
     /**
      * What was the outcome of the procedure - did it resolve reasons why the procedure was performed?
      */
-    @Child(name ="outcome", type={CodeableConcept.class}, order=11, min=0, max=1)
+    @Child(name = "outcome", type = {CodeableConcept.class}, order=11, min=0, max=1)
     @Description(shortDefinition="What was result of procedure?", formalDefinition="What was the outcome of the procedure - did it resolve reasons why the procedure was performed?" )
     protected CodeableConcept outcome;
 
     /**
      * This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies.
      */
-    @Child(name ="report", type={DiagnosticReport.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "report", type = {DiagnosticReport.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Any report that results from the procedure", formalDefinition="This could be a histology result. There could potentially be multiple reports - e.g. if this was a procedure that made multiple biopsies." )
     protected List<Reference> report;
     /**
@@ -854,42 +855,42 @@ public class Procedure extends DomainResource {
     /**
      * Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues.
      */
-    @Child(name ="complication", type={CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "complication", type = {CodeableConcept.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Complication following the procedure", formalDefinition="Any complications that occurred during the procedure, or in the immediate post-operative period. These are generally tracked separately from the notes, which typically will describe the procedure itself rather than any 'post procedure' issues." )
     protected List<CodeableConcept> complication;
 
     /**
      * If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used.
      */
-    @Child(name ="followUp", type={CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "followUp", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Instructions for follow up", formalDefinition="If the procedure required specific follow up - e.g. removal of sutures. The followup may be represented as a simple note, or potentially could be more complex in which case the CarePlan resource can be used." )
     protected List<CodeableConcept> followUp;
 
     /**
      * Procedures may be related to other items such as procedures or medications. For example treating wound dehiscence following a previous procedure.
      */
-    @Child(name ="relatedItem", type={}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "relatedItem", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A procedure that is related to this one", formalDefinition="Procedures may be related to other items such as procedures or medications. For example treating wound dehiscence following a previous procedure." )
     protected List<ProcedureRelatedItemComponent> relatedItem;
 
     /**
      * Any other notes about the procedure - e.g. the operative notes.
      */
-    @Child(name ="notes", type={StringType.class}, order=16, min=0, max=1)
+    @Child(name = "notes", type = {StringType.class}, order=16, min=0, max=1)
     @Description(shortDefinition="Additional information about procedure", formalDefinition="Any other notes about the procedure - e.g. the operative notes." )
     protected StringType notes;
 
     /**
      * A device change during the procedure.
      */
-    @Child(name ="device", type={}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "device", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Device changed in procedure", formalDefinition="A device change during the procedure." )
     protected List<ProcedureDeviceComponent> device;
 
     /**
      * Identifies medications, devices and other substance used as part of the procedure.
      */
-    @Child(name ="used", type={Device.class, Medication.class, Substance.class}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "used", type = {Device.class, Medication.class, Substance.class}, order=18, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Items used during procedure", formalDefinition="Identifies medications, devices and other substance used as part of the procedure." )
     protected List<Reference> used;
     /**
@@ -1811,16 +1812,16 @@ public class Procedure extends DomainResource {
     return ResourceType.Procedure;
    }
 
-  @SearchParamDefinition(name="date", path="Procedure.performed[x]", description="Date/Period the procedure was performed", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="performer", path="Procedure.performer.person", description="The reference to the practitioner", type="reference" )
-  public static final String SP_PERFORMER = "performer";
   @SearchParamDefinition(name="patient", path="Procedure.patient", description="The identity of a patient to list procedures  for", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="location", path="Procedure.location", description="Where the procedure happened", type="reference" )
   public static final String SP_LOCATION = "location";
+  @SearchParamDefinition(name="performer", path="Procedure.performer.person", description="The reference to the practitioner", type="reference" )
+  public static final String SP_PERFORMER = "performer";
   @SearchParamDefinition(name="encounter", path="Procedure.encounter", description="The encounter when procedure performed", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="date", path="Procedure.performed[x]", description="Date/Period the procedure was performed", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="type", path="Procedure.type", description="Type of procedure", type="token" )
   public static final String SP_TYPE = "type";
 

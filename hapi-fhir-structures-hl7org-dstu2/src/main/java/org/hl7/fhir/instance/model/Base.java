@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 public abstract class Base implements Serializable, IBase {
@@ -40,6 +41,9 @@ private Map<String, Object> userData;
       return userData.containsKey(name);
   }
 
+	public String getUserString(String name) {
+    return (String) getUserData(name);
+  }
 
   public boolean hasFormatComment() {
   	return (formatComments != null && !formatComments.isEmpty());
@@ -83,7 +87,7 @@ private Map<String, Object> userData;
     listChildren(children);
     for (Property c : children)
       if (c.getName().equals(name) || (c.getName().endsWith("[x]") && name.startsWith(c.getName())))
-        return c.values;
+        return c.getValues();
     return new ArrayList<Base>();
   }
 

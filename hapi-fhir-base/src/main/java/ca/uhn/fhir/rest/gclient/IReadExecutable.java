@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IReadExecutable<T extends IBaseResource> extends IClientExecutable<IReadExecutable<T>, T>{
 

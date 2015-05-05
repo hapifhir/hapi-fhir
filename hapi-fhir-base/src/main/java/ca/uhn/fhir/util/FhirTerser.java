@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -244,7 +244,7 @@ public class FhirTerser {
 			break;
 		case RESOURCE_REF:
 			IBaseReference resRefDt = (IBaseReference) theElement;
-			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
+			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
 				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
@@ -339,7 +339,7 @@ public class FhirTerser {
 			break;
 		case RESOURCE_REF:
 			IBaseReference resRefDt = (IBaseReference) theElement;
-			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
+			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
 				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);

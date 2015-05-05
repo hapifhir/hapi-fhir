@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides processing status, errors and notes from the processing of a resource.
  */
@@ -50,14 +51,14 @@ public class ProcessResponse extends DomainResource {
         /**
          * The note purpose: Print/Display.
          */
-        @Child(name ="type", type={Coding.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1)
         @Description(shortDefinition="display | print | printoper", formalDefinition="The note purpose: Print/Display." )
         protected Coding type;
 
         /**
          * The note text.
          */
-        @Child(name ="text", type={StringType.class}, order=2, min=0, max=1)
+        @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Notes text", formalDefinition="The note text." )
         protected StringType text;
 
@@ -184,14 +185,14 @@ public class ProcessResponse extends DomainResource {
     /**
      * The Response Business Identifier.
      */
-    @Child(name ="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * Original request resource reference.
      */
-    @Child(name ="request", type={}, order=1, min=0, max=1)
+    @Child(name = "request", type = {}, order=1, min=0, max=1)
     @Description(shortDefinition="Request reference", formalDefinition="Original request resource reference." )
     protected Reference request;
 
@@ -203,42 +204,42 @@ public class ProcessResponse extends DomainResource {
     /**
      * Transaction status: error, complete, held.
      */
-    @Child(name ="outcome", type={Coding.class}, order=2, min=0, max=1)
+    @Child(name = "outcome", type = {Coding.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Processing outcome", formalDefinition="Transaction status: error, complete, held." )
     protected Coding outcome;
 
     /**
      * A description of the status of the adjudication or processing.
      */
-    @Child(name ="disposition", type={StringType.class}, order=3, min=0, max=1)
+    @Child(name = "disposition", type = {StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication or processing." )
     protected StringType disposition;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name ="ruleset", type={Coding.class}, order=4, min=0, max=1)
+    @Child(name = "ruleset", type = {Coding.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name ="originalRuleset", type={Coding.class}, order=5, min=0, max=1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name ="created", type={DateTimeType.class}, order=6, min=0, max=1)
+    @Child(name = "created", type = {DateTimeType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * The organization who produced this adjudicated response.
      */
-    @Child(name ="organization", type={Organization.class}, order=7, min=0, max=1)
+    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Authoring Organization", formalDefinition="The organization who produced this adjudicated response." )
     protected Reference organization;
 
@@ -250,7 +251,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name ="requestProvider", type={Practitioner.class}, order=8, min=0, max=1)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Responsible Practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference requestProvider;
 
@@ -262,7 +263,7 @@ public class ProcessResponse extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name ="requestOrganization", type={Organization.class}, order=9, min=0, max=1)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference requestOrganization;
 
@@ -274,21 +275,21 @@ public class ProcessResponse extends DomainResource {
     /**
      * The form to be used for printing the content.
      */
-    @Child(name ="form", type={Coding.class}, order=10, min=0, max=1)
+    @Child(name = "form", type = {Coding.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     protected Coding form;
 
     /**
      * Suite of processing note or additional requirements is the processing has been held.
      */
-    @Child(name ="notes", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "notes", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Notes", formalDefinition="Suite of processing note or additional requirements is the processing has been held." )
     protected List<ProcessResponseNotesComponent> notes;
 
     /**
      * Processing errors.
      */
-    @Child(name ="error", type={Coding.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "error", type = {Coding.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Error code", formalDefinition="Processing errors." )
     protected List<Coding> error;
 
@@ -874,16 +875,16 @@ public class ProcessResponse extends DomainResource {
     return ResourceType.ProcessResponse;
    }
 
-  @SearchParamDefinition(name="identifier", path="ProcessResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="request", path="ProcessResponse.request", description="The reference to the claim", type="reference" )
-  public static final String SP_REQUEST = "request";
   @SearchParamDefinition(name="organization", path="ProcessResponse.organization", description="The organization who generated this resource", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="requestprovider", path="ProcessResponse.requestProvider", description="The Provider who is responsible the request transaction", type="reference" )
   public static final String SP_REQUESTPROVIDER = "requestprovider";
+  @SearchParamDefinition(name="request", path="ProcessResponse.request", description="The reference to the claim", type="reference" )
+  public static final String SP_REQUEST = "request";
   @SearchParamDefinition(name="requestorganization", path="ProcessResponse.requestOrganization", description="The Organization who is responsible the request transaction", type="reference" )
   public static final String SP_REQUESTORGANIZATION = "requestorganization";
+  @SearchParamDefinition(name="identifier", path="ProcessResponse.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

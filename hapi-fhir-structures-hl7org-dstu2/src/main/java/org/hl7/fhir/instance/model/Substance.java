@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A homogeneous material with a definite composition.
  */
@@ -50,21 +51,21 @@ public class Substance extends DomainResource {
         /**
          * Identifier associated with the package/container (usually a label affixed directly).
          */
-        @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=1)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Identifier of the package/container", formalDefinition="Identifier associated with the package/container (usually a label affixed directly)." )
         protected Identifier identifier;
 
         /**
          * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
          */
-        @Child(name="expiry", type={DateTimeType.class}, order=2, min=0, max=1)
+        @Child(name = "expiry", type = {DateTimeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="When no longer valid to use", formalDefinition="When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry." )
         protected DateTimeType expiry;
 
         /**
          * The amount of the substance.
          */
-        @Child(name="quantity", type={Quantity.class}, order=3, min=0, max=1)
+        @Child(name = "quantity", type = {Quantity.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Amount of substance in the package", formalDefinition="The amount of the substance." )
         protected Quantity quantity;
 
@@ -220,14 +221,14 @@ public class Substance extends DomainResource {
         /**
          * The amount of the ingredient in the substance - a concentration ratio.
          */
-        @Child(name="quantity", type={Ratio.class}, order=1, min=0, max=1)
+        @Child(name = "quantity", type = {Ratio.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Optional amount (concentration)", formalDefinition="The amount of the ingredient in the substance - a concentration ratio." )
         protected Ratio quantity;
 
         /**
          * Another substance that is a component of this substance.
          */
-        @Child(name="substance", type={Substance.class}, order=2, min=1, max=1)
+        @Child(name = "substance", type = {Substance.class}, order=2, min=1, max=1)
         @Description(shortDefinition="A component of the substance", formalDefinition="Another substance that is a component of this substance." )
         protected Reference substance;
 
@@ -359,28 +360,28 @@ public class Substance extends DomainResource {
     /**
      * A code (or set of codes) that identify this substance.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order = 0, min = 1, max = 1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1)
     @Description(shortDefinition="What kind of substance this is", formalDefinition="A code (or set of codes) that identify this substance." )
     protected CodeableConcept type;
 
     /**
      * A description of the substance - its appearance, handling requirements, and other usage notes.
      */
-    @Child(name = "description", type = {StringType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Textual description of the substance, comments", formalDefinition="A description of the substance - its appearance, handling requirements, and other usage notes." )
     protected StringType description;
 
     /**
      * Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.
      */
-    @Child(name = "instance", type = {}, order = 2, min = 0, max = 1)
+    @Child(name = "instance", type = {}, order=2, min=0, max=1)
     @Description(shortDefinition="If this describes a specific package/container of the substance", formalDefinition="Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance." )
     protected SubstanceInstanceComponent instance;
 
     /**
      * A substance can be composed of other substances.
      */
-    @Child(name = "ingredient", type = {}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "ingredient", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Composition information about the substance", formalDefinition="A substance can be composed of other substances." )
     protected List<SubstanceIngredientComponent> ingredient;
 
@@ -522,6 +523,16 @@ public class Substance extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Substance addIngredient(SubstanceIngredientComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.ingredient == null)
+        this.ingredient = new ArrayList<SubstanceIngredientComponent>();
+      this.ingredient.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -580,16 +591,16 @@ public class Substance extends DomainResource {
     return ResourceType.Substance;
    }
 
+  @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
+  public static final String SP_SUBSTANCE = "substance";
+  @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="number" )
+  public static final String SP_QUANTITY = "quantity";
+  @SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name = "quantity", path = "Substance.instance.quantity", description = "Amount of substance in the package", type = "number")
-  public static final String SP_QUANTITY = "quantity";
-  @SearchParamDefinition(name = "substance", path = "Substance.ingredient.substance", description = "A component of the substance", type = "reference")
-  public static final String SP_SUBSTANCE = "substance";
   @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="When no longer valid to use", type="date" )
   public static final String SP_EXPIRY = "expiry";
-  @SearchParamDefinition(name = "type", path = "Substance.type", description = "The type of the substance", type = "token")
-  public static final String SP_TYPE = "type";
 
 }
 

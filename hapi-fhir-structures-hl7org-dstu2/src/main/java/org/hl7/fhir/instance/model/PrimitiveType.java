@@ -1,9 +1,9 @@
 package org.hl7.fhir.instance.model;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>, IBaseHasExtensions {
 
@@ -27,7 +27,7 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 
 	@Override
 	public boolean isEmpty() {
-		return super.isEmpty() && StringUtils.isBlank(getValueAsString());
+		return super.isEmpty() && getValue() == null;
 	}
 
 	public PrimitiveType<T> setValue(T theValue) {

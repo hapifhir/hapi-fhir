@@ -20,7 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.parser.DataFormatException;
 

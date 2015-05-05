@@ -1,6 +1,4 @@
-package org.hl7.fhir.instance.model;
-
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
+package org.hl7.fhir.instance.model.api;
 
 /*
  * #%L
@@ -22,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
  * #L%
  */
 
-public interface ICompositeType extends IBaseDatatype {
+
+public interface IBaseBackboneElement extends IBase, IBaseHasExtensions, IBaseHasModifierExtensions {
 
 }

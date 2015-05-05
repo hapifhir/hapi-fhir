@@ -29,23 +29,21 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
+import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.hl7.fhir.utilities.xhtml.XhtmlParser;
+
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.Child;
+import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A human-readable formatted text, including images.
  */
 @DatatypeDef(name="Narrative")
-public class Narrative extends Element implements INarrative {
+public class Narrative extends BaseNarrative implements INarrative {
 
     public enum NarrativeStatus {
         /**
@@ -110,10 +108,10 @@ public class Narrative extends Element implements INarrative {
         }
         public String getDisplay() {
           switch (this) {
-            case GENERATED: return "generated";
-            case EXTENSIONS: return "extensions";
-            case ADDITIONAL: return "additional";
-            case EMPTY: return "empty";
+            case GENERATED: return "Generated";
+            case EXTENSIONS: return "Extensions";
+            case ADDITIONAL: return "Additional";
+            case EMPTY: return "Empty";
             default: return "?";
           }
         }
@@ -150,14 +148,14 @@ public class Narrative extends Element implements INarrative {
     /**
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 0, min = 1, max = 1)
-    @Description(shortDefinition="generated | extensions | additional", formalDefinition="The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data." )
+    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1)
+    @Description(shortDefinition="generated | extensions | additional | empty", formalDefinition="The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data." )
     protected Enumeration<NarrativeStatus> status;
 
     /**
      * The actual narrative content, a stripped down version of XHTML.
      */
-    @Child(name="div", type={}, order=1, min=1, max=1)
+    @Child(name = "div", type = {}, order=1, min=1, max=1)
     @Description(shortDefinition="Limited xhtml content", formalDefinition="The actual narrative content, a stripped down version of XHTML." )
     protected XhtmlNode div;
 
@@ -283,29 +281,6 @@ public class Narrative extends Element implements INarrative {
         return super.isEmpty() && (status == null || status.isEmpty()) && (div == null || div.isEmpty())
           ;
       }
-
-  /**
-   * Sets the value of
-   *
-   * @param theString
-   * @throws Exception
-   */
-  public void setDivAsString(String theString) throws Exception {
-    if (StringUtils.isNotBlank(theString)) {
-      div = new XhtmlNode();
-      div.setValueAsString(theString);
-    } else {
-      div = null;
-    }
-  }
-
-  public String getDivAsString() throws Exception {
-    if (div != null && !div.isEmpty()) {
-      return div.getValueAsString();
-    } else {
-      return null;
-    }
-  }
 
 
 }

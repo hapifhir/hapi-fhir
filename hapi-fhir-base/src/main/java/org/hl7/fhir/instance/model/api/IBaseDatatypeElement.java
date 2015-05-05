@@ -20,8 +20,7 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBase;
 
-public interface IBackboneElement extends IBase {
+public interface IBaseDatatypeElement extends IBase {
 
 }

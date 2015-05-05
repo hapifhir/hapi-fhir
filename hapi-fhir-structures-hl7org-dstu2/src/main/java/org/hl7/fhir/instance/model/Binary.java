@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,24 +39,24 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
 @ResourceDef(name="Binary", profile="http://hl7.org/fhir/Profile/Binary")
-public class Binary extends Resource implements IBaseBinary {
+public class Binary extends Resource {
 
     /**
      * MimeType of the binary content represented as a standard MimeType (BCP 13).
      */
-    @Child(name = "contentType", type = {CodeType.class}, order = 0, min = 1, max = 1)
+    @Child(name = "contentType", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="MimeType of the binary content", formalDefinition="MimeType of the binary content represented as a standard MimeType (BCP 13)." )
     protected CodeType contentType;
 
     /**
      * The actual content, base64 encoded.
      */
-    @Child(name = "content", type = {Base64BinaryType.class}, order = 1, min = 1, max = 1)
+    @Child(name = "content", type = {Base64BinaryType.class}, order=1, min=1, max=1)
     @Description(shortDefinition="The actual content", formalDefinition="The actual content, base64 encoded." )
     protected Base64BinaryType content;
 
@@ -212,21 +212,6 @@ public class Binary extends Resource implements IBaseBinary {
 
   @SearchParamDefinition(name="contenttype", path="Binary.contentType", description="MimeType of the binary content", type="token" )
   public static final String SP_CONTENTTYPE = "contenttype";
-
-@Override
-public String getContentAsBase64() {
-	return getContentElement().getValueAsString();
-}
-
-@Override
-public Binary setContentAsBase64(String theContent) {
-	if (theContent != null) {
-		getContentElement().setValueAsString(theContent);
-	} else {
-		setContent(null);
-	}
-	return this;
-}
 
 }
 

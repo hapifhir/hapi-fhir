@@ -29,47 +29,48 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
-import java.util.List;
+import java.util.*;
 
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.api.IRiResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Base Resource for everything.
  */
 @ResourceDef(name="Resource", profile="http://hl7.org/fhir/Profile/Resource")
-public abstract class Resource extends Base implements IRiResource {
+public abstract class Resource extends BaseResource implements IRefImplResource {
 
     /**
      * The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
      */
-    @Child(name = "id", type = {IdType.class}, order = 0, min = 0, max = 1)
+    @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Logical id of this artefact", formalDefinition="The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes." )
     protected IdType id;
 
     /**
      * The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
      */
-    @Child(name = "meta", type = {Meta.class}, order = 1, min = 0, max = 1)
+    @Child(name = "meta", type = {Meta.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Metadata about the resource", formalDefinition="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource." )
     protected Meta meta;
 
     /**
      * A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.
      */
-    @Child(name = "implicitRules", type = {UriType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "implicitRules", type = {UriType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="A set of rules under which this content was created", formalDefinition="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content." )
     protected UriType implicitRules;
 
     /**
      * The base language in which the resource is written.
      */
-    @Child(name = "language", type = {CodeType.class}, order = 3, min = 0, max = 1)
+    @Child(name = "language", type = {CodeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Language of the resource content", formalDefinition="The base language in which the resource is written." )
     protected CodeType language;
 
@@ -110,8 +111,8 @@ public abstract class Resource extends Base implements IRiResource {
     /**
      * @return The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
      */
-    public IdType getId() { 
-      return getIdElement(); // this.id == null ? null : this.id.getValue();
+    public String getId() { 
+      return this.id == null ? null : this.id.getValue();
     }
 
     /**
@@ -126,20 +127,6 @@ public abstract class Resource extends Base implements IRiResource {
         this.id.setValue(value);
       }
       return this;
-    }
-
-    /**
-     * @param value The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
-     */
-    public Resource setId(IIdType value) {
-    	if (value == null) {
-    		this.id = null;
-    	} else if (value instanceof IdType) {
-    		this.id = (IdType) value;
-    	} else {
-    		this.id = new IdType(value.getValue());
-    	}
-    	return this;
     }
 
     /**

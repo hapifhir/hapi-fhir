@@ -27,8 +27,8 @@ import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

@@ -37,10 +37,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRiResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -94,8 +94,8 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 		} else if (theTarget instanceof IDomainResource) {
-			List<? extends IRiResource> containedResources = ((IDomainResource) theTarget).getContained();
-			for (IRiResource next : containedResources) {
+			List<? extends IRefImplResource> containedResources = ((IDomainResource) theTarget).getContained();
+			for (IRefImplResource next : containedResources) {
 				String nextId = next.getId().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
 					if (!nextId.startsWith("#")) {
@@ -124,11 +124,11 @@ public abstract class BaseParser implements IParser {
 					}
 
 					containResourcesForEncoding(theContained, resource, theTarget);
-				} else if (next.getReference().isLocal()) {
+				} else if (next.getReferenceElement().isLocal()) {
 					if (existingIdToContainedResource != null) {
-						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReference().getValue());
+						IBaseResource potentialTarget = existingIdToContainedResource.remove(next.getReferenceElement().getValue());
 						if (potentialTarget != null) {
-							theContained.addContained(next.getReference(), potentialTarget);
+							theContained.addContained(next.getReferenceElement(), potentialTarget);
 							containResourcesForEncoding(theContained, potentialTarget, theTarget);
 						}
 					}
@@ -145,7 +145,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected String determineReferenceText(IBaseReference theRef) {
-		IIdType ref = theRef.getReference();
+		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
 			String reference = ref.getValue();
 			if (theRef.getResource() != null) {

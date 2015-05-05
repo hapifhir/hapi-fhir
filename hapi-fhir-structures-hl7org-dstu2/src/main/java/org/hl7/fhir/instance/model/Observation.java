@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,167 +39,12 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
 @ResourceDef(name="Observation", profile="http://hl7.org/fhir/Profile/Observation")
 public class Observation extends DomainResource {
-
-    public enum DataAbsentReason {
-        /**
-         * The value is not known
-         */
-        UNKNOWN, 
-        /**
-         * The source human does not know the value
-         */
-        ASKED, 
-        /**
-         * There is reason to expect (from the workflow) that the value may become known
-         */
-        TEMP, 
-        /**
-         * The workflow didn't lead to this value being known
-         */
-        NOTASKED, 
-        /**
-         * The information is not available due to security, privacy or related reasons
-         */
-        MASKED, 
-        /**
-         * The source system wasn't capable of supporting this element
-         */
-        UNSUPPORTED, 
-        /**
-         * The content of the data is represented in the resource narrative
-         */
-        ASTEXT, 
-        /**
-         * Some system or workflow process error means that the information is not available
-         */
-        ERROR, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static DataAbsentReason fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("unknown".equals(codeString))
-          return UNKNOWN;
-        if ("asked".equals(codeString))
-          return ASKED;
-        if ("temp".equals(codeString))
-          return TEMP;
-        if ("notasked".equals(codeString))
-          return NOTASKED;
-        if ("masked".equals(codeString))
-          return MASKED;
-        if ("unsupported".equals(codeString))
-          return UNSUPPORTED;
-        if ("astext".equals(codeString))
-          return ASTEXT;
-        if ("error".equals(codeString))
-          return ERROR;
-        throw new Exception("Unknown DataAbsentReason code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case UNKNOWN: return "unknown";
-            case ASKED: return "asked";
-            case TEMP: return "temp";
-            case NOTASKED: return "notasked";
-            case MASKED: return "masked";
-            case UNSUPPORTED: return "unsupported";
-            case ASTEXT: return "astext";
-            case ERROR: return "error";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case UNKNOWN: return "";
-            case ASKED: return "";
-            case TEMP: return "";
-            case NOTASKED: return "";
-            case MASKED: return "";
-            case UNSUPPORTED: return "";
-            case ASTEXT: return "";
-            case ERROR: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case UNKNOWN: return "The value is not known";
-            case ASKED: return "The source human does not know the value";
-            case TEMP: return "There is reason to expect (from the workflow) that the value may become known";
-            case NOTASKED: return "The workflow didn't lead to this value being known";
-            case MASKED: return "The information is not available due to security, privacy or related reasons";
-            case UNSUPPORTED: return "The source system wasn't capable of supporting this element";
-            case ASTEXT: return "The content of the data is represented in the resource narrative";
-            case ERROR: return "Some system or workflow process error means that the information is not available";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case UNKNOWN: return "unknown";
-            case ASKED: return "asked";
-            case TEMP: return "temp";
-            case NOTASKED: return "notasked";
-            case MASKED: return "masked";
-            case UNSUPPORTED: return "unsupported";
-            case ASTEXT: return "astext";
-            case ERROR: return "error";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class DataAbsentReasonEnumFactory implements EnumFactory<DataAbsentReason> {
-    public DataAbsentReason fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("unknown".equals(codeString))
-          return DataAbsentReason.UNKNOWN;
-        if ("asked".equals(codeString))
-          return DataAbsentReason.ASKED;
-        if ("temp".equals(codeString))
-          return DataAbsentReason.TEMP;
-        if ("notasked".equals(codeString))
-          return DataAbsentReason.NOTASKED;
-        if ("masked".equals(codeString))
-          return DataAbsentReason.MASKED;
-        if ("unsupported".equals(codeString))
-          return DataAbsentReason.UNSUPPORTED;
-        if ("astext".equals(codeString))
-          return DataAbsentReason.ASTEXT;
-        if ("error".equals(codeString))
-          return DataAbsentReason.ERROR;
-        throw new IllegalArgumentException("Unknown DataAbsentReason code '"+codeString+"'");
-        }
-    public String toCode(DataAbsentReason code) {
-      if (code == DataAbsentReason.UNKNOWN)
-        return "unknown";
-      if (code == DataAbsentReason.ASKED)
-        return "asked";
-      if (code == DataAbsentReason.TEMP)
-        return "temp";
-      if (code == DataAbsentReason.NOTASKED)
-        return "notasked";
-      if (code == DataAbsentReason.MASKED)
-        return "masked";
-      if (code == DataAbsentReason.UNSUPPORTED)
-        return "unsupported";
-      if (code == DataAbsentReason.ASTEXT)
-        return "astext";
-      if (code == DataAbsentReason.ERROR)
-        return "error";
-      return "?";
-      }
-    }
 
     public enum ObservationStatus {
         /**
@@ -227,6 +72,10 @@ public class Observation extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
+         * The observation status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
+         */
+        UNKNOWN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -245,6 +94,8 @@ public class Observation extends DomainResource {
           return CANCELLED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return UNKNOWN;
         throw new Exception("Unknown ObservationStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -255,6 +106,7 @@ public class Observation extends DomainResource {
             case AMENDED: return "amended";
             case CANCELLED: return "cancelled";
             case ENTEREDINERROR: return "entered-in-error";
+            case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
@@ -266,6 +118,7 @@ public class Observation extends DomainResource {
             case AMENDED: return "";
             case CANCELLED: return "";
             case ENTEREDINERROR: return "";
+            case UNKNOWN: return "";
             default: return "?";
           }
         }
@@ -277,17 +130,19 @@ public class Observation extends DomainResource {
             case AMENDED: return "The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.";
             case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called 'aborted').";
             case ENTEREDINERROR: return "The observation has been withdrawn following previous Final release.";
+            case UNKNOWN: return "The observation status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
             case REGISTERED: return "Registered";
-            case PRELIMINARY: return "preliminary";
-            case FINAL: return "final";
-            case AMENDED: return "amended";
-            case CANCELLED: return "cancelled";
-            case ENTEREDINERROR: return "entered-in-error";
+            case PRELIMINARY: return "Preliminary";
+            case FINAL: return "Final";
+            case AMENDED: return "Amended";
+            case CANCELLED: return "Cancelled";
+            case ENTEREDINERROR: return "Entered In Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -310,6 +165,8 @@ public class Observation extends DomainResource {
           return ObservationStatus.CANCELLED;
         if ("entered-in-error".equals(codeString))
           return ObservationStatus.ENTEREDINERROR;
+        if ("unknown".equals(codeString))
+          return ObservationStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown ObservationStatus code '"+codeString+"'");
         }
     public String toCode(ObservationStatus code) {
@@ -325,6 +182,8 @@ public class Observation extends DomainResource {
         return "cancelled";
       if (code == ObservationStatus.ENTEREDINERROR)
         return "entered-in-error";
+      if (code == ObservationStatus.UNKNOWN)
+        return "unknown";
       return "?";
       }
     }
@@ -419,13 +278,13 @@ public class Observation extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case OK: return "ok";
-            case ONGOING: return "ongoing";
-            case EARLY: return "early";
-            case QUESTIONABLE: return "questionable";
-            case CALIBRATING: return "calibrating";
-            case ERROR: return "error";
-            case UNKNOWN: return "unknown";
+            case OK: return "Ok";
+            case ONGOING: return "Ongoing";
+            case EARLY: return "Early";
+            case QUESTIONABLE: return "Questionable";
+            case CALIBRATING: return "Calibrating";
+            case ERROR: return "Error";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -561,13 +420,13 @@ public class Observation extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case HASCOMPONENT: return "has-component";
-            case HASMEMBER: return "has-member";
-            case DERIVEDFROM: return "derived-from";
-            case SEQUELTO: return "sequel-to";
-            case REPLACES: return "replaces";
-            case QUALIFIEDBY: return "qualified-by";
-            case INTERFEREDBY: return "interfered-by";
+            case HASCOMPONENT: return "Has Component";
+            case HASMEMBER: return "Has Member";
+            case DERIVEDFROM: return "Derived From";
+            case SEQUELTO: return "Sequel To";
+            case REPLACES: return "Replaces";
+            case QUALIFIEDBY: return "Qualified By";
+            case INTERFEREDBY: return "Interfered By";
             default: return "?";
           }
         }
@@ -618,35 +477,35 @@ public class Observation extends DomainResource {
         /**
          * The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.
          */
-        @Child(name="low", type={Quantity.class}, order=1, min=0, max=1)
-        @Description(shortDefinition = "Low Range, if relevant", formalDefinition = "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.")
+        @Child(name = "low", type = {Quantity.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="Low Range, if relevant", formalDefinition="The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'." )
         protected Quantity low;
 
         /**
          * The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.
          */
-        @Child(name="high", type={Quantity.class}, order=2, min=0, max=1)
-        @Description(shortDefinition = "High Range, if relevant", formalDefinition = "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.")
+        @Child(name = "high", type = {Quantity.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="High Range, if relevant", formalDefinition="The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'." )
         protected Quantity high;
 
         /**
          * Code for the meaning of the reference range.
          */
-        @Child(name="meaning", type={CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "meaning", type = {CodeableConcept.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Indicates the meaning/use of this range of this range", formalDefinition="Code for the meaning of the reference range." )
         protected CodeableConcept meaning;
 
         /**
          * The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.
          */
-        @Child(name="age", type={Range.class}, order=4, min=0, max=1)
+        @Child(name = "age", type = {Range.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Applicable age range, if relevant", formalDefinition="The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so." )
         protected Range age;
 
         /**
          * Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of "Negative" or a list or table of 'normals'.
          */
-        @Child(name="text", type={StringType.class}, order=5, min=0, max=1)
+        @Child(name = "text", type = {StringType.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Text based reference range in an observation", formalDefinition="Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of 'Negative' or a list or table of 'normals'." )
         protected StringType text;
 
@@ -803,8 +662,8 @@ public class Observation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-            childrenList.add(new Property("low", "Quantity", "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.", 0, java.lang.Integer.MAX_VALUE, low));
-            childrenList.add(new Property("high", "Quantity", "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.", 0, java.lang.Integer.MAX_VALUE, high));
+          childrenList.add(new Property("low", "Quantity", "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.", 0, java.lang.Integer.MAX_VALUE, low));
+          childrenList.add(new Property("high", "Quantity", "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.", 0, java.lang.Integer.MAX_VALUE, high));
           childrenList.add(new Property("meaning", "CodeableConcept", "Code for the meaning of the reference range.", 0, java.lang.Integer.MAX_VALUE, meaning));
           childrenList.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, java.lang.Integer.MAX_VALUE, age));
           childrenList.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of 'Negative' or a list or table of 'normals'.", 0, java.lang.Integer.MAX_VALUE, text));
@@ -855,14 +714,14 @@ public class Observation extends DomainResource {
         /**
          * A code specifying the kind of relationship that exists with the target observation.
          */
-        @Child(name="type", type={CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", formalDefinition="A code specifying the kind of relationship that exists with the target observation." )
         protected Enumeration<ObservationRelationshiptypes> type;
 
         /**
          * A reference to the observation that is related to this observation.
          */
-        @Child(name="target", type={Observation.class}, order=2, min=1, max=1)
+        @Child(name = "target", type = {Observation.class}, order=2, min=1, max=1)
         @Description(shortDefinition="Observation that is related to this one", formalDefinition="A reference to the observation that is related to this observation." )
         protected Reference target;
 
@@ -1019,92 +878,92 @@ public class Observation extends DomainResource {
     /**
      * Describes what was observed. Sometimes this is called the observation "code".
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order = 0, min = 1, max = 1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=0, min=1, max=1)
     @Description(shortDefinition="Type of observation (code / type)", formalDefinition="Describes what was observed. Sometimes this is called the observation 'code'." )
     protected CodeableConcept code;
 
     /**
      * The information determined as a result of making the observation, if the information has a simple value.
      */
-    @Child(name = "value", type = {Quantity.class, CodeableConcept.class, AttachmentType.class, Ratio.class, DateTimeType.class, Period.class, SampledData.class, StringType.class, TimeType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "value", type = {Quantity.class, CodeableConcept.class, StringType.class, Range.class, Ratio.class, SampledData.class, Attachment.class, TimeType.class, DateTimeType.class, Period.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Actual result", formalDefinition="The information determined as a result of making the observation, if the information has a simple value." )
     protected Type value;
 
     /**
      * Provides a reason why the expected value in the element Observation.value[x] is missing.
      */
-    @Child(name = "dataAbsentReason", type = {CodeType.class}, order = 2, min = 0, max = 1)
-    @Description(shortDefinition="unknown | asked | temp | notasked +", formalDefinition="Provides a reason why the expected value in the element Observation.value[x] is missing." )
-    protected Enumeration<DataAbsentReason> dataAbsentReason;
+    @Child(name = "dataAbsentReason", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Description(shortDefinition="Why the result is missing", formalDefinition="Provides a reason why the expected value in the element Observation.value[x] is missing." )
+    protected CodeableConcept dataAbsentReason;
 
     /**
      * The assessment made based on the result of the observation.
      */
-    @Child(name = "interpretation", type = {CodeableConcept.class}, order = 3, min = 0, max = 1)
+    @Child(name = "interpretation", type = {CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="High, low, normal, etc.", formalDefinition="The assessment made based on the result of the observation." )
     protected CodeableConcept interpretation;
 
     /**
      * May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.
      */
-    @Child(name = "comments", type = {StringType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Comments about result", formalDefinition="May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result." )
     protected StringType comments;
 
     /**
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.
      */
-    @Child(name = "applies", type = {DateTimeType.class, Period.class}, order = 5, min = 0, max = 1)
+    @Child(name = "applies", type = {DateTimeType.class, Period.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Physiologically Relevant time/time-period for observation", formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself." )
     protected Type applies;
 
     /**
      * The date and time this observation was made available.
      */
-    @Child(name = "issued", type = {InstantType.class}, order = 6, min = 0, max = 1)
+    @Child(name = "issued", type = {InstantType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Date/Time this was made available", formalDefinition="The date and time this observation was made available." )
     protected InstantType issued;
 
     /**
      * The status of the result value.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 7, min = 1, max = 1)
+    @Child(name = "status", type = {CodeType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="registered | preliminary | final | amended +", formalDefinition="The status of the result value." )
     protected Enumeration<ObservationStatus> status;
 
     /**
      * An estimate of the degree to which quality issues have impacted on the value reported.
      */
-    @Child(name = "reliability", type = {CodeType.class}, order = 8, min = 0, max = 1)
+    @Child(name = "reliability", type = {CodeType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="ok | ongoing | early | questionable | calibrating | error +", formalDefinition="An estimate of the degree to which quality issues have impacted on the value reported." )
     protected Enumeration<ObservationReliability> reliability;
 
     /**
      * Indicates the site on the subject's body where the observation was made ( i.e. the target site).
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order = 9, min = 0, max = 1)
+    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Observed body part", formalDefinition="Indicates the site on the subject's body where the observation was made ( i.e. the target site)." )
     protected Type bodySite;
 
     /**
      * Indicates the mechanism used to perform the observation.
      */
-    @Child(name = "method", type = {CodeableConcept.class}, order = 10, min = 0, max = 1)
+    @Child(name = "method", type = {CodeableConcept.class}, order=10, min=0, max=1)
     @Description(shortDefinition="How it was done", formalDefinition="Indicates the mechanism used to perform the observation." )
     protected CodeableConcept method;
 
     /**
      * A unique identifier for the simple observation.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 11, min = 0, max = 1)
+    @Child(name = "identifier", type = {Identifier.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Unique Id for this particular observation", formalDefinition="A unique identifier for the simple observation." )
-    protected Identifier identifier;
+    protected List<Identifier> identifier;
 
     /**
      * The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
 other observer (for example a relative or EMT), or any observation made about the subject.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order = 12, min = 0, max = 1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=12, min=0, max=1)
     @Description(shortDefinition="Who and/or what this is about", formalDefinition="The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,\nother observer (for example a relative or EMT), or any observation made about the subject." )
     protected Reference subject;
 
@@ -1117,7 +976,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * The specimen that was used when this observation was made.
      */
-    @Child(name = "specimen", type = {Specimen.class}, order = 13, min = 0, max = 1)
+    @Child(name = "specimen", type = {Specimen.class}, order=13, min=0, max=1)
     @Description(shortDefinition="Specimen used for this observation", formalDefinition="The specimen that was used when this observation was made." )
     protected Reference specimen;
 
@@ -1129,7 +988,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * Who was responsible for asserting the observed value as "true".
      */
-    @Child(name = "performer", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "performer", type = {Practitioner.class, Organization.class, Patient.class, RelatedPerson.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who did the observation", formalDefinition="Who was responsible for asserting the observed value as 'true'." )
     protected List<Reference> performer;
     /**
@@ -1141,7 +1000,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * The device used to generate the observation data.
      */
-    @Child(name = "device", type = {Device.class, DeviceMetric.class}, order = 15, min = 0, max = 1)
+    @Child(name = "device", type = {Device.class, DeviceMetric.class}, order=15, min=0, max=1)
     @Description(shortDefinition="(Measurement) Device", formalDefinition="The device used to generate the observation data." )
     protected Reference device;
 
@@ -1153,7 +1012,7 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order = 16, min = 0, max = 1)
+    @Child(name = "encounter", type = {Encounter.class}, order=16, min=0, max=1)
     @Description(shortDefinition="Healthcare event during which this observation is made", formalDefinition="The healthcare event  ( e.g. a patient and healthcare provider interaction ) during which this observation is made." )
     protected Reference encounter;
 
@@ -1165,18 +1024,18 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * Guidance on how to interpret the value by comparison to a normal or recommended range.
      */
-    @Child(name = "referenceRange", type = {}, order = 17, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "referenceRange", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Provides guide for interpretation", formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range." )
     protected List<ObservationReferenceRangeComponent> referenceRange;
 
     /**
      * Related observations - either components, or previous observations, or statements of derivation.
      */
-    @Child(name = "related", type = {}, order = 18, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "related", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Observations related to this observation", formalDefinition="Related observations - either components, or previous observations, or statements of derivation." )
     protected List<ObservationRelatedComponent> related;
 
-    private static final long serialVersionUID = 1185478098L;
+    private static final long serialVersionUID = 1157047775L;
 
     public Observation() {
       super();
@@ -1184,31 +1043,31 @@ other observer (for example a relative or EMT), or any observation made about th
 
     public Observation(CodeableConcept code, Enumeration<ObservationStatus> status) {
       super();
-        this.code = code;
+      this.code = code;
       this.status = status;
     }
 
     /**
      * @return {@link #code} (Describes what was observed. Sometimes this is called the observation "code".)
      */
-    public CodeableConcept getCode() {
-        if (this.code == null)
+    public CodeableConcept getCode() { 
+      if (this.code == null)
         if (Configuration.errorOnAutoCreate())
-            throw new Error("Attempt to auto-create Observation.code");
+          throw new Error("Attempt to auto-create Observation.code");
         else if (Configuration.doAutoCreate())
-            this.code = new CodeableConcept(); // cc
-        return this.code;
+          this.code = new CodeableConcept(); // cc
+      return this.code;
     }
 
-    public boolean hasCode() {
-        return this.code != null && !this.code.isEmpty();
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
     }
 
     /**
      * @param value {@link #code} (Describes what was observed. Sometimes this is called the observation "code".)
      */
-    public Observation setCode(CodeableConcept value) {
-        this.code = value;
+    public Observation setCode(CodeableConcept value) { 
+      this.code = value;
       return this;
     }
 
@@ -1240,10 +1099,19 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
      */
-    public AttachmentType getValueAttachment() throws Exception { 
-      if (!(this.value instanceof AttachmentType))
-        throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
-      return (AttachmentType) this.value;
+    public StringType getValueStringType() throws Exception { 
+      if (!(this.value instanceof StringType))
+        throw new Exception("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (StringType) this.value;
+    }
+
+    /**
+     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
+     */
+    public Range getValueRange() throws Exception { 
+      if (!(this.value instanceof Range))
+        throw new Exception("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (Range) this.value;
     }
 
     /**
@@ -1253,6 +1121,33 @@ other observer (for example a relative or EMT), or any observation made about th
       if (!(this.value instanceof Ratio))
         throw new Exception("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Ratio) this.value;
+    }
+
+    /**
+     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
+     */
+    public SampledData getValueSampledData() throws Exception { 
+      if (!(this.value instanceof SampledData))
+        throw new Exception("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (SampledData) this.value;
+    }
+
+    /**
+     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
+     */
+    public Attachment getValueAttachment() throws Exception { 
+      if (!(this.value instanceof Attachment))
+        throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (Attachment) this.value;
+    }
+
+    /**
+     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
+     */
+    public TimeType getValueTimeType() throws Exception { 
+      if (!(this.value instanceof TimeType))
+        throw new Exception("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (TimeType) this.value;
     }
 
     /**
@@ -1273,33 +1168,6 @@ other observer (for example a relative or EMT), or any observation made about th
       return (Period) this.value;
     }
 
-    /**
-     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
-     */
-    public SampledData getValueSampledData() throws Exception { 
-      if (!(this.value instanceof SampledData))
-        throw new Exception("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
-      return (SampledData) this.value;
-    }
-
-    /**
-     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
-     */
-    public StringType getValueStringType() throws Exception { 
-      if (!(this.value instanceof StringType))
-        throw new Exception("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
-      return (StringType) this.value;
-    }
-
-    /**
-     * @return {@link #value} (The information determined as a result of making the observation, if the information has a simple value.)
-     */
-    public TimeType getValueTimeType() throws Exception { 
-      if (!(this.value instanceof TimeType))
-        throw new Exception("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
-      return (TimeType) this.value;
-    }
-
     public boolean hasValue() { 
       return this.value != null && !this.value.isEmpty();
     }
@@ -1313,19 +1181,15 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @return {@link #dataAbsentReason} (Provides a reason why the expected value in the element Observation.value[x] is missing.). This is the underlying object with id, value and extensions. The accessor "getDataAbsentReason" gives direct access to the value
+     * @return {@link #dataAbsentReason} (Provides a reason why the expected value in the element Observation.value[x] is missing.)
      */
-    public Enumeration<DataAbsentReason> getDataAbsentReasonElement() { 
+    public CodeableConcept getDataAbsentReason() { 
       if (this.dataAbsentReason == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Observation.dataAbsentReason");
         else if (Configuration.doAutoCreate())
-          this.dataAbsentReason = new Enumeration<DataAbsentReason>(new DataAbsentReasonEnumFactory()); // bb
+          this.dataAbsentReason = new CodeableConcept(); // cc
       return this.dataAbsentReason;
-    }
-
-    public boolean hasDataAbsentReasonElement() { 
-      return this.dataAbsentReason != null && !this.dataAbsentReason.isEmpty();
     }
 
     public boolean hasDataAbsentReason() { 
@@ -1333,31 +1197,10 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @param value {@link #dataAbsentReason} (Provides a reason why the expected value in the element Observation.value[x] is missing.). This is the underlying object with id, value and extensions. The accessor "getDataAbsentReason" gives direct access to the value
+     * @param value {@link #dataAbsentReason} (Provides a reason why the expected value in the element Observation.value[x] is missing.)
      */
-    public Observation setDataAbsentReasonElement(Enumeration<DataAbsentReason> value) { 
+    public Observation setDataAbsentReason(CodeableConcept value) { 
       this.dataAbsentReason = value;
-      return this;
-    }
-
-    /**
-     * @return Provides a reason why the expected value in the element Observation.value[x] is missing.
-     */
-    public DataAbsentReason getDataAbsentReason() { 
-      return this.dataAbsentReason == null ? null : this.dataAbsentReason.getValue();
-    }
-
-    /**
-     * @param value Provides a reason why the expected value in the element Observation.value[x] is missing.
-     */
-    public Observation setDataAbsentReason(DataAbsentReason value) { 
-      if (value == null)
-        this.dataAbsentReason = null;
-      else {
-        if (this.dataAbsentReason == null)
-          this.dataAbsentReason = new Enumeration<DataAbsentReason>(new DataAbsentReasonEnumFactory());
-        this.dataAbsentReason.setValue(value);
-      }
       return this;
     }
 
@@ -1678,24 +1521,40 @@ other observer (for example a relative or EMT), or any observation made about th
     /**
      * @return {@link #identifier} (A unique identifier for the simple observation.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Observation.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #identifier} (A unique identifier for the simple observation.)
+     * @return {@link #identifier} (A unique identifier for the simple observation.)
      */
-    public Observation setIdentifier(Identifier value) { 
-      this.identifier = value;
+    // syntactic sugar
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Observation addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
       return this;
     }
 
@@ -1814,6 +1673,16 @@ other observer (for example a relative or EMT), or any observation made about th
         this.performer = new ArrayList<Reference>();
       this.performer.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Observation addPerformer(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.performer == null)
+        this.performer = new ArrayList<Reference>();
+      this.performer.add(t);
+      return this;
     }
 
     /**
@@ -1938,6 +1807,16 @@ other observer (for example a relative or EMT), or any observation made about th
       return t;
     }
 
+    // syntactic sugar
+    public Observation addReferenceRange(ObservationReferenceRangeComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.referenceRange == null)
+        this.referenceRange = new ArrayList<ObservationReferenceRangeComponent>();
+      this.referenceRange.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #related} (Related observations - either components, or previous observations, or statements of derivation.)
      */
@@ -1968,11 +1847,21 @@ other observer (for example a relative or EMT), or any observation made about th
       return t;
     }
 
+    // syntactic sugar
+    public Observation addRelated(ObservationRelatedComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.related == null)
+        this.related = new ArrayList<ObservationRelatedComponent>();
+      this.related.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-          childrenList.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation 'code'.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("value[x]", "Quantity|CodeableConcept|Attachment|Ratio|dateTime|Period|SampledData|string|time", "The information determined as a result of making the observation, if the information has a simple value.", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("dataAbsentReason", "code", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
+        childrenList.add(new Property("code", "CodeableConcept", "Describes what was observed. Sometimes this is called the observation 'code'.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("value[x]", "Quantity|CodeableConcept|string|Range|Ratio|SampledData|Attachment|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, java.lang.Integer.MAX_VALUE, value));
+        childrenList.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
         childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.", 0, java.lang.Integer.MAX_VALUE, interpretation));
         childrenList.add(new Property("comments", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, java.lang.Integer.MAX_VALUE, comments));
         childrenList.add(new Property("applies[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, applies));
@@ -1994,7 +1883,7 @@ other observer (for example a relative or EMT), or any observation made about th
       public Observation copy() {
         Observation dst = new Observation();
         copyValues(dst);
-          dst.code = code == null ? null : code.copy();
+        dst.code = code == null ? null : code.copy();
         dst.value = value == null ? null : value.copy();
         dst.dataAbsentReason = dataAbsentReason == null ? null : dataAbsentReason.copy();
         dst.interpretation = interpretation == null ? null : interpretation.copy();
@@ -2005,7 +1894,11 @@ other observer (for example a relative or EMT), or any observation made about th
         dst.reliability = reliability == null ? null : reliability.copy();
         dst.bodySite = bodySite == null ? null : bodySite.copy();
         dst.method = method == null ? null : method.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.subject = subject == null ? null : subject.copy();
         dst.specimen = specimen == null ? null : specimen.copy();
         if (performer != null) {
@@ -2039,7 +1932,7 @@ other observer (for example a relative or EMT), or any observation made about th
         if (!(other instanceof Observation))
           return false;
         Observation o = (Observation) other;
-          return compareDeep(code, o.code, true) && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
+        return compareDeep(code, o.code, true) && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
            && compareDeep(interpretation, o.interpretation, true) && compareDeep(comments, o.comments, true)
            && compareDeep(applies, o.applies, true) && compareDeep(issued, o.issued, true) && compareDeep(status, o.status, true)
            && compareDeep(reliability, o.reliability, true) && compareDeep(bodySite, o.bodySite, true) && compareDeep(method, o.method, true)
@@ -2056,13 +1949,12 @@ other observer (for example a relative or EMT), or any observation made about th
         if (!(other instanceof Observation))
           return false;
         Observation o = (Observation) other;
-        return compareValues(dataAbsentReason, o.dataAbsentReason, true) && compareValues(comments, o.comments, true)
-           && compareValues(issued, o.issued, true) && compareValues(status, o.status, true) && compareValues(reliability, o.reliability, true)
-          ;
+        return compareValues(comments, o.comments, true) && compareValues(issued, o.issued, true) && compareValues(status, o.status, true)
+           && compareValues(reliability, o.reliability, true);
       }
 
       public boolean isEmpty() {
-          return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
+        return super.isEmpty() && (code == null || code.isEmpty()) && (value == null || value.isEmpty())
            && (dataAbsentReason == null || dataAbsentReason.isEmpty()) && (interpretation == null || interpretation.isEmpty())
            && (comments == null || comments.isEmpty()) && (applies == null || applies.isEmpty()) && (issued == null || issued.isEmpty())
            && (status == null || status.isEmpty()) && (reliability == null || reliability.isEmpty())
@@ -2077,46 +1969,46 @@ other observer (for example a relative or EMT), or any observation made about th
     return ResourceType.Observation;
    }
 
-    @SearchParamDefinition(name = "date", path = "Observation.applies[x]", description = "Obtained date/time. If the obtained element is a period, a date that falls in the period", type = "date")
-    public static final String SP_DATE = "date";
-    @SearchParamDefinition(name = "identifier", path = "Observation.identifier", description = "The unique Id for a particular observation", type = "token")
-    public static final String SP_IDENTIFIER = "identifier";
-    @SearchParamDefinition(name = "code", path = "Observation.code", description = "The code of the observation type", type = "token")
-    public static final String SP_CODE = "code";
-    @SearchParamDefinition(name = "code-value-[x]", path = "", description = "Both code and one of the value parameters", type = "composite")
-    public static final String SP_CODEVALUEX = "code-value-[x]";
-    @SearchParamDefinition(name = "performer", path = "Observation.performer", description = "Who performed the observation", type = "reference")
-    public static final String SP_PERFORMER = "performer";
-    @SearchParamDefinition(name = "value-quantity", path = "Observation.valueQuantity", description = "The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type = "quantity")
-    public static final String SP_VALUEQUANTITY = "value-quantity";
+  @SearchParamDefinition(name="value-string", path="Observation.valueString", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
+  public static final String SP_VALUESTRING = "value-string";
+  @SearchParamDefinition(name="status", path="Observation.status", description="The status of the observation", type="token" )
+  public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="subject", path="Observation.subject", description="The subject that the observation is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="value-concept", path="Observation.valueCodeableConcept", description="The value of the observation, if the value is a CodeableConcept", type="token" )
+  public static final String SP_VALUECONCEPT = "value-concept";
   @SearchParamDefinition(name="reliability", path="Observation.reliability", description="The reliability of the observation", type="token" )
   public static final String SP_RELIABILITY = "reliability";
-    @SearchParamDefinition(name = "value-concept", path = "Observation.valueCodeableConcept", description = "The value of the observation, if the value is a CodeableConcept", type = "token")
-    public static final String SP_VALUECONCEPT = "value-concept";
-    @SearchParamDefinition(name = "value-date", path = "Observation.valueDateTime|Observation.valuePeriod", description = "The value of the observation, if the value is a Period", type = "date")
-    public static final String SP_VALUEDATE = "value-date";
-    @SearchParamDefinition(name = "data-absent-reason", path = "Observation.dataAbsentReason", description = "The reason why the expected value in the element Observation.value[x] is missing.", type = "token")
-    public static final String SP_DATAABSENTREASON = "data-absent-reason";
   @SearchParamDefinition(name="encounter", path="Observation.encounter", description="Healthcare event related to the observation", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-    @SearchParamDefinition(name = "related-type", path = "Observation.related.type", description = "has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type = "token")
-    public static final String SP_RELATEDTYPE = "related-type";
+  @SearchParamDefinition(name="code", path="Observation.code", description="The code of the observation type", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="related-target", path="Observation.related.target", description="Observation that is related to this one", type="reference" )
   public static final String SP_RELATEDTARGET = "related-target";
+  @SearchParamDefinition(name="data-absent-reason", path="Observation.dataAbsentReason", description="The reason why the expected value in the element Observation.value[x] is missing.", type="token" )
+  public static final String SP_DATAABSENTREASON = "data-absent-reason";
   @SearchParamDefinition(name="related", path="", description="Related Observations - search on related-type and related-target together", type="composite" )
   public static final String SP_RELATED = "related";
   @SearchParamDefinition(name="patient", path="Observation.subject", description="The subject that the observation is about (if patient)", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="specimen", path="Observation.specimen", description="Specimen used for this observation", type="reference" )
   public static final String SP_SPECIMEN = "specimen";
-    @SearchParamDefinition(name = "value-string", path = "Observation.valueString", description = "The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type = "string")
-    public static final String SP_VALUESTRING = "value-string";
   @SearchParamDefinition(name="device", path="Observation.device", description="The Device that generated the observation data.", type="reference" )
   public static final String SP_DEVICE = "device";
-    @SearchParamDefinition(name = "status", path = "Observation.status", description = "The status of the observation", type = "token")
-    public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="related-type", path="Observation.related.type", description="has-component | has-member | derived-from | sequel-to | replaces | qualified-by | interfered-by", type="token" )
+  public static final String SP_RELATEDTYPE = "related-type";
+  @SearchParamDefinition(name="performer", path="Observation.performer", description="Who performed the observation", type="reference" )
+  public static final String SP_PERFORMER = "performer";
+  @SearchParamDefinition(name="identifier", path="Observation.identifier", description="The unique Id for a particular observation", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="value-quantity", path="Observation.valueQuantity", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
+  public static final String SP_VALUEQUANTITY = "value-quantity";
+  @SearchParamDefinition(name="code-value-[x]", path="", description="Both code and one of the value parameters", type="composite" )
+  public static final String SP_CODEVALUEX = "code-value-[x]";
+  @SearchParamDefinition(name="value-date", path="Observation.valueDateTime|Observation.valuePeriod", description="The value of the observation, if the value is a Period", type="date" )
+  public static final String SP_VALUEDATE = "value-date";
 
 }
 

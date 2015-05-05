@@ -55,7 +55,7 @@ import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
@@ -367,6 +367,20 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 	private Set<Long> addPredicateParamMissing(Set<Long> thePids, String joinName, String theParamName, Class<? extends BaseResourceIndexedSearchParam> theParamTable) {
 		String resourceType = getContext().getResourceDefinition(getResourceType()).getName();
+
+		{ // TODO: rmeove this!
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Object> cq = builder.createQuery();
+			Root<? extends BaseResourceIndexedSearchParam> subQfrom = cq.from(theParamTable); 
+			cq.select(subQfrom.get("myResourcePid"));
+			Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
+			Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), resourceType);
+			cq.where(builder.and(subQtype, subQname));
+			List<Object> results = myEntityManager.createQuery(cq).getResultList();
+			for (Object object : results) {
+				ourLog.info("Next result: {}", object);
+			}
+		}
 		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);

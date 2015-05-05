@@ -47,10 +47,10 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRiResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -616,7 +616,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 					if (nextValue instanceof IBaseExtension && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						// This is called for the Query resource in DSTU1 only
-						extensionUrl = ((IBaseExtension<?>) nextValue).getUrl();
+						extensionUrl = ((IBaseExtension<?, ?>) nextValue).getUrl();
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
 
 					} else if (extensionUrl != null && childName.equals("extension") == false) {
@@ -664,11 +664,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 	/**
 	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to
-	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?>> seems to be rejected by the compiler
+	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be rejected by the compiler
 	 * some of the time.
 	 */
-	private <Q extends IBaseExtension<?>> List<IBaseExtension<?>> toBaseExtensionList(final List<Q> theList) {
-		List<IBaseExtension<?>> retVal = new ArrayList<IBaseExtension<?>>(theList.size());
+	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
+		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
 		retVal.addAll(theList);
 		return retVal;
 	}
@@ -751,7 +751,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		} else {
 			// HL7 structs
-			IRiResource resource = (IRiResource) theResource;
+			IRefImplResource resource = (IRefImplResource) theResource;
 			if (StringUtils.isNotBlank(resource.getId().getIdPart())) {
 				resourceId = resource.getId().getIdPart();
 			}
@@ -773,7 +773,7 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
-		if (theResource instanceof IRiResource) {
+		if (theResource instanceof IRefImplResource) {
 			
 			// HL7.org Structures
 			writeOptionalTagWithValue(theEventWriter, "id", theResourceId);
@@ -890,8 +890,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
-		for (IBaseExtension<?> next : theExtensions) {
+	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+		for (IBaseExtension<?, ?> next : theExtensions) {
 			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 				continue;
 			}

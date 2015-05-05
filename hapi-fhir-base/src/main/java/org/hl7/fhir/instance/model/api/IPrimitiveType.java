@@ -1,5 +1,6 @@
 package org.hl7.fhir.instance.model.api;
 
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -20,16 +21,15 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
 
-public interface IRiResource extends IBaseResource {
+public interface IPrimitiveType<T> extends IBaseDatatype {
 
-	IIdType getId();
+	void setValueAsString(String theValue) throws IllegalArgumentException;
 
-	IRiResource setId(String theId);
+	String getValueAsString();
 
-	IIdType getIdElement();
-
-	IMetaType getMeta();
+	T getValue();
+	
+	IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
 	
 }

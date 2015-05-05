@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
@@ -134,35 +135,35 @@ public class Flag extends DomainResource {
     /**
      * Identifier assigned to the flag for external use (outside the FHIR environment).
      */
-    @Child(name ="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="Identifier assigned to the flag for external use (outside the FHIR environment)." )
     protected List<Identifier> identifier;
 
     /**
      * Allows an flag to be divided into different categories like clinical, administrative etc.
      */
-    @Child(name ="category", type={CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc." )
     protected CodeableConcept category;
 
     /**
      * Supports basic workflow.
      */
-    @Child(name ="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Supports basic workflow." )
     protected Enumeration<FlagStatus> status;
 
     /**
      * The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.
      */
-    @Child(name ="period", type={Period.class}, order=3, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Time period when flag is active", formalDefinition="The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified." )
     protected Period period;
 
     /**
      * The patient record this flag is associated with.
      */
-    @Child(name ="patient", type={Patient.class}, order=4, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=4, min=1, max=1)
     @Description(shortDefinition="Who is flag about?", formalDefinition="The patient record this flag is associated with." )
     protected Reference patient;
 
@@ -174,7 +175,7 @@ public class Flag extends DomainResource {
     /**
      * The person or device that created the flag.
      */
-    @Child(name ="author", type={Practitioner.class, Patient.class, Device.class}, order=5, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Flag creator", formalDefinition="The person or device that created the flag." )
     protected Reference author;
 
@@ -186,7 +187,7 @@ public class Flag extends DomainResource {
     /**
      * The coded value or textual component of the flag to display to the user.
      */
-    @Child(name ="code", type={CodeableConcept.class}, order=6, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=6, min=1, max=1)
     @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the flag to display to the user." )
     protected CodeableConcept code;
 
@@ -508,14 +509,14 @@ public class Flag extends DomainResource {
     return ResourceType.Flag;
    }
 
-  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="subject", path="Flag.patient", description="The identity of a subject to list flags for", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="patient", path="Flag.patient", description="The identity of a subject to list flags for", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference" )
   public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name="patient", path="Flag.patient", description="The identity of a subject to list flags for", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="subject", path="Flag.patient", description="The identity of a subject to list flags for", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="date", path="Flag.period", description="Time period when flag is active", type="date" )
+  public static final String SP_DATE = "date";
 
 }
 

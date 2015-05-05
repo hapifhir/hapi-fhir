@@ -20,18 +20,15 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import java.util.Date;
 
-import org.hl7.fhir.instance.model.ICompositeType;
+public interface IRefImplResource extends IBaseResource {
 
-public interface IMetaType extends ICompositeType {
+	IIdType getId();
 
-	IBaseCoding addTag();
+	IRefImplResource setId(String theId);
 
-	IMetaType setLastUpdated(Date theHeaderDateValue);
+	IIdType getIdElement();
 
-	Date getLastUpdated();
-
-	String getVersionId();
-
+	IBaseMetaType getMeta();
+	
 }

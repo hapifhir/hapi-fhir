@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A record of a clinical assessment performed to determine what problem(s) may affect the patient and before planning the treatments or management strategies that are best to manage a patient's condition. Assessments are often 1:1 with a clinical consultation / encounter,  but this varies greatly depending on the clinical workflow. This resource is called "ClinicalImpression" rather than "ClinicalAssessment" to avoid confusion with the recording of assessment tools such as Apgar score.
  */
@@ -136,14 +137,14 @@ public class ClinicalImpression extends DomainResource {
         /**
          * A name/code for the group ("set") of investigations. Typically, this will be something like "signs", "symptoms", "clinical", "diagnostic", but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used.
          */
-        @Child(name ="code", type={CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1)
         @Description(shortDefinition="A name/code for the set", formalDefinition="A name/code for the group ('set') of investigations. Typically, this will be something like 'signs', 'symptoms', 'clinical', 'diagnostic', but the list is not constrained, and others such groups such as (exposure|family|travel|nutitirional) history may be used." )
         protected CodeableConcept code;
 
         /**
          * A record of a specific investigation that was undertaken.
          */
-        @Child(name ="item", type={Observation.class, QuestionnaireAnswers.class, FamilyMemberHistory.class, DiagnosticReport.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "item", type = {Observation.class, QuestionnaireAnswers.class, FamilyMemberHistory.class, DiagnosticReport.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Record of a specific investigation", formalDefinition="A record of a specific investigation that was undertaken." )
         protected List<Reference> item;
         /**
@@ -286,14 +287,14 @@ public class ClinicalImpression extends DomainResource {
         /**
          * Specific text of code for finding or diagnosis.
          */
-        @Child(name ="item", type={CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "item", type = {CodeableConcept.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Specific text or code for finding", formalDefinition="Specific text of code for finding or diagnosis." )
         protected CodeableConcept item;
 
         /**
          * Which investigations support finding or diagnosis.
          */
-        @Child(name ="cause", type={StringType.class}, order=2, min=0, max=1)
+        @Child(name = "cause", type = {StringType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Which investigations support finding", formalDefinition="Which investigations support finding or diagnosis." )
         protected StringType cause;
 
@@ -427,14 +428,14 @@ public class ClinicalImpression extends DomainResource {
         /**
          * Specific text of code for diagnosis.
          */
-        @Child(name ="item", type={CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "item", type = {CodeableConcept.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Specific text of code for diagnosis", formalDefinition="Specific text of code for diagnosis." )
         protected CodeableConcept item;
 
         /**
          * Grounds for elimination.
          */
-        @Child(name ="reason", type={StringType.class}, order=2, min=0, max=1)
+        @Child(name = "reason", type = {StringType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Grounds for elimination", formalDefinition="Grounds for elimination." )
         protected StringType reason;
 
@@ -566,7 +567,7 @@ public class ClinicalImpression extends DomainResource {
     /**
      * The patient being asssesed.
      */
-    @Child(name ="patient", type={Patient.class}, order=0, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=0, min=1, max=1)
     @Description(shortDefinition="The patient being asssesed", formalDefinition="The patient being asssesed." )
     protected Reference patient;
 
@@ -578,7 +579,7 @@ public class ClinicalImpression extends DomainResource {
     /**
      * The clinician performing the assessment.
      */
-    @Child(name ="assessor", type={Practitioner.class}, order=1, min=0, max=1)
+    @Child(name = "assessor", type = {Practitioner.class}, order=1, min=0, max=1)
     @Description(shortDefinition="The clinician performing the assessment", formalDefinition="The clinician performing the assessment." )
     protected Reference assessor;
 
@@ -590,28 +591,28 @@ public class ClinicalImpression extends DomainResource {
     /**
      * Identifies the workflow status of the assessment.
      */
-    @Child(name ="status", type={CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="in-progress | completed | entered-in-error", formalDefinition="Identifies the workflow status of the assessment." )
     protected Enumeration<ClinicalImpressionStatus> status;
 
     /**
      * The point in time at which the assessment was concluded (not when it was recorded).
      */
-    @Child(name ="date", type={DateTimeType.class}, order=3, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="When the assessment occurred", formalDefinition="The point in time at which the assessment was concluded (not when it was recorded)." )
     protected DateTimeType date;
 
     /**
      * A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it.
      */
-    @Child(name ="description", type={StringType.class}, order=4, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Why/how the assessment was performed", formalDefinition="A summary of the context and/or cause of the assessment - why / where was it peformed, and what patient events/sstatus prompted it." )
     protected StringType description;
 
     /**
      * A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes.
      */
-    @Child(name ="previous", type={ClinicalImpression.class}, order=5, min=0, max=1)
+    @Child(name = "previous", type = {ClinicalImpression.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Reference to last assessment", formalDefinition="A reference to the last assesment that was conducted bon this patient. Assessments are often/usually ongoing in nature; a care provider (practitioner or team) will make new assessments on an ongoing basis as new data arises or the patient's conditions changes." )
     protected Reference previous;
 
@@ -623,7 +624,7 @@ public class ClinicalImpression extends DomainResource {
     /**
      * This a list of the general problems/conditions for a patient.
      */
-    @Child(name ="problem", type={Condition.class, AllergyIntolerance.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "problem", type = {Condition.class, AllergyIntolerance.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="General assessment of patient state", formalDefinition="This a list of the general problems/conditions for a patient." )
     protected List<Reference> problem;
     /**
@@ -635,63 +636,63 @@ public class ClinicalImpression extends DomainResource {
     /**
      * The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.
      */
-    @Child(name ="trigger", type={CodeableConcept.class}, order=7, min=0, max=1)
+    @Child(name = "trigger", type = {CodeableConcept.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Request or event that necessitated this assessment", formalDefinition="The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource." )
     protected Type trigger;
 
     /**
      * One or more sets of investigations (signs, symptions, etc). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes.
      */
-    @Child(name ="investigations", type={}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "investigations", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="One or more sets of investigations (signs, symptions, etc)", formalDefinition="One or more sets of investigations (signs, symptions, etc). The actual grouping of investigations vary greatly depending on the type and context of the assessment. These investigations may include data generated during the assessment process, or data previously generated and recorded that is pertinent to the outcomes." )
     protected List<ClinicalImpressionInvestigationsComponent> investigations;
 
     /**
      * Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis.
      */
-    @Child(name ="protocol", type={UriType.class}, order=9, min=0, max=1)
+    @Child(name = "protocol", type = {UriType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Clinical Protocol followed", formalDefinition="Reference to a specific published clinical protocol that was followed during this assessment, and/or that provides evidence in support of the diagnosis." )
     protected UriType protocol;
 
     /**
      * A text summary of the investigations and the diagnosis.
      */
-    @Child(name ="summary", type={StringType.class}, order=10, min=0, max=1)
+    @Child(name = "summary", type = {StringType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Summary of the assessment", formalDefinition="A text summary of the investigations and the diagnosis." )
     protected StringType summary;
 
     /**
      * Specific findings or diagnoses that was considered likely or relevant to ongoing treatment.
      */
-    @Child(name ="finding", type={}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "finding", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Possible or likely findings and diagnoses", formalDefinition="Specific findings or diagnoses that was considered likely or relevant to ongoing treatment." )
     protected List<ClinicalImpressionFindingComponent> finding;
 
     /**
      * Diagnoses/conditions resolved since the last assessment.
      */
-    @Child(name ="resolved", type={CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "resolved", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Diagnosies/conditions resolved since previous assessment", formalDefinition="Diagnoses/conditions resolved since the last assessment." )
     protected List<CodeableConcept> resolved;
 
     /**
      * Diagnosis considered not possible.
      */
-    @Child(name ="ruledOut", type={}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "ruledOut", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Diagnosis considered not possible", formalDefinition="Diagnosis considered not possible." )
     protected List<ClinicalImpressionRuledOutComponent> ruledOut;
 
     /**
      * Estimate of likely outcome.
      */
-    @Child(name ="prognosis", type={StringType.class}, order=14, min=0, max=1)
+    @Child(name = "prognosis", type = {StringType.class}, order=14, min=0, max=1)
     @Description(shortDefinition="Estimate of likely outcome", formalDefinition="Estimate of likely outcome." )
     protected StringType prognosis;
 
     /**
      * Plan of action after assessment.
      */
-    @Child(name ="plan", type={CarePlan.class, Appointment.class, CommunicationRequest.class, DeviceUseRequest.class, DiagnosticOrder.class, MedicationPrescription.class, NutritionOrder.class, Order.class, ProcedureRequest.class, ProcessRequest.class, ReferralRequest.class, Supply.class, VisionPrescription.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "plan", type = {CarePlan.class, Appointment.class, CommunicationRequest.class, DeviceUseRequest.class, DiagnosticOrder.class, MedicationPrescription.class, NutritionOrder.class, Order.class, ProcedureRequest.class, ProcessRequest.class, ReferralRequest.class, Supply.class, VisionPrescription.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Plan of action after assessment", formalDefinition="Plan of action after assessment." )
     protected List<Reference> plan;
     /**
@@ -703,7 +704,7 @@ public class ClinicalImpression extends DomainResource {
     /**
      * Actions taken during assessment.
      */
-    @Child(name ="action", type={ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationPrescription.class, DiagnosticOrder.class, NutritionOrder.class, Supply.class, Appointment.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "action", type = {ReferralRequest.class, ProcedureRequest.class, Procedure.class, MedicationPrescription.class, DiagnosticOrder.class, NutritionOrder.class, Supply.class, Appointment.class}, order=16, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Actions taken during assessment", formalDefinition="Actions taken during assessment." )
     protected List<Reference> action;
     /**
@@ -1608,34 +1609,34 @@ public class ClinicalImpression extends DomainResource {
     return ResourceType.ClinicalImpression;
    }
 
-  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference" )
-  public static final String SP_PREVIOUS = "previous";
   @SearchParamDefinition(name="assessor", path="ClinicalImpression.assessor", description="The clinician performing the assessment", type="reference" )
   public static final String SP_ASSESSOR = "assessor";
   @SearchParamDefinition(name="trigger", path="ClinicalImpression.triggerReference", description="Request or event that necessitated this assessment", type="reference" )
   public static final String SP_TRIGGER = "trigger";
-  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
-  public static final String SP_FINDING = "finding";
-  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
-  public static final String SP_RULEDOUT = "ruledout";
-  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
-  public static final String SP_PROBLEM = "problem";
   @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being asssesed", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
-  public static final String SP_INVESTIGATION = "investigation";
-  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference" )
-  public static final String SP_ACTION = "action";
-  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.triggerCodeableConcept", description="Request or event that necessitated this assessment", type="token" )
-  public static final String SP_TRIGGERCODE = "trigger-code";
   @SearchParamDefinition(name="plan", path="ClinicalImpression.plan", description="Plan of action after assessment", type="reference" )
   public static final String SP_PLAN = "plan";
   @SearchParamDefinition(name="resolved", path="ClinicalImpression.resolved", description="Diagnosies/conditions resolved since previous assessment", type="token" )
   public static final String SP_RESOLVED = "resolved";
+  @SearchParamDefinition(name="trigger-code", path="ClinicalImpression.triggerCodeableConcept", description="Request or event that necessitated this assessment", type="token" )
+  public static final String SP_TRIGGERCODE = "trigger-code";
+  @SearchParamDefinition(name="previous", path="ClinicalImpression.previous", description="Reference to last assessment", type="reference" )
+  public static final String SP_PREVIOUS = "previous";
   @SearchParamDefinition(name="status", path="ClinicalImpression.status", description="in-progress | completed | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="action", path="ClinicalImpression.action", description="Actions taken during assessment", type="reference" )
+  public static final String SP_ACTION = "action";
+  @SearchParamDefinition(name="finding", path="ClinicalImpression.finding.item", description="Specific text or code for finding", type="token" )
+  public static final String SP_FINDING = "finding";
+  @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
+  public static final String SP_INVESTIGATION = "investigation";
+  @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
+  public static final String SP_PROBLEM = "problem";
+  @SearchParamDefinition(name="date", path="ClinicalImpression.date", description="When the assessment occurred", type="date" )
+  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="ruledout", path="ClinicalImpression.ruledOut.item", description="Specific text of code for diagnosis", type="token" )
+  public static final String SP_RULEDOUT = "ruledout";
 
 }
 

@@ -22,9 +22,9 @@ package org.hl7.fhir.instance.model.api;
 
 import java.util.List;
 
-public interface IDomainResource extends IRiResource {
+public interface IDomainResource extends IRefImplResource {
 
-	List<? extends IRiResource> getContained();
+	List<? extends IRefImplResource> getContained();
 
 	INarrative getText();
 

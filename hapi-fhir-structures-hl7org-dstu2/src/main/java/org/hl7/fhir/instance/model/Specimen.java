@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,263 +39,19 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Sample for analysis.
  */
 @ResourceDef(name="Specimen", profile="http://hl7.org/fhir/Profile/Specimen")
 public class Specimen extends DomainResource {
 
-    public enum HierarchicalRelationshipType {
-        /**
-         * The target resource is the parent of the focal specimen resource.
-         */
-        PARENT, 
-        /**
-         * The target resource is the child of the focal specimen resource.
-         */
-        CHILD, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static HierarchicalRelationshipType fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("parent".equals(codeString))
-          return PARENT;
-        if ("child".equals(codeString))
-          return CHILD;
-        throw new Exception("Unknown HierarchicalRelationshipType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case PARENT: return "parent";
-            case CHILD: return "child";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case PARENT: return "";
-            case CHILD: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case PARENT: return "The target resource is the parent of the focal specimen resource.";
-            case CHILD: return "The target resource is the child of the focal specimen resource.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case PARENT: return "Parent";
-            case CHILD: return "Child";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class HierarchicalRelationshipTypeEnumFactory implements EnumFactory<HierarchicalRelationshipType> {
-    public HierarchicalRelationshipType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("parent".equals(codeString))
-          return HierarchicalRelationshipType.PARENT;
-        if ("child".equals(codeString))
-          return HierarchicalRelationshipType.CHILD;
-        throw new IllegalArgumentException("Unknown HierarchicalRelationshipType code '"+codeString+"'");
-        }
-    public String toCode(HierarchicalRelationshipType code) {
-      if (code == HierarchicalRelationshipType.PARENT)
-        return "parent";
-      if (code == HierarchicalRelationshipType.CHILD)
-        return "child";
-      return "?";
-      }
-    }
-
-    @Block()
-    public static class SpecimenSourceComponent extends BackboneElement {
-        /**
-         * Whether this relationship is to a parent or to a child.
-         */
-        @Child(name="relationship", type={CodeType.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="parent | child", formalDefinition="Whether this relationship is to a parent or to a child." )
-        protected Enumeration<HierarchicalRelationshipType> relationship;
-
-        /**
-         * The specimen resource that is the target of this relationship.
-         */
-        @Child(name="target", type={Specimen.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="The subject of the relationship", formalDefinition="The specimen resource that is the target of this relationship." )
-        protected List<Reference> target;
-        /**
-         * The actual objects that are the target of the reference (The specimen resource that is the target of this relationship.)
-         */
-        protected List<Specimen> targetTarget;
-
-
-        private static final long serialVersionUID = 1653620362L;
-
-      public SpecimenSourceComponent() {
-        super();
-      }
-
-      public SpecimenSourceComponent(Enumeration<HierarchicalRelationshipType> relationship) {
-        super();
-        this.relationship = relationship;
-      }
-
-        /**
-         * @return {@link #relationship} (Whether this relationship is to a parent or to a child.). This is the underlying object with id, value and extensions. The accessor "getRelationship" gives direct access to the value
-         */
-        public Enumeration<HierarchicalRelationshipType> getRelationshipElement() { 
-          if (this.relationship == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenSourceComponent.relationship");
-            else if (Configuration.doAutoCreate())
-              this.relationship = new Enumeration<HierarchicalRelationshipType>(new HierarchicalRelationshipTypeEnumFactory()); // bb
-          return this.relationship;
-        }
-
-        public boolean hasRelationshipElement() { 
-          return this.relationship != null && !this.relationship.isEmpty();
-        }
-
-        public boolean hasRelationship() { 
-          return this.relationship != null && !this.relationship.isEmpty();
-        }
-
-        /**
-         * @param value {@link #relationship} (Whether this relationship is to a parent or to a child.). This is the underlying object with id, value and extensions. The accessor "getRelationship" gives direct access to the value
-         */
-        public SpecimenSourceComponent setRelationshipElement(Enumeration<HierarchicalRelationshipType> value) { 
-          this.relationship = value;
-          return this;
-        }
-
-        /**
-         * @return Whether this relationship is to a parent or to a child.
-         */
-        public HierarchicalRelationshipType getRelationship() { 
-          return this.relationship == null ? null : this.relationship.getValue();
-        }
-
-        /**
-         * @param value Whether this relationship is to a parent or to a child.
-         */
-        public SpecimenSourceComponent setRelationship(HierarchicalRelationshipType value) { 
-            if (this.relationship == null)
-              this.relationship = new Enumeration<HierarchicalRelationshipType>(new HierarchicalRelationshipTypeEnumFactory());
-            this.relationship.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #target} (The specimen resource that is the target of this relationship.)
-         */
-        public List<Reference> getTarget() { 
-          if (this.target == null)
-            this.target = new ArrayList<Reference>();
-          return this.target;
-        }
-
-        public boolean hasTarget() { 
-          if (this.target == null)
-            return false;
-          for (Reference item : this.target)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #target} (The specimen resource that is the target of this relationship.)
-         */
-    // syntactic sugar
-        public Reference addTarget() { //3
-          Reference t = new Reference();
-          if (this.target == null)
-            this.target = new ArrayList<Reference>();
-          this.target.add(t);
-          return t;
-        }
-
-        /**
-         * @return {@link #target} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The specimen resource that is the target of this relationship.)
-         */
-        public List<Specimen> getTargetTarget() { 
-          if (this.targetTarget == null)
-            this.targetTarget = new ArrayList<Specimen>();
-          return this.targetTarget;
-        }
-
-    // syntactic sugar
-        /**
-         * @return {@link #target} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The specimen resource that is the target of this relationship.)
-         */
-        public Specimen addTargetTarget() { 
-          Specimen r = new Specimen();
-          if (this.targetTarget == null)
-            this.targetTarget = new ArrayList<Specimen>();
-          this.targetTarget.add(r);
-          return r;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("relationship", "code", "Whether this relationship is to a parent or to a child.", 0, java.lang.Integer.MAX_VALUE, relationship));
-          childrenList.add(new Property("target", "Reference(Specimen)", "The specimen resource that is the target of this relationship.", 0, java.lang.Integer.MAX_VALUE, target));
-        }
-
-      public SpecimenSourceComponent copy() {
-        SpecimenSourceComponent dst = new SpecimenSourceComponent();
-        copyValues(dst);
-        dst.relationship = relationship == null ? null : relationship.copy();
-        if (target != null) {
-          dst.target = new ArrayList<Reference>();
-          for (Reference i : target)
-            dst.target.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof SpecimenSourceComponent))
-          return false;
-        SpecimenSourceComponent o = (SpecimenSourceComponent) other;
-        return compareDeep(relationship, o.relationship, true) && compareDeep(target, o.target, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof SpecimenSourceComponent))
-          return false;
-        SpecimenSourceComponent o = (SpecimenSourceComponent) other;
-        return compareValues(relationship, o.relationship, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (relationship == null || relationship.isEmpty()) && (target == null || target.isEmpty())
-          ;
-      }
-
-  }
-
     @Block()
     public static class SpecimenCollectionComponent extends BackboneElement {
         /**
          * Person who collected the specimen.
          */
-        @Child(name="collector", type={Practitioner.class}, order=1, min=0, max=1)
+        @Child(name = "collector", type = {Practitioner.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Who collected the specimen", formalDefinition="Person who collected the specimen." )
         protected Reference collector;
 
@@ -307,36 +63,36 @@ public class Specimen extends DomainResource {
         /**
          * To communicate any details or issues encountered during the specimen collection procedure.
          */
-        @Child(name="comment", type={StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "comment", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Collector comments", formalDefinition="To communicate any details or issues encountered during the specimen collection procedure." )
         protected List<StringType> comment;
 
         /**
          * Time when specimen was collected from subject - the physiologically relevant time.
          */
-        @Child(name="collected", type={DateTimeType.class, Period.class}, order=3, min=0, max=1)
+        @Child(name = "collected", type = {DateTimeType.class, Period.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Collection time", formalDefinition="Time when specimen was collected from subject - the physiologically relevant time." )
         protected Type collected;
 
         /**
          * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.
          */
-        @Child(name="quantity", type={Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="The quantity of specimen collected", formalDefinition="The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample." )
         protected Quantity quantity;
 
         /**
          * A coded value specifying the technique that is used to perform the procedure.
          */
-        @Child(name="method", type={CodeableConcept.class}, order=5, min=0, max=1)
+        @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Technique used to perform collection", formalDefinition="A coded value specifying the technique that is used to perform the procedure." )
         protected CodeableConcept method;
 
         /**
-         * Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens.
+         * Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.
          */
-        @Child(name="bodySite", type={CodeableConcept.class, BodySite.class}, order=6, min=0, max=1)
-        @Description(shortDefinition="Anatomical collection site", formalDefinition="Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens." )
+        @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=6, min=0, max=1)
+        @Description(shortDefinition="Anatomical collection site", formalDefinition="Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens." )
         protected Type bodySite;
 
         private static final long serialVersionUID = 2117268554L;
@@ -529,14 +285,14 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens.)
+         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
         public Type getBodySite() { 
           return this.bodySite;
         }
 
         /**
-         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens.)
+         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
         public CodeableConcept getBodySiteCodeableConcept() throws Exception { 
           if (!(this.bodySite instanceof CodeableConcept))
@@ -545,7 +301,7 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens.)
+         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
         public Reference getBodySiteReference() throws Exception { 
           if (!(this.bodySite instanceof Reference))
@@ -558,7 +314,7 @@ public class Specimen extends DomainResource {
         }
 
         /**
-         * @param value {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens.)
+         * @param value {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
         public SpecimenCollectionComponent setBodySite(Type value) { 
           this.bodySite = value;
@@ -572,7 +328,7 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("collected[x]", "dateTime|Period", "Time when specimen was collected from subject - the physiologically relevant time.", 0, java.lang.Integer.MAX_VALUE, collected));
           childrenList.add(new Property("quantity", "Quantity", "The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value specifying the technique that is used to perform the procedure.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("bodySite[x]", "CodeableConcept|Reference(BodySite)", "Anatomical location from which the specimen was collected (if subject is a patient). This element is not used for environmental specimens.", 0, java.lang.Integer.MAX_VALUE, bodySite));
+          childrenList.add(new Property("bodySite[x]", "CodeableConcept|Reference(BodySite)", "Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.", 0, java.lang.Integer.MAX_VALUE, bodySite));
         }
 
       public SpecimenCollectionComponent copy() {
@@ -626,21 +382,21 @@ public class Specimen extends DomainResource {
         /**
          * Textual description of procedure.
          */
-        @Child(name="description", type={StringType.class}, order=1, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Textual description of procedure", formalDefinition="Textual description of procedure." )
         protected StringType description;
 
         /**
          * A coded value specifying the procedure used to process the specimen.
          */
-        @Child(name="procedure", type={CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "procedure", type = {CodeableConcept.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Indicates the treatment or processing step  applied to the specimen", formalDefinition="A coded value specifying the procedure used to process the specimen." )
         protected CodeableConcept procedure;
 
         /**
          * Material used in the processing step.
          */
-        @Child(name="additive", type={Substance.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "additive", type = {Substance.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Material used in the processing step", formalDefinition="Material used in the processing step." )
         protected List<Reference> additive;
         /**
@@ -758,6 +514,16 @@ public class Specimen extends DomainResource {
           return t;
         }
 
+    // syntactic sugar
+        public SpecimenTreatmentComponent addAdditive(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.additive == null)
+            this.additive = new ArrayList<Reference>();
+          this.additive.add(t);
+          return this;
+        }
+
         /**
          * @return {@link #additive} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Material used in the processing step.)
          */
@@ -832,42 +598,42 @@ public class Specimen extends DomainResource {
         /**
          * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances.
          */
-        @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Id for the container", formalDefinition="Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances." )
         protected List<Identifier> identifier;
 
         /**
          * Textual description of the container.
          */
-        @Child(name="description", type={StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Textual description of the container", formalDefinition="Textual description of the container." )
         protected StringType description;
 
         /**
          * The type of container associated with the specimen (e.g. slide, aliquot, etc).
          */
-        @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Kind of container directly associated with specimen", formalDefinition="The type of container associated with the specimen (e.g. slide, aliquot, etc)." )
         protected CodeableConcept type;
 
         /**
          * The capacity (volume or other measure) the container may contain.
          */
-        @Child(name="capacity", type={Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "capacity", type = {Quantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Container volume or size", formalDefinition="The capacity (volume or other measure) the container may contain." )
         protected Quantity capacity;
 
         /**
          * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.
          */
-        @Child(name="specimenQuantity", type={Quantity.class}, order=5, min=0, max=1)
+        @Child(name = "specimenQuantity", type = {Quantity.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Quantity of specimen within container", formalDefinition="The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type." )
         protected Quantity specimenQuantity;
 
         /**
          * Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.
          */
-        @Child(name="additive", type={CodeableConcept.class, Substance.class}, order=6, min=0, max=1)
+        @Child(name = "additive", type = {CodeableConcept.class, Substance.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Additive associated with container", formalDefinition="Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA." )
         protected Type additive;
 
@@ -905,6 +671,16 @@ public class Specimen extends DomainResource {
             this.identifier = new ArrayList<Identifier>();
           this.identifier.add(t);
           return t;
+        }
+
+    // syntactic sugar
+        public SpecimenContainerComponent addIdentifier(Identifier t) { //3
+          if (t == null)
+            return this;
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          this.identifier.add(t);
+          return this;
         }
 
         /**
@@ -1124,28 +900,33 @@ public class Specimen extends DomainResource {
     /**
      * Id for specimen.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Identifier", formalDefinition="Id for specimen." )
     protected List<Identifier> identifier;
 
     /**
-     * Kind of material that forms the specimen.
+     * The kind of material that forms the specimen.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order = 1, min = 0, max = 1)
-    @Description(shortDefinition="Kind of material that forms the specimen", formalDefinition="Kind of material that forms the specimen." )
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Description(shortDefinition="Kind of material that forms the specimen", formalDefinition="The kind of material that forms the specimen." )
     protected CodeableConcept type;
 
     /**
-     * Parent specimen from which the focal specimen was a component.
+     * Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.
      */
-    @Child(name = "source", type = {}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Parent of specimen", formalDefinition="Parent specimen from which the focal specimen was a component." )
-    protected List<SpecimenSourceComponent> source;
+    @Child(name = "parent", type = {Specimen.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Specimen from which this specimen originated", formalDefinition="Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen." )
+    protected List<Reference> parent;
+    /**
+     * The actual objects that are the target of the reference (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     */
+    protected List<Specimen> parentTarget;
+
 
     /**
      * Where the specimen came from. This may be from the patient(s) or from the environment or a device.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order = 3, min = 1, max = 1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order=3, min=1, max=1)
     @Description(shortDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device", formalDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device." )
     protected Reference subject;
 
@@ -1157,39 +938,39 @@ public class Specimen extends DomainResource {
     /**
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
      */
-    @Child(name = "accessionIdentifier", type = {Identifier.class}, order = 4, min = 0, max = 1)
+    @Child(name = "accessionIdentifier", type = {Identifier.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Identifier assigned by the lab", formalDefinition="The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures." )
     protected Identifier accessionIdentifier;
 
     /**
      * Time when specimen was received for processing or testing.
      */
-    @Child(name = "receivedTime", type = {DateTimeType.class}, order = 5, min = 0, max = 1)
+    @Child(name = "receivedTime", type = {DateTimeType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="The time when specimen was received for processing", formalDefinition="Time when specimen was received for processing or testing." )
     protected DateTimeType receivedTime;
 
     /**
      * Details concerning the specimen collection.
      */
-    @Child(name = "collection", type = {}, order = 6, min = 0, max = 1)
+    @Child(name = "collection", type = {}, order=6, min=0, max=1)
     @Description(shortDefinition="Collection details", formalDefinition="Details concerning the specimen collection." )
     protected SpecimenCollectionComponent collection;
 
     /**
      * Details concerning treatment and processing steps for the specimen.
      */
-    @Child(name = "treatment", type = {}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "treatment", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Treatment and processing step details", formalDefinition="Details concerning treatment and processing steps for the specimen." )
     protected List<SpecimenTreatmentComponent> treatment;
 
     /**
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      */
-    @Child(name = "container", type = {}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "container", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Direct container of specimen (tube/slide, etc)", formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here." )
     protected List<SpecimenContainerComponent> container;
 
-    private static final long serialVersionUID = 862754396L;
+    private static final long serialVersionUID = -1070246507L;
 
     public Specimen() {
       super();
@@ -1230,8 +1011,18 @@ public class Specimen extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Specimen addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
+    }
+
     /**
-     * @return {@link #type} (Kind of material that forms the specimen.)
+     * @return {@link #type} (The kind of material that forms the specimen.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -1247,7 +1038,7 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (Kind of material that forms the specimen.)
+     * @param value {@link #type} (The kind of material that forms the specimen.)
      */
     public Specimen setType(CodeableConcept value) { 
       this.type = value;
@@ -1255,33 +1046,64 @@ public class Specimen extends DomainResource {
     }
 
     /**
-     * @return {@link #source} (Parent specimen from which the focal specimen was a component.)
+     * @return {@link #parent} (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
      */
-    public List<SpecimenSourceComponent> getSource() { 
-      if (this.source == null)
-        this.source = new ArrayList<SpecimenSourceComponent>();
-      return this.source;
+    public List<Reference> getParent() { 
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      return this.parent;
     }
 
-    public boolean hasSource() { 
-      if (this.source == null)
+    public boolean hasParent() { 
+      if (this.parent == null)
         return false;
-      for (SpecimenSourceComponent item : this.source)
+      for (Reference item : this.parent)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #source} (Parent specimen from which the focal specimen was a component.)
+     * @return {@link #parent} (Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
      */
     // syntactic sugar
-    public SpecimenSourceComponent addSource() { //3
-      SpecimenSourceComponent t = new SpecimenSourceComponent();
-      if (this.source == null)
-        this.source = new ArrayList<SpecimenSourceComponent>();
-      this.source.add(t);
+    public Reference addParent() { //3
+      Reference t = new Reference();
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      this.parent.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Specimen addParent(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.parent == null)
+        this.parent = new ArrayList<Reference>();
+      this.parent.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #parent} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     */
+    public List<Specimen> getParentTarget() { 
+      if (this.parentTarget == null)
+        this.parentTarget = new ArrayList<Specimen>();
+      return this.parentTarget;
+    }
+
+    // syntactic sugar
+    /**
+     * @return {@link #parent} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.)
+     */
+    public Specimen addParentTarget() { 
+      Specimen r = new Specimen();
+      if (this.parentTarget == null)
+        this.parentTarget = new ArrayList<Specimen>();
+      this.parentTarget.add(r);
+      return r;
     }
 
     /**
@@ -1450,6 +1272,16 @@ public class Specimen extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Specimen addTreatment(SpecimenTreatmentComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.treatment == null)
+        this.treatment = new ArrayList<SpecimenTreatmentComponent>();
+      this.treatment.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #container} (The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.)
      */
@@ -1480,11 +1312,21 @@ public class Specimen extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Specimen addContainer(SpecimenContainerComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.container == null)
+        this.container = new ArrayList<SpecimenContainerComponent>();
+      this.container.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Id for specimen.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "CodeableConcept", "Kind of material that forms the specimen.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("source", "", "Parent specimen from which the focal specimen was a component.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("type", "CodeableConcept", "The kind of material that forms the specimen.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("parent", "Reference(Specimen)", "Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Substance)", "Where the specimen came from. This may be from the patient(s) or from the environment or a device.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("accessionIdentifier", "Identifier", "The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.", 0, java.lang.Integer.MAX_VALUE, accessionIdentifier));
         childrenList.add(new Property("receivedTime", "dateTime", "Time when specimen was received for processing or testing.", 0, java.lang.Integer.MAX_VALUE, receivedTime));
@@ -1502,10 +1344,10 @@ public class Specimen extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.type = type == null ? null : type.copy();
-        if (source != null) {
-          dst.source = new ArrayList<SpecimenSourceComponent>();
-          for (SpecimenSourceComponent i : source)
-            dst.source.add(i.copy());
+        if (parent != null) {
+          dst.parent = new ArrayList<Reference>();
+          for (Reference i : parent)
+            dst.parent.add(i.copy());
         };
         dst.subject = subject == null ? null : subject.copy();
         dst.accessionIdentifier = accessionIdentifier == null ? null : accessionIdentifier.copy();
@@ -1535,7 +1377,7 @@ public class Specimen extends DomainResource {
         if (!(other instanceof Specimen))
           return false;
         Specimen o = (Specimen) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(source, o.source, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(parent, o.parent, true)
            && compareDeep(subject, o.subject, true) && compareDeep(accessionIdentifier, o.accessionIdentifier, true)
            && compareDeep(receivedTime, o.receivedTime, true) && compareDeep(collection, o.collection, true)
            && compareDeep(treatment, o.treatment, true) && compareDeep(container, o.container, true);
@@ -1553,7 +1395,7 @@ public class Specimen extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
-           && (source == null || source.isEmpty()) && (subject == null || subject.isEmpty()) && (accessionIdentifier == null || accessionIdentifier.isEmpty())
+           && (parent == null || parent.isEmpty()) && (subject == null || subject.isEmpty()) && (accessionIdentifier == null || accessionIdentifier.isEmpty())
            && (receivedTime == null || receivedTime.isEmpty()) && (collection == null || collection.isEmpty())
            && (treatment == null || treatment.isEmpty()) && (container == null || container.isEmpty())
           ;
@@ -1564,28 +1406,30 @@ public class Specimen extends DomainResource {
     return ResourceType.Specimen;
    }
 
-    @SearchParamDefinition(name = "container", path = "Specimen.container.type", description = "The kind of specimen container", type = "token")
-    public static final String SP_CONTAINER = "container";
-    @SearchParamDefinition(name = "identifier", path = "Specimen.identifier", description = "The unique identifier associated with the specimen", type = "token")
-    public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="site", path="Specimen.collection.bodySite[x]", description="The source or body site from where the specimen came", type="token" )
-  public static final String SP_SITE = "site";
-    @SearchParamDefinition(name = "subject", path = "Specimen.subject", description = "The subject of the specimen", type = "reference")
-    public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
+  public static final String SP_COLLECTOR = "collector";
   @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
   public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="site-code", path="Specimen.collection.bodySiteCodeableConcept", description="The code for the body site from where the specimen originated", type="token" )
+  public static final String SP_SITECODE = "site-code";
+  @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token" )
+  public static final String SP_CONTAINER = "container";
   @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
   public static final String SP_COLLECTED = "collected";
-    @SearchParamDefinition(name = "source", path = "Specimen.source.target", description = "The parent of the specimen", type = "reference")
-    public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
+  public static final String SP_CONTAINERID = "containerid";
+  @SearchParamDefinition(name="site-reference", path="Specimen.collection.bodySiteReference", description="BodySite resource for the body site from where the specimen originated", type="reference" )
+  public static final String SP_SITEREFERENCE = "site-reference";
   @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
   public static final String SP_ACCESSION = "accession";
+  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
+  public static final String SP_PARENT = "parent";
   @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
   public static final String SP_TYPE = "type";
-    @SearchParamDefinition(name = "containerid", path = "Specimen.container.identifier", description = "The unique identifier associated with the specimen container", type = "token")
-    public static final String SP_CONTAINERID = "containerid";
-    @SearchParamDefinition(name = "collector", path = "Specimen.collection.collector", description = "Who collected the specimen", type = "reference")
-    public static final String SP_COLLECTOR = "collector";
+  @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

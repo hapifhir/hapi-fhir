@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,13 +39,14 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A response to an order.
  */
 @ResourceDef(name="OrderResponse", profile="http://hl7.org/fhir/Profile/OrderResponse")
 public class OrderResponse extends DomainResource {
 
-    public enum OrderOutcomeCode {
+    public enum OrderStatus {
         /**
          * The order is known, but no processing has occurred at this time.
          */
@@ -81,12 +82,12 @@ public class OrderResponse extends DomainResource {
         /**
          * The order has been completed.
          */
-        COMPLETE, 
+        COMPLETED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static OrderOutcomeCode fromCode(String codeString) throws Exception {
+        public static OrderStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("pending".equals(codeString))
@@ -105,9 +106,9 @@ public class OrderResponse extends DomainResource {
           return REPLACED;
         if ("aborted".equals(codeString))
           return ABORTED;
-        if ("complete".equals(codeString))
-          return COMPLETE;
-        throw new Exception("Unknown OrderOutcomeCode code '"+codeString+"'");
+        if ("completed".equals(codeString))
+          return COMPLETED;
+        throw new Exception("Unknown OrderStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -119,7 +120,7 @@ public class OrderResponse extends DomainResource {
             case CANCELLED: return "cancelled";
             case REPLACED: return "replaced";
             case ABORTED: return "aborted";
-            case COMPLETE: return "complete";
+            case COMPLETED: return "completed";
             default: return "?";
           }
         }
@@ -133,7 +134,7 @@ public class OrderResponse extends DomainResource {
             case CANCELLED: return "";
             case REPLACED: return "";
             case ABORTED: return "";
-            case COMPLETE: return "";
+            case COMPLETED: return "";
             default: return "?";
           }
         }
@@ -147,70 +148,70 @@ public class OrderResponse extends DomainResource {
             case CANCELLED: return "Processing the order was halted at the initiators request.";
             case REPLACED: return "The order has been cancelled and replaced by another.";
             case ABORTED: return "Processing the order was stopped because of some workflow/business logic reason.";
-            case COMPLETE: return "The order has been completed.";
+            case COMPLETED: return "The order has been completed.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PENDING: return "pending";
-            case REVIEW: return "review";
-            case REJECTED: return "rejected";
-            case ERROR: return "error";
-            case ACCEPTED: return "accepted";
-            case CANCELLED: return "cancelled";
-            case REPLACED: return "replaced";
-            case ABORTED: return "aborted";
-            case COMPLETE: return "complete";
+            case PENDING: return "Pending";
+            case REVIEW: return "Review";
+            case REJECTED: return "Rejected";
+            case ERROR: return "Error";
+            case ACCEPTED: return "Accepted";
+            case CANCELLED: return "Cancelled";
+            case REPLACED: return "Replaced";
+            case ABORTED: return "Aborted";
+            case COMPLETED: return "Completed";
             default: return "?";
           }
         }
     }
 
-  public static class OrderOutcomeCodeEnumFactory implements EnumFactory<OrderOutcomeCode> {
-    public OrderOutcomeCode fromCode(String codeString) throws IllegalArgumentException {
+  public static class OrderStatusEnumFactory implements EnumFactory<OrderStatus> {
+    public OrderStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("pending".equals(codeString))
-          return OrderOutcomeCode.PENDING;
+          return OrderStatus.PENDING;
         if ("review".equals(codeString))
-          return OrderOutcomeCode.REVIEW;
+          return OrderStatus.REVIEW;
         if ("rejected".equals(codeString))
-          return OrderOutcomeCode.REJECTED;
+          return OrderStatus.REJECTED;
         if ("error".equals(codeString))
-          return OrderOutcomeCode.ERROR;
+          return OrderStatus.ERROR;
         if ("accepted".equals(codeString))
-          return OrderOutcomeCode.ACCEPTED;
+          return OrderStatus.ACCEPTED;
         if ("cancelled".equals(codeString))
-          return OrderOutcomeCode.CANCELLED;
+          return OrderStatus.CANCELLED;
         if ("replaced".equals(codeString))
-          return OrderOutcomeCode.REPLACED;
+          return OrderStatus.REPLACED;
         if ("aborted".equals(codeString))
-          return OrderOutcomeCode.ABORTED;
-        if ("complete".equals(codeString))
-          return OrderOutcomeCode.COMPLETE;
-        throw new IllegalArgumentException("Unknown OrderOutcomeCode code '"+codeString+"'");
+          return OrderStatus.ABORTED;
+        if ("completed".equals(codeString))
+          return OrderStatus.COMPLETED;
+        throw new IllegalArgumentException("Unknown OrderStatus code '"+codeString+"'");
         }
-    public String toCode(OrderOutcomeCode code) {
-      if (code == OrderOutcomeCode.PENDING)
+    public String toCode(OrderStatus code) {
+      if (code == OrderStatus.PENDING)
         return "pending";
-      if (code == OrderOutcomeCode.REVIEW)
+      if (code == OrderStatus.REVIEW)
         return "review";
-      if (code == OrderOutcomeCode.REJECTED)
+      if (code == OrderStatus.REJECTED)
         return "rejected";
-      if (code == OrderOutcomeCode.ERROR)
+      if (code == OrderStatus.ERROR)
         return "error";
-      if (code == OrderOutcomeCode.ACCEPTED)
+      if (code == OrderStatus.ACCEPTED)
         return "accepted";
-      if (code == OrderOutcomeCode.CANCELLED)
+      if (code == OrderStatus.CANCELLED)
         return "cancelled";
-      if (code == OrderOutcomeCode.REPLACED)
+      if (code == OrderStatus.REPLACED)
         return "replaced";
-      if (code == OrderOutcomeCode.ABORTED)
+      if (code == OrderStatus.ABORTED)
         return "aborted";
-      if (code == OrderOutcomeCode.COMPLETE)
-        return "complete";
+      if (code == OrderStatus.COMPLETED)
+        return "completed";
       return "?";
       }
     }
@@ -218,14 +219,14 @@ public class OrderResponse extends DomainResource {
     /**
      * Identifiers assigned to this order. The identifiers are usually assigned by the system responding to the order, but they may be provided or added to by other systems.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifiers assigned to this order by the orderer or by the receiver", formalDefinition="Identifiers assigned to this order. The identifiers are usually assigned by the system responding to the order, but they may be provided or added to by other systems." )
     protected List<Identifier> identifier;
 
     /**
      * A reference to the order that this is in response to.
      */
-    @Child(name = "request", type = {Order.class}, order = 1, min = 1, max = 1)
+    @Child(name = "request", type = {Order.class}, order=1, min=1, max=1)
     @Description(shortDefinition="The order that this is a response to", formalDefinition="A reference to the order that this is in response to." )
     protected Reference request;
 
@@ -237,14 +238,14 @@ public class OrderResponse extends DomainResource {
     /**
      * The date and time at which this order response was made (created/posted).
      */
-    @Child(name = "date", type = {DateTimeType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="When the response was made", formalDefinition="The date and time at which this order response was made (created/posted)." )
     protected DateTimeType date;
 
     /**
      * The person, organization, or device credited with making the response.
      */
-    @Child(name = "who", type = {Practitioner.class, Organization.class, Device.class}, order = 3, min = 0, max = 1)
+    @Child(name = "who", type = {Practitioner.class, Organization.class, Device.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Who made the response", formalDefinition="The person, organization, or device credited with making the response." )
     protected Reference who;
 
@@ -256,28 +257,28 @@ public class OrderResponse extends DomainResource {
     /**
      * A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.
      */
-    @Child(name = "authority", type = {CodeableConcept.class}, order = 4, min = 0, max = 1)
+    @Child(name = "authority", type = {CodeableConcept.class}, order=4, min=0, max=1)
     @Description(shortDefinition="If required by policy", formalDefinition="A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection." )
     protected Type authority;
 
     /**
      * What this response says about the status of the original order.
      */
-    @Child(name = "code", type = {CodeType.class}, order = 5, min = 1, max = 1)
-    @Description(shortDefinition="pending | review | rejected | error | accepted | cancelled | replaced | aborted | complete", formalDefinition="What this response says about the status of the original order." )
-    protected Enumeration<OrderOutcomeCode> code;
+    @Child(name = "orderStatus", type = {CodeType.class}, order=5, min=1, max=1)
+    @Description(shortDefinition="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", formalDefinition="What this response says about the status of the original order." )
+    protected Enumeration<OrderStatus> orderStatus;
 
     /**
      * Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.
      */
-    @Child(name = "description", type = {StringType.class}, order = 6, min = 0, max = 1)
+    @Child(name = "description", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Additional description of the response", formalDefinition="Additional description about the response - e.g. a text description provided by a human user when making decisions about the order." )
     protected StringType description;
 
     /**
      * Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.
      */
-    @Child(name = "fulfillment", type = {}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "fulfillment", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Details of the outcome of performing the order", formalDefinition="Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order." )
     protected List<Reference> fulfillment;
     /**
@@ -286,16 +287,16 @@ public class OrderResponse extends DomainResource {
     protected List<Resource> fulfillmentTarget;
 
 
-    private static final long serialVersionUID = 557384358L;
+    private static final long serialVersionUID = -1983664888L;
 
     public OrderResponse() {
       super();
     }
 
-    public OrderResponse(Reference request, Enumeration<OrderOutcomeCode> code) {
+    public OrderResponse(Reference request, Enumeration<OrderStatus> orderStatus) {
       super();
       this.request = request;
-      this.code = code;
+      this.orderStatus = orderStatus;
     }
 
     /**
@@ -326,6 +327,16 @@ public class OrderResponse extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public OrderResponse addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -498,47 +509,47 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #code} (What this response says about the status of the original order.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+     * @return {@link #orderStatus} (What this response says about the status of the original order.). This is the underlying object with id, value and extensions. The accessor "getOrderStatus" gives direct access to the value
      */
-    public Enumeration<OrderOutcomeCode> getCodeElement() { 
-      if (this.code == null)
+    public Enumeration<OrderStatus> getOrderStatusElement() { 
+      if (this.orderStatus == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create OrderResponse.code");
+          throw new Error("Attempt to auto-create OrderResponse.orderStatus");
         else if (Configuration.doAutoCreate())
-          this.code = new Enumeration<OrderOutcomeCode>(new OrderOutcomeCodeEnumFactory()); // bb
-      return this.code;
+          this.orderStatus = new Enumeration<OrderStatus>(new OrderStatusEnumFactory()); // bb
+      return this.orderStatus;
     }
 
-    public boolean hasCodeElement() { 
-      return this.code != null && !this.code.isEmpty();
+    public boolean hasOrderStatusElement() { 
+      return this.orderStatus != null && !this.orderStatus.isEmpty();
     }
 
-    public boolean hasCode() { 
-      return this.code != null && !this.code.isEmpty();
+    public boolean hasOrderStatus() { 
+      return this.orderStatus != null && !this.orderStatus.isEmpty();
     }
 
     /**
-     * @param value {@link #code} (What this response says about the status of the original order.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+     * @param value {@link #orderStatus} (What this response says about the status of the original order.). This is the underlying object with id, value and extensions. The accessor "getOrderStatus" gives direct access to the value
      */
-    public OrderResponse setCodeElement(Enumeration<OrderOutcomeCode> value) { 
-      this.code = value;
+    public OrderResponse setOrderStatusElement(Enumeration<OrderStatus> value) { 
+      this.orderStatus = value;
       return this;
     }
 
     /**
      * @return What this response says about the status of the original order.
      */
-    public OrderOutcomeCode getCode() { 
-      return this.code == null ? null : this.code.getValue();
+    public OrderStatus getOrderStatus() { 
+      return this.orderStatus == null ? null : this.orderStatus.getValue();
     }
 
     /**
      * @param value What this response says about the status of the original order.
      */
-    public OrderResponse setCode(OrderOutcomeCode value) { 
-        if (this.code == null)
-          this.code = new Enumeration<OrderOutcomeCode>(new OrderOutcomeCodeEnumFactory());
-        this.code.setValue(value);
+    public OrderResponse setOrderStatus(OrderStatus value) { 
+        if (this.orderStatus == null)
+          this.orderStatus = new Enumeration<OrderStatus>(new OrderStatusEnumFactory());
+        this.orderStatus.setValue(value);
       return this;
     }
 
@@ -621,6 +632,16 @@ public class OrderResponse extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public OrderResponse addFulfillment(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.fulfillment == null)
+        this.fulfillment = new ArrayList<Reference>();
+      this.fulfillment.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #fulfillment} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.)
      */
@@ -637,7 +658,7 @@ public class OrderResponse extends DomainResource {
         childrenList.add(new Property("date", "dateTime", "The date and time at which this order response was made (created/posted).", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("who", "Reference(Practitioner|Organization|Device)", "The person, organization, or device credited with making the response.", 0, java.lang.Integer.MAX_VALUE, who));
         childrenList.add(new Property("authority[x]", "CodeableConcept|Reference(Any)", "A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.", 0, java.lang.Integer.MAX_VALUE, authority));
-        childrenList.add(new Property("code", "code", "What this response says about the status of the original order.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("orderStatus", "code", "What this response says about the status of the original order.", 0, java.lang.Integer.MAX_VALUE, orderStatus));
         childrenList.add(new Property("description", "string", "Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("fulfillment", "Reference(Any)", "Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
       }
@@ -654,7 +675,7 @@ public class OrderResponse extends DomainResource {
         dst.date = date == null ? null : date.copy();
         dst.who = who == null ? null : who.copy();
         dst.authority = authority == null ? null : authority.copy();
-        dst.code = code == null ? null : code.copy();
+        dst.orderStatus = orderStatus == null ? null : orderStatus.copy();
         dst.description = description == null ? null : description.copy();
         if (fulfillment != null) {
           dst.fulfillment = new ArrayList<Reference>();
@@ -676,7 +697,7 @@ public class OrderResponse extends DomainResource {
           return false;
         OrderResponse o = (OrderResponse) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(request, o.request, true) && compareDeep(date, o.date, true)
-           && compareDeep(who, o.who, true) && compareDeep(authority, o.authority, true) && compareDeep(code, o.code, true)
+           && compareDeep(who, o.who, true) && compareDeep(authority, o.authority, true) && compareDeep(orderStatus, o.orderStatus, true)
            && compareDeep(description, o.description, true) && compareDeep(fulfillment, o.fulfillment, true)
           ;
       }
@@ -688,15 +709,15 @@ public class OrderResponse extends DomainResource {
         if (!(other instanceof OrderResponse))
           return false;
         OrderResponse o = (OrderResponse) other;
-        return compareValues(date, o.date, true) && compareValues(code, o.code, true) && compareValues(description, o.description, true)
+        return compareValues(date, o.date, true) && compareValues(orderStatus, o.orderStatus, true) && compareValues(description, o.description, true)
           ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (request == null || request.isEmpty())
            && (date == null || date.isEmpty()) && (who == null || who.isEmpty()) && (authority == null || authority.isEmpty())
-           && (code == null || code.isEmpty()) && (description == null || description.isEmpty()) && (fulfillment == null || fulfillment.isEmpty())
-          ;
+           && (orderStatus == null || orderStatus.isEmpty()) && (description == null || description.isEmpty())
+           && (fulfillment == null || fulfillment.isEmpty());
       }
 
   @Override
@@ -704,16 +725,16 @@ public class OrderResponse extends DomainResource {
     return ResourceType.OrderResponse;
    }
 
-  @SearchParamDefinition(name = "date", path = "OrderResponse.date", description = "When the response was made", type = "date")
-  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="patient", path="", description="The patient the reuqest order is related to", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="Details of the outcome of performing the order", type="reference" )
+  public static final String SP_FULFILLMENT = "fulfillment";
   @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
   public static final String SP_REQUEST = "request";
-  @SearchParamDefinition(name="code", path="OrderResponse.code", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | complete", type="token" )
+  @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name = "patient", path = "", description = "The patient the reuqest order is related to", type = "reference")
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name = "fulfillment", path = "OrderResponse.fulfillment", description = "Details of the outcome of performing the order", type = "reference")
-  public static final String SP_FULFILLMENT = "fulfillment";
+  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference" )
   public static final String SP_WHO = "who";
 

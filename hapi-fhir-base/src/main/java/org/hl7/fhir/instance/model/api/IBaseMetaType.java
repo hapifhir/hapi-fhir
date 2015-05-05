@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model;
+package org.hl7.fhir.instance.model.api;
 
 /*
  * #%L
@@ -20,13 +20,16 @@ package org.hl7.fhir.instance.model;
  * #L%
  */
 
-/**
- * This interface is a simple marker for anything which is an HL7
- * structure of some kind. It is provided mostly to simplify convergence
- * between the HL7.org structures and the HAPI ones. 
- */
-public interface IBase {
+import java.util.Date;
 
-	boolean isEmpty();
+public interface IBaseMetaType extends ICompositeType {
+
+	IBaseCoding addTag();
+
+	IBaseMetaType setLastUpdated(Date theHeaderDateValue);
+
+	Date getLastUpdated();
+
+	String getVersionId();
 
 }

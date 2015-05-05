@@ -24,8 +24,8 @@ import java.util.List;
 
 public interface IBaseHasExtensions {
 
-    public List<? extends IBaseExtension<?>> getExtension();
+    public List<? extends IBaseExtension<?, ?>> getExtension();
 
-    public IBaseExtension<?> addExtension();
+    public IBaseExtension<?, ?> addExtension();
 
 }

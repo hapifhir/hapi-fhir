@@ -23,7 +23,7 @@ package ca.uhn.fhir.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.model.api.ICompositeElement;
 import ca.uhn.fhir.model.api.IElement;

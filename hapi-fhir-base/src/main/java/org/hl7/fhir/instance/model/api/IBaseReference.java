@@ -20,10 +20,6 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.ICompositeType;
-import org.hl7.fhir.instance.model.IPrimitiveType;
 
 public interface IBaseReference extends ICompositeType {
 
@@ -31,7 +27,7 @@ public interface IBaseReference extends ICompositeType {
 
 	void setResource(IBaseResource theResource);
 
-	IIdType getReference();
+	IIdType getReferenceElement();
 
 	IBaseReference setReference(String theReference);
 

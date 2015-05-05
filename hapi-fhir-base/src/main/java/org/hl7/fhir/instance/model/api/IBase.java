@@ -1,6 +1,4 @@
-package org.hl7.fhir.instance.model;
-
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
+package org.hl7.fhir.instance.model.api;
 
 /*
  * #%L
@@ -22,15 +20,13 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
  * #L%
  */
 
+/**
+ * This interface is a simple marker for anything which is an HL7
+ * structure of some kind. It is provided mostly to simplify convergence
+ * between the HL7.org structures and the HAPI ones. 
+ */
+public interface IBase {
 
-public interface IPrimitiveType<T> extends IBaseDatatype {
+	boolean isEmpty();
 
-	void setValueAsString(String theValue) throws IllegalArgumentException;
-
-	String getValueAsString();
-
-	T getValue();
-	
-	IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
-	
 }

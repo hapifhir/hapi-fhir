@@ -48,18 +48,18 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.ICompositeType;
-import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRiResource;
-import org.hl7.fhir.instance.model.api.IBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.IDatatypeElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -304,7 +304,7 @@ class ModelScanner {
 		Block blockDefinition = pullAnnotation(theClass, Block.class);
 
 		if (blockDefinition != null) {
-			if (IResourceBlock.class.isAssignableFrom(theClass) || IBackboneElement.class.isAssignableFrom(theClass) || IDatatypeElement.class.isAssignableFrom(theClass)) {
+			if (IResourceBlock.class.isAssignableFrom(theClass) || IBaseBackboneElement.class.isAssignableFrom(theClass) || IBaseDatatypeElement.class.isAssignableFrom(theClass)) {
 				scanBlock(theClass);
 			} else {
 				throw new ConfigurationException("Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": " + theClass.getCanonicalName());
@@ -510,7 +510,7 @@ class ModelScanner {
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
-			} else if (IRiResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
+			} else if (IRefImplResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
 				/*
 				 * Child is a resource as a direct child, as in Bundle.entry.resource
 				 */
@@ -571,7 +571,7 @@ class ModelScanner {
 				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
 				orderMap.put(order, def);
 
-			} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBackboneElement.class.isAssignableFrom(nextElementType) || IDatatypeElement.class.isAssignableFrom(nextElementType)) {
+			} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBaseBackboneElement.class.isAssignableFrom(nextElementType) || IBaseDatatypeElement.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource block (i.e. a sub-tag within a resource) TODO: do these have a better name
 				 * according to HL7?

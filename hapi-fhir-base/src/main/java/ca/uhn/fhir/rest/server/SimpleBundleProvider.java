@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.server;
 import java.util.Collections;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.primitive.InstantDt;
 

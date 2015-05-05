@@ -35,12 +35,12 @@ import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.instance.model.Bundle.HttpVerb;
 import org.hl7.fhir.instance.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.api.IRiResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -93,7 +93,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			IDomainResource next = (IDomainResource) nextBaseRes;
 
 			Set<String> containedIds = new HashSet<String>();
-			for (IRiResource nextContained : next.getContained()) {
+			for (IRefImplResource nextContained : next.getContained()) {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getId().getValue());
 				}

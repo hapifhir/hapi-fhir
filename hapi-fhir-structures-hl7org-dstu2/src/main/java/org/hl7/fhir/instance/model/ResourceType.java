@@ -1,280 +1,286 @@
 package org.hl7.fhir.instance.model;
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 public enum ResourceType {
-    Appointment,
-    ReferralRequest,
-    Provenance,
-    Questionnaire,
-    ExplanationOfBenefit,
-    DocumentManifest,
-    Specimen,
-    AllergyIntolerance,
-    CarePlan,
-    Goal,
-    StructureDefinition,
-    EnrollmentRequest,
-    EpisodeOfCare,
-    MedicationPrescription,
-    OperationOutcome,
-    Medication,
-    Procedure,
-    List,
-    ConceptMap,
-    Subscription,
-    ValueSet,
-    OperationDefinition,
-    DocumentReference,
-    Order,
-    Immunization,
-    Device,
-    VisionPrescription,
-    Media,
-    Conformance,
-    ProcedureRequest,
-    EligibilityResponse,
-    DeviceUseRequest,
-    DeviceMetric,
-    Flag,
-    RelatedPerson,
-    Practitioner,
-    AppointmentResponse,
-    Observation,
-    MedicationAdministration,
-    Slot,
-    Contraindication,
-    EnrollmentResponse,
-    Binary,
-    MedicationStatement,
-    Contract,
-    Person,
-    CommunicationRequest,
-    RiskAssessment,
-    Basic,
-    Group,
-    PaymentNotice,
-    Organization,
-    ClaimResponse,
-    EligibilityRequest,
-    ProcessRequest,
-    MedicationDispense,
-    Supply,
-    DiagnosticReport,
-    ImagingStudy,
-    ImagingObjectSelection,
-    HealthcareService,
-    DataElement,
-    DeviceComponent,
-    FamilyMemberHistory,
-    QuestionnaireAnswers,
-    NutritionOrder,
-    Encounter,
-    Substance,
-    AuditEvent,
-    SearchParameter,
-    PaymentReconciliation,
-    Communication,
     Condition,
-    Composition,
-    Bundle,
-    DiagnosticOrder,
-    Patient,
-    OrderResponse,
+    Supply,
+    ProcedureRequest,
+    DeviceComponent,
+    DeviceMetric,
+    Communication,
+    Organization,
+    ProcessRequest,
+    Group,
+    ValueSet,
     Coverage,
-    DeviceUseStatement,
-    ProcessResponse,
-    NamingSystem,
-    Schedule,
-    ClinicalImpression,
-    MessageHeader,
-    Claim,
     ImmunizationRecommendation,
-    Location,
+    Appointment,
+    MedicationDispense,
+    MedicationPrescription,
+    Slot,
+    PaymentNotice,
+    Contraindication,
+    AppointmentResponse,
+    MedicationStatement,
+    EpisodeOfCare,
+    Questionnaire,
+    Composition,
+    OperationOutcome,
+    Conformance,
+    FamilyMemberHistory,
+    NamingSystem,
+    Media,
+    Binary,
+    HealthcareService,
+    VisionPrescription,
+    DocumentReference,
+    Immunization,
+    Bundle,
+    Subscription,
+    OrderResponse,
+    ConceptMap,
+    ImagingStudy,
+    Practitioner,
+    CarePlan,
+    Provenance,
+    Device,
+    StructureDefinition,
+    Order,
+    Procedure,
+    Substance,
+    DeviceUseRequest,
+    DiagnosticReport,
+    Medication,
+    MessageHeader,
+    SupplyDelivery,
+    Schedule,
+    DocumentManifest,
+    DataElement,
+    EligibilityRequest,
+    QuestionnaireAnswers,
+    MedicationAdministration,
+    Encounter,
+    PaymentReconciliation,
+    List,
+    DeviceUseStatement,
+    OperationDefinition,
+    Goal,
+    ImagingObjectSelection,
+    SearchParameter,
+    NutritionOrder,
+    ClaimResponse,
+    ReferralRequest,
+    ClinicalImpression,
     BodySite,
+    Flag,
+    CommunicationRequest,
+    Claim,
+    RiskAssessment,
+    EnrollmentRequest,
+    Location,
+    ExplanationOfBenefit,
+    AllergyIntolerance,
+    Observation,
+    Contract,
+    RelatedPerson,
+    Basic,
+    ProcessResponse,
+    Specimen,
+    AuditEvent,
+    EnrollmentResponse,
+    SupplyRequest,
+    Patient,
+    EligibilityResponse,
+    Person,
+    DiagnosticOrder,
     Parameters;
 
 
     public String getPath() {;
       switch (this) {
-    case Appointment:
-      return "appointment";
-    case ReferralRequest:
-      return "referralrequest";
-    case Provenance:
-      return "provenance";
-    case Questionnaire:
-      return "questionnaire";
-    case ExplanationOfBenefit:
-      return "explanationofbenefit";
-    case DocumentManifest:
-      return "documentmanifest";
-    case Specimen:
-      return "specimen";
-    case AllergyIntolerance:
-      return "allergyintolerance";
-    case CarePlan:
-      return "careplan";
-    case Goal:
-      return "goal";
-    case StructureDefinition:
-      return "structuredefinition";
-    case EnrollmentRequest:
-      return "enrollmentrequest";
-    case EpisodeOfCare:
-      return "episodeofcare";
-    case MedicationPrescription:
-      return "medicationprescription";
-    case OperationOutcome:
-      return "operationoutcome";
-    case Medication:
-      return "medication";
-    case Procedure:
-      return "procedure";
-    case List:
-      return "list";
-    case ConceptMap:
-      return "conceptmap";
-    case Subscription:
-      return "subscription";
-    case ValueSet:
-      return "valueset";
-    case OperationDefinition:
-      return "operationdefinition";
-    case DocumentReference:
-      return "documentreference";
-    case Order:
-      return "order";
-    case Immunization:
-      return "immunization";
-    case Device:
-      return "device";
-    case VisionPrescription:
-      return "visionprescription";
-    case Media:
-      return "media";
-    case Conformance:
-      return "conformance";
-    case ProcedureRequest:
-      return "procedurerequest";
-    case EligibilityResponse:
-      return "eligibilityresponse";
-    case DeviceUseRequest:
-      return "deviceuserequest";
-    case DeviceMetric:
-      return "devicemetric";
-    case Flag:
-      return "flag";
-    case RelatedPerson:
-      return "relatedperson";
-    case Practitioner:
-      return "practitioner";
-    case AppointmentResponse:
-      return "appointmentresponse";
-    case Observation:
-      return "observation";
-    case MedicationAdministration:
-      return "medicationadministration";
-    case Slot:
-      return "slot";
-    case Contraindication:
-      return "contraindication";
-    case EnrollmentResponse:
-      return "enrollmentresponse";
-    case Binary:
-      return "binary";
-    case MedicationStatement:
-      return "medicationstatement";
-    case Contract:
-      return "contract";
-    case Person:
-      return "person";
-    case CommunicationRequest:
-      return "communicationrequest";
-    case RiskAssessment:
-      return "riskassessment";
-    case Basic:
-      return "basic";
-    case Group:
-      return "group";
-    case PaymentNotice:
-      return "paymentnotice";
-    case Organization:
-      return "organization";
-    case ClaimResponse:
-      return "claimresponse";
-    case EligibilityRequest:
-      return "eligibilityrequest";
-    case ProcessRequest:
-      return "processrequest";
-    case MedicationDispense:
-      return "medicationdispense";
-    case Supply:
-      return "supply";
-    case DiagnosticReport:
-      return "diagnosticreport";
-    case ImagingStudy:
-      return "imagingstudy";
-    case ImagingObjectSelection:
-      return "imagingobjectselection";
-    case HealthcareService:
-      return "healthcareservice";
-    case DataElement:
-      return "dataelement";
-    case DeviceComponent:
-      return "devicecomponent";
-    case FamilyMemberHistory:
-      return "familymemberhistory";
-    case QuestionnaireAnswers:
-      return "questionnaireanswers";
-    case NutritionOrder:
-      return "nutritionorder";
-    case Encounter:
-      return "encounter";
-    case Substance:
-      return "substance";
-    case AuditEvent:
-      return "auditevent";
-    case SearchParameter:
-      return "searchparameter";
-    case PaymentReconciliation:
-      return "paymentreconciliation";
-    case Communication:
-      return "communication";
     case Condition:
       return "condition";
-    case Composition:
-      return "composition";
-    case Bundle:
-      return "bundle";
-    case DiagnosticOrder:
-      return "diagnosticorder";
-    case Patient:
-      return "patient";
-    case OrderResponse:
-      return "orderresponse";
+    case Supply:
+      return "supply";
+    case ProcedureRequest:
+      return "procedurerequest";
+    case DeviceComponent:
+      return "devicecomponent";
+    case DeviceMetric:
+      return "devicemetric";
+    case Communication:
+      return "communication";
+    case Organization:
+      return "organization";
+    case ProcessRequest:
+      return "processrequest";
+    case Group:
+      return "group";
+    case ValueSet:
+      return "valueset";
     case Coverage:
       return "coverage";
-    case DeviceUseStatement:
-      return "deviceusestatement";
-    case ProcessResponse:
-      return "processresponse";
-    case NamingSystem:
-      return "namingsystem";
-    case Schedule:
-      return "schedule";
-    case ClinicalImpression:
-      return "clinicalimpression";
-    case MessageHeader:
-      return "messageheader";
-    case Claim:
-      return "claim";
     case ImmunizationRecommendation:
       return "immunizationrecommendation";
-    case Location:
-      return "location";
+    case Appointment:
+      return "appointment";
+    case MedicationDispense:
+      return "medicationdispense";
+    case MedicationPrescription:
+      return "medicationprescription";
+    case Slot:
+      return "slot";
+    case PaymentNotice:
+      return "paymentnotice";
+    case Contraindication:
+      return "contraindication";
+    case AppointmentResponse:
+      return "appointmentresponse";
+    case MedicationStatement:
+      return "medicationstatement";
+    case EpisodeOfCare:
+      return "episodeofcare";
+    case Questionnaire:
+      return "questionnaire";
+    case Composition:
+      return "composition";
+    case OperationOutcome:
+      return "operationoutcome";
+    case Conformance:
+      return "conformance";
+    case FamilyMemberHistory:
+      return "familymemberhistory";
+    case NamingSystem:
+      return "namingsystem";
+    case Media:
+      return "media";
+    case Binary:
+      return "binary";
+    case HealthcareService:
+      return "healthcareservice";
+    case VisionPrescription:
+      return "visionprescription";
+    case DocumentReference:
+      return "documentreference";
+    case Immunization:
+      return "immunization";
+    case Bundle:
+      return "bundle";
+    case Subscription:
+      return "subscription";
+    case OrderResponse:
+      return "orderresponse";
+    case ConceptMap:
+      return "conceptmap";
+    case ImagingStudy:
+      return "imagingstudy";
+    case Practitioner:
+      return "practitioner";
+    case CarePlan:
+      return "careplan";
+    case Provenance:
+      return "provenance";
+    case Device:
+      return "device";
+    case StructureDefinition:
+      return "structuredefinition";
+    case Order:
+      return "order";
+    case Procedure:
+      return "procedure";
+    case Substance:
+      return "substance";
+    case DeviceUseRequest:
+      return "deviceuserequest";
+    case DiagnosticReport:
+      return "diagnosticreport";
+    case Medication:
+      return "medication";
+    case MessageHeader:
+      return "messageheader";
+    case SupplyDelivery:
+      return "supplydelivery";
+    case Schedule:
+      return "schedule";
+    case DocumentManifest:
+      return "documentmanifest";
+    case DataElement:
+      return "dataelement";
+    case EligibilityRequest:
+      return "eligibilityrequest";
+    case QuestionnaireAnswers:
+      return "questionnaireanswers";
+    case MedicationAdministration:
+      return "medicationadministration";
+    case Encounter:
+      return "encounter";
+    case PaymentReconciliation:
+      return "paymentreconciliation";
+    case List:
+      return "list";
+    case DeviceUseStatement:
+      return "deviceusestatement";
+    case OperationDefinition:
+      return "operationdefinition";
+    case Goal:
+      return "goal";
+    case ImagingObjectSelection:
+      return "imagingobjectselection";
+    case SearchParameter:
+      return "searchparameter";
+    case NutritionOrder:
+      return "nutritionorder";
+    case ClaimResponse:
+      return "claimresponse";
+    case ReferralRequest:
+      return "referralrequest";
+    case ClinicalImpression:
+      return "clinicalimpression";
     case BodySite:
       return "bodysite";
+    case Flag:
+      return "flag";
+    case CommunicationRequest:
+      return "communicationrequest";
+    case Claim:
+      return "claim";
+    case RiskAssessment:
+      return "riskassessment";
+    case EnrollmentRequest:
+      return "enrollmentrequest";
+    case Location:
+      return "location";
+    case ExplanationOfBenefit:
+      return "explanationofbenefit";
+    case AllergyIntolerance:
+      return "allergyintolerance";
+    case Observation:
+      return "observation";
+    case Contract:
+      return "contract";
+    case RelatedPerson:
+      return "relatedperson";
+    case Basic:
+      return "basic";
+    case ProcessResponse:
+      return "processresponse";
+    case Specimen:
+      return "specimen";
+    case AuditEvent:
+      return "auditevent";
+    case EnrollmentResponse:
+      return "enrollmentresponse";
+    case SupplyRequest:
+      return "supplyrequest";
+    case Patient:
+      return "patient";
+    case EligibilityResponse:
+      return "eligibilityresponse";
+    case Person:
+      return "person";
+    case DiagnosticOrder:
+      return "diagnosticorder";
     case Parameters:
       return "parameters";
     }

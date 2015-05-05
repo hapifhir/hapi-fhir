@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,40 +39,40 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * This special resource type is used to represent [operation](operations.html] request and response. It has no other use, and there is no RESTful end=point associated with it.
  */
 @ResourceDef(name="Parameters", profile="http://hl7.org/fhir/Profile/Parameters")
-public class Parameters extends Resource implements IBaseParameters {
+public class Parameters extends Resource {
 
     @Block()
     public static class ParametersParameterComponent extends BackboneElement {
         /**
          * The name of the parameter (reference to the operation definition).
          */
-        @Child(name="name", type={StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Name from the definition", formalDefinition="The name of the parameter (reference to the operation definition)." )
         protected StringType name;
 
         /**
          * If the parameter is a data type.
          */
-        @Child(name="value", type={}, order=2, min=0, max=1)
+        @Child(name = "value", type = {}, order=2, min=0, max=1)
         @Description(shortDefinition="If parameter is a data type", formalDefinition="If the parameter is a data type." )
         protected org.hl7.fhir.instance.model.Type value;
 
         /**
          * If the parameter is a whole resource.
          */
-        @Child(name="resource", type={Resource.class}, order=3, min=0, max=1)
+        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1)
         @Description(shortDefinition="If parameter is a whole resource", formalDefinition="If the parameter is a whole resource." )
         protected Resource resource;
 
         /**
          * A named part of a parameter. In many implementation context, a set of named parts is known as a "Tuple".
          */
-        @Child(name="part", type={}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "part", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Named part of a parameter (e.g. Tuple)", formalDefinition="A named part of a parameter. In many implementation context, a set of named parts is known as a 'Tuple'." )
         protected List<ParametersParameterPartComponent> part;
 
@@ -200,6 +200,16 @@ public class Parameters extends Resource implements IBaseParameters {
           return t;
         }
 
+    // syntactic sugar
+        public ParametersParameterComponent addPart(ParametersParameterPartComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.part == null)
+            this.part = new ArrayList<ParametersParameterPartComponent>();
+          this.part.add(t);
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
@@ -255,27 +265,33 @@ public class Parameters extends Resource implements IBaseParameters {
         /**
          * The name of the parameter (reference to the operation definition).
          */
-        @Child(name="name", type={StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Name from the definition", formalDefinition="The name of the parameter (reference to the operation definition)." )
         protected StringType name;
 
         /**
          * The value of the parameter.
          */
-        @Child(name="value", type={}, order=2, min=1, max=1)
+        @Child(name = "value", type = {}, order=2, min=0, max=1)
         @Description(shortDefinition="Value of the part", formalDefinition="The value of the parameter." )
         protected org.hl7.fhir.instance.model.Type value;
 
-        private static final long serialVersionUID = 2130806097L;
+        /**
+         * If the parameter is a whole resource.
+         */
+        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1)
+        @Description(shortDefinition="If part is a whole resource", formalDefinition="If the parameter is a whole resource." )
+        protected Resource resource;
+
+        private static final long serialVersionUID = 1120601371L;
 
       public ParametersParameterPartComponent() {
         super();
       }
 
-      public ParametersParameterPartComponent(StringType name, org.hl7.fhir.instance.model.Type value) {
+      public ParametersParameterPartComponent(StringType name) {
         super();
         this.name = name;
-        this.value = value;
       }
 
         /**
@@ -342,10 +358,30 @@ public class Parameters extends Resource implements IBaseParameters {
           return this;
         }
 
+        /**
+         * @return {@link #resource} (If the parameter is a whole resource.)
+         */
+        public Resource getResource() { 
+          return this.resource;
+        }
+
+        public boolean hasResource() { 
+          return this.resource != null && !this.resource.isEmpty();
+        }
+
+        /**
+         * @param value {@link #resource} (If the parameter is a whole resource.)
+         */
+        public ParametersParameterPartComponent setResource(Resource value) { 
+          this.resource = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("name", "string", "The name of the parameter (reference to the operation definition).", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("value[x]", "*", "The value of the parameter.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("resource", "Resource", "If the parameter is a whole resource.", 0, java.lang.Integer.MAX_VALUE, resource));
         }
 
       public ParametersParameterPartComponent copy() {
@@ -353,6 +389,7 @@ public class Parameters extends Resource implements IBaseParameters {
         copyValues(dst);
         dst.name = name == null ? null : name.copy();
         dst.value = value == null ? null : value.copy();
+        dst.resource = resource == null ? null : resource.copy();
         return dst;
       }
 
@@ -363,7 +400,8 @@ public class Parameters extends Resource implements IBaseParameters {
         if (!(other instanceof ParametersParameterPartComponent))
           return false;
         ParametersParameterPartComponent o = (ParametersParameterPartComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
+        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true) && compareDeep(resource, o.resource, true)
+          ;
       }
 
       @Override
@@ -378,7 +416,7 @@ public class Parameters extends Resource implements IBaseParameters {
 
       public boolean isEmpty() {
         return super.isEmpty() && (name == null || name.isEmpty()) && (value == null || value.isEmpty())
-          ;
+           && (resource == null || resource.isEmpty());
       }
 
   }
@@ -386,7 +424,7 @@ public class Parameters extends Resource implements IBaseParameters {
     /**
      * A parameter passed to or received from the operation.
      */
-    @Child(name = "parameter", type = {}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "parameter", type = {}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Operation Parameter", formalDefinition="A parameter passed to or received from the operation." )
     protected List<ParametersParameterComponent> parameter;
 
@@ -424,6 +462,16 @@ public class Parameters extends Resource implements IBaseParameters {
         this.parameter = new ArrayList<ParametersParameterComponent>();
       this.parameter.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Parameters addParameter(ParametersParameterComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.parameter == null)
+        this.parameter = new ArrayList<ParametersParameterComponent>();
+      this.parameter.add(t);
+      return this;
     }
 
       protected void listChildren(List<Property> childrenList) {

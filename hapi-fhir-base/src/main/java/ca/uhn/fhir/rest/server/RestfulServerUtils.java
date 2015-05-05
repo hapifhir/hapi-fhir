@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IRiResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -148,7 +148,7 @@ public class RestfulServerUtils {
 				}
 			}
 		} else {
-			Date lastUpdated = ((IRiResource)theResource).getMeta().getLastUpdated();
+			Date lastUpdated = ((IRefImplResource)theResource).getMeta().getLastUpdated();
 			if (lastUpdated != null) {
 				theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated));
 			}

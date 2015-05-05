@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc.
  */
@@ -106,10 +107,10 @@ public class ContactPoint extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
-            case PHONE: return "phone";
-            case FAX: return "fax";
-            case EMAIL: return "email";
-            case URL: return "url";
+            case PHONE: return "Phone";
+            case FAX: return "Fax";
+            case EMAIL: return "Email";
+            case URL: return "Url";
             default: return "?";
           }
         }
@@ -215,11 +216,11 @@ public class ContactPoint extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
-            case HOME: return "home";
-            case WORK: return "work";
-            case TEMP: return "temp";
-            case OLD: return "old";
-            case MOBILE: return "mobile";
+            case HOME: return "Home";
+            case WORK: return "Work";
+            case TEMP: return "Temp";
+            case OLD: return "Old";
+            case MOBILE: return "Mobile";
             default: return "?";
           }
         }
@@ -260,28 +261,28 @@ public class ContactPoint extends Type implements ICompositeType {
     /**
      * Telecommunications form for contact point - what communications system is required to make use of the contact.
      */
-    @Child(name = "system", type = {CodeType.class}, order = 0, min = 0, max = 1)
+    @Child(name = "system", type = {CodeType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="phone | fax | email | url", formalDefinition="Telecommunications form for contact point - what communications system is required to make use of the contact." )
     protected Enumeration<ContactPointSystem> system;
 
     /**
      * The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      */
-    @Child(name = "value", type = {StringType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "value", type = {StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="The actual contact point details", formalDefinition="The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)." )
     protected StringType value;
 
     /**
      * Identifies the purpose for the contact point.
      */
-    @Child(name = "use", type = {CodeType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "use", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="home | work | temp | old | mobile - purpose of this contact point", formalDefinition="Identifies the purpose for the contact point." )
     protected Enumeration<ContactPointUse> use;
 
     /**
      * Time period when the contact point was/is in use.
      */
-    @Child(name = "period", type = {Period.class}, order = 3, min = 0, max = 1)
+    @Child(name = "period", type = {Period.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Time period when the contact point was/is in use", formalDefinition="Time period when the contact point was/is in use." )
     protected Period period;
 

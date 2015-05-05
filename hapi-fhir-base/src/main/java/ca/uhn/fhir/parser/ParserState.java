@@ -32,18 +32,18 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.ICompositeType;
-import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator;
@@ -821,7 +821,7 @@ class ParserState<T> {
 			} else {
 				if (theIsModifier == false) {
 					if (getCurrentElement() instanceof IBaseHasExtensions) {
-						IBaseExtension<?> ext = ((IBaseHasExtensions) getCurrentElement()).addExtension();
+						IBaseExtension<?, ?> ext = ((IBaseHasExtensions) getCurrentElement()).addExtension();
 						ext.setUrl(theUrlAttr);
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
@@ -830,7 +830,7 @@ class ParserState<T> {
 					}
 				} else {
 					if (getCurrentElement() instanceof IBaseHasModifierExtensions) {
-						IBaseExtension<?> ext = ((IBaseHasModifierExtensions) getCurrentElement()).addModifierExtension();
+						IBaseExtension<?, ?> ext = ((IBaseHasModifierExtensions) getCurrentElement()).addModifierExtension();
 						ext.setUrl(theUrlAttr);
 						ParserState<T>.ExtensionState newState = new ExtensionState(myPreResourceState, ext);
 						push(newState);
@@ -1657,9 +1657,9 @@ class ParserState<T> {
 
 	private class ExtensionState extends BaseState {
 
-		private IBaseExtension<?> myExtension;
+		private IBaseExtension<?, ?> myExtension;
 
-		public ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?> theExtension) {
+		public ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?, ?> theExtension) {
 			super(thePreResourceState);
 			myExtension = theExtension;
 		}
@@ -1722,7 +1722,7 @@ class ParserState<T> {
 		}
 
 		@Override
-		protected IBaseExtension<?> getCurrentElement() {
+		protected IBaseExtension<?, ?> getCurrentElement() {
 			return myExtension;
 		}
 
@@ -2080,7 +2080,7 @@ class ParserState<T> {
 						}
 					}else					if (theElement instanceof IBaseReference) {
 						IBaseReference nextRef = (IBaseReference) theElement;
-						String ref = nextRef.getReference().getValue();
+						String ref = nextRef.getReferenceElement().getValue();
 						if (isNotBlank(ref)) {
 							if (ref.startsWith("#")) {
 								IBaseResource target = myContainedResources.get(ref.substring(1));
@@ -2192,7 +2192,7 @@ class ParserState<T> {
 				} else if (myInstance instanceof IBaseElement) {
 					((IBaseElement) myInstance).setId(theValue);
 				} else if (myInstance instanceof IBaseResource) {
-					new IdDt(theValue).applyTo((org.hl7.fhir.instance.model.IBaseResource) myInstance);
+					new IdDt(theValue).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
 				}
 			}
 		}

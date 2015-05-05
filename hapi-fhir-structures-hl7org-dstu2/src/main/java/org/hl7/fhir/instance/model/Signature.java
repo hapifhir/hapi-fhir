@@ -29,44 +29,45 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * An XML digital signature along with supporting context.
  */
 @DatatypeDef(name="Signature")
-public class Signature extends Type {
+public class Signature extends Type implements ICompositeType {
 
     /**
      * An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.
      */
-    @Child(name ="type", type={Coding.class}, order=0, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {Coding.class}, order=0, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Indication of the reason the entity signed the object(s)", formalDefinition="An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document." )
     protected List<Coding> type;
 
     /**
      * When the digital signature was signed.
      */
-    @Child(name ="when", type={InstantType.class}, order=1, min=1, max=1)
+    @Child(name = "when", type = {InstantType.class}, order=1, min=1, max=1)
     @Description(shortDefinition="When the signature was created", formalDefinition="When the digital signature was signed." )
     protected InstantType when;
 
     /**
      * A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).
      */
-    @Child(name ="who", type={UriType.class, Practitioner.class, RelatedPerson.class, Patient.class}, order=2, min=1, max=1)
+    @Child(name = "who", type = {UriType.class, Practitioner.class, RelatedPerson.class, Patient.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Who signed the signature", formalDefinition="A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key)." )
     protected Type who;
 
     /**
      * The base64 encoding of the XML-Signature.
      */
-    @Child(name ="blob", type={Base64BinaryType.class}, order=3, min=1, max=1)
+    @Child(name = "blob", type = {Base64BinaryType.class}, order=3, min=1, max=1)
     @Description(shortDefinition="The actual XML Dig-Sig", formalDefinition="The base64 encoding of the XML-Signature." )
     protected Base64BinaryType blob;
 

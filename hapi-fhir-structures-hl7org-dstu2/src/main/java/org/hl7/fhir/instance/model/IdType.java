@@ -39,19 +39,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.Constants;
-import ca.uhn.fhir.util.UrlUtil;
-
 /**
  * Primitive type "id" in FHIR: a string from 1 to 64 characters, only containing letters, digits, "-" and "."
  */
 @DatatypeDef(name = "id")
 public class IdType extends UriType implements IIdType {
 
-	private static final long serialVersionUID = 1L;
+	public static final int MAX_LENGTH = 64;
+	private static final long serialVersionUID = 4L;
 	
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -96,8 +91,7 @@ public class IdType extends UriType implements IIdType {
 	 * regex: [a-z0-9\-\.]{1,36}
 	 * </p>
 	 */
-	@SimpleSetter
-	public IdType(@SimpleSetter.Parameter(name = "theId") String theValue) {
+	public IdType(String theValue) {
 		setValue(theValue);
 	}
 
@@ -174,7 +168,7 @@ public class IdType extends UriType implements IIdType {
 	/**
 	 * Creates an ID based on a given URL
 	 */
-	public IdType(UriDt theUrl) {
+	public IdType(UriType theUrl) {
 		setValue(theUrl.getValueAsString());
 	}
 
@@ -291,9 +285,7 @@ public class IdType extends UriType implements IIdType {
 			
 			b.append(myUnqualifiedId);
 			if (isNotBlank(myUnqualifiedVersionId)) {
-				b.append('/');
-				b.append(Constants.PARAM_HISTORY);
-				b.append('/');
+				b.append("/_history/");
 				b.append(myUnqualifiedVersionId);
 			}
 			String value = b.toString();
@@ -347,7 +339,7 @@ public class IdType extends UriType implements IIdType {
 		if (StringUtils.isBlank(getValue())) {
 			return false;
 		}
-		return UrlUtil.isAbsolute(getValue());
+		return isAbsolute(getValue());
 	}
 
 	/**
@@ -392,7 +384,7 @@ public class IdType extends UriType implements IIdType {
 	 * </p>
 	 */
 	@Override
-	public IdType setValue(String theValue) throws DataFormatException {
+	public IdType setValue(String theValue) {
 		// TODO: add validation
 		myValue = theValue;
 		myHaveComponentParts = false;
@@ -454,7 +446,7 @@ public class IdType extends UriType implements IIdType {
 	 * </p>
 	 */
 	@Override
-	public void setValueAsString(String theValue) throws DataFormatException {
+	public void setValueAsString(String theValue) {
 		setValue(theValue);
 	}
 
@@ -510,7 +502,7 @@ public class IdType extends UriType implements IIdType {
 
 		String existingValue = getValue();
 
-		int i = existingValue.indexOf(Constants.PARAM_HISTORY);
+		int i = existingValue.indexOf("_history");
 		String value;
 		if (i > 1) {
 			value = existingValue.substring(0, i - 1);
@@ -518,7 +510,7 @@ public class IdType extends UriType implements IIdType {
 			value = existingValue;
 		}
 
-		return new IdType(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
+		return new IdType(value + "/_history/" + theVersion);
 	}
 
 	private static String toPlainStringWithNpeThrowIfNeeded(BigDecimal theIdPart) {
@@ -546,6 +538,10 @@ public class IdType extends UriType implements IIdType {
 	}
 
 	
-	
+	private static boolean isAbsolute(String theValue) {
+		String value = theValue.toLowerCase();
+		return value.startsWith("http://") || value.startsWith("https://");
+	}
+
 	
 }

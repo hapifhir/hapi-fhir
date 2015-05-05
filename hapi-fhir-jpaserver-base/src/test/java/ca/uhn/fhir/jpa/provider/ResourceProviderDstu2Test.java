@@ -26,7 +26,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -316,6 +316,7 @@ public class ResourceProviderDstu2Test {
 
 	@Test
 	public void testSearchWithMissing() throws Exception {
+		ourLog.info("Starting testSearchWithMissing");
 		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
@@ -896,7 +897,7 @@ public class ResourceProviderDstu2Test {
 
 		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
+//		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

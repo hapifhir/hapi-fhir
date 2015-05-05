@@ -1,6 +1,6 @@
 package ca.uhn.fhir.model.api;
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 
 /*
  * #%L

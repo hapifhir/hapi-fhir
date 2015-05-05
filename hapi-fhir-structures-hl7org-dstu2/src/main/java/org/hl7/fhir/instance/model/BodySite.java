@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,396 +39,113 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
- * Record details about the anatomical location of a specimen or body part, including precise localisation information.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
+ * Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
  */
 @ResourceDef(name="BodySite", profile="http://hl7.org/fhir/Profile/BodySite")
 public class BodySite extends DomainResource {
 
-    @Block()
-    public static class BodySiteSpecificLocationComponent extends BackboneElement {
-        /**
-         * Named anatomical location - ideally would be coded where possible.
-         */
-        @Child(name="name", type={CodeableConcept.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Named anatomical location", formalDefinition="Named anatomical location - ideally would be coded where possible." )
-        protected CodeableConcept name;
+    /**
+     * The person to which the body site belongs.
+     */
+    @Child(name = "patient", type = {Patient.class}, order=0, min=1, max=1)
+    @Description(shortDefinition="Patient", formalDefinition="The person to which the body site belongs." )
+    protected Reference patient;
 
-        /**
-         * Specify lateraility of the anatomical location.
-         */
-        @Child(name="side", type={CodeableConcept.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Laterality", formalDefinition="Specify lateraility of the anatomical location." )
-        protected CodeableConcept side;
-
-        /**
-         * Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe.
-         */
-        @Child(name="number", type={IntegerType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Which instance of many", formalDefinition="Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe." )
-        protected IntegerType number;
-
-        /**
-         * Line describing the position of a vertical anatomical plane in the body.
-         */
-        @Child(name="anatomicalPlane", type={CodeableConcept.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Description of anatomical plane", formalDefinition="Line describing the position of a vertical anatomical plane in the body." )
-        protected CodeableConcept anatomicalPlane;
-
-        private static final long serialVersionUID = -1123177167L;
-
-      public BodySiteSpecificLocationComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #name} (Named anatomical location - ideally would be coded where possible.)
-         */
-        public CodeableConcept getName() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteSpecificLocationComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new CodeableConcept(); // cc
-          return this.name;
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Named anatomical location - ideally would be coded where possible.)
-         */
-        public BodySiteSpecificLocationComponent setName(CodeableConcept value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #side} (Specify lateraility of the anatomical location.)
-         */
-        public CodeableConcept getSide() { 
-          if (this.side == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteSpecificLocationComponent.side");
-            else if (Configuration.doAutoCreate())
-              this.side = new CodeableConcept(); // cc
-          return this.side;
-        }
-
-        public boolean hasSide() { 
-          return this.side != null && !this.side.isEmpty();
-        }
-
-        /**
-         * @param value {@link #side} (Specify lateraility of the anatomical location.)
-         */
-        public BodySiteSpecificLocationComponent setSide(CodeableConcept value) { 
-          this.side = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #number} (Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe.). This is the underlying object with id, value and extensions. The accessor "getNumber" gives direct access to the value
-         */
-        public IntegerType getNumberElement() { 
-          if (this.number == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteSpecificLocationComponent.number");
-            else if (Configuration.doAutoCreate())
-              this.number = new IntegerType(); // bb
-          return this.number;
-        }
-
-        public boolean hasNumberElement() { 
-          return this.number != null && !this.number.isEmpty();
-        }
-
-        public boolean hasNumber() { 
-          return this.number != null && !this.number.isEmpty();
-        }
-
-        /**
-         * @param value {@link #number} (Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe.). This is the underlying object with id, value and extensions. The accessor "getNumber" gives direct access to the value
-         */
-        public BodySiteSpecificLocationComponent setNumberElement(IntegerType value) { 
-          this.number = value;
-          return this;
-        }
-
-        /**
-         * @return Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe.
-         */
-        public int getNumber() { 
-          return this.number == null ? 0 : this.number.getValue();
-        }
-
-        /**
-         * @param value Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe.
-         */
-        public BodySiteSpecificLocationComponent setNumber(int value) { 
-            if (this.number == null)
-              this.number = new IntegerType();
-            this.number.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #anatomicalPlane} (Line describing the position of a vertical anatomical plane in the body.)
-         */
-        public CodeableConcept getAnatomicalPlane() { 
-          if (this.anatomicalPlane == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteSpecificLocationComponent.anatomicalPlane");
-            else if (Configuration.doAutoCreate())
-              this.anatomicalPlane = new CodeableConcept(); // cc
-          return this.anatomicalPlane;
-        }
-
-        public boolean hasAnatomicalPlane() { 
-          return this.anatomicalPlane != null && !this.anatomicalPlane.isEmpty();
-        }
-
-        /**
-         * @param value {@link #anatomicalPlane} (Line describing the position of a vertical anatomical plane in the body.)
-         */
-        public BodySiteSpecificLocationComponent setAnatomicalPlane(CodeableConcept value) { 
-          this.anatomicalPlane = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("name", "CodeableConcept", "Named anatomical location - ideally would be coded where possible.", 0, java.lang.Integer.MAX_VALUE, name));
-          childrenList.add(new Property("side", "CodeableConcept", "Specify lateraility of the anatomical location.", 0, java.lang.Integer.MAX_VALUE, side));
-          childrenList.add(new Property("number", "integer", "Identify the specific anatomical site out of multiple eg tenth rib; fourth vertebra; second toe.", 0, java.lang.Integer.MAX_VALUE, number));
-          childrenList.add(new Property("anatomicalPlane", "CodeableConcept", "Line describing the position of a vertical anatomical plane in the body.", 0, java.lang.Integer.MAX_VALUE, anatomicalPlane));
-        }
-
-      public BodySiteSpecificLocationComponent copy() {
-        BodySiteSpecificLocationComponent dst = new BodySiteSpecificLocationComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        dst.side = side == null ? null : side.copy();
-        dst.number = number == null ? null : number.copy();
-        dst.anatomicalPlane = anatomicalPlane == null ? null : anatomicalPlane.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof BodySiteSpecificLocationComponent))
-          return false;
-        BodySiteSpecificLocationComponent o = (BodySiteSpecificLocationComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(side, o.side, true) && compareDeep(number, o.number, true)
-           && compareDeep(anatomicalPlane, o.anatomicalPlane, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof BodySiteSpecificLocationComponent))
-          return false;
-        BodySiteSpecificLocationComponent o = (BodySiteSpecificLocationComponent) other;
-        return compareValues(number, o.number, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (side == null || side.isEmpty())
-           && (number == null || number.isEmpty()) && (anatomicalPlane == null || anatomicalPlane.isEmpty())
-          ;
-      }
-
-  }
-
-    @Block()
-    public static class BodySiteRelativeLocationComponent extends BackboneElement {
-        /**
-         * Identified anatomical landmark from which to specify relative anatomical location.
-         */
-        @Child(name="landmark", type={CodeableConcept.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Identified landmark\nIdentified landmark\nIdentified landmark", formalDefinition="Identified anatomical landmark from which to specify relative anatomical location." )
-        protected CodeableConcept landmark;
-
-        /**
-         * Qualifier to identify which direction the anatomical location is in relation to the identified landmark.
-         */
-        @Child(name="aspect", type={CodeableConcept.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Relative position to landmark", formalDefinition="Qualifier to identify which direction the anatomical location is in relation to the identified landmark." )
-        protected CodeableConcept aspect;
-
-        /**
-         * Distance of location from the identified landmark.
-         */
-        @Child(name="distance", type={Quantity.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Distance from Landmark", formalDefinition="Distance of location from the identified landmark." )
-        protected Quantity distance;
-
-        private static final long serialVersionUID = 729150336L;
-
-      public BodySiteRelativeLocationComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #landmark} (Identified anatomical landmark from which to specify relative anatomical location.)
-         */
-        public CodeableConcept getLandmark() { 
-          if (this.landmark == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteRelativeLocationComponent.landmark");
-            else if (Configuration.doAutoCreate())
-              this.landmark = new CodeableConcept(); // cc
-          return this.landmark;
-        }
-
-        public boolean hasLandmark() { 
-          return this.landmark != null && !this.landmark.isEmpty();
-        }
-
-        /**
-         * @param value {@link #landmark} (Identified anatomical landmark from which to specify relative anatomical location.)
-         */
-        public BodySiteRelativeLocationComponent setLandmark(CodeableConcept value) { 
-          this.landmark = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #aspect} (Qualifier to identify which direction the anatomical location is in relation to the identified landmark.)
-         */
-        public CodeableConcept getAspect() { 
-          if (this.aspect == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteRelativeLocationComponent.aspect");
-            else if (Configuration.doAutoCreate())
-              this.aspect = new CodeableConcept(); // cc
-          return this.aspect;
-        }
-
-        public boolean hasAspect() { 
-          return this.aspect != null && !this.aspect.isEmpty();
-        }
-
-        /**
-         * @param value {@link #aspect} (Qualifier to identify which direction the anatomical location is in relation to the identified landmark.)
-         */
-        public BodySiteRelativeLocationComponent setAspect(CodeableConcept value) { 
-          this.aspect = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #distance} (Distance of location from the identified landmark.)
-         */
-        public Quantity getDistance() { 
-          if (this.distance == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create BodySiteRelativeLocationComponent.distance");
-            else if (Configuration.doAutoCreate())
-              this.distance = new Quantity(); // cc
-          return this.distance;
-        }
-
-        public boolean hasDistance() { 
-          return this.distance != null && !this.distance.isEmpty();
-        }
-
-        /**
-         * @param value {@link #distance} (Distance of location from the identified landmark.)
-         */
-        public BodySiteRelativeLocationComponent setDistance(Quantity value) { 
-          this.distance = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("landmark", "CodeableConcept", "Identified anatomical landmark from which to specify relative anatomical location.", 0, java.lang.Integer.MAX_VALUE, landmark));
-          childrenList.add(new Property("aspect", "CodeableConcept", "Qualifier to identify which direction the anatomical location is in relation to the identified landmark.", 0, java.lang.Integer.MAX_VALUE, aspect));
-          childrenList.add(new Property("distance", "Quantity", "Distance of location from the identified landmark.", 0, java.lang.Integer.MAX_VALUE, distance));
-        }
-
-      public BodySiteRelativeLocationComponent copy() {
-        BodySiteRelativeLocationComponent dst = new BodySiteRelativeLocationComponent();
-        copyValues(dst);
-        dst.landmark = landmark == null ? null : landmark.copy();
-        dst.aspect = aspect == null ? null : aspect.copy();
-        dst.distance = distance == null ? null : distance.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof BodySiteRelativeLocationComponent))
-          return false;
-        BodySiteRelativeLocationComponent o = (BodySiteRelativeLocationComponent) other;
-        return compareDeep(landmark, o.landmark, true) && compareDeep(aspect, o.aspect, true) && compareDeep(distance, o.distance, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof BodySiteRelativeLocationComponent))
-          return false;
-        BodySiteRelativeLocationComponent o = (BodySiteRelativeLocationComponent) other;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (landmark == null || landmark.isEmpty()) && (aspect == null || aspect.isEmpty())
-           && (distance == null || distance.isEmpty());
-      }
-
-  }
+    /**
+     * The actual object that is the target of the reference (The person to which the body site belongs.)
+     */
+    protected Patient patientTarget;
 
     /**
      * Identifier for this instance of the anatomical location.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Bodysite identifier", formalDefinition="Identifier for this instance of the anatomical location." )
     protected List<Identifier> identifier;
 
     /**
-     * The Specific and identified anatomical location.
+     * Named anatomical location - ideally would be coded where possible.
      */
-    @Child(name = "specificLocation", type = {}, order = 1, min = 0, max = 1)
-    @Description(shortDefinition="Specific anatomical location", formalDefinition="The Specific and identified anatomical location." )
-    protected BodySiteSpecificLocationComponent specificLocation;
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Description(shortDefinition="Named anatomical location", formalDefinition="Named anatomical location - ideally would be coded where possible." )
+    protected CodeableConcept code;
 
     /**
-     * Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference.
+     * Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane.
      */
-    @Child(name = "relativeLocation", type = {}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Relative anatomical location(s)", formalDefinition="Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference." )
-    protected List<BodySiteRelativeLocationComponent> relativeLocation;
+    @Child(name = "modifier", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Modification to location code", formalDefinition="Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane." )
+    protected List<CodeableConcept> modifier;
 
     /**
      * Description of anatomical location.
      */
-    @Child(name = "description", type = {StringType.class}, order = 3, min = 0, max = 1)
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="The Description of anatomical location", formalDefinition="Description of anatomical location." )
     protected StringType description;
 
     /**
      * Image or images used to identify a location.
      */
-    @Child(name = "image", type = {AttachmentType.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "image", type = {Attachment.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Attached images", formalDefinition="Image or images used to identify a location." )
-    protected List<AttachmentType> image;
+    protected List<Attachment> image;
 
-    private static final long serialVersionUID = -11708151L;
+    private static final long serialVersionUID = 1568109920L;
 
     public BodySite() {
       super();
+    }
+
+    public BodySite(Reference patient) {
+      super();
+      this.patient = patient;
+    }
+
+    /**
+     * @return {@link #patient} (The person to which the body site belongs.)
+     */
+    public Reference getPatient() { 
+      if (this.patient == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create BodySite.patient");
+        else if (Configuration.doAutoCreate())
+          this.patient = new Reference(); // cc
+      return this.patient;
+    }
+
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
+    }
+
+    /**
+     * @param value {@link #patient} (The person to which the body site belongs.)
+     */
+    public BodySite setPatient(Reference value) { 
+      this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person to which the body site belongs.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create BodySite.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person to which the body site belongs.)
+     */
+    public BodySite setPatientTarget(Patient value) { 
+      this.patientTarget = value;
+      return this;
     }
 
     /**
@@ -461,58 +178,78 @@ public class BodySite extends DomainResource {
       return t;
     }
 
-    /**
-     * @return {@link #specificLocation} (The Specific and identified anatomical location.)
-     */
-    public BodySiteSpecificLocationComponent getSpecificLocation() { 
-      if (this.specificLocation == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create BodySite.specificLocation");
-        else if (Configuration.doAutoCreate())
-          this.specificLocation = new BodySiteSpecificLocationComponent(); // cc
-      return this.specificLocation;
-    }
-
-    public boolean hasSpecificLocation() { 
-      return this.specificLocation != null && !this.specificLocation.isEmpty();
-    }
-
-    /**
-     * @param value {@link #specificLocation} (The Specific and identified anatomical location.)
-     */
-    public BodySite setSpecificLocation(BodySiteSpecificLocationComponent value) { 
-      this.specificLocation = value;
+    // syntactic sugar
+    public BodySite addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
       return this;
     }
 
     /**
-     * @return {@link #relativeLocation} (Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference.)
+     * @return {@link #code} (Named anatomical location - ideally would be coded where possible.)
      */
-    public List<BodySiteRelativeLocationComponent> getRelativeLocation() { 
-      if (this.relativeLocation == null)
-        this.relativeLocation = new ArrayList<BodySiteRelativeLocationComponent>();
-      return this.relativeLocation;
+    public CodeableConcept getCode() { 
+      if (this.code == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create BodySite.code");
+        else if (Configuration.doAutoCreate())
+          this.code = new CodeableConcept(); // cc
+      return this.code;
     }
 
-    public boolean hasRelativeLocation() { 
-      if (this.relativeLocation == null)
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
+    }
+
+    /**
+     * @param value {@link #code} (Named anatomical location - ideally would be coded where possible.)
+     */
+    public BodySite setCode(CodeableConcept value) { 
+      this.code = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #modifier} (Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane.)
+     */
+    public List<CodeableConcept> getModifier() { 
+      if (this.modifier == null)
+        this.modifier = new ArrayList<CodeableConcept>();
+      return this.modifier;
+    }
+
+    public boolean hasModifier() { 
+      if (this.modifier == null)
         return false;
-      for (BodySiteRelativeLocationComponent item : this.relativeLocation)
+      for (CodeableConcept item : this.modifier)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #relativeLocation} (Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference.)
+     * @return {@link #modifier} (Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane.)
      */
     // syntactic sugar
-    public BodySiteRelativeLocationComponent addRelativeLocation() { //3
-      BodySiteRelativeLocationComponent t = new BodySiteRelativeLocationComponent();
-      if (this.relativeLocation == null)
-        this.relativeLocation = new ArrayList<BodySiteRelativeLocationComponent>();
-      this.relativeLocation.add(t);
+    public CodeableConcept addModifier() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.modifier == null)
+        this.modifier = new ArrayList<CodeableConcept>();
+      this.modifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public BodySite addModifier(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.modifier == null)
+        this.modifier = new ArrayList<CodeableConcept>();
+      this.modifier.add(t);
+      return this;
     }
 
     /**
@@ -567,16 +304,16 @@ public class BodySite extends DomainResource {
     /**
      * @return {@link #image} (Image or images used to identify a location.)
      */
-    public List<AttachmentType> getImage() { 
+    public List<Attachment> getImage() { 
       if (this.image == null)
-        this.image = new ArrayList<AttachmentType>();
+        this.image = new ArrayList<Attachment>();
       return this.image;
     }
 
     public boolean hasImage() { 
       if (this.image == null)
         return false;
-      for (AttachmentType item : this.image)
+      for (Attachment item : this.image)
         if (!item.isEmpty())
           return true;
       return false;
@@ -586,19 +323,30 @@ public class BodySite extends DomainResource {
      * @return {@link #image} (Image or images used to identify a location.)
      */
     // syntactic sugar
-    public AttachmentType addImage() { //3
-      AttachmentType t = new AttachmentType();
+    public Attachment addImage() { //3
+      Attachment t = new Attachment();
       if (this.image == null)
-        this.image = new ArrayList<AttachmentType>();
+        this.image = new ArrayList<Attachment>();
       this.image.add(t);
       return t;
     }
 
+    // syntactic sugar
+    public BodySite addImage(Attachment t) { //3
+      if (t == null)
+        return this;
+      if (this.image == null)
+        this.image = new ArrayList<Attachment>();
+      this.image.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("patient", "Reference(Patient)", "The person to which the body site belongs.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("identifier", "Identifier", "Identifier for this instance of the anatomical location.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("specificLocation", "", "The Specific and identified anatomical location.", 0, java.lang.Integer.MAX_VALUE, specificLocation));
-        childrenList.add(new Property("relativeLocation", "", "Qualifiers to identify non-specific location eg 5cm (distance) inferior (aspect) to the tibial tuberosity (landmark). There may be more than one relative location required to provide a cross reference.", 0, java.lang.Integer.MAX_VALUE, relativeLocation));
+        childrenList.add(new Property("code", "CodeableConcept", "Named anatomical location - ideally would be coded where possible.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("modifier", "CodeableConcept", "Modifier to refine the anatomical location.  These include modifiers for laterality, relative location, directionality, number, and plane.", 0, java.lang.Integer.MAX_VALUE, modifier));
         childrenList.add(new Property("description", "string", "Description of anatomical location.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("image", "Attachment", "Image or images used to identify a location.", 0, java.lang.Integer.MAX_VALUE, image));
       }
@@ -606,21 +354,22 @@ public class BodySite extends DomainResource {
       public BodySite copy() {
         BodySite dst = new BodySite();
         copyValues(dst);
+        dst.patient = patient == null ? null : patient.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.specificLocation = specificLocation == null ? null : specificLocation.copy();
-        if (relativeLocation != null) {
-          dst.relativeLocation = new ArrayList<BodySiteRelativeLocationComponent>();
-          for (BodySiteRelativeLocationComponent i : relativeLocation)
-            dst.relativeLocation.add(i.copy());
+        dst.code = code == null ? null : code.copy();
+        if (modifier != null) {
+          dst.modifier = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : modifier)
+            dst.modifier.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
         if (image != null) {
-          dst.image = new ArrayList<AttachmentType>();
-          for (AttachmentType i : image)
+          dst.image = new ArrayList<Attachment>();
+          for (Attachment i : image)
             dst.image.add(i.copy());
         };
         return dst;
@@ -637,9 +386,9 @@ public class BodySite extends DomainResource {
         if (!(other instanceof BodySite))
           return false;
         BodySite o = (BodySite) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(specificLocation, o.specificLocation, true)
-           && compareDeep(relativeLocation, o.relativeLocation, true) && compareDeep(description, o.description, true)
-           && compareDeep(image, o.image, true);
+        return compareDeep(patient, o.patient, true) && compareDeep(identifier, o.identifier, true) && compareDeep(code, o.code, true)
+           && compareDeep(modifier, o.modifier, true) && compareDeep(description, o.description, true) && compareDeep(image, o.image, true)
+          ;
       }
 
       @Override
@@ -653,8 +402,8 @@ public class BodySite extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (specificLocation == null || specificLocation.isEmpty())
-           && (relativeLocation == null || relativeLocation.isEmpty()) && (description == null || description.isEmpty())
+        return super.isEmpty() && (patient == null || patient.isEmpty()) && (identifier == null || identifier.isEmpty())
+           && (code == null || code.isEmpty()) && (modifier == null || modifier.isEmpty()) && (description == null || description.isEmpty())
            && (image == null || image.isEmpty());
       }
 
@@ -663,8 +412,10 @@ public class BodySite extends DomainResource {
     return ResourceType.BodySite;
    }
 
-  @SearchParamDefinition(name="name", path="BodySite.specificLocation.name", description="Named anatomical location", type="token" )
-  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="patient", path="BodySite.patient", description="Patient to whom bodysite belongs", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="code", path="BodySite.code", description="Named anatomical location", type="token" )
+  public static final String SP_CODE = "code";
 
 }
 

@@ -156,6 +156,12 @@ public class ResourceReferenceDt
 		return myReference;
 	}
 
+	@Override
+	public IdDt getReferenceElement() {
+		return getReference();
+	}
+
+
 	/**
 	 * Sets the value(s) for <b>reference</b> (Relative, internal or absolute URL reference)
 	 *

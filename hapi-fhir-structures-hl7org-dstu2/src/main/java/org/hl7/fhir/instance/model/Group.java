@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized.  I.e. A collection of entities that isn't an Organization.
  */
@@ -126,12 +127,12 @@ public class Group extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case PERSON: return "person";
-            case ANIMAL: return "animal";
-            case PRACTITIONER: return "practitioner";
-            case DEVICE: return "device";
-            case MEDICATION: return "medication";
-            case SUBSTANCE: return "substance";
+            case PERSON: return "Person";
+            case ANIMAL: return "Animal";
+            case PRACTITIONER: return "Practitioner";
+            case DEVICE: return "Device";
+            case MEDICATION: return "Medication";
+            case SUBSTANCE: return "Substance";
             default: return "?";
           }
         }
@@ -178,21 +179,21 @@ public class Group extends DomainResource {
         /**
          * A code that identifies the kind of trait being asserted.
          */
-        @Child(name="code", type={CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Kind of characteristic", formalDefinition="A code that identifies the kind of trait being asserted." )
         protected CodeableConcept code;
 
         /**
          * The value of the trait that holds (or does not hold - see 'exclude') for members of the group.
          */
-        @Child(name="value", type={CodeableConcept.class, BooleanType.class, Quantity.class, Range.class}, order=2, min=1, max=1)
+        @Child(name = "value", type = {CodeableConcept.class, BooleanType.class, Quantity.class, Range.class}, order=2, min=1, max=1)
         @Description(shortDefinition="Value held by characteristic", formalDefinition="The value of the trait that holds (or does not hold - see 'exclude') for members of the group." )
         protected Type value;
 
         /**
          * If true, indicates the characteristic is one that is NOT held by members of the group.
          */
-        @Child(name="exclude", type={BooleanType.class}, order=3, min=1, max=1)
+        @Child(name = "exclude", type = {BooleanType.class}, order=3, min=1, max=1)
         @Description(shortDefinition="Group includes or excludes", formalDefinition="If true, indicates the characteristic is one that is NOT held by members of the group." )
         protected BooleanType exclude;
 
@@ -320,7 +321,7 @@ public class Group extends DomainResource {
          * @return If true, indicates the characteristic is one that is NOT held by members of the group.
          */
         public boolean getExclude() { 
-          return this.exclude == null ? false : this.exclude.getValue();
+          return this.exclude == null || this.exclude.isEmpty() ? false : this.exclude.getValue();
         }
 
         /**
@@ -380,57 +381,57 @@ public class Group extends DomainResource {
     /**
      * A unique business identifier for this group.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = 1)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Unique id", formalDefinition="A unique business identifier for this group." )
     protected Identifier identifier;
 
     /**
      * Identifies the broad classification of the kind of resources the group includes.
      */
-    @Child(name = "type", type = {CodeType.class}, order = 1, min = 1, max = 1)
+    @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
     @Description(shortDefinition="person | animal | practitioner | device | medication | substance", formalDefinition="Identifies the broad classification of the kind of resources the group includes." )
     protected Enumeration<GroupType> type;
 
     /**
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.
      */
-    @Child(name = "actual", type = {BooleanType.class}, order = 2, min = 1, max = 1)
+    @Child(name = "actual", type = {BooleanType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Descriptive or actual", formalDefinition="If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals." )
     protected BooleanType actual;
 
     /**
      * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order = 3, min = 0, max = 1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes.  E.g. 'cow', 'syringe', etc." )
     protected CodeableConcept code;
 
     /**
      * A label assigned to the group for human identification and communication.
      */
-    @Child(name = "name", type = {StringType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "name", type = {StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Label for Group", formalDefinition="A label assigned to the group for human identification and communication." )
     protected StringType name;
 
     /**
      * A count of the number of resource instances that are part of the group.
      */
-    @Child(name = "quantity", type = {IntegerType.class}, order = 5, min = 0, max = 1)
+    @Child(name = "quantity", type = {UnsignedIntType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Number of members", formalDefinition="A count of the number of resource instances that are part of the group." )
-    protected IntegerType quantity;
+    protected UnsignedIntType quantity;
 
     /**
      * Identifies the traits shared by members of the group.
      */
-    @Child(name = "characteristic", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "characteristic", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Trait of group members", formalDefinition="Identifies the traits shared by members of the group." )
     protected List<GroupCharacteristicComponent> characteristic;
 
     /**
      * Identifies the resource instances that are members of the group.
      */
-    @Child(name = "member", type = {Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Who is in group", formalDefinition="Identifies the resource instances that are members of the group." )
+    @Child(name = "member", type = {Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Who or what is in group", formalDefinition="Identifies the resource instances that are members of the group." )
     protected List<Reference> member;
     /**
      * The actual objects that are the target of the reference (Identifies the resource instances that are members of the group.)
@@ -438,7 +439,7 @@ public class Group extends DomainResource {
     protected List<Resource> memberTarget;
 
 
-    private static final long serialVersionUID = 45096653L;
+    private static final long serialVersionUID = -1024529199L;
 
     public Group() {
       super();
@@ -551,7 +552,7 @@ public class Group extends DomainResource {
      * @return If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.
      */
     public boolean getActual() { 
-      return this.actual == null ? false : this.actual.getValue();
+      return this.actual == null || this.actual.isEmpty() ? false : this.actual.getValue();
     }
 
     /**
@@ -640,12 +641,12 @@ public class Group extends DomainResource {
     /**
      * @return {@link #quantity} (A count of the number of resource instances that are part of the group.). This is the underlying object with id, value and extensions. The accessor "getQuantity" gives direct access to the value
      */
-    public IntegerType getQuantityElement() { 
+    public UnsignedIntType getQuantityElement() { 
       if (this.quantity == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Group.quantity");
         else if (Configuration.doAutoCreate())
-          this.quantity = new IntegerType(); // bb
+          this.quantity = new UnsignedIntType(); // bb
       return this.quantity;
     }
 
@@ -660,7 +661,7 @@ public class Group extends DomainResource {
     /**
      * @param value {@link #quantity} (A count of the number of resource instances that are part of the group.). This is the underlying object with id, value and extensions. The accessor "getQuantity" gives direct access to the value
      */
-    public Group setQuantityElement(IntegerType value) { 
+    public Group setQuantityElement(UnsignedIntType value) { 
       this.quantity = value;
       return this;
     }
@@ -669,7 +670,7 @@ public class Group extends DomainResource {
      * @return A count of the number of resource instances that are part of the group.
      */
     public int getQuantity() { 
-      return this.quantity == null ? 0 : this.quantity.getValue();
+      return this.quantity == null || this.quantity.isEmpty() ? 0 : this.quantity.getValue();
     }
 
     /**
@@ -677,7 +678,7 @@ public class Group extends DomainResource {
      */
     public Group setQuantity(int value) { 
         if (this.quantity == null)
-          this.quantity = new IntegerType();
+          this.quantity = new UnsignedIntType();
         this.quantity.setValue(value);
       return this;
     }
@@ -712,6 +713,16 @@ public class Group extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Group addCharacteristic(GroupCharacteristicComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.characteristic == null)
+        this.characteristic = new ArrayList<GroupCharacteristicComponent>();
+      this.characteristic.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #member} (Identifies the resource instances that are members of the group.)
      */
@@ -742,6 +753,16 @@ public class Group extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Group addMember(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.member == null)
+        this.member = new ArrayList<Reference>();
+      this.member.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #member} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies the resource instances that are members of the group.)
      */
@@ -758,7 +779,7 @@ public class Group extends DomainResource {
         childrenList.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, java.lang.Integer.MAX_VALUE, actual));
         childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes.  E.g. 'cow', 'syringe', etc.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("quantity", "integer", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
+        childrenList.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
         childrenList.add(new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));
         childrenList.add(new Property("member", "Reference(Patient|Practitioner|Device|Medication|Substance)", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member));
       }
@@ -824,24 +845,24 @@ public class Group extends DomainResource {
     return ResourceType.Group;
    }
 
+  @SearchParamDefinition(name="member", path="Group.member", description="Who or what is in group", type="reference" )
+  public static final String SP_MEMBER = "member";
+  @SearchParamDefinition(name="characteristic-value", path="", description="A composite of both characteristic and value", type="composite" )
+  public static final String SP_CHARACTERISTICVALUE = "characteristic-value";
+  @SearchParamDefinition(name="value", path="Group.characteristic.value[x]", description="Value held by characteristic", type="token" )
+  public static final String SP_VALUE = "value";
   @SearchParamDefinition(name="actual", path="Group.actual", description="Descriptive or actual", type="token" )
   public static final String SP_ACTUAL = "actual";
-  @SearchParamDefinition(name = "identifier", path = "Group.identifier", description = "Unique id", type = "token")
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name = "characteristic-value", path = "", description = "A composite of both characteristic and value", type = "composite")
-  public static final String SP_CHARACTERISTICVALUE = "characteristic-value";
+  @SearchParamDefinition(name="exclude", path="Group.characteristic.exclude", description="Group includes or excludes", type="token" )
+  public static final String SP_EXCLUDE = "exclude";
   @SearchParamDefinition(name="code", path="Group.code", description="The kind of resources contained", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name = "member", path = "Group.member", description = "Who is in group", type = "reference")
-  public static final String SP_MEMBER = "member";
-  @SearchParamDefinition(name = "exclude", path = "Group.characteristic.exclude", description = "Group includes or excludes", type = "token")
-  public static final String SP_EXCLUDE = "exclude";
+  @SearchParamDefinition(name="characteristic", path="Group.characteristic.code", description="Kind of characteristic", type="token" )
+  public static final String SP_CHARACTERISTIC = "characteristic";
   @SearchParamDefinition(name="type", path="Group.type", description="The type of resources the group contains", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name = "value", path = "Group.characteristic.value[x]", description = "Value held by characteristic", type = "token")
-  public static final String SP_VALUE = "value";
-  @SearchParamDefinition(name = "characteristic", path = "Group.characteristic.code", description = "Kind of characteristic", type = "token")
-  public static final String SP_CHARACTERISTIC = "characteristic";
+  @SearchParamDefinition(name="identifier", path="Group.identifier", description="Unique id", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

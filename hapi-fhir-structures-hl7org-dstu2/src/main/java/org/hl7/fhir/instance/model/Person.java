@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Apr 2, 2015 10:47-0400 for FHIR v0.5.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Demographics and administrative information about a person independent of a specific health-related context.
  */
@@ -250,7 +251,7 @@ public class Person extends DomainResource {
         /**
          * The resource to which this actual person is associated.
          */
-        @Child(name ="target", type={Patient.class, Practitioner.class, RelatedPerson.class, Person.class}, order=1, min=1, max=1)
+        @Child(name = "target", type = {Patient.class, Practitioner.class, RelatedPerson.class, Person.class}, order=1, min=1, max=1)
         @Description(shortDefinition="The resource to which this actual person is associated", formalDefinition="The resource to which this actual person is associated." )
         protected Reference target;
 
@@ -262,7 +263,7 @@ public class Person extends DomainResource {
         /**
          * Level of assurance that this link is actually associated with the target resource.
          */
-        @Child(name ="assurance", type={CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "assurance", type = {CodeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="level1 | level2 | level3 | level4", formalDefinition="Level of assurance that this link is actually associated with the target resource." )
         protected Enumeration<IdentityAssuranceLevel> assurance;
 
@@ -409,56 +410,56 @@ public class Person extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name ="identifier", type={Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * A name associated with the person.
      */
-    @Child(name ="name", type={HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "name", type = {HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected List<HumanName> name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name ="telecom", type={ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender.
      */
-    @Child(name ="gender", type={CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * The birth date for the person.
      */
-    @Child(name ="birthDate", type={DateTimeType.class}, order=4, min=0, max=1)
+    @Child(name = "birthDate", type = {DateTimeType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="The birth date for the person", formalDefinition="The birth date for the person." )
     protected DateTimeType birthDate;
 
     /**
      * One or more addresses for the person.
      */
-    @Child(name ="address", type={Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="One or more addresses for the person", formalDefinition="One or more addresses for the person." )
     protected List<Address> address;
 
     /**
      * An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.
      */
-    @Child(name ="photo", type={Attachment.class}, order=6, min=0, max=1)
+    @Child(name = "photo", type = {Attachment.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Image of the Person", formalDefinition="An image that can be displayed as a thumbnail of the person to enhance the identification of the individual." )
     protected Attachment photo;
 
     /**
      * The Organization that is the custodian of the person record.
      */
-    @Child(name ="managingOrganization", type={Organization.class}, order=7, min=0, max=1)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=1)
     @Description(shortDefinition="The Organization that is the custodian of the person record", formalDefinition="The Organization that is the custodian of the person record." )
     protected Reference managingOrganization;
 
@@ -470,14 +471,14 @@ public class Person extends DomainResource {
     /**
      * Whether this person's record is in active use.
      */
-    @Child(name ="active", type={BooleanType.class}, order=8, min=0, max=1)
+    @Child(name = "active", type = {BooleanType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="This person's record is in active use", formalDefinition="Whether this person's record is in active use." )
     protected BooleanType active;
 
     /**
      * Link to a resource that concerns the same actual person.
      */
-    @Child(name ="link", type={}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "link", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Link to a resource that concerns the same actual person", formalDefinition="Link to a resource that concerns the same actual person." )
     protected List<PersonLinkComponent> link;
 
@@ -988,28 +989,28 @@ public class Person extends DomainResource {
     return ResourceType.Person;
    }
 
-  @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
-  public static final String SP_PHONETIC = "phonetic";
-  @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string" )
-  public static final String SP_ADDRESS = "address";
-  @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date" )
-  public static final String SP_BIRTHDATE = "birthdate";
-  @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token" )
-  public static final String SP_GENDER = "gender";
-  @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference" )
-  public static final String SP_PRACTITIONER = "practitioner";
-  @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
-  @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
-  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference" )
+  public static final String SP_PRACTITIONER = "practitioner";
+  @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string" )
+  public static final String SP_ADDRESS = "address";
   @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference" )
   public static final String SP_LINK = "link";
+  @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date" )
+  public static final String SP_BIRTHDATE = "birthdate";
   @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
+  @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token" )
+  public static final String SP_GENDER = "gender";
+  @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference" )
   public static final String SP_RELATEDPERSON = "relatedperson";
 

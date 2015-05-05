@@ -20,7 +20,6 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBase;
 
 public interface IBaseDatatype extends IBase {
 

@@ -1,8 +1,7 @@
 package org.hl7.fhir.instance.model;
 
-import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IBase;
 
-import ca.uhn.fhir.model.api.TagList;
 
 /*
  * #%L
@@ -34,10 +33,10 @@ import ca.uhn.fhir.model.api.TagList;
  */
 public interface IBaseResource extends IBase {
 
-	IIdType getId();
-	
-	IBaseResource setId(String theId);
-
-	IBaseResource setId(IIdType theId);
+//	IIdType getId();
+//	
+//	IBaseResource setId(String theId);
+//
+//	IBaseResource setId(IIdType theId);
 
 }

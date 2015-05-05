@@ -7,7 +7,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 

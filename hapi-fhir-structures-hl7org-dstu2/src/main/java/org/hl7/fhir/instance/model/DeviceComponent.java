@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Describes the characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
@@ -248,21 +249,21 @@ public class DeviceComponent extends DomainResource {
         /**
          * Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc.
          */
-        @Child(name="specType", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "specType", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Specification type", formalDefinition="Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc." )
         protected CodeableConcept specType;
 
         /**
          * Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of.
          */
-        @Child(name="componentId", type={Identifier.class}, order=2, min=0, max=1)
+        @Child(name = "componentId", type = {Identifier.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Internal component unique identification", formalDefinition="Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of." )
         protected Identifier componentId;
 
         /**
          * Describes the printable string defining the component.
          */
-        @Child(name="productionSpec", type={StringType.class}, order=3, min=0, max=1)
+        @Child(name = "productionSpec", type = {StringType.class}, order=3, min=0, max=1)
         @Description(shortDefinition="A printable string defining the component", formalDefinition="Describes the printable string defining the component." )
         protected StringType productionSpec;
 
@@ -416,28 +417,28 @@ public class DeviceComponent extends DomainResource {
     /**
      * Describes the specific component type as defined in the object-oriented or metric nomenclature partition.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order = 0, min = 1, max = 1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1)
     @Description(shortDefinition="What kind of component it is", formalDefinition="Describes the specific component type as defined in the object-oriented or metric nomenclature partition." )
     protected CodeableConcept type;
 
     /**
      * Describes the local assigned unique identification by the software. For example: handle ID.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 1, max = 1)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Instance id assigned by the software stack", formalDefinition="Describes the local assigned unique identification by the software. For example: handle ID." )
     protected Identifier identifier;
 
     /**
      * Describes the timestamp for the most recent system change which includes device configuration or setting change.
      */
-    @Child(name = "lastSystemChange", type = {InstantType.class}, order = 2, min = 1, max = 1)
+    @Child(name = "lastSystemChange", type = {InstantType.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Recent system change timestamp", formalDefinition="Describes the timestamp for the most recent system change which includes device configuration or setting change." )
     protected InstantType lastSystemChange;
 
     /**
      * Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc.
      */
-    @Child(name = "source", type = {Device.class}, order = 3, min = 0, max = 1)
+    @Child(name = "source", type = {Device.class}, order=3, min=0, max=1)
     @Description(shortDefinition="A source device of this component", formalDefinition="Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc." )
     protected Reference source;
 
@@ -449,7 +450,7 @@ public class DeviceComponent extends DomainResource {
     /**
      * Describes the link to the parent resource. For example: Channel is linked to its VMD parent.
      */
-    @Child(name = "parent", type = {DeviceComponent.class}, order = 4, min = 0, max = 1)
+    @Child(name = "parent", type = {DeviceComponent.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Parent resource link", formalDefinition="Describes the link to the parent resource. For example: Channel is linked to its VMD parent." )
     protected Reference parent;
 
@@ -461,35 +462,35 @@ public class DeviceComponent extends DomainResource {
     /**
      * Indicates current operational status of the device. For example: On, Off, Standby, etc.
      */
-    @Child(name = "operationalStatus", type = {CodeableConcept.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "operationalStatus", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Component operational status", formalDefinition="Indicates current operational status of the device. For example: On, Off, Standby, etc." )
     protected List<CodeableConcept> operationalStatus;
 
     /**
      * Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular.
      */
-    @Child(name = "parameterGroup", type = {CodeableConcept.class}, order = 6, min = 0, max = 1)
+    @Child(name = "parameterGroup", type = {CodeableConcept.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Current supported parameter group", formalDefinition="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular." )
     protected CodeableConcept parameterGroup;
 
     /**
      * Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
      */
-    @Child(name = "measurementPrinciple", type = {CodeType.class}, order = 7, min = 0, max = 1)
+    @Child(name = "measurementPrinciple", type = {CodeType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="other | chemical | electrical | impedance | nuclear | optical | thermal | biological | mechanical | acoustical | manual+", formalDefinition="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc." )
     protected Enumeration<MeasurementPrinciple> measurementPrinciple;
 
     /**
      * Describes the production specification such as component revision, serial number, etc.
      */
-    @Child(name = "productionSpecification", type = {}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "productionSpecification", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Production specification of the component", formalDefinition="Describes the production specification such as component revision, serial number, etc." )
     protected List<DeviceComponentProductionSpecificationComponent> productionSpecification;
 
     /**
      * Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US.
      */
-    @Child(name = "languageCode", type = {CodeableConcept.class}, order = 9, min = 0, max = 1)
+    @Child(name = "languageCode", type = {CodeableConcept.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Language code for the human-readable text strings produced by the device", formalDefinition="Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US." )
     protected CodeableConcept languageCode;
 
@@ -717,6 +718,16 @@ public class DeviceComponent extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public DeviceComponent addOperationalStatus(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.operationalStatus == null)
+        this.operationalStatus = new ArrayList<CodeableConcept>();
+      this.operationalStatus.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #parameterGroup} (Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular.)
      */
@@ -818,6 +829,16 @@ public class DeviceComponent extends DomainResource {
         this.productionSpecification = new ArrayList<DeviceComponentProductionSpecificationComponent>();
       this.productionSpecification.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public DeviceComponent addProductionSpecification(DeviceComponentProductionSpecificationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.productionSpecification == null)
+        this.productionSpecification = new ArrayList<DeviceComponentProductionSpecificationComponent>();
+      this.productionSpecification.add(t);
+      return this;
     }
 
     /**
@@ -925,10 +946,10 @@ public class DeviceComponent extends DomainResource {
     return ResourceType.DeviceComponent;
    }
 
+  @SearchParamDefinition(name="source", path="DeviceComponent.source", description="The device source", type="reference" )
+  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="parent", path="DeviceComponent.parent", description="The parent DeviceComponent resource", type="reference" )
   public static final String SP_PARENT = "parent";
-  @SearchParamDefinition(name = "source", path = "DeviceComponent.source", description = "The device source", type = "reference")
-  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="type", path="DeviceComponent.type", description="The device component type", type="token" )
   public static final String SP_TYPE = "type";
 

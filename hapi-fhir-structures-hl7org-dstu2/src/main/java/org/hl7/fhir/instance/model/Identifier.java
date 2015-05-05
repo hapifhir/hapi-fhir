@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 10:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,7 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A technical identifier - identifies some entity uniquely and unambiguously.
  */
@@ -106,10 +107,10 @@ public class Identifier extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
-            case USUAL: return "usual";
-            case OFFICIAL: return "official";
-            case TEMP: return "temp";
-            case SECONDARY: return "secondary";
+            case USUAL: return "Usual";
+            case OFFICIAL: return "Official";
+            case TEMP: return "Temp";
+            case SECONDARY: return "Secondary";
             default: return "?";
           }
         }
@@ -146,42 +147,42 @@ public class Identifier extends Type implements ICompositeType {
     /**
      * The purpose of this identifier.
      */
-    @Child(name = "use", type = {CodeType.class}, order = 0, min = 0, max = 1, enumFactory = IdentifierUseEnumFactory.class)
+    @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="usual | official | temp | secondary (If known)", formalDefinition="The purpose of this identifier." )
     protected Enumeration<IdentifierUse> use;
 
     /**
-     * A text string for the identifier that can be displayed to a human so they can recognize the identifier.
+     * A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.
      */
-    @Child(name = "label", type = {StringType.class}, order = 1, min = 0, max = 1)
-    @Description(shortDefinition="Description of identifier", formalDefinition="A text string for the identifier that can be displayed to a human so they can recognize the identifier." )
-    protected StringType label;
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Description(shortDefinition="Description of identifier", formalDefinition="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose." )
+    protected CodeableConcept type;
 
     /**
      * Establishes the namespace in which set of possible id values is unique.
      */
-    @Child(name = "system", type = {UriType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "system", type = {UriType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="The namespace for the identifier", formalDefinition="Establishes the namespace in which set of possible id values is unique." )
     protected UriType system;
 
     /**
      * The portion of the identifier typically displayed to the user and which is unique within the context of the system.
      */
-    @Child(name = "value", type = {StringType.class}, order = 3, min = 0, max = 1)
+    @Child(name = "value", type = {StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="The value that is unique", formalDefinition="The portion of the identifier typically displayed to the user and which is unique within the context of the system." )
     protected StringType value;
 
     /**
      * Time period during which identifier is/was valid for use.
      */
-    @Child(name = "period", type = {Period.class}, order = 4, min = 0, max = 1)
+    @Child(name = "period", type = {Period.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Time period when id is/was valid for use", formalDefinition="Time period during which identifier is/was valid for use." )
     protected Period period;
 
     /**
      * Organization that issued/manages the identifier.
      */
-    @Child(name = "assigner", type = {Organization.class}, order = 5, min = 0, max = 1)
+    @Child(name = "assigner", type = {Organization.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Organization that issued id (may be just text)", formalDefinition="Organization that issued/manages the identifier." )
     protected Reference assigner;
 
@@ -190,7 +191,7 @@ public class Identifier extends Type implements ICompositeType {
      */
     protected Organization assignerTarget;
 
-    private static final long serialVersionUID = 334577297L;
+    private static final long serialVersionUID = -478840981L;
 
     public Identifier() {
       super();
@@ -246,51 +247,26 @@ public class Identifier extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #label} (A text string for the identifier that can be displayed to a human so they can recognize the identifier.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+     * @return {@link #type} (A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.)
      */
-    public StringType getLabelElement() { 
-      if (this.label == null)
+    public CodeableConcept getType() { 
+      if (this.type == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Identifier.label");
+          throw new Error("Attempt to auto-create Identifier.type");
         else if (Configuration.doAutoCreate())
-          this.label = new StringType(); // bb
-      return this.label;
+          this.type = new CodeableConcept(); // cc
+      return this.type;
     }
 
-    public boolean hasLabelElement() { 
-      return this.label != null && !this.label.isEmpty();
-    }
-
-    public boolean hasLabel() { 
-      return this.label != null && !this.label.isEmpty();
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
     }
 
     /**
-     * @param value {@link #label} (A text string for the identifier that can be displayed to a human so they can recognize the identifier.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+     * @param value {@link #type} (A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.)
      */
-    public Identifier setLabelElement(StringType value) { 
-      this.label = value;
-      return this;
-    }
-
-    /**
-     * @return A text string for the identifier that can be displayed to a human so they can recognize the identifier.
-     */
-    public String getLabel() { 
-      return this.label == null ? null : this.label.getValue();
-    }
-
-    /**
-     * @param value A text string for the identifier that can be displayed to a human so they can recognize the identifier.
-     */
-    public Identifier setLabel(String value) { 
-      if (Utilities.noString(value))
-        this.label = null;
-      else {
-        if (this.label == null)
-          this.label = new StringType();
-        this.label.setValue(value);
-      }
+    public Identifier setType(CodeableConcept value) { 
+      this.type = value;
       return this;
     }
 
@@ -463,7 +439,7 @@ public class Identifier extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("use", "code", "The purpose of this identifier.", 0, java.lang.Integer.MAX_VALUE, use));
-        childrenList.add(new Property("label", "string", "A text string for the identifier that can be displayed to a human so they can recognize the identifier.", 0, java.lang.Integer.MAX_VALUE, label));
+        childrenList.add(new Property("type", "CodeableConcept", "A coded type for the identifier that can be used to determine which identifier to use for a specific purpose.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("system", "uri", "Establishes the namespace in which set of possible id values is unique.", 0, java.lang.Integer.MAX_VALUE, system));
         childrenList.add(new Property("value", "string", "The portion of the identifier typically displayed to the user and which is unique within the context of the system.", 0, java.lang.Integer.MAX_VALUE, value));
         childrenList.add(new Property("period", "Period", "Time period during which identifier is/was valid for use.", 0, java.lang.Integer.MAX_VALUE, period));
@@ -474,7 +450,7 @@ public class Identifier extends Type implements ICompositeType {
         Identifier dst = new Identifier();
         copyValues(dst);
         dst.use = use == null ? null : use.copy();
-        dst.label = label == null ? null : label.copy();
+        dst.type = type == null ? null : type.copy();
         dst.system = system == null ? null : system.copy();
         dst.value = value == null ? null : value.copy();
         dst.period = period == null ? null : period.copy();
@@ -493,7 +469,7 @@ public class Identifier extends Type implements ICompositeType {
         if (!(other instanceof Identifier))
           return false;
         Identifier o = (Identifier) other;
-        return compareDeep(use, o.use, true) && compareDeep(label, o.label, true) && compareDeep(system, o.system, true)
+        return compareDeep(use, o.use, true) && compareDeep(type, o.type, true) && compareDeep(system, o.system, true)
            && compareDeep(value, o.value, true) && compareDeep(period, o.period, true) && compareDeep(assigner, o.assigner, true)
           ;
       }
@@ -505,12 +481,12 @@ public class Identifier extends Type implements ICompositeType {
         if (!(other instanceof Identifier))
           return false;
         Identifier o = (Identifier) other;
-        return compareValues(use, o.use, true) && compareValues(label, o.label, true) && compareValues(system, o.system, true)
-           && compareValues(value, o.value, true);
+        return compareValues(use, o.use, true) && compareValues(system, o.system, true) && compareValues(value, o.value, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (use == null || use.isEmpty()) && (label == null || label.isEmpty())
+        return super.isEmpty() && (use == null || use.isEmpty()) && (type == null || type.isEmpty())
            && (system == null || system.isEmpty()) && (value == null || value.isEmpty()) && (period == null || period.isEmpty())
            && (assigner == null || assigner.isEmpty());
       }
