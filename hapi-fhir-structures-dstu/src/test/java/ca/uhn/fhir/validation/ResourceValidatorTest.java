@@ -9,10 +9,12 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -25,6 +27,7 @@ import static org.junit.Assert.fail;
 public class ResourceValidatorTest {
 
 	private static FhirContext ourCtx = new FhirContext();
+	private static Locale ourDefaultLocale;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceValidatorTest.class);
 
 	@Test
@@ -45,10 +48,29 @@ public class ResourceValidatorTest {
 		} catch (ValidationFailureException e) {
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			assertEquals(1, e.getOperationOutcome().getIssue().size());
-			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("Invalid content was found starting with element 'breed'"));
+			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type.2.4.a"));
 		}
 	}
-
+	
+	@BeforeClass
+	public static void beforeClass() {
+		/*
+		 * We cache the default locale, but temporarily set it to a random value during this test. This helps ensure that there are no
+		 * language specific dependencies in the test. 
+		 */
+		ourDefaultLocale = Locale.getDefault();
+		
+		Locale[] available = Locale.getAvailableLocales();
+		Locale newLocale = available[(int)(Math.random() * available.length)];
+		Locale.setDefault(newLocale);
+		
+		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
+	}
+	
+	public static void afterClass() {
+		Locale.setDefault(ourDefaultLocale);
+	}
+	
 	/**
 	 * See issue #50
 	 */
@@ -92,7 +114,7 @@ public class ResourceValidatorTest {
 		} catch (ValidationFailureException e) {
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			assertEquals(1, e.getOperationOutcome().getIssue().size());
-			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("Inv-2: A system is required if a value is provided."));
+			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("Inv-2:"));
 		}
 	}
 
@@ -114,7 +136,7 @@ public class ResourceValidatorTest {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
+		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2:"));
 
 		p.getTelecomFirstRep().setSystem(ContactSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);
@@ -155,7 +177,7 @@ public class ResourceValidatorTest {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2: A system is required if a value is provided."));
+		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2:"));
 	}
 
 	private FhirValidator createFhirValidator() {
