@@ -48,6 +48,10 @@
 	</dependencies>
 
 	<prerequisites>
+		<!--
+		   TODO: the version number here should probably be
+		   either 3.2 or 3.3. Check and fix
+		-->
 		<maven>3.0.1</maven>
 	</prerequisites>
 
