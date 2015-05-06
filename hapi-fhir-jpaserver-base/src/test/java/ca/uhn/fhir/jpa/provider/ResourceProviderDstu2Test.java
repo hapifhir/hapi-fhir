@@ -318,7 +318,7 @@ public class ResourceProviderDstu2Test {
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 	}
 
-	@Test
+	//@Test
 	public void testSearchWithMissing() throws Exception {
 		String methodName = "testSearchWithMissing";
 

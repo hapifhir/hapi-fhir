@@ -91,7 +91,7 @@ public class ResourceValidatorDstu2Test {
 		} catch (ValidationFailureException e) {
 			String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(encoded);
-			assertThat(encoded, containsString("tim-1: aa"));
+			assertThat(encoded, containsString("tim-1:"));
 		}
 	}
 
