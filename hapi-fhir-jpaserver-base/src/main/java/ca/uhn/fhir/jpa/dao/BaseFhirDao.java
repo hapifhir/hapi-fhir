@@ -24,8 +24,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -636,7 +638,12 @@ public abstract class BaseFhirDao implements IDao {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters;
 		try {
-			parameters = URLEncodedUtils.parse(new URI(theMatchUrl), "UTF-8");
+			String matchUrl = theMatchUrl;
+			if (matchUrl.indexOf('?') == -1) {
+				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: URL does not contain any parameters ('?' not detected)");
+			}
+			matchUrl = matchUrl.replace("|", "%7C");
+			parameters = URLEncodedUtils.parse(new URI(matchUrl), "UTF-8");
 		} catch (URISyntaxException e) {
 			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: " + e.toString());
 		}

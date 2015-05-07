@@ -41,6 +41,14 @@ public class SystemProviderTest {
 		ourLog.info(response);
 	}
 	
+	@Test
+	public void testTransactionFromBundle2() throws Exception {
+
+		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+	}
 	
 	@AfterClass
 	public static void afterClass() throws Exception {
