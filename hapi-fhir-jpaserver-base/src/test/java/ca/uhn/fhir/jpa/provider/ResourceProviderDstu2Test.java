@@ -3,12 +3,14 @@ package ca.uhn.fhir.jpa.provider;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -270,7 +272,7 @@ public class ResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue("555-44-4444");
+		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
 		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
@@ -291,26 +293,32 @@ public class ResourceProviderDstu2Test {
 		 * but we want to make sure that works too..  
 		 */
 		Socket sock = new Socket();
+		sock.setSoTimeout(3000);
 		try {
 			sock.connect(new InetSocketAddress("localhost", ourPort));
-			sock.getOutputStream().write(("DELETE " + "/fhir/context/Patient?identifier=" + ("http://ghh.org/patient|555-44-4444")).getBytes("UTF-8"));
-			sock.getOutputStream().write("\n\n".getBytes("UTF-8"));
-			sock.getOutputStream().flush();
+			sock.getOutputStream().write(("DELETE /fhir/context/Patient?identifier=http://ghh.org/patient|" + methodName + " HTTP/1.1\n").getBytes("UTF-8"));
+			sock.getOutputStream().write("Host: localhost\n".getBytes("UTF-8"));
+			sock.getOutputStream().write("\n".getBytes("UTF-8"));
 			
-			InputStream inputStream = sock.getInputStream();
+			BufferedReader socketInput = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
-			byte[] buf = new byte[10000];
-			int count;
-			StringBuilder b = new StringBuilder();
-			while ((count = inputStream.read(buf)) != -1) {
-				b.append(new String(buf, 0, count, Charset.forName("UTF-8")));
-			}
+            //String response = ""; 
+            StringBuilder b = new StringBuilder();
+            char[] buf = new char[1000];
+            while(socketInput.read(buf) != -1){
+            	b.append(buf);
+            }
 			String resp = b.toString();
 						
 			ourLog.info("Resp: {}", resp);
+		} catch (SocketTimeoutException e) {
+			e.printStackTrace();
 		} finally {
 			sock.close();
 		}
+		
+		Thread.sleep(1000);
+		
 		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
 		response = ourHttpClient.execute(read);
 		try {
