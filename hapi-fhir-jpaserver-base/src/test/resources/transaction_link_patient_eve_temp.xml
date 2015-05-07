@@ -1,3 +1,4 @@
+<!-- Example Provided by Rene Spronk -->
 <Bundle xmlns="http://hl7.org/fhir">
     <id value="ringholm1430996763590912"/>
     <type value="transaction"/>
