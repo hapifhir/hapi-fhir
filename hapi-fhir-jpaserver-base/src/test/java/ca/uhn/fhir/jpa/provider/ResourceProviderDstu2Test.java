@@ -302,7 +302,7 @@ public class ResourceProviderDstu2Test {
 			byte[] buf = new byte[10000];
 			int count;
 			StringBuilder b = new StringBuilder();
-			while ((count = inputStream.read(buf)) > 0) {
+			while ((count = inputStream.read(buf)) != -1) {
 				b.append(new String(buf, 0, count, Charset.forName("UTF-8")));
 			}
 			String resp = b.toString();

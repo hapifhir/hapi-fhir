@@ -2006,7 +2006,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				entity = myEntityManager.find(ResourceTable.class, pid);
 				resourceId = entity.getIdDt();
 			} else {
-				return create(theResource);
+				return create(theResource, null, thePerformIndexing);
 			}
 		} else {
 			resourceId = theResource.getId();

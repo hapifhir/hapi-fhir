@@ -200,9 +200,9 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
 
 					UrlParts parts = parseUrl(verb.getCode(), url);
-					if (res.getId().hasIdPart() && isBlank(parts.getResourceId())) {
-						parts.setResourceId(res.getId().getIdPart());
-					}
+//					if (res.getId().hasIdPart() && isBlank(parts.getResourceId())) {
+//						parts.setResourceId(res.getId().getIdPart());
+//					}
 					if (isNotBlank(parts.getResourceId())) {
 						res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
 						outcome = resourceDao.update(res, null, false);

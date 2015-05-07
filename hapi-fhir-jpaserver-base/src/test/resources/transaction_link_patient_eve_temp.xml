@@ -11,7 +11,7 @@
                 </text>
                 <target>
                     <!-- unversioned, part of a transaction -->
-                    <reference value="Patient/b555-44-4444"/>
+                    <reference value="Patient/555-44-4444"/>
                 </target>
                 <recorded value="2015-05-07T13:06:03+01:00"/>
                 <reason>
@@ -27,7 +27,7 @@
                         <code value="patient"/>
                     </type>
                     <referenceReference>
-                        <reference value="Patient/b555-44-4444"/>
+                        <reference value="Patient/555-44-4444"/>
                         <display value="Patient Everywoman"/>
                     </referenceReference>
                     <display value="Eve Everywoman"/>
@@ -41,7 +41,7 @@
     <entry>
         <resource>
             <Patient>
-                <id value="b555-44-4444"/>
+                <id value="555-44-4444"/>
                 <extension url="http://ihe.net/ITI-78/Profile/pdqm#mothersMaidenName">
                     <valueHumanName>
                         <family value="Jones"/>
@@ -123,7 +123,7 @@
                 </managingOrganization>
                 <link>
                     <other>
-                        <reference value="Patient/b555-44-4444"/>
+                        <reference value="Patient/555-44-4444"/>
                     </other>
                     <type value="replace"/>
                 </link>
