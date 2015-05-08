@@ -22,6 +22,16 @@ package ca.uhn.fhir.rest.gclient;
 
 public interface IParam {
 
+	/**
+	 * Returns the name of this parameter
+	 */
 	String getParamName();
 
+	/**
+	 * Sets the <code>:missing</code> qualifier for this parameter. Set this to <code>true</code>
+	 * to indicate that the server should return resources with this value <p>populated</p>. Set this to
+	 * <code>false</code> to indicate that the server should return resources with this value <b>missing</b>.
+	 */
+	ICriterion<?> isMissing(boolean theMissing);
+	
 }

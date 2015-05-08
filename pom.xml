@@ -12,9 +12,9 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>HAPI-FHIR</name>
-	<url>http://hl7api.sourceforge.net/hapi-fhir/</url>
+	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
 	<organization>
 		<name>University Health Network</name>
@@ -48,6 +48,10 @@
 	</dependencies>
 
 	<prerequisites>
+		<!--
+		   TODO: the version number here should probably be
+		   either 3.2 or 3.3. Check and fix
+		-->
 		<maven>3.0.1</maven>
 	</prerequisites>
 

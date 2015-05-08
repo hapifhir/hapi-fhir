@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -616,6 +617,64 @@ public class GenericClientDstu2Test {
 		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
 	}
 
+	
+	@Test
+	public void testTransactionWithString() throws Exception {
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle req = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		req.addEntry().setResource(new Patient());
+		req.addEntry().setResource(new Observation());
+		String reqStringJson = ourCtx.newJsonParser().encodeResourceToString(req);
+		String reqStringXml = ourCtx.newXmlParser().encodeResourceToString(req);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		final String respStringJson = ourCtx.newJsonParser().encodeResourceToString(resp);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respStringJson), Charset.forName("UTF-8"));
+			}});
+		
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+        String response = client.transaction()
+                .withBundle(reqStringJson)
+                .execute();
+        //@formatter:on
+
+		assertEquals("http://example.com/fhir/", capt.getValue().getURI().toString());
+		assertEquals(respStringJson, response);
+		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
+		IOUtils.closeQuietly(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
+		assertEquals(reqStringJson, requestString);
+		assertEquals("application/json+fhir; charset=UTF-8", capt.getValue().getFirstHeader("Content-Type").getValue());
+		
+		//@formatter:off
+        response = client.transaction()
+                .withBundle(reqStringJson)
+                .encodedXml()
+                .execute();
+        //@formatter:on
+
+		assertEquals("http://example.com/fhir/?_format=xml", capt.getValue().getURI().toString());
+		assertEquals(respStringJson, response);
+		requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
+		IOUtils.closeQuietly(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
+		assertEquals(reqStringXml, requestString);
+		assertEquals("application/xml+fhir; charset=UTF-8", capt.getValue().getFirstHeader("Content-Type").getValue());
+
+	}
+	
+	
+	
 	@Test
 	public void testTransactionWithTransactionResource() throws Exception {
 

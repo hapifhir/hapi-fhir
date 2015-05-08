@@ -48,23 +48,35 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public String getQueryParameterQualifier() {
-		if (getMissing() != null) {
-			return super.getQueryParameterQualifier();
-		}else if (isExact()) {
+	String doGetQueryParameterQualifier() {
+		if (isExact()) {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
 		} else {
 			return null;
 		}
 	}
 
+	@Override
+	String doGetValueAsQueryToken() {
+		return ParameterUtil.escape(myValue);
+	}
+
+	@Override
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
+			setExact(true);
+		} else {
+			setExact(false);
+		}
+		myValue = ParameterUtil.unescape(theValue);
+	}
+
 	public String getValue() {
 		return myValue;
 	}
 
-	@Override
-	public String getValueAsQueryToken() {
-		return ParameterUtil.escape(myValue);
+	public StringDt getValueAsStringDt() {
+		return new StringDt(myValue);
 	}
 
 	public String getValueNotNull() {
@@ -88,27 +100,16 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
-			setExact(true);
-		} else {
-			setExact(false);
-		}
-		myValue = ParameterUtil.unescape(theValue);
-	}
-
-	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("value", getValue());
 		if (myExact) {
 			builder.append("exact", myExact);
 		}
+		if (getMissing() != null) {
+			builder.append("missing", getMissing().booleanValue());
+		}
 		return builder.toString();
-	}
-
-	public StringDt getValueAsStringDt() {
-		return new StringDt(myValue);
 	}
 
 }

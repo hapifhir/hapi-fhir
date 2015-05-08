@@ -23,7 +23,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  */
 
 
-public class ReferenceClientParam implements IParam {
+public class ReferenceClientParam extends BaseClientParam  implements IParam {
 
 	private String myName;
 

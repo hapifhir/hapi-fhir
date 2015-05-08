@@ -142,33 +142,13 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 		myApproximate = false;
 	}
 
-	public QuantityCompararatorEnum getComparator() {
-		return myQuantity.getComparatorElement().getValueAsEnum();
+	@Override
+	String doGetQueryParameterQualifier() {
+		return null;
 	}
 
 	@Override
-	public String getQueryParameterQualifier() {
-		return super.getQueryParameterQualifier();
-	}
-
-	public UriDt getSystem() {
-		return myQuantity.getSystemElement();
-	}
-
-	public String getUnits() {
-		return myQuantity.getUnitsElement().getValue();
-	}
-
-	public DecimalDt getValue() {
-		return myQuantity.getValueElement();
-	}
-
-	@Override
-	public String getValueAsQueryToken() {
-		if (super.getMissing() != null) {
-			return super.getValueAsQueryToken();
-		}
-
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (myApproximate) {
 			b.append('~');
@@ -189,6 +169,62 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 		}
 
 		return b.toString();
+	}
+
+	@Override
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
+		clear();
+
+		if (theValue == null) {
+			return;
+		}
+		List<String> parts = ParameterUtil.splitParameterString(theValue, '|', true);
+
+		if (parts.size() > 0 && StringUtils.isNotBlank(parts.get(0))) {
+			if (parts.get(0).startsWith("~")) {
+				myQuantity.setComparator((QuantityCompararatorEnum) null);
+				myApproximate = true;
+				myQuantity.setValue(new BigDecimal(parts.get(0).substring(1)));
+			} else if (parts.get(0).startsWith("<=")) {
+				myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);
+				myQuantity.setValue(new BigDecimal(parts.get(0).substring(2)));
+			} else if (parts.get(0).startsWith("<")) {
+				myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN);
+				String valStr = parts.get(0).substring(1);
+				myQuantity.setValue(new BigDecimal(valStr));
+			} else if (parts.get(0).startsWith(">=")) {
+				myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
+				myQuantity.setValue(new BigDecimal(parts.get(0).substring(2)));
+			} else if (parts.get(0).startsWith(">")) {
+				myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN);
+				myQuantity.setValue(new BigDecimal(parts.get(0).substring(1)));
+			} else {
+				myQuantity.setValue(new BigDecimal(parts.get(0)));
+			}
+		}
+		if (parts.size() > 1 && StringUtils.isNotBlank(parts.get(1))) {
+			myQuantity.setSystem(parts.get(1));
+		}
+		if (parts.size() > 2 && StringUtils.isNotBlank(parts.get(2))) {
+			myQuantity.setUnits(parts.get(2));
+		}
+
+	}
+
+	public QuantityCompararatorEnum getComparator() {
+		return myQuantity.getComparatorElement().getValueAsEnum();
+	}
+
+	public UriDt getSystem() {
+		return myQuantity.getSystemElement();
+	}
+
+	public String getUnits() {
+		return myQuantity.getUnitsElement().getValue();
+	}
+
+	public DecimalDt getValue() {
+		return myQuantity.getValueElement();
 	}
 
 	public boolean isApproximate() {
@@ -251,51 +287,6 @@ public class QuantityParam extends BaseParam implements IQueryParameterType {
 	public QuantityParam setValue(long theValue) {
 		myQuantity.setValue(theValue);
 		return this;
-	}
-
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
-		clear();
-
-		super.setValueAsQueryToken(theQualifier, theValue);
-		if (getMissing() != null) {
-			return;
-		}
-
-		if (theValue == null) {
-			return;
-		}
-		List<String> parts = ParameterUtil.splitParameterString(theValue, '|', true);
-
-		if (parts.size() > 0 && StringUtils.isNotBlank(parts.get(0))) {
-			if (parts.get(0).startsWith("~")) {
-				myQuantity.setComparator((QuantityCompararatorEnum) null);
-				myApproximate = true;
-				myQuantity.setValue(new BigDecimal(parts.get(0).substring(1)));
-			} else if (parts.get(0).startsWith("<=")) {
-				myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS);
-				myQuantity.setValue(new BigDecimal(parts.get(0).substring(2)));
-			} else if (parts.get(0).startsWith("<")) {
-				myQuantity.setComparator(QuantityCompararatorEnum.LESSTHAN);
-				String valStr = parts.get(0).substring(1);
-				myQuantity.setValue(new BigDecimal(valStr));
-			} else if (parts.get(0).startsWith(">=")) {
-				myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS);
-				myQuantity.setValue(new BigDecimal(parts.get(0).substring(2)));
-			} else if (parts.get(0).startsWith(">")) {
-				myQuantity.setComparator(QuantityCompararatorEnum.GREATERTHAN);
-				myQuantity.setValue(new BigDecimal(parts.get(0).substring(1)));
-			} else {
-				myQuantity.setValue(new BigDecimal(parts.get(0)));
-			}
-		}
-		if (parts.size() > 1 && StringUtils.isNotBlank(parts.get(1))) {
-			myQuantity.setSystem(parts.get(1));
-		}
-		if (parts.size() > 2 && StringUtils.isNotBlank(parts.get(2))) {
-			myQuantity.setUnits(parts.get(2));
-		}
-
 	}
 
 	@Override

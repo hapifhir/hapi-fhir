@@ -59,4 +59,16 @@ public interface IQueryParameterType {
 	 */
 	public String getQueryParameterQualifier();
 
+	/**
+	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale 
+	 * instead of a normal value 
+	 */
+	Boolean getMissing();
+
+	/**
+	 * If set to non-null value, indicates that this parameter has been populated with a "[name]:missing=true" or "[name]:missing=false" vale 
+	 * instead of a normal value 
+	 */
+	void setMissing(Boolean theMissing);
+
 }

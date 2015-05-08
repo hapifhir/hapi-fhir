@@ -173,6 +173,25 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 */
 	public abstract String getResourceName();
 
+	/**
+	 * Returns the value of {@link #getResourceOperationType()} or {@link #getSystemOperationType()} or {@link #getOtherOperationType()}
+	 */
+	public String getResourceOrSystemOperationType() {
+		Enum<?> retVal = getResourceOperationType();
+		if (retVal != null) {
+			return retVal.name();
+		}
+		retVal = getSystemOperationType();
+		if (retVal != null) {
+			return retVal.name();
+		}
+		retVal = getOtherOperationType();
+		if (retVal != null) {
+			return retVal.name();
+		}
+		return null;
+	}
+
 	public abstract RestfulOperationTypeEnum getResourceOperationType();
 
 	public abstract RestfulOperationSystemEnum getSystemOperationType();

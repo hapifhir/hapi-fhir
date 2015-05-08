@@ -41,21 +41,6 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 	public TokenParam() {
 	}
 
-	public TokenParam(String theSystem, String theValue) {
-		setSystem(theSystem);
-		setValue(theValue);
-	}
-
-	public TokenParam(String theSystem, String theValue, boolean theText) {
-		if (theText && isNotBlank(theSystem)) {
-			throw new IllegalArgumentException(
-					"theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
-		}
-		setSystem(theSystem);
-		setValue(theValue);
-		setText(theText);
-	}
-
 	/**
 	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a parameter
 	 * 
@@ -76,18 +61,53 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
 	}
 
-	private static String toSystemValue(UriDt theSystem) {
-		return theSystem.getValueAsString();
+	public TokenParam(String theSystem, String theValue) {
+		setSystem(theSystem);
+		setValue(theValue);
+	}
+
+	public TokenParam(String theSystem, String theValue, boolean theText) {
+		if (theText && isNotBlank(theSystem)) {
+			throw new IllegalArgumentException(
+					"theSystem can not be non-blank if theText is true (:text searches do not include a system). In other words, set the first parameter to null for a text search");
+		}
+		setSystem(theSystem);
+		setValue(theValue);
+		setText(theText);
 	}
 
 	@Override
-	public String getQueryParameterQualifier() {
-		if (getMissing() != null) {
-			return super.getQueryParameterQualifier();
-		} else if (isText()) {
+	String doGetQueryParameterQualifier() {
+		if (isText()) {
 			return Constants.PARAMQUALIFIER_TOKEN_TEXT;
 		} else {
 			return null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	String doGetValueAsQueryToken() {
+		if (getSystem() != null) {
+			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
+		} else {
+			return ParameterUtil.escape(getValue());
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	void doSetValueAsQueryToken(String theQualifier, String theParameter) {
+		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
+		if (barIndex != -1) {
+			setSystem(theParameter.substring(0, barIndex));
+			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
+		} else {
+			setValue(ParameterUtil.unescape(theParameter));
 		}
 	}
 
@@ -99,18 +119,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return myValue;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String getValueAsQueryToken() {
-		if (getMissing() != null) {
-			return super.getValueAsQueryToken();
-		} else if (getSystem() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
-		} else {
-			return ParameterUtil.escape(getValue());
-		}
+	public InternalCodingDt getValueAsCoding() {
+		return new InternalCodingDt(mySystem, myValue);
 	}
 
 	public String getValueNotNull() {
@@ -137,25 +147,6 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		myValue = theValue;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void setValueAsQueryToken(String theQualifier, String theParameter) {
-		super.setValueAsQueryToken(theQualifier, theParameter);
-		if (getMissing() != null) {
-			return;
-		}
-		
-		int barIndex = ParameterUtil.nonEscapedIndexOf(theParameter, '|');
-		if (barIndex != -1) {
-			setSystem(theParameter.substring(0, barIndex));
-			setValue(ParameterUtil.unescape(theParameter.substring(barIndex + 1)));
-		} else {
-			setValue(ParameterUtil.unescape(theParameter));
-		}
-	}
-
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -170,8 +161,8 @@ public class TokenParam extends BaseParam implements IQueryParameterType {
 		return builder.toString();
 	}
 
-	public InternalCodingDt getValueAsCoding() {
-		return new InternalCodingDt(mySystem, myValue);
+	private static String toSystemValue(UriDt theSystem) {
+		return theSystem.getValueAsString();
 	}
 
 }

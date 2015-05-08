@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.StringParam;
 
 public abstract class BaseIdentifierDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 
@@ -110,6 +111,31 @@ public abstract class BaseIdentifierDt extends BaseIdentifiableElement implement
 		} else {
 			setValue(ParameterUtil.unescape(theParameter));
 		}
+	}
+
+	
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public Boolean getMissing() {
+		return null;
+	}
+
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
 	}
 
 }

@@ -91,7 +91,7 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		if (myUndeclaredExtensions == null) {
 			myUndeclaredExtensions = new ArrayList<ExtensionDt>();
 		}
-		return Collections.unmodifiableList(myUndeclaredExtensions);
+		return (myUndeclaredExtensions);
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public abstract class BaseElement implements IElement, ISupportsUndeclaredExtens
 		if (myUndeclaredModifierExtensions == null) {
 			myUndeclaredModifierExtensions = new ArrayList<ExtensionDt>();
 		}
-		return Collections.unmodifiableList(myUndeclaredModifierExtensions);
+		return (myUndeclaredModifierExtensions);
 	}
 
 	/**

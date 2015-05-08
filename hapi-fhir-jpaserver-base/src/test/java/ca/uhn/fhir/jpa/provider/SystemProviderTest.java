@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.provider;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.List;
+import static org.junit.Assert.*;
 
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -15,25 +16,22 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu1;
 import ca.uhn.fhir.jpa.rp.dstu.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu.PatientResourceProvider;
-import ca.uhn.fhir.jpa.provider.QuestionnaireResourceProvider;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
 public class SystemProviderTest {
 
-	
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTest.class);
 	private static Server ourServer;
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static FhirContext ourCtx;
@@ -42,14 +40,48 @@ public class SystemProviderTest {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 
-		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/test-server-seed-bundle.json");
-		Bundle bundle = FhirContext.forDstu1().newJsonParser().parseBundle(new InputStreamReader(bundleRes));
-		List<IResource> res = bundle.toListOfResources();
-		
-		ourClient.transaction().withResources(res).execute();
-		
+		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
 	}
 	
+	@Test
+	public void testTransactionFromBundle2() throws Exception {
+
+		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+		
+		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		IdDt id1_1 = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		assertEquals("Provenance", id1_1.getResourceType());
+		IdDt id1_2 = new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation());
+		IdDt id1_3 = new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation());
+		IdDt id1_4 = new IdDt(resp.getEntry().get(4).getTransactionResponse().getLocation());
+
+		/*
+		 * Same bundle!
+		 */
+		
+		bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		bundle = IOUtils.toString(bundleRes);
+		response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+		
+		resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		IdDt id2_1 = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt id2_2 = new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation());
+		IdDt id2_3 = new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation());
+		IdDt id2_4 = new IdDt(resp.getEntry().get(4).getTransactionResponse().getLocation());
+		
+		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
+		assertEquals("Provenance", id2_1.getResourceType());
+		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
+		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
+		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
+	}
 	
 	@AfterClass
 	public static void afterClass() throws Exception {
@@ -60,28 +92,28 @@ public class SystemProviderTest {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourAppCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml", "hapi-fhir-server-resourceproviders-dstu1.xml");
+		ourAppCtx = new ClassPathXmlApplicationContext("fhir-jpabase-spring-test-config.xml", "hapi-fhir-server-resourceproviders-dstu2.xml");
 
-		IFhirResourceDao<Patient> patientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDaoDstu1", IFhirResourceDao.class);
+		IFhirResourceDao<Patient> patientDao = (IFhirResourceDao<Patient>) ourAppCtx.getBean("myPatientDaoDstu2", IFhirResourceDao.class);
 		PatientResourceProvider patientRp = new PatientResourceProvider();
 		patientRp.setDao(patientDao);
 
-		IFhirResourceDao<Questionnaire> questionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDaoDstu1", IFhirResourceDao.class);
+		IFhirResourceDao<Questionnaire> questionnaireDao = (IFhirResourceDao<Questionnaire>) ourAppCtx.getBean("myQuestionnaireDaoDstu2", IFhirResourceDao.class);
 		QuestionnaireResourceProvider questionnaireRp = new QuestionnaireResourceProvider();
 		questionnaireRp.setDao(questionnaireDao);
 
-		IFhirResourceDao<Observation> observationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDaoDstu1", IFhirResourceDao.class);
+		IFhirResourceDao<Observation> observationDao = (IFhirResourceDao<Observation>) ourAppCtx.getBean("myObservationDaoDstu2", IFhirResourceDao.class);
 		ObservationResourceProvider observationRp = new ObservationResourceProvider();
 		observationRp.setDao(observationDao);
 
-		IFhirResourceDao<Organization> organizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu1", IFhirResourceDao.class);
+		IFhirResourceDao<Organization> organizationDao = (IFhirResourceDao<Organization>) ourAppCtx.getBean("myOrganizationDaoDstu2", IFhirResourceDao.class);
 		OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 		organizationRp.setDao(organizationDao);
 
 		RestfulServer restServer = new RestfulServer();
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
-		JpaSystemProviderDstu1 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu1.class, "mySystemProviderDstu1");
+		JpaSystemProviderDstu2 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu2.class, "mySystemProviderDstu2");
 		restServer.setPlainProviders(systemProv);
 
 		int myPort = RandomServerPortProvider.findFreePort();
@@ -96,10 +128,12 @@ public class SystemProviderTest {
 		servletHolder.setServlet(restServer);
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
+		ourCtx = FhirContext.forDstu2();
+		restServer.setFhirContext(ourCtx);
+		
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		ourCtx = restServer.getFhirContext();
 
 		ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 		ourClient = ourCtx.newRestfulGenericClient(serverBase);

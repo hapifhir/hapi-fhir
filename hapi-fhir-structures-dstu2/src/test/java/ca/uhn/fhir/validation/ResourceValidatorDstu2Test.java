@@ -10,6 +10,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
@@ -65,7 +66,7 @@ public class ResourceValidatorDstu2Test {
 		ourLog.info(resultString);
 
 		assertEquals(2, result.getOperationOutcome().getIssue().size());
-		assertThat(resultString, StringContains.containsString("cvc-pattern-valid: Value '2000-15-31'"));
+		assertThat(resultString, StringContains.containsString("'2000-15-31'"));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -90,7 +91,7 @@ public class ResourceValidatorDstu2Test {
 		} catch (ValidationFailureException e) {
 			String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(encoded);
-			assertThat(encoded, containsString("if there's a duration, there needs to be"));
+			assertThat(encoded, containsString("tim-1:"));
 		}
 	}
 
@@ -115,7 +116,7 @@ public class ResourceValidatorDstu2Test {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("if there's a duration, there needs to be"));
+		assertThat(encoded, containsString("tim-1:"));
 	}
 
 	@Test
@@ -157,7 +158,7 @@ public class ResourceValidatorDstu2Test {
 		} catch (ValidationFailureException e) {
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			assertEquals(1, e.getOperationOutcome().getIssue().size());
-			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("Invalid content was found starting with element 'breed'"));
+			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
 		}
 	}
 
@@ -179,7 +180,7 @@ public class ResourceValidatorDstu2Test {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetails(), containsString("A system is required if a value is provided."));
+		assertThat(operationOutcome.getIssueFirstRep().getDetails(), containsString("cpt-2:"));
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);

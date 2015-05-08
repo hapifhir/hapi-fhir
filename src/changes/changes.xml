@@ -161,7 +161,47 @@
 				populated in a resource ID when the resource is parsed. Thanks to
 				Nick Peterson for reporting, and for providing a test case!
 			</action>
-		</release>
+			<action type="add">
+				Allow fluent/generic client users to execute a transaction using a raw string (containing a bundle resource)
+				as input instead of a Bundle resource class instance.
+			</action>
+			<action type="fix">
+				Disable date validation in the web tester UI, so that it is possible to 
+				enter partial dates, or dates without times, or even test out invalid date
+				options.
+			</action>
+			<action type="fix" issue="36">
+				Make BaseElement#getUndeclaredExtensions() and BaseElement#getUndeclaredExtensions() return
+				a mutable list so that it is possible to delete extensions from a resource instance.
+			</action>
+			<action type="fix" issue="168">
+				Server conformance statement check in clients (this is the check
+				where the first time a given FhirContext is used to access a given server
+				base URL, it will first check the server's Conformance statement to ensure
+				that it supports the correct version of FHIR) now uses any 
+				registered client interceptors. In addition, IGenericClient now has a method
+				"forceConformanceCheck()" which manually triggers this check. Thanks to
+				Doug Martin for reporting and suggesting!
+			</action>
+			<action type="add" issue="167">
+				Rename the Spring Bean definition for the JPA server EntityManager from
+				"myEntityManagerFactory" to just "entityManagerFactory" as this is the
+				default bean name expected in other parts of the Spring framework. 
+				Thanks to Mohammad Jafari for the suggestion!
+			</action>
+			<action type="add" issue="164">
+				Improve error message when a user tries to perform a create/update with an invalid
+				or missing Content-Type header. Thanks to wanghaisheng for reporting! (This was
+				actually a three part bug, so the following two fixes also reference this
+				bug number)
+			</action>
+			<action type="add" issue="164">
+				Add support for :missing qualifier in generic/fluent client.
+			</action>
+			<action type="add" issue="164">
+				Add support for :missing qualifier in JPA server.
+			</action>
+					</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
 				Support for DSTU2 features introduced: New resource definitions, Bundle resource, 

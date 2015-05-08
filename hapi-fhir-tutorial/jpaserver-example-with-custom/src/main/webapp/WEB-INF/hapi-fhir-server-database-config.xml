@@ -32,7 +32,7 @@
 	database (e.g. Postgres). Consult the Hibernate documentation to see a list of
 	available dialects. 
 	-->
-	<bean id="myEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
 		<!-- 
 		<property name="persistenceXmlLocation" value="classpath:META-INF/fhirtest_persistence.xml" />

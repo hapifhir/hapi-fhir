@@ -51,6 +51,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInnapropriateForServerException;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.util.FhirTerser;
@@ -137,7 +138,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 	
 	@Override
-	public ServerValidationModeEnum getServerValidationModeEnum() {
+	public ServerValidationModeEnum getServerValidationMode() {
 		return myServerValidationMode;
 	}
 
@@ -195,23 +196,27 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	/**
 	 * This method is internal to HAPI - It may change in future versions, use with caution.
 	 */
-	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, HttpClient theHttpClient) {
-		String serverBase = theServerBase;
-		if (!serverBase.endsWith("/")) {
-			serverBase = serverBase + "/";
-		}
+	public void validateServerBaseIfConfiguredToDoSo(String theServerBase, HttpClient theHttpClient, BaseClient theClient) {
+		String serverBase = normalizeBaseUrlForMap(theServerBase);
 
 		switch (myServerValidationMode) {
 		case NEVER:
 			break;
 		case ONCE:
 			if (!myValidatedServerBaseUrls.contains(serverBase)) {
-				validateServerBase(serverBase, theHttpClient);
-				myValidatedServerBaseUrls.add(serverBase);
+				validateServerBase(serverBase, theHttpClient, theClient);
 			}
 			break;
 		}
 
+	}
+
+	private String normalizeBaseUrlForMap(String theServerBase) {
+		String serverBase = theServerBase;
+		if (!serverBase.endsWith("/")) {
+			serverBase = serverBase + "/";
+		}
+		return serverBase;
 	}
 
 	@Override
@@ -258,7 +263,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
+	public void setServerValidationMode(ServerValidationModeEnum theServerValidationMode) {
 		Validate.notNull(theServerValidationMode, "theServerValidationMode may not be null");
 		myServerValidationMode = theServerValidationMode;
 	}
@@ -269,10 +274,12 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		myHttpClient = null;
 	}
 
-	@SuppressWarnings("unchecked")
-	private void validateServerBase(String theServerBase, HttpClient theHttpClient) {
+	void validateServerBase(String theServerBase, HttpClient theHttpClient, BaseClient theClient) {
 
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
+		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
+			client.registerInterceptor(interceptor);
+		}
 		client.setDontValidateConformance(true);
 		
 		IBaseResource conformance;
@@ -296,7 +303,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		} else {
 			if (serverFhirVersionString.startsWith("0.80") || serverFhirVersionString.startsWith("0.0.8")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU1;
-			} else if (serverFhirVersionString.startsWith("0.4") || serverFhirVersionString.startsWith("0.5")) {
+			} else if (serverFhirVersionString.startsWith("0.4")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
 			} else if (serverFhirVersionString.startsWith("0.5")) {
 				serverFhirVersionEnum = FhirVersionEnum.DSTU2;
@@ -309,9 +316,22 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		if (serverFhirVersionEnum != null) {
 			FhirVersionEnum contextFhirVersion = myContext.getVersion().getVersion();
 			if (!contextFhirVersion.isEquivalentTo(serverFhirVersionEnum)) {
-				throw new FhirClientConnectionException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance", theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
+				throw new FhirClientInnapropriateForServerException(myContext.getLocalizer().getMessage(RestfulClientFactory.class, "wrongVersionInConformance", theServerBase + Constants.URL_TOKEN_METADATA, serverFhirVersionString, serverFhirVersionEnum, contextFhirVersion));
 			}
 		}
+		
+		myValidatedServerBaseUrls.add(normalizeBaseUrlForMap(theServerBase));
+
+	}
+
+	@Override
+	public ServerValidationModeEnum getServerValidationModeEnum() {
+		return getServerValidationMode();
+	}
+
+	@Override
+	public void setServerValidationModeEnum(ServerValidationModeEnum theServerValidationMode) {
+		setServerValidationMode(theServerValidationMode);
 	}
 
 }

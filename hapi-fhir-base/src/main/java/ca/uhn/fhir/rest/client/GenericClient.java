@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.client.HttpClient;
@@ -143,12 +144,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		super(theHttpClient, theServerBase, theFactory);
 		myContext = theContext;
 	}
-
 	
 	@Override
 	public BaseConformance conformance() {
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			throw new IllegalArgumentException("Must call conformance(" + IBaseConformance.class.getSimpleName() + ") for HL7.org structures");
+			throw new IllegalArgumentException("Must call conformance(" + IBaseConformance.class.getSimpleName() + ") instead of conformance() for HL7.org structures");
 		}
 		
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();
@@ -162,6 +162,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ResourceResponseHandler<? extends BaseConformance> binding = new ResourceResponseHandler<BaseConformance>(conformance, null);
 		BaseConformance resp = invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
 		return resp;
+	}
+
+	@Override
+	public void forceConformanceCheck() {
+		super.forceConformanceCheck();
 	}
 
 	@Override
@@ -588,23 +593,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return resp;
 		}
 
-		protected IBaseResource parseResourceBody(String theResourceBody) {
-			EncodingEnum encoding = null;
-			for (int i = 0; i < theResourceBody.length() && encoding == null; i++) {
-				switch (theResourceBody.charAt(i)) {
-				case '<':
-					encoding = EncodingEnum.XML;
-					break;
-				case '{':
-					encoding = EncodingEnum.JSON;
-					break;
-				}
-			}
+		protected IResource parseResourceBody(String theResourceBody) {
+			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
 				throw new InvalidRequestException("FHIR client can't determine resource encoding");
 			}
 			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
+
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -614,7 +610,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 	}
-
+	
 	private final class BundleResponseHandler implements IClientResponseHandler<Bundle> {
 
 		private Class<? extends IBaseResource> myType;
@@ -632,6 +628,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			IParser parser = respType.newParser(myContext);
 			return parser.parseBundle(myType, theResponseReader);
+		}
+	}
+
+	private final class StringResponseHandler implements IClientResponseHandler<String> {
+
+		@Override
+		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
+				BaseServerResponseException {
+			return IOUtils.toString(theResponseReader);
 		}
 	}
 
@@ -1575,6 +1580,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Bundle myBundle;
 		private List<IBaseResource> myResources;
 		private IBaseBundle myBaseBundle;
+		private String myRawBundle;
+		private EncodingEnum myRawBundleEncoding;
 
 		public TransactionExecutable(Bundle theResources) {
 			myBundle = theResources;
@@ -1588,6 +1595,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myBaseBundle = theBundle;
 		}
 
+		public TransactionExecutable(String theBundle) {
+			myRawBundle = theBundle;
+			myRawBundleEncoding = MethodUtil.detectEncodingNoDefault(myRawBundle);
+			if (myRawBundleEncoding == null) {
+				throw new IllegalArgumentException("Can not determine encoding of raw resource body");
+			}
+		}
+
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public T execute() {
@@ -1599,6 +1614,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			} else if (myBaseBundle != null) {
 				ResourceResponseHandler binding = new ResourceResponseHandler(myBaseBundle.getClass(), null);
 				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myBaseBundle, myContext);
+				return (T) invoke(params, binding, invocation);
+			} else if (myRawBundle != null) {
+				StringResponseHandler binding = new StringResponseHandler();
+				/*
+				 * If the user has explicitly requested a given encoding, we may need to reencode the raw string
+				 */
+				if (getParamEncoding() != null) {
+					if (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
+						IResource parsed = parseResourceBody(myRawBundle);
+						myRawBundle = getParamEncoding().newParser(getFhirContext()).encodeResourceToString(parsed);
+					}
+				}
+				BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(myRawBundle, myContext);
 				return (T) invoke(params, binding, invocation);
 			} else {
 				BundleResponseHandler binding = new BundleResponseHandler(null);
@@ -1627,6 +1655,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public <T extends IBaseBundle> ITransactionTyped<T> withBundle(T theBundle) {
 			Validate.notNull(theBundle, "theBundle must not be null");
 			return new TransactionExecutable<T>(theBundle);
+		}
+
+		@Override
+		public ITransactionTyped<String> withBundle(String theBundle) {
+			Validate.notBlank(theBundle, "theBundle must not be null");
+			return new TransactionExecutable<String>(theBundle);
 		}
 
 	}

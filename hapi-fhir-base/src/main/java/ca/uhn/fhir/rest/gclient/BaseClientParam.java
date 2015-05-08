@@ -20,26 +20,34 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-/**
- * Composite parameter type for use in fluent client interfaces
- */
-public class CompositeClientParam<A extends IParam, B extends IParam> extends BaseClientParam implements IParam {
+import ca.uhn.fhir.rest.server.Constants;
 
-	private String myName;
-
-	public CompositeClientParam(String theName) {
-		myName=theName;
-	}
-
+abstract class BaseClientParam implements IParam {
 
 	@Override
-	public String getParamName() {
-		return myName;
+	public ICriterion<?> isMissing(boolean theMissing) {
+		return new MissingCriterion(theMissing ? Constants.PARAMQUALIFIER_MISSING_TRUE : Constants.PARAMQUALIFIER_MISSING_FALSE);
 	}
-	
-	public ICompositeWithLeft<B> withLeft(ICriterion<A> theLeft) {
-		return new CompositeCriterion<A,B>(myName, theLeft);
+
+	private class MissingCriterion implements ICriterion<IParam>, ICriterionInternal
+	{
+		private String myParameterValue;
+
+
+		public MissingCriterion(String theParameterValue) {
+			myParameterValue = theParameterValue;
+		}
+
+		@Override
+		public String getParameterValue() {
+			return myParameterValue;
+		}
+
+		@Override
+		public String getParameterName() {
+			return BaseClientParam.this.getParamName() + Constants.PARAMQUALIFIER_MISSING;
+		}
+		
 	}
-	
 	
 }

@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.dao;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -424,16 +426,14 @@ public abstract class BaseFhirDao implements IDao {
 
 		// Get list of IDs
 		searchHistoryCurrentVersion(theResourceName, theId, theSince, end.getValue(), limit, tuples);
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 		ourLog.info("Retrieved {} history IDs from current versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
 		searchHistoryHistory(theResourceName, theId, theSince, end.getValue(), limit, tuples);
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
 		ourLog.info("Retrieved {} history IDs from previous versions in {} ms", tuples.size(), timer.getMillisAndRestart());
 
 		// Sort merged list
 		Collections.sort(tuples, Collections.reverseOrder());
-		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated());
+		assert tuples.size() < 2 || !tuples.get(tuples.size() - 2).getUpdated().before(tuples.get(tuples.size() - 1).getUpdated()) : tuples.toString();
 
 		return new IBundleProvider() {
 
@@ -641,7 +641,12 @@ public abstract class BaseFhirDao implements IDao {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters;
 		try {
-			parameters = URLEncodedUtils.parse(new URI(theMatchUrl), "UTF-8");
+			String matchUrl = theMatchUrl;
+			if (matchUrl.indexOf('?') == -1) {
+				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: URL does not contain any parameters ('?' not detected)");
+			}
+			matchUrl = matchUrl.replace("|", "%7C");
+			parameters = URLEncodedUtils.parse(new URI(matchUrl), "UTF-8");
 		} catch (URISyntaxException e) {
 			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: " + e.toString());
 		}
@@ -1045,6 +1050,9 @@ public abstract class BaseFhirDao implements IDao {
 				quantityParams = extractSearchParamQuantity(entity, theResource);
 				dateParams = extractSearchParamDates(entity, theResource);
 
+				ourLog.info("Indexing resource: {}", entity.getId());
+				ourLog.info("Storing string indexes: {}", stringParams);
+				
 				tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
 				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(entity, theResource)) {
 					if (next instanceof ResourceIndexedSearchParamToken) {

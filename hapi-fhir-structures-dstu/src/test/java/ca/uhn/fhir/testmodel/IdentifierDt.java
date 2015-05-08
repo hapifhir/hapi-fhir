@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.param.StringParam;
 
 /**
  * HAPI/FHIR <b>Identifier</b> Datatype
@@ -402,5 +403,29 @@ public class IdentifierDt
 		return null;
 	}	
 
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public Boolean getMissing() {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+	}
 
+	/**
+	 * <b>Not supported!</b>
+	 * 
+	 * @deprecated get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you
+	 * need this functionality
+	 */
+	@Deprecated
+	@Override
+	public void setMissing(Boolean theMissing) {
+		throw new UnsupportedOperationException("get/setMissing is not supported in StringDt. Use {@link StringParam} instead if you need this functionality");
+	}
+
+	
 }

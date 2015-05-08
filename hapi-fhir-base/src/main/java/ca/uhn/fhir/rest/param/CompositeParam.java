@@ -30,7 +30,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> implements IQueryParameterType {
+public class CompositeParam<A extends IQueryParameterType, B extends IQueryParameterType> extends BaseParam implements IQueryParameterType {
 
 	private A myLeftType;
 	private B myRightType;
@@ -59,27 +59,13 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		}
 	}
 
-	/**
-	 * @return Returns the left value for this parameter (the first of two parameters in this composite)
-	 */
-	public A getLeftValue() {
-		return myLeftType;
-	}
-
 	@Override
-	public String getQueryParameterQualifier() {
+	String doGetQueryParameterQualifier() {
 		return null;
 	}
 
-	/**
-	 * @return Returns the right value for this parameter (the second of two parameters in this composite)
-	 */
-	public B getRightValue() {
-		return myRightType;
-	}
-
 	@Override
-	public String getValueAsQueryToken() {
+	String doGetValueAsQueryToken() {
 		StringBuilder b = new StringBuilder();
 		if (myLeftType != null) {
 			b.append(myLeftType.getValueAsQueryToken());
@@ -92,7 +78,7 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	}
 
 	@Override
-	public void setValueAsQueryToken(String theQualifier, String theValue) {
+	void doSetValueAsQueryToken(String theQualifier, String theValue) {
 		if (isBlank(theValue)) {
 			myLeftType.setValueAsQueryToken(theQualifier, "");
 			myRightType.setValueAsQueryToken(theQualifier, "");
@@ -106,6 +92,20 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 				myRightType.setValueAsQueryToken(theQualifier, parts.get(1));
 			}
 		}
+	}
+
+	/**
+	 * @return Returns the left value for this parameter (the first of two parameters in this composite)
+	 */
+	public A getLeftValue() {
+		return myLeftType;
+	}
+
+	/**
+	 * @return Returns the right value for this parameter (the second of two parameters in this composite)
+	 */
+	public B getRightValue() {
+		return myRightType;
 	}
 
 }

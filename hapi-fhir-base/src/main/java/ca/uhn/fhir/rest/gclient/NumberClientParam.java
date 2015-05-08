@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.gclient;
 /**
  * Token parameter type for use in fluent client interfaces
  */
-public class NumberClientParam implements IParam {
+public class NumberClientParam extends BaseClientParam  implements IParam {
 
 	private String myParamName;
 

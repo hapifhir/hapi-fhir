@@ -4,7 +4,15 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -13,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -32,11 +41,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.google.common.net.UrlEscapers;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu.resource.Device;
@@ -89,6 +101,7 @@ public class ResourceProviderDstu2Test {
 	private static DaoConfig ourDaoConfig;
 	private static CloseableHttpClient ourHttpClient;
 	private static String ourServerBase;
+	private static int ourPort;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
@@ -142,6 +155,7 @@ public class ResourceProviderDstu2Test {
 		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
@@ -161,7 +175,7 @@ public class ResourceProviderDstu2Test {
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertEquals(id.getValue(), newIdString);
+			assertEquals(id.getValue(), newIdString); // version should match for conditional create
 		} finally {
 			response.close();
 		}
@@ -176,7 +190,7 @@ public class ResourceProviderDstu2Test {
 		pt.addName().addFamily(methodName);
 		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
@@ -195,7 +209,7 @@ public class ResourceProviderDstu2Test {
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			IdDt newId = new IdDt(response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue());
-			assertEquals(id.toVersionless(), newId.toVersionless());
+			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
 			assertNotEquals(id, newId);
 		} finally {
 			response.close();
@@ -204,8 +218,8 @@ public class ResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testDeleteResourceConditional() throws IOException {
-		String methodName = "testDeleteResourceConditional";
+	public void testDeleteResourceConditional1() throws IOException {
+		String methodName = "testDeleteResourceConditional1";
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -232,6 +246,67 @@ public class ResourceProviderDstu2Test {
 			response.close();
 		}
 
+		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
+		response = ourHttpClient.execute(read);
+		try {
+			ourLog.info(response.toString());
+			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+
+	}
+
+	/**
+	 * Based on email from Rene Spronk
+	 */
+	@Test
+	public void testDeleteResourceConditional2() throws IOException, Exception {
+		String methodName = "testDeleteResourceConditional2";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue("555-44-4444");
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+
+		/*
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL
+		 * but we want to make sure that works too..  
+		 */
+		Socket sock = new Socket();
+		try {
+			sock.connect(new InetSocketAddress("localhost", ourPort));
+			sock.getOutputStream().write(("DELETE " + "/fhir/context/Patient?identifier=" + ("http://ghh.org/patient|555-44-4444")).getBytes("UTF-8"));
+			sock.getOutputStream().write("\n\n".getBytes("UTF-8"));
+			sock.getOutputStream().flush();
+			
+			InputStream inputStream = sock.getInputStream();
+
+			byte[] buf = new byte[10000];
+			int count;
+			StringBuilder b = new StringBuilder();
+			while ((count = inputStream.read(buf)) != -1) {
+				b.append(new String(buf, 0, count, Charset.forName("UTF-8")));
+			}
+			String resp = b.toString();
+						
+			ourLog.info("Resp: {}", resp);
+		} finally {
+			sock.close();
+		}
 		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
 		response = ourHttpClient.execute(read);
 		try {
@@ -282,7 +357,7 @@ public class ResourceProviderDstu2Test {
 			response.close();
 		}
 	}
-	
+
 	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
@@ -311,6 +386,59 @@ public class ResourceProviderDstu2Test {
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+	}
+
+	//@Test
+	public void testSearchWithMissing() throws Exception {
+		String methodName = "testSearchWithMissing";
+
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
+		org.setName(methodName + "name");
+		IdDt orgNotMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+
+		org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
+		IdDt orgMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+
+		{
+			//@formatter:off
+			Bundle found = ourClient
+					.search()
+					.forResource(Organization.class)
+					.where(Organization.NAME.isMissing(false))
+					.prettyPrint()
+					.execute();
+			//@formatter:on
+
+			List<IdDt> list = toIdListUnqualifiedVersionless(found);
+			ourLog.info(methodName + ": " + list.toString());
+			assertThat(list, containsInRelativeOrder(orgNotMissing));
+			assertThat(list, not(containsInRelativeOrder(orgMissing)));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient
+					.search()
+					.forResource(Organization.class)
+					.where(Organization.NAME.isMissing(true))
+					.prettyPrint()
+					.execute();
+			//@formatter:on
+
+			List<IdDt> list = toIdListUnqualifiedVersionless(found);
+			ourLog.info(methodName + ": " + list.toString());
+			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
+			assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
+		}
+	}
+
+	private List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {
+		List<IdDt> list = new ArrayList<IdDt>();
+		for (BundleEntry next : found.getEntries()) {
+			list.add(next.getResource().getId().toUnqualifiedVersionless());
+		}
+		return list;
 	}
 
 	@Test
@@ -802,13 +930,13 @@ public class ResourceProviderDstu2Test {
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		int port = RandomServerPortProvider.findFreePort();
+		ourPort = RandomServerPortProvider.findFreePort();
 
 		RestfulServer restServer = new RestfulServer();
 		ourFhirCtx = FhirContext.forDstu2();
 		restServer.setFhirContext(ourFhirCtx);
 
-		ourServerBase = "http://localhost:" + port + "/fhir/context";
+		ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");
 
@@ -826,7 +954,7 @@ public class ResourceProviderDstu2Test {
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		ourServer = new Server(port);
+		ourServer = new Server(ourPort);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");

@@ -153,10 +153,14 @@ public abstract class BaseClient implements IRestfulClient {
 		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse);
 	}
 
+	void forceConformanceCheck() {
+		myFactory.validateServerBase(myUrlBase, myClient, this);
+	}
+	
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
 
 		if (!myDontValidateConformance) {
-			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient);
+			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
 		}
 		
 		// TODO: handle non 2xx status codes by throwing the correct exception,
@@ -369,7 +373,7 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
-	 * This method is an internal part of the HAPI API andmay change, use with caution. If you 
+	 * This method is an internal part of the HAPI API and may change, use with caution. If you 
 	 * want to disable the loading of conformance statements, use {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
 	 */
 	public void setDontValidateConformance(boolean theDontValidateConformance) {
@@ -439,6 +443,10 @@ public abstract class BaseClient implements IRestfulClient {
 
 		Reader reader = new InputStreamReader(theResponse.getEntity().getContent(), charset);
 		return reader;
+	}
+
+	public List<IClientInterceptor> getInterceptors() {
+		return Collections.unmodifiableList(myInterceptors);
 	}
 
 }

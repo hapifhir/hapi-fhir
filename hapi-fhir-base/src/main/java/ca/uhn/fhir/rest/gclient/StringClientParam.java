@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * @author james
  *
  */
-public class StringClientParam implements IParam {
+public class StringClientParam extends BaseClientParam  implements IParam {
 
 	private final String myParamName;
 

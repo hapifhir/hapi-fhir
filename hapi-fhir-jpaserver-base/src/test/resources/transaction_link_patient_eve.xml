@@ -1,0 +1,114 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="a130877d-a636-4993-97e6-0eeb7734e5"/>
+    <type value="transaction"/>
+    <entry>
+        <resource>
+            <Patient>
+                <!-- PID|||555-44-4444||EVERYWOMAN^EVE^E^^^^L|JONES|19620320|F|||153 FERNWOOD DR.^
+                    ^STATESVILLE^OH^35292||(206)3345232|(206)752-121||||AC555444444||67-A4335^OH^20030520 -->
+                <id value="a555-44-4444"/>
+                <extension url="http://ihe.net/ITI-78/Profile/pdqm#mothersMaidenName">
+                    <valueHumanName>
+                        <family value="Jones"/>
+                    </valueHumanName>
+                </extension>
+                <identifier>
+                    <use value="official"/>
+                    <system value="http://ghh.org/patient"/>
+                    <value value="555-44-4444"/>
+                </identifier>
+                <identifier>
+                    <use value="official"/>
+                    <system value="http://www.ohio.gov/dmv/driverslicence"/>
+                    <value value="67-A4335"/>
+                    <period>
+                        <end value="2003-05-20"/>
+                    </period>
+                </identifier>
+                <name>
+                    <use value="official"/>
+                    <family value="Everywoman"/>
+                    <given value="Eve E."/>
+                </name>
+                <telecom>
+                    <system value="phone"/>
+                    <value value="(206)3345232"/>
+                    <use value="home"/>
+                </telecom>
+                <telecom>
+                    <system value="phone"/>
+                    <value value="(206)752-121"/>
+                    <use value="work"/>
+                </telecom>
+                <gender value="female"/>
+                <birthDate value="1962-03-20"/>
+                <address>
+                    <line value="153 Fernwood Dr."/>
+                    <city value="Statesville"/>
+                    <state value="OH"/>
+                    <postalCode value="35292"/>
+                </address>
+                <managingOrganization>
+                    <reference value="Organization/GHH"/>
+                    <display value="Good Health Hospital"/>
+                </managingOrganization>
+                <link>
+                    <other>
+                        <reference value="Patient/temp6789"/>
+                    </other>
+                    <type value="seealso"/>
+                </link>
+                <active value="true"/>
+            </Patient>
+        </resource>
+        <transaction>
+            <method value="PUT"/>
+            <url value="Patient/a555-44-4444"/>
+        </transaction>
+    </entry>
+    <entry>
+        <resource>
+            <Patient>
+                <!-- Jane Doe registered in the emergency department -->
+                <id value="temp6789"/>
+                <identifier>
+                    <use value="temp"/>
+                    <system value="http://ghh.org/patient"/>
+                    <value value="temp6789"/>
+                </identifier>
+                <name>
+                    <use value="temp"/>
+                    <family value="Doe 6789"/>
+                    <given value="Jane"/>
+                </name>
+                <gender value="female"/>
+                <managingOrganization>
+                    <reference value="Organization/GHH"/>
+                    <display value="Good Health Hospital"/>
+                </managingOrganization>
+                <link>
+                    <other>
+                        <reference value="Patient/a555-44-4444"/>
+                    </other>
+                    <type value="replace"/>
+                </link>
+                <active value="true"/>
+            </Patient>
+        </resource>
+        <transaction>
+            <method value="PUT"/>
+            <url value="Patient/temp6789"/>
+        </transaction>
+    </entry>
+    <entry>
+        <resource>
+            <Organization>
+                <id value="GHH"/>
+            </Organization>
+        </resource>
+        <transaction>
+            <method value="PUT"/>
+            <url value="Organization/GHH"/>
+        </transaction>
+    </entry>
+</Bundle>
