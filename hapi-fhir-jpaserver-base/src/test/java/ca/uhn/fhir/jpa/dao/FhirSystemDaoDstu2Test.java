@@ -518,12 +518,12 @@ public class FhirSystemDaoDstu2Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Hello");
-		p.setId("urn:"+methodName);
+		p.setId(methodName);
 		request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.PUT).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient/urn:"+methodName);
+		o.getSubject().setReference("Patient/"+methodName);
 		request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
 		Bundle resp = ourSystemDao.transaction(request);

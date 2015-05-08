@@ -8,8 +8,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
@@ -172,7 +172,7 @@ public class GenericClientExample {
          // START SNIPPET: conformance
          // Retrieve the server's conformance statement and print its
          // description
-         BaseConformance conf = client.conformance();
+         Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
          System.out.println(conf.getDescriptionElement().getValue());
          // END SNIPPET: conformance
       }

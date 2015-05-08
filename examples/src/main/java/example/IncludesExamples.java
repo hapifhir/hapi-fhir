@@ -6,7 +6,6 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -20,7 +19,7 @@ public class IncludesExamples {
    }
 
    private static void testSearchForPatients() {
-      List<IResource> resources = new IncludesExamples().searchForPatients();
+      List<IBaseResource> resources = new IncludesExamples().searchForPatients();
 
       // Create a bundle with both
       FhirContext ctx = FhirContext.forDstu2();
@@ -36,7 +35,7 @@ public class IncludesExamples {
 
    // START SNIPPET: addIncludes
    @Search
-   private List<IResource> searchForPatients() {
+   private List<IBaseResource> searchForPatients() {
       // Create an organization
       Organization org = new Organization();
       org.setId("Organization/65546");
@@ -49,7 +48,7 @@ public class IncludesExamples {
       patient.getManagingOrganization().setResource(org);
 
       // Here we return only the patient object, which has links to other resources
-      List<IResource> retVal = new ArrayList<IResource>();
+      List<IBaseResource> retVal = new ArrayList<IBaseResource>();
       retVal.add(patient);
       return retVal;
    }

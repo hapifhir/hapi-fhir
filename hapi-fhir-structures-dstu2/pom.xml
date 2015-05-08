@@ -5,20 +5,20 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>1.0-SNAPSHOT</version>
+		<version>1.1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-structures-dstu2</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Structures - DSTU2 (FHIR v0.4.0)</name>
+	<name>HAPI FHIR Structures - DSTU2 (FHIR v0.5.0)</name>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -177,7 +177,7 @@
 			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
-				<version>1.0-SNAPSHOT</version>
+				<version>1.1-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<goals>

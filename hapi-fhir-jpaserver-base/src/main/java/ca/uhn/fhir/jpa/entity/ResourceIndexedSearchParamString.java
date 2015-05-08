@@ -25,6 +25,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Entity
 @Table(name = "HFJ_SPIDX_STRING"/*, indexes= {@Index(name="IDX_SP_STRING", columnList="SP_VALUE_NORMALIZED")}*/)
@@ -73,6 +75,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		myValueExact = theValueExact;
 	}
 
-
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", getParamName());
+		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("value", getValueNormalized());
+		return b.build();
+	}
 
 }

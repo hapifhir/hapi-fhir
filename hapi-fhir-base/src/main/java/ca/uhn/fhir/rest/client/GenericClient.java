@@ -148,7 +148,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public BaseConformance conformance() {
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			throw new IllegalArgumentException("Must call conformance(" + IBaseConformance.class.getSimpleName() + ") for HL7.org structures");
+			throw new IllegalArgumentException("Must call conformance(" + IBaseConformance.class.getSimpleName() + ") instead of conformance() for HL7.org structures");
 		}
 		
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();

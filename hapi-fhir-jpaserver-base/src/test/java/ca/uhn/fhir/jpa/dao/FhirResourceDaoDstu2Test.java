@@ -219,8 +219,8 @@ public class FhirResourceDaoDstu2Test {
 	}
 
 	@Test
-	public void testCreateWithIfNoneExist() {
-		String methodName = "testCreateWithIfNoneExist";
+	public void testCreateWithIfNoneExistBasic() {
+		String methodName = "testCreateWithIfNoneExistBasic";
 		MethodOutcome results;
 
 		Patient p = new Patient();

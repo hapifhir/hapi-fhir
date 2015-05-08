@@ -34,7 +34,6 @@ import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -54,7 +53,7 @@ public class SchematronBaseValidator implements IValidator {
 	}
 
 	@Override
-	public void validateResource(ValidationContext<IResource> theCtx) {
+	public void validateResource(ValidationContext<IBaseResource> theCtx) {
 
 		ISchematronResource sch = getSchematron(theCtx);
 		StreamSource source = new StreamSource(new StringReader(theCtx.getXmlEncodedResource()));
@@ -92,14 +91,14 @@ public class SchematronBaseValidator implements IValidator {
 
 	}
 
-	private ISchematronResource getSchematron(ValidationContext<IResource> theCtx) {
-		Class<? extends IResource> resource = theCtx.getResource().getClass();
+	private ISchematronResource getSchematron(ValidationContext<IBaseResource> theCtx) {
+		Class<? extends IBaseResource> resource = theCtx.getResource().getClass();
 		Class<? extends IBaseResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
 		return getSchematronAndCache(theCtx, "dstu", baseResourceClass);
 	}
 
-	private ISchematronResource getSchematronAndCache(ValidationContext<IResource> theCtx, String theVersion, Class<? extends IBaseResource> theClass) {
+	private ISchematronResource getSchematronAndCache(ValidationContext<IBaseResource> theCtx, String theVersion, Class<? extends IBaseResource> theClass) {
 		synchronized (myClassToSchematron) {
 			ISchematronResource retVal = myClassToSchematron.get(theClass);
 			if (retVal != null) {
@@ -124,7 +123,7 @@ public class SchematronBaseValidator implements IValidator {
 	public void validateBundle(ValidationContext<Bundle> theContext) {
 		for (BundleEntry next : theContext.getResource().getEntries()) {
 			if (next.getResource() != null) {
-				ValidationContext<IResource> ctx = ValidationContext.newChild(theContext, next.getResource());
+				ValidationContext<IBaseResource> ctx = ValidationContext.newChild(theContext, next.getResource());
 				validateResource(ctx);
 			}
 		}

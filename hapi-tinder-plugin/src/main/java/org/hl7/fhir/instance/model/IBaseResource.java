@@ -1,7 +1,5 @@
 package org.hl7.fhir.instance.model;
 
-import org.hl7.fhir.instance.model.api.IBase;
-
 
 /*
  * #%L
@@ -33,10 +31,10 @@ import org.hl7.fhir.instance.model.api.IBase;
  */
 public interface IBaseResource extends IBase {
 
-//	IIdType getId();
-//	
-//	IBaseResource setId(String theId);
-//
-//	IBaseResource setId(IIdType theId);
+	IIdType getIdElement();
+	
+	IBaseResource setId(String theId);
+
+	IBaseResource setId(IIdType theId);
 
 }

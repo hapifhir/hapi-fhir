@@ -39,6 +39,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import org.apache.commons.io.input.BOMInputStream;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -48,7 +49,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -155,7 +155,7 @@ class SchemaBaseValidator implements IValidator {
 	}
 
 	@Override
-	public void validateResource(ValidationContext<IResource> theContext) {
+	public void validateResource(ValidationContext<IBaseResource> theContext) {
 		doValidate(theContext, "fhir-single.xsd");
 	}
 

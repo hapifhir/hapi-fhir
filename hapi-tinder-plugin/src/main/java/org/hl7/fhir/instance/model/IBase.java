@@ -1,8 +1,4 @@
-package ca.uhn.fhir.validation;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.api.Bundle;
+package org.hl7.fhir.instance.model;
 
 /*
  * #%L
@@ -24,11 +20,13 @@ import ca.uhn.fhir.model.api.Bundle;
  * #L%
  */
 
+/**
+ * This interface is a simple marker for anything which is an HL7
+ * structure of some kind. It is provided mostly to simplify convergence
+ * between the HL7.org structures and the HAPI ones. 
+ */
+public interface IBase {
 
-interface IValidator {
-
-	void validateResource(ValidationContext<IBaseResource> theCtx);
-
-	void validateBundle(ValidationContext<Bundle> theContext);
+	boolean isEmpty();
 
 }

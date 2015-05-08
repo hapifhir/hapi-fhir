@@ -162,7 +162,7 @@ public class FhirValidator {
 	 *            The resource to validate
 	 * @throws ValidationFailureException
 	 *             If the validation fails
-     * @deprecated use {@link #validateWithResult(ca.uhn.fhir.model.api.IResource)} instead
+     * @deprecated use {@link #validateWithResult(IBaseResource)} instead
 	 */
     @Deprecated
 	public void validate(IResource theResource) throws ValidationFailureException {
@@ -203,7 +203,7 @@ public class FhirValidator {
     public ValidationResult validateWithResult(IBaseResource theResource) {
         Validate.notNull(theResource, "theResource must not be null");
 
-        ValidationContext<IResource> ctx = ValidationContext.forResource(myContext, (IResource) theResource);
+        ValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource);
 
         for (IValidator next : myValidators) {
             next.validateResource(ctx);

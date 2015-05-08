@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.Assert.*;
+
 import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -22,6 +24,8 @@ import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
@@ -42,6 +46,42 @@ public class SystemProviderTest {
 		ourLog.info(response);
 	}
 	
+	@Test
+	public void testTransactionFromBundle2() throws Exception {
+
+		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+		
+		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		IdDt id1_1 = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		assertEquals("Provenance", id1_1.getResourceType());
+		IdDt id1_2 = new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation());
+		IdDt id1_3 = new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation());
+		IdDt id1_4 = new IdDt(resp.getEntry().get(4).getTransactionResponse().getLocation());
+
+		/*
+		 * Same bundle!
+		 */
+		
+		bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		bundle = IOUtils.toString(bundleRes);
+		response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+		
+		resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		IdDt id2_1 = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt id2_2 = new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation());
+		IdDt id2_3 = new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation());
+		IdDt id2_4 = new IdDt(resp.getEntry().get(4).getTransactionResponse().getLocation());
+		
+		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
+		assertEquals("Provenance", id2_1.getResourceType());
+		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
+		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
+		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
+	}
 	
 	@AfterClass
 	public static void afterClass() throws Exception {
