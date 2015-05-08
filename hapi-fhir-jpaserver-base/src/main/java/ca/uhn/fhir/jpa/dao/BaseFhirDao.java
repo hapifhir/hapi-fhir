@@ -23,10 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;

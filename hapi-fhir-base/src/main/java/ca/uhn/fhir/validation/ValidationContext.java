@@ -20,9 +20,10 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -76,8 +77,8 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		});
 	}
 
-	public static ValidationContext<IResource> forResource(final FhirContext theContext, final IResource theResource) {
-		return new ValidationContext<IResource>(theContext, theResource, new IEncoder() {
+	public static <T extends IBaseResource> ValidationContext<T> forResource(final FhirContext theContext, final T theResource) {
+		return new ValidationContext<T>(theContext, theResource, new IEncoder() {
 			@Override
 			public String encode() {
 				return theContext.newXmlParser().encodeResourceToString(theResource);
@@ -85,8 +86,8 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		});
 	}
 
-	public static ValidationContext<IResource> newChild(ValidationContext<Bundle> theContext, IResource theResource) {
-		ValidationContext<IResource> retVal = forResource(theContext.getFhirContext(), theResource);
+	public static ValidationContext<IBaseResource> newChild(ValidationContext<Bundle> theContext, IBaseResource theResource) {
+		ValidationContext<IBaseResource> retVal = forResource(theContext.getFhirContext(), theResource);
 		retVal.myOperationOutcome = theContext.getOperationOutcome();
 		return retVal;
 	}

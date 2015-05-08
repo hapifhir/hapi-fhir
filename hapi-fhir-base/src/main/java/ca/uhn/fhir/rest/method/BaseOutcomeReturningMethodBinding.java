@@ -20,9 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -278,7 +277,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	/**
 	 * @throws IOException
 	 */
-	protected IResource parseIncomingServerResource(Request theRequest) throws IOException {
+	protected IBaseResource parseIncomingServerResource(Request theRequest) throws IOException {
 
 		Reader requestReader;
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);

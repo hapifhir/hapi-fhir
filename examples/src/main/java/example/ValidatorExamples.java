@@ -8,7 +8,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.validation.FhirValidator;

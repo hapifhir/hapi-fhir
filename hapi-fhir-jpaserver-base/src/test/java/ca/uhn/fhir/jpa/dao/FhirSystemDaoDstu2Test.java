@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

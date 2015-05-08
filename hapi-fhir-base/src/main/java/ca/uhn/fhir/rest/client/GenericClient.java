@@ -593,7 +593,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return resp;
 		}
 
-		protected IResource parseResourceBody(String theResourceBody) {
+		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
 				throw new InvalidRequestException("FHIR client can't determine resource encoding");
@@ -1622,7 +1622,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				 */
 				if (getParamEncoding() != null) {
 					if (MethodUtil.detectEncodingNoDefault(myRawBundle) != getParamEncoding()) {
-						IResource parsed = parseResourceBody(myRawBundle);
+						IBaseResource parsed = parseResourceBody(myRawBundle);
 						myRawBundle = getParamEncoding().newParser(getFhirContext()).encodeResourceToString(parsed);
 					}
 				}

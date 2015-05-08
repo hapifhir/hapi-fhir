@@ -2,6 +2,8 @@ package example;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.IBaseResource;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -43,7 +45,7 @@ public class PagingPatientProvider implements IResourceProvider {
 			}
 
 			@Override
-			public List<IResource> getResources(int theFromIndex, int theToIndex) {
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 				int end = Math.max(theToIndex, matchingResourceIds.size() - 1);
 				List<Long> idsToReturn = matchingResourceIds.subList(theFromIndex, end);
 				return loadResourcesByIds(idsToReturn);
@@ -65,7 +67,7 @@ public class PagingPatientProvider implements IResourceProvider {
 	/**
 	 * Load a list of patient resources given their IDs
 	 */
-	private List<IResource> loadResourcesByIds(List<Long> theIdsToReturn) {
+	private List<IBaseResource> loadResourcesByIds(List<Long> theIdsToReturn) {
 		// .. implement this search against the database ..
 		return null;
 	}
