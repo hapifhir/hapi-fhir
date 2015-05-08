@@ -17,6 +17,10 @@
 	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="debug">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	
+	<logger name="org.hibernate.SQL" additivity="false" level="DEBUG">
+		<appender-ref ref="STDOUT" />
+	</logger>
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

@@ -38,11 +38,13 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>1.1-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>1.1-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -142,8 +144,8 @@
 								<includes>
 									<include>commons-codec:commons-codec</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
+									<!--<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
+									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>-->
 									<include>org.glassfish:javax.json</include>
 									<include>org.codehaus.woodstox:woodstox-core-asl</include>
 									<include>javax.xml.stream:stax-api</include>

@@ -2,7 +2,7 @@ package org.hl7.fhir.utilities;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Structures - HL7.org DSTU2
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%

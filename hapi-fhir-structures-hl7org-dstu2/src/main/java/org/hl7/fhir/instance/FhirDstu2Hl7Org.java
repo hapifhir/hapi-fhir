@@ -2,7 +2,7 @@ package org.hl7.fhir.instance;
 
 /*
  * #%L
- * HAPI FHIR Structures - DSTU2 (FHIR v0.4.0)
+ * HAPI FHIR Structures - HL7.org DSTU2
  * %%
  * Copyright (C) 2014 - 2015 University Health Network
  * %%
