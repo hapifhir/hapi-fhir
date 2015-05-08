@@ -421,7 +421,7 @@ public class ResourceProviderDstu2Test {
 			//@formatter:on
 
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
-			ourLog.info(methodName + ": " + list.toString());
+			ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
 			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
 			assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
 		}

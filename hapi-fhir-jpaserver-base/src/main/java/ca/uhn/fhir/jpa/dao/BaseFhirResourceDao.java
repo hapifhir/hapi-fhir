@@ -372,14 +372,12 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Object> cq = builder.createQuery();
 			Root<? extends BaseResourceIndexedSearchParam> subQfrom = cq.from(theParamTable); 
-			cq.select(subQfrom.get("myResourcePid"));
+			cq.select(subQfrom);
 			Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
 			Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), resourceType);
 			cq.where(builder.and(subQtype, subQname));
 			List<Object> results = myEntityManager.createQuery(cq).getResultList();
-			for (Object object : results) {
-				ourLog.info("Next result: {}", object);
-			}
+			ourLog.info("All results: {}", results);
 		}
 		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
