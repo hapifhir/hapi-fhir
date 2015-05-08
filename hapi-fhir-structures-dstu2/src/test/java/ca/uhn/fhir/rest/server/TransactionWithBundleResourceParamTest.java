@@ -55,7 +55,7 @@ public class TransactionWithBundleResourceParamTest {
 	}
 
 	@Test
-	public void testTransaction() throws Exception {
+	public void testTransactionWithXmlRequest() throws Exception {
 		Bundle b = new Bundle();
 		InstantDt nowInstant = InstantDt.withCurrentTime();
 
@@ -79,8 +79,55 @@ public class TransactionWithBundleResourceParamTest {
 		ourLog.info(bundleString);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
-		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_ATOM_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		ourLog.info(responseContent);
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		assertEquals(3, bundle.getEntry().size());
+
+		Entry entry0 = bundle.getEntry().get(0);
+		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+
+		Entry entry1 = bundle.getEntry().get(1);
+		assertEquals( "Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+
+		Entry entry2 = bundle.getEntry().get(2);
+		assertEquals("Patient/123/_history/93", entry2.getTransactionResponse().getLocation());
+	}
+
+	@Test
+	public void testTransactionWithJsonRequest() throws Exception {
+		Bundle b = new Bundle();
+		InstantDt nowInstant = InstantDt.withCurrentTime();
+
+		Patient p1 = new Patient();
+		p1.addName().addFamily("Family1");
+		Entry entry = b.addEntry();
+		p1.getId().setValue("1");
+		entry.setResource(p1);
+
+		Patient p2 = new Patient();
+		p2.addName().addFamily("Family2");
+		entry = b.addEntry();
+		p2.getId().setValue("2");
+		entry.setResource(p2);
+
+		Entry deletedEntry = b.addEntry();
+		deletedEntry.getTransaction().setMethod(HTTPVerbEnum.DELETE);
+		deletedEntry.getTransaction().setUrl("http://base.com/Patient/123");
+
+		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(bundleString);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+//		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
+		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
