@@ -20,12 +20,12 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class RuntimeElementDirectResource extends BaseRuntimeElementDefinition<IBaseResource> {
 
-	public RuntimeElementDirectResource() {
-		super("DirectChildResource", IBaseResource.class);
+	public RuntimeElementDirectResource(boolean theStandardType) {
+		super("DirectChildResource", IBaseResource.class, theStandardType);
 	}
 
 	@Override

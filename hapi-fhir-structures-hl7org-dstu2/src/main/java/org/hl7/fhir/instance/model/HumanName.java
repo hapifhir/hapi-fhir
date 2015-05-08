@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,6 +37,8 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A human's name with the ability to identify parts and usage.
  */
@@ -133,13 +135,13 @@ public class HumanName extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
-            case USUAL: return "usual";
-            case OFFICIAL: return "official";
-            case TEMP: return "temp";
-            case NICKNAME: return "nickname";
-            case ANONYMOUS: return "anonymous";
-            case OLD: return "old";
-            case MAIDEN: return "maiden";
+            case USUAL: return "Usual";
+            case OFFICIAL: return "Official";
+            case TEMP: return "Temp";
+            case NICKNAME: return "Nickname";
+            case ANONYMOUS: return "Anonymous";
+            case OLD: return "Old";
+            case MAIDEN: return "Maiden";
             default: return "?";
           }
         }
@@ -188,54 +190,57 @@ public class HumanName extends Type implements ICompositeType {
     /**
      * Identifies the purpose for this name.
      */
-    @Child(name = "use", type = {CodeType.class}, order = 0, min = 0, max = 1)
+    @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="usual | official | temp | nickname | anonymous | old | maiden", formalDefinition="Identifies the purpose for this name." )
     protected Enumeration<NameUse> use;
 
     /**
      * A full text representation of the name.
      */
-    @Child(name = "text", type = {StringType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Text representation of the full name", formalDefinition="A full text representation of the name." )
     protected StringType text;
 
     /**
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      */
-    @Child(name = "family", type = {StringType.class}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "family", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Family name (often called 'Surname')", formalDefinition="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father." )
     protected List<StringType> family;
 
     /**
      * Given name.
      */
-    @Child(name = "given", type = {StringType.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "given", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Given names (not always 'first'). Includes middle names", formalDefinition="Given name." )
     protected List<StringType> given;
 
     /**
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name.
      */
-    @Child(name = "prefix", type = {StringType.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "prefix", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Parts that come before the name", formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name." )
     protected List<StringType> prefix;
 
     /**
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name.
      */
-    @Child(name = "suffix", type = {StringType.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "suffix", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Parts that come after the name", formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name." )
     protected List<StringType> suffix;
 
     /**
      * Indicates the period of time when this name was valid for the named person.
      */
-    @Child(name = "period", type = {Period.class}, order = 6, min = 0, max = 1)
+    @Child(name = "period", type = {Period.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Time period when name was/is in use", formalDefinition="Indicates the period of time when this name was valid for the named person." )
     protected Period period;
 
     private static final long serialVersionUID = -210174642L;
 
+  /*
+   * Constructor
+   */
     public HumanName() {
       super();
     }

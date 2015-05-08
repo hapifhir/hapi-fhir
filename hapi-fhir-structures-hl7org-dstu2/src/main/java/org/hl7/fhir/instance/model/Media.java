@@ -29,23 +29,24 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
 @ResourceDef(name="Media", profile="http://hl7.org/fhir/Profile/Media")
 public class Media extends DomainResource {
 
-    public enum MediaType {
+    public enum DigitalMediaType {
         /**
          * The media consists of one or more unmoving images, including photographs, computer-generated graphs and charts, and scanned documents.
          */
@@ -62,7 +63,7 @@ public class Media extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MediaType fromCode(String codeString) throws Exception {
+        public static DigitalMediaType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("photo".equals(codeString))
@@ -71,7 +72,7 @@ public class Media extends DomainResource {
           return VIDEO;
         if ("audio".equals(codeString))
           return AUDIO;
-        throw new Exception("Unknown MediaType code '"+codeString+"'");
+        throw new Exception("Unknown DigitalMediaType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -99,33 +100,33 @@ public class Media extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case PHOTO: return "photo";
-            case VIDEO: return "video";
-            case AUDIO: return "audio";
+            case PHOTO: return "Photo";
+            case VIDEO: return "Video";
+            case AUDIO: return "Audio";
             default: return "?";
           }
         }
     }
 
-  public static class MediaTypeEnumFactory implements EnumFactory<MediaType> {
-    public MediaType fromCode(String codeString) throws IllegalArgumentException {
+  public static class DigitalMediaTypeEnumFactory implements EnumFactory<DigitalMediaType> {
+    public DigitalMediaType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("photo".equals(codeString))
-          return MediaType.PHOTO;
+          return DigitalMediaType.PHOTO;
         if ("video".equals(codeString))
-          return MediaType.VIDEO;
+          return DigitalMediaType.VIDEO;
         if ("audio".equals(codeString))
-          return MediaType.AUDIO;
-        throw new IllegalArgumentException("Unknown MediaType code '"+codeString+"'");
+          return DigitalMediaType.AUDIO;
+        throw new IllegalArgumentException("Unknown DigitalMediaType code '"+codeString+"'");
         }
-    public String toCode(MediaType code) {
-      if (code == MediaType.PHOTO)
+    public String toCode(DigitalMediaType code) {
+      if (code == DigitalMediaType.PHOTO)
         return "photo";
-      if (code == MediaType.VIDEO)
+      if (code == DigitalMediaType.VIDEO)
         return "video";
-      if (code == MediaType.AUDIO)
+      if (code == DigitalMediaType.AUDIO)
         return "audio";
       return "?";
       }
@@ -134,35 +135,28 @@ public class Media extends DomainResource {
     /**
      * Whether the media is a photo (still image), an audio recording, or a video recording.
      */
-    @Child(name = "type", type = {CodeType.class}, order = 0, min = 1, max = 1)
+    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="photo | video | audio", formalDefinition="Whether the media is a photo (still image), an audio recording, or a video recording." )
-    protected Enumeration<MediaType> type;
+    protected Enumeration<DigitalMediaType> type;
 
     /**
      * Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.
      */
-    @Child(name = "subtype", type = {CodeableConcept.class}, order = 1, min = 0, max = 1)
+    @Child(name = "subtype", type = {CodeableConcept.class}, order=1, min=0, max=1)
     @Description(shortDefinition="The type of acquisition equipment/process", formalDefinition="Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality." )
     protected CodeableConcept subtype;
 
     /**
      * Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 2, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifier(s) for the image", formalDefinition="Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers." )
     protected List<Identifier> identifier;
 
     /**
-     * The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.
-     */
-    @Child(name = "created", type = {DateTimeType.class}, order = 3, min = 0, max = 1)
-    @Description(shortDefinition="When the media was taken/recorded (start)", formalDefinition="The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording." )
-    protected DateTimeType created;
-
-    /**
      * Who/What this Media is a record of.
      */
-    @Child(name = "subject", type = {Patient.class, Practitioner.class, Group.class, Device.class, Specimen.class}, order = 4, min = 0, max = 1)
+    @Child(name = "subject", type = {Patient.class, Practitioner.class, Group.class, Device.class, Specimen.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Who/What this Media is a record of", formalDefinition="Who/What this Media is a record of." )
     protected Reference subject;
 
@@ -174,7 +168,7 @@ public class Media extends DomainResource {
     /**
      * The person who administered the collection of the image.
      */
-    @Child(name = "operator", type = {Practitioner.class}, order = 5, min = 0, max = 1)
+    @Child(name = "operator", type = {Practitioner.class}, order=4, min=0, max=1)
     @Description(shortDefinition="The person who generated the image", formalDefinition="The person who administered the collection of the image." )
     protected Reference operator;
 
@@ -186,59 +180,65 @@ public class Media extends DomainResource {
     /**
      * The name of the imaging view e.g Lateral or Antero-posterior (AP).
      */
-    @Child(name = "view", type = {CodeableConcept.class}, order = 6, min = 0, max = 1)
+    @Child(name = "view", type = {CodeableConcept.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Imaging view e.g Lateral or Antero-posterior", formalDefinition="The name of the imaging view e.g Lateral or Antero-posterior (AP)." )
     protected CodeableConcept view;
 
     /**
      * The name of the device / manufacturer of the device  that was used to make the recording.
      */
-    @Child(name = "deviceName", type = {StringType.class}, order = 7, min = 0, max = 1)
+    @Child(name = "deviceName", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Name of the device/manufacturer", formalDefinition="The name of the device / manufacturer of the device  that was used to make the recording." )
     protected StringType deviceName;
 
     /**
      * Height of the image in pixels(photo/video).
      */
-    @Child(name = "height", type = {IntegerType.class}, order = 8, min = 0, max = 1)
+    @Child(name = "height", type = {PositiveIntType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Height of the image in pixels(photo/video)", formalDefinition="Height of the image in pixels(photo/video)." )
-    protected IntegerType height;
+    protected PositiveIntType height;
 
     /**
      * Width of the image in pixels (photo/video).
      */
-    @Child(name = "width", type = {IntegerType.class}, order = 9, min = 0, max = 1)
+    @Child(name = "width", type = {PositiveIntType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Width of the image in pixels (photo/video)", formalDefinition="Width of the image in pixels (photo/video)." )
-    protected IntegerType width;
+    protected PositiveIntType width;
 
     /**
      * The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.
      */
-    @Child(name = "frames", type = {IntegerType.class}, order = 10, min = 0, max = 1)
+    @Child(name = "frames", type = {PositiveIntType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Number of frames if > 1 (photo)", formalDefinition="The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required." )
-    protected IntegerType frames;
+    protected PositiveIntType frames;
 
     /**
      * The duration of the recording in seconds - for audio and video.
      */
-    @Child(name = "duration", type = {IntegerType.class}, order = 11, min = 0, max = 1)
+    @Child(name = "duration", type = {UnsignedIntType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="Length in seconds (audio / video)", formalDefinition="The duration of the recording in seconds - for audio and video." )
-    protected IntegerType duration;
+    protected UnsignedIntType duration;
 
     /**
      * The actual content of the media - inline or by direct reference to the media source file.
      */
-    @Child(name = "content", type = {AttachmentType.class}, order = 12, min = 1, max = 1)
+    @Child(name = "content", type = {Attachment.class}, order=11, min=1, max=1)
     @Description(shortDefinition="Actual Media - reference or data", formalDefinition="The actual content of the media - inline or by direct reference to the media source file." )
-    protected AttachmentType content;
+    protected Attachment content;
 
-    private static final long serialVersionUID = 1930988698L;
+    private static final long serialVersionUID = -280764739L;
 
+  /*
+   * Constructor
+   */
     public Media() {
       super();
     }
 
-    public Media(Enumeration<MediaType> type, AttachmentType content) {
+  /*
+   * Constructor
+   */
+    public Media(Enumeration<DigitalMediaType> type, Attachment content) {
       super();
       this.type = type;
       this.content = content;
@@ -247,12 +247,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #type} (Whether the media is a photo (still image), an audio recording, or a video recording.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public Enumeration<MediaType> getTypeElement() { 
+    public Enumeration<DigitalMediaType> getTypeElement() { 
       if (this.type == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.type");
         else if (Configuration.doAutoCreate())
-          this.type = new Enumeration<MediaType>(new MediaTypeEnumFactory()); // bb
+          this.type = new Enumeration<DigitalMediaType>(new DigitalMediaTypeEnumFactory()); // bb
       return this.type;
     }
 
@@ -267,7 +267,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #type} (Whether the media is a photo (still image), an audio recording, or a video recording.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public Media setTypeElement(Enumeration<MediaType> value) { 
+    public Media setTypeElement(Enumeration<DigitalMediaType> value) { 
       this.type = value;
       return this;
     }
@@ -275,16 +275,16 @@ public class Media extends DomainResource {
     /**
      * @return Whether the media is a photo (still image), an audio recording, or a video recording.
      */
-    public MediaType getType() { 
+    public DigitalMediaType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
      * @param value Whether the media is a photo (still image), an audio recording, or a video recording.
      */
-    public Media setType(MediaType value) { 
+    public Media setType(DigitalMediaType value) { 
         if (this.type == null)
-          this.type = new Enumeration<MediaType>(new MediaTypeEnumFactory());
+          this.type = new Enumeration<DigitalMediaType>(new DigitalMediaTypeEnumFactory());
         this.type.setValue(value);
       return this;
     }
@@ -343,52 +343,13 @@ public class Media extends DomainResource {
       return t;
     }
 
-    /**
-     * @return {@link #created} (The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
-     */
-    public DateTimeType getCreatedElement() { 
-      if (this.created == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Media.created");
-        else if (Configuration.doAutoCreate())
-          this.created = new DateTimeType(); // bb
-      return this.created;
-    }
-
-    public boolean hasCreatedElement() { 
-      return this.created != null && !this.created.isEmpty();
-    }
-
-    public boolean hasCreated() { 
-      return this.created != null && !this.created.isEmpty();
-    }
-
-    /**
-     * @param value {@link #created} (The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
-     */
-    public Media setCreatedElement(DateTimeType value) { 
-      this.created = value;
-      return this;
-    }
-
-    /**
-     * @return The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.
-     */
-    public Date getCreated() { 
-      return this.created == null ? null : this.created.getValue();
-    }
-
-    /**
-     * @param value The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.
-     */
-    public Media setCreated(Date value) { 
-      if (value == null)
-        this.created = null;
-      else {
-        if (this.created == null)
-          this.created = new DateTimeType();
-        this.created.setValue(value);
-      }
+    // syntactic sugar
+    public Media addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
       return this;
     }
 
@@ -551,12 +512,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #height} (Height of the image in pixels(photo/video).). This is the underlying object with id, value and extensions. The accessor "getHeight" gives direct access to the value
      */
-    public IntegerType getHeightElement() { 
+    public PositiveIntType getHeightElement() { 
       if (this.height == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.height");
         else if (Configuration.doAutoCreate())
-          this.height = new IntegerType(); // bb
+          this.height = new PositiveIntType(); // bb
       return this.height;
     }
 
@@ -571,7 +532,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #height} (Height of the image in pixels(photo/video).). This is the underlying object with id, value and extensions. The accessor "getHeight" gives direct access to the value
      */
-    public Media setHeightElement(IntegerType value) { 
+    public Media setHeightElement(PositiveIntType value) { 
       this.height = value;
       return this;
     }
@@ -580,7 +541,7 @@ public class Media extends DomainResource {
      * @return Height of the image in pixels(photo/video).
      */
     public int getHeight() { 
-      return this.height == null ? 0 : this.height.getValue();
+      return this.height == null || this.height.isEmpty() ? 0 : this.height.getValue();
     }
 
     /**
@@ -588,7 +549,7 @@ public class Media extends DomainResource {
      */
     public Media setHeight(int value) { 
         if (this.height == null)
-          this.height = new IntegerType();
+          this.height = new PositiveIntType();
         this.height.setValue(value);
       return this;
     }
@@ -596,12 +557,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #width} (Width of the image in pixels (photo/video).). This is the underlying object with id, value and extensions. The accessor "getWidth" gives direct access to the value
      */
-    public IntegerType getWidthElement() { 
+    public PositiveIntType getWidthElement() { 
       if (this.width == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.width");
         else if (Configuration.doAutoCreate())
-          this.width = new IntegerType(); // bb
+          this.width = new PositiveIntType(); // bb
       return this.width;
     }
 
@@ -616,7 +577,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #width} (Width of the image in pixels (photo/video).). This is the underlying object with id, value and extensions. The accessor "getWidth" gives direct access to the value
      */
-    public Media setWidthElement(IntegerType value) { 
+    public Media setWidthElement(PositiveIntType value) { 
       this.width = value;
       return this;
     }
@@ -625,7 +586,7 @@ public class Media extends DomainResource {
      * @return Width of the image in pixels (photo/video).
      */
     public int getWidth() { 
-      return this.width == null ? 0 : this.width.getValue();
+      return this.width == null || this.width.isEmpty() ? 0 : this.width.getValue();
     }
 
     /**
@@ -633,7 +594,7 @@ public class Media extends DomainResource {
      */
     public Media setWidth(int value) { 
         if (this.width == null)
-          this.width = new IntegerType();
+          this.width = new PositiveIntType();
         this.width.setValue(value);
       return this;
     }
@@ -641,12 +602,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #frames} (The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.). This is the underlying object with id, value and extensions. The accessor "getFrames" gives direct access to the value
      */
-    public IntegerType getFramesElement() { 
+    public PositiveIntType getFramesElement() { 
       if (this.frames == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.frames");
         else if (Configuration.doAutoCreate())
-          this.frames = new IntegerType(); // bb
+          this.frames = new PositiveIntType(); // bb
       return this.frames;
     }
 
@@ -661,7 +622,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #frames} (The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.). This is the underlying object with id, value and extensions. The accessor "getFrames" gives direct access to the value
      */
-    public Media setFramesElement(IntegerType value) { 
+    public Media setFramesElement(PositiveIntType value) { 
       this.frames = value;
       return this;
     }
@@ -670,7 +631,7 @@ public class Media extends DomainResource {
      * @return The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.
      */
     public int getFrames() { 
-      return this.frames == null ? 0 : this.frames.getValue();
+      return this.frames == null || this.frames.isEmpty() ? 0 : this.frames.getValue();
     }
 
     /**
@@ -678,7 +639,7 @@ public class Media extends DomainResource {
      */
     public Media setFrames(int value) { 
         if (this.frames == null)
-          this.frames = new IntegerType();
+          this.frames = new PositiveIntType();
         this.frames.setValue(value);
       return this;
     }
@@ -686,12 +647,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #duration} (The duration of the recording in seconds - for audio and video.). This is the underlying object with id, value and extensions. The accessor "getDuration" gives direct access to the value
      */
-    public IntegerType getDurationElement() { 
+    public UnsignedIntType getDurationElement() { 
       if (this.duration == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.duration");
         else if (Configuration.doAutoCreate())
-          this.duration = new IntegerType(); // bb
+          this.duration = new UnsignedIntType(); // bb
       return this.duration;
     }
 
@@ -706,7 +667,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #duration} (The duration of the recording in seconds - for audio and video.). This is the underlying object with id, value and extensions. The accessor "getDuration" gives direct access to the value
      */
-    public Media setDurationElement(IntegerType value) { 
+    public Media setDurationElement(UnsignedIntType value) { 
       this.duration = value;
       return this;
     }
@@ -715,7 +676,7 @@ public class Media extends DomainResource {
      * @return The duration of the recording in seconds - for audio and video.
      */
     public int getDuration() { 
-      return this.duration == null ? 0 : this.duration.getValue();
+      return this.duration == null || this.duration.isEmpty() ? 0 : this.duration.getValue();
     }
 
     /**
@@ -723,7 +684,7 @@ public class Media extends DomainResource {
      */
     public Media setDuration(int value) { 
         if (this.duration == null)
-          this.duration = new IntegerType();
+          this.duration = new UnsignedIntType();
         this.duration.setValue(value);
       return this;
     }
@@ -731,12 +692,12 @@ public class Media extends DomainResource {
     /**
      * @return {@link #content} (The actual content of the media - inline or by direct reference to the media source file.)
      */
-    public AttachmentType getContent() { 
+    public Attachment getContent() { 
       if (this.content == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Media.content");
         else if (Configuration.doAutoCreate())
-          this.content = new AttachmentType(); // cc
+          this.content = new Attachment(); // cc
       return this.content;
     }
 
@@ -747,7 +708,7 @@ public class Media extends DomainResource {
     /**
      * @param value {@link #content} (The actual content of the media - inline or by direct reference to the media source file.)
      */
-    public Media setContent(AttachmentType value) { 
+    public Media setContent(Attachment value) { 
       this.content = value;
       return this;
     }
@@ -757,15 +718,14 @@ public class Media extends DomainResource {
         childrenList.add(new Property("type", "code", "Whether the media is a photo (still image), an audio recording, or a video recording.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("subtype", "CodeableConcept", "Details of the type of the media - usually, how it was acquired (what type of device). If images sourced from a DICOM system, are wrapped in a Media resource, then this is the modality.", 0, java.lang.Integer.MAX_VALUE, subtype));
         childrenList.add(new Property("identifier", "Identifier", "Identifiers associated with the image - these may include identifiers for the image itself, identifiers for the context of its collection (e.g. series ids) and context ids such as accession numbers or other workflow identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("created", "dateTime", "The date/time when the media was originally recorded. For video and audio, if the length of the recording is not insignificant, this is the start of the recording.", 0, java.lang.Integer.MAX_VALUE, created));
         childrenList.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device|Specimen)", "Who/What this Media is a record of.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("operator", "Reference(Practitioner)", "The person who administered the collection of the image.", 0, java.lang.Integer.MAX_VALUE, operator));
         childrenList.add(new Property("view", "CodeableConcept", "The name of the imaging view e.g Lateral or Antero-posterior (AP).", 0, java.lang.Integer.MAX_VALUE, view));
         childrenList.add(new Property("deviceName", "string", "The name of the device / manufacturer of the device  that was used to make the recording.", 0, java.lang.Integer.MAX_VALUE, deviceName));
-        childrenList.add(new Property("height", "integer", "Height of the image in pixels(photo/video).", 0, java.lang.Integer.MAX_VALUE, height));
-        childrenList.add(new Property("width", "integer", "Width of the image in pixels (photo/video).", 0, java.lang.Integer.MAX_VALUE, width));
-        childrenList.add(new Property("frames", "integer", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, java.lang.Integer.MAX_VALUE, frames));
-        childrenList.add(new Property("duration", "integer", "The duration of the recording in seconds - for audio and video.", 0, java.lang.Integer.MAX_VALUE, duration));
+        childrenList.add(new Property("height", "positiveInt", "Height of the image in pixels(photo/video).", 0, java.lang.Integer.MAX_VALUE, height));
+        childrenList.add(new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, java.lang.Integer.MAX_VALUE, width));
+        childrenList.add(new Property("frames", "positiveInt", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, java.lang.Integer.MAX_VALUE, frames));
+        childrenList.add(new Property("duration", "unsignedInt", "The duration of the recording in seconds - for audio and video.", 0, java.lang.Integer.MAX_VALUE, duration));
         childrenList.add(new Property("content", "Attachment", "The actual content of the media - inline or by direct reference to the media source file.", 0, java.lang.Integer.MAX_VALUE, content));
       }
 
@@ -779,7 +739,6 @@ public class Media extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.created = created == null ? null : created.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.operator = operator == null ? null : operator.copy();
         dst.view = view == null ? null : view.copy();
@@ -804,10 +763,10 @@ public class Media extends DomainResource {
           return false;
         Media o = (Media) other;
         return compareDeep(type, o.type, true) && compareDeep(subtype, o.subtype, true) && compareDeep(identifier, o.identifier, true)
-           && compareDeep(created, o.created, true) && compareDeep(subject, o.subject, true) && compareDeep(operator, o.operator, true)
-           && compareDeep(view, o.view, true) && compareDeep(deviceName, o.deviceName, true) && compareDeep(height, o.height, true)
-           && compareDeep(width, o.width, true) && compareDeep(frames, o.frames, true) && compareDeep(duration, o.duration, true)
-           && compareDeep(content, o.content, true);
+           && compareDeep(subject, o.subject, true) && compareDeep(operator, o.operator, true) && compareDeep(view, o.view, true)
+           && compareDeep(deviceName, o.deviceName, true) && compareDeep(height, o.height, true) && compareDeep(width, o.width, true)
+           && compareDeep(frames, o.frames, true) && compareDeep(duration, o.duration, true) && compareDeep(content, o.content, true)
+          ;
       }
 
       @Override
@@ -817,18 +776,17 @@ public class Media extends DomainResource {
         if (!(other instanceof Media))
           return false;
         Media o = (Media) other;
-        return compareValues(type, o.type, true) && compareValues(created, o.created, true) && compareValues(deviceName, o.deviceName, true)
-           && compareValues(height, o.height, true) && compareValues(width, o.width, true) && compareValues(frames, o.frames, true)
-           && compareValues(duration, o.duration, true);
+        return compareValues(type, o.type, true) && compareValues(deviceName, o.deviceName, true) && compareValues(height, o.height, true)
+           && compareValues(width, o.width, true) && compareValues(frames, o.frames, true) && compareValues(duration, o.duration, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (type == null || type.isEmpty()) && (subtype == null || subtype.isEmpty())
-           && (identifier == null || identifier.isEmpty()) && (created == null || created.isEmpty())
-           && (subject == null || subject.isEmpty()) && (operator == null || operator.isEmpty()) && (view == null || view.isEmpty())
-           && (deviceName == null || deviceName.isEmpty()) && (height == null || height.isEmpty()) && (width == null || width.isEmpty())
-           && (frames == null || frames.isEmpty()) && (duration == null || duration.isEmpty()) && (content == null || content.isEmpty())
-          ;
+           && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
+           && (operator == null || operator.isEmpty()) && (view == null || view.isEmpty()) && (deviceName == null || deviceName.isEmpty())
+           && (height == null || height.isEmpty()) && (width == null || width.isEmpty()) && (frames == null || frames.isEmpty())
+           && (duration == null || duration.isEmpty()) && (content == null || content.isEmpty());
       }
 
   @Override
@@ -836,20 +794,20 @@ public class Media extends DomainResource {
     return ResourceType.Media;
    }
 
-  @SearchParamDefinition(name = "identifier", path = "Media.identifier", description = "Identifier(s) for the image", type = "token")
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name = "view", path = "Media.view", description = "Imaging view e.g Lateral or Antero-posterior", type = "token")
-  public static final String SP_VIEW = "view";
-  @SearchParamDefinition(name = "subtype", path = "Media.subtype", description = "The type of acquisition equipment/process", type = "token")
-  public static final String SP_SUBTYPE = "subtype";
-  @SearchParamDefinition(name="created", path="Media.created", description="When the media was taken/recorded (start)", type="date" )
+  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="created", path="Media.content.creation", description="Date attachment was first created", type="date" )
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name = "patient", path = "Media.subject", description = "Who/What this Media is a record of", type = "reference")
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token" )
+  public static final String SP_SUBTYPE = "subtype";
+  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view e.g Lateral or Antero-posterior", type="token" )
+  public static final String SP_VIEW = "view";
   @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token" )
   public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference" )
   public static final String SP_OPERATOR = "operator";
 

@@ -29,113 +29,25 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
- * A Resource Profile - a statement of use of one or more FHIR Resources.  It may include constraints on Resources and Data Types, Terminology Binding Statements and Extension Definitions.
+ * A definition of a FHIR structure. This resource is used to describe the underlying resources, data types defined in FHIR, and also for describing extensions, and constraints on resources and data types.
  */
 @ResourceDef(name="StructureDefinition", profile="http://hl7.org/fhir/Profile/StructureDefinition")
 public class StructureDefinition extends DomainResource {
 
-    public enum StructureDefinitionStatus {
-        /**
-         * This profile is still under development.
-         */
-        DRAFT, 
-        /**
-         * This profile is ready for normal use.
-         */
-        ACTIVE, 
-        /**
-         * This profile has been deprecated, withdrawn or superseded and should no longer be used.
-         */
-        RETIRED, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static StructureDefinitionStatus fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("draft".equals(codeString))
-          return DRAFT;
-        if ("active".equals(codeString))
-          return ACTIVE;
-        if ("retired".equals(codeString))
-          return RETIRED;
-        throw new Exception("Unknown StructureDefinitionStatus code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case DRAFT: return "draft";
-            case ACTIVE: return "active";
-            case RETIRED: return "retired";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case DRAFT: return "";
-            case ACTIVE: return "";
-            case RETIRED: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case DRAFT: return "This profile is still under development.";
-            case ACTIVE: return "This profile is ready for normal use.";
-            case RETIRED: return "This profile has been deprecated, withdrawn or superseded and should no longer be used.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case DRAFT: return "draft";
-            case ACTIVE: return "active";
-            case RETIRED: return "retired";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class StructureDefinitionStatusEnumFactory implements EnumFactory<StructureDefinitionStatus> {
-    public StructureDefinitionStatus fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("draft".equals(codeString))
-          return StructureDefinitionStatus.DRAFT;
-        if ("active".equals(codeString))
-          return StructureDefinitionStatus.ACTIVE;
-        if ("retired".equals(codeString))
-          return StructureDefinitionStatus.RETIRED;
-        throw new IllegalArgumentException("Unknown StructureDefinitionStatus code '"+codeString+"'");
-        }
-    public String toCode(StructureDefinitionStatus code) {
-      if (code == StructureDefinitionStatus.DRAFT)
-        return "draft";
-      if (code == StructureDefinitionStatus.ACTIVE)
-        return "active";
-      if (code == StructureDefinitionStatus.RETIRED)
-        return "retired";
-      return "?";
-      }
-    }
-
     public enum StructureDefinitionType {
-        /**
-         * An abstract Type. Structure Definitions for abstract types are provided for structural completeness, and to support functions such as code generation.
-         */
-        ABSTRACT, 
         /**
          * A data type - either a primitive or complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions.
          */
@@ -159,8 +71,6 @@ public class StructureDefinition extends DomainResource {
         public static StructureDefinitionType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("abstract".equals(codeString))
-          return ABSTRACT;
         if ("type".equals(codeString))
           return TYPE;
         if ("resource".equals(codeString))
@@ -173,7 +83,6 @@ public class StructureDefinition extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case ABSTRACT: return "abstract";
             case TYPE: return "type";
             case RESOURCE: return "resource";
             case CONSTRAINT: return "constraint";
@@ -183,7 +92,6 @@ public class StructureDefinition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ABSTRACT: return "";
             case TYPE: return "";
             case RESOURCE: return "";
             case CONSTRAINT: return "";
@@ -193,7 +101,6 @@ public class StructureDefinition extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ABSTRACT: return "An abstract Type. Structure Definitions for abstract types are provided for structural completeness, and to support functions such as code generation.";
             case TYPE: return "A data type - either a primitive or complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions.";
             case RESOURCE: return "A resource defined by the FHIR specification.";
             case CONSTRAINT: return "A set of constraints on a resource or data type that describe how it is used for a particular use.";
@@ -203,7 +110,6 @@ public class StructureDefinition extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case ABSTRACT: return "Abstract type";
             case TYPE: return "Data Type";
             case RESOURCE: return "Resource";
             case CONSTRAINT: return "Constrained Type";
@@ -218,8 +124,6 @@ public class StructureDefinition extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("abstract".equals(codeString))
-          return StructureDefinitionType.ABSTRACT;
         if ("type".equals(codeString))
           return StructureDefinitionType.TYPE;
         if ("resource".equals(codeString))
@@ -231,8 +135,6 @@ public class StructureDefinition extends DomainResource {
         throw new IllegalArgumentException("Unknown StructureDefinitionType code '"+codeString+"'");
         }
     public String toCode(StructureDefinitionType code) {
-      if (code == StructureDefinitionType.ABSTRACT)
-        return "abstract";
       if (code == StructureDefinitionType.TYPE)
         return "type";
       if (code == StructureDefinitionType.RESOURCE)
@@ -308,10 +210,10 @@ public class StructureDefinition extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case RESOURCE: return "resource";
-            case DATATYPE: return "datatype";
-            case MAPPING: return "mapping";
-            case EXTENSION: return "extension";
+            case RESOURCE: return "Resource";
+            case DATATYPE: return "Datatype";
+            case MAPPING: return "Mapping";
+            case EXTENSION: return "Extension";
             default: return "?";
           }
         }
@@ -346,41 +248,206 @@ public class StructureDefinition extends DomainResource {
     }
 
     @Block()
-    public static class StructureDefinitionMappingComponent extends BackboneElement {
+    public static class StructureDefinitionContactComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The name of an individual to contact regarding the structure definition.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the structure definition." )
+        protected StringType name;
+
+        /**
+         * Contact details for individual (if a name was provided) or the publisher.
+         */
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
+        protected List<ContactPoint> telecom;
+
+        private static final long serialVersionUID = -1179697803L;
+
+    /*
+     * Constructor
+     */
+      public StructureDefinitionContactComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #name} (The name of an individual to contact regarding the structure definition.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StructureDefinitionContactComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (The name of an individual to contact regarding the structure definition.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StructureDefinitionContactComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return The name of an individual to contact regarding the structure definition.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value The name of an individual to contact regarding the structure definition.
+         */
+        public StructureDefinitionContactComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
+         */
+        public List<ContactPoint> getTelecom() { 
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          return this.telecom;
+        }
+
+        public boolean hasTelecom() { 
+          if (this.telecom == null)
+            return false;
+          for (ContactPoint item : this.telecom)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
+         */
+    // syntactic sugar
+        public ContactPoint addTelecom() { //3
+          ContactPoint t = new ContactPoint();
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public StructureDefinitionContactComponent addTelecom(ContactPoint t) { //3
+          if (t == null)
+            return this;
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the structure definition.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        }
+
+      public StructureDefinitionContactComponent copy() {
+        StructureDefinitionContactComponent dst = new StructureDefinitionContactComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        if (telecom != null) {
+          dst.telecom = new ArrayList<ContactPoint>();
+          for (ContactPoint i : telecom)
+            dst.telecom.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof StructureDefinitionContactComponent))
+          return false;
+        StructureDefinitionContactComponent o = (StructureDefinitionContactComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof StructureDefinitionContactComponent))
+          return false;
+        StructureDefinitionContactComponent o = (StructureDefinitionContactComponent) other;
+        return compareValues(name, o.name, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
+      }
+
+  }
+
+    @Block()
+    public static class StructureDefinitionMappingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An Internal id that is used to identify this mapping set when specific mappings are made.
          */
-        @Child(name="identity", type={IdType.class}, order=1, min=1, max=1)
+        @Child(name = "identity", type = {IdType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Internal id when this mapping is used", formalDefinition="An Internal id that is used to identify this mapping set when specific mappings are made." )
         protected IdType identity;
 
         /**
-         * A URI that identifies the specification that this mapping is expressed to.
+         * An absolute URI that identifies the specification that this mapping is expressed to.
          */
-        @Child(name="uri", type={UriType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Identifies what this mapping refers to", formalDefinition="A URI that identifies the specification that this mapping is expressed to." )
+        @Child(name = "uri", type = {UriType.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="Identifies what this mapping refers to", formalDefinition="An absolute URI that identifies the specification that this mapping is expressed to." )
         protected UriType uri;
 
         /**
          * A name for the specification that is being mapped to.
          */
-        @Child(name="name", type={StringType.class}, order=3, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Names what this mapping refers to", formalDefinition="A name for the specification that is being mapped to." )
         protected StringType name;
 
         /**
          * Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage.
          */
-        @Child(name="comments", type={StringType.class}, order=4, min=0, max=1)
+        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Versions, Issues, Scope limitations etc", formalDefinition="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage." )
         protected StringType comments;
 
         private static final long serialVersionUID = 299630820L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionMappingComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionMappingComponent(IdType identity) {
         super();
         this.identity = identity;
@@ -432,7 +499,7 @@ public class StructureDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #uri} (A URI that identifies the specification that this mapping is expressed to.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
+         * @return {@link #uri} (An absolute URI that identifies the specification that this mapping is expressed to.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
         public UriType getUriElement() { 
           if (this.uri == null)
@@ -452,7 +519,7 @@ public class StructureDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #uri} (A URI that identifies the specification that this mapping is expressed to.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
+         * @param value {@link #uri} (An absolute URI that identifies the specification that this mapping is expressed to.). This is the underlying object with id, value and extensions. The accessor "getUri" gives direct access to the value
          */
         public StructureDefinitionMappingComponent setUriElement(UriType value) { 
           this.uri = value;
@@ -460,14 +527,14 @@ public class StructureDefinition extends DomainResource {
         }
 
         /**
-         * @return A URI that identifies the specification that this mapping is expressed to.
+         * @return An absolute URI that identifies the specification that this mapping is expressed to.
          */
         public String getUri() { 
           return this.uri == null ? null : this.uri.getValue();
         }
 
         /**
-         * @param value A URI that identifies the specification that this mapping is expressed to.
+         * @param value An absolute URI that identifies the specification that this mapping is expressed to.
          */
         public StructureDefinitionMappingComponent setUri(String value) { 
           if (Utilities.noString(value))
@@ -581,7 +648,7 @@ public class StructureDefinition extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("identity", "id", "An Internal id that is used to identify this mapping set when specific mappings are made.", 0, java.lang.Integer.MAX_VALUE, identity));
-          childrenList.add(new Property("uri", "uri", "A URI that identifies the specification that this mapping is expressed to.", 0, java.lang.Integer.MAX_VALUE, uri));
+          childrenList.add(new Property("uri", "uri", "An absolute URI that identifies the specification that this mapping is expressed to.", 0, java.lang.Integer.MAX_VALUE, uri));
           childrenList.add(new Property("name", "string", "A name for the specification that is being mapped to.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("comments", "string", "Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage.", 0, java.lang.Integer.MAX_VALUE, comments));
         }
@@ -626,16 +693,19 @@ public class StructureDefinition extends DomainResource {
   }
 
     @Block()
-    public static class StructureDefinitionSnapshotComponent extends BackboneElement {
+    public static class StructureDefinitionSnapshotComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Captures constraints on each element within the resource.
          */
-        @Child(name="element", type={ElementDefinition.class}, order=1, min=1, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Definition of elements in the resource (if no profile)", formalDefinition="Captures constraints on each element within the resource." )
+        @Child(name = "element", type = {ElementDefinition.class}, order=1, min=1, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Definition of elements in the resource (if no StructureDefinition)", formalDefinition="Captures constraints on each element within the resource." )
         protected List<ElementDefinition> element;
 
         private static final long serialVersionUID = 53896641L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionSnapshotComponent() {
         super();
       }
@@ -668,6 +738,16 @@ public class StructureDefinition extends DomainResource {
             this.element = new ArrayList<ElementDefinition>();
           this.element.add(t);
           return t;
+        }
+
+    // syntactic sugar
+        public StructureDefinitionSnapshotComponent addElement(ElementDefinition t) { //3
+          if (t == null)
+            return this;
+          if (this.element == null)
+            this.element = new ArrayList<ElementDefinition>();
+          this.element.add(t);
+          return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -713,16 +793,19 @@ public class StructureDefinition extends DomainResource {
   }
 
     @Block()
-    public static class StructureDefinitionDifferentialComponent extends BackboneElement {
+    public static class StructureDefinitionDifferentialComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Captures constraints on each element within the resource.
          */
-        @Child(name="element", type={ElementDefinition.class}, order=1, min=1, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Definition of elements in the resource (if no profile)", formalDefinition="Captures constraints on each element within the resource." )
+        @Child(name = "element", type = {ElementDefinition.class}, order=1, min=1, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Definition of elements in the resource (if no StructureDefinition)", formalDefinition="Captures constraints on each element within the resource." )
         protected List<ElementDefinition> element;
 
         private static final long serialVersionUID = 53896641L;
 
+    /*
+     * Constructor
+     */
       public StructureDefinitionDifferentialComponent() {
         super();
       }
@@ -755,6 +838,16 @@ public class StructureDefinition extends DomainResource {
             this.element = new ArrayList<ElementDefinition>();
           this.element.add(t);
           return t;
+        }
+
+    // syntactic sugar
+        public StructureDefinitionDifferentialComponent addElement(ElementDefinition t) { //3
+          if (t == null)
+            return this;
+          if (this.element == null)
+            this.element = new ArrayList<ElementDefinition>();
+          this.element.add(t);
+          return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -800,168 +893,196 @@ public class StructureDefinition extends DomainResource {
   }
 
     /**
-     * The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.
+     * An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems.
      */
-    @Child(name = "url", type = {UriType.class}, order = 0, min = 1, max = 1)
-    @Description(shortDefinition="Literal URL used to reference this profile", formalDefinition="The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems." )
+    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1)
+    @Description(shortDefinition="Literal URL used to reference this StructureDefinition", formalDefinition="An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems." )
     protected UriType url;
 
     /**
-     * Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).
+     * Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Other identifiers for the profile", formalDefinition="Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)." )
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Other identifiers for the StructureDefinition", formalDefinition="Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI)." )
     protected List<Identifier> identifier;
 
     /**
-     * The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.
+     * The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually.
      */
-    @Child(name = "version", type = {StringType.class}, order = 2, min = 0, max = 1)
-    @Description(shortDefinition="Logical id for this version of the profile", formalDefinition="The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually." )
+    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+    @Description(shortDefinition="Logical id for this version of the StructureDefinition", formalDefinition="The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually." )
     protected StringType version;
 
     /**
-     * A free text natural language name identifying the Profile.
+     * A free text natural language name identifying the StructureDefinition.
      */
-    @Child(name = "name", type = {StringType.class}, order = 3, min = 1, max = 1)
-    @Description(shortDefinition="Informal name for this profile", formalDefinition="A free text natural language name identifying the Profile." )
+    @Child(name = "name", type = {StringType.class}, order=3, min=1, max=1)
+    @Description(shortDefinition="Informal name for this StructureDefinition", formalDefinition="A free text natural language name identifying the StructureDefinition." )
     protected StringType name;
+
+    /**
+     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions.
+     */
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions." )
+    protected List<CodeableConcept> useContext;
 
     /**
      * Defined so that applications can use this name when displaying the value of the extension to the user.
      */
-    @Child(name = "display", type = {StringType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "display", type = {StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Use this name when displaying the value", formalDefinition="Defined so that applications can use this name when displaying the value of the extension to the user." )
     protected StringType display;
 
     /**
-     * Details of the individual or organization who accepts responsibility for publishing the profile.
+     * The name of the individual or organization that published the structure definition.
      */
-    @Child(name = "publisher", type = {StringType.class}, order = 5, min = 0, max = 1)
-    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="Details of the individual or organization who accepts responsibility for publishing the profile." )
+    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1)
+    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the structure definition." )
     protected StringType publisher;
 
     /**
-     * Contact details to assist a user in finding and communicating with the publisher.
+     * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Contact information of the publisher", formalDefinition="Contact details to assist a user in finding and communicating with the publisher." )
-    protected List<ContactPoint> telecom;
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
+    protected List<StructureDefinitionContactComponent> contact;
 
     /**
-     * A free text natural language description of the profile and its use.
+     * A free text natural language description of the StructureDefinition and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order = 7, min = 0, max = 1)
-    @Description(shortDefinition="Natural language description of the profile", formalDefinition="A free text natural language description of the profile and its use." )
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1)
+    @Description(shortDefinition="Natural language description of the StructureDefinition", formalDefinition="A free text natural language description of the StructureDefinition and its use." )
     protected StringType description;
+
+    /**
+     * Explains why this structure definition is needed and why it's been constrained as it has.
+     */
+    @Child(name = "requirements", type = {StringType.class}, order=9, min=0, max=1)
+    @Description(shortDefinition="Scope and Usage this structure definition is for", formalDefinition="Explains why this structure definition is needed and why it's been constrained as it has." )
+    protected StringType requirements;
+
+    /**
+     * A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     */
+    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1)
+    @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
+    protected StringType copyright;
 
     /**
      * A set of terms from external terminologies that may be used to assist with indexing and searching of templates.
      */
-    @Child(name = "code", type = {Coding.class}, order = 8, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "code", type = {Coding.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Assist with indexing and finding", formalDefinition="A set of terms from external terminologies that may be used to assist with indexing and searching of templates." )
     protected List<Coding> code;
 
     /**
-     * The status of the profile.
+     * The status of the StructureDefinition.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 9, min = 1, max = 1)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the profile." )
-    protected Enumeration<StructureDefinitionStatus> status;
+    @Child(name = "status", type = {CodeType.class}, order=12, min=1, max=1)
+    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the StructureDefinition." )
+    protected Enumeration<ConformanceResourceStatus> status;
 
     /**
-     * This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order = 10, min = 0, max = 1)
-    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
+    @Child(name = "experimental", type = {BooleanType.class}, order=13, min=0, max=1)
+    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
-     * The date that this version of the profile was published.
+     * The date that this version of the StructureDefinition was published.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order = 11, min = 0, max = 1)
-    @Description(shortDefinition="Date for this version of the profile", formalDefinition="The date that this version of the profile was published." )
+    @Child(name = "date", type = {DateTimeType.class}, order=14, min=0, max=1)
+    @Description(shortDefinition="Date for this version of the StructureDefinition", formalDefinition="The date that this version of the StructureDefinition was published." )
     protected DateTimeType date;
 
     /**
-     * The Scope and Usage that this profile was created to meet.
+     * The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
      */
-    @Child(name = "requirements", type = {StringType.class}, order = 12, min = 0, max = 1)
-    @Description(shortDefinition="Scope and Usage this profile is for", formalDefinition="The Scope and Usage that this profile was created to meet." )
-    protected StringType requirements;
-
-    /**
-     * The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.
-     */
-    @Child(name = "fhirVersion", type = {IdType.class}, order = 13, min = 0, max = 1)
-    @Description(shortDefinition="FHIR Version this profile targets", formalDefinition="The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version." )
+    @Child(name = "fhirVersion", type = {IdType.class}, order=15, min=0, max=1)
+    @Description(shortDefinition="FHIR Version this StructureDefinition targets", formalDefinition="The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version." )
     protected IdType fhirVersion;
 
     /**
      * An external specification that the content is mapped to.
      */
-    @Child(name = "mapping", type = {}, order = 14, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "mapping", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External specification that the content is mapped to", formalDefinition="An external specification that the content is mapped to." )
     protected List<StructureDefinitionMappingComponent> mapping;
 
     /**
      * Defines the type of structure that this definition is describing.
      */
-    @Child(name = "type", type = {CodeType.class}, order = 15, min = 1, max = 1)
-    @Description(shortDefinition="abstract | type | resource | constraint | extension", formalDefinition="Defines the type of structure that this definition is describing." )
+    @Child(name = "type", type = {CodeType.class}, order=17, min=1, max=1)
+    @Description(shortDefinition="type | resource | constraint | extension", formalDefinition="Defines the type of structure that this definition is describing." )
     protected Enumeration<StructureDefinitionType> type;
 
     /**
-     * Identifies the type of context to which the extension applies.
+     * Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.
      */
-    @Child(name = "contextType", type = {CodeType.class}, order = 16, min = 0, max = 1)
-    @Description(shortDefinition="resource | datatype | mapping | extension", formalDefinition="Identifies the type of context to which the extension applies." )
+    @Child(name = "abstract_", type = {BooleanType.class}, order=18, min=1, max=1)
+    @Description(shortDefinition="Whether the structure is abstract", formalDefinition="Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type." )
+    protected BooleanType abstract_;
+
+    /**
+     * If this is an extension, Identifies the context within FHIR resources where the extension can be used.
+     */
+    @Child(name = "contextType", type = {CodeType.class}, order=19, min=0, max=1)
+    @Description(shortDefinition="resource | datatype | mapping | extension", formalDefinition="If this is an extension, Identifies the context within FHIR resources where the extension can be used." )
     protected Enumeration<ExtensionContext> contextType;
 
     /**
      * Identifies the types of resource or data type elements to which the extension can be applied.
      */
-    @Child(name = "context", type = {StringType.class}, order = 17, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "context", type = {StringType.class}, order=20, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Where the extension can be used in instances", formalDefinition="Identifies the types of resource or data type elements to which the extension can be applied." )
     protected List<StringType> context;
 
     /**
-     * The structure that is the base on which this set of constraints is derived from.
+     * An absolute URI that is the base structure from which this set of constraints is derived.
      */
-    @Child(name = "base", type = {UriType.class}, order = 18, min = 0, max = 1)
-    @Description(shortDefinition="Structure that this set of constraints applies to", formalDefinition="The structure that is the base on which this set of constraints is derived from." )
+    @Child(name = "base", type = {UriType.class}, order=21, min=0, max=1)
+    @Description(shortDefinition="Structure that this set of constraints applies to", formalDefinition="An absolute URI that is the base structure from which this set of constraints is derived." )
     protected UriType base;
 
     /**
-     * A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile.
+     * A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.
      */
-    @Child(name = "snapshot", type = {}, order = 19, min = 0, max = 1)
-    @Description(shortDefinition="Snapshot view of the structure", formalDefinition="A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile." )
+    @Child(name = "snapshot", type = {}, order=22, min=0, max=1)
+    @Description(shortDefinition="Snapshot view of the structure", formalDefinition="A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition." )
     protected StructureDefinitionSnapshotComponent snapshot;
 
     /**
-     * A differential view is expressed relative to the base profile - a statement of differences that it applies.
+     * A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.
      */
-    @Child(name = "differential", type = {}, order = 20, min = 0, max = 1)
-    @Description(shortDefinition="Differential view of the structure", formalDefinition="A differential view is expressed relative to the base profile - a statement of differences that it applies." )
+    @Child(name = "differential", type = {}, order=23, min=0, max=1)
+    @Description(shortDefinition="Differential view of the structure", formalDefinition="A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies." )
     protected StructureDefinitionDifferentialComponent differential;
 
-    private static final long serialVersionUID = -149055817L;
+    private static final long serialVersionUID = -1935809660L;
 
+  /*
+   * Constructor
+   */
     public StructureDefinition() {
       super();
     }
 
-    public StructureDefinition(UriType url, StringType name, Enumeration<StructureDefinitionStatus> status, Enumeration<StructureDefinitionType> type) {
+  /*
+   * Constructor
+   */
+    public StructureDefinition(UriType url, StringType name, Enumeration<ConformanceResourceStatus> status, Enumeration<StructureDefinitionType> type, BooleanType abstract_) {
       super();
       this.url = url;
       this.name = name;
       this.status = status;
       this.type = type;
+      this.abstract_ = abstract_;
     }
 
     /**
-     * @return {@link #url} (The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -981,7 +1102,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public StructureDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -989,14 +1110,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.
+     * @return An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.
+     * @param value An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems.
      */
     public StructureDefinition setUrl(String value) { 
         if (this.url == null)
@@ -1006,7 +1127,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).)
+     * @return {@link #identifier} (Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1024,7 +1145,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).)
+     * @return {@link #identifier} (Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -1035,8 +1156,18 @@ public class StructureDefinition extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public StructureDefinition addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
+    }
+
     /**
-     * @return {@link #version} (The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @return {@link #version} (The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StringType getVersionElement() { 
       if (this.version == null)
@@ -1056,7 +1187,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #version} (The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     * @param value {@link #version} (The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
      */
     public StructureDefinition setVersionElement(StringType value) { 
       this.version = value;
@@ -1064,14 +1195,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.
+     * @return The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually.
      */
     public String getVersion() { 
       return this.version == null ? null : this.version.getValue();
     }
 
     /**
-     * @param value The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.
+     * @param value The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually.
      */
     public StructureDefinition setVersion(String value) { 
       if (Utilities.noString(value))
@@ -1085,7 +1216,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #name} (A free text natural language name identifying the Profile.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #name} (A free text natural language name identifying the StructureDefinition.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -1105,7 +1236,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (A free text natural language name identifying the Profile.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (A free text natural language name identifying the StructureDefinition.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StructureDefinition setNameElement(StringType value) { 
       this.name = value;
@@ -1113,19 +1244,59 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return A free text natural language name identifying the Profile.
+     * @return A free text natural language name identifying the StructureDefinition.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value A free text natural language name identifying the Profile.
+     * @param value A free text natural language name identifying the StructureDefinition.
      */
     public StructureDefinition setName(String value) { 
         if (this.name == null)
           this.name = new StringType();
         this.name.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions.)
+     */
+    public List<CodeableConcept> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      return this.useContext;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (CodeableConcept item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions.)
+     */
+    // syntactic sugar
+    public CodeableConcept addUseContext() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public StructureDefinition addUseContext(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      this.useContext.add(t);
       return this;
     }
 
@@ -1179,7 +1350,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #publisher} (Details of the individual or organization who accepts responsibility for publishing the profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @return {@link #publisher} (The name of the individual or organization that published the structure definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StringType getPublisherElement() { 
       if (this.publisher == null)
@@ -1199,7 +1370,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #publisher} (Details of the individual or organization who accepts responsibility for publishing the profile.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     * @param value {@link #publisher} (The name of the individual or organization that published the structure definition.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
      */
     public StructureDefinition setPublisherElement(StringType value) { 
       this.publisher = value;
@@ -1207,14 +1378,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return Details of the individual or organization who accepts responsibility for publishing the profile.
+     * @return The name of the individual or organization that published the structure definition.
      */
     public String getPublisher() { 
       return this.publisher == null ? null : this.publisher.getValue();
     }
 
     /**
-     * @param value Details of the individual or organization who accepts responsibility for publishing the profile.
+     * @param value The name of the individual or organization that published the structure definition.
      */
     public StructureDefinition setPublisher(String value) { 
       if (Utilities.noString(value))
@@ -1228,37 +1399,47 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #telecom} (Contact details to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
      */
-    public List<ContactPoint> getTelecom() { 
-      if (this.telecom == null)
-        this.telecom = new ArrayList<ContactPoint>();
-      return this.telecom;
+    public List<StructureDefinitionContactComponent> getContact() { 
+      if (this.contact == null)
+        this.contact = new ArrayList<StructureDefinitionContactComponent>();
+      return this.contact;
     }
 
-    public boolean hasTelecom() { 
-      if (this.telecom == null)
+    public boolean hasContact() { 
+      if (this.contact == null)
         return false;
-      for (ContactPoint item : this.telecom)
+      for (StructureDefinitionContactComponent item : this.contact)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #telecom} (Contact details to assist a user in finding and communicating with the publisher.)
+     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
      */
     // syntactic sugar
-    public ContactPoint addTelecom() { //3
-      ContactPoint t = new ContactPoint();
-      if (this.telecom == null)
-        this.telecom = new ArrayList<ContactPoint>();
-      this.telecom.add(t);
+    public StructureDefinitionContactComponent addContact() { //3
+      StructureDefinitionContactComponent t = new StructureDefinitionContactComponent();
+      if (this.contact == null)
+        this.contact = new ArrayList<StructureDefinitionContactComponent>();
+      this.contact.add(t);
       return t;
     }
 
+    // syntactic sugar
+    public StructureDefinition addContact(StructureDefinitionContactComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<StructureDefinitionContactComponent>();
+      this.contact.add(t);
+      return this;
+    }
+
     /**
-     * @return {@link #description} (A free text natural language description of the profile and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (A free text natural language description of the StructureDefinition and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -1278,7 +1459,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the profile and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the StructureDefinition and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StructureDefinition setDescriptionElement(StringType value) { 
       this.description = value;
@@ -1286,14 +1467,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return A free text natural language description of the profile and its use.
+     * @return A free text natural language description of the StructureDefinition and its use.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the profile and its use.
+     * @param value A free text natural language description of the StructureDefinition and its use.
      */
     public StructureDefinition setDescription(String value) { 
       if (Utilities.noString(value))
@@ -1302,6 +1483,104 @@ public class StructureDefinition extends DomainResource {
         if (this.description == null)
           this.description = new StringType();
         this.description.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #requirements} (Explains why this structure definition is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     */
+    public StringType getRequirementsElement() { 
+      if (this.requirements == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureDefinition.requirements");
+        else if (Configuration.doAutoCreate())
+          this.requirements = new StringType(); // bb
+      return this.requirements;
+    }
+
+    public boolean hasRequirementsElement() { 
+      return this.requirements != null && !this.requirements.isEmpty();
+    }
+
+    public boolean hasRequirements() { 
+      return this.requirements != null && !this.requirements.isEmpty();
+    }
+
+    /**
+     * @param value {@link #requirements} (Explains why this structure definition is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     */
+    public StructureDefinition setRequirementsElement(StringType value) { 
+      this.requirements = value;
+      return this;
+    }
+
+    /**
+     * @return Explains why this structure definition is needed and why it's been constrained as it has.
+     */
+    public String getRequirements() { 
+      return this.requirements == null ? null : this.requirements.getValue();
+    }
+
+    /**
+     * @param value Explains why this structure definition is needed and why it's been constrained as it has.
+     */
+    public StructureDefinition setRequirements(String value) { 
+      if (Utilities.noString(value))
+        this.requirements = null;
+      else {
+        if (this.requirements == null)
+          this.requirements = new StringType();
+        this.requirements.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #copyright} (A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public StringType getCopyrightElement() { 
+      if (this.copyright == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureDefinition.copyright");
+        else if (Configuration.doAutoCreate())
+          this.copyright = new StringType(); // bb
+      return this.copyright;
+    }
+
+    public boolean hasCopyrightElement() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    public boolean hasCopyright() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    /**
+     * @param value {@link #copyright} (A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public StructureDefinition setCopyrightElement(StringType value) { 
+      this.copyright = value;
+      return this;
+    }
+
+    /**
+     * @return A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     */
+    public String getCopyright() { 
+      return this.copyright == null ? null : this.copyright.getValue();
+    }
+
+    /**
+     * @param value A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     */
+    public StructureDefinition setCopyright(String value) { 
+      if (Utilities.noString(value))
+        this.copyright = null;
+      else {
+        if (this.copyright == null)
+          this.copyright = new StringType();
+        this.copyright.setValue(value);
       }
       return this;
     }
@@ -1336,15 +1615,25 @@ public class StructureDefinition extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public StructureDefinition addCode(Coding t) { //3
+      if (t == null)
+        return this;
+      if (this.code == null)
+        this.code = new ArrayList<Coding>();
+      this.code.add(t);
+      return this;
+    }
+
     /**
-     * @return {@link #status} (The status of the profile.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The status of the StructureDefinition.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<StructureDefinitionStatus> getStatusElement() { 
+    public Enumeration<ConformanceResourceStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create StructureDefinition.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<StructureDefinitionStatus>(new StructureDefinitionStatusEnumFactory()); // bb
+          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -1357,32 +1646,32 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (The status of the profile.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The status of the StructureDefinition.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public StructureDefinition setStatusElement(Enumeration<StructureDefinitionStatus> value) { 
+    public StructureDefinition setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
       this.status = value;
       return this;
     }
 
     /**
-     * @return The status of the profile.
+     * @return The status of the StructureDefinition.
      */
-    public StructureDefinitionStatus getStatus() { 
+    public ConformanceResourceStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The status of the profile.
+     * @param value The status of the StructureDefinition.
      */
-    public StructureDefinition setStatus(StructureDefinitionStatus value) { 
+    public StructureDefinition setStatus(ConformanceResourceStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<StructureDefinitionStatus>(new StructureDefinitionStatusEnumFactory());
+          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #experimental} (This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @return {@link #experimental} (This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public BooleanType getExperimentalElement() { 
       if (this.experimental == null)
@@ -1402,7 +1691,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #experimental} (This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     * @param value {@link #experimental} (This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
      */
     public StructureDefinition setExperimentalElement(BooleanType value) { 
       this.experimental = value;
@@ -1410,14 +1699,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @return This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public boolean getExperimental() { 
-      return this.experimental == null ? false : this.experimental.getValue();
+      return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
     }
 
     /**
-     * @param value This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     * @param value This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
     public StructureDefinition setExperimental(boolean value) { 
         if (this.experimental == null)
@@ -1427,7 +1716,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #date} (The date that this version of the profile was published.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @return {@link #date} (The date that this version of the StructureDefinition was published.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public DateTimeType getDateElement() { 
       if (this.date == null)
@@ -1447,7 +1736,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #date} (The date that this version of the profile was published.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     * @param value {@link #date} (The date that this version of the StructureDefinition was published.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
      */
     public StructureDefinition setDateElement(DateTimeType value) { 
       this.date = value;
@@ -1455,14 +1744,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return The date that this version of the profile was published.
+     * @return The date that this version of the StructureDefinition was published.
      */
     public Date getDate() { 
       return this.date == null ? null : this.date.getValue();
     }
 
     /**
-     * @param value The date that this version of the profile was published.
+     * @param value The date that this version of the StructureDefinition was published.
      */
     public StructureDefinition setDate(Date value) { 
       if (value == null)
@@ -1476,56 +1765,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #requirements} (The Scope and Usage that this profile was created to meet.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
-     */
-    public StringType getRequirementsElement() { 
-      if (this.requirements == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create StructureDefinition.requirements");
-        else if (Configuration.doAutoCreate())
-          this.requirements = new StringType(); // bb
-      return this.requirements;
-    }
-
-    public boolean hasRequirementsElement() { 
-      return this.requirements != null && !this.requirements.isEmpty();
-    }
-
-    public boolean hasRequirements() { 
-      return this.requirements != null && !this.requirements.isEmpty();
-    }
-
-    /**
-     * @param value {@link #requirements} (The Scope and Usage that this profile was created to meet.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
-     */
-    public StructureDefinition setRequirementsElement(StringType value) { 
-      this.requirements = value;
-      return this;
-    }
-
-    /**
-     * @return The Scope and Usage that this profile was created to meet.
-     */
-    public String getRequirements() { 
-      return this.requirements == null ? null : this.requirements.getValue();
-    }
-
-    /**
-     * @param value The Scope and Usage that this profile was created to meet.
-     */
-    public StructureDefinition setRequirements(String value) { 
-      if (Utilities.noString(value))
-        this.requirements = null;
-      else {
-        if (this.requirements == null)
-          this.requirements = new StringType();
-        this.requirements.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public IdType getFhirVersionElement() { 
       if (this.fhirVersion == null)
@@ -1545,7 +1785,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
     public StructureDefinition setFhirVersionElement(IdType value) { 
       this.fhirVersion = value;
@@ -1553,14 +1793,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.
+     * @return The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
      */
     public String getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.
+     * @param value The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
      */
     public StructureDefinition setFhirVersion(String value) { 
       if (Utilities.noString(value))
@@ -1601,6 +1841,16 @@ public class StructureDefinition extends DomainResource {
         this.mapping = new ArrayList<StructureDefinitionMappingComponent>();
       this.mapping.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public StructureDefinition addMapping(StructureDefinitionMappingComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.mapping == null)
+        this.mapping = new ArrayList<StructureDefinitionMappingComponent>();
+      this.mapping.add(t);
+      return this;
     }
 
     /**
@@ -1649,7 +1899,52 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #contextType} (Identifies the type of context to which the extension applies.). This is the underlying object with id, value and extensions. The accessor "getContextType" gives direct access to the value
+     * @return {@link #abstract_} (Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.). This is the underlying object with id, value and extensions. The accessor "getAbstract" gives direct access to the value
+     */
+    public BooleanType getAbstractElement() { 
+      if (this.abstract_ == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create StructureDefinition.abstract_");
+        else if (Configuration.doAutoCreate())
+          this.abstract_ = new BooleanType(); // bb
+      return this.abstract_;
+    }
+
+    public boolean hasAbstractElement() { 
+      return this.abstract_ != null && !this.abstract_.isEmpty();
+    }
+
+    public boolean hasAbstract() { 
+      return this.abstract_ != null && !this.abstract_.isEmpty();
+    }
+
+    /**
+     * @param value {@link #abstract_} (Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.). This is the underlying object with id, value and extensions. The accessor "getAbstract" gives direct access to the value
+     */
+    public StructureDefinition setAbstractElement(BooleanType value) { 
+      this.abstract_ = value;
+      return this;
+    }
+
+    /**
+     * @return Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.
+     */
+    public boolean getAbstract() { 
+      return this.abstract_ == null || this.abstract_.isEmpty() ? false : this.abstract_.getValue();
+    }
+
+    /**
+     * @param value Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.
+     */
+    public StructureDefinition setAbstract(boolean value) { 
+        if (this.abstract_ == null)
+          this.abstract_ = new BooleanType();
+        this.abstract_.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #contextType} (If this is an extension, Identifies the context within FHIR resources where the extension can be used.). This is the underlying object with id, value and extensions. The accessor "getContextType" gives direct access to the value
      */
     public Enumeration<ExtensionContext> getContextTypeElement() { 
       if (this.contextType == null)
@@ -1669,7 +1964,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #contextType} (Identifies the type of context to which the extension applies.). This is the underlying object with id, value and extensions. The accessor "getContextType" gives direct access to the value
+     * @param value {@link #contextType} (If this is an extension, Identifies the context within FHIR resources where the extension can be used.). This is the underlying object with id, value and extensions. The accessor "getContextType" gives direct access to the value
      */
     public StructureDefinition setContextTypeElement(Enumeration<ExtensionContext> value) { 
       this.contextType = value;
@@ -1677,14 +1972,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return Identifies the type of context to which the extension applies.
+     * @return If this is an extension, Identifies the context within FHIR resources where the extension can be used.
      */
     public ExtensionContext getContextType() { 
       return this.contextType == null ? null : this.contextType.getValue();
     }
 
     /**
-     * @param value Identifies the type of context to which the extension applies.
+     * @param value If this is an extension, Identifies the context within FHIR resources where the extension can be used.
      */
     public StructureDefinition setContextType(ExtensionContext value) { 
       if (value == null)
@@ -1752,7 +2047,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #base} (The structure that is the base on which this set of constraints is derived from.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
+     * @return {@link #base} (An absolute URI that is the base structure from which this set of constraints is derived.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
      */
     public UriType getBaseElement() { 
       if (this.base == null)
@@ -1772,7 +2067,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #base} (The structure that is the base on which this set of constraints is derived from.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
+     * @param value {@link #base} (An absolute URI that is the base structure from which this set of constraints is derived.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
      */
     public StructureDefinition setBaseElement(UriType value) { 
       this.base = value;
@@ -1780,14 +2075,14 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return The structure that is the base on which this set of constraints is derived from.
+     * @return An absolute URI that is the base structure from which this set of constraints is derived.
      */
     public String getBase() { 
       return this.base == null ? null : this.base.getValue();
     }
 
     /**
-     * @param value The structure that is the base on which this set of constraints is derived from.
+     * @param value An absolute URI that is the base structure from which this set of constraints is derived.
      */
     public StructureDefinition setBase(String value) { 
       if (Utilities.noString(value))
@@ -1801,7 +2096,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #snapshot} (A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile.)
+     * @return {@link #snapshot} (A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.)
      */
     public StructureDefinitionSnapshotComponent getSnapshot() { 
       if (this.snapshot == null)
@@ -1817,7 +2112,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #snapshot} (A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile.)
+     * @param value {@link #snapshot} (A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.)
      */
     public StructureDefinition setSnapshot(StructureDefinitionSnapshotComponent value) { 
       this.snapshot = value;
@@ -1825,7 +2120,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #differential} (A differential view is expressed relative to the base profile - a statement of differences that it applies.)
+     * @return {@link #differential} (A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.)
      */
     public StructureDefinitionDifferentialComponent getDifferential() { 
       if (this.differential == null)
@@ -1841,7 +2136,7 @@ public class StructureDefinition extends DomainResource {
     }
 
     /**
-     * @param value {@link #differential} (A differential view is expressed relative to the base profile - a statement of differences that it applies.)
+     * @param value {@link #differential} (A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.)
      */
     public StructureDefinition setDifferential(StructureDefinitionDifferentialComponent value) { 
       this.differential = value;
@@ -1850,27 +2145,30 @@ public class StructureDefinition extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "The URL at which this profile is (or will be) published, and which is used to reference this profile in extension urls and tag values in operational FHIR systems.", 0, java.lang.Integer.MAX_VALUE, url));
-        childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this profile when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the profile when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually.", 0, java.lang.Integer.MAX_VALUE, version));
-        childrenList.add(new Property("name", "string", "A free text natural language name identifying the Profile.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("url", "uri", "An absolute URL at which this StructureDefinition is (or will be) published, and which is used to reference this StructureDefinition in extension urls and tag values in operational FHIR systems.", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this StructureDefinition when it is represented in other formats, or referenced in a specification, model, design or an instance  (should be globally unique OID, UUID, or URI), (if it's not possible to use the literal URI).", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the StructureDefinition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the StructureDefinition author manually.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A free text natural language name identifying the StructureDefinition.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of structure definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("display", "string", "Defined so that applications can use this name when displaying the value of the extension to the user.", 0, java.lang.Integer.MAX_VALUE, display));
-        childrenList.add(new Property("publisher", "string", "Details of the individual or organization who accepts responsibility for publishing the profile.", 0, java.lang.Integer.MAX_VALUE, publisher));
-        childrenList.add(new Property("telecom", "ContactPoint", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the profile and its use.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the structure definition.", 0, java.lang.Integer.MAX_VALUE, publisher));
+        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("description", "string", "A free text natural language description of the StructureDefinition and its use.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("requirements", "string", "Explains why this structure definition is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the structure definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("code", "Coding", "A set of terms from external terminologies that may be used to assist with indexing and searching of templates.", 0, java.lang.Integer.MAX_VALUE, code));
-        childrenList.add(new Property("status", "code", "The status of the profile.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("experimental", "boolean", "This profile was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
-        childrenList.add(new Property("date", "dateTime", "The date that this version of the profile was published.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("requirements", "string", "The Scope and Usage that this profile was created to meet.", 0, java.lang.Integer.MAX_VALUE, requirements));
-        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this profile is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.4.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
+        childrenList.add(new Property("status", "code", "The status of the StructureDefinition.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "This StructureDefinition was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("date", "dateTime", "The date that this version of the StructureDefinition was published.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this StructureDefinition is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
         childrenList.add(new Property("mapping", "", "An external specification that the content is mapped to.", 0, java.lang.Integer.MAX_VALUE, mapping));
         childrenList.add(new Property("type", "code", "Defines the type of structure that this definition is describing.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("contextType", "code", "Identifies the type of context to which the extension applies.", 0, java.lang.Integer.MAX_VALUE, contextType));
+        childrenList.add(new Property("abstract", "boolean", "Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.", 0, java.lang.Integer.MAX_VALUE, abstract_));
+        childrenList.add(new Property("contextType", "code", "If this is an extension, Identifies the context within FHIR resources where the extension can be used.", 0, java.lang.Integer.MAX_VALUE, contextType));
         childrenList.add(new Property("context", "string", "Identifies the types of resource or data type elements to which the extension can be applied.", 0, java.lang.Integer.MAX_VALUE, context));
-        childrenList.add(new Property("base", "uri", "The structure that is the base on which this set of constraints is derived from.", 0, java.lang.Integer.MAX_VALUE, base));
-        childrenList.add(new Property("snapshot", "", "A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base profile.", 0, java.lang.Integer.MAX_VALUE, snapshot));
-        childrenList.add(new Property("differential", "", "A differential view is expressed relative to the base profile - a statement of differences that it applies.", 0, java.lang.Integer.MAX_VALUE, differential));
+        childrenList.add(new Property("base", "uri", "An absolute URI that is the base structure from which this set of constraints is derived.", 0, java.lang.Integer.MAX_VALUE, base));
+        childrenList.add(new Property("snapshot", "", "A snapshot view is expressed in a stand alone form that can be used and interpreted without considering the base StructureDefinition.", 0, java.lang.Integer.MAX_VALUE, snapshot));
+        childrenList.add(new Property("differential", "", "A differential view is expressed relative to the base StructureDefinition - a statement of differences that it applies.", 0, java.lang.Integer.MAX_VALUE, differential));
       }
 
       public StructureDefinition copy() {
@@ -1884,14 +2182,21 @@ public class StructureDefinition extends DomainResource {
         };
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
+        if (useContext != null) {
+          dst.useContext = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : useContext)
+            dst.useContext.add(i.copy());
+        };
         dst.display = display == null ? null : display.copy();
         dst.publisher = publisher == null ? null : publisher.copy();
-        if (telecom != null) {
-          dst.telecom = new ArrayList<ContactPoint>();
-          for (ContactPoint i : telecom)
-            dst.telecom.add(i.copy());
+        if (contact != null) {
+          dst.contact = new ArrayList<StructureDefinitionContactComponent>();
+          for (StructureDefinitionContactComponent i : contact)
+            dst.contact.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
+        dst.requirements = requirements == null ? null : requirements.copy();
+        dst.copyright = copyright == null ? null : copyright.copy();
         if (code != null) {
           dst.code = new ArrayList<Coding>();
           for (Coding i : code)
@@ -1900,7 +2205,6 @@ public class StructureDefinition extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
         dst.date = date == null ? null : date.copy();
-        dst.requirements = requirements == null ? null : requirements.copy();
         dst.fhirVersion = fhirVersion == null ? null : fhirVersion.copy();
         if (mapping != null) {
           dst.mapping = new ArrayList<StructureDefinitionMappingComponent>();
@@ -1908,6 +2212,7 @@ public class StructureDefinition extends DomainResource {
             dst.mapping.add(i.copy());
         };
         dst.type = type == null ? null : type.copy();
+        dst.abstract_ = abstract_ == null ? null : abstract_.copy();
         dst.contextType = contextType == null ? null : contextType.copy();
         if (context != null) {
           dst.context = new ArrayList<StringType>();
@@ -1932,11 +2237,12 @@ public class StructureDefinition extends DomainResource {
           return false;
         StructureDefinition o = (StructureDefinition) other;
         return compareDeep(url, o.url, true) && compareDeep(identifier, o.identifier, true) && compareDeep(version, o.version, true)
-           && compareDeep(name, o.name, true) && compareDeep(display, o.display, true) && compareDeep(publisher, o.publisher, true)
-           && compareDeep(telecom, o.telecom, true) && compareDeep(description, o.description, true) && compareDeep(code, o.code, true)
-           && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true) && compareDeep(date, o.date, true)
-           && compareDeep(requirements, o.requirements, true) && compareDeep(fhirVersion, o.fhirVersion, true)
-           && compareDeep(mapping, o.mapping, true) && compareDeep(type, o.type, true) && compareDeep(contextType, o.contextType, true)
+           && compareDeep(name, o.name, true) && compareDeep(useContext, o.useContext, true) && compareDeep(display, o.display, true)
+           && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
+           && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
+           && compareDeep(code, o.code, true) && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true)
+           && compareDeep(date, o.date, true) && compareDeep(fhirVersion, o.fhirVersion, true) && compareDeep(mapping, o.mapping, true)
+           && compareDeep(type, o.type, true) && compareDeep(abstract_, o.abstract_, true) && compareDeep(contextType, o.contextType, true)
            && compareDeep(context, o.context, true) && compareDeep(base, o.base, true) && compareDeep(snapshot, o.snapshot, true)
            && compareDeep(differential, o.differential, true);
       }
@@ -1950,21 +2256,24 @@ public class StructureDefinition extends DomainResource {
         StructureDefinition o = (StructureDefinition) other;
         return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
            && compareValues(display, o.display, true) && compareValues(publisher, o.publisher, true) && compareValues(description, o.description, true)
+           && compareValues(requirements, o.requirements, true) && compareValues(copyright, o.copyright, true)
            && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(date, o.date, true)
-           && compareValues(requirements, o.requirements, true) && compareValues(fhirVersion, o.fhirVersion, true)
-           && compareValues(type, o.type, true) && compareValues(contextType, o.contextType, true) && compareValues(context, o.context, true)
-           && compareValues(base, o.base, true);
+           && compareValues(fhirVersion, o.fhirVersion, true) && compareValues(type, o.type, true) && compareValues(abstract_, o.abstract_, true)
+           && compareValues(contextType, o.contextType, true) && compareValues(context, o.context, true) && compareValues(base, o.base, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (url == null || url.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (version == null || version.isEmpty()) && (name == null || name.isEmpty()) && (display == null || display.isEmpty())
-           && (publisher == null || publisher.isEmpty()) && (telecom == null || telecom.isEmpty()) && (description == null || description.isEmpty())
-           && (code == null || code.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
-           && (date == null || date.isEmpty()) && (requirements == null || requirements.isEmpty()) && (fhirVersion == null || fhirVersion.isEmpty())
-           && (mapping == null || mapping.isEmpty()) && (type == null || type.isEmpty()) && (contextType == null || contextType.isEmpty())
-           && (context == null || context.isEmpty()) && (base == null || base.isEmpty()) && (snapshot == null || snapshot.isEmpty())
-           && (differential == null || differential.isEmpty());
+           && (version == null || version.isEmpty()) && (name == null || name.isEmpty()) && (useContext == null || useContext.isEmpty())
+           && (display == null || display.isEmpty()) && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty())
+           && (description == null || description.isEmpty()) && (requirements == null || requirements.isEmpty())
+           && (copyright == null || copyright.isEmpty()) && (code == null || code.isEmpty()) && (status == null || status.isEmpty())
+           && (experimental == null || experimental.isEmpty()) && (date == null || date.isEmpty()) && (fhirVersion == null || fhirVersion.isEmpty())
+           && (mapping == null || mapping.isEmpty()) && (type == null || type.isEmpty()) && (abstract_ == null || abstract_.isEmpty())
+           && (contextType == null || contextType.isEmpty()) && (context == null || context.isEmpty())
+           && (base == null || base.isEmpty()) && (snapshot == null || snapshot.isEmpty()) && (differential == null || differential.isEmpty())
+          ;
       }
 
   @Override
@@ -1972,30 +2281,44 @@ public class StructureDefinition extends DomainResource {
     return ResourceType.StructureDefinition;
    }
 
+  @SearchParamDefinition(name="abstract", path="StructureDefinition.abstract", description="Whether the structure is abstract", type="token" )
+  public static final String SP_ABSTRACT = "abstract";
+  @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token" )
+  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="experimental", path="StructureDefinition.experimental", description="If for testing purposes, not real usage", type="token" )
+  public static final String SP_EXPERIMENTAL = "experimental";
+  @SearchParamDefinition(name="display", path="StructureDefinition.display", description="Use this name when displaying the value", type="string" )
+  public static final String SP_DISPLAY = "display";
+  @SearchParamDefinition(name="ext-context", path="StructureDefinition.context", description="Where the extension can be used in instances", type="string" )
+  public static final String SP_EXTCONTEXT = "ext-context";
+  @SearchParamDefinition(name="code", path="StructureDefinition.code", description="A code for the profile", type="token" )
+  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="StructureDefinition.date", description="The profile publication date", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-    @SearchParamDefinition(name = "path", path = "StructureDefinition.snapshot.element.path|StructureDefinition.differential.element.path", description = "A path that is constrained in the profile", type = "token")
-    public static final String SP_PATH = "path";
-    @SearchParamDefinition(name = "code", path = "StructureDefinition.code", description = "A code for the profile", type = "token")
-    public static final String SP_CODE = "code";
-    @SearchParamDefinition(name = "valueset", path = "StructureDefinition.snapshot.element.binding.reference[x]", description = "A vocabulary binding code", type = "reference")
-    public static final String SP_VALUESET = "valueset";
-    @SearchParamDefinition(name = "name", path = "StructureDefinition.name", description = "Name of the profile", type = "string")
-    public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
-    @SearchParamDefinition(name = "description", path = "StructureDefinition.description", description = "Text search in the description of the profile", type = "string")
-    public static final String SP_DESCRIPTION = "description";
-    @SearchParamDefinition(name = "type", path = "StructureDefinition.type", description = "abstract | type | resource | constraint | extension", type = "token")
-    public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="type", path="StructureDefinition.type", description="type | resource | constraint | extension", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="url", path="StructureDefinition.url", description="Literal URL used to reference this StructureDefinition", type="uri" )
+  public static final String SP_URL = "url";
   @SearchParamDefinition(name="version", path="StructureDefinition.version", description="The version identifier of the profile", type="token" )
   public static final String SP_VERSION = "version";
-    @SearchParamDefinition(name = "url", path = "StructureDefinition.url", description = "Literal URL used to reference this profile", type = "token")
-    public static final String SP_URL = "url";
-    @SearchParamDefinition(name = "status", path = "StructureDefinition.status", description = "The current status of the profile", type = "token")
-    public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="valueset", path="StructureDefinition.snapshot.element.binding.valueSet[x]", description="A vocabulary binding reference", type="reference" )
+  public static final String SP_VALUESET = "valueset";
+  @SearchParamDefinition(name="context-type", path="StructureDefinition.contextType", description="resource | datatype | mapping | extension", type="token" )
+  public static final String SP_CONTEXTTYPE = "context-type";
+  @SearchParamDefinition(name="description", path="StructureDefinition.description", description="Text search in the description of the profile", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="name", path="StructureDefinition.name", description="Name of the profile", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="base", path="StructureDefinition.base", description="Structure that this set of constraints applies to", type="uri" )
+  public static final String SP_BASE = "base";
+  @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token" )
+  public static final String SP_CONTEXT = "context";
+  @SearchParamDefinition(name="path", path="StructureDefinition.snapshot.element.path|StructureDefinition.differential.element.path", description="A path that is constrained in the profile", type="token" )
+  public static final String SP_PATH = "path";
+  @SearchParamDefinition(name="identifier", path="StructureDefinition.identifier", description="The identifier of the profile", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.server;
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
@@ -46,7 +46,7 @@ public interface IVersionSpecificBundleFactory {
 
 	IBaseResource getResourceBundle();
 
-	void initializeBundleFromResourceList(String theAuthor, List<IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
+	void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
 
 	void initializeWithBundleResource(IBaseResource theResource);
 

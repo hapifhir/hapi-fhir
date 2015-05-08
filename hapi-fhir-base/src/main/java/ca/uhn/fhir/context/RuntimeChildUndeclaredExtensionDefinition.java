@@ -25,13 +25,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.text.WordUtils;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IDatatype;
@@ -71,9 +69,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theType) {
-		Class<? extends IBase> type = theType;
-//		if (IReference.type)
-		return myDatatypeToDefinition.get(type);
+		return myDatatypeToDefinition.get(theType);
 	}
 
 	@Override
@@ -122,6 +118,8 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
 		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 
+//		for (theContext.get)
+		
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {
 				// if (next.getName().equals("CodeableConcept")) {
@@ -131,6 +129,11 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				myDatatypeToDefinition.put(next.getImplementingClass(), next);
 
 				if (!((IRuntimeDatatypeDefinition) next).isSpecialization()) {
+					
+					if (!next.isStandardType()) {
+						continue;
+					}
+					
 					String qualifiedName = next.getImplementingClass().getName();
 					
 					/*
@@ -176,7 +179,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	private void addReferenceBinding(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, String value) {
 		List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 		types.add(IBaseResource.class);
-		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types);
+		RuntimeResourceReferenceDefinition def = new RuntimeResourceReferenceDefinition(value, types, false);
 		def.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		myAttributeNameToDefinition.put(value, def);

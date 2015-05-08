@@ -28,7 +28,7 @@ import java.util.Map;
 
 import javax.xml.transform.stream.StreamSource;
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 
 import ca.uhn.fhir.context.FhirContext;

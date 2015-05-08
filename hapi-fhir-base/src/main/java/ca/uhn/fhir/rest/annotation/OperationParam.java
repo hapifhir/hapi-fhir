@@ -25,7 +25,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 
 /**
  */

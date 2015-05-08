@@ -27,8 +27,8 @@ import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -166,14 +166,14 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		for (int i = 0; i < retResources.size(); i++) {
 			IdDt oldId = oldIds.get(retResources.get(i));
 			IBaseResource newRes = retResources.get(i);
-			if (newRes.getId() == null || newRes.getId().isEmpty()) {
+			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {
 				if (!(newRes instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
 				}
 			}
 
 			if (oldId != null && !oldId.isEmpty()) {
-				if (!oldId.equals(newRes.getId()) && newRes instanceof IResource) {
+				if (!oldId.equals(newRes.getIdElement()) && newRes instanceof IResource) {
 					((IResource)newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
@@ -195,7 +195,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		return new HttpPostClientInvocation(theContext, theBundle);
 	}
 
-	public static BaseHttpClientInvocation createTransactionInvocation(List<IBaseResource> theResources, FhirContext theContext) {
+	public static BaseHttpClientInvocation createTransactionInvocation(List<? extends IBaseResource> theResources, FhirContext theContext) {
 		return new HttpPostClientInvocation(theContext, theResources, BundleTypeEnum.TRANSACTION);
 	}
 

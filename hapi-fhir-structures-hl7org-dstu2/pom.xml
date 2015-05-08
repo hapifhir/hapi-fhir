@@ -20,7 +20,7 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -97,13 +97,13 @@
 			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-http</artifactId>
 			<version>${jetty_version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>${logback_version}</version>
@@ -123,18 +123,18 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-schematron</artifactId>
-		    <version>${phloc_schematron_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+			<version>${phloc_schematron_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>com.phloc</groupId>
-		    <artifactId>phloc-commons</artifactId>
-		    <version>${phloc_commons_version}</version>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-commons</artifactId>
+			<version>${phloc_commons_version}</version>
 			<scope>test</scope>
 		</dependency>
-        
+
 
 		<!-- UNIT TEST DEPENDENCIES -->
 		<dependency>
@@ -187,27 +187,13 @@
 			<version>${guava_version}</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-			<version>${spring_security_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
-			<version>${spring_security_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-		    <groupId>org.springframework.security</groupId>
-		    <artifactId>spring-security-jwt</artifactId>
-		    <version>1.0.2.RELEASE</version>
-			<scope>test</scope>
-		</dependency>
-		-->		
-		
+		<!-- <dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-web</artifactId> 
+			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
+			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-config</artifactId> 
+			<version>${spring_security_version}</version> <scope>test</scope> </dependency> 
+			<dependency> <groupId>org.springframework.security</groupId> <artifactId>spring-security-jwt</artifactId> 
+			<version>1.0.2.RELEASE</version> <scope>test</scope> </dependency> -->
+
 	</dependencies>
 
 	<build>

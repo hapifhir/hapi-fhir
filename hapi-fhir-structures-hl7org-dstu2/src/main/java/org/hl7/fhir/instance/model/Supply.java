@@ -29,16 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A supply - a  request for something, and provision of what is supplied.
  */
@@ -246,39 +247,39 @@ public class Supply extends DomainResource {
     }
 
     @Block()
-    public static class SupplyDispenseComponent extends BackboneElement {
+    public static class SupplyDispenseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifier assigned by the dispensing facility when the item(s) is dispensed.
          */
-        @Child(name="identifier", type={Identifier.class}, order=1, min=0, max=1)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
         @Description(shortDefinition="External identifier", formalDefinition="Identifier assigned by the dispensing facility when the item(s) is dispensed." )
         protected Identifier identifier;
 
         /**
          * A code specifying the state of the dispense event.
          */
-        @Child(name="status", type={CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="in-progress | dispensed | abandoned", formalDefinition="A code specifying the state of the dispense event." )
         protected Enumeration<ValuesetSupplyDispenseStatus> status;
 
         /**
          * Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.
          */
-        @Child(name="type", type={CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Category of dispense event", formalDefinition="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc." )
         protected CodeableConcept type;
 
         /**
          * The amount of supply that has been dispensed. Includes unit of measure.
          */
-        @Child(name="quantity", type={Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Amount dispensed", formalDefinition="The amount of supply that has been dispensed. Includes unit of measure." )
         protected Quantity quantity;
 
         /**
          * Identifies the medication or substance or device being dispensed. This is either a link to a resource representing the details of the item or a simple attribute carrying a code that identifies the item from a known list.
          */
-        @Child(name="suppliedItem", type={Medication.class, Substance.class, Device.class}, order=5, min=0, max=1)
+        @Child(name = "suppliedItem", type = {Medication.class, Substance.class, Device.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Medication, Substance, or Device supplied", formalDefinition="Identifies the medication or substance or device being dispensed. This is either a link to a resource representing the details of the item or a simple attribute carrying a code that identifies the item from a known list." )
         protected Reference suppliedItem;
 
@@ -290,7 +291,7 @@ public class Supply extends DomainResource {
         /**
          * The individual responsible for dispensing the medication, supplier or device.
          */
-        @Child(name="supplier", type={Practitioner.class}, order=6, min=0, max=1)
+        @Child(name = "supplier", type = {Practitioner.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Dispenser", formalDefinition="The individual responsible for dispensing the medication, supplier or device." )
         protected Reference supplier;
 
@@ -302,21 +303,21 @@ public class Supply extends DomainResource {
         /**
          * The time the dispense event occurred.
          */
-        @Child(name="whenPrepared", type={Period.class}, order=7, min=0, max=1)
+        @Child(name = "whenPrepared", type = {Period.class}, order=7, min=0, max=1)
         @Description(shortDefinition="Dispensing time", formalDefinition="The time the dispense event occurred." )
         protected Period whenPrepared;
 
         /**
          * The time the dispensed item was sent or handed to the patient (or agent).
          */
-        @Child(name="whenHandedOver", type={DateTimeType.class}, order=8, min=0, max=1)
+        @Child(name = "whenHandedOver", type = {DateTimeType.class}, order=8, min=0, max=1)
         @Description(shortDefinition="Handover time", formalDefinition="The time the dispensed item was sent or handed to the patient (or agent)." )
         protected DateTimeType whenHandedOver;
 
         /**
          * Identification of the facility/location where the Supply was shipped to, as part of the dispense event.
          */
-        @Child(name="destination", type={Location.class}, order=9, min=0, max=1)
+        @Child(name = "destination", type = {Location.class}, order=9, min=0, max=1)
         @Description(shortDefinition="Where the Supply was sent", formalDefinition="Identification of the facility/location where the Supply was shipped to, as part of the dispense event." )
         protected Reference destination;
 
@@ -328,7 +329,7 @@ public class Supply extends DomainResource {
         /**
          * Identifies the person who picked up the Supply.
          */
-        @Child(name="receiver", type={Practitioner.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "receiver", type = {Practitioner.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Who collected the Supply", formalDefinition="Identifies the person who picked up the Supply." )
         protected List<Reference> receiver;
         /**
@@ -339,6 +340,9 @@ public class Supply extends DomainResource {
 
         private static final long serialVersionUID = -1941592649L;
 
+    /*
+     * Constructor
+     */
       public SupplyDispenseComponent() {
         super();
       }
@@ -694,6 +698,16 @@ public class Supply extends DomainResource {
           return t;
         }
 
+    // syntactic sugar
+        public SupplyDispenseComponent addReceiver(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.receiver == null)
+            this.receiver = new ArrayList<Reference>();
+          this.receiver.add(t);
+          return this;
+        }
+
         /**
          * @return {@link #receiver} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Identifies the person who picked up the Supply.)
          */
@@ -786,28 +800,28 @@ public class Supply extends DomainResource {
     /**
      * Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.
      */
-    @Child(name = "kind", type = {CodeableConcept.class}, order = 0, min = 0, max = 1)
+    @Child(name = "kind", type = {CodeableConcept.class}, order=0, min=0, max=1)
     @Description(shortDefinition="The kind of supply (central, non-stock, etc)", formalDefinition="Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process." )
     protected CodeableConcept kind;
 
     /**
      * Unique identifier for this supply request.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 0, max = 1)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Unique identifier", formalDefinition="Unique identifier for this supply request." )
     protected Identifier identifier;
 
     /**
      * Status of the supply request.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="requested | dispensed | received | failed | cancelled", formalDefinition="Status of the supply request." )
     protected Enumeration<ValuesetSupplyStatus> status;
 
     /**
      * The item that is requested to be supplied.
      */
-    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order = 3, min = 0, max = 1)
+    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied." )
     protected Reference orderedItem;
 
@@ -819,7 +833,7 @@ public class Supply extends DomainResource {
     /**
      * A link to a resource representing the person whom the ordered item is for.
      */
-    @Child(name = "patient", type = {Patient.class}, order = 4, min = 0, max = 1)
+    @Child(name = "patient", type = {Patient.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Patient for whom the item is supplied", formalDefinition="A link to a resource representing the person whom the ordered item is for." )
     protected Reference patient;
 
@@ -831,12 +845,15 @@ public class Supply extends DomainResource {
     /**
      * Indicates the details of the dispense event such as the days supply and quantity of a supply dispensed.
      */
-    @Child(name = "dispense", type = {}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "dispense", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Supply details", formalDefinition="Indicates the details of the dispense event such as the days supply and quantity of a supply dispensed." )
     protected List<SupplyDispenseComponent> dispense;
 
     private static final long serialVersionUID = 1122115505L;
 
+  /*
+   * Constructor
+   */
     public Supply() {
       super();
     }
@@ -1051,6 +1068,16 @@ public class Supply extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Supply addDispense(SupplyDispenseComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.dispense == null)
+        this.dispense = new ArrayList<SupplyDispenseComponent>();
+      this.dispense.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("kind", "CodeableConcept", "Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.", 0, java.lang.Integer.MAX_VALUE, kind));
@@ -1114,20 +1141,20 @@ public class Supply extends DomainResource {
     return ResourceType.Supply;
    }
 
+  @SearchParamDefinition(name="patient", path="Supply.patient", description="Patient for whom the item is supplied", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="status", path="Supply.status", description="requested | dispensed | received | failed | cancelled", type="token" )
+  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="External identifier", type="token" )
+  public static final String SP_DISPENSEID = "dispenseid";
   @SearchParamDefinition(name="identifier", path="Supply.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="Dispenser", type="reference" )
+  public static final String SP_SUPPLIER = "supplier";
   @SearchParamDefinition(name="kind", path="Supply.kind", description="The kind of supply (central, non-stock, etc)", type="token" )
   public static final String SP_KIND = "kind";
-    @SearchParamDefinition(name = "patient", path = "Supply.patient", description = "Patient for whom the item is supplied", type = "reference")
-    public static final String SP_PATIENT = "patient";
-    @SearchParamDefinition(name = "supplier", path = "Supply.dispense.supplier", description = "Dispenser", type = "reference")
-    public static final String SP_SUPPLIER = "supplier";
-    @SearchParamDefinition(name = "dispenseid", path = "Supply.dispense.identifier", description = "External identifier", type = "token")
-    public static final String SP_DISPENSEID = "dispenseid";
   @SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="in-progress | dispensed | abandoned", type="token" )
   public static final String SP_DISPENSESTATUS = "dispensestatus";
-    @SearchParamDefinition(name = "status", path = "Supply.status", description = "requested | dispensed | received | failed | cancelled", type = "token")
-    public static final String SP_STATUS = "status";
 
 }
 

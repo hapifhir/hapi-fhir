@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 

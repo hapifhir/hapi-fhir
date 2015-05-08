@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,12 +31,12 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -802,11 +802,11 @@ public class FhirSystemDaoDstu2Test {
 		List<IBaseResource> allRes = all.getResources(0, all.size());
 		for (IBaseResource iResource : allRes) {
 			if (ResourceMetadataKeyEnum.DELETED_AT.get((IResource) iResource) == null) {
-				ourLog.info("Deleting: {}", iResource.getId());
+				ourLog.info("Deleting: {}", iResource.getIdElement());
 				
 				Bundle b = new Bundle();
 				b.setType(BundleTypeEnum.TRANSACTION);
-				String url = iResource.getId().toVersionless().getValue();
+				String url = iResource.getIdElement().toVersionless().getValue();
 				b.addEntry().getTransaction().setMethod(HTTPVerbEnum.DELETE).setUrl(url);
 				systemDao.transaction(b);
 			}

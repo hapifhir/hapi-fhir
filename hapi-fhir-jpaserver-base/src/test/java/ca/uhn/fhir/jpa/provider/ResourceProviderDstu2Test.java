@@ -30,7 +30,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -126,9 +126,9 @@ public class ResourceProviderDstu2Test {
 
 	@Test
 	public void testCreateResourceWithNumericId() throws IOException {
-		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1777\"/><meta><versionId value=\"1\"/><lastUpdated value=\"2015-02-25T15:47:48Z\"/></meta></Patient>";
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/2");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -383,6 +383,7 @@ public class ResourceProviderDstu2Test {
 
 	@Test
 	public void testSearchWithMissing() throws Exception {
+		ourLog.info("Starting testSearchWithMissing");
 		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
@@ -961,7 +962,7 @@ public class ResourceProviderDstu2Test {
 
 		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
+//		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

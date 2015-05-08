@@ -14,7 +14,7 @@ import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -80,7 +80,7 @@ public class XmlParserDstu2Test {
 		assertThat(val, StringContains.containsString("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
 
 		Patient actual = parser.parseResource(Patient.class, val);
-		assertEquals(AddressUseEnum.HOME, patient.getAddress().get(0).getUse());
+		assertEquals(AddressUseEnum.HOME.getCode(), patient.getAddress().get(0).getUse());
 		List<ExtensionDt> ext = actual.getUndeclaredExtensions();
 		assertEquals(1, ext.size());
 		ResourceReferenceDt ref = (ResourceReferenceDt) ext.get(0).getValue();
@@ -488,6 +488,9 @@ public class XmlParserDstu2Test {
 	}
 
 	
+
+
+
 	/**
 	 * Thanks to Alexander Kley!
 	 */

@@ -31,8 +31,8 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -209,8 +209,8 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 				IBaseResource responseResource = responseResources.get(0);
 				
 				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
-				if (responseResource.getId() != null && responseResource.getId().hasVersionIdPart()) {
-					if (responseResource.getId().getVersionIdPart().equals(ifNoneMatch)) {
+				if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
+					if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
 						ourLog.debug("Returning HTTP 301 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
 						throw new NotModifiedException("Not Modified");
 					}

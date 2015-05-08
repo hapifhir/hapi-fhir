@@ -29,16 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.
  */
@@ -90,8 +91,8 @@ public class ExplanationOfBenefit extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case ERROR: return "error";
+            case COMPLETE: return "Complete";
+            case ERROR: return "Error";
             default: return "?";
           }
         }
@@ -120,61 +121,61 @@ public class ExplanationOfBenefit extends DomainResource {
     /**
      * The Response Business Identifier.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * Original request resource reference.
      */
-    @Child(name = "request", type = {OralHealthClaim.class}, order = 1, min = 0, max = 1)
+    @Child(name = "request", type = {Claim.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Claim reference", formalDefinition="Original request resource reference." )
     protected Reference request;
 
     /**
      * The actual object that is the target of the reference (Original request resource reference.)
      */
-    protected OralHealthClaim requestTarget;
+    protected Claim requestTarget;
 
     /**
      * Transaction status: error, complete.
      */
-    @Child(name = "outcome", type = {CodeType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "outcome", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="complete | error", formalDefinition="Transaction status: error, complete." )
     protected Enumeration<RSLink> outcome;
 
     /**
      * A description of the status of the adjudication.
      */
-    @Child(name = "disposition", type = {StringType.class}, order = 3, min = 0, max = 1)
+    @Child(name = "disposition", type = {StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
     protected StringType disposition;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name = "ruleset", type = {Coding.class}, order = 4, min = 0, max = 1)
+    @Child(name = "ruleset", type = {Coding.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name = "originalRuleset", type = {Coding.class}, order = 5, min = 0, max = 1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order = 6, min = 0, max = 1)
+    @Child(name = "created", type = {DateTimeType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * The Insurer who produced this adjudicated response.
      */
-    @Child(name = "organization", type = {Organization.class}, order = 7, min = 0, max = 1)
+    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
     protected Reference organization;
 
@@ -186,7 +187,7 @@ public class ExplanationOfBenefit extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Practitioner.class}, order = 8, min = 0, max = 1)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference requestProvider;
 
@@ -198,7 +199,7 @@ public class ExplanationOfBenefit extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestOrganization", type = {Organization.class}, order = 9, min = 0, max = 1)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference requestOrganization;
 
@@ -207,8 +208,11 @@ public class ExplanationOfBenefit extends DomainResource {
      */
     protected Organization requestOrganizationTarget;
 
-    private static final long serialVersionUID = 1627363360L;
+    private static final long serialVersionUID = 2098041034L;
 
+  /*
+   * Constructor
+   */
     public ExplanationOfBenefit() {
       super();
     }
@@ -243,6 +247,16 @@ public class ExplanationOfBenefit extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public ExplanationOfBenefit addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #request} (Original request resource reference.)
      */
@@ -270,19 +284,19 @@ public class ExplanationOfBenefit extends DomainResource {
     /**
      * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
      */
-    public OralHealthClaim getRequestTarget() { 
+    public Claim getRequestTarget() { 
       if (this.requestTarget == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ExplanationOfBenefit.request");
         else if (Configuration.doAutoCreate())
-          this.requestTarget = new OralHealthClaim(); // aa
+          this.requestTarget = new Claim(); // aa
       return this.requestTarget;
     }
 
     /**
      * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
      */
-    public ExplanationOfBenefit setRequestTarget(OralHealthClaim value) { 
+    public ExplanationOfBenefit setRequestTarget(Claim value) { 
       this.requestTarget = value;
       return this;
     }
@@ -617,7 +631,7 @@ public class ExplanationOfBenefit extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "The Response Business Identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("request", "Reference(OralHealthClaim)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
+        childrenList.add(new Property("request", "Reference(Claim)", "Original request resource reference.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("outcome", "code", "Transaction status: error, complete.", 0, java.lang.Integer.MAX_VALUE, outcome));
         childrenList.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, java.lang.Integer.MAX_VALUE, disposition));
         childrenList.add(new Property("ruleset", "Coding", "The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.", 0, java.lang.Integer.MAX_VALUE, ruleset));

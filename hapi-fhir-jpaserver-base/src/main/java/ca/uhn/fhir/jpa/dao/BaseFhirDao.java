@@ -52,7 +52,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -500,7 +501,7 @@ public abstract class BaseFhirDao implements IDao {
 		};
 	}
 
-	protected boolean isValidPid(IdDt theId) {
+	protected boolean isValidPid(IIdType theId) {
 		String idPart = theId.getIdPart();
 		for (int i = 0; i < idPart.length(); i++) {
 			char nextChar = idPart.charAt(i);
@@ -511,9 +512,9 @@ public abstract class BaseFhirDao implements IDao {
 		return true;
 	}
 
-	protected List<IBaseResource> loadResourcesById(Set<IdDt> theIncludePids) {
+	protected List<IBaseResource> loadResourcesById(Set<? extends IIdType> theIncludePids) {
 		Set<Long> pids = new HashSet<Long>();
-		for (IdDt next : theIncludePids) {
+		for (IIdType next : theIncludePids) {
 			if (next.isIdPartValidLong()) {
 				pids.add(next.getIdPartAsLong());
 			} else {
@@ -962,7 +963,7 @@ public abstract class BaseFhirDao implements IDao {
 		return myContext.getResourceDefinition(theResource).getName();
 	}
 
-	protected Long translateForcedIdToPid(IdDt theId) {
+	protected Long translateForcedIdToPid(IIdType theId) {
 		if (isValidPid(theId)) {
 			return theId.getIdPartAsLong();
 		} else {

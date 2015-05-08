@@ -22,13 +22,13 @@ package ca.uhn.fhir.context;
 
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 
 public class RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition  extends BaseRuntimeElementDefinition<IBaseXhtml> {
 
-	public RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(String theName, Class<? extends IBaseXhtml> theImplementingClass) {
-		super(theName, theImplementingClass);
+	public RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(String theName, Class<? extends IBaseXhtml> theImplementingClass, boolean theStandardType) {
+		super(theName, theImplementingClass, theStandardType);
 	}
 
 	@Override

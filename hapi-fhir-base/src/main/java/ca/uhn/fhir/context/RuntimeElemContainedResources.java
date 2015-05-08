@@ -24,8 +24,8 @@ import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 
 public class RuntimeElemContainedResources extends BaseRuntimeElementDefinition<BaseContainedDt> {
 
-	public RuntimeElemContainedResources(Class<? extends BaseContainedDt> theClass) {
-		super("contained", theClass);
+	public RuntimeElemContainedResources(Class<? extends BaseContainedDt> theClass, boolean theStandardType) {
+		super("contained", theClass, theStandardType);
 		assert BaseContainedDt.class.isAssignableFrom(theClass);
 	}
 

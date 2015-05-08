@@ -29,13 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A relationship of two Quantity values - expressed as a numerator and a denominator.
  */
@@ -45,19 +47,22 @@ public class Ratio extends Type implements ICompositeType {
     /**
      * The value of the numerator.
      */
-    @Child(name = "numerator", type = {Quantity.class}, order = 0, min = 0, max = 1)
+    @Child(name = "numerator", type = {Quantity.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Numerator value", formalDefinition="The value of the numerator." )
     protected Quantity numerator;
 
     /**
      * The value of the denominator.
      */
-    @Child(name = "denominator", type = {Quantity.class}, order = 1, min = 0, max = 1)
+    @Child(name = "denominator", type = {Quantity.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Denominator value", formalDefinition="The value of the denominator." )
     protected Quantity denominator;
 
     private static final long serialVersionUID = 479922563L;
 
+  /*
+   * Constructor
+   */
     public Ratio() {
       super();
     }

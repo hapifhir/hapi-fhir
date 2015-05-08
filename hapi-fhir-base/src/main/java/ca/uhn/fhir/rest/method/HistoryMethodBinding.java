@@ -28,7 +28,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -190,10 +190,10 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);
 				int index = theFromIndex;
 				for (IBaseResource nextResource : retVal) {
-					if (nextResource.getId() == null || isBlank(nextResource.getId().getIdPart())) {
+					if (nextResource.getIdElement() == null || isBlank(nextResource.getIdElement().getIdPart())) {
 						throw new InternalErrorException("Server provided resource at index " + index + " with no ID set (using IResource#setId(IdDt))");
 					}
-					if (isBlank(nextResource.getId().getVersionIdPart()) && nextResource instanceof IResource) {
+					if (isBlank(nextResource.getIdElement().getVersionIdPart()) && nextResource instanceof IResource) {
 						IdDt versionId = (IdDt) ResourceMetadataKeyEnum.VERSION_ID.get((IResource) nextResource);
 						if (versionId == null || versionId.isEmpty()) {
 							throw new InternalErrorException("Server provided resource at index " + index + " with no Version ID set (using IResource#setId(IdDt))");

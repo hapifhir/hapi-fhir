@@ -92,6 +92,11 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 
 	@Override
+	public IIdType getIdElement() {
+		return getId();
+	}
+
+	@Override
 	public CodeDt getLanguage() {
 		if (myLanguage == null) {
 			myLanguage = new CodeDt();

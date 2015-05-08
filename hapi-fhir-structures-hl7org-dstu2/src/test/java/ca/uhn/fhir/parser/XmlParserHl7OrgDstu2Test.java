@@ -28,9 +28,9 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.AddressType;
-import org.hl7.fhir.instance.model.AddressType.AddressUse;
-import org.hl7.fhir.instance.model.AddressType.AddressUseEnumFactory;
+import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.Address.AddressUse;
+import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
@@ -46,12 +46,12 @@ import org.hl7.fhir.instance.model.EnumFactory;
 import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.HumanName;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -489,7 +489,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testParseNarrative() throws Exception {
 		//@formatter:off
 		String htmlNoNs = "<div>AAA<b>BBB</b>CCC</div>";
-		String htmlNs = htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">"); 
+		String htmlNs = fixDivNodeText(htmlNoNs); 
 		String res= "<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
 				"   <id value=\"1333\"/>\n" + 
 				"   <text>\n" + 
@@ -500,6 +500,13 @@ public class XmlParserHl7OrgDstu2Test {
 		
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
 		assertEquals(htmlNs, p.getText().getDivAsString());
+	}
+
+	private String fixDivNodeText(String htmlNoNs) {
+		return htmlNoNs.replace("<div>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">");
+	}
+	private String fixDivNodeTextJson(String htmlNoNs) {
+		return htmlNoNs.replace("<div>", "<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">");
 	}
 	
 	@Test
@@ -564,11 +571,11 @@ public class XmlParserHl7OrgDstu2Test {
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+		assertEquals("#1", patient.getManagingOrganization().getReferenceElement().getValue());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId().getValue());
+		assertEquals("#1", org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
@@ -602,7 +609,7 @@ public class XmlParserHl7OrgDstu2Test {
 	 * Thanks to Alexander Kley!
 	 */
 	@Test
-	public void testParseContainedBinaryResource() {
+	public void testParseContainedBinaryResource() throws Exception {
 		byte[] bin = new byte[] { 0, 1, 2, 3, 4 };
 		final Binary binary = new Binary();
 		binary.setContentType("PatientConsent").setContent(bin);
@@ -614,7 +621,7 @@ public class XmlParserHl7OrgDstu2Test {
 		cc.addCoding().setSystem("mySystem").setCode("PatientDocument");
 		manifest.setType(cc);
 		manifest.setMasterIdentifier(new Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
-		manifest.addContent().setResource(binary);
+		manifest.addContent().setP(new Reference(binary));
 		manifest.setStatus(DocumentReferenceStatus.CURRENT);
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
@@ -624,7 +631,7 @@ public class XmlParserHl7OrgDstu2Test {
 		DocumentManifest actual = ourCtx.newXmlParser().parseResource(DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());
 		assertEquals(1, actual.getContent().size());
-		assertNotNull(actual.getContent().get(0).getResource());
+		assertNotNull(actual.getContent().get(0).getPReference().getResource());
 
 	}
 
@@ -764,7 +771,7 @@ public class XmlParserHl7OrgDstu2Test {
 		rpt.getName().setText("Report");
 
 		Specimen spm = new Specimen();
-		spm.addIdentifier().setLabel("Report1ContainedSpecimen1");
+		spm.addIdentifier().setValue("Report1ContainedSpecimen1");
 		rpt.addSpecimen().setResource(spm);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -804,7 +811,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.setFoo(new AddressType().addLine("line1"));
+		patient.setFoo(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -812,7 +819,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-		AddressType ref = actual.getFoo();
+		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
@@ -832,7 +839,7 @@ public class XmlParserHl7OrgDstu2Test {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Reference ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
 	}
 
@@ -842,7 +849,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue(new Reference("Organization/123"));
+		patient.addExtension().setUrl("urn:foo").setValue(new Reference().setReference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -853,7 +860,7 @@ public class XmlParserHl7OrgDstu2Test {
 		List<Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
 	}
 
@@ -988,7 +995,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue(new AddressType().addLine("line1"));
+		patient.addExtension().setUrl("urn:foo").setValue(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -996,7 +1003,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-		AddressType ref = actual.getFoo();
+		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
@@ -1077,7 +1084,7 @@ public class XmlParserHl7OrgDstu2Test {
 		//@formatter:off
 		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
 				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
 				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
 				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
@@ -1137,13 +1144,13 @@ public class XmlParserHl7OrgDstu2Test {
 				"		</extension>\n" + 
 				"	</extension>\n" + 
 				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<value value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
 				"</ResourceWithExtensionsA>";
 		//@formatter:on
 
 		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", resource.getFoo1().get(0).getValue());
 		assertEquals("Foo1Value2", resource.getFoo1().get(1).getValue());
 		assertEquals("Foo2Value1", resource.getFoo2().getValue());
@@ -1191,13 +1198,13 @@ public class XmlParserHl7OrgDstu2Test {
 				"		<valueString value=\"Foo2Value1\"/>\n" + 
 				"	</modifierExtension>\n" + 
 				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<value value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
 				"</Patient>";
 		//@formatter:on
 
 		Patient resource = (Patient) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", ((IPrimitiveType<?>) resource.getExtension().get(0).getValue()).getValueAsString());
 		assertEquals("Foo1Value2", ((IPrimitiveType<?>) resource.getExtension().get(1).getValue()).getValueAsString());
 		assertEquals("Foo2Value1", ((IPrimitiveType<?>) resource.getModifierExtension().get(0).getValue()).getValueAsString());
@@ -1221,14 +1228,15 @@ public class XmlParserHl7OrgDstu2Test {
 
 		//@formatter:off
 		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
+				+ "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
 				+ "</Patient>";
 		//@formatter:on
 
 		Patient patient1 = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 		String encoded1 = ourCtx.newXmlParser().encodeResourceToString(patient1);
 
-		ourLog.info(encoded1);
+		ourLog.info("Expected: {}", msg);
+		ourLog.info("Actual:   {}", encoded1);
 		
 		Diff d = new Diff(new StringReader(msg), new StringReader(encoded1));
 		assertTrue(d.toString(), d.identical());
@@ -1464,19 +1472,19 @@ public class XmlParserHl7OrgDstu2Test {
 		String msg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 				"<Patient xmlns=\"http://hl7.org/fhir\">\n" + 
 				"	<identifier>\n" + 
-				"		<label value=\"IdentifierLabel\"/>\n" + 
+				"		<value value=\"IdentifierLabel\"/>\n" + 
 				"	</identifier>\n" + 
 				"</Patient>";
 		//@formatter:on
 
 		Patient resource = (Patient) p.parseResource(msg);
-		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getLabel());
+		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 	}
 
 	@Test
 	public void testSimpleResourceEncode() throws IOException, SAXException {
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
 		Patient obs = ourCtx.newJsonParser().parseResource(Patient.class, xmlString);
 
 		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
@@ -1489,7 +1497,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
 
 		String expected = (jsonString);
 		String actual = (encoded.trim());
@@ -1503,7 +1511,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
 		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
 		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getExtension().size());
@@ -1519,14 +1527,15 @@ public class XmlParserHl7OrgDstu2Test {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
 
 		// The encoded escapes quote marks using XML escaping instead of JSON escaping, which is probably nicer anyhow...
-		String exp = expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;").replace(" xmlns=\\\"http://www.w3.org/1999/xhtml\\\"",  "");
-		String act = actual.toString().replace(" xmlns=\\\"http://www.w3.org/1999/xhtml\\\"",  "");
+		String exp = fixDivNodeTextJson(expected.toString().replace("\\\"Jim\\\"", "&quot;Jim&quot;"));
+		String act = fixDivNodeTextJson(actual.toString());
+
 		ourLog.info("Expected: {}", exp);
 		ourLog.info("Actual  : {}", act);
 		assertEquals(exp, act);

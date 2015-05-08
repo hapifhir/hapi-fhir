@@ -29,16 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Financial instrument which may be used to pay for or reimburse for health care products and services.
  */
@@ -48,7 +49,7 @@ public class Coverage extends DomainResource {
     /**
      * The program or plan underwriter or payor.
      */
-    @Child(name = "issuer", type = {Organization.class}, order = 0, min = 0, max = 1)
+    @Child(name = "issuer", type = {Organization.class}, order=0, min=0, max=1)
     @Description(shortDefinition="An identifier for the plan issuer", formalDefinition="The program or plan underwriter or payor." )
     protected Reference issuer;
 
@@ -58,65 +59,79 @@ public class Coverage extends DomainResource {
     protected Organization issuerTarget;
 
     /**
+     * Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business.
+     */
+    @Child(name = "bin", type = {Identifier.class}, order=1, min=0, max=1)
+    @Description(shortDefinition="BIN Number", formalDefinition="Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business." )
+    protected Identifier bin;
+
+    /**
      * Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.
      */
-    @Child(name = "period", type = {Period.class}, order = 1, min = 0, max = 1)
+    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Coverage start and end dates", formalDefinition="Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force." )
     protected Period period;
 
     /**
      * The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health.
      */
-    @Child(name = "type", type = {Coding.class}, order = 2, min = 0, max = 1)
+    @Child(name = "type", type = {Coding.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Type of coverage", formalDefinition="The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health." )
     protected Coding type;
 
     /**
-     * The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID.
+     * The id issued to the subscriber.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID." )
+    @Child(name = "subscriberId", type = {Identifier.class}, order=4, min=0, max=1)
+    @Description(shortDefinition="Subscriber ID", formalDefinition="The id issued to the subscriber." )
+    protected Identifier subscriberId;
+
+    /**
+     * The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name = "group", type = {StringType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "group", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="An identifier for the group", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType group;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name = "plan", type = {StringType.class}, order = 5, min = 0, max = 1)
+    @Child(name = "plan", type = {StringType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="An identifier for the plan", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType plan;
 
     /**
      * Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.
      */
-    @Child(name = "subplan", type = {StringType.class}, order = 6, min = 0, max = 1)
+    @Child(name = "subPlan", type = {StringType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="An identifier for the subsection of the plan", formalDefinition="Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID." )
-    protected StringType subplan;
+    protected StringType subPlan;
 
     /**
      * A unique identifier for a dependent under the coverage.
      */
-    @Child(name = "dependent", type = {IntegerType.class}, order = 7, min = 0, max = 1)
+    @Child(name = "dependent", type = {PositiveIntType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="The dependent number", formalDefinition="A unique identifier for a dependent under the coverage." )
-    protected IntegerType dependent;
+    protected PositiveIntType dependent;
 
     /**
      * An optional counter for a particular instance of the identified coverage which increments upon each renewal.
      */
-    @Child(name = "sequence", type = {IntegerType.class}, order = 8, min = 0, max = 1)
+    @Child(name = "sequence", type = {PositiveIntType.class}, order=10, min=0, max=1)
     @Description(shortDefinition="The plan instance or sequence counter", formalDefinition="An optional counter for a particular instance of the identified coverage which increments upon each renewal." )
-    protected IntegerType sequence;
+    protected PositiveIntType sequence;
 
     /**
      * The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due.
      */
-    @Child(name = "subscriber", type = {Patient.class}, order = 9, min = 0, max = 1)
+    @Child(name = "subscriber", type = {Patient.class}, order=11, min=0, max=1)
     @Description(shortDefinition="Plan holder information", formalDefinition="The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due." )
     protected Reference subscriber;
 
@@ -128,14 +143,14 @@ public class Coverage extends DomainResource {
     /**
      * The identifier for a community of providers.
      */
-    @Child(name = "network", type = {Identifier.class}, order = 10, min = 0, max = 1)
+    @Child(name = "network", type = {Identifier.class}, order=12, min=0, max=1)
     @Description(shortDefinition="Insurer network", formalDefinition="The identifier for a community of providers." )
     protected Identifier network;
 
     /**
      * The policy(s) which constitute this insurance coverage.
      */
-    @Child(name = "contract", type = {Contract.class}, order = 11, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "contract", type = {Contract.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contract details", formalDefinition="The policy(s) which constitute this insurance coverage." )
     protected List<Reference> contract;
     /**
@@ -144,8 +159,11 @@ public class Coverage extends DomainResource {
     protected List<Contract> contractTarget;
 
 
-    private static final long serialVersionUID = 1420850573L;
+    private static final long serialVersionUID = -1312031251L;
 
+  /*
+   * Constructor
+   */
     public Coverage() {
       super();
     }
@@ -191,6 +209,30 @@ public class Coverage extends DomainResource {
      */
     public Coverage setIssuerTarget(Organization value) { 
       this.issuerTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #bin} (Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business.)
+     */
+    public Identifier getBin() { 
+      if (this.bin == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Coverage.bin");
+        else if (Configuration.doAutoCreate())
+          this.bin = new Identifier(); // cc
+      return this.bin;
+    }
+
+    public boolean hasBin() { 
+      return this.bin != null && !this.bin.isEmpty();
+    }
+
+    /**
+     * @param value {@link #bin} (Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business.)
+     */
+    public Coverage setBin(Identifier value) { 
+      this.bin = value;
       return this;
     }
 
@@ -243,7 +285,31 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID.)
+     * @return {@link #subscriberId} (The id issued to the subscriber.)
+     */
+    public Identifier getSubscriberId() { 
+      if (this.subscriberId == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Coverage.subscriberId");
+        else if (Configuration.doAutoCreate())
+          this.subscriberId = new Identifier(); // cc
+      return this.subscriberId;
+    }
+
+    public boolean hasSubscriberId() { 
+      return this.subscriberId != null && !this.subscriberId.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subscriberId} (The id issued to the subscriber.)
+     */
+    public Coverage setSubscriberId(Identifier value) { 
+      this.subscriberId = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #identifier} (The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -261,7 +327,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID.)
+     * @return {@link #identifier} (The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -270,6 +336,16 @@ public class Coverage extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Coverage addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -371,50 +447,50 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #subplan} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.). This is the underlying object with id, value and extensions. The accessor "getSubplan" gives direct access to the value
+     * @return {@link #subPlan} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.). This is the underlying object with id, value and extensions. The accessor "getSubPlan" gives direct access to the value
      */
-    public StringType getSubplanElement() { 
-      if (this.subplan == null)
+    public StringType getSubPlanElement() { 
+      if (this.subPlan == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Coverage.subplan");
+          throw new Error("Attempt to auto-create Coverage.subPlan");
         else if (Configuration.doAutoCreate())
-          this.subplan = new StringType(); // bb
-      return this.subplan;
+          this.subPlan = new StringType(); // bb
+      return this.subPlan;
     }
 
-    public boolean hasSubplanElement() { 
-      return this.subplan != null && !this.subplan.isEmpty();
+    public boolean hasSubPlanElement() { 
+      return this.subPlan != null && !this.subPlan.isEmpty();
     }
 
-    public boolean hasSubplan() { 
-      return this.subplan != null && !this.subplan.isEmpty();
+    public boolean hasSubPlan() { 
+      return this.subPlan != null && !this.subPlan.isEmpty();
     }
 
     /**
-     * @param value {@link #subplan} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.). This is the underlying object with id, value and extensions. The accessor "getSubplan" gives direct access to the value
+     * @param value {@link #subPlan} (Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.). This is the underlying object with id, value and extensions. The accessor "getSubPlan" gives direct access to the value
      */
-    public Coverage setSubplanElement(StringType value) { 
-      this.subplan = value;
+    public Coverage setSubPlanElement(StringType value) { 
+      this.subPlan = value;
       return this;
     }
 
     /**
      * @return Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.
      */
-    public String getSubplan() { 
-      return this.subplan == null ? null : this.subplan.getValue();
+    public String getSubPlan() { 
+      return this.subPlan == null ? null : this.subPlan.getValue();
     }
 
     /**
      * @param value Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.
      */
-    public Coverage setSubplan(String value) { 
+    public Coverage setSubPlan(String value) { 
       if (Utilities.noString(value))
-        this.subplan = null;
+        this.subPlan = null;
       else {
-        if (this.subplan == null)
-          this.subplan = new StringType();
-        this.subplan.setValue(value);
+        if (this.subPlan == null)
+          this.subPlan = new StringType();
+        this.subPlan.setValue(value);
       }
       return this;
     }
@@ -422,12 +498,12 @@ public class Coverage extends DomainResource {
     /**
      * @return {@link #dependent} (A unique identifier for a dependent under the coverage.). This is the underlying object with id, value and extensions. The accessor "getDependent" gives direct access to the value
      */
-    public IntegerType getDependentElement() { 
+    public PositiveIntType getDependentElement() { 
       if (this.dependent == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Coverage.dependent");
         else if (Configuration.doAutoCreate())
-          this.dependent = new IntegerType(); // bb
+          this.dependent = new PositiveIntType(); // bb
       return this.dependent;
     }
 
@@ -442,7 +518,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #dependent} (A unique identifier for a dependent under the coverage.). This is the underlying object with id, value and extensions. The accessor "getDependent" gives direct access to the value
      */
-    public Coverage setDependentElement(IntegerType value) { 
+    public Coverage setDependentElement(PositiveIntType value) { 
       this.dependent = value;
       return this;
     }
@@ -451,7 +527,7 @@ public class Coverage extends DomainResource {
      * @return A unique identifier for a dependent under the coverage.
      */
     public int getDependent() { 
-      return this.dependent == null ? 0 : this.dependent.getValue();
+      return this.dependent == null || this.dependent.isEmpty() ? 0 : this.dependent.getValue();
     }
 
     /**
@@ -459,7 +535,7 @@ public class Coverage extends DomainResource {
      */
     public Coverage setDependent(int value) { 
         if (this.dependent == null)
-          this.dependent = new IntegerType();
+          this.dependent = new PositiveIntType();
         this.dependent.setValue(value);
       return this;
     }
@@ -467,12 +543,12 @@ public class Coverage extends DomainResource {
     /**
      * @return {@link #sequence} (An optional counter for a particular instance of the identified coverage which increments upon each renewal.). This is the underlying object with id, value and extensions. The accessor "getSequence" gives direct access to the value
      */
-    public IntegerType getSequenceElement() { 
+    public PositiveIntType getSequenceElement() { 
       if (this.sequence == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Coverage.sequence");
         else if (Configuration.doAutoCreate())
-          this.sequence = new IntegerType(); // bb
+          this.sequence = new PositiveIntType(); // bb
       return this.sequence;
     }
 
@@ -487,7 +563,7 @@ public class Coverage extends DomainResource {
     /**
      * @param value {@link #sequence} (An optional counter for a particular instance of the identified coverage which increments upon each renewal.). This is the underlying object with id, value and extensions. The accessor "getSequence" gives direct access to the value
      */
-    public Coverage setSequenceElement(IntegerType value) { 
+    public Coverage setSequenceElement(PositiveIntType value) { 
       this.sequence = value;
       return this;
     }
@@ -496,7 +572,7 @@ public class Coverage extends DomainResource {
      * @return An optional counter for a particular instance of the identified coverage which increments upon each renewal.
      */
     public int getSequence() { 
-      return this.sequence == null ? 0 : this.sequence.getValue();
+      return this.sequence == null || this.sequence.isEmpty() ? 0 : this.sequence.getValue();
     }
 
     /**
@@ -504,7 +580,7 @@ public class Coverage extends DomainResource {
      */
     public Coverage setSequence(int value) { 
         if (this.sequence == null)
-          this.sequence = new IntegerType();
+          this.sequence = new PositiveIntType();
         this.sequence.setValue(value);
       return this;
     }
@@ -607,6 +683,16 @@ public class Coverage extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Coverage addContract(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.contract == null)
+        this.contract = new ArrayList<Reference>();
+      this.contract.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #contract} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The policy(s) which constitute this insurance coverage.)
      */
@@ -631,14 +717,16 @@ public class Coverage extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("issuer", "Reference(Organization)", "The program or plan underwriter or payor.", 0, java.lang.Integer.MAX_VALUE, issuer));
+        childrenList.add(new Property("bin", "Identifier", "Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business.", 0, java.lang.Integer.MAX_VALUE, bin));
         childrenList.add(new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("type", "Coding", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Subscriber Id, Certificate number or Personal Health Number or Case ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("subscriberId", "Identifier", "The id issued to the subscriber.", 0, java.lang.Integer.MAX_VALUE, subscriberId));
+        childrenList.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("group", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.", 0, java.lang.Integer.MAX_VALUE, group));
         childrenList.add(new Property("plan", "string", "Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.", 0, java.lang.Integer.MAX_VALUE, plan));
-        childrenList.add(new Property("subplan", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.", 0, java.lang.Integer.MAX_VALUE, subplan));
-        childrenList.add(new Property("dependent", "integer", "A unique identifier for a dependent under the coverage.", 0, java.lang.Integer.MAX_VALUE, dependent));
-        childrenList.add(new Property("sequence", "integer", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, java.lang.Integer.MAX_VALUE, sequence));
+        childrenList.add(new Property("subPlan", "string", "Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.", 0, java.lang.Integer.MAX_VALUE, subPlan));
+        childrenList.add(new Property("dependent", "positiveInt", "A unique identifier for a dependent under the coverage.", 0, java.lang.Integer.MAX_VALUE, dependent));
+        childrenList.add(new Property("sequence", "positiveInt", "An optional counter for a particular instance of the identified coverage which increments upon each renewal.", 0, java.lang.Integer.MAX_VALUE, sequence));
         childrenList.add(new Property("subscriber", "Reference(Patient)", "The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due.", 0, java.lang.Integer.MAX_VALUE, subscriber));
         childrenList.add(new Property("network", "Identifier", "The identifier for a community of providers.", 0, java.lang.Integer.MAX_VALUE, network));
         childrenList.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
@@ -648,8 +736,10 @@ public class Coverage extends DomainResource {
         Coverage dst = new Coverage();
         copyValues(dst);
         dst.issuer = issuer == null ? null : issuer.copy();
+        dst.bin = bin == null ? null : bin.copy();
         dst.period = period == null ? null : period.copy();
         dst.type = type == null ? null : type.copy();
+        dst.subscriberId = subscriberId == null ? null : subscriberId.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
@@ -657,7 +747,7 @@ public class Coverage extends DomainResource {
         };
         dst.group = group == null ? null : group.copy();
         dst.plan = plan == null ? null : plan.copy();
-        dst.subplan = subplan == null ? null : subplan.copy();
+        dst.subPlan = subPlan == null ? null : subPlan.copy();
         dst.dependent = dependent == null ? null : dependent.copy();
         dst.sequence = sequence == null ? null : sequence.copy();
         dst.subscriber = subscriber == null ? null : subscriber.copy();
@@ -681,11 +771,11 @@ public class Coverage extends DomainResource {
         if (!(other instanceof Coverage))
           return false;
         Coverage o = (Coverage) other;
-        return compareDeep(issuer, o.issuer, true) && compareDeep(period, o.period, true) && compareDeep(type, o.type, true)
-           && compareDeep(identifier, o.identifier, true) && compareDeep(group, o.group, true) && compareDeep(plan, o.plan, true)
-           && compareDeep(subplan, o.subplan, true) && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true)
-           && compareDeep(subscriber, o.subscriber, true) && compareDeep(network, o.network, true) && compareDeep(contract, o.contract, true)
-          ;
+        return compareDeep(issuer, o.issuer, true) && compareDeep(bin, o.bin, true) && compareDeep(period, o.period, true)
+           && compareDeep(type, o.type, true) && compareDeep(subscriberId, o.subscriberId, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(group, o.group, true) && compareDeep(plan, o.plan, true) && compareDeep(subPlan, o.subPlan, true)
+           && compareDeep(dependent, o.dependent, true) && compareDeep(sequence, o.sequence, true) && compareDeep(subscriber, o.subscriber, true)
+           && compareDeep(network, o.network, true) && compareDeep(contract, o.contract, true);
       }
 
       @Override
@@ -695,16 +785,17 @@ public class Coverage extends DomainResource {
         if (!(other instanceof Coverage))
           return false;
         Coverage o = (Coverage) other;
-        return compareValues(group, o.group, true) && compareValues(plan, o.plan, true) && compareValues(subplan, o.subplan, true)
+        return compareValues(group, o.group, true) && compareValues(plan, o.plan, true) && compareValues(subPlan, o.subPlan, true)
            && compareValues(dependent, o.dependent, true) && compareValues(sequence, o.sequence, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (issuer == null || issuer.isEmpty()) && (period == null || period.isEmpty())
-           && (type == null || type.isEmpty()) && (identifier == null || identifier.isEmpty()) && (group == null || group.isEmpty())
-           && (plan == null || plan.isEmpty()) && (subplan == null || subplan.isEmpty()) && (dependent == null || dependent.isEmpty())
-           && (sequence == null || sequence.isEmpty()) && (subscriber == null || subscriber.isEmpty())
-           && (network == null || network.isEmpty()) && (contract == null || contract.isEmpty());
+        return super.isEmpty() && (issuer == null || issuer.isEmpty()) && (bin == null || bin.isEmpty())
+           && (period == null || period.isEmpty()) && (type == null || type.isEmpty()) && (subscriberId == null || subscriberId.isEmpty())
+           && (identifier == null || identifier.isEmpty()) && (group == null || group.isEmpty()) && (plan == null || plan.isEmpty())
+           && (subPlan == null || subPlan.isEmpty()) && (dependent == null || dependent.isEmpty()) && (sequence == null || sequence.isEmpty())
+           && (subscriber == null || subscriber.isEmpty()) && (network == null || network.isEmpty())
+           && (contract == null || contract.isEmpty());
       }
 
   @Override
@@ -712,22 +803,22 @@ public class Coverage extends DomainResource {
     return ResourceType.Coverage;
    }
 
-    @SearchParamDefinition(name = "identifier", path = "Coverage.identifier", description = "The primary identifier of the insured", type = "token")
-    public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token" )
+  public static final String SP_PLAN = "plan";
+  @SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference" )
+  public static final String SP_ISSUER = "issuer";
   @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
   public static final String SP_SEQUENCE = "sequence";
-    @SearchParamDefinition(name = "subplan", path = "Coverage.subplan", description = "Sub-plan identifier", type = "token")
-    public static final String SP_SUBPLAN = "subplan";
-    @SearchParamDefinition(name = "type", path = "Coverage.type", description = "The kind of coverage", type = "token")
-    public static final String SP_TYPE = "type";
-    @SearchParamDefinition(name = "plan", path = "Coverage.plan", description = "A plan or policy identifier", type = "token")
-    public static final String SP_PLAN = "plan";
   @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token" )
   public static final String SP_DEPENDENT = "dependent";
-    @SearchParamDefinition(name = "issuer", path = "Coverage.issuer", description = "The identity of the insurer", type = "reference")
-    public static final String SP_ISSUER = "issuer";
   @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
   public static final String SP_GROUP = "group";
+  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token" )
+  public static final String SP_SUBPLAN = "subplan";
 
 }
 

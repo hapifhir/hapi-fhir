@@ -29,16 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * This resource provides Enrollment and plan details from the processing of an Enrollment resource.
  */
@@ -90,8 +91,8 @@ public class EnrollmentResponse extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case ERROR: return "error";
+            case COMPLETE: return "Complete";
+            case ERROR: return "Error";
             default: return "?";
           }
         }
@@ -120,14 +121,14 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * The Response Business Identifier.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business Identifier", formalDefinition="The Response Business Identifier." )
     protected List<Identifier> identifier;
 
     /**
      * Original request resource reference.
      */
-    @Child(name = "request", type = {EnrollmentRequest.class}, order = 1, min = 0, max = 1)
+    @Child(name = "request", type = {EnrollmentRequest.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Claim reference", formalDefinition="Original request resource reference." )
     protected Reference request;
 
@@ -139,42 +140,42 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * Transaction status: error, complete.
      */
-    @Child(name = "outcome", type = {CodeType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "outcome", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="complete | error", formalDefinition="Transaction status: error, complete." )
     protected Enumeration<RSLink> outcome;
 
     /**
      * A description of the status of the adjudication.
      */
-    @Child(name = "disposition", type = {StringType.class}, order = 3, min = 0, max = 1)
+    @Child(name = "disposition", type = {StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
     protected StringType disposition;
 
     /**
      * The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources.
      */
-    @Child(name = "ruleset", type = {Coding.class}, order = 4, min = 0, max = 1)
+    @Child(name = "ruleset", type = {Coding.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Resource version", formalDefinition="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources." )
     protected Coding ruleset;
 
     /**
      * The style (standard) and version of the original material which was converted into this resource.
      */
-    @Child(name = "originalRuleset", type = {Coding.class}, order = 5, min = 0, max = 1)
+    @Child(name = "originalRuleset", type = {Coding.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Original version", formalDefinition="The style (standard) and version of the original material which was converted into this resource." )
     protected Coding originalRuleset;
 
     /**
      * The date when the enclosed suite of services were performed or completed.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order = 6, min = 0, max = 1)
+    @Child(name = "created", type = {DateTimeType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
     protected DateTimeType created;
 
     /**
      * The Insurer who produced this adjudicated response.
      */
-    @Child(name = "organization", type = {Organization.class}, order = 7, min = 0, max = 1)
+    @Child(name = "organization", type = {Organization.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
     protected Reference organization;
 
@@ -186,7 +187,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Practitioner.class}, order = 8, min = 0, max = 1)
+    @Child(name = "requestProvider", type = {Practitioner.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference requestProvider;
 
@@ -198,7 +199,7 @@ public class EnrollmentResponse extends DomainResource {
     /**
      * The organization which is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestOrganization", type = {Organization.class}, order = 9, min = 0, max = 1)
+    @Child(name = "requestOrganization", type = {Organization.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Responsible organization", formalDefinition="The organization which is responsible for the services rendered to the patient." )
     protected Reference requestOrganization;
 
@@ -209,6 +210,9 @@ public class EnrollmentResponse extends DomainResource {
 
     private static final long serialVersionUID = -318929031L;
 
+  /*
+   * Constructor
+   */
     public EnrollmentResponse() {
       super();
     }
@@ -241,6 +245,16 @@ public class EnrollmentResponse extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public EnrollmentResponse addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**

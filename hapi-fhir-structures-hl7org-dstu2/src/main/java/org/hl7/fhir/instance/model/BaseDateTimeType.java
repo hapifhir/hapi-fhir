@@ -488,21 +488,54 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 		return getValue().after(theDateTimeType.getValue());
 	}
 
-	/**
-	 * Returns a human readable version of this date/time using the system local format
-	 */
+    /**
+     * Returns a human readable version of this date/time using the system local format.
+     * <p>
+     * <b>Note on time zones:</b> This method renders the value using the time zone
+     * that is contained within the value. For example, if this date object contains the
+     * value "2012-01-05T12:00:00-08:00", the human display will be rendered as "12:00:00"
+     * even if the application is being executed on a system in a different time zone. If
+     * this behaviour is not what you want, use {@link #toHumanDisplayLocalTimezone()}
+     * instead.
+     * </p>
+     */
 	public String toHumanDisplay() {
+		TimeZone tz = getTimeZone();
+		Calendar value = tz != null ? Calendar.getInstance(tz) : Calendar.getInstance();
+		value.setTime(getValue());
+
 		switch (getPrecision()) {
 		case YEAR:
 		case MONTH:
 		case DAY:
-			return ourHumanDateFormat.format(getValue());
+			return ourHumanDateFormat.format(value);
 		case MILLI:
 		case SECOND:
 		default:
-			return ourHumanDateTimeFormat.format(getValue());
+			return ourHumanDateTimeFormat.format(value);
 		}
 	}
+
+    /**
+     * Returns a human readable version of this date/time using the system local format,
+     * converted to the local timezone if neccesary.
+     * 
+     * @see #toHumanDisplay() for a method which does not convert the time to the local
+     * timezone before rendering it.
+     */
+    public String toHumanDisplayLocalTimezone() {
+		switch (getPrecision()) {
+        case YEAR:
+        case MONTH:
+        case DAY:
+                return ourHumanDateFormat.format(getValue());
+        case MILLI:
+        case SECOND:
+        default:
+                return ourHumanDateTimeFormat.format(getValue());
+        }
+    }
+
 
 	/**
 	 * Returns a view of this date/time as a Calendar object
@@ -598,6 +631,8 @@ public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 				b.append(nextChar);
 			}
 
+			if (b.length() == 16)
+				b.append(":00"); // schema rule, must have seconds
 			if (timeZone != null && b.length() > 10) {
 				if (timeZone.length() ==5) {
 					b.append(timeZone.substring(0, 3));

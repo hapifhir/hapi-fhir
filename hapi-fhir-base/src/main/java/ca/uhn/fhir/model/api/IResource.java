@@ -31,6 +31,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 /**
  * This interface is the parent interface for all FHIR Resource definition
  * classes. Classes implementing this interface should be annotated
@@ -42,10 +44,9 @@ import java.util.Set;
  * should not need to implement it directly.
  * </p>
  */
-public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.IBaseResource {
+public interface IResource extends ICompositeElement, org.hl7.fhir.instance.model.api.IBaseResource {
     public static final Include INCLUDE_ALL = new Include("*");
     public static final Set<Include> WILDCARD_ALL_SET = new HashSet<Include>(Arrays.asList(INCLUDE_ALL));
-
 
     /**
 	 * Returns the contained resource list for this resource.

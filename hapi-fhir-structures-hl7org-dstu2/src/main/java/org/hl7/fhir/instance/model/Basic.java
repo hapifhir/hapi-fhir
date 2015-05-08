@@ -29,15 +29,16 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Basic is used for handling concepts not yet defined in FHIR, narrative-only resources that don't map to an existing resource, and custom resources not appropriate for inclusion in the FHIR specification.
  */
@@ -47,21 +48,21 @@ public class Basic extends DomainResource {
     /**
      * Identifier assigned to the resource for business purposes, outside the context of FHIR.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Business identifier", formalDefinition="Identifier assigned to the resource for business purposes, outside the context of FHIR." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the 'type' of resource - equivalent to the resource name for other resources.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order = 1, min = 1, max = 1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Kind of Resource", formalDefinition="Identifies the 'type' of resource - equivalent to the resource name for other resources." )
     protected CodeableConcept code;
 
     /**
      * Identifies the patient, practitioner, device or any other resource that is the "focus" of this resoruce.
      */
-    @Child(name = "subject", type = {}, order = 2, min = 0, max = 1)
+    @Child(name = "subject", type = {}, order=2, min=0, max=1)
     @Description(shortDefinition="Identifies the", formalDefinition="Identifies the patient, practitioner, device or any other resource that is the 'focus' of this resoruce." )
     protected Reference subject;
 
@@ -73,7 +74,7 @@ public class Basic extends DomainResource {
     /**
      * Indicates who was responsible for creating the resource instance.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order = 3, min = 0, max = 1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Who created", formalDefinition="Indicates who was responsible for creating the resource instance." )
     protected Reference author;
 
@@ -85,16 +86,22 @@ public class Basic extends DomainResource {
     /**
      * Identifies when the resource was first created.
      */
-    @Child(name = "created", type = {DateType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "created", type = {DateType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="When created", formalDefinition="Identifies when the resource was first created." )
     protected DateType created;
 
     private static final long serialVersionUID = 916539354L;
 
+  /*
+   * Constructor
+   */
     public Basic() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Basic(CodeableConcept code) {
       super();
       this.code = code;
@@ -128,6 +135,16 @@ public class Basic extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Basic addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -341,14 +358,16 @@ public class Basic extends DomainResource {
     return ResourceType.Basic;
    }
 
+  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference" )
+  public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name="patient", path="Basic.subject", description="Identifies the", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="created", path="Basic.created", description="When created", type="date" )
+  public static final String SP_CREATED = "created";
+  @SearchParamDefinition(name="subject", path="Basic.subject", description="Identifies the", type="reference" )
+  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="code", path="Basic.code", description="Kind of Resource", type="token" )
   public static final String SP_CODE = "code";
-    @SearchParamDefinition(name = "subject", path = "Basic.subject", description = "Identifies the", type = "reference")
-    public static final String SP_SUBJECT = "subject";
-    @SearchParamDefinition(name = "created", path = "Basic.created", description = "When created", type = "date")
-    public static final String SP_CREATED = "created";
-    @SearchParamDefinition(name = "patient", path = "Basic.subject", description = "Identifies the", type = "reference")
-    public static final String SP_PATIENT = "patient";
 
 }
 

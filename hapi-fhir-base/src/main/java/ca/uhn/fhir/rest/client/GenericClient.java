@@ -37,11 +37,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -283,7 +283,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (isNotBlank(theId)) {
 			return theId;
 		}
-		return theResource.getId().getIdPart();
+		return theResource.getIdElement().getIdPart();
 	}
 
 	@Override
@@ -1578,7 +1578,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TransactionExecutable<T> extends BaseClientExecutable<ITransactionTyped<T>, T> implements ITransactionTyped<T> {
 
 		private Bundle myBundle;
-		private List<IBaseResource> myResources;
+		private List<? extends IBaseResource> myResources;
 		private IBaseBundle myBaseBundle;
 		private String myRawBundle;
 		private EncodingEnum myRawBundleEncoding;
@@ -1588,7 +1588,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		public TransactionExecutable(List<? extends IBaseResource> theResources) {
-			myResources = new ArrayList<IBaseResource>(theResources);
+			myResources = theResources;
 		}
 
 		public TransactionExecutable(IBaseBundle theBundle) {
@@ -1709,7 +1709,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = MethodUtil.createUpdateInvocation(myContext, myResource, myResourceBody, myCriterionList.toParamList());
 			} else {
 				if (myId == null) {
-					myId = myResource.getId();
+					myId = myResource.getIdElement();
 				}
 				if (myId == null || myId.hasIdPart() == false) {
 					throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");

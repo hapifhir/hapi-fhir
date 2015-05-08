@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
  * <li>{@link TemporalPrecisionEnum#MILLI}
  * </ul>
  */
-@DatatypeDef(name = "instant")
+@DatatypeDef(name="instant")
 public class InstantType extends BaseDateTimeType {
 
 	private static final long serialVersionUID = 3L;

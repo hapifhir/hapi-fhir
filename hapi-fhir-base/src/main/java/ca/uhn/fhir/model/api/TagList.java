@@ -28,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 
 /**
  * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of added tags will be consistent, but duplicates will not be preserved.

@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -122,23 +122,21 @@ public class FhirTerser {
         final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
         BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
         visit(theResource, null, null, def, new IModelVisitor() {
-            @SuppressWarnings("unchecked")
             @Override
             public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
                 if (theElement == null || theElement.isEmpty()) {
                     return;
                 }
-                if (BaseResourceReferenceDt.class.isAssignableFrom(theElement.getClass())) {
-                    retVal.add(new ResourceReferenceInfo(theResource, thePathToElement, (BaseResourceReferenceDt)theElement));
+                if (IBaseReference.class.isAssignableFrom(theElement.getClass())) {
+                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (IBaseReference)theElement));
                 }
             }
 
-            @SuppressWarnings("unchecked")
             @Override
             public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
                                                   ExtensionDt theNextExt) {
                 if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
-                    retVal.add(new ResourceReferenceInfo(theResource, thePathToElement, (BaseResourceReferenceDt)theNextExt.getValue()));
+                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (BaseResourceReferenceDt)theNextExt.getValue()));
                 }
             }
         });
@@ -245,10 +243,10 @@ public class FhirTerser {
 			// These are primitive types
 			break;
 		case RESOURCE_REF:
-			IReference resRefDt = (IReference) theElement;
-			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
+			IBaseReference resRefDt = (IBaseReference) theElement;
+			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
-				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
+				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 					visit(theResource, pathToElement, null, def, theCallback);
 				}
@@ -272,22 +270,7 @@ public class FhirTerser {
 						childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
 
 						if (childElementDef == null) {
-							StringBuilder b = new StringBuilder();
-							b.append("Found value of type[");
-							b.append(nextValue.getClass().getSimpleName());
-							b.append("] which is not valid for field[");
-							b.append(nextChild.getElementName());
-							b.append("] in ");
-							b.append(childDef.getName());
-							b.append(" - Valid types: ");
-							for (Iterator<String> iter = new TreeSet<String>(nextChild.getValidChildNames()).iterator(); iter.hasNext();) {
-								BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
-								b.append(childByName.getImplementingClass().getSimpleName());
-								if (iter.hasNext()) {
-									b.append(", ");
-								}
-							}
-							throw new DataFormatException(b.toString());
+							childElementDef = myContext.getElementDefinition(nextValue.getClass()); 
 						}
 
 						if (nextChild instanceof RuntimeChildDirectResource) {
@@ -355,10 +338,10 @@ public class FhirTerser {
 			// These are primitive types, so we don't need to visit their children
 			break;
 		case RESOURCE_REF:
-			IReference resRefDt = (IReference) theElement;
-			if (resRefDt.getReference().getValue() == null && resRefDt.getResource() != null) {
+			IBaseReference resRefDt = (IBaseReference) theElement;
+			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
-				if (theResource.getId() == null || theResource.getId().isEmpty() || theResource.getId().isLocal()) {
+				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
 					visit(theResource, null, def, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
 				}

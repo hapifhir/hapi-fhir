@@ -25,8 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.ICompositeType;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
@@ -34,8 +34,8 @@ public class RuntimeExtensionDtDefinition extends RuntimeCompositeDatatypeDefini
 
 	private List<BaseRuntimeChildDefinition> myChildren;
 
-	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass) {
-		super(theDef, theImplementingClass);
+	public RuntimeExtensionDtDefinition(DatatypeDef theDef, Class<? extends ICompositeType> theImplementingClass, boolean theStandardType) {
+		super(theDef, theImplementingClass, theStandardType);
 	}
 
 	@Override

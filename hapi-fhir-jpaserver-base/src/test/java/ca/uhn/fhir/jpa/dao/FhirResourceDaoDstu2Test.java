@@ -28,7 +28,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -87,6 +87,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+@SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu2Test {
 
 	private static ClassPathXmlApplicationContext ourCtx;
@@ -111,7 +112,7 @@ public class FhirResourceDaoDstu2Test {
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
 			assertEquals(1, found.size());
-			assertEquals(id1, found.getResources(0, 1).get(0).getId());
+			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
 
@@ -125,7 +126,7 @@ public class FhirResourceDaoDstu2Test {
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_DATE, new DateParam("2001-01-02"));
 			assertEquals(1, found.size());
-			assertEquals(id2, found.getResources(0, 1).get(0).getId());
+			assertEquals(id2, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
 
@@ -156,7 +157,7 @@ public class FhirResourceDaoDstu2Test {
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", "foo", "bar"));
 			assertEquals(1, found.size());
-			assertEquals(id3, found.getResources(0, 1).get(0).getId());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", "foo", "bar"));
@@ -165,12 +166,12 @@ public class FhirResourceDaoDstu2Test {
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", "foo", "bar"));
 			assertEquals(1, found.size());
-			assertEquals(id3, found.getResources(0, 1).get(0).getId());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", "foo", "bar"));
 			assertEquals(1, found.size());
-			assertEquals(id3, found.getResources(0, 1).get(0).getId());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
 
@@ -185,7 +186,7 @@ public class FhirResourceDaoDstu2Test {
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_STRING, new StringParam("testChoiceParam04Str"));
 			assertEquals(1, found.size());
-			assertEquals(id4, found.getResources(0, 1).get(0).getId());
+			assertEquals(id4, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
 
@@ -456,7 +457,7 @@ public class FhirResourceDaoDstu2Test {
 		IBundleProvider history = ourPatientDao.history(null);
 		assertEquals(4 + initialHistory, history.size());
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertNotNull(((IResource) resources.get(0)).getResourceMetadata().get(ResourceMetadataKeyEnum.DELETED_AT));
+		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) resources.get(0)));
 
 		try {
 			ourPatientDao.delete(id2);
@@ -1190,7 +1191,7 @@ public class FhirResourceDaoDstu2Test {
 			CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
 			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_STRING, val);
 			assertEquals(1, result.size());
-			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getId().toUnqualifiedVersionless());
+			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		}
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
@@ -1198,7 +1199,7 @@ public class FhirResourceDaoDstu2Test {
 			CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
 			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_STRING, val);
 			assertEquals(1, result.size());
-			assertEquals(id2.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getId().toUnqualifiedVersionless());
+			assertEquals(id2.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		}
 	}
 
@@ -1220,7 +1221,7 @@ public class FhirResourceDaoDstu2Test {
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
 			IBundleProvider result = ourObservationDao.search(Observation.SP_CODE_VALUE_DATE, val);
 			assertEquals(1, result.size());
-			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getId().toUnqualifiedVersionless());
+			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		}
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
@@ -2354,14 +2355,14 @@ public class FhirResourceDaoDstu2Test {
 		assertEquals(2, historyBundle.size());
 
 		List<IBaseResource> history = historyBundle.getResources(0, 2);
-		assertEquals("1", history.get(1).getId().getVersionIdPart());
-		assertEquals("2", history.get(0).getId().getVersionIdPart());
-		assertEquals(published, ((IResource)history.get(1)).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
-		assertEquals(published, ((IResource)history.get(1)).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
-		assertEquals(updated, ((IResource)history.get(1)).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("1", history.get(1).getIdElement().getVersionIdPart());
+		assertEquals("2", history.get(0).getIdElement().getVersionIdPart());
+		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
+		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
+		assertEquals(updated, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(1)));
 		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue());
-		assertEquals(published2, ((IResource)history.get(0)).getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED));
-		assertEquals(updated2, ((IResource)history.get(0)).getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals(published2, ResourceMetadataKeyEnum.PUBLISHED.get( (IResource) history.get(0)));
+		assertEquals(updated2, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(0)));
 		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue());
 
 	}
@@ -2497,15 +2498,15 @@ public class FhirResourceDaoDstu2Test {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends IResource> List<T> toList(IBundleProvider theSearch) {
-		return (List<T>) theSearch.getResources(0, theSearch.size());
+	@SuppressWarnings({ "rawtypes" })
+	private List toList(IBundleProvider theSearch) {
+		return theSearch.getResources(0, theSearch.size());
 	}
 
 	private List<IdDt> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
 		List<IdDt> retVal = new ArrayList<IdDt>();
 		for (IBaseResource next : theFound.getResources(0, theFound.size())) {
-			retVal.add((IdDt) next.getId().toUnqualifiedVersionless());
+			retVal.add((IdDt) next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -2515,7 +2516,6 @@ public class FhirResourceDaoDstu2Test {
 		ourCtx.close();
 	}
 
-	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "fhir-jpabase-spring-test-config.xml");
@@ -2543,13 +2543,13 @@ public class FhirResourceDaoDstu2Test {
 		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
 		ourLog.info("Initial size: " + value.size());
 		for (IBaseResource next : value.getResources(0, value.size())) {
-			ourLog.info("Deleting: {}", next.getId());
-			ourDeviceDao.delete((IdDt) next.getId());
+			ourLog.info("Deleting: {}", next.getIdElement());
+			ourDeviceDao.delete((IdDt) next.getIdElement());
 		}
 
 		value = ourDeviceDao.search(new SearchParameterMap());
 		if (value.size() > 0) {
-			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getId()));
+			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
 			fail(ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
 		}
 		assertEquals(0, value.size());

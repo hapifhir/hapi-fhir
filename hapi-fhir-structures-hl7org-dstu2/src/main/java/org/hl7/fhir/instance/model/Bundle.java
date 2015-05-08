@@ -29,20 +29,20 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
-import java.math.*;
 
+import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
- * A container for a group of resources.
+ * A container for a collection of resources.
  */
 @ResourceDef(name="Bundle", profile="http://hl7.org/fhir/Profile/Bundle")
 public class Bundle extends Resource implements IBaseBundle {
@@ -362,27 +362,33 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     @Block()
-    public static class BundleLinkComponent extends BackboneElement {
+    public static class BundleLinkComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
          */
-        @Child(name="relation", type={StringType.class}, order=1, min=1, max=1)
+        @Child(name = "relation", type = {StringType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="http://www.iana.org/assignments/link-relations/link-relations.xhtml", formalDefinition="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]." )
         protected StringType relation;
 
         /**
          * The reference details for the link.
          */
-        @Child(name="url", type={UriType.class}, order=2, min=1, max=1)
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1)
         @Description(shortDefinition="Reference details for the link", formalDefinition="The reference details for the link." )
         protected UriType url;
 
         private static final long serialVersionUID = -1010386066L;
 
+    /*
+     * Constructor
+     */
       public BundleLinkComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public BundleLinkComponent(StringType relation, UriType url) {
         super();
         this.relation = relation;
@@ -521,44 +527,54 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntryComponent extends BackboneElement {
+    public static class BundleEntryComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The Base URL for the resource, if different to the base URL specified for the bundle as a whole.
          */
-        @Child(name="base", type={UriType.class}, order=1, min=0, max=1)
+        @Child(name = "base", type = {UriType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Base URL, if different to bundle base", formalDefinition="The Base URL for the resource, if different to the base URL specified for the bundle as a whole." )
         protected UriType base;
 
         /**
+         * A series of links that provide context to this entry.
+         */
+        @Child(name = "link", type = {BundleLinkComponent.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Links related to this entry", formalDefinition="A series of links that provide context to this entry." )
+        protected List<BundleLinkComponent> link;
+
+        /**
          * The Resources for the entry.
          */
-        @Child(name="resource", type={Resource.class}, order=2, min=0, max=1)
+        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Resources in this bundle", formalDefinition="The Resources for the entry." )
         protected Resource resource;
 
         /**
          * Information about the search process that lead to the creation of this entry.
          */
-        @Child(name="search", type={}, order=3, min=0, max=1)
+        @Child(name = "search", type = {}, order=4, min=0, max=1)
         @Description(shortDefinition="Search related information", formalDefinition="Information about the search process that lead to the creation of this entry." )
         protected BundleEntrySearchComponent search;
 
         /**
          * Additional information about how this entry should be processed as part of a transaction.
          */
-        @Child(name="transaction", type={}, order=4, min=0, max=1)
+        @Child(name = "transaction", type = {}, order=5, min=0, max=1)
         @Description(shortDefinition="Transaction Related Information", formalDefinition="Additional information about how this entry should be processed as part of a transaction." )
         protected BundleEntryTransactionComponent transaction;
 
         /**
          * Additional information about how this entry should be processed as part of a transaction.
          */
-        @Child(name="transactionResponse", type={}, order=5, min=0, max=1)
+        @Child(name = "transactionResponse", type = {}, order=6, min=0, max=1)
         @Description(shortDefinition="Transaction Related Information", formalDefinition="Additional information about how this entry should be processed as part of a transaction." )
         protected BundleEntryTransactionResponseComponent transactionResponse;
 
-        private static final long serialVersionUID = 2068509254L;
+        private static final long serialVersionUID = -1846898377L;
 
+    /*
+     * Constructor
+     */
       public BundleEntryComponent() {
         super();
       }
@@ -609,6 +625,46 @@ public class Bundle extends Resource implements IBaseBundle {
               this.base = new UriType();
             this.base.setValue(value);
           }
+          return this;
+        }
+
+        /**
+         * @return {@link #link} (A series of links that provide context to this entry.)
+         */
+        public List<BundleLinkComponent> getLink() { 
+          if (this.link == null)
+            this.link = new ArrayList<BundleLinkComponent>();
+          return this.link;
+        }
+
+        public boolean hasLink() { 
+          if (this.link == null)
+            return false;
+          for (BundleLinkComponent item : this.link)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #link} (A series of links that provide context to this entry.)
+         */
+    // syntactic sugar
+        public BundleLinkComponent addLink() { //3
+          BundleLinkComponent t = new BundleLinkComponent();
+          if (this.link == null)
+            this.link = new ArrayList<BundleLinkComponent>();
+          this.link.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public BundleEntryComponent addLink(BundleLinkComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.link == null)
+            this.link = new ArrayList<BundleLinkComponent>();
+          this.link.add(t);
           return this;
         }
 
@@ -706,6 +762,7 @@ public class Bundle extends Resource implements IBaseBundle {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("base", "uri", "The Base URL for the resource, if different to the base URL specified for the bundle as a whole.", 0, java.lang.Integer.MAX_VALUE, base));
+          childrenList.add(new Property("link", "@Bundle.link", "A series of links that provide context to this entry.", 0, java.lang.Integer.MAX_VALUE, link));
           childrenList.add(new Property("resource", "Resource", "The Resources for the entry.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("search", "", "Information about the search process that lead to the creation of this entry.", 0, java.lang.Integer.MAX_VALUE, search));
           childrenList.add(new Property("transaction", "", "Additional information about how this entry should be processed as part of a transaction.", 0, java.lang.Integer.MAX_VALUE, transaction));
@@ -716,6 +773,11 @@ public class Bundle extends Resource implements IBaseBundle {
         BundleEntryComponent dst = new BundleEntryComponent();
         copyValues(dst);
         dst.base = base == null ? null : base.copy();
+        if (link != null) {
+          dst.link = new ArrayList<BundleLinkComponent>();
+          for (BundleLinkComponent i : link)
+            dst.link.add(i.copy());
+        };
         dst.resource = resource == null ? null : resource.copy();
         dst.search = search == null ? null : search.copy();
         dst.transaction = transaction == null ? null : transaction.copy();
@@ -730,8 +792,8 @@ public class Bundle extends Resource implements IBaseBundle {
         if (!(other instanceof BundleEntryComponent))
           return false;
         BundleEntryComponent o = (BundleEntryComponent) other;
-        return compareDeep(base, o.base, true) && compareDeep(resource, o.resource, true) && compareDeep(search, o.search, true)
-           && compareDeep(transaction, o.transaction, true) && compareDeep(transactionResponse, o.transactionResponse, true)
+        return compareDeep(base, o.base, true) && compareDeep(link, o.link, true) && compareDeep(resource, o.resource, true)
+           && compareDeep(search, o.search, true) && compareDeep(transaction, o.transaction, true) && compareDeep(transactionResponse, o.transactionResponse, true)
           ;
       }
 
@@ -746,31 +808,34 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (base == null || base.isEmpty()) && (resource == null || resource.isEmpty())
-           && (search == null || search.isEmpty()) && (transaction == null || transaction.isEmpty())
+        return super.isEmpty() && (base == null || base.isEmpty()) && (link == null || link.isEmpty())
+           && (resource == null || resource.isEmpty()) && (search == null || search.isEmpty()) && (transaction == null || transaction.isEmpty())
            && (transactionResponse == null || transactionResponse.isEmpty());
       }
 
   }
 
     @Block()
-    public static class BundleEntrySearchComponent extends BackboneElement {
+    public static class BundleEntrySearchComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
          */
-        @Child(name="mode", type={CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="match | include - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement." )
         protected Enumeration<SearchEntryMode> mode;
 
         /**
          * When searching, the server's search ranking score for the entry.
          */
-        @Child(name="score", type={DecimalType.class}, order=2, min=0, max=1)
+        @Child(name = "score", type = {DecimalType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Search ranking (between 0 and 1)", formalDefinition="When searching, the server's search ranking score for the entry." )
         protected DecimalType score;
 
         private static final long serialVersionUID = 837739866L;
 
+    /*
+     * Constructor
+     */
       public BundleEntrySearchComponent() {
         super();
       }
@@ -915,55 +980,61 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntryTransactionComponent extends BackboneElement {
+    public static class BundleEntryTransactionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
          */
-        @Child(name="method", type={CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="GET | POST | PUT | DELETE", formalDefinition="The HTTP verb for this entry in either a update history, or a transaction/ transaction response." )
         protected Enumeration<HttpVerb> method;
 
         /**
          * A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).
          */
-        @Child(name="url", type={UriType.class}, order=2, min=1, max=1)
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1)
         @Description(shortDefinition="The URL for the transaction", formalDefinition="A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation)." )
         protected UriType url;
 
         /**
          * If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation.
          */
-        @Child(name="ifNoneMatch", type={StringType.class}, order=3, min=0, max=1)
+        @Child(name = "ifNoneMatch", type = {StringType.class}, order=3, min=0, max=1)
         @Description(shortDefinition="For managing cache currency", formalDefinition="If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation." )
         protected StringType ifNoneMatch;
 
         /**
          * Only perform the operation if the Etag value matches. For more information, see the API section "Managing Resource Contention".
          */
-        @Child(name="ifMatch", type={StringType.class}, order=4, min=0, max=1)
+        @Child(name = "ifMatch", type = {StringType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the Etag value matches. For more information, see the API section 'Managing Resource Contention'." )
         protected StringType ifMatch;
 
         /**
          * Only perform the operation if the last updated date matches. For more information, see the API section "Managing Resource Contention".
          */
-        @Child(name = "ifModifiedSince", type = {InstantType.class}, order = 5, min = 0, max = 1)
+        @Child(name = "ifModifiedSince", type = {InstantType.class}, order=5, min=0, max=1)
         @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the last updated date matches. For more information, see the API section 'Managing Resource Contention'." )
         protected InstantType ifModifiedSince;
 
         /**
          * Instruct the server not to perform the create if a specified resource already exists. For further information, see "Conditional Create".
          */
-        @Child(name="ifNoneExist", type={StringType.class}, order=6, min=0, max=1)
+        @Child(name = "ifNoneExist", type = {StringType.class}, order=6, min=0, max=1)
         @Description(shortDefinition="For conditional creates", formalDefinition="Instruct the server not to perform the create if a specified resource already exists. For further information, see 'Conditional Create'." )
         protected StringType ifNoneExist;
 
         private static final long serialVersionUID = -769185862L;
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionComponent(Enumeration<HttpVerb> method, UriType url) {
         super();
         this.method = method;
@@ -1166,7 +1237,7 @@ public class Bundle extends Resource implements IBaseBundle {
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create BundleEntryTransactionComponent.ifModifiedSince");
             else if (Configuration.doAutoCreate())
-                this.ifModifiedSince = new InstantType(); // bb
+              this.ifModifiedSince = new InstantType(); // bb
           return this.ifModifiedSince;
         }
 
@@ -1196,12 +1267,12 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * @param value Only perform the operation if the last updated date matches. For more information, see the API section "Managing Resource Contention".
          */
-        public BundleEntryTransactionComponent setIfModifiedSince(Date value) {
-            if (value == null)
+        public BundleEntryTransactionComponent setIfModifiedSince(Date value) { 
+          if (value == null)
             this.ifModifiedSince = null;
           else {
             if (this.ifModifiedSince == null)
-                this.ifModifiedSince = new InstantType();
+              this.ifModifiedSince = new InstantType();
             this.ifModifiedSince.setValue(value);
           }
           return this;
@@ -1262,7 +1333,7 @@ public class Bundle extends Resource implements IBaseBundle {
           childrenList.add(new Property("url", "uri", "A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).", 0, java.lang.Integer.MAX_VALUE, url));
           childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation.", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
           childrenList.add(new Property("ifMatch", "string", "Only perform the operation if the Etag value matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifMatch));
-            childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
+          childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
           childrenList.add(new Property("ifNoneExist", "string", "Instruct the server not to perform the create if a specified resource already exists. For further information, see 'Conditional Create'.", 0, java.lang.Integer.MAX_VALUE, ifNoneExist));
         }
 
@@ -1312,41 +1383,47 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     @Block()
-    public static class BundleEntryTransactionResponseComponent extends BackboneElement {
+    public static class BundleEntryTransactionResponseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The status code returned by processing this entry.
          */
-        @Child(name="status", type={StringType.class}, order=1, min=1, max=1)
+        @Child(name = "status", type = {StringType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Status return code for entry", formalDefinition="The status code returned by processing this entry." )
         protected StringType status;
 
         /**
          * The location header created by processing this operation.
          */
-        @Child(name="location", type={UriType.class}, order=2, min=0, max=1)
+        @Child(name = "location", type = {UriType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="The location, if the operation returns a location", formalDefinition="The location header created by processing this operation." )
         protected UriType location;
 
         /**
          * The etag for the resource, it the operation for the entry produced a versioned resource.
          */
-        @Child(name = "etag", type = {StringType.class}, order = 3, min = 0, max = 1)
+        @Child(name = "etag", type = {StringType.class}, order=3, min=0, max=1)
         @Description(shortDefinition="The etag for the resource (if relevant)", formalDefinition="The etag for the resource, it the operation for the entry produced a versioned resource." )
         protected StringType etag;
 
         /**
          * The date/time that the resource was modified on the server.
          */
-        @Child(name = "lastModified", type = {InstantType.class}, order = 4, min = 0, max = 1)
-        @Description(shortDefinition = "Server's date time modified", formalDefinition = "The date/time that the resource was modified on the server.")
+        @Child(name = "lastModified", type = {InstantType.class}, order=4, min=0, max=1)
+        @Description(shortDefinition="Server's date time modified", formalDefinition="The date/time that the resource was modified on the server." )
         protected InstantType lastModified;
 
         private static final long serialVersionUID = -1526413234L;
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionResponseComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public BundleEntryTransactionResponseComponent(StringType status) {
         super();
         this.status = status;
@@ -1451,97 +1528,97 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         public StringType getEtagElement() { 
           if (this.etag == null)
-              if (Configuration.errorOnAutoCreate())
-                  throw new Error("Attempt to auto-create BundleEntryTransactionResponseComponent.etag");
-              else if (Configuration.doAutoCreate())
-                  this.etag = new StringType(); // bb
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create BundleEntryTransactionResponseComponent.etag");
+            else if (Configuration.doAutoCreate())
+              this.etag = new StringType(); // bb
           return this.etag;
         }
 
-        public boolean hasEtagElement() {
-            return this.etag != null && !this.etag.isEmpty();
+        public boolean hasEtagElement() { 
+          return this.etag != null && !this.etag.isEmpty();
         }
 
-        public boolean hasEtag() {
-            return this.etag != null && !this.etag.isEmpty();
+        public boolean hasEtag() { 
+          return this.etag != null && !this.etag.isEmpty();
         }
 
         /**
          * @param value {@link #etag} (The etag for the resource, it the operation for the entry produced a versioned resource.). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
-        public BundleEntryTransactionResponseComponent setEtagElement(StringType value) {
-            this.etag = value;
-            return this;
+        public BundleEntryTransactionResponseComponent setEtagElement(StringType value) { 
+          this.etag = value;
+          return this;
         }
 
         /**
          * @return The etag for the resource, it the operation for the entry produced a versioned resource.
          */
-        public String getEtag() {
-            return this.etag == null ? null : this.etag.getValue();
+        public String getEtag() { 
+          return this.etag == null ? null : this.etag.getValue();
         }
 
         /**
          * @param value The etag for the resource, it the operation for the entry produced a versioned resource.
          */
-        public BundleEntryTransactionResponseComponent setEtag(String value) {
-            if (Utilities.noString(value))
-                this.etag = null;
-            else {
-                if (this.etag == null)
-                    this.etag = new StringType();
-                this.etag.setValue(value);
-            }
+        public BundleEntryTransactionResponseComponent setEtag(String value) { 
+          if (Utilities.noString(value))
+            this.etag = null;
+          else {
+            if (this.etag == null)
+              this.etag = new StringType();
+            this.etag.setValue(value);
+          }
           return this;
         }
 
         /**
          * @return {@link #lastModified} (The date/time that the resource was modified on the server.). This is the underlying object with id, value and extensions. The accessor "getLastModified" gives direct access to the value
          */
-        public InstantType getLastModifiedElement() {
-            if (this.lastModified == null)
-                if (Configuration.errorOnAutoCreate())
-                    throw new Error("Attempt to auto-create BundleEntryTransactionResponseComponent.lastModified");
-                else if (Configuration.doAutoCreate())
-                    this.lastModified = new InstantType(); // bb
-            return this.lastModified;
+        public InstantType getLastModifiedElement() { 
+          if (this.lastModified == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create BundleEntryTransactionResponseComponent.lastModified");
+            else if (Configuration.doAutoCreate())
+              this.lastModified = new InstantType(); // bb
+          return this.lastModified;
         }
 
-        public boolean hasLastModifiedElement() {
-            return this.lastModified != null && !this.lastModified.isEmpty();
+        public boolean hasLastModifiedElement() { 
+          return this.lastModified != null && !this.lastModified.isEmpty();
         }
 
-        public boolean hasLastModified() {
-            return this.lastModified != null && !this.lastModified.isEmpty();
+        public boolean hasLastModified() { 
+          return this.lastModified != null && !this.lastModified.isEmpty();
         }
 
         /**
          * @param value {@link #lastModified} (The date/time that the resource was modified on the server.). This is the underlying object with id, value and extensions. The accessor "getLastModified" gives direct access to the value
          */
-        public BundleEntryTransactionResponseComponent setLastModifiedElement(InstantType value) {
-            this.lastModified = value;
-            return this;
+        public BundleEntryTransactionResponseComponent setLastModifiedElement(InstantType value) { 
+          this.lastModified = value;
+          return this;
         }
 
         /**
          * @return The date/time that the resource was modified on the server.
          */
-        public Date getLastModified() {
-            return this.lastModified == null ? null : this.lastModified.getValue();
+        public Date getLastModified() { 
+          return this.lastModified == null ? null : this.lastModified.getValue();
         }
 
         /**
          * @param value The date/time that the resource was modified on the server.
          */
-        public BundleEntryTransactionResponseComponent setLastModified(Date value) {
-            if (value == null)
-                this.lastModified = null;
-            else {
-                if (this.lastModified == null)
-                    this.lastModified = new InstantType();
-                this.lastModified.setValue(value);
-            }
-            return this;
+        public BundleEntryTransactionResponseComponent setLastModified(Date value) { 
+          if (value == null)
+            this.lastModified = null;
+          else {
+            if (this.lastModified == null)
+              this.lastModified = new InstantType();
+            this.lastModified.setValue(value);
+          }
+          return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
@@ -1549,7 +1626,7 @@ public class Bundle extends Resource implements IBaseBundle {
           childrenList.add(new Property("status", "string", "The status code returned by processing this entry.", 0, java.lang.Integer.MAX_VALUE, status));
           childrenList.add(new Property("location", "uri", "The location header created by processing this operation.", 0, java.lang.Integer.MAX_VALUE, location));
           childrenList.add(new Property("etag", "string", "The etag for the resource, it the operation for the entry produced a versioned resource.", 0, java.lang.Integer.MAX_VALUE, etag));
-            childrenList.add(new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, java.lang.Integer.MAX_VALUE, lastModified));
+          childrenList.add(new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, java.lang.Integer.MAX_VALUE, lastModified));
         }
 
       public BundleEntryTransactionResponseComponent copy() {
@@ -1557,8 +1634,8 @@ public class Bundle extends Resource implements IBaseBundle {
         copyValues(dst);
         dst.status = status == null ? null : status.copy();
         dst.location = location == null ? null : location.copy();
-          dst.etag = etag == null ? null : etag.copy();
-          dst.lastModified = lastModified == null ? null : lastModified.copy();
+        dst.etag = etag == null ? null : etag.copy();
+        dst.lastModified = lastModified == null ? null : lastModified.copy();
         return dst;
       }
 
@@ -1570,7 +1647,7 @@ public class Bundle extends Resource implements IBaseBundle {
           return false;
         BundleEntryTransactionResponseComponent o = (BundleEntryTransactionResponseComponent) other;
         return compareDeep(status, o.status, true) && compareDeep(location, o.location, true) && compareDeep(etag, o.etag, true)
-                && compareDeep(lastModified, o.lastModified, true);
+           && compareDeep(lastModified, o.lastModified, true);
       }
 
       @Override
@@ -1581,12 +1658,12 @@ public class Bundle extends Resource implements IBaseBundle {
           return false;
         BundleEntryTransactionResponseComponent o = (BundleEntryTransactionResponseComponent) other;
         return compareValues(status, o.status, true) && compareValues(location, o.location, true) && compareValues(etag, o.etag, true)
-                && compareValues(lastModified, o.lastModified, true);
+           && compareValues(lastModified, o.lastModified, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (status == null || status.isEmpty()) && (location == null || location.isEmpty())
-                && (etag == null || etag.isEmpty()) && (lastModified == null || lastModified.isEmpty());
+           && (etag == null || etag.isEmpty()) && (lastModified == null || lastModified.isEmpty());
       }
 
   }
@@ -1594,51 +1671,57 @@ public class Bundle extends Resource implements IBaseBundle {
     /**
      * Indicates the purpose of this bundle- how it was intended to be used.
      */
-    @Child(name = "type", type = {CodeType.class}, order = 0, min = 1, max = 1)
+    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="document | message | transaction | transaction-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle- how it was intended to be used." )
     protected Enumeration<BundleType> type;
 
     /**
      * The base URL for the service that provided these resources. All relative URLs are relative to this one (equivalent to xml:base).
      */
-    @Child(name = "base", type = {UriType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "base", type = {UriType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Stated Base URL", formalDefinition="The base URL for the service that provided these resources. All relative URLs are relative to this one (equivalent to xml:base)." )
     protected UriType base;
 
     /**
      * If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
      */
-    @Child(name = "total", type = {IntegerType.class}, order = 2, min = 0, max = 1)
+    @Child(name = "total", type = {UnsignedIntType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="If search, the total number of matches", formalDefinition="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)." )
-    protected IntegerType total;
+    protected UnsignedIntType total;
 
     /**
      * A series of links that provide context to this bundle.
      */
-    @Child(name = "link", type = {}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "link", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Links related to this Bundle", formalDefinition="A series of links that provide context to this bundle." )
     protected List<BundleLinkComponent> link;
 
     /**
      * An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).
      */
-    @Child(name = "entry", type = {}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "entry", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Entry in the bundle - will have a resource, or information", formalDefinition="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)." )
     protected List<BundleEntryComponent> entry;
 
     /**
      * XML Digital Signature - base64 encoded.
      */
-    @Child(name = "signature", type = {Base64BinaryType.class}, order = 5, min = 0, max = 1)
+    @Child(name = "signature", type = {Base64BinaryType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="XML Digital Signature (base64 encoded)", formalDefinition="XML Digital Signature - base64 encoded." )
     protected Base64BinaryType signature;
 
-    private static final long serialVersionUID = -1332054150L;
+    private static final long serialVersionUID = -1380125450L;
 
+  /*
+   * Constructor
+   */
     public Bundle() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Bundle(Enumeration<BundleType> type) {
       super();
       this.type = type;
@@ -1741,12 +1824,12 @@ public class Bundle extends Resource implements IBaseBundle {
     /**
      * @return {@link #total} (If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
      */
-    public IntegerType getTotalElement() { 
+    public UnsignedIntType getTotalElement() { 
       if (this.total == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Bundle.total");
         else if (Configuration.doAutoCreate())
-          this.total = new IntegerType(); // bb
+          this.total = new UnsignedIntType(); // bb
       return this.total;
     }
 
@@ -1761,7 +1844,7 @@ public class Bundle extends Resource implements IBaseBundle {
     /**
      * @param value {@link #total} (If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
      */
-    public Bundle setTotalElement(IntegerType value) { 
+    public Bundle setTotalElement(UnsignedIntType value) { 
       this.total = value;
       return this;
     }
@@ -1770,7 +1853,7 @@ public class Bundle extends Resource implements IBaseBundle {
      * @return If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
      */
     public int getTotal() { 
-      return this.total == null ? 0 : this.total.getValue();
+      return this.total == null || this.total.isEmpty() ? 0 : this.total.getValue();
     }
 
     /**
@@ -1778,7 +1861,7 @@ public class Bundle extends Resource implements IBaseBundle {
      */
     public Bundle setTotal(int value) { 
         if (this.total == null)
-          this.total = new IntegerType();
+          this.total = new UnsignedIntType();
         this.total.setValue(value);
       return this;
     }
@@ -1813,6 +1896,16 @@ public class Bundle extends Resource implements IBaseBundle {
       return t;
     }
 
+    // syntactic sugar
+    public Bundle addLink(BundleLinkComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.link == null)
+        this.link = new ArrayList<BundleLinkComponent>();
+      this.link.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #entry} (An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).)
      */
@@ -1841,6 +1934,16 @@ public class Bundle extends Resource implements IBaseBundle {
         this.entry = new ArrayList<BundleEntryComponent>();
       this.entry.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Bundle addEntry(BundleEntryComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.entry == null)
+        this.entry = new ArrayList<BundleEntryComponent>();
+      this.entry.add(t);
+      return this;
     }
 
     /**
@@ -1896,7 +1999,7 @@ public class Bundle extends Resource implements IBaseBundle {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "code", "Indicates the purpose of this bundle- how it was intended to be used.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("base", "uri", "The base URL for the service that provided these resources. All relative URLs are relative to this one (equivalent to xml:base).", 0, java.lang.Integer.MAX_VALUE, base));
-        childrenList.add(new Property("total", "integer", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, java.lang.Integer.MAX_VALUE, total));
+        childrenList.add(new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, java.lang.Integer.MAX_VALUE, total));
         childrenList.add(new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link));
         childrenList.add(new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry));
         childrenList.add(new Property("signature", "base64Binary", "XML Digital Signature - base64 encoded.", 0, java.lang.Integer.MAX_VALUE, signature));
@@ -1960,12 +2063,12 @@ public class Bundle extends Resource implements IBaseBundle {
     return ResourceType.Bundle;
    }
 
-  @SearchParamDefinition(name="composition", path="", description="The first resource in the bundle, if the bundle type is 'document' - this is a composition, and this parameter provides access to searches it's contents", type="reference" )
+  @SearchParamDefinition(name="message", path="", description="The first resource in the bundle, if the bundle type is 'message' - this is a message header, and this parameter provides access to search its contents", type="reference" )
+  public static final String SP_MESSAGE = "message";
+  @SearchParamDefinition(name="composition", path="", description="The first resource in the bundle, if the bundle type is 'document' - this is a composition, and this parameter provides access to searches its contents", type="reference" )
   public static final String SP_COMPOSITION = "composition";
   @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | history | searchset | collection", type="token" )
   public static final String SP_TYPE = "type";
-    @SearchParamDefinition(name = "message", path = "", description = "The first resource in the bundle, if the bundle type is 'message' - this is a message header, and this parameter provides access to search it's contents", type = "reference")
-    public static final String SP_MESSAGE = "message";
 
 }
 

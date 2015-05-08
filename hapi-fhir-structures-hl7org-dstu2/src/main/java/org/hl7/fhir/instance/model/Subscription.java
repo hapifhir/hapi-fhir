@@ -29,18 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
- * Todo.
+ * The subscription resource is used to define a push based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system is able to take an appropriate action.
  */
 @ResourceDef(name="Subscription", profile="http://hl7.org/fhir/Profile/Subscription")
 public class Subscription extends DomainResource {
@@ -108,10 +109,10 @@ public class Subscription extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case REQUESTED: return "requested";
-            case ACTIVE: return "active";
-            case ERROR: return "error";
-            case OFF: return "off";
+            case REQUESTED: return "Requested";
+            case ACTIVE: return "Active";
+            case ERROR: return "Error";
+            case OFF: return "Off";
             default: return "?";
           }
         }
@@ -217,11 +218,11 @@ public class Subscription extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case RESTHOOK: return "rest-hook";
-            case WEBSOCKET: return "websocket";
-            case EMAIL: return "email";
-            case SMS: return "sms";
-            case MESSAGE: return "message";
+            case RESTHOOK: return "Rest Hook";
+            case WEBSOCKET: return "Websocket";
+            case EMAIL: return "Email";
+            case SMS: return "Sms";
+            case MESSAGE: return "Message";
             default: return "?";
           }
         }
@@ -260,41 +261,47 @@ public class Subscription extends DomainResource {
     }
 
     @Block()
-    public static class SubscriptionChannelComponent extends BackboneElement {
+    public static class SubscriptionChannelComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Todo.
+         * The type of channel to send notififcations on.
          */
-        @Child(name="type", type={CodeType.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="rest-hook | websocket | email | sms | message", formalDefinition="Todo." )
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+        @Description(shortDefinition="rest-hook | websocket | email | sms | message", formalDefinition="The type of channel to send notififcations on." )
         protected Enumeration<SubscriptionChannelType> type;
 
         /**
-         * Todo.
+         * The uri that describes tha actual end point to send messages to.
          */
-        @Child(name="url", type={UriType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Where the channel points to", formalDefinition="Todo." )
-        protected UriType url;
+        @Child(name = "endpoint", type = {UriType.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="Where the channel points to", formalDefinition="The uri that describes tha actual end point to send messages to." )
+        protected UriType endpoint;
 
         /**
-         * ToDo.
+         * The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
          */
-        @Child(name="payload", type={StringType.class}, order=3, min=1, max=1)
-        @Description(shortDefinition="Mimetype to send, or blank for no payload", formalDefinition="ToDo." )
+        @Child(name = "payload", type = {StringType.class}, order=3, min=1, max=1)
+        @Description(shortDefinition="Mimetype to send, or blank for no payload", formalDefinition="The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification." )
         protected StringType payload;
 
         /**
-         * Usage depends on the channel type.
+         * Additional headers / information to send as part of the notification.
          */
-        @Child(name="header", type={StringType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Usage depends on the channel type", formalDefinition="Usage depends on the channel type." )
+        @Child(name = "header", type = {StringType.class}, order=4, min=0, max=1)
+        @Description(shortDefinition="Usage depends on the channel type", formalDefinition="Additional headers / information to send as part of the notification." )
         protected StringType header;
 
-        private static final long serialVersionUID = 904575965L;
+        private static final long serialVersionUID = -279715391L;
 
+    /*
+     * Constructor
+     */
       public SubscriptionChannelComponent() {
         super();
       }
 
+    /*
+     * Constructor
+     */
       public SubscriptionChannelComponent(Enumeration<SubscriptionChannelType> type, StringType payload) {
         super();
         this.type = type;
@@ -302,7 +309,7 @@ public class Subscription extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Todo.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #type} (The type of channel to send notififcations on.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public Enumeration<SubscriptionChannelType> getTypeElement() { 
           if (this.type == null)
@@ -322,7 +329,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Todo.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (The type of channel to send notififcations on.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public SubscriptionChannelComponent setTypeElement(Enumeration<SubscriptionChannelType> value) { 
           this.type = value;
@@ -330,14 +337,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return Todo.
+         * @return The type of channel to send notififcations on.
          */
         public SubscriptionChannelType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
-         * @param value Todo.
+         * @param value The type of channel to send notififcations on.
          */
         public SubscriptionChannelComponent setType(SubscriptionChannelType value) { 
             if (this.type == null)
@@ -347,56 +354,56 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #url} (Todo.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @return {@link #endpoint} (The uri that describes tha actual end point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public UriType getUrlElement() { 
-          if (this.url == null)
+        public UriType getEndpointElement() { 
+          if (this.endpoint == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubscriptionChannelComponent.url");
+              throw new Error("Attempt to auto-create SubscriptionChannelComponent.endpoint");
             else if (Configuration.doAutoCreate())
-              this.url = new UriType(); // bb
-          return this.url;
+              this.endpoint = new UriType(); // bb
+          return this.endpoint;
         }
 
-        public boolean hasUrlElement() { 
-          return this.url != null && !this.url.isEmpty();
+        public boolean hasEndpointElement() { 
+          return this.endpoint != null && !this.endpoint.isEmpty();
         }
 
-        public boolean hasUrl() { 
-          return this.url != null && !this.url.isEmpty();
+        public boolean hasEndpoint() { 
+          return this.endpoint != null && !this.endpoint.isEmpty();
         }
 
         /**
-         * @param value {@link #url} (Todo.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @param value {@link #endpoint} (The uri that describes tha actual end point to send messages to.). This is the underlying object with id, value and extensions. The accessor "getEndpoint" gives direct access to the value
          */
-        public SubscriptionChannelComponent setUrlElement(UriType value) { 
-          this.url = value;
+        public SubscriptionChannelComponent setEndpointElement(UriType value) { 
+          this.endpoint = value;
           return this;
         }
 
         /**
-         * @return Todo.
+         * @return The uri that describes tha actual end point to send messages to.
          */
-        public String getUrl() { 
-          return this.url == null ? null : this.url.getValue();
+        public String getEndpoint() { 
+          return this.endpoint == null ? null : this.endpoint.getValue();
         }
 
         /**
-         * @param value Todo.
+         * @param value The uri that describes tha actual end point to send messages to.
          */
-        public SubscriptionChannelComponent setUrl(String value) { 
+        public SubscriptionChannelComponent setEndpoint(String value) { 
           if (Utilities.noString(value))
-            this.url = null;
+            this.endpoint = null;
           else {
-            if (this.url == null)
-              this.url = new UriType();
-            this.url.setValue(value);
+            if (this.endpoint == null)
+              this.endpoint = new UriType();
+            this.endpoint.setValue(value);
           }
           return this;
         }
 
         /**
-         * @return {@link #payload} (ToDo.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @return {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
         public StringType getPayloadElement() { 
           if (this.payload == null)
@@ -416,7 +423,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #payload} (ToDo.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @param value {@link #payload} (The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
         public SubscriptionChannelComponent setPayloadElement(StringType value) { 
           this.payload = value;
@@ -424,14 +431,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return ToDo.
+         * @return The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
          */
         public String getPayload() { 
           return this.payload == null ? null : this.payload.getValue();
         }
 
         /**
-         * @param value ToDo.
+         * @param value The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.
          */
         public SubscriptionChannelComponent setPayload(String value) { 
             if (this.payload == null)
@@ -441,7 +448,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #header} (Usage depends on the channel type.). This is the underlying object with id, value and extensions. The accessor "getHeader" gives direct access to the value
+         * @return {@link #header} (Additional headers / information to send as part of the notification.). This is the underlying object with id, value and extensions. The accessor "getHeader" gives direct access to the value
          */
         public StringType getHeaderElement() { 
           if (this.header == null)
@@ -461,7 +468,7 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #header} (Usage depends on the channel type.). This is the underlying object with id, value and extensions. The accessor "getHeader" gives direct access to the value
+         * @param value {@link #header} (Additional headers / information to send as part of the notification.). This is the underlying object with id, value and extensions. The accessor "getHeader" gives direct access to the value
          */
         public SubscriptionChannelComponent setHeaderElement(StringType value) { 
           this.header = value;
@@ -469,14 +476,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return Usage depends on the channel type.
+         * @return Additional headers / information to send as part of the notification.
          */
         public String getHeader() { 
           return this.header == null ? null : this.header.getValue();
         }
 
         /**
-         * @param value Usage depends on the channel type.
+         * @param value Additional headers / information to send as part of the notification.
          */
         public SubscriptionChannelComponent setHeader(String value) { 
           if (Utilities.noString(value))
@@ -491,17 +498,17 @@ public class Subscription extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "Todo.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("url", "uri", "Todo.", 0, java.lang.Integer.MAX_VALUE, url));
-          childrenList.add(new Property("payload", "string", "ToDo.", 0, java.lang.Integer.MAX_VALUE, payload));
-          childrenList.add(new Property("header", "string", "Usage depends on the channel type.", 0, java.lang.Integer.MAX_VALUE, header));
+          childrenList.add(new Property("type", "code", "The type of channel to send notififcations on.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("endpoint", "uri", "The uri that describes tha actual end point to send messages to.", 0, java.lang.Integer.MAX_VALUE, endpoint));
+          childrenList.add(new Property("payload", "string", "The mime type to send the payload in - either application/xml+fhir, or application/json+fhir. If the mime type is blank, then there is no payload in the notification, just a notification.", 0, java.lang.Integer.MAX_VALUE, payload));
+          childrenList.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }
 
       public SubscriptionChannelComponent copy() {
         SubscriptionChannelComponent dst = new SubscriptionChannelComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        dst.url = url == null ? null : url.copy();
+        dst.endpoint = endpoint == null ? null : endpoint.copy();
         dst.payload = payload == null ? null : payload.copy();
         dst.header = header == null ? null : header.copy();
         return dst;
@@ -514,7 +521,7 @@ public class Subscription extends DomainResource {
         if (!(other instanceof SubscriptionChannelComponent))
           return false;
         SubscriptionChannelComponent o = (SubscriptionChannelComponent) other;
-        return compareDeep(type, o.type, true) && compareDeep(url, o.url, true) && compareDeep(payload, o.payload, true)
+        return compareDeep(type, o.type, true) && compareDeep(endpoint, o.endpoint, true) && compareDeep(payload, o.payload, true)
            && compareDeep(header, o.header, true);
       }
 
@@ -525,298 +532,85 @@ public class Subscription extends DomainResource {
         if (!(other instanceof SubscriptionChannelComponent))
           return false;
         SubscriptionChannelComponent o = (SubscriptionChannelComponent) other;
-        return compareValues(type, o.type, true) && compareValues(url, o.url, true) && compareValues(payload, o.payload, true)
+        return compareValues(type, o.type, true) && compareValues(endpoint, o.endpoint, true) && compareValues(payload, o.payload, true)
            && compareValues(header, o.header, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (url == null || url.isEmpty())
+        return super.isEmpty() && (type == null || type.isEmpty()) && (endpoint == null || endpoint.isEmpty())
            && (payload == null || payload.isEmpty()) && (header == null || header.isEmpty());
       }
 
   }
 
-    @Block()
-    public static class SubscriptionTagComponent extends BackboneElement {
-        /**
-         * Todo.
-         */
-        @Child(name="term", type={UriType.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="The term that identifies the tag", formalDefinition="Todo." )
-        protected UriType term;
-
-        /**
-         * Todo.
-         */
-        @Child(name="scheme", type={UriType.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="The scheme for the tag (kind of tag)", formalDefinition="Todo." )
-        protected UriType scheme;
-
-        /**
-         * Todo.
-         */
-        @Child(name="description", type={StringType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Tag description label", formalDefinition="Todo." )
-        protected StringType description;
-
-        private static final long serialVersionUID = 957833176L;
-
-      public SubscriptionTagComponent() {
-        super();
-      }
-
-      public SubscriptionTagComponent(UriType term, UriType scheme) {
-        super();
-        this.term = term;
-        this.scheme = scheme;
-      }
-
-        /**
-         * @return {@link #term} (Todo.). This is the underlying object with id, value and extensions. The accessor "getTerm" gives direct access to the value
-         */
-        public UriType getTermElement() { 
-          if (this.term == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubscriptionTagComponent.term");
-            else if (Configuration.doAutoCreate())
-              this.term = new UriType(); // bb
-          return this.term;
-        }
-
-        public boolean hasTermElement() { 
-          return this.term != null && !this.term.isEmpty();
-        }
-
-        public boolean hasTerm() { 
-          return this.term != null && !this.term.isEmpty();
-        }
-
-        /**
-         * @param value {@link #term} (Todo.). This is the underlying object with id, value and extensions. The accessor "getTerm" gives direct access to the value
-         */
-        public SubscriptionTagComponent setTermElement(UriType value) { 
-          this.term = value;
-          return this;
-        }
-
-        /**
-         * @return Todo.
-         */
-        public String getTerm() { 
-          return this.term == null ? null : this.term.getValue();
-        }
-
-        /**
-         * @param value Todo.
-         */
-        public SubscriptionTagComponent setTerm(String value) { 
-            if (this.term == null)
-              this.term = new UriType();
-            this.term.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #scheme} (Todo.). This is the underlying object with id, value and extensions. The accessor "getScheme" gives direct access to the value
-         */
-        public UriType getSchemeElement() { 
-          if (this.scheme == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubscriptionTagComponent.scheme");
-            else if (Configuration.doAutoCreate())
-              this.scheme = new UriType(); // bb
-          return this.scheme;
-        }
-
-        public boolean hasSchemeElement() { 
-          return this.scheme != null && !this.scheme.isEmpty();
-        }
-
-        public boolean hasScheme() { 
-          return this.scheme != null && !this.scheme.isEmpty();
-        }
-
-        /**
-         * @param value {@link #scheme} (Todo.). This is the underlying object with id, value and extensions. The accessor "getScheme" gives direct access to the value
-         */
-        public SubscriptionTagComponent setSchemeElement(UriType value) { 
-          this.scheme = value;
-          return this;
-        }
-
-        /**
-         * @return Todo.
-         */
-        public String getScheme() { 
-          return this.scheme == null ? null : this.scheme.getValue();
-        }
-
-        /**
-         * @param value Todo.
-         */
-        public SubscriptionTagComponent setScheme(String value) { 
-            if (this.scheme == null)
-              this.scheme = new UriType();
-            this.scheme.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #description} (Todo.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public StringType getDescriptionElement() { 
-          if (this.description == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubscriptionTagComponent.description");
-            else if (Configuration.doAutoCreate())
-              this.description = new StringType(); // bb
-          return this.description;
-        }
-
-        public boolean hasDescriptionElement() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        public boolean hasDescription() { 
-          return this.description != null && !this.description.isEmpty();
-        }
-
-        /**
-         * @param value {@link #description} (Todo.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
-         */
-        public SubscriptionTagComponent setDescriptionElement(StringType value) { 
-          this.description = value;
-          return this;
-        }
-
-        /**
-         * @return Todo.
-         */
-        public String getDescription() { 
-          return this.description == null ? null : this.description.getValue();
-        }
-
-        /**
-         * @param value Todo.
-         */
-        public SubscriptionTagComponent setDescription(String value) { 
-          if (Utilities.noString(value))
-            this.description = null;
-          else {
-            if (this.description == null)
-              this.description = new StringType();
-            this.description.setValue(value);
-          }
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("term", "uri", "Todo.", 0, java.lang.Integer.MAX_VALUE, term));
-          childrenList.add(new Property("scheme", "uri", "Todo.", 0, java.lang.Integer.MAX_VALUE, scheme));
-          childrenList.add(new Property("description", "string", "Todo.", 0, java.lang.Integer.MAX_VALUE, description));
-        }
-
-      public SubscriptionTagComponent copy() {
-        SubscriptionTagComponent dst = new SubscriptionTagComponent();
-        copyValues(dst);
-        dst.term = term == null ? null : term.copy();
-        dst.scheme = scheme == null ? null : scheme.copy();
-        dst.description = description == null ? null : description.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof SubscriptionTagComponent))
-          return false;
-        SubscriptionTagComponent o = (SubscriptionTagComponent) other;
-        return compareDeep(term, o.term, true) && compareDeep(scheme, o.scheme, true) && compareDeep(description, o.description, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof SubscriptionTagComponent))
-          return false;
-        SubscriptionTagComponent o = (SubscriptionTagComponent) other;
-        return compareValues(term, o.term, true) && compareValues(scheme, o.scheme, true) && compareValues(description, o.description, true)
-          ;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (term == null || term.isEmpty()) && (scheme == null || scheme.isEmpty())
-           && (description == null || description.isEmpty());
-      }
-
-  }
-
     /**
-     * Todo.
+     * The rules that the server should use to determine when to generate notifications for this subscription.
      */
-    @Child(name = "criteria", type = {StringType.class}, order = 0, min = 1, max = 1)
-    @Description(shortDefinition="Rule for server push criteria", formalDefinition="Todo." )
+    @Child(name = "criteria", type = {StringType.class}, order=0, min=1, max=1)
+    @Description(shortDefinition="Rule for server push criteria", formalDefinition="The rules that the server should use to determine when to generate notifications for this subscription." )
     protected StringType criteria;
 
     /**
-     * Todo.
+     * Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.
      */
-    @Child(name = "contact", type = {ContactPoint.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Contact details for source (e.g. troubleshooting)", formalDefinition="Todo." )
+    @Child(name = "contact", type = {ContactPoint.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Contact details for source (e.g. troubleshooting)", formalDefinition="Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting." )
     protected List<ContactPoint> contact;
 
     /**
-     * Todo.
+     * A description of why this subscription is defined.
      */
-    @Child(name = "reason", type = {StringType.class}, order = 2, min = 1, max = 1)
-    @Description(shortDefinition="Description of why this subscription was created", formalDefinition="Todo." )
+    @Child(name = "reason", type = {StringType.class}, order=2, min=1, max=1)
+    @Description(shortDefinition="Description of why this subscription was created", formalDefinition="A description of why this subscription is defined." )
     protected StringType reason;
 
     /**
-     * Todo.
+     * The status of the subscription, which marks the server state for managing the subscription.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 3, min = 1, max = 1)
-    @Description(shortDefinition="requested | active | error | off", formalDefinition="Todo." )
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1)
+    @Description(shortDefinition="requested | active | error | off", formalDefinition="The status of the subscription, which marks the server state for managing the subscription." )
     protected Enumeration<SubscriptionStatus> status;
 
     /**
-     * Todo.
+     * A record of the last error that occurred when the server processed a notification.
      */
-    @Child(name = "error", type = {StringType.class}, order = 4, min = 0, max = 1)
-    @Description(shortDefinition="Latest error note", formalDefinition="Todo." )
+    @Child(name = "error", type = {StringType.class}, order=4, min=0, max=1)
+    @Description(shortDefinition="Latest error note", formalDefinition="A record of the last error that occurred when the server processed a notification." )
     protected StringType error;
 
     /**
-     * Todo.
+     * Details where to send notifications when resources are received that meet the criteria.
      */
-    @Child(name = "channel", type = {}, order = 5, min = 1, max = 1)
-    @Description(shortDefinition="The channel on which to report matches to the criteria", formalDefinition="Todo." )
+    @Child(name = "channel", type = {}, order=5, min=1, max=1)
+    @Description(shortDefinition="The channel on which to report matches to the criteria", formalDefinition="Details where to send notifications when resources are received that meet the criteria." )
     protected SubscriptionChannelComponent channel;
 
     /**
-     * Todo.
+     * The time for the server to turn the subscription off.
      */
-    @Child(name = "end", type = {InstantType.class}, order = 6, min = 0, max = 1)
-    @Description(shortDefinition="When to automatically delete the subscription", formalDefinition="Todo." )
+    @Child(name = "end", type = {InstantType.class}, order=6, min=0, max=1)
+    @Description(shortDefinition="When to automatically delete the subscription", formalDefinition="The time for the server to turn the subscription off." )
     protected InstantType end;
 
     /**
-     * Todo.
+     * A tag to add to any resource that matches the criteria, after the subscription is processed.
      */
-    @Child(name = "tag", type = {}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="A tag to add to matching resources", formalDefinition="Todo." )
-    protected List<SubscriptionTagComponent> tag;
+    @Child(name = "tag", type = {Coding.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="A tag to add to matching resources", formalDefinition="A tag to add to any resource that matches the criteria, after the subscription is processed." )
+    protected List<Coding> tag;
 
-    private static final long serialVersionUID = 68195650L;
+    private static final long serialVersionUID = -1390870804L;
 
+  /*
+   * Constructor
+   */
     public Subscription() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public Subscription(StringType criteria, StringType reason, Enumeration<SubscriptionStatus> status, SubscriptionChannelComponent channel) {
       super();
       this.criteria = criteria;
@@ -826,7 +620,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #criteria} (Todo.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
+     * @return {@link #criteria} (The rules that the server should use to determine when to generate notifications for this subscription.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
      */
     public StringType getCriteriaElement() { 
       if (this.criteria == null)
@@ -846,7 +640,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @param value {@link #criteria} (Todo.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
+     * @param value {@link #criteria} (The rules that the server should use to determine when to generate notifications for this subscription.). This is the underlying object with id, value and extensions. The accessor "getCriteria" gives direct access to the value
      */
     public Subscription setCriteriaElement(StringType value) { 
       this.criteria = value;
@@ -854,14 +648,14 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return Todo.
+     * @return The rules that the server should use to determine when to generate notifications for this subscription.
      */
     public String getCriteria() { 
       return this.criteria == null ? null : this.criteria.getValue();
     }
 
     /**
-     * @param value Todo.
+     * @param value The rules that the server should use to determine when to generate notifications for this subscription.
      */
     public Subscription setCriteria(String value) { 
         if (this.criteria == null)
@@ -871,7 +665,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #contact} (Todo.)
+     * @return {@link #contact} (Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.)
      */
     public List<ContactPoint> getContact() { 
       if (this.contact == null)
@@ -889,7 +683,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #contact} (Todo.)
+     * @return {@link #contact} (Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.)
      */
     // syntactic sugar
     public ContactPoint addContact() { //3
@@ -900,8 +694,18 @@ public class Subscription extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Subscription addContact(ContactPoint t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<ContactPoint>();
+      this.contact.add(t);
+      return this;
+    }
+
     /**
-     * @return {@link #reason} (Todo.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
+     * @return {@link #reason} (A description of why this subscription is defined.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
      */
     public StringType getReasonElement() { 
       if (this.reason == null)
@@ -921,7 +725,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @param value {@link #reason} (Todo.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
+     * @param value {@link #reason} (A description of why this subscription is defined.). This is the underlying object with id, value and extensions. The accessor "getReason" gives direct access to the value
      */
     public Subscription setReasonElement(StringType value) { 
       this.reason = value;
@@ -929,14 +733,14 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return Todo.
+     * @return A description of why this subscription is defined.
      */
     public String getReason() { 
       return this.reason == null ? null : this.reason.getValue();
     }
 
     /**
-     * @param value Todo.
+     * @param value A description of why this subscription is defined.
      */
     public Subscription setReason(String value) { 
         if (this.reason == null)
@@ -946,7 +750,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #status} (Todo.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The status of the subscription, which marks the server state for managing the subscription.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Enumeration<SubscriptionStatus> getStatusElement() { 
       if (this.status == null)
@@ -966,7 +770,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (Todo.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The status of the subscription, which marks the server state for managing the subscription.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
     public Subscription setStatusElement(Enumeration<SubscriptionStatus> value) { 
       this.status = value;
@@ -974,14 +778,14 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return Todo.
+     * @return The status of the subscription, which marks the server state for managing the subscription.
      */
     public SubscriptionStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value Todo.
+     * @param value The status of the subscription, which marks the server state for managing the subscription.
      */
     public Subscription setStatus(SubscriptionStatus value) { 
         if (this.status == null)
@@ -991,7 +795,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #error} (Todo.). This is the underlying object with id, value and extensions. The accessor "getError" gives direct access to the value
+     * @return {@link #error} (A record of the last error that occurred when the server processed a notification.). This is the underlying object with id, value and extensions. The accessor "getError" gives direct access to the value
      */
     public StringType getErrorElement() { 
       if (this.error == null)
@@ -1011,7 +815,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @param value {@link #error} (Todo.). This is the underlying object with id, value and extensions. The accessor "getError" gives direct access to the value
+     * @param value {@link #error} (A record of the last error that occurred when the server processed a notification.). This is the underlying object with id, value and extensions. The accessor "getError" gives direct access to the value
      */
     public Subscription setErrorElement(StringType value) { 
       this.error = value;
@@ -1019,14 +823,14 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return Todo.
+     * @return A record of the last error that occurred when the server processed a notification.
      */
     public String getError() { 
       return this.error == null ? null : this.error.getValue();
     }
 
     /**
-     * @param value Todo.
+     * @param value A record of the last error that occurred when the server processed a notification.
      */
     public Subscription setError(String value) { 
       if (Utilities.noString(value))
@@ -1040,7 +844,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #channel} (Todo.)
+     * @return {@link #channel} (Details where to send notifications when resources are received that meet the criteria.)
      */
     public SubscriptionChannelComponent getChannel() { 
       if (this.channel == null)
@@ -1056,7 +860,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @param value {@link #channel} (Todo.)
+     * @param value {@link #channel} (Details where to send notifications when resources are received that meet the criteria.)
      */
     public Subscription setChannel(SubscriptionChannelComponent value) { 
       this.channel = value;
@@ -1064,7 +868,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #end} (Todo.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     * @return {@link #end} (The time for the server to turn the subscription off.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
      */
     public InstantType getEndElement() { 
       if (this.end == null)
@@ -1084,7 +888,7 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @param value {@link #end} (Todo.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
+     * @param value {@link #end} (The time for the server to turn the subscription off.). This is the underlying object with id, value and extensions. The accessor "getEnd" gives direct access to the value
      */
     public Subscription setEndElement(InstantType value) { 
       this.end = value;
@@ -1092,14 +896,14 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return Todo.
+     * @return The time for the server to turn the subscription off.
      */
     public Date getEnd() { 
       return this.end == null ? null : this.end.getValue();
     }
 
     /**
-     * @param value Todo.
+     * @param value The time for the server to turn the subscription off.
      */
     public Subscription setEnd(Date value) { 
       if (value == null)
@@ -1113,45 +917,55 @@ public class Subscription extends DomainResource {
     }
 
     /**
-     * @return {@link #tag} (Todo.)
+     * @return {@link #tag} (A tag to add to any resource that matches the criteria, after the subscription is processed.)
      */
-    public List<SubscriptionTagComponent> getTag() { 
+    public List<Coding> getTag() { 
       if (this.tag == null)
-        this.tag = new ArrayList<SubscriptionTagComponent>();
+        this.tag = new ArrayList<Coding>();
       return this.tag;
     }
 
     public boolean hasTag() { 
       if (this.tag == null)
         return false;
-      for (SubscriptionTagComponent item : this.tag)
+      for (Coding item : this.tag)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #tag} (Todo.)
+     * @return {@link #tag} (A tag to add to any resource that matches the criteria, after the subscription is processed.)
      */
     // syntactic sugar
-    public SubscriptionTagComponent addTag() { //3
-      SubscriptionTagComponent t = new SubscriptionTagComponent();
+    public Coding addTag() { //3
+      Coding t = new Coding();
       if (this.tag == null)
-        this.tag = new ArrayList<SubscriptionTagComponent>();
+        this.tag = new ArrayList<Coding>();
       this.tag.add(t);
       return t;
     }
 
+    // syntactic sugar
+    public Subscription addTag(Coding t) { //3
+      if (t == null)
+        return this;
+      if (this.tag == null)
+        this.tag = new ArrayList<Coding>();
+      this.tag.add(t);
+      return this;
+    }
+
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("criteria", "string", "Todo.", 0, java.lang.Integer.MAX_VALUE, criteria));
-        childrenList.add(new Property("contact", "ContactPoint", "Todo.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("reason", "string", "Todo.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("status", "code", "Todo.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("error", "string", "Todo.", 0, java.lang.Integer.MAX_VALUE, error));
-        childrenList.add(new Property("channel", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, channel));
-        childrenList.add(new Property("end", "instant", "Todo.", 0, java.lang.Integer.MAX_VALUE, end));
-        childrenList.add(new Property("tag", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, tag));
+        childrenList.add(new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, java.lang.Integer.MAX_VALUE, criteria));
+        childrenList.add(new Property("contact", "ContactPoint", "Contact details for a human to contact about the subscription. The primary use of this for system administrator troubleshooting.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("reason", "string", "A description of why this subscription is defined.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("status", "code", "The status of the subscription, which marks the server state for managing the subscription.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, java.lang.Integer.MAX_VALUE, error));
+        childrenList.add(new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, java.lang.Integer.MAX_VALUE, channel));
+        childrenList.add(new Property("end", "instant", "The time for the server to turn the subscription off.", 0, java.lang.Integer.MAX_VALUE, end));
+        childrenList.add(new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag));
       }
 
       public Subscription copy() {
@@ -1169,8 +983,8 @@ public class Subscription extends DomainResource {
         dst.channel = channel == null ? null : channel.copy();
         dst.end = end == null ? null : end.copy();
         if (tag != null) {
-          dst.tag = new ArrayList<SubscriptionTagComponent>();
-          for (SubscriptionTagComponent i : tag)
+          dst.tag = new ArrayList<Coding>();
+          for (Coding i : tag)
             dst.tag.add(i.copy());
         };
         return dst;
@@ -1215,20 +1029,20 @@ public class Subscription extends DomainResource {
     return ResourceType.Subscription;
    }
 
-    @SearchParamDefinition(name = "payload", path = "Subscription.channel.payload", description = "Mimetype to send, or blank for no payload", type = "string")
-    public static final String SP_PAYLOAD = "payload";
   @SearchParamDefinition(name="criteria", path="Subscription.criteria", description="Rule for server push criteria", type="string" )
   public static final String SP_CRITERIA = "criteria";
-    @SearchParamDefinition(name = "contact", path = "Subscription.contact", description = "Contact details for source (e.g. troubleshooting)", type = "token")
-    public static final String SP_CONTACT = "contact";
-  @SearchParamDefinition(name="tag", path="Subscription.tag.term", description="The term that identifies the tag", type="string" )
+  @SearchParamDefinition(name="status", path="Subscription.status", description="requested | active | error | off", type="token" )
+  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="tag", path="Subscription.tag", description="A tag to add to matching resources", type="token" )
   public static final String SP_TAG = "tag";
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="Mimetype to send, or blank for no payload", type="string" )
+  public static final String SP_PAYLOAD = "payload";
   @SearchParamDefinition(name="type", path="Subscription.channel.type", description="rest-hook | websocket | email | sms | message", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="url", path="Subscription.channel.url", description="Where the channel points to", type="string" )
+  @SearchParamDefinition(name="contact", path="Subscription.contact", description="Contact details for source (e.g. troubleshooting)", type="token" )
+  public static final String SP_CONTACT = "contact";
+  @SearchParamDefinition(name="url", path="Subscription.channel.endpoint", description="Where the channel points to", type="uri" )
   public static final String SP_URL = "url";
-    @SearchParamDefinition(name = "status", path = "Subscription.status", description = "requested | active | error | off", type = "token")
-    public static final String SP_STATUS = "status";
 
 }
 

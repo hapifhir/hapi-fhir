@@ -24,11 +24,11 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -629,11 +629,11 @@ public class GenericClientDstu2Hl7OrgTest {
 		assertEquals("Patient/2", requestBundle.getEntry().get(1).getTransaction().getUrl());
 
 		p1 = (Patient) response.get(0);
-		assertEquals(new IdType("Patient/1/_history/1"), p1.getId().toUnqualified());
+		assertEquals(new IdType("Patient/1/_history/1"), p1.getIdElement().toUnqualified());
 		// assertEquals("PATIENT1", p1.getName().get(0).getFamily().get(0).getValue());
 
 		p2 = (Patient) response.get(1);
-		assertEquals(new IdType("Patient/2/_history/2"), p2.getId().toUnqualified());
+		assertEquals(new IdType("Patient/2/_history/2"), p2.getIdElement().toUnqualified());
 		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
 	}
 

@@ -27,9 +27,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -50,15 +50,15 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		return myStructureVersion;
 	}
 
-	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation) {
-		super(theResourceName, theClass);
+	public RuntimeResourceDefinition(FhirContext theContext, String theResourceName, Class<? extends IBaseResource> theClass, ResourceDef theResourceAnnotation, boolean theStandardType) {
+		super(theResourceName, theClass, theStandardType);
 		myContext= theContext;
 		myResourceProfile = theResourceAnnotation.profile();
 		myId = theResourceAnnotation.id();
 		
 		try {
 			IBaseResource instance = theClass.newInstance();
-			if (instance instanceof IAnyResource) {
+			if (instance instanceof IRefImplResource) {
 				myStructureVersion = FhirVersionEnum.DSTU2_HL7ORG;
 			} else {
 				myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();

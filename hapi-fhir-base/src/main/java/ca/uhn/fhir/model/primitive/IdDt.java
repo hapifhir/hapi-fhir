@@ -28,8 +28,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
@@ -546,8 +546,8 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IResource) {
 			((IResource) theResouce).setId(new IdDt(getValue()));
-		} else if (theResouce instanceof IAnyResource) {
-			((IAnyResource) theResouce).setId(getValue());
+		} else if (theResouce instanceof IRefImplResource) {
+			((IRefImplResource) theResouce).setId(getValue());
 		} else {
 			throw new IllegalArgumentException("Unknown resource class type, does not implement IResource or extend Resource");
 		}
@@ -560,7 +560,7 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		if (theResouce == null) {
 			throw new NullPointerException("theResource can not be null");
 		} else if (theResouce instanceof IBaseResource) {
-			IIdType retVal = ((IBaseResource) theResouce).getId();
+			IIdType retVal = ((IBaseResource) theResouce).getIdElement();
 			if (retVal == null) {
 				return null;
 			} else if (retVal instanceof IdDt) {

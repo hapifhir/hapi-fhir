@@ -20,6 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,32 +29,42 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
-	private String myName;
-	private Class<? extends T> myImplementingClass;
+	private static final Class<Void> VOID_CLASS = Void.class;
+	
+	private final String myName;
+	private final Class<? extends T> myImplementingClass;
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensions = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
 	private Map<String, RuntimeChildDeclaredExtensionDefinition> myUrlToExtension = new HashMap<String, RuntimeChildDeclaredExtensionDefinition>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
 	private List<RuntimeChildDeclaredExtensionDefinition> myExtensionsNonModifier = new ArrayList<RuntimeChildDeclaredExtensionDefinition>();
+	private final boolean myStandardType;
+	private Map<Class<?>, Constructor<T>> myConstructors = Collections.synchronizedMap(new HashMap<Class<?>, Constructor<T>>());
 
-	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass) {
+	public BaseRuntimeElementDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
 		assert StringUtils.isNotBlank(theName);
 		assert theImplementingClass != null;
 
-		myName = theName;
-		
+		String name = theName;
 		// TODO: remove this and fix for the model
-		if (myName.endsWith("Dt")) {
-			myName = myName.substring(0, myName.length() - 2);
+		if (name.endsWith("Dt")) {
+			name = name.substring(0, name.length() - 2);
 		}
 		
+		
+		myName = name;
+		myStandardType = theStandardType;
 		myImplementingClass = theImplementingClass;
+	}
+
+	public boolean isStandardType() {
+		return myStandardType;
 	}
 
 	@Override
@@ -102,13 +113,9 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	public T newInstance(Object theArgument) {
 		try {
 			if (theArgument == null) {
-				return getImplementingClass().newInstance();
-			} else if (theArgument instanceof IValueSetEnumBinder) {
-				return getImplementingClass().getConstructor(IValueSetEnumBinder.class).newInstance(theArgument);
-			} else if (theArgument instanceof IBaseEnumFactory) {
-				return getImplementingClass().getConstructor(IBaseEnumFactory.class).newInstance(theArgument);
+				return getConstructor(null).newInstance(null);
 			} else {
-				return getImplementingClass().getConstructor(theArgument.getClass()).newInstance(theArgument);
+				return getConstructor(theArgument).newInstance(theArgument);
 			}
 		} catch (InstantiationException e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
@@ -118,11 +125,42 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
 		} catch (InvocationTargetException e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
-		} catch (NoSuchMethodException e) {
-			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
 		} catch (SecurityException e) {
 			throw new ConfigurationException("Failed to instantiate type:" + getImplementingClass().getName(), e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Constructor<T> getConstructor(Object theArgument) {
+		
+		Class<? extends Object> argumentType;
+		if (theArgument == null) {
+			argumentType = VOID_CLASS;
+		} else {
+			argumentType = theArgument.getClass();
+		}
+		
+		Constructor<T> retVal = myConstructors.get(argumentType);
+		if (retVal == null) {
+			for (Constructor<?> next : getImplementingClass().getConstructors()) {
+				if (argumentType == VOID_CLASS) {
+					if (next.getParameterTypes().length == 0) {
+						retVal = (Constructor<T>) next;
+						break;
+					}
+				} else if (next.getParameterTypes().length == 1) {
+					if (next.getParameterTypes()[0].isAssignableFrom(argumentType)) {
+						retVal = (Constructor<T>) next;
+						break;
+					}
+				}
+			}
+			if (retVal == null) {
+				throw new ConfigurationException("Class " + getImplementingClass() + " has no constructor with a single argument of type " + argumentType);
+			}
+			myConstructors.put(argumentType, retVal);
+		}
+		return retVal;
 	}
 
 	public Class<? extends T> getImplementingClass() {

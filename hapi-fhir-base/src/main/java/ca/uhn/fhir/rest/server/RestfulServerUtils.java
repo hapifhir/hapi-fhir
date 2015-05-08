@@ -40,8 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -79,15 +79,15 @@ public class RestfulServerUtils {
 			boolean theRequestIsBrowser, RestfulServer.NarrativeModeEnum theNarrativeMode, int stausCode, boolean theRespondGzip, String theServerBase, boolean theAddContentLocationHeader) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
-		if (theAddContentLocationHeader && theResource.getId() != null && theResource.getId().hasIdPart() && isNotBlank(theServerBase)) {
+		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(theServerBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			IIdType fullId = theResource.getId().withServerBase(theServerBase, resName);
+			IIdType fullId = theResource.getIdElement().withServerBase(theServerBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (theResource.getId().hasVersionIdPart()) {
-				theHttpResponse.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getId().getVersionIdPart() + '"');
+			if (theResource.getIdElement().hasVersionIdPart()) {
+				theHttpResponse.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getIdElement().getVersionIdPart() + '"');
 			}
 		}
 
@@ -148,7 +148,7 @@ public class RestfulServerUtils {
 				}
 			}
 		} else {
-			Date lastUpdated = ((IAnyResource)theResource).getMeta().getLastUpdated();
+			Date lastUpdated = ((IRefImplResource)theResource).getMeta().getLastUpdated();
 			if (lastUpdated != null) {
 				theHttpResponse.addHeader(Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(lastUpdated));
 			}

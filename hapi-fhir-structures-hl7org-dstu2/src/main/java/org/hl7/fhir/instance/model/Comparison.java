@@ -82,8 +82,8 @@ public class Comparison {
 	public static void merge(Identifier dst, Identifier src) {
 		if (dst.getUseElement() == null && src.getUseElement() != null)
 			dst.setUseElement(src.getUseElement());  
-		if (dst.getLabelElement() == null && src.getLabelElement() != null)
-			dst.setLabelElement(src.getLabelElement());  
+		if (dst.getType() == null && src.getType() != null)
+			dst.setType(src.getType());  
 		if (dst.getPeriod() == null && src.getPeriod() != null)
 			dst.setPeriod(src.getPeriod());  
 		if (dst.getAssigner() == null && src.getAssigner() != null)

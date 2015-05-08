@@ -29,21 +29,22 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
  */
 @ResourceDef(name="DeviceMetric", profile="http://hl7.org/fhir/Profile/DeviceMetric")
-public class DeviceMetric extends Resource {
+public class DeviceMetric extends DomainResource {
 
     public enum MetricOperationalStatus {
         /**
@@ -99,9 +100,9 @@ public class DeviceMetric extends Resource {
         }
         public String getDisplay() {
           switch (this) {
-            case ON: return "on";
-            case OFF: return "off";
-            case STANDBY: return "standby";
+            case ON: return "On";
+            case OFF: return "Off";
+            case STANDBY: return "Standby";
             default: return "?";
           }
         }
@@ -127,6 +128,162 @@ public class DeviceMetric extends Resource {
         return "off";
       if (code == MetricOperationalStatus.STANDBY)
         return "standby";
+      return "?";
+      }
+    }
+
+    public enum MetricColor {
+        /**
+         * Color for representation - black.
+         */
+        BLACK, 
+        /**
+         * Color for representation - red.
+         */
+        RED, 
+        /**
+         * Color for representation - green.
+         */
+        GREEN, 
+        /**
+         * Color for representation - yellow.
+         */
+        YELLOW, 
+        /**
+         * Color for representation - blue.
+         */
+        BLUE, 
+        /**
+         * Color for representation - magenta.
+         */
+        MAGENTA, 
+        /**
+         * Color for representation - cyan.
+         */
+        CYAN, 
+        /**
+         * Color for representation - white.
+         */
+        WHITE, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static MetricColor fromCode(String codeString) throws Exception {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("black".equals(codeString))
+          return BLACK;
+        if ("red".equals(codeString))
+          return RED;
+        if ("green".equals(codeString))
+          return GREEN;
+        if ("yellow".equals(codeString))
+          return YELLOW;
+        if ("blue".equals(codeString))
+          return BLUE;
+        if ("magenta".equals(codeString))
+          return MAGENTA;
+        if ("cyan".equals(codeString))
+          return CYAN;
+        if ("white".equals(codeString))
+          return WHITE;
+        throw new Exception("Unknown MetricColor code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case BLACK: return "black";
+            case RED: return "red";
+            case GREEN: return "green";
+            case YELLOW: return "yellow";
+            case BLUE: return "blue";
+            case MAGENTA: return "magenta";
+            case CYAN: return "cyan";
+            case WHITE: return "white";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case BLACK: return "";
+            case RED: return "";
+            case GREEN: return "";
+            case YELLOW: return "";
+            case BLUE: return "";
+            case MAGENTA: return "";
+            case CYAN: return "";
+            case WHITE: return "";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case BLACK: return "Color for representation - black.";
+            case RED: return "Color for representation - red.";
+            case GREEN: return "Color for representation - green.";
+            case YELLOW: return "Color for representation - yellow.";
+            case BLUE: return "Color for representation - blue.";
+            case MAGENTA: return "Color for representation - magenta.";
+            case CYAN: return "Color for representation - cyan.";
+            case WHITE: return "Color for representation - white.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case BLACK: return "col-black";
+            case RED: return "col-red";
+            case GREEN: return "col-green";
+            case YELLOW: return "col-yellow";
+            case BLUE: return "col-blue";
+            case MAGENTA: return "col-magenta";
+            case CYAN: return "col-cyan";
+            case WHITE: return "col-white";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class MetricColorEnumFactory implements EnumFactory<MetricColor> {
+    public MetricColor fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("black".equals(codeString))
+          return MetricColor.BLACK;
+        if ("red".equals(codeString))
+          return MetricColor.RED;
+        if ("green".equals(codeString))
+          return MetricColor.GREEN;
+        if ("yellow".equals(codeString))
+          return MetricColor.YELLOW;
+        if ("blue".equals(codeString))
+          return MetricColor.BLUE;
+        if ("magenta".equals(codeString))
+          return MetricColor.MAGENTA;
+        if ("cyan".equals(codeString))
+          return MetricColor.CYAN;
+        if ("white".equals(codeString))
+          return MetricColor.WHITE;
+        throw new IllegalArgumentException("Unknown MetricColor code '"+codeString+"'");
+        }
+    public String toCode(MetricColor code) {
+      if (code == MetricColor.BLACK)
+        return "black";
+      if (code == MetricColor.RED)
+        return "red";
+      if (code == MetricColor.GREEN)
+        return "green";
+      if (code == MetricColor.YELLOW)
+        return "yellow";
+      if (code == MetricColor.BLUE)
+        return "blue";
+      if (code == MetricColor.MAGENTA)
+        return "magenta";
+      if (code == MetricColor.CYAN)
+        return "cyan";
+      if (code == MetricColor.WHITE)
+        return "white";
       return "?";
       }
     }
@@ -194,10 +351,10 @@ public class DeviceMetric extends Resource {
         }
         public String getDisplay() {
           switch (this) {
-            case MEASUREMENT: return "measurement";
-            case SETTING: return "setting";
-            case CALCULATION: return "calculation";
-            case UNSPECIFIED: return "unspecified";
+            case MEASUREMENT: return "Measurement";
+            case SETTING: return "Setting";
+            case CALCULATION: return "Calculation";
+            case UNSPECIFIED: return "Unspecified";
             default: return "?";
           }
         }
@@ -294,10 +451,10 @@ public class DeviceMetric extends Resource {
         }
         public String getDisplay() {
           switch (this) {
-            case UNSPECIFIED: return "unspecified";
-            case OFFSET: return "offset";
-            case GAIN: return "gain";
-            case TWOPOINT: return "two-point";
+            case UNSPECIFIED: return "Unspecified";
+            case OFFSET: return "Offset";
+            case GAIN: return "Gain";
+            case TWOPOINT: return "Two Point";
             default: return "?";
           }
         }
@@ -394,10 +551,10 @@ public class DeviceMetric extends Resource {
         }
         public String getDisplay() {
           switch (this) {
-            case NOTCALIBRATED: return "not-calibrated";
-            case CALIBRATIONREQUIRED: return "calibration-required";
-            case CALIBRATED: return "calibrated";
-            case UNSPECIFIED: return "unspecified";
+            case NOTCALIBRATED: return "Not Calibrated";
+            case CALIBRATIONREQUIRED: return "Calibration Required";
+            case CALIBRATED: return "Calibrated";
+            case UNSPECIFIED: return "Unspecified";
             default: return "?";
           }
         }
@@ -432,31 +589,34 @@ public class DeviceMetric extends Resource {
     }
 
     @Block()
-    public static class DeviceMetricCalibrationInfoComponent extends BackboneElement {
+    public static class DeviceMetricCalibrationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the type of the calibration method.
          */
-        @Child(name="type", type={CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="unspecified | offset | gain | two-point", formalDefinition="Describes the type of the calibration method." )
         protected Enumeration<MetricCalibrationType> type;
 
         /**
          * Describes the state of the calibration.
          */
-        @Child(name="state", type={CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "state", type = {CodeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="not-calibrated | calibration-required | calibrated | unspecified", formalDefinition="Describes the state of the calibration." )
         protected Enumeration<MetricCalibrationState> state;
 
         /**
          * Describes the time last calibration has been performed.
          */
-        @Child(name="time", type={InstantType.class}, order=3, min=0, max=1)
+        @Child(name = "time", type = {InstantType.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Describes the time last calibration has been performed", formalDefinition="Describes the time last calibration has been performed." )
         protected InstantType time;
 
         private static final long serialVersionUID = 407720126L;
 
-      public DeviceMetricCalibrationInfoComponent() {
+    /*
+     * Constructor
+     */
+      public DeviceMetricCalibrationComponent() {
         super();
       }
 
@@ -466,7 +626,7 @@ public class DeviceMetric extends Resource {
         public Enumeration<MetricCalibrationType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DeviceMetricCalibrationInfoComponent.type");
+              throw new Error("Attempt to auto-create DeviceMetricCalibrationComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new Enumeration<MetricCalibrationType>(new MetricCalibrationTypeEnumFactory()); // bb
           return this.type;
@@ -483,7 +643,7 @@ public class DeviceMetric extends Resource {
         /**
          * @param value {@link #type} (Describes the type of the calibration method.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public DeviceMetricCalibrationInfoComponent setTypeElement(Enumeration<MetricCalibrationType> value) { 
+        public DeviceMetricCalibrationComponent setTypeElement(Enumeration<MetricCalibrationType> value) { 
           this.type = value;
           return this;
         }
@@ -498,7 +658,7 @@ public class DeviceMetric extends Resource {
         /**
          * @param value Describes the type of the calibration method.
          */
-        public DeviceMetricCalibrationInfoComponent setType(MetricCalibrationType value) { 
+        public DeviceMetricCalibrationComponent setType(MetricCalibrationType value) { 
           if (value == null)
             this.type = null;
           else {
@@ -515,7 +675,7 @@ public class DeviceMetric extends Resource {
         public Enumeration<MetricCalibrationState> getStateElement() { 
           if (this.state == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DeviceMetricCalibrationInfoComponent.state");
+              throw new Error("Attempt to auto-create DeviceMetricCalibrationComponent.state");
             else if (Configuration.doAutoCreate())
               this.state = new Enumeration<MetricCalibrationState>(new MetricCalibrationStateEnumFactory()); // bb
           return this.state;
@@ -532,7 +692,7 @@ public class DeviceMetric extends Resource {
         /**
          * @param value {@link #state} (Describes the state of the calibration.). This is the underlying object with id, value and extensions. The accessor "getState" gives direct access to the value
          */
-        public DeviceMetricCalibrationInfoComponent setStateElement(Enumeration<MetricCalibrationState> value) { 
+        public DeviceMetricCalibrationComponent setStateElement(Enumeration<MetricCalibrationState> value) { 
           this.state = value;
           return this;
         }
@@ -547,7 +707,7 @@ public class DeviceMetric extends Resource {
         /**
          * @param value Describes the state of the calibration.
          */
-        public DeviceMetricCalibrationInfoComponent setState(MetricCalibrationState value) { 
+        public DeviceMetricCalibrationComponent setState(MetricCalibrationState value) { 
           if (value == null)
             this.state = null;
           else {
@@ -564,7 +724,7 @@ public class DeviceMetric extends Resource {
         public InstantType getTimeElement() { 
           if (this.time == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DeviceMetricCalibrationInfoComponent.time");
+              throw new Error("Attempt to auto-create DeviceMetricCalibrationComponent.time");
             else if (Configuration.doAutoCreate())
               this.time = new InstantType(); // bb
           return this.time;
@@ -581,7 +741,7 @@ public class DeviceMetric extends Resource {
         /**
          * @param value {@link #time} (Describes the time last calibration has been performed.). This is the underlying object with id, value and extensions. The accessor "getTime" gives direct access to the value
          */
-        public DeviceMetricCalibrationInfoComponent setTimeElement(InstantType value) { 
+        public DeviceMetricCalibrationComponent setTimeElement(InstantType value) { 
           this.time = value;
           return this;
         }
@@ -596,7 +756,7 @@ public class DeviceMetric extends Resource {
         /**
          * @param value Describes the time last calibration has been performed.
          */
-        public DeviceMetricCalibrationInfoComponent setTime(Date value) { 
+        public DeviceMetricCalibrationComponent setTime(Date value) { 
           if (value == null)
             this.time = null;
           else {
@@ -614,8 +774,8 @@ public class DeviceMetric extends Resource {
           childrenList.add(new Property("time", "instant", "Describes the time last calibration has been performed.", 0, java.lang.Integer.MAX_VALUE, time));
         }
 
-      public DeviceMetricCalibrationInfoComponent copy() {
-        DeviceMetricCalibrationInfoComponent dst = new DeviceMetricCalibrationInfoComponent();
+      public DeviceMetricCalibrationComponent copy() {
+        DeviceMetricCalibrationComponent dst = new DeviceMetricCalibrationComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.state = state == null ? null : state.copy();
@@ -627,9 +787,9 @@ public class DeviceMetric extends Resource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof DeviceMetricCalibrationInfoComponent))
+        if (!(other instanceof DeviceMetricCalibrationComponent))
           return false;
-        DeviceMetricCalibrationInfoComponent o = (DeviceMetricCalibrationInfoComponent) other;
+        DeviceMetricCalibrationComponent o = (DeviceMetricCalibrationComponent) other;
         return compareDeep(type, o.type, true) && compareDeep(state, o.state, true) && compareDeep(time, o.time, true)
           ;
       }
@@ -638,9 +798,9 @@ public class DeviceMetric extends Resource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof DeviceMetricCalibrationInfoComponent))
+        if (!(other instanceof DeviceMetricCalibrationComponent))
           return false;
-        DeviceMetricCalibrationInfoComponent o = (DeviceMetricCalibrationInfoComponent) other;
+        DeviceMetricCalibrationComponent o = (DeviceMetricCalibrationComponent) other;
         return compareValues(type, o.type, true) && compareValues(state, o.state, true) && compareValues(time, o.time, true)
           ;
       }
@@ -655,7 +815,7 @@ public class DeviceMetric extends Resource {
     /**
      * Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order = 0, min = 1, max = 1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1)
     @Description(shortDefinition="Type of metric", formalDefinition="Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc." )
     protected CodeableConcept type;
 
@@ -663,21 +823,21 @@ public class DeviceMetric extends Resource {
      * Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID. 
 It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 1, min = 1, max = 1)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Unique identifier of this DeviceMetric", formalDefinition="Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID. \nIt should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device." )
     protected Identifier identifier;
 
     /**
      * Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.
      */
-    @Child(name = "unit", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
+    @Child(name = "unit", type = {CodeableConcept.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Unit of metric", formalDefinition="Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc." )
     protected CodeableConcept unit;
 
     /**
      * Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc.
      */
-    @Child(name = "source", type = {Device.class}, order = 3, min = 0, max = 1)
+    @Child(name = "source", type = {Device.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Describes the link to the source Device", formalDefinition="Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc." )
     protected Reference source;
 
@@ -690,7 +850,7 @@ It should be noted that in order to make the identifier unique, the system eleme
      * Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.
 An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.
      */
-    @Child(name = "parent", type = {DeviceComponent.class}, order = 4, min = 0, max = 1)
+    @Child(name = "parent", type = {DeviceComponent.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Describes the link to the parent DeviceComponent", formalDefinition="Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.\nAn example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location." )
     protected Reference parent;
 
@@ -703,28 +863,21 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     /**
      * Indicates current operational state of the device. For example: On, Off, Standby, etc.
      */
-    @Child(name = "operationalState", type = {CodeType.class}, order = 5, min = 0, max = 1)
+    @Child(name = "operationalStatus", type = {CodeType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="on | off | standby", formalDefinition="Indicates current operational state of the device. For example: On, Off, Standby, etc." )
-    protected Enumeration<MetricOperationalStatus> operationalState;
-
-    /**
-     * Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.
-     */
-    @Child(name = "measurementMode", type = {Identifier.class}, order = 6, min = 0, max = 1)
-    @Description(shortDefinition="Describes the physical principle of the measurement", formalDefinition="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc." )
-    protected Identifier measurementMode;
+    protected Enumeration<MetricOperationalStatus> operationalStatus;
 
     /**
      * Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
      */
-    @Child(name = "color", type = {Identifier.class}, order = 7, min = 0, max = 1)
-    @Description(shortDefinition="Describes the typical color of representation", formalDefinition="Describes the typical color of the representation of observations that have been generated for this DeviceMetric." )
-    protected Identifier color;
+    @Child(name = "color", type = {CodeType.class}, order=6, min=0, max=1)
+    @Description(shortDefinition="black | red | green | yellow | blue | magenta | cyan | white", formalDefinition="Describes the typical color of the representation of observations that have been generated for this DeviceMetric." )
+    protected Enumeration<MetricColor> color;
 
     /**
      * Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.
      */
-    @Child(name = "category", type = {CodeType.class}, order = 8, min = 1, max = 1)
+    @Child(name = "category", type = {CodeType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="measurement | setting | calculation | unspecified", formalDefinition="Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation." )
     protected Enumeration<MetricCategory> category;
 
@@ -733,23 +886,29 @@ An example would be a DeviceComponent that represents a Channel. This reference 
 necessarily the same as the update
 period.
      */
-    @Child(name = "measurementPeriod", type = {Timing.class}, order = 9, min = 0, max = 1)
+    @Child(name = "measurementPeriod", type = {Timing.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Describes the measurement repetition time", formalDefinition="Describes the measurement repetition time. This is not\nnecessarily the same as the update\nperiod." )
     protected Timing measurementPeriod;
 
     /**
      * Describes the calibrations that have been performed or that are required to be performed.
      */
-    @Child(name = "calibrationInfo", type = {}, order = 10, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "calibration", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Describes the calibrations that have been performed or that are required to be performed", formalDefinition="Describes the calibrations that have been performed or that are required to be performed." )
-    protected List<DeviceMetricCalibrationInfoComponent> calibrationInfo;
+    protected List<DeviceMetricCalibrationComponent> calibration;
 
-    private static final long serialVersionUID = 600373390L;
+    private static final long serialVersionUID = -480554704L;
 
+  /*
+   * Constructor
+   */
     public DeviceMetric() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DeviceMetric(CodeableConcept type, Identifier identifier, Enumeration<MetricCategory> category) {
       super();
       this.type = type;
@@ -924,88 +1083,68 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     }
 
     /**
-     * @return {@link #operationalState} (Indicates current operational state of the device. For example: On, Off, Standby, etc.). This is the underlying object with id, value and extensions. The accessor "getOperationalState" gives direct access to the value
+     * @return {@link #operationalStatus} (Indicates current operational state of the device. For example: On, Off, Standby, etc.). This is the underlying object with id, value and extensions. The accessor "getOperationalStatus" gives direct access to the value
      */
-    public Enumeration<MetricOperationalStatus> getOperationalStateElement() { 
-      if (this.operationalState == null)
+    public Enumeration<MetricOperationalStatus> getOperationalStatusElement() { 
+      if (this.operationalStatus == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DeviceMetric.operationalState");
+          throw new Error("Attempt to auto-create DeviceMetric.operationalStatus");
         else if (Configuration.doAutoCreate())
-          this.operationalState = new Enumeration<MetricOperationalStatus>(new MetricOperationalStatusEnumFactory()); // bb
-      return this.operationalState;
+          this.operationalStatus = new Enumeration<MetricOperationalStatus>(new MetricOperationalStatusEnumFactory()); // bb
+      return this.operationalStatus;
     }
 
-    public boolean hasOperationalStateElement() { 
-      return this.operationalState != null && !this.operationalState.isEmpty();
+    public boolean hasOperationalStatusElement() { 
+      return this.operationalStatus != null && !this.operationalStatus.isEmpty();
     }
 
-    public boolean hasOperationalState() { 
-      return this.operationalState != null && !this.operationalState.isEmpty();
+    public boolean hasOperationalStatus() { 
+      return this.operationalStatus != null && !this.operationalStatus.isEmpty();
     }
 
     /**
-     * @param value {@link #operationalState} (Indicates current operational state of the device. For example: On, Off, Standby, etc.). This is the underlying object with id, value and extensions. The accessor "getOperationalState" gives direct access to the value
+     * @param value {@link #operationalStatus} (Indicates current operational state of the device. For example: On, Off, Standby, etc.). This is the underlying object with id, value and extensions. The accessor "getOperationalStatus" gives direct access to the value
      */
-    public DeviceMetric setOperationalStateElement(Enumeration<MetricOperationalStatus> value) { 
-      this.operationalState = value;
+    public DeviceMetric setOperationalStatusElement(Enumeration<MetricOperationalStatus> value) { 
+      this.operationalStatus = value;
       return this;
     }
 
     /**
      * @return Indicates current operational state of the device. For example: On, Off, Standby, etc.
      */
-    public MetricOperationalStatus getOperationalState() { 
-      return this.operationalState == null ? null : this.operationalState.getValue();
+    public MetricOperationalStatus getOperationalStatus() { 
+      return this.operationalStatus == null ? null : this.operationalStatus.getValue();
     }
 
     /**
      * @param value Indicates current operational state of the device. For example: On, Off, Standby, etc.
      */
-    public DeviceMetric setOperationalState(MetricOperationalStatus value) { 
+    public DeviceMetric setOperationalStatus(MetricOperationalStatus value) { 
       if (value == null)
-        this.operationalState = null;
+        this.operationalStatus = null;
       else {
-        if (this.operationalState == null)
-          this.operationalState = new Enumeration<MetricOperationalStatus>(new MetricOperationalStatusEnumFactory());
-        this.operationalState.setValue(value);
+        if (this.operationalStatus == null)
+          this.operationalStatus = new Enumeration<MetricOperationalStatus>(new MetricOperationalStatusEnumFactory());
+        this.operationalStatus.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #measurementMode} (Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.)
+     * @return {@link #color} (Describes the typical color of the representation of observations that have been generated for this DeviceMetric.). This is the underlying object with id, value and extensions. The accessor "getColor" gives direct access to the value
      */
-    public Identifier getMeasurementMode() { 
-      if (this.measurementMode == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DeviceMetric.measurementMode");
-        else if (Configuration.doAutoCreate())
-          this.measurementMode = new Identifier(); // cc
-      return this.measurementMode;
-    }
-
-    public boolean hasMeasurementMode() { 
-      return this.measurementMode != null && !this.measurementMode.isEmpty();
-    }
-
-    /**
-     * @param value {@link #measurementMode} (Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.)
-     */
-    public DeviceMetric setMeasurementMode(Identifier value) { 
-      this.measurementMode = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #color} (Describes the typical color of the representation of observations that have been generated for this DeviceMetric.)
-     */
-    public Identifier getColor() { 
+    public Enumeration<MetricColor> getColorElement() { 
       if (this.color == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create DeviceMetric.color");
         else if (Configuration.doAutoCreate())
-          this.color = new Identifier(); // cc
+          this.color = new Enumeration<MetricColor>(new MetricColorEnumFactory()); // bb
       return this.color;
+    }
+
+    public boolean hasColorElement() { 
+      return this.color != null && !this.color.isEmpty();
     }
 
     public boolean hasColor() { 
@@ -1013,10 +1152,31 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     }
 
     /**
-     * @param value {@link #color} (Describes the typical color of the representation of observations that have been generated for this DeviceMetric.)
+     * @param value {@link #color} (Describes the typical color of the representation of observations that have been generated for this DeviceMetric.). This is the underlying object with id, value and extensions. The accessor "getColor" gives direct access to the value
      */
-    public DeviceMetric setColor(Identifier value) { 
+    public DeviceMetric setColorElement(Enumeration<MetricColor> value) { 
       this.color = value;
+      return this;
+    }
+
+    /**
+     * @return Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
+     */
+    public MetricColor getColor() { 
+      return this.color == null ? null : this.color.getValue();
+    }
+
+    /**
+     * @param value Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
+     */
+    public DeviceMetric setColor(MetricColor value) { 
+      if (value == null)
+        this.color = null;
+      else {
+        if (this.color == null)
+          this.color = new Enumeration<MetricColor>(new MetricColorEnumFactory());
+        this.color.setValue(value);
+      }
       return this;
     }
 
@@ -1094,33 +1254,43 @@ period.)
     }
 
     /**
-     * @return {@link #calibrationInfo} (Describes the calibrations that have been performed or that are required to be performed.)
+     * @return {@link #calibration} (Describes the calibrations that have been performed or that are required to be performed.)
      */
-    public List<DeviceMetricCalibrationInfoComponent> getCalibrationInfo() { 
-      if (this.calibrationInfo == null)
-        this.calibrationInfo = new ArrayList<DeviceMetricCalibrationInfoComponent>();
-      return this.calibrationInfo;
+    public List<DeviceMetricCalibrationComponent> getCalibration() { 
+      if (this.calibration == null)
+        this.calibration = new ArrayList<DeviceMetricCalibrationComponent>();
+      return this.calibration;
     }
 
-    public boolean hasCalibrationInfo() { 
-      if (this.calibrationInfo == null)
+    public boolean hasCalibration() { 
+      if (this.calibration == null)
         return false;
-      for (DeviceMetricCalibrationInfoComponent item : this.calibrationInfo)
+      for (DeviceMetricCalibrationComponent item : this.calibration)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #calibrationInfo} (Describes the calibrations that have been performed or that are required to be performed.)
+     * @return {@link #calibration} (Describes the calibrations that have been performed or that are required to be performed.)
      */
     // syntactic sugar
-    public DeviceMetricCalibrationInfoComponent addCalibrationInfo() { //3
-      DeviceMetricCalibrationInfoComponent t = new DeviceMetricCalibrationInfoComponent();
-      if (this.calibrationInfo == null)
-        this.calibrationInfo = new ArrayList<DeviceMetricCalibrationInfoComponent>();
-      this.calibrationInfo.add(t);
+    public DeviceMetricCalibrationComponent addCalibration() { //3
+      DeviceMetricCalibrationComponent t = new DeviceMetricCalibrationComponent();
+      if (this.calibration == null)
+        this.calibration = new ArrayList<DeviceMetricCalibrationComponent>();
+      this.calibration.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public DeviceMetric addCalibration(DeviceMetricCalibrationComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.calibration == null)
+        this.calibration = new ArrayList<DeviceMetricCalibrationComponent>();
+      this.calibration.add(t);
+      return this;
     }
 
       protected void listChildren(List<Property> childrenList) {
@@ -1130,12 +1300,11 @@ period.)
         childrenList.add(new Property("unit", "CodeableConcept", "Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.", 0, java.lang.Integer.MAX_VALUE, unit));
         childrenList.add(new Property("source", "Reference(Device)", "Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("parent", "Reference(DeviceComponent)", "Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.\nAn example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.", 0, java.lang.Integer.MAX_VALUE, parent));
-        childrenList.add(new Property("operationalState", "code", "Indicates current operational state of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalState));
-        childrenList.add(new Property("measurementMode", "Identifier", "Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc.", 0, java.lang.Integer.MAX_VALUE, measurementMode));
-        childrenList.add(new Property("color", "Identifier", "Describes the typical color of the representation of observations that have been generated for this DeviceMetric.", 0, java.lang.Integer.MAX_VALUE, color));
+        childrenList.add(new Property("operationalStatus", "code", "Indicates current operational state of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
+        childrenList.add(new Property("color", "code", "Describes the typical color of the representation of observations that have been generated for this DeviceMetric.", 0, java.lang.Integer.MAX_VALUE, color));
         childrenList.add(new Property("category", "code", "Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.", 0, java.lang.Integer.MAX_VALUE, category));
         childrenList.add(new Property("measurementPeriod", "Timing", "Describes the measurement repetition time. This is not\nnecessarily the same as the update\nperiod.", 0, java.lang.Integer.MAX_VALUE, measurementPeriod));
-        childrenList.add(new Property("calibrationInfo", "", "Describes the calibrations that have been performed or that are required to be performed.", 0, java.lang.Integer.MAX_VALUE, calibrationInfo));
+        childrenList.add(new Property("calibration", "", "Describes the calibrations that have been performed or that are required to be performed.", 0, java.lang.Integer.MAX_VALUE, calibration));
       }
 
       public DeviceMetric copy() {
@@ -1146,15 +1315,14 @@ period.)
         dst.unit = unit == null ? null : unit.copy();
         dst.source = source == null ? null : source.copy();
         dst.parent = parent == null ? null : parent.copy();
-        dst.operationalState = operationalState == null ? null : operationalState.copy();
-        dst.measurementMode = measurementMode == null ? null : measurementMode.copy();
+        dst.operationalStatus = operationalStatus == null ? null : operationalStatus.copy();
         dst.color = color == null ? null : color.copy();
         dst.category = category == null ? null : category.copy();
         dst.measurementPeriod = measurementPeriod == null ? null : measurementPeriod.copy();
-        if (calibrationInfo != null) {
-          dst.calibrationInfo = new ArrayList<DeviceMetricCalibrationInfoComponent>();
-          for (DeviceMetricCalibrationInfoComponent i : calibrationInfo)
-            dst.calibrationInfo.add(i.copy());
+        if (calibration != null) {
+          dst.calibration = new ArrayList<DeviceMetricCalibrationComponent>();
+          for (DeviceMetricCalibrationComponent i : calibration)
+            dst.calibration.add(i.copy());
         };
         return dst;
       }
@@ -1171,10 +1339,9 @@ period.)
           return false;
         DeviceMetric o = (DeviceMetric) other;
         return compareDeep(type, o.type, true) && compareDeep(identifier, o.identifier, true) && compareDeep(unit, o.unit, true)
-           && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalState, o.operationalState, true)
-           && compareDeep(measurementMode, o.measurementMode, true) && compareDeep(color, o.color, true) && compareDeep(category, o.category, true)
-           && compareDeep(measurementPeriod, o.measurementPeriod, true) && compareDeep(calibrationInfo, o.calibrationInfo, true)
-          ;
+           && compareDeep(source, o.source, true) && compareDeep(parent, o.parent, true) && compareDeep(operationalStatus, o.operationalStatus, true)
+           && compareDeep(color, o.color, true) && compareDeep(category, o.category, true) && compareDeep(measurementPeriod, o.measurementPeriod, true)
+           && compareDeep(calibration, o.calibration, true);
       }
 
       @Override
@@ -1184,16 +1351,16 @@ period.)
         if (!(other instanceof DeviceMetric))
           return false;
         DeviceMetric o = (DeviceMetric) other;
-        return compareValues(operationalState, o.operationalState, true) && compareValues(category, o.category, true)
-          ;
+        return compareValues(operationalStatus, o.operationalStatus, true) && compareValues(color, o.color, true)
+           && compareValues(category, o.category, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (type == null || type.isEmpty()) && (identifier == null || identifier.isEmpty())
            && (unit == null || unit.isEmpty()) && (source == null || source.isEmpty()) && (parent == null || parent.isEmpty())
-           && (operationalState == null || operationalState.isEmpty()) && (measurementMode == null || measurementMode.isEmpty())
-           && (color == null || color.isEmpty()) && (category == null || category.isEmpty()) && (measurementPeriod == null || measurementPeriod.isEmpty())
-           && (calibrationInfo == null || calibrationInfo.isEmpty());
+           && (operationalStatus == null || operationalStatus.isEmpty()) && (color == null || color.isEmpty())
+           && (category == null || category.isEmpty()) && (measurementPeriod == null || measurementPeriod.isEmpty())
+           && (calibration == null || calibration.isEmpty());
       }
 
   @Override
@@ -1201,16 +1368,16 @@ period.)
     return ResourceType.DeviceMetric;
    }
 
+  @SearchParamDefinition(name="category", path="DeviceMetric.category", description="The category of the metric", type="token" )
+  public static final String SP_CATEGORY = "category";
+  @SearchParamDefinition(name="source", path="DeviceMetric.source", description="The device resource", type="reference" )
+  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="parent", path="DeviceMetric.parent", description="The parent DeviceMetric resource", type="reference" )
   public static final String SP_PARENT = "parent";
+  @SearchParamDefinition(name="type", path="DeviceMetric.type", description="The component type", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="DeviceMetric.identifier", description="The identifier of the metric", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-    @SearchParamDefinition(name = "source", path = "DeviceMetric.source", description = "The device resource", type = "reference")
-    public static final String SP_SOURCE = "source";
-    @SearchParamDefinition(name = "type", path = "DeviceMetric.type", description = "The component type", type = "token")
-    public static final String SP_TYPE = "type";
-    @SearchParamDefinition(name = "category", path = "DeviceMetric.category", description = "The category of the metric", type = "token")
-    public static final String SP_CATEGORY = "category";
 
 }
 

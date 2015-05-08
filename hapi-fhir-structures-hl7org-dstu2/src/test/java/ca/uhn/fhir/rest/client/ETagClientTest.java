@@ -102,7 +102,7 @@ public class ETagClientTest {
 
 		Patient response = client.read(Patient.class, new IdDt("Patient/1234"));
 
-		assertEquals("http://foo.com/Patient/123/_history/2333", response.getId().getValue());
+		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
 	}
 
 	@Test

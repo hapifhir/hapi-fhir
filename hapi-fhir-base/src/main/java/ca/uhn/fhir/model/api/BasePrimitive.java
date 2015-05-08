@@ -22,7 +22,7 @@ package ca.uhn.fhir.model.api;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hl7.fhir.instance.model.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.parser.DataFormatException;
 

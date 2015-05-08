@@ -44,8 +44,12 @@ public class Property {
 	/**
 	 * The actual elements that exist on this instance
 	 */
-	public List<Base> values = new ArrayList<Base>();
+	private List<Base> values = new ArrayList<Base>();
 
+	/**
+	 * For run time, if/once a property is hooked up to it's definition
+	 */
+	private StructureDefinition structure; 
 
 	/**
 	 * Internal constructor
@@ -122,6 +126,15 @@ public class Property {
         return true;
     return false;
   }
+
+  public StructureDefinition getStructure() {
+    return structure;
+  }
+
+  public void setStructure(StructureDefinition structure) {
+    this.structure = structure;
+  }
+
 
 	
 }

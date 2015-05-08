@@ -7,7 +7,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
@@ -214,6 +214,11 @@ public class ServerInvalidDefinitionTest {
 				@Override
 				public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 					return null;
+				}
+
+				@Override
+				public IIdType getIdElement() {
+					return getId();
 				}
 
 				@Override

@@ -33,8 +33,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.hl7.fhir.instance.model.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -65,7 +65,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private String myIfNoneExistString;
 	private Map<String, List<String>> myParams;
 	private final IBaseResource myResource;
-	private final List<IBaseResource> myResources;
+	private final List<? extends IBaseResource> myResources;
 	private final TagList myTagList;
 	private final String myUrlPath;
 
@@ -105,7 +105,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		myBundleType = null;
 	}
 
-	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<IBaseResource> theResources, BundleTypeEnum theBundleType) {
+	public BaseHttpClientInvocationWithContents(FhirContext theContext, List<? extends IBaseResource> theResources, BundleTypeEnum theBundleType) {
 		myContext = theContext;
 		myResource = null;
 		myTagList = null;

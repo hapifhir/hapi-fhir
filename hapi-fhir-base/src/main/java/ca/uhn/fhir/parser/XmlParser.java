@@ -47,10 +47,10 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -60,7 +60,7 @@ import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -490,7 +490,7 @@ public class XmlParser extends BaseParser implements IParser {
 			break;
 		}
 		case RESOURCE_REF: {
-			IReference ref = (IReference) nextValue;
+			IBaseReference ref = (IBaseReference) nextValue;
 			if (!ref.isEmpty()) {
 				theEventWriter.writeStartElement(childName);
 				encodeResourceReferenceToStreamWriter(theEventWriter, ref, theResource, theIncludedResource);
@@ -616,7 +616,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 					if (nextValue instanceof IBaseExtension && myContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 						// This is called for the Query resource in DSTU1 only
-						extensionUrl = ((IBaseExtension<?>) nextValue).getUrl();
+						extensionUrl = ((IBaseExtension<?, ?>) nextValue).getUrl();
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextValue, childName, childDef, extensionUrl, theIncludedResource);
 
 					} else if (extensionUrl != null && childName.equals("extension") == false) {
@@ -664,16 +664,16 @@ public class XmlParser extends BaseParser implements IParser {
 
 	/**
 	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to
-	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?>> seems to be rejected by the compiler
+	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be rejected by the compiler
 	 * some of the time.
 	 */
-	private <Q extends IBaseExtension<?>> List<IBaseExtension<?>> toBaseExtensionList(final List<Q> theList) {
-		List<IBaseExtension<?>> retVal = new ArrayList<IBaseExtension<?>>(theList.size());
+	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
+		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
 		retVal.addAll(theList);
 		return retVal;
 	}
 
-	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IReference theRef, IBaseResource theResource, boolean theIncludedResource) throws XMLStreamException {
+	private void encodeResourceReferenceToStreamWriter(XMLStreamWriter theEventWriter, IBaseReference theRef, IBaseResource theResource, boolean theIncludedResource) throws XMLStreamException {
 		String reference = determineReferenceText(theRef);
 
 		encodeExtensionsIfPresent(theResource, theEventWriter, theRef, theIncludedResource);
@@ -751,9 +751,9 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		} else {
 			// HL7 structs
-			IAnyResource resource = (IAnyResource) theResource;
-			if (StringUtils.isNotBlank(resource.getId().getIdPart())) {
-				resourceId = resource.getId().getIdPart();
+			IRefImplResource resource = (IRefImplResource) theResource;
+			if (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {
+				resourceId = resource.getIdElement().getIdPart();
 			}
 		}
 
@@ -773,7 +773,7 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
-		if (theResource instanceof IAnyResource) {
+		if (theResource instanceof IRefImplResource) {
 			
 			// HL7.org Structures
 			writeOptionalTagWithValue(theEventWriter, "id", theResourceId);
@@ -890,8 +890,8 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
-		for (IBaseExtension<?> next : theExtensions) {
+	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+		for (IBaseExtension<?, ?> next : theExtensions) {
 			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 				continue;
 			}

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -37,7 +37,8 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Base definition for all elements in a resource.
  */
@@ -46,19 +47,22 @@ public abstract class Element extends Base implements IBaseHasExtensions {
     /**
      * unique id for the element within a resource (for internal references).
      */
-    @Child(name = "id", type = {IdType.class}, order = 0, min = 0, max = 1)
+    @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="xml:id (or equivalent in JSON)", formalDefinition="unique id for the element within a resource (for internal references)." )
     protected IdType id;
 
     /**
      * May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.
      */
-    @Child(name = "extension", type = {Extension.class}, order = 1, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "extension", type = {Extension.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Additional Content defined by implementations", formalDefinition="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension." )
     protected List<Extension> extension;
 
     private static final long serialVersionUID = -158027598L;
 
+  /*
+   * Constructor
+   */
     public Element() {
       super();
     }
@@ -140,6 +144,16 @@ public abstract class Element extends Base implements IBaseHasExtensions {
         this.extension = new ArrayList<Extension>();
       this.extension.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Element addExtension(Extension t) { //3
+      if (t == null)
+        return this;
+      if (this.extension == null)
+        this.extension = new ArrayList<Extension>();
+      this.extension.add(t);
+      return this;
     }
 
       protected void listChildren(List<Property> childrenList) {

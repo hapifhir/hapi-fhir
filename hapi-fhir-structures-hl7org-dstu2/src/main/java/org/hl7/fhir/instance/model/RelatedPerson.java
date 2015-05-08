@@ -29,16 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.
  */
@@ -108,10 +109,10 @@ public class RelatedPerson extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case MALE: return "male";
-            case FEMALE: return "female";
-            case OTHER: return "other";
-            case UNKNOWN: return "unknown";
+            case MALE: return "Male";
+            case FEMALE: return "Female";
+            case OTHER: return "Other";
+            case UNKNOWN: return "Unknown";
             default: return "?";
           }
         }
@@ -148,14 +149,14 @@ public class RelatedPerson extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * The patient this person is related to.
      */
-    @Child(name = "patient", type = {Patient.class}, order = 1, min = 1, max = 1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
     @Description(shortDefinition="The patient this person is related to", formalDefinition="The patient this person is related to." )
     protected Reference patient;
 
@@ -167,58 +168,64 @@ public class RelatedPerson extends DomainResource {
     /**
      * The nature of the relationship between a patient and the related person.
      */
-    @Child(name = "relationship", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order=2, min=0, max=1)
     @Description(shortDefinition="The nature of the relationship", formalDefinition="The nature of the relationship between a patient and the related person." )
     protected CodeableConcept relationship;
 
     /**
      * A name associated with the person.
      */
-    @Child(name = "name", type = {HumanName.class}, order = 3, min = 0, max = 1)
+    @Child(name = "name", type = {HumanName.class}, order=3, min=0, max=1)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected HumanName name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
      */
-    @Child(name = "gender", type = {CodeType.class}, order = 5, min = 0, max = 1)
+    @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name = "address", type = {AddressType.class}, order = 6, min = 0, max = 1)
+    @Child(name = "address", type = {Address.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
-    protected AddressType address;
+    protected Address address;
 
     /**
      * Image of the person.
      */
-    @Child(name = "photo", type = {AttachmentType.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "photo", type = {Attachment.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
-    protected List<AttachmentType> photo;
+    protected List<Attachment> photo;
 
     /**
      * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
      */
-    @Child(name = "period", type = {Period.class}, order = 8, min = 0, max = 1)
+    @Child(name = "period", type = {Period.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
     private static final long serialVersionUID = 1871047258L;
 
+  /*
+   * Constructor
+   */
     public RelatedPerson() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public RelatedPerson(Reference patient) {
       super();
       this.patient = patient;
@@ -252,6 +259,16 @@ public class RelatedPerson extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public RelatedPerson addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -376,6 +393,16 @@ public class RelatedPerson extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public RelatedPerson addTelecom(ContactPoint t) { //3
+      if (t == null)
+        return this;
+      if (this.telecom == null)
+        this.telecom = new ArrayList<ContactPoint>();
+      this.telecom.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #gender} (Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.). This is the underlying object with id, value and extensions. The accessor "getGender" gives direct access to the value
      */
@@ -428,12 +455,12 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public AddressType getAddress() { 
+    public Address getAddress() { 
       if (this.address == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create RelatedPerson.address");
         else if (Configuration.doAutoCreate())
-          this.address = new AddressType(); // cc
+          this.address = new Address(); // cc
       return this.address;
     }
 
@@ -444,7 +471,7 @@ public class RelatedPerson extends DomainResource {
     /**
      * @param value {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public RelatedPerson setAddress(AddressType value) { 
+    public RelatedPerson setAddress(Address value) { 
       this.address = value;
       return this;
     }
@@ -452,16 +479,16 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #photo} (Image of the person.)
      */
-    public List<AttachmentType> getPhoto() { 
+    public List<Attachment> getPhoto() { 
       if (this.photo == null)
-        this.photo = new ArrayList<AttachmentType>();
+        this.photo = new ArrayList<Attachment>();
       return this.photo;
     }
 
     public boolean hasPhoto() { 
       if (this.photo == null)
         return false;
-      for (AttachmentType item : this.photo)
+      for (Attachment item : this.photo)
         if (!item.isEmpty())
           return true;
       return false;
@@ -471,12 +498,22 @@ public class RelatedPerson extends DomainResource {
      * @return {@link #photo} (Image of the person.)
      */
     // syntactic sugar
-    public AttachmentType addPhoto() { //3
-      AttachmentType t = new AttachmentType();
+    public Attachment addPhoto() { //3
+      Attachment t = new Attachment();
       if (this.photo == null)
-        this.photo = new ArrayList<AttachmentType>();
+        this.photo = new ArrayList<Attachment>();
       this.photo.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public RelatedPerson addPhoto(Attachment t) { //3
+      if (t == null)
+        return this;
+      if (this.photo == null)
+        this.photo = new ArrayList<Attachment>();
+      this.photo.add(t);
+      return this;
     }
 
     /**
@@ -535,8 +572,8 @@ public class RelatedPerson extends DomainResource {
         dst.gender = gender == null ? null : gender.copy();
         dst.address = address == null ? null : address.copy();
         if (photo != null) {
-          dst.photo = new ArrayList<AttachmentType>();
-          for (AttachmentType i : photo)
+          dst.photo = new ArrayList<Attachment>();
+          for (Attachment i : photo)
             dst.photo.add(i.copy());
         };
         dst.period = period == null ? null : period.copy();
@@ -582,20 +619,20 @@ public class RelatedPerson extends DomainResource {
     return ResourceType.RelatedPerson;
    }
 
-  @SearchParamDefinition(name = "identifier", path = "RelatedPerson.identifier", description = "A patient Identifier", type = "token")
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
-  @SearchParamDefinition(name = "gender", path = "RelatedPerson.gender", description = "Gender of the person", type = "token")
-  public static final String SP_GENDER = "gender";
-  @SearchParamDefinition(name = "patient", path = "RelatedPerson.patient", description = "The patient this person is related to", type = "reference")
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string" )
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="string" )
+  @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
+  @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token" )
+  public static final String SP_GENDER = "gender";
+  @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

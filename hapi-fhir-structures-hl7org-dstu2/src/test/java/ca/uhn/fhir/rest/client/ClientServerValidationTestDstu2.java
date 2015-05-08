@@ -34,6 +34,7 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ClientServerValidationTestDstu2 {
@@ -146,7 +147,7 @@ public class ClientServerValidationTestDstu2 {
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 			fail();
-		} catch (FhirClientConnectionException e) {
+		} catch (FhirClientInappropriateForServerException e) {
 			String out = e.toString();
 			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.80\" which corresponds to DSTU1, but this client is configured to use DSTU2_HL7ORG (via the FhirContext)";
 			ourLog.info(out);

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpUriRequest;
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 

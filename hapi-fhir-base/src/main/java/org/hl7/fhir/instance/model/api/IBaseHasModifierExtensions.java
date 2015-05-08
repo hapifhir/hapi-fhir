@@ -24,8 +24,8 @@ import java.util.List;
 
 public interface IBaseHasModifierExtensions {
 
-    public List<? extends IBaseExtension<?>> getModifierExtension();
+    public List<? extends IBaseExtension<?, ?>> getModifierExtension();
 
-    public IBaseExtension<?> addModifierExtension();
+    public IBaseExtension<?, ?> addModifierExtension();
 
 }

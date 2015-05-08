@@ -29,18 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
- * Represents a request for the use of a device.
+ * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
 @ResourceDef(name="DeviceUseRequest", profile="http://hl7.org/fhir/Profile/DeviceUseRequest")
 public class DeviceUseRequest extends DomainResource {
@@ -162,16 +163,16 @@ public class DeviceUseRequest extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case PROPOSED: return "proposed";
-            case PLANNED: return "planned";
-            case REQUESTED: return "requested";
-            case RECEIVED: return "received";
-            case ACCEPTED: return "accepted";
-            case INPROGRESS: return "in-progress";
-            case COMPLETED: return "completed";
-            case SUSPENDED: return "suspended";
-            case REJECTED: return "rejected";
-            case ABORTED: return "aborted";
+            case PROPOSED: return "Proposed";
+            case PLANNED: return "Planned";
+            case REQUESTED: return "Requested";
+            case RECEIVED: return "Received";
+            case ACCEPTED: return "Accepted";
+            case INPROGRESS: return "In Progress";
+            case COMPLETED: return "Completed";
+            case SUSPENDED: return "Suspended";
+            case REJECTED: return "Rejected";
+            case ABORTED: return "Aborted";
             default: return "?";
           }
         }
@@ -292,10 +293,10 @@ public class DeviceUseRequest extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case ROUTINE: return "routine";
-            case URGENT: return "urgent";
-            case STAT: return "stat";
-            case ASAP: return "asap";
+            case ROUTINE: return "Routine";
+            case URGENT: return "Urgent";
+            case STAT: return "Stat";
+            case ASAP: return "Asap";
             default: return "?";
           }
         }
@@ -330,23 +331,23 @@ public class DeviceUseRequest extends DomainResource {
     }
 
     /**
-     * Body site where the device is to be used.
+     * Indicates the site on the subject's body where the device should be used ( i.e. the target site).
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Target body site", formalDefinition="Body site where the device is to be used." )
-    protected List<CodeableConcept> bodySite;
+    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=0, min=0, max=1)
+    @Description(shortDefinition="Target body site", formalDefinition="Indicates the site on the subject's body where the device should be used ( i.e. the target site)." )
+    protected Type bodySite;
 
     /**
      * The status of the request.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | aborted", formalDefinition="The status of the request." )
     protected Enumeration<DeviceUseRequestStatus> status;
 
     /**
      * The details of the device  to be used.
      */
-    @Child(name = "device", type = {Device.class}, order = 2, min = 1, max = 1)
+    @Child(name = "device", type = {Device.class}, order=2, min=1, max=1)
     @Description(shortDefinition="Device requested", formalDefinition="The details of the device  to be used." )
     protected Reference device;
 
@@ -358,7 +359,7 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * An encounter that provides additional context in which this request is made.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order = 3, min = 0, max = 1)
+    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Encounter motivating request", formalDefinition="An encounter that provides additional context in which this request is made." )
     protected Reference encounter;
 
@@ -370,49 +371,49 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * Identifiers assigned to this order by the orderer or by the receiver.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Request identifier", formalDefinition="Identifiers assigned to this order by the orderer or by the receiver." )
     protected List<Identifier> identifier;
 
     /**
      * Reason or justification for the use of this device.
      */
-    @Child(name = "indication", type = {CodeableConcept.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "indication", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Reason for request", formalDefinition="Reason or justification for the use of this device." )
     protected List<CodeableConcept> indication;
 
     /**
      * Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.
      */
-    @Child(name = "notes", type = {StringType.class}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "notes", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Notes or comments", formalDefinition="Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
     protected List<StringType> notes;
 
     /**
      * The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.
      */
-    @Child(name = "prnReason", type = {CodeableConcept.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "prnReason", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="PRN", formalDefinition="The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%." )
     protected List<CodeableConcept> prnReason;
 
     /**
      * The time when the request was made.
      */
-    @Child(name = "orderedOn", type = {DateTimeType.class}, order = 8, min = 0, max = 1)
+    @Child(name = "orderedOn", type = {DateTimeType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="When ordered", formalDefinition="The time when the request was made." )
     protected DateTimeType orderedOn;
 
     /**
      * The time at which the request was made/recorded.
      */
-    @Child(name = "recordedOn", type = {DateTimeType.class}, order = 9, min = 0, max = 1)
+    @Child(name = "recordedOn", type = {DateTimeType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="When recorded", formalDefinition="The time at which the request was made/recorded." )
     protected DateTimeType recordedOn;
 
     /**
      * The patient who will use the device.
      */
-    @Child(name = "subject", type = {Patient.class}, order = 10, min = 1, max = 1)
+    @Child(name = "subject", type = {Patient.class}, order=10, min=1, max=1)
     @Description(shortDefinition="Focus of request", formalDefinition="The patient who will use the device." )
     protected Reference subject;
 
@@ -424,23 +425,29 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
      */
-    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order = 11, min = 0, max = 1)
+    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=11, min=0, max=1)
     @Description(shortDefinition="Schedule for use", formalDefinition="The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. 'Every 8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:'; '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'." )
     protected Type timing;
 
     /**
      * Characterizes how quickly the  use of device must be initiated. Includes concepts such as stat, urgent, routine.
      */
-    @Child(name = "priority", type = {CodeType.class}, order = 12, min = 0, max = 1)
+    @Child(name = "priority", type = {CodeType.class}, order=12, min=0, max=1)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="Characterizes how quickly the  use of device must be initiated. Includes concepts such as stat, urgent, routine." )
     protected Enumeration<DeviceUseRequestPriority> priority;
 
-    private static final long serialVersionUID = -1244116449L;
+    private static final long serialVersionUID = 1208477058L;
 
+  /*
+   * Constructor
+   */
     public DeviceUseRequest() {
       super();
     }
 
+  /*
+   * Constructor
+   */
     public DeviceUseRequest(Reference device, Reference subject) {
       super();
       this.device = device;
@@ -448,33 +455,40 @@ public class DeviceUseRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #bodySite} (Body site where the device is to be used.)
+     * @return {@link #bodySite} (Indicates the site on the subject's body where the device should be used ( i.e. the target site).)
      */
-    public List<CodeableConcept> getBodySite() { 
-      if (this.bodySite == null)
-        this.bodySite = new ArrayList<CodeableConcept>();
+    public Type getBodySite() { 
       return this.bodySite;
     }
 
-    public boolean hasBodySite() { 
-      if (this.bodySite == null)
-        return false;
-      for (CodeableConcept item : this.bodySite)
-        if (!item.isEmpty())
-          return true;
-      return false;
+    /**
+     * @return {@link #bodySite} (Indicates the site on the subject's body where the device should be used ( i.e. the target site).)
+     */
+    public CodeableConcept getBodySiteCodeableConcept() throws Exception { 
+      if (!(this.bodySite instanceof CodeableConcept))
+        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.bodySite;
     }
 
     /**
-     * @return {@link #bodySite} (Body site where the device is to be used.)
+     * @return {@link #bodySite} (Indicates the site on the subject's body where the device should be used ( i.e. the target site).)
      */
-    // syntactic sugar
-    public CodeableConcept addBodySite() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.bodySite == null)
-        this.bodySite = new ArrayList<CodeableConcept>();
-      this.bodySite.add(t);
-      return t;
+    public Reference getBodySiteReference() throws Exception { 
+      if (!(this.bodySite instanceof Reference))
+        throw new Exception("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
+      return (Reference) this.bodySite;
+    }
+
+    public boolean hasBodySite() { 
+      return this.bodySite != null && !this.bodySite.isEmpty();
+    }
+
+    /**
+     * @param value {@link #bodySite} (Indicates the site on the subject's body where the device should be used ( i.e. the target site).)
+     */
+    public DeviceUseRequest setBodySite(Type value) { 
+      this.bodySite = value;
+      return this;
     }
 
     /**
@@ -644,6 +658,16 @@ public class DeviceUseRequest extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public DeviceUseRequest addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #indication} (Reason or justification for the use of this device.)
      */
@@ -672,6 +696,16 @@ public class DeviceUseRequest extends DomainResource {
         this.indication = new ArrayList<CodeableConcept>();
       this.indication.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public DeviceUseRequest addIndication(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.indication == null)
+        this.indication = new ArrayList<CodeableConcept>();
+      this.indication.add(t);
+      return this;
     }
 
     /**
@@ -756,6 +790,16 @@ public class DeviceUseRequest extends DomainResource {
         this.prnReason = new ArrayList<CodeableConcept>();
       this.prnReason.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public DeviceUseRequest addPrnReason(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.prnReason == null)
+        this.prnReason = new ArrayList<CodeableConcept>();
+      this.prnReason.add(t);
+      return this;
     }
 
     /**
@@ -997,7 +1041,7 @@ public class DeviceUseRequest extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("bodySite", "CodeableConcept", "Body site where the device is to be used.", 0, java.lang.Integer.MAX_VALUE, bodySite));
+        childrenList.add(new Property("bodySite[x]", "CodeableConcept|Reference(BodySite)", "Indicates the site on the subject's body where the device should be used ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("status", "code", "The status of the request.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("device", "Reference(Device)", "The details of the device  to be used.", 0, java.lang.Integer.MAX_VALUE, device));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "An encounter that provides additional context in which this request is made.", 0, java.lang.Integer.MAX_VALUE, encounter));
@@ -1015,11 +1059,7 @@ public class DeviceUseRequest extends DomainResource {
       public DeviceUseRequest copy() {
         DeviceUseRequest dst = new DeviceUseRequest();
         copyValues(dst);
-        if (bodySite != null) {
-          dst.bodySite = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : bodySite)
-            dst.bodySite.add(i.copy());
-        };
+        dst.bodySite = bodySite == null ? null : bodySite.copy();
         dst.status = status == null ? null : status.copy();
         dst.device = device == null ? null : device.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
@@ -1094,10 +1134,12 @@ public class DeviceUseRequest extends DomainResource {
     return ResourceType.DeviceUseRequest;
    }
 
+  @SearchParamDefinition(name="patient", path="DeviceUseRequest.subject", description="Search by subject - a patient", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="subject", path="DeviceUseRequest.subject", description="Search by subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
-    @SearchParamDefinition(name = "patient", path = "DeviceUseRequest.subject", description = "Search by subject - a patient", type = "reference")
-    public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="device", path="DeviceUseRequest.device", description="Device requested", type="reference" )
+  public static final String SP_DEVICE = "device";
 
 }
 

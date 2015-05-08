@@ -35,7 +35,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.model.api.Include;
-import org.hl7.fhir.instance.model.IBaseResource;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

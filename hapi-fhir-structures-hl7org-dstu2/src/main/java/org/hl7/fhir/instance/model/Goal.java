@@ -29,18 +29,19 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
- * Describes the intended objective(s) of the care.
+ * Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc.
  */
 @ResourceDef(name="Goal", profile="http://hl7.org/fhir/Profile/Goal")
 public class Goal extends DomainResource {
@@ -144,14 +145,14 @@ public class Goal extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case PROPOSED: return "proposed";
-            case PLANNED: return "planned";
-            case INPROGRESS: return "in-progress";
-            case ACHIEVED: return "achieved";
-            case SUSTAINING: return "sustaining";
-            case CANCELLED: return "cancelled";
-            case ACCEPTED: return "accepted";
-            case REJECTED: return "rejected";
+            case PROPOSED: return "Proposed";
+            case PLANNED: return "Planned";
+            case INPROGRESS: return "In Progress";
+            case ACHIEVED: return "Achieved";
+            case SUSTAINING: return "Sustaining";
+            case CANCELLED: return "Cancelled";
+            case ACCEPTED: return "Accepted";
+            case REJECTED: return "Rejected";
             default: return "?";
           }
         }
@@ -201,17 +202,110 @@ public class Goal extends DomainResource {
       }
     }
 
+    @Block()
+    public static class GoalOutcomeComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Details of what's changed (or not changed).
+         */
+        @Child(name = "result", type = {CodeableConcept.class, Observation.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="Code or observation that resulted from gual", formalDefinition="Details of what's changed (or not changed)." )
+        protected Type result;
+
+        private static final long serialVersionUID = 1994317639L;
+
+    /*
+     * Constructor
+     */
+      public GoalOutcomeComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #result} (Details of what's changed (or not changed).)
+         */
+        public Type getResult() { 
+          return this.result;
+        }
+
+        /**
+         * @return {@link #result} (Details of what's changed (or not changed).)
+         */
+        public CodeableConcept getResultCodeableConcept() throws Exception { 
+          if (!(this.result instanceof CodeableConcept))
+            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.result.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.result;
+        }
+
+        /**
+         * @return {@link #result} (Details of what's changed (or not changed).)
+         */
+        public Reference getResultReference() throws Exception { 
+          if (!(this.result instanceof Reference))
+            throw new Exception("Type mismatch: the type Reference was expected, but "+this.result.getClass().getName()+" was encountered");
+          return (Reference) this.result;
+        }
+
+        public boolean hasResult() { 
+          return this.result != null && !this.result.isEmpty();
+        }
+
+        /**
+         * @param value {@link #result} (Details of what's changed (or not changed).)
+         */
+        public GoalOutcomeComponent setResult(Type value) { 
+          this.result = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("result[x]", "CodeableConcept|Reference(Observation)", "Details of what's changed (or not changed).", 0, java.lang.Integer.MAX_VALUE, result));
+        }
+
+      public GoalOutcomeComponent copy() {
+        GoalOutcomeComponent dst = new GoalOutcomeComponent();
+        copyValues(dst);
+        dst.result = result == null ? null : result.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof GoalOutcomeComponent))
+          return false;
+        GoalOutcomeComponent o = (GoalOutcomeComponent) other;
+        return compareDeep(result, o.result, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof GoalOutcomeComponent))
+          return false;
+        GoalOutcomeComponent o = (GoalOutcomeComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (result == null || result.isEmpty());
+      }
+
+  }
+
     /**
      * This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="External Ids for this goal", formalDefinition="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the patient/subject whose intended care is described by the plan.
      */
-    @Child(name = "patient", type = {Patient.class}, order = 1, min = 0, max = 1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=0, max=1)
     @Description(shortDefinition="The patient for whom this goal is intended for", formalDefinition="Identifies the patient/subject whose intended care is described by the plan." )
     protected Reference patient;
 
@@ -221,47 +315,94 @@ public class Goal extends DomainResource {
     protected Patient patientTarget;
 
     /**
+     * Indicates when the goal is intended to be reached.
+     */
+    @Child(name = "targetDate", type = {DateType.class}, order=2, min=0, max=1)
+    @Description(shortDefinition="Reach goal on or before", formalDefinition="Indicates when the goal is intended to be reached." )
+    protected DateType targetDate;
+
+    /**
      * Human-readable description of a specific desired objective of care.
      */
-    @Child(name = "description", type = {StringType.class}, order = 2, min = 1, max = 1)
+    @Child(name = "description", type = {StringType.class}, order=3, min=1, max=1)
     @Description(shortDefinition="What's the desired outcome?", formalDefinition="Human-readable description of a specific desired objective of care." )
     protected StringType description;
 
     /**
      * Indicates whether the goal has been reached and is still considered relevant.
      */
-    @Child(name = "status", type = {CodeType.class}, order = 3, min = 0, max = 1)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1)
     @Description(shortDefinition="proposed | planned | in-progress | achieved | sustaining | cancelled | accepted | rejected", formalDefinition="Indicates whether the goal has been reached and is still considered relevant." )
     protected Enumeration<GoalStatus> status;
 
     /**
+     * Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.
+     */
+    @Child(name = "statusDate", type = {DateType.class}, order=5, min=0, max=1)
+    @Description(shortDefinition="When goal status took effect", formalDefinition="Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc." )
+    protected DateType statusDate;
+
+    /**
+     * Indicates whose goal this is - patient goal, practitioner goal, etc.
+     */
+    @Child(name = "author", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1)
+    @Description(shortDefinition="Who's responsible for creating Goal?", formalDefinition="Indicates whose goal this is - patient goal, practitioner goal, etc." )
+    protected Reference author;
+
+    /**
+     * The actual object that is the target of the reference (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     */
+    protected Resource authorTarget;
+
+    /**
+     * Identifies the level of importance associated with reaching/sustaining the goal.
+     */
+    @Child(name = "priority", type = {CodeableConcept.class}, order=7, min=0, max=1)
+    @Description(shortDefinition="high | medium |low", formalDefinition="Identifies the level of importance associated with reaching/sustaining the goal." )
+    protected CodeableConcept priority;
+
+    /**
+     * The identified conditions and other health record elements that are intended to be addressed by the goal.
+     */
+    @Child(name = "concern", type = {Condition.class, Observation.class, MedicationStatement.class, NutritionOrder.class, ProcedureRequest.class, RiskAssessment.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Health issues this goal addresses", formalDefinition="The identified conditions and other health record elements that are intended to be addressed by the goal." )
+    protected List<Reference> concern;
+    /**
+     * The actual objects that are the target of the reference (The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     */
+    protected List<Resource> concernTarget;
+
+
+    /**
      * Any comments related to the goal.
      */
-    @Child(name = "notes", type = {StringType.class}, order = 4, min = 0, max = 1)
+    @Child(name = "notes", type = {StringType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Comments about the goal", formalDefinition="Any comments related to the goal." )
     protected StringType notes;
 
     /**
-     * The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.
+     * Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.
      */
-    @Child(name = "concern", type = {Condition.class}, order = 5, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Health issues this goal addresses", formalDefinition="The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address." )
-    protected List<Reference> concern;
-    /**
-     * The actual objects that are the target of the reference (The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.)
-     */
-    protected List<Condition> concernTarget;
+    @Child(name = "outcome", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="What was end result of goal?", formalDefinition="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved." )
+    protected List<GoalOutcomeComponent> outcome;
 
+    private static final long serialVersionUID = -314822558L;
 
-    private static final long serialVersionUID = -73791119L;
-
+  /*
+   * Constructor
+   */
     public Goal() {
       super();
     }
 
-    public Goal(StringType description) {
+  /*
+   * Constructor
+   */
+    public Goal(StringType description, Enumeration<GoalStatus> status) {
       super();
       this.description = description;
+      this.status = status;
     }
 
     /**
@@ -292,6 +433,16 @@ public class Goal extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Goal addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -335,6 +486,55 @@ public class Goal extends DomainResource {
      */
     public Goal setPatientTarget(Patient value) { 
       this.patientTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #targetDate} (Indicates when the goal is intended to be reached.). This is the underlying object with id, value and extensions. The accessor "getTargetDate" gives direct access to the value
+     */
+    public DateType getTargetDateElement() { 
+      if (this.targetDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Goal.targetDate");
+        else if (Configuration.doAutoCreate())
+          this.targetDate = new DateType(); // bb
+      return this.targetDate;
+    }
+
+    public boolean hasTargetDateElement() { 
+      return this.targetDate != null && !this.targetDate.isEmpty();
+    }
+
+    public boolean hasTargetDate() { 
+      return this.targetDate != null && !this.targetDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #targetDate} (Indicates when the goal is intended to be reached.). This is the underlying object with id, value and extensions. The accessor "getTargetDate" gives direct access to the value
+     */
+    public Goal setTargetDateElement(DateType value) { 
+      this.targetDate = value;
+      return this;
+    }
+
+    /**
+     * @return Indicates when the goal is intended to be reached.
+     */
+    public Date getTargetDate() { 
+      return this.targetDate == null ? null : this.targetDate.getValue();
+    }
+
+    /**
+     * @param value Indicates when the goal is intended to be reached.
+     */
+    public Goal setTargetDate(Date value) { 
+      if (value == null)
+        this.targetDate = null;
+      else {
+        if (this.targetDate == null)
+          this.targetDate = new DateType();
+        this.targetDate.setValue(value);
+      }
       return this;
     }
 
@@ -422,14 +622,171 @@ public class Goal extends DomainResource {
      * @param value Indicates whether the goal has been reached and is still considered relevant.
      */
     public Goal setStatus(GoalStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
         if (this.status == null)
           this.status = new Enumeration<GoalStatus>(new GoalStatusEnumFactory());
         this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #statusDate} (Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
+     */
+    public DateType getStatusDateElement() { 
+      if (this.statusDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Goal.statusDate");
+        else if (Configuration.doAutoCreate())
+          this.statusDate = new DateType(); // bb
+      return this.statusDate;
+    }
+
+    public boolean hasStatusDateElement() { 
+      return this.statusDate != null && !this.statusDate.isEmpty();
+    }
+
+    public boolean hasStatusDate() { 
+      return this.statusDate != null && !this.statusDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #statusDate} (Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
+     */
+    public Goal setStatusDateElement(DateType value) { 
+      this.statusDate = value;
+      return this;
+    }
+
+    /**
+     * @return Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.
+     */
+    public Date getStatusDate() { 
+      return this.statusDate == null ? null : this.statusDate.getValue();
+    }
+
+    /**
+     * @param value Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.
+     */
+    public Goal setStatusDate(Date value) { 
+      if (value == null)
+        this.statusDate = null;
+      else {
+        if (this.statusDate == null)
+          this.statusDate = new DateType();
+        this.statusDate.setValue(value);
       }
       return this;
+    }
+
+    /**
+     * @return {@link #author} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     */
+    public Reference getAuthor() { 
+      if (this.author == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Goal.author");
+        else if (Configuration.doAutoCreate())
+          this.author = new Reference(); // cc
+      return this.author;
+    }
+
+    public boolean hasAuthor() { 
+      return this.author != null && !this.author.isEmpty();
+    }
+
+    /**
+     * @param value {@link #author} (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     */
+    public Goal setAuthor(Reference value) { 
+      this.author = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     */
+    public Resource getAuthorTarget() { 
+      return this.authorTarget;
+    }
+
+    /**
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates whose goal this is - patient goal, practitioner goal, etc.)
+     */
+    public Goal setAuthorTarget(Resource value) { 
+      this.authorTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #priority} (Identifies the level of importance associated with reaching/sustaining the goal.)
+     */
+    public CodeableConcept getPriority() { 
+      if (this.priority == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Goal.priority");
+        else if (Configuration.doAutoCreate())
+          this.priority = new CodeableConcept(); // cc
+      return this.priority;
+    }
+
+    public boolean hasPriority() { 
+      return this.priority != null && !this.priority.isEmpty();
+    }
+
+    /**
+     * @param value {@link #priority} (Identifies the level of importance associated with reaching/sustaining the goal.)
+     */
+    public Goal setPriority(CodeableConcept value) { 
+      this.priority = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #concern} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     */
+    public List<Reference> getConcern() { 
+      if (this.concern == null)
+        this.concern = new ArrayList<Reference>();
+      return this.concern;
+    }
+
+    public boolean hasConcern() { 
+      if (this.concern == null)
+        return false;
+      for (Reference item : this.concern)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #concern} (The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     */
+    // syntactic sugar
+    public Reference addConcern() { //3
+      Reference t = new Reference();
+      if (this.concern == null)
+        this.concern = new ArrayList<Reference>();
+      this.concern.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Goal addConcern(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.concern == null)
+        this.concern = new ArrayList<Reference>();
+      this.concern.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #concern} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The identified conditions and other health record elements that are intended to be addressed by the goal.)
+     */
+    public List<Resource> getConcernTarget() { 
+      if (this.concernTarget == null)
+        this.concernTarget = new ArrayList<Resource>();
+      return this.concernTarget;
     }
 
     /**
@@ -482,64 +839,58 @@ public class Goal extends DomainResource {
     }
 
     /**
-     * @return {@link #concern} (The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.)
+     * @return {@link #outcome} (Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.)
      */
-    public List<Reference> getConcern() { 
-      if (this.concern == null)
-        this.concern = new ArrayList<Reference>();
-      return this.concern;
+    public List<GoalOutcomeComponent> getOutcome() { 
+      if (this.outcome == null)
+        this.outcome = new ArrayList<GoalOutcomeComponent>();
+      return this.outcome;
     }
 
-    public boolean hasConcern() { 
-      if (this.concern == null)
+    public boolean hasOutcome() { 
+      if (this.outcome == null)
         return false;
-      for (Reference item : this.concern)
+      for (GoalOutcomeComponent item : this.outcome)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #concern} (The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.)
+     * @return {@link #outcome} (Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.)
      */
     // syntactic sugar
-    public Reference addConcern() { //3
-      Reference t = new Reference();
-      if (this.concern == null)
-        this.concern = new ArrayList<Reference>();
-      this.concern.add(t);
+    public GoalOutcomeComponent addOutcome() { //3
+      GoalOutcomeComponent t = new GoalOutcomeComponent();
+      if (this.outcome == null)
+        this.outcome = new ArrayList<GoalOutcomeComponent>();
+      this.outcome.add(t);
       return t;
     }
 
-    /**
-     * @return {@link #concern} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.)
-     */
-    public List<Condition> getConcernTarget() { 
-      if (this.concernTarget == null)
-        this.concernTarget = new ArrayList<Condition>();
-      return this.concernTarget;
-    }
-
     // syntactic sugar
-    /**
-     * @return {@link #concern} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.)
-     */
-    public Condition addConcernTarget() { 
-      Condition r = new Condition();
-      if (this.concernTarget == null)
-        this.concernTarget = new ArrayList<Condition>();
-      this.concernTarget.add(r);
-      return r;
+    public Goal addOutcome(GoalOutcomeComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.outcome == null)
+        this.outcome = new ArrayList<GoalOutcomeComponent>();
+      this.outcome.add(t);
+      return this;
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("patient", "Reference(Patient)", "Identifies the patient/subject whose intended care is described by the plan.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("targetDate", "date", "Indicates when the goal is intended to be reached.", 0, java.lang.Integer.MAX_VALUE, targetDate));
         childrenList.add(new Property("description", "string", "Human-readable description of a specific desired objective of care.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("status", "code", "Indicates whether the goal has been reached and is still considered relevant.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("statusDate", "date", "Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc.", 0, java.lang.Integer.MAX_VALUE, statusDate));
+        childrenList.add(new Property("author", "Reference(Patient|Practitioner|RelatedPerson)", "Indicates whose goal this is - patient goal, practitioner goal, etc.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("priority", "CodeableConcept", "Identifies the level of importance associated with reaching/sustaining the goal.", 0, java.lang.Integer.MAX_VALUE, priority));
+        childrenList.add(new Property("concern", "Reference(Condition|Observation|MedicationStatement|NutritionOrder|ProcedureRequest|RiskAssessment)", "The identified conditions and other health record elements that are intended to be addressed by the goal.", 0, java.lang.Integer.MAX_VALUE, concern));
         childrenList.add(new Property("notes", "string", "Any comments related to the goal.", 0, java.lang.Integer.MAX_VALUE, notes));
-        childrenList.add(new Property("concern", "Reference(Condition)", "The identified conditions that this goal relates to - the condition that caused it to be created, or that it is intended to address.", 0, java.lang.Integer.MAX_VALUE, concern));
+        childrenList.add(new Property("outcome", "", "Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved.", 0, java.lang.Integer.MAX_VALUE, outcome));
       }
 
       public Goal copy() {
@@ -551,13 +902,22 @@ public class Goal extends DomainResource {
             dst.identifier.add(i.copy());
         };
         dst.patient = patient == null ? null : patient.copy();
+        dst.targetDate = targetDate == null ? null : targetDate.copy();
         dst.description = description == null ? null : description.copy();
         dst.status = status == null ? null : status.copy();
-        dst.notes = notes == null ? null : notes.copy();
+        dst.statusDate = statusDate == null ? null : statusDate.copy();
+        dst.author = author == null ? null : author.copy();
+        dst.priority = priority == null ? null : priority.copy();
         if (concern != null) {
           dst.concern = new ArrayList<Reference>();
           for (Reference i : concern)
             dst.concern.add(i.copy());
+        };
+        dst.notes = notes == null ? null : notes.copy();
+        if (outcome != null) {
+          dst.outcome = new ArrayList<GoalOutcomeComponent>();
+          for (GoalOutcomeComponent i : outcome)
+            dst.outcome.add(i.copy());
         };
         return dst;
       }
@@ -573,9 +933,10 @@ public class Goal extends DomainResource {
         if (!(other instanceof Goal))
           return false;
         Goal o = (Goal) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(description, o.description, true)
-           && compareDeep(status, o.status, true) && compareDeep(notes, o.notes, true) && compareDeep(concern, o.concern, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(targetDate, o.targetDate, true)
+           && compareDeep(description, o.description, true) && compareDeep(status, o.status, true) && compareDeep(statusDate, o.statusDate, true)
+           && compareDeep(author, o.author, true) && compareDeep(priority, o.priority, true) && compareDeep(concern, o.concern, true)
+           && compareDeep(notes, o.notes, true) && compareDeep(outcome, o.outcome, true);
       }
 
       @Override
@@ -585,14 +946,17 @@ public class Goal extends DomainResource {
         if (!(other instanceof Goal))
           return false;
         Goal o = (Goal) other;
-        return compareValues(description, o.description, true) && compareValues(status, o.status, true) && compareValues(notes, o.notes, true)
+        return compareValues(targetDate, o.targetDate, true) && compareValues(description, o.description, true)
+           && compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true) && compareValues(notes, o.notes, true)
           ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (patient == null || patient.isEmpty())
-           && (description == null || description.isEmpty()) && (status == null || status.isEmpty())
-           && (notes == null || notes.isEmpty()) && (concern == null || concern.isEmpty());
+           && (targetDate == null || targetDate.isEmpty()) && (description == null || description.isEmpty())
+           && (status == null || status.isEmpty()) && (statusDate == null || statusDate.isEmpty()) && (author == null || author.isEmpty())
+           && (priority == null || priority.isEmpty()) && (concern == null || concern.isEmpty()) && (notes == null || notes.isEmpty())
+           && (outcome == null || outcome.isEmpty());
       }
 
   @Override

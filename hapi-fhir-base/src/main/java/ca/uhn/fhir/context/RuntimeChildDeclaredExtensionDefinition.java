@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -166,7 +166,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends BaseRuntimeDeclared
 				myDatatypeChildName = "valueResource";
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add(IResource.class);
-				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types);
+				myChildDef = new RuntimeResourceReferenceDefinition("valueResource", types, false);
 			} else {
 				myChildDef = elementDef;
 			}

@@ -20,7 +20,7 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;

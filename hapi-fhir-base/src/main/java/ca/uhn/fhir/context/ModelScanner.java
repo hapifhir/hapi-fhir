@@ -48,21 +48,21 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.ICompositeType;
-import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBackboneElement;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
-import org.hl7.fhir.instance.model.api.IDatatypeElement;
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.INarrative;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.model.api.CodeableConceptElement;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -102,6 +102,7 @@ class ModelScanner {
 	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 	private FhirVersionEnum myVersion;
 	private Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinitions = new HashMap<String, BaseRuntimeElementDefinition<?>>();
+	private Set<Class<? extends IBase>> myVersionTypes;
 
 	ModelScanner(FhirContext theContext, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IElement>> theResourceTypes) throws ConfigurationException {
 		myContext = theContext;
@@ -182,7 +183,7 @@ class ModelScanner {
 		long start = System.currentTimeMillis();
 		Map<String, Class<? extends IBaseResource>> resourceTypes = myNameToResourceType;
 
-		scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
+		myVersionTypes = scanVersionPropertyFile(theDatatypes, resourceTypes, myVersion);
 
 		// toScan.add(DateDt.class);
 		// toScan.add(CodeDt.class);
@@ -303,7 +304,7 @@ class ModelScanner {
 		Block blockDefinition = pullAnnotation(theClass, Block.class);
 
 		if (blockDefinition != null) {
-			if (IResourceBlock.class.isAssignableFrom(theClass) || IBackboneElement.class.isAssignableFrom(theClass) || IDatatypeElement.class.isAssignableFrom(theClass)) {
+			if (IResourceBlock.class.isAssignableFrom(theClass) || IBaseBackboneElement.class.isAssignableFrom(theClass) || IBaseDatatypeElement.class.isAssignableFrom(theClass)) {
 				scanBlock(theClass);
 			} else {
 				throw new ConfigurationException("Type contains a @" + Block.class.getSimpleName() + " annotation but does not implement " + IResourceBlock.class.getCanonicalName() + ": " + theClass.getCanonicalName());
@@ -323,7 +324,7 @@ class ModelScanner {
 			throw new ConfigurationException("Block type @" + Block.class.getSimpleName() + " annotation contains no name: " + theClass.getCanonicalName());
 		}
 
-		RuntimeResourceBlockDefinition resourceDef = new RuntimeResourceBlockDefinition(resourceName, theClass);
+		RuntimeResourceBlockDefinition resourceDef = new RuntimeResourceBlockDefinition(resourceName, theClass, isStandardType(theClass));
 		myClassToElementDefinitions.put(theClass, resourceDef);
 
 		scanCompositeElementForChildren(theClass, resourceDef);
@@ -334,13 +335,17 @@ class ModelScanner {
 
 		RuntimeCompositeDatatypeDefinition resourceDef;
 		if (theClass.equals(ExtensionDt.class)) {
-			resourceDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass);
+			resourceDef = new RuntimeExtensionDtDefinition(theDatatypeDefinition, theClass, true);
 		} else {
-			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass);
+			resourceDef = new RuntimeCompositeDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToElementDefinitions.put(resourceDef.getName(), resourceDef);
 		scanCompositeElementForChildren(theClass, resourceDef);
+	}
+
+	private boolean isStandardType(Class<? extends IBase> theClass) {
+		return myVersionTypes.contains(theClass);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -505,14 +510,14 @@ class ModelScanner {
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
-			} else if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
+			} else if (IRefImplResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
 				/*
 				 * Child is a resource as a direct child, as in Bundle.entry.resource
 				 */
 				RuntimeChildDirectResource def = new RuntimeChildDirectResource(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
-			} else if (choiceTypes.size() > 1 && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IReference.class.isAssignableFrom(nextElementType)) {
+			} else if (choiceTypes.size() > 1 && !BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) && !IBaseReference.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a choice element
 				 */
@@ -551,7 +556,7 @@ class ModelScanner {
 				if (IBase.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IBase>) nextElementType);
 				}
-			} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IReference.class.isAssignableFrom(nextElementType)) {
+			} else if (BaseResourceReferenceDt.class.isAssignableFrom(nextElementType) || IBaseReference.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource reference
 				 */
@@ -566,7 +571,7 @@ class ModelScanner {
 				RuntimeChildResourceDefinition def = new RuntimeChildResourceDefinition(next, elementName, childAnnotation, descriptionAnnotation, refTypesList);
 				orderMap.put(order, def);
 
-			} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBackboneElement.class.isAssignableFrom(nextElementType) || IDatatypeElement.class.isAssignableFrom(nextElementType)) {
+			} else if (IResourceBlock.class.isAssignableFrom(nextElementType) || IBaseBackboneElement.class.isAssignableFrom(nextElementType) || IBaseDatatypeElement.class.isAssignableFrom(nextElementType)) {
 				/*
 				 * Child is a resource block (i.e. a sub-tag within a resource) TODO: do these have a better name
 				 * according to HL7?
@@ -650,15 +655,15 @@ class ModelScanner {
 		if (theClass.equals(XhtmlDt.class)) {
 			@SuppressWarnings("unchecked")
 			Class<XhtmlDt> clazz = (Class<XhtmlDt>) theClass;
-			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz);
+			resourceDef = new RuntimePrimitiveDatatypeNarrativeDefinition(resourceName, clazz, isStandardType(clazz));
 		} else if (IBaseXhtml.class.isAssignableFrom(theClass)) {
 			@SuppressWarnings("unchecked")
 			Class<? extends IBaseXhtml> clazz = (Class<? extends IBaseXhtml>) theClass;
-			resourceDef = new RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(resourceName, clazz);
+			resourceDef = new RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition(resourceName, clazz, isStandardType(clazz));
 		} else if (IIdType.class.isAssignableFrom(theClass)) {
-			resourceDef = new RuntimeIdDatatypeDefinition(theDatatypeDefinition, theClass);
+			resourceDef = new RuntimeIdDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		} else {
-			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass);
+			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToElementDefinitions.put(resourceName, resourceDef);
@@ -693,7 +698,7 @@ class ModelScanner {
 			}
 		}
 
-		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition);
+		RuntimeResourceDefinition resourceDef = new RuntimeResourceDefinition(myContext, resourceName, theClass, resourceDefinition, isStandardType(theClass));
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		if (primaryNameProvider) {
 			if (resourceDef.getStructureVersion() == myVersion) {
@@ -763,7 +768,9 @@ class ModelScanner {
 		return type;
 	}
 
-	static void scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum version) {
+	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum version) {
+		Set<Class<? extends IBase>> retVal = new HashSet<Class<? extends IBase>>();
+		
 		InputStream str = version.getVersionImplementation().getFhirVersionPropertiesFile();
 		Properties prop = new Properties();
 		try {
@@ -776,7 +783,11 @@ class ModelScanner {
 					if (theDatatypes != null) {
 						try {
 							// Datatypes
-							Class<?> dtType = Class.forName(nextValue);
+							
+							@SuppressWarnings("unchecked")
+							Class<? extends IBase> dtType = (Class<? extends IBase>) Class.forName(nextValue);
+							retVal.add(dtType);
+							
 							if (IElement.class.isAssignableFrom(dtType)) {
 								@SuppressWarnings("unchecked")
 								Class<? extends IElement> nextClass = (Class<? extends IElement>) dtType;
@@ -791,7 +802,7 @@ class ModelScanner {
 							}
 
 						} catch (ClassNotFoundException e) {
-							ourLog.error("Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
+							throw new ConfigurationException("Unknown class[" + nextValue + "] for data type definition: " + nextKey.substring("datatype.".length()), e);
 						}
 					}
 				} else if (nextKey.startsWith("resource.")) {
@@ -801,21 +812,22 @@ class ModelScanner {
 						@SuppressWarnings("unchecked")
 						Class<? extends IBaseResource> nextClass = (Class<? extends IBaseResource>) Class.forName(nextValue);
 						if (!IBaseResource.class.isAssignableFrom(nextClass)) {
-							ourLog.warn("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
-							continue;
+							throw new ConfigurationException("Class is not assignable from " + IBaseResource.class.getSimpleName() + ": " + nextValue);
 						}
 
 						theResourceTypes.put(resName, nextClass);
 					} catch (ClassNotFoundException e) {
-						ourLog.error("Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
+						throw new ConfigurationException("Unknown class[" + nextValue + "] for resource definition: " + nextKey.substring("resource.".length()), e);
 					}
 				} else {
-					ourLog.warn("Unexpected property in version property file: {}={}", nextKey, nextValue);
+					throw new ConfigurationException("Unexpected property in version property file: " + nextKey + "=" + nextValue);
 				}
 			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
 		}
+		
+		return retVal;
 	}
 
 	public Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinitions() {

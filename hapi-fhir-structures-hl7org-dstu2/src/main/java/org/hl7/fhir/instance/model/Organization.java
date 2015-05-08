@@ -29,161 +29,58 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc.
  */
 @ResourceDef(name="Organization", profile="http://hl7.org/fhir/Profile/Organization")
 public class Organization extends DomainResource {
 
-    public enum AdministrativeGender {
-        /**
-         * Male
-         */
-        MALE, 
-        /**
-         * Female
-         */
-        FEMALE, 
-        /**
-         * Other
-         */
-        OTHER, 
-        /**
-         * Unknown
-         */
-        UNKNOWN, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static AdministrativeGender fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("male".equals(codeString))
-          return MALE;
-        if ("female".equals(codeString))
-          return FEMALE;
-        if ("other".equals(codeString))
-          return OTHER;
-        if ("unknown".equals(codeString))
-          return UNKNOWN;
-        throw new Exception("Unknown AdministrativeGender code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case MALE: return "male";
-            case FEMALE: return "female";
-            case OTHER: return "other";
-            case UNKNOWN: return "unknown";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case MALE: return "";
-            case FEMALE: return "";
-            case OTHER: return "";
-            case UNKNOWN: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case MALE: return "Male";
-            case FEMALE: return "Female";
-            case OTHER: return "Other";
-            case UNKNOWN: return "Unknown";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case MALE: return "male";
-            case FEMALE: return "female";
-            case OTHER: return "other";
-            case UNKNOWN: return "unknown";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class AdministrativeGenderEnumFactory implements EnumFactory<AdministrativeGender> {
-    public AdministrativeGender fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("male".equals(codeString))
-          return AdministrativeGender.MALE;
-        if ("female".equals(codeString))
-          return AdministrativeGender.FEMALE;
-        if ("other".equals(codeString))
-          return AdministrativeGender.OTHER;
-        if ("unknown".equals(codeString))
-          return AdministrativeGender.UNKNOWN;
-        throw new IllegalArgumentException("Unknown AdministrativeGender code '"+codeString+"'");
-        }
-    public String toCode(AdministrativeGender code) {
-      if (code == AdministrativeGender.MALE)
-        return "male";
-      if (code == AdministrativeGender.FEMALE)
-        return "female";
-      if (code == AdministrativeGender.OTHER)
-        return "other";
-      if (code == AdministrativeGender.UNKNOWN)
-        return "unknown";
-      return "?";
-      }
-    }
-
     @Block()
-    public static class OrganizationContactComponent extends BackboneElement {
+    public static class OrganizationContactComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates a purpose for which the contact can be reached.
          */
-        @Child(name="purpose", type={CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "purpose", type = {CodeableConcept.class}, order=1, min=0, max=1)
         @Description(shortDefinition="The type of contact", formalDefinition="Indicates a purpose for which the contact can be reached." )
         protected CodeableConcept purpose;
 
         /**
          * A name associated with the contact.
          */
-        @Child(name="name", type={HumanName.class}, order=2, min=0, max=1)
+        @Child(name = "name", type = {HumanName.class}, order=2, min=0, max=1)
         @Description(shortDefinition="A name associated with the contact", formalDefinition="A name associated with the contact." )
         protected HumanName name;
 
         /**
          * A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.
          */
-        @Child(name="telecom", type={ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Contact details (telephone, email, etc)  for a contact", formalDefinition="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted." )
         protected List<ContactPoint> telecom;
 
         /**
          * Visiting or postal addresses for the contact.
          */
-        @Child(name="address", type={AddressType.class}, order=4, min=0, max=1)
+        @Child(name = "address", type = {Address.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Visiting or postal addresses for the contact", formalDefinition="Visiting or postal addresses for the contact." )
-        protected AddressType address;
+        protected Address address;
 
-        /**
-         * Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
-         */
-        @Child(name="gender", type={CodeType.class}, order=5, min=0, max=1)
-        @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes." )
-        protected Enumeration<AdministrativeGender> gender;
+        private static final long serialVersionUID = 1831121305L;
 
-        private static final long serialVersionUID = -1433864122L;
-
+    /*
+     * Constructor
+     */
       public OrganizationContactComponent() {
         super();
       }
@@ -266,15 +163,25 @@ public class Organization extends DomainResource {
           return t;
         }
 
+    // syntactic sugar
+        public OrganizationContactComponent addTelecom(ContactPoint t) { //3
+          if (t == null)
+            return this;
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return this;
+        }
+
         /**
          * @return {@link #address} (Visiting or postal addresses for the contact.)
          */
-        public AddressType getAddress() { 
+        public Address getAddress() { 
           if (this.address == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create OrganizationContactComponent.address");
             else if (Configuration.doAutoCreate())
-              this.address = new AddressType(); // cc
+              this.address = new Address(); // cc
           return this.address;
         }
 
@@ -285,57 +192,8 @@ public class Organization extends DomainResource {
         /**
          * @param value {@link #address} (Visiting or postal addresses for the contact.)
          */
-        public OrganizationContactComponent setAddress(AddressType value) { 
+        public OrganizationContactComponent setAddress(Address value) { 
           this.address = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #gender} (Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.). This is the underlying object with id, value and extensions. The accessor "getGender" gives direct access to the value
-         */
-        public Enumeration<AdministrativeGender> getGenderElement() { 
-          if (this.gender == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create OrganizationContactComponent.gender");
-            else if (Configuration.doAutoCreate())
-              this.gender = new Enumeration<AdministrativeGender>(new AdministrativeGenderEnumFactory()); // bb
-          return this.gender;
-        }
-
-        public boolean hasGenderElement() { 
-          return this.gender != null && !this.gender.isEmpty();
-        }
-
-        public boolean hasGender() { 
-          return this.gender != null && !this.gender.isEmpty();
-        }
-
-        /**
-         * @param value {@link #gender} (Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.). This is the underlying object with id, value and extensions. The accessor "getGender" gives direct access to the value
-         */
-        public OrganizationContactComponent setGenderElement(Enumeration<AdministrativeGender> value) { 
-          this.gender = value;
-          return this;
-        }
-
-        /**
-         * @return Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
-         */
-        public AdministrativeGender getGender() { 
-          return this.gender == null ? null : this.gender.getValue();
-        }
-
-        /**
-         * @param value Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.
-         */
-        public OrganizationContactComponent setGender(AdministrativeGender value) { 
-          if (value == null)
-            this.gender = null;
-          else {
-            if (this.gender == null)
-              this.gender = new Enumeration<AdministrativeGender>(new AdministrativeGenderEnumFactory());
-            this.gender.setValue(value);
-          }
           return this;
         }
 
@@ -345,7 +203,6 @@ public class Organization extends DomainResource {
           childrenList.add(new Property("name", "HumanName", "A name associated with the contact.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the party may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom));
           childrenList.add(new Property("address", "Address", "Visiting or postal addresses for the contact.", 0, java.lang.Integer.MAX_VALUE, address));
-          childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
         }
 
       public OrganizationContactComponent copy() {
@@ -359,7 +216,6 @@ public class Organization extends DomainResource {
             dst.telecom.add(i.copy());
         };
         dst.address = address == null ? null : address.copy();
-        dst.gender = gender == null ? null : gender.copy();
         return dst;
       }
 
@@ -371,7 +227,7 @@ public class Organization extends DomainResource {
           return false;
         OrganizationContactComponent o = (OrganizationContactComponent) other;
         return compareDeep(purpose, o.purpose, true) && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true)
-           && compareDeep(address, o.address, true) && compareDeep(gender, o.gender, true);
+           && compareDeep(address, o.address, true);
       }
 
       @Override
@@ -381,13 +237,12 @@ public class Organization extends DomainResource {
         if (!(other instanceof OrganizationContactComponent))
           return false;
         OrganizationContactComponent o = (OrganizationContactComponent) other;
-        return compareValues(gender, o.gender, true);
+        return true;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (purpose == null || purpose.isEmpty()) && (name == null || name.isEmpty())
-           && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty()) && (gender == null || gender.isEmpty())
-          ;
+           && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty());
       }
 
   }
@@ -395,42 +250,42 @@ public class Organization extends DomainResource {
     /**
      * Identifier for the organization that is used to identify the organization across multiple disparate systems.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order = 0, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Identifies this organization  across multiple systems", formalDefinition="Identifier for the organization that is used to identify the organization across multiple disparate systems." )
     protected List<Identifier> identifier;
 
     /**
      * A name associated with the organization.
      */
-    @Child(name = "name", type = {StringType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Name used for the organization", formalDefinition="A name associated with the organization." )
     protected StringType name;
 
     /**
      * The kind of organization that this is.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order = 2, min = 0, max = 1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Kind of organization", formalDefinition="The kind of organization that this is." )
     protected CodeableConcept type;
 
     /**
      * A contact detail for the organization.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order = 3, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A contact detail for the organization", formalDefinition="A contact detail for the organization." )
     protected List<ContactPoint> telecom;
 
     /**
      * An address for the organization.
      */
-    @Child(name = "address", type = {AddressType.class}, order = 4, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="An address for the organization", formalDefinition="An address for the organization." )
-    protected List<AddressType> address;
+    protected List<Address> address;
 
     /**
      * The organization of which this organization forms a part.
      */
-    @Child(name = "partOf", type = {Organization.class}, order = 5, min = 0, max = 1)
+    @Child(name = "partOf", type = {Organization.class}, order=5, min=0, max=1)
     @Description(shortDefinition="The organization of which this organization forms a part", formalDefinition="The organization of which this organization forms a part." )
     protected Reference partOf;
 
@@ -442,31 +297,22 @@ public class Organization extends DomainResource {
     /**
      * Contact for the organization for a certain purpose.
      */
-    @Child(name = "contact", type = {}, order = 6, min = 0, max = Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Contact for the organization for a certain purpose", formalDefinition="Contact for the organization for a certain purpose." )
     protected List<OrganizationContactComponent> contact;
 
     /**
-     * Location(s) the organization uses to provide services.
-     */
-    @Child(name = "location", type = {Location.class}, order = 7, min = 0, max = Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Location(s) the organization uses to provide services", formalDefinition="Location(s) the organization uses to provide services." )
-    protected List<Reference> location;
-    /**
-     * The actual objects that are the target of the reference (Location(s) the organization uses to provide services.)
-     */
-    protected List<Location> locationTarget;
-
-
-    /**
      * Whether the organization's record is still in active use.
      */
-    @Child(name = "active", type = {BooleanType.class}, order = 8, min = 0, max = 1)
+    @Child(name = "active", type = {BooleanType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Whether the organization's record is still in active use", formalDefinition="Whether the organization's record is still in active use." )
     protected BooleanType active;
 
-    private static final long serialVersionUID = -75313696L;
+    private static final long serialVersionUID = 1766834739L;
 
+  /*
+   * Constructor
+   */
     public Organization() {
       super();
     }
@@ -499,6 +345,16 @@ public class Organization extends DomainResource {
         this.identifier = new ArrayList<Identifier>();
       this.identifier.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Organization addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -604,19 +460,29 @@ public class Organization extends DomainResource {
       return t;
     }
 
+    // syntactic sugar
+    public Organization addTelecom(ContactPoint t) { //3
+      if (t == null)
+        return this;
+      if (this.telecom == null)
+        this.telecom = new ArrayList<ContactPoint>();
+      this.telecom.add(t);
+      return this;
+    }
+
     /**
      * @return {@link #address} (An address for the organization.)
      */
-    public List<AddressType> getAddress() { 
+    public List<Address> getAddress() { 
       if (this.address == null)
-        this.address = new ArrayList<AddressType>();
+        this.address = new ArrayList<Address>();
       return this.address;
     }
 
     public boolean hasAddress() { 
       if (this.address == null)
         return false;
-      for (AddressType item : this.address)
+      for (Address item : this.address)
         if (!item.isEmpty())
           return true;
       return false;
@@ -626,12 +492,22 @@ public class Organization extends DomainResource {
      * @return {@link #address} (An address for the organization.)
      */
     // syntactic sugar
-    public AddressType addAddress() { //3
-      AddressType t = new AddressType();
+    public Address addAddress() { //3
+      Address t = new Address();
       if (this.address == null)
-        this.address = new ArrayList<AddressType>();
+        this.address = new ArrayList<Address>();
       this.address.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public Organization addAddress(Address t) { //3
+      if (t == null)
+        return this;
+      if (this.address == null)
+        this.address = new ArrayList<Address>();
+      this.address.add(t);
+      return this;
     }
 
     /**
@@ -708,55 +584,14 @@ public class Organization extends DomainResource {
       return t;
     }
 
-    /**
-     * @return {@link #location} (Location(s) the organization uses to provide services.)
-     */
-    public List<Reference> getLocation() { 
-      if (this.location == null)
-        this.location = new ArrayList<Reference>();
-      return this.location;
-    }
-
-    public boolean hasLocation() { 
-      if (this.location == null)
-        return false;
-      for (Reference item : this.location)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    /**
-     * @return {@link #location} (Location(s) the organization uses to provide services.)
-     */
     // syntactic sugar
-    public Reference addLocation() { //3
-      Reference t = new Reference();
-      if (this.location == null)
-        this.location = new ArrayList<Reference>();
-      this.location.add(t);
-      return t;
-    }
-
-    /**
-     * @return {@link #location} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Location(s) the organization uses to provide services.)
-     */
-    public List<Location> getLocationTarget() { 
-      if (this.locationTarget == null)
-        this.locationTarget = new ArrayList<Location>();
-      return this.locationTarget;
-    }
-
-    // syntactic sugar
-    /**
-     * @return {@link #location} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Location(s) the organization uses to provide services.)
-     */
-    public Location addLocationTarget() { 
-      Location r = new Location();
-      if (this.locationTarget == null)
-        this.locationTarget = new ArrayList<Location>();
-      this.locationTarget.add(r);
-      return r;
+    public Organization addContact(OrganizationContactComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<OrganizationContactComponent>();
+      this.contact.add(t);
+      return this;
     }
 
     /**
@@ -791,7 +626,7 @@ public class Organization extends DomainResource {
      * @return Whether the organization's record is still in active use.
      */
     public boolean getActive() { 
-      return this.active == null ? false : this.active.getValue();
+      return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
     }
 
     /**
@@ -813,7 +648,6 @@ public class Organization extends DomainResource {
         childrenList.add(new Property("address", "Address", "An address for the organization.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("partOf", "Reference(Organization)", "The organization of which this organization forms a part.", 0, java.lang.Integer.MAX_VALUE, partOf));
         childrenList.add(new Property("contact", "", "Contact for the organization for a certain purpose.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("location", "Reference(Location)", "Location(s) the organization uses to provide services.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("active", "boolean", "Whether the organization's record is still in active use.", 0, java.lang.Integer.MAX_VALUE, active));
       }
 
@@ -833,8 +667,8 @@ public class Organization extends DomainResource {
             dst.telecom.add(i.copy());
         };
         if (address != null) {
-          dst.address = new ArrayList<AddressType>();
-          for (AddressType i : address)
+          dst.address = new ArrayList<Address>();
+          for (Address i : address)
             dst.address.add(i.copy());
         };
         dst.partOf = partOf == null ? null : partOf.copy();
@@ -842,11 +676,6 @@ public class Organization extends DomainResource {
           dst.contact = new ArrayList<OrganizationContactComponent>();
           for (OrganizationContactComponent i : contact)
             dst.contact.add(i.copy());
-        };
-        if (location != null) {
-          dst.location = new ArrayList<Reference>();
-          for (Reference i : location)
-            dst.location.add(i.copy());
         };
         dst.active = active == null ? null : active.copy();
         return dst;
@@ -865,8 +694,7 @@ public class Organization extends DomainResource {
         Organization o = (Organization) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(type, o.type, true)
            && compareDeep(telecom, o.telecom, true) && compareDeep(address, o.address, true) && compareDeep(partOf, o.partOf, true)
-           && compareDeep(contact, o.contact, true) && compareDeep(location, o.location, true) && compareDeep(active, o.active, true)
-          ;
+           && compareDeep(contact, o.contact, true) && compareDeep(active, o.active, true);
       }
 
       @Override
@@ -882,8 +710,8 @@ public class Organization extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (name == null || name.isEmpty())
            && (type == null || type.isEmpty()) && (telecom == null || telecom.isEmpty()) && (address == null || address.isEmpty())
-           && (partOf == null || partOf.isEmpty()) && (contact == null || contact.isEmpty()) && (location == null || location.isEmpty())
-           && (active == null || active.isEmpty());
+           && (partOf == null || partOf.isEmpty()) && (contact == null || contact.isEmpty()) && (active == null || active.isEmpty())
+          ;
       }
 
   @Override
@@ -891,18 +719,20 @@ public class Organization extends DomainResource {
     return ResourceType.Organization;
    }
 
-  @SearchParamDefinition(name = "identifier", path = "Organization.identifier", description = "Any identifier for the organization (not the accreditation issuer's identifier)", type = "token")
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="phonetic", path="", description="A portion of the organization's name using some kind of phonetic matching algorithm", type="string" )
+  public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="partof", path="Organization.partOf", description="Search all organizations that are part of the given organization", type="reference" )
   public static final String SP_PARTOF = "partof";
-  @SearchParamDefinition(name = "phonetic", path = "", description = "A portion of the organization's name using some kind of phonetic matching algorithm", type = "string")
-  public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="address", path="Organization.address", description="A (part of the) address of the Organization", type="string" )
+  public static final String SP_ADDRESS = "address";
   @SearchParamDefinition(name="name", path="Organization.name", description="A portion of the organization's name", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="active", path="Organization.active", description="Whether the organization's record is active", type="token" )
   public static final String SP_ACTIVE = "active";
   @SearchParamDefinition(name="type", path="Organization.type", description="A code for the type of organization", type="token" )
   public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="identifier", path="Organization.identifier", description="Any identifier for the organization (not the accreditation issuer's identifier)", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
 
 }
 

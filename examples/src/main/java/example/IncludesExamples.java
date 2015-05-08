@@ -3,7 +3,7 @@ package example;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Organization;

@@ -27,8 +27,8 @@ import org.custommonkey.xmlunit.Diff;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.AddressType;
-import org.hl7.fhir.instance.model.AddressType.AddressUse;
+import org.hl7.fhir.instance.model.Address;
+import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
@@ -40,8 +40,6 @@ import org.hl7.fhir.instance.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.HumanName;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.List_;
@@ -57,6 +55,8 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetDefineComponent;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -224,7 +224,6 @@ public class JsonParserHl7OrgTest {
 		
 		dp.setId(("3"));
 		InstantType nowDt = InstantType.withCurrentTime();
-		dp.getMeta().setDeleted(true);
 		dp.getMeta().setLastUpdatedElement(nowDt);
 
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
@@ -248,8 +247,7 @@ public class JsonParserHl7OrgTest {
 			"\"resource\":{",
 			"\"id\":\"3\"",
 			"\"meta\":{",
-			"\"lastUpdated\":\"" + nowDt.getValueAsString() + "\"", 
-			"\"deleted\":true"
+			"\"lastUpdated\":\"" + nowDt.getValueAsString() + "\"" 
 		};
 		//@formatter:off
 		assertThat(bundleString, StringContainsInOrder.stringContainsInOrder(strings));
@@ -342,11 +340,11 @@ public class JsonParserHl7OrgTest {
 		
 		// Re-parse the bundle
 		patient = (Patient) jsonParser.parseResource(jsonParser.encodeResourceToString(patient));
-		assertEquals("#1", patient.getManagingOrganization().getReference().getValue());
+		assertEquals("#1", patient.getManagingOrganization().getReference());
 		
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId().getValue());
+		assertEquals("#1", org.getIdElement().getValue());
 		assertEquals("Contained Test Organization", org.getName());
 		
 		// And re-encode a second time
@@ -457,7 +455,7 @@ public class JsonParserHl7OrgTest {
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.setFoo(new AddressType().addLine("line1"));
+		patient.setFoo(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -465,7 +463,7 @@ public class JsonParserHl7OrgTest {
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-		AddressType ref = actual.getFoo();
+		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
@@ -485,7 +483,7 @@ public class JsonParserHl7OrgTest {
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Reference ref = actual.getFoo();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 
@@ -579,10 +577,10 @@ public class JsonParserHl7OrgTest {
 	public void testEncodeExtensionOnEmptyElement() throws Exception {
 
 		ValueSet valueSet = new ValueSet();
-		valueSet.addTelecom().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
+		valueSet.addUseContext().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
-		assertThat(encoded, containsString("\"telecom\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
+		assertThat(encoded, containsString("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
 
 	}
 
@@ -596,14 +594,14 @@ public class JsonParserHl7OrgTest {
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
-		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueResource\":{\"reference\":\"Organization/123\"}}]"));
+		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
 
 		Patient actual = parser.parseResource(Patient.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		List<Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertEquals("Organization/123", ref.getReference().getValue());
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 	
@@ -665,7 +663,7 @@ public class JsonParserHl7OrgTest {
 		out = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(out);
 		// Backslashes need to be escaped because they are in a JSON value
-		assertThat(out, containsString("<div>hello</div>"));
+		assertThat(out, containsString("<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\">hello</xhtml:div>"));
 
 	}
 
@@ -722,7 +720,7 @@ public class JsonParserHl7OrgTest {
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue(new AddressType().addLine("line1"));
+		patient.addExtension().setUrl("urn:foo").setValue(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -730,7 +728,7 @@ public class JsonParserHl7OrgTest {
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
 		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-		AddressType ref = actual.getFoo();
+		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
@@ -1078,7 +1076,7 @@ public class JsonParserHl7OrgTest {
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
 		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
-		assertEquals("Organization/1", parsed.getManagingOrganization().getReference().getValue());
+		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
 	}
 
 	@Test
@@ -1246,13 +1244,13 @@ public class JsonParserHl7OrgTest {
 		
 		@Child(order = 0, name = "foo")
 		@org.hl7.fhir.instance.model.annotations.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-		private AddressType myFoo;
+		private Address myFoo;
 
-		public AddressType getFoo() {
+		public Address getFoo() {
 			return myFoo;
 		}
 
-		public void setFoo(AddressType theFoo) {
+		public void setFoo(Address theFoo) {
 			myFoo = theFoo;
 		}
 

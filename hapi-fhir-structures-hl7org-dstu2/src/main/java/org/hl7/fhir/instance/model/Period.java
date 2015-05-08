@@ -29,13 +29,15 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A time period defined by a start and end date and optionally time.
  */
@@ -45,19 +47,22 @@ public class Period extends Type implements ICompositeType {
     /**
      * The start of the period. The boundary is inclusive.
      */
-    @Child(name = "start", type = {DateTimeType.class}, order = 0, min = 0, max = 1)
+    @Child(name = "start", type = {DateTimeType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Starting time with inclusive boundary", formalDefinition="The start of the period. The boundary is inclusive." )
     protected DateTimeType start;
 
     /**
      * The end of the period. If the end of the period is missing, it means that the period is ongoing.
      */
-    @Child(name = "end", type = {DateTimeType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "end", type = {DateTimeType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="End time with inclusive boundary, if not ongoing", formalDefinition="The end of the period. If the end of the period is missing, it means that the period is ongoing." )
     protected DateTimeType end;
 
     private static final long serialVersionUID = 649791751L;
 
+  /*
+   * Constructor
+   */
     public Period() {
       super();
     }

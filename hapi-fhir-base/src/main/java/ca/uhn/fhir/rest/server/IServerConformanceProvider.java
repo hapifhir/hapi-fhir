@@ -22,7 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IServerConformanceProvider<T extends IBaseResource> {
 

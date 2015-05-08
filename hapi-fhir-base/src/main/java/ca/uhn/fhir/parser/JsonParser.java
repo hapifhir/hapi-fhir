@@ -51,10 +51,10 @@ import javax.json.stream.JsonParsingException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -64,7 +64,7 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -143,7 +143,7 @@ public class JsonParser extends BaseParser implements IParser {
 		myContext = theContext;
 	}
 
-	private void addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier) {
+	private void addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?, ?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier) {
 		if (ext.size() > 0) {
 			list.ensureCapacity(valueIdx);
 			while (list.size() <= valueIdx) {
@@ -152,7 +152,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (list.get(valueIdx) == null) {
 				list.set(valueIdx, new ArrayList<JsonParser.HeldExtension>());
 			}
-			for (IBaseExtension<?> next : ext) {
+			for (IBaseExtension<?, ?> next : ext) {
 				list.get(valueIdx).add(new HeldExtension(next, theIsModifier));
 			}
 		}
@@ -413,14 +413,14 @@ public class JsonParser extends BaseParser implements IParser {
 				theWriter.writeStartObject();
 			}
 			if (theNextValue instanceof IBaseExtension) {
-				theWriter.write("url", ((IBaseExtension<?>) theNextValue).getUrl());
+				theWriter.write("url", ((IBaseExtension<?, ?>) theNextValue).getUrl());
 			}
 			encodeCompositeElementToStreamWriter(theResDef, theResource, theNextValue, theWriter, childCompositeDef, theContainedResource);
 			theWriter.writeEnd();
 			break;
 		}
 		case RESOURCE_REF: {
-			IReference referenceDt = (IReference) theNextValue;
+			IBaseReference referenceDt = (IBaseReference) theNextValue;
 			if (theChildName != null) {
 				theWriter.writeStartObject(theChildName);
 			} else {
@@ -596,12 +596,12 @@ public class JsonParser extends BaseParser implements IParser {
 						} else {
 							if (nextValue instanceof IBaseHasExtensions) {
 								IBaseHasExtensions element = (IBaseHasExtensions) nextValue;
-								List<? extends IBaseExtension<?>> ext = element.getExtension();
+								List<? extends IBaseExtension<?, ?>> ext = element.getExtension();
 								addToHeldExtensions(valueIdx, ext, extensions, false);
 							}
 							if (nextValue instanceof IBaseHasModifierExtensions) {
 								IBaseHasModifierExtensions element = (IBaseHasModifierExtensions) nextValue;
-								List<? extends IBaseExtension<?>> ext = element.getModifierExtension();
+								List<? extends IBaseExtension<?, ?>> ext = element.getModifierExtension();
 								addToHeldExtensions(valueIdx, ext, extensions, true);
 							}
 						}
@@ -676,10 +676,10 @@ public class JsonParser extends BaseParser implements IParser {
 					resourceId = res.getId().getIdPart();
 				}
 			}
-		} else if (theResource instanceof IAnyResource) {
-			IAnyResource res = (IAnyResource) theResource;
-			if (StringUtils.isNotBlank(res.getId().getIdPart())) {
-				resourceId = res.getId().getIdPart();
+		} else if (theResource instanceof IRefImplResource) {
+			IRefImplResource res = (IRefImplResource) theResource;
+			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
+				resourceId = res.getIdElement().getIdPart();
 			}
 		}
 
@@ -876,8 +876,8 @@ public class JsonParser extends BaseParser implements IParser {
 		} else {
 			if (theElement instanceof IBaseHasExtensions) {
 				IBaseHasExtensions element = (IBaseHasExtensions) theElement;
-				List<? extends IBaseExtension<?>> ext = element.getExtension();
-				for (IBaseExtension<?> next : ext) {
+				List<? extends IBaseExtension<?, ?>> ext = element.getExtension();
+				for (IBaseExtension<?, ?> next : ext) {
 					if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 						continue;
 					}
@@ -886,8 +886,8 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 			if (theElement instanceof IBaseHasModifierExtensions) {
 				IBaseHasModifierExtensions element = (IBaseHasModifierExtensions) theElement;
-				List<? extends IBaseExtension<?>> ext = element.getModifierExtension();
-				for (IBaseExtension<?> next : ext) {
+				List<? extends IBaseExtension<?, ?>> ext = element.getModifierExtension();
+				for (IBaseExtension<?, ?> next : ext) {
 					if (next == null || next.isEmpty()) {
 						continue;
 					}
@@ -1096,7 +1096,7 @@ public class JsonParser extends BaseParser implements IParser {
 			if (object instanceof IIdentifiableElement) {
 				((IIdentifiableElement) object).setElementSpecificId(elementId);
 			} else if (object instanceof IBaseResource) {
-				((IBaseResource) object).getId().setValue(elementId);
+				((IBaseResource) object).getIdElement().setValue(elementId);
 			}
 		}
 	}
@@ -1384,11 +1384,11 @@ public class JsonParser extends BaseParser implements IParser {
 	private class HeldExtension implements Comparable<HeldExtension> {
 
 		private RuntimeChildDeclaredExtensionDefinition myDef;
-		private IBaseExtension<?> myUndeclaredExtension;
+		private IBaseExtension<?, ?> myUndeclaredExtension;
 		private IBase myValue;
 		private boolean myModifier;
 
-		public HeldExtension(IBaseExtension<?> theUndeclaredExtension, boolean theModifier) {
+		public HeldExtension(IBaseExtension<?, ?> theUndeclaredExtension, boolean theModifier) {
 			assert theUndeclaredExtension != null;
 			myUndeclaredExtension = theUndeclaredExtension;
 			myModifier = theModifier;
@@ -1420,7 +1420,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
-		private void writeUndeclaredExtInDstu1Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, IBaseExtension<?> ext) throws IOException {
+		private void writeUndeclaredExtInDstu1Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, IBaseExtension<?, ?> ext) throws IOException {
 			IBaseDatatype value = ext.getValue();
 			String extensionUrl = ext.getUrl();
 
@@ -1439,7 +1439,7 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 
 				for (Object next : ext.getExtension()) {
-					writeUndeclaredExtInDstu1Format(theResDef, theResource, theEventWriter, (IBaseExtension<?>) next);
+					writeUndeclaredExtInDstu1Format(theResDef, theResource, theEventWriter, (IBaseExtension<?, ?>) next);
 				}
 				theEventWriter.writeEnd();
 			} else {

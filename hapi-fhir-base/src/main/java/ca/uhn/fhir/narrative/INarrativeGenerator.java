@@ -20,7 +20,7 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;

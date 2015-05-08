@@ -1,7 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 
 /*
@@ -37,7 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
  * Primitive type "code" in FHIR, where the code is tied to an enumerated list of possible values
  * 
  */
-@DatatypeDef(name="code", isSpecialization=true)
+@DatatypeDef(name="code", isSpecialization=true) 
 public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements IBaseEnumeration<T> {
 
 	private static final long serialVersionUID = 1L;
@@ -52,16 +51,6 @@ public class Enumeration<T extends Enum<?>> extends PrimitiveType<T> implements 
 		myEnumFactory = theEnumFactory;
 	}
 
-	/**
-	 * Constructor
-	 */
-	public Enumeration(IBaseEnumFactory<T> theEnumFactory) {
-		if (theEnumFactory == null)
-			throw new IllegalArgumentException("An enumeration factory must be provided");
-		myEnumFactory = (EnumFactory<T>) theEnumFactory;
-	}
-
-	
 	/**
 	 * Constructor
 	 */

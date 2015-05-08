@@ -29,16 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
-import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
@@ -108,10 +109,10 @@ public class OperationOutcome extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case FATAL: return "fatal";
-            case ERROR: return "error";
-            case WARNING: return "warning";
-            case INFORMATION: return "information";
+            case FATAL: return "Fatal";
+            case ERROR: return "Error";
+            case WARNING: return "Warning";
+            case INFORMATION: return "Information";
             default: return "?";
           }
         }
@@ -146,44 +147,51 @@ public class OperationOutcome extends DomainResource {
     }
 
     @Block()
-    public static class OperationOutcomeIssueComponent extends BackboneElement {
+    public static class OperationOutcomeIssueComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Indicates whether the issue indicates a variation from successful processing.
          */
-        @Child(name="severity", type={CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="fatal | error | warning | information", formalDefinition="Indicates whether the issue indicates a variation from successful processing." )
         protected Enumeration<IssueSeverity> severity;
 
         /**
-         * A code indicating the type of error, warning or information message.
+         * Describes the type of the issue.
          */
-        @Child(name="type", type={Coding.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Error or warning code", formalDefinition="A code indicating the type of error, warning or information message." )
-        protected Coding type;
+        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=1, max=1)
+        @Description(shortDefinition="Error or warning code", formalDefinition="Describes the type of the issue." )
+        protected CodeableConcept code;
 
         /**
-         * Additional description of the issue.
+         * Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue.
          */
-        @Child(name="details", type={StringType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Additional description of the issue", formalDefinition="Additional description of the issue." )
+        @Child(name = "details", type = {StringType.class}, order=3, min=0, max=1)
+        @Description(shortDefinition="Additional diagnostic information about the issue", formalDefinition="Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue." )
         protected StringType details;
 
         /**
          * A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.
          */
-        @Child(name="location", type={StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "location", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="XPath of element(s) related to issue", formalDefinition="A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised." )
         protected List<StringType> location;
 
-        private static final long serialVersionUID = 1583015135L;
+        private static final long serialVersionUID = -869408333L;
 
+    /*
+     * Constructor
+     */
       public OperationOutcomeIssueComponent() {
         super();
       }
 
-      public OperationOutcomeIssueComponent(Enumeration<IssueSeverity> severity) {
+    /*
+     * Constructor
+     */
+      public OperationOutcomeIssueComponent(Enumeration<IssueSeverity> severity, CodeableConcept code) {
         super();
         this.severity = severity;
+        this.code = code;
       }
 
         /**
@@ -232,31 +240,31 @@ public class OperationOutcome extends DomainResource {
         }
 
         /**
-         * @return {@link #type} (A code indicating the type of error, warning or information message.)
+         * @return {@link #code} (Describes the type of the issue.)
          */
-        public Coding getType() { 
-          if (this.type == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create OperationOutcomeIssueComponent.type");
+              throw new Error("Attempt to auto-create OperationOutcomeIssueComponent.code");
             else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #type} (A code indicating the type of error, warning or information message.)
+         * @param value {@link #code} (Describes the type of the issue.)
          */
-        public OperationOutcomeIssueComponent setType(Coding value) { 
-          this.type = value;
+        public OperationOutcomeIssueComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
         /**
-         * @return {@link #details} (Additional description of the issue.). This is the underlying object with id, value and extensions. The accessor "getDetails" gives direct access to the value
+         * @return {@link #details} (Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue.). This is the underlying object with id, value and extensions. The accessor "getDetails" gives direct access to the value
          */
         public StringType getDetailsElement() { 
           if (this.details == null)
@@ -276,7 +284,7 @@ public class OperationOutcome extends DomainResource {
         }
 
         /**
-         * @param value {@link #details} (Additional description of the issue.). This is the underlying object with id, value and extensions. The accessor "getDetails" gives direct access to the value
+         * @param value {@link #details} (Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue.). This is the underlying object with id, value and extensions. The accessor "getDetails" gives direct access to the value
          */
         public OperationOutcomeIssueComponent setDetailsElement(StringType value) { 
           this.details = value;
@@ -284,14 +292,14 @@ public class OperationOutcome extends DomainResource {
         }
 
         /**
-         * @return Additional description of the issue.
+         * @return Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue.
          */
         public String getDetails() { 
           return this.details == null ? null : this.details.getValue();
         }
 
         /**
-         * @param value Additional description of the issue.
+         * @param value Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue.
          */
         public OperationOutcomeIssueComponent setDetails(String value) { 
           if (Utilities.noString(value))
@@ -361,8 +369,8 @@ public class OperationOutcome extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, java.lang.Integer.MAX_VALUE, severity));
-          childrenList.add(new Property("type", "Coding", "A code indicating the type of error, warning or information message.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("details", "string", "Additional description of the issue.", 0, java.lang.Integer.MAX_VALUE, details));
+          childrenList.add(new Property("code", "CodeableConcept", "Describes the type of the issue.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("details", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stck dump to help trace the issue.", 0, java.lang.Integer.MAX_VALUE, details));
           childrenList.add(new Property("location", "string", "A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, location));
         }
 
@@ -370,7 +378,7 @@ public class OperationOutcome extends DomainResource {
         OperationOutcomeIssueComponent dst = new OperationOutcomeIssueComponent();
         copyValues(dst);
         dst.severity = severity == null ? null : severity.copy();
-        dst.type = type == null ? null : type.copy();
+        dst.code = code == null ? null : code.copy();
         dst.details = details == null ? null : details.copy();
         if (location != null) {
           dst.location = new ArrayList<StringType>();
@@ -387,7 +395,7 @@ public class OperationOutcome extends DomainResource {
         if (!(other instanceof OperationOutcomeIssueComponent))
           return false;
         OperationOutcomeIssueComponent o = (OperationOutcomeIssueComponent) other;
-        return compareDeep(severity, o.severity, true) && compareDeep(type, o.type, true) && compareDeep(details, o.details, true)
+        return compareDeep(severity, o.severity, true) && compareDeep(code, o.code, true) && compareDeep(details, o.details, true)
            && compareDeep(location, o.location, true);
       }
 
@@ -403,7 +411,7 @@ public class OperationOutcome extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (severity == null || severity.isEmpty()) && (type == null || type.isEmpty())
+        return super.isEmpty() && (severity == null || severity.isEmpty()) && (code == null || code.isEmpty())
            && (details == null || details.isEmpty()) && (location == null || location.isEmpty());
       }
 
@@ -412,12 +420,15 @@ public class OperationOutcome extends DomainResource {
     /**
      * An error, warning or information message that results from a system action.
      */
-    @Child(name = "issue", type = {}, order = 0, min = 1, max = Child.MAX_UNLIMITED)
+    @Child(name = "issue", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A single issue associated with the action", formalDefinition="An error, warning or information message that results from a system action." )
     protected List<OperationOutcomeIssueComponent> issue;
 
     private static final long serialVersionUID = -152150052L;
 
+  /*
+   * Constructor
+   */
     public OperationOutcome() {
       super();
     }
@@ -450,6 +461,16 @@ public class OperationOutcome extends DomainResource {
         this.issue = new ArrayList<OperationOutcomeIssueComponent>();
       this.issue.add(t);
       return t;
+    }
+
+    // syntactic sugar
+    public OperationOutcome addIssue(OperationOutcomeIssueComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.issue == null)
+        this.issue = new ArrayList<OperationOutcomeIssueComponent>();
+      this.issue.add(t);
+      return this;
     }
 
       protected void listChildren(List<Property> childrenList) {

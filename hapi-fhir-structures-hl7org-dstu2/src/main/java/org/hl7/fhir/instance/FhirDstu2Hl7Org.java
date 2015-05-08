@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.conf.ServerConformanceProvider;
 import org.hl7.fhir.instance.conf.ServerProfileProvider;
-import org.hl7.fhir.instance.model.Profile;
 import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.StructureDefinition;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -50,8 +50,8 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 	}
 
 	@Override
-	public Profile generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
-		Profile retVal = new Profile();
+	public StructureDefinition generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
+		StructureDefinition retVal = new StructureDefinition();
 
 		RuntimeResourceDefinition def = theRuntimeResourceDefinition;
 

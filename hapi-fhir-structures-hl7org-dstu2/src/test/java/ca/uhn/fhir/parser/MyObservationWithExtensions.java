@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.instance.model.AttachmentType;
+import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.BackboneElement;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Patient;
@@ -9,7 +9,7 @@ import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Extension;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.api.IBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
 import ca.uhn.fhir.util.ElementUtil;
 
@@ -19,7 +19,7 @@ public class MyObservationWithExtensions extends Patient {
 	
 	@Extension(url = "urn:patientext:att", definedLocally = false, isModifier = false)
 	@Child(name = "extAtt", order = 0)
-	private AttachmentType myExtAtt;
+	private Attachment myExtAtt;
 
 	@Extension(url = "urn:patientext:moreext", definedLocally = false, isModifier = false)
 	@Child(name = "moreExt", order = 1)
@@ -29,7 +29,7 @@ public class MyObservationWithExtensions extends Patient {
 	@Child(name = "modExt", order = 2)
 	private DateType myModExt;
 
-	public AttachmentType getExtAtt() {
+	public Attachment getExtAtt() {
 		return myExtAtt;
 	}
 
@@ -49,7 +49,7 @@ public class MyObservationWithExtensions extends Patient {
 		myModExt = theModExt;
 	}
 
-	public void setExtAtt(AttachmentType theExtAtt) {
+	public void setExtAtt(Attachment theExtAtt) {
 		myExtAtt = theExtAtt;
 	}
 
@@ -66,7 +66,7 @@ public class MyObservationWithExtensions extends Patient {
 	 * </p>
 	 */
 	@Block(name = "Observation.someExtensions")
-	public static class MoreExt extends BackboneElement implements IBackboneElement {
+	public static class MoreExt extends BackboneElement implements IBaseBackboneElement {
 
 		@Extension(url = "urn:patientext:moreext:1", definedLocally = false, isModifier = false)
 		@Child(name = "str1", order = 0)

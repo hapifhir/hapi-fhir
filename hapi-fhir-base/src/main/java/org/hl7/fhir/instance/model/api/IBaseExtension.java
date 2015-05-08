@@ -22,9 +22,7 @@ package org.hl7.fhir.instance.model.api;
 
 import java.util.List;
 
-import org.hl7.fhir.instance.model.ICompositeType;
-
-public interface IBaseExtension<T> extends ICompositeType {
+public interface IBaseExtension<T, D> extends ICompositeType {
 
 	List<T> getExtension();
 

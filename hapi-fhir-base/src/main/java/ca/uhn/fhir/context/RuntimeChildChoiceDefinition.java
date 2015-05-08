@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -90,7 +90,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
 				List<Class<? extends IBaseResource>> types = new ArrayList<Class<? extends IBaseResource>>();
 				types.add((Class<? extends IBaseResource>) next);
-				nextDef = new RuntimeResourceReferenceDefinition(elementName, types);
+				nextDef = new RuntimeResourceReferenceDefinition(elementName, types, false);
 				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
 				
 				myNameToChildDefinition.put(getElementName() + "Reference", nextDef);

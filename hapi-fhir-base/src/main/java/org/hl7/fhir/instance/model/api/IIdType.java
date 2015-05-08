@@ -1,6 +1,5 @@
 package org.hl7.fhir.instance.model.api;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 
 /*
  * #%L
@@ -68,5 +67,9 @@ public interface IIdType {
 	IIdType withServerBase(String theServerBase, String theResourceName);
 
 	boolean isAbsolute();
+
+	boolean isIdPartValidLong();
+
+	Long getIdPartAsLong();
 
 }

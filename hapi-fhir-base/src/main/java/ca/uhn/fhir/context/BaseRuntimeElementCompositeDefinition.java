@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.hl7.fhir.instance.model.IBase;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
@@ -37,8 +37,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
 	private Map<String, BaseRuntimeChildDefinition> myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
 
-	public BaseRuntimeElementCompositeDefinition(String theName, Class<? extends T> theImplementingClass) {
-		super(theName, theImplementingClass);
+	public BaseRuntimeElementCompositeDefinition(String theName, Class<? extends T> theImplementingClass, boolean theStandardType) {
+		super(theName, theImplementingClass, theStandardType);
 	}
 
 	public void addChild(BaseRuntimeChildDefinition theNext) {

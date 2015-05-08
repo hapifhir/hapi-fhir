@@ -141,6 +141,11 @@
 			<name>Mohammad Jafari</name>
 			<organization>Edmond Scientific Company</organization>
 		</developer>
+		<developer>
+			<id>joel-costigliola</id>
+			<name>Joel Costigliola</name>
+			<organization>JCOS-Technologies</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -865,7 +870,7 @@
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
-				<!--<module>hapi-fhir-structures-dev</module>-->
+				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-example</module>
 				<module>restful-server-example</module>

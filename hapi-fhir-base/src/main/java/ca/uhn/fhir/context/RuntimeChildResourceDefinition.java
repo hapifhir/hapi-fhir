@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hl7.fhir.instance.model.IBase;
-import org.hl7.fhir.instance.model.IBaseResource;
-import org.hl7.fhir.instance.model.api.IReference;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -60,7 +60,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-		if (IReference.class.isAssignableFrom(theDatatype)) {
+		if (IBaseReference.class.isAssignableFrom(theDatatype)) {
 			return getElementName();
 		}
 		return null;
@@ -68,7 +68,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
-		if (IReference.class.isAssignableFrom(theDatatype)) {
+		if (IBaseReference.class.isAssignableFrom(theDatatype)) {
 			return myRuntimeDef;
 		}
 		return null;
@@ -86,7 +86,7 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes);
+		myRuntimeDef = new RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes, false);
 		myRuntimeDef.sealAndInitialize(theContext, theClassToElementDefinitions);
 
 		myValidChildNames = new HashSet<String>();

@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.IPrimitiveType;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 @DatatypeDef(name="xhtml")
 public class XhtmlNode implements IBaseXhtml {
@@ -85,6 +85,9 @@ public class XhtmlNode implements IBaseXhtml {
   }
 
   public List<XhtmlNode> getChildNodes() {
+	  if (childNodes == null) {
+		  childNodes = new ArrayList<XhtmlNode>();
+	  }
     return childNodes;
   }
 

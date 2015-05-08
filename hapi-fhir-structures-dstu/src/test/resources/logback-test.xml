@@ -13,10 +13,10 @@
 	<logger name="org.apache" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
-	<logger name="org.thymeleaf" additivity="false" level="info">
+	<logger name="org.thymeleaf" additivity="false" level="warn">
 		<appender-ref ref="STDOUT" />
 	</logger>
-	
+
 	<!-- 
 	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
 		<appender-ref ref="STDOUT" />

@@ -29,107 +29,75 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Feb 18, 2015 12:09-0500 for FHIR v0.4.0
+// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
 
-import java.util.List;
+import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.annotations.Child;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IReference;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.Child;
+import org.hl7.fhir.instance.model.annotations.Description;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A reference from one resource to another.
  */
 @DatatypeDef(name="Reference")
-public class Reference extends Type implements IReference, ICompositeType {
-
-
-    /**
-     * Constructor
-     */
-    public Reference() {
-        super();
-    }
-
-    /**
-     * Constructor
-     */
-    public Reference(IAnyResource theResource) {
-        this.resource = theResource;
-    }
-
-    /**
-     * Constructor
-     */
-    public Reference(StringType theReference) {
-        if (theReference != null) {
-            this.reference = new IdType(theReference.getValue());
-        }
-    }
-
-    /**
-     * Constructor
-     */
-    public Reference(String theReference) {
-        if (StringUtils.isNotBlank(theReference)) {
-            this.reference = new IdType(theReference);
-        }
-    }
-
-    /**
-     * This is not a part of the "wire format" resource, but can be changed/accessed by parsers
-     */
-    private transient IBaseResource resource;
-
-    /**
-     * Retrieves the actual resource referenced by this reference. Note that the resource itself is not
-     * a part of the FHIR "wire format" and is never transmitted or receieved inline, but this property
-     * may be changed/accessed by parsers.
-     */
-    public IBaseResource getResource() {
-        return resource;
-    }
-
-    /**
-     * Sets the actual resource referenced by this reference. Note that the resource itself is not
-     * a part of the FHIR "wire format" and is never transmitted or receieved inline, but this property
-     * may be changed/accessed by parsers.
-     */
-    public void setResource(IBaseResource theResource) {
-        resource = theResource;
-    }
+public class Reference extends BaseReference implements IBaseReference, ICompositeType {
 
     /**
      * A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
      */
-    @Child(name = "reference", type = {StringType.class}, order = 0, min = 0, max = 1)
+    @Child(name = "reference", type = {StringType.class}, order=0, min=0, max=1)
     @Description(shortDefinition="Relative, internal or absolute URL reference", formalDefinition="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources." )
-    protected IdType reference;
+    protected StringType reference;
 
     /**
      * Plain text narrative that identifies the resource in addition to the resource reference.
      */
-    @Child(name = "display", type = {StringType.class}, order = 1, min = 0, max = 1)
+    @Child(name = "display", type = {StringType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="Text alternative for the resource", formalDefinition="Plain text narrative that identifies the resource in addition to the resource reference." )
     protected StringType display;
 
     private static final long serialVersionUID = 22777321L;
 
+  /*
+   * Constructor
+   */
+    public Reference() {
+      super();
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param theReference The given reference string (e.g. "Patient/123" or "http://example.com/Patient/123")
+     */
+    public Reference(String theReference) {
+      super(theReference);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param theReference The given reference as an IdType (e.g. "Patient/123" or "http://example.com/Patient/123")
+     */
+    public Reference(IdType theReference) {
+      super(theReference);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param theResource The resource represented by this reference
+     */
+    public Reference(IRefImplResource theResource) {
+      super(theResource);
+    }
+
     /**
      * @return {@link #reference} (A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
      */
-    public IdType getReferenceElement() { 
-      if (this.reference == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Reference.reference");
-        else if (Configuration.doAutoCreate())
-          this.reference = new IdType(); // bb
-      return this.reference;
-    }
-
     public boolean hasReferenceElement() { 
       return this.reference != null && !this.reference.isEmpty();
     }
@@ -141,7 +109,7 @@ public class Reference extends Type implements IReference, ICompositeType {
     /**
      * @param value {@link #reference} (A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.). This is the underlying object with id, value and extensions. The accessor "getReference" gives direct access to the value
      */
-    public Reference setReferenceElement(IdType value) { 
+    public Reference setReferenceElement(StringType value) { 
       this.reference = value;
       return this;
     }
@@ -149,8 +117,8 @@ public class Reference extends Type implements IReference, ICompositeType {
     /**
      * @return A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with '#') refer to contained resources.
      */
-    public IdType getReference() { 
-      return getReferenceElement();
+    public String getReference() { 
+      return this.reference == null ? null : this.reference.getValue();
     }
 
     /**
@@ -161,7 +129,7 @@ public class Reference extends Type implements IReference, ICompositeType {
         this.reference = null;
       else {
         if (this.reference == null)
-          this.reference = new IdType();
+          this.reference = new StringType();
         this.reference.setValue(value);
       }
       return this;
@@ -255,7 +223,7 @@ public class Reference extends Type implements IReference, ICompositeType {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty()) && resource == null
+        return super.isEmpty() && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty())
           ;
       }
 

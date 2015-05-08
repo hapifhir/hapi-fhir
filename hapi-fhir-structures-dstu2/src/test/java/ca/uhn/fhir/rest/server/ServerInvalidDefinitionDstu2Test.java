@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import javax.servlet.ServletException;
 
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
