@@ -98,7 +98,9 @@ class TransactionParamBinder implements IParameter {
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
 
-		EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theRequest.getServer(), theRequest.getServletRequest());
+		// TODO: don't use a default encoding, just fail!
+		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
+
 		IParser parser = encoding.newParser(myContext);
 
 		BufferedReader reader;

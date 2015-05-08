@@ -45,6 +45,16 @@ public class SystemProviderTest {
 		ourLog.info(response);
 	}
 	
+	// TODO: enable!
+//	@Test
+	public void testTransactionFromBundle3() throws Exception {
+
+		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/grahame-transaction.xml");
+		String bundle = IOUtils.toString(bundleRes);
+		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
+		ourLog.info(response);
+	}
+
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 

@@ -1,0 +1,446 @@
+<!-- transaction test case 
+ 
+This is intended to be aplied to a database that just contains a set of resources from the spec 
+ 
+In this transaction
+- 1 create a resource (provenance, with both version and version independent references)
+- 2 create a resource if nothing already exists (where nothing does)
+- 3 create a resource if nothing already exists (where something does)
+- 4 update an exising resource
+- 4a delete a resource that doesn't exist
+- 5 update an existing resource version dependently 
+- 6 update an existing resource conditionally (where nothing does)
+- 7 update an existing resource conditionally (where something does)
+- 8 delete an existing resource
+- 9 delete an existing resource version dependently 
+- 10 delete an existing resource conditionally (where nothing does)
+- 11 delete an existing resource conditionally (where something does)
+- 12 read a resource 
+- 13 read a resource for something in the transaction
+- 14 vread a resource 
+- 15 do a search 
+ 
+error conditions (comment out for success):
+- 16 create a resource with multiple matches
+- 17 update an existing resource that doesn't exist
+- 18 update a duplicate resource 
+- 19 update a resource specifying a wrong version
+- 20 update a resource conditionally with multiple matches
+- 22 delete a duplicate resource 
+- 23 delete a duplicate with update
+- 24 delete a resource specifying a wrong version
+- 25 delete a resource conditionally with multiple matches
+- 26 conditionally delete a resource created in the transaction
+- 27 conditionally update a resource created in the transaction 
+ 
+ 
+-->
+<Bundle xmlns="http://hl7.org/fhir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hl7.org/fhir file:///C:/work/org.hl7.fhir/build/schema/bundle.xsd">
+  <id value="e4f1c1b8-c7db-49c7-a891-f8a014e75911"/>
+  <type value="transaction"/>
+  <base value="http://hl7.org/fhir"/>
+  <!-- this is in the spec space -->
+  <!-- - 1 create a resource (provenance, with both version and version independent references) -->
+  <entry>
+    <resource>
+      <Provenance xmlns="http://hl7.org/fhir">
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Make sure links are updated: <a href="Patient/xdfsdsg">Patient</a>
+          </div>
+        </text>
+        <target>
+          <reference value="Patient/xdfsdsg/_history/1"/>
+        </target>
+        <target>
+          <reference value="Patient/patx1"/>
+        </target>
+        <recorded value="2015-04-30T12:00:00+05:00"/>
+      </Provenance>
+    </resource>
+    <transaction>
+      <method value="POST"/>
+      <url value="Provenance"/>
+    </transaction>
+  </entry>
+  <!-- - 2 create a resource if nothing already exists (where nothing does) -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <id value="xdfsdsg"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped for brevity</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:1.2.36.146.595.217.0.1"/>
+          <value value="xdfsdsg"/>
+        </identifier>
+ 
+        <!--   Peter James Chalmers, but called &quot;Jim&quot;   -->
+        <name>
+          <family value="Chalmers"/>
+          <given value="Peter"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="POST"/>
+      <url value="Patient"/>
+      <ifNoneExist value="Patient?identifier=xdfsdsg"/>
+    </transaction>
+  </entry>
+  <!-- - 3 create a resource if nothing already exists (where something does) -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped for brevity</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:1.2.36.146.595.217.0.1"/>
+          <value value="12345"/>
+        </identifier>
+ 
+        <!--   Peter James Chalmers, but called &quot;Jim&quot;   -->
+        <name>
+          <family value="Chalmers"/>
+          <given value="Peter"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="POST"/>
+      <url value="Patient"/>
+      <ifNoneExist value="Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345"/>
+    </transaction>
+  </entry>
+  <!-- - 4 update an exising resource -->
+  <entry>
+    <resource>
+      <Patient>
+        <id value="xcda"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <name>
+          <family value="Levin"/>
+          <given value="Henry"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient/xcda"/>
+    </transaction>
+  </entry>
+  <!-- - 4a update an existing resource that doesn't exist -->
+  <entry>
+    <resource>
+      <Patient>
+        <id value="xcda1"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <name>
+          <family value="Levin"/>
+          <given value="Henry"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient/xcda"/>
+    </transaction>
+  </entry>
+  <!-- - 5 update an existing resource version dependently  -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <id value="xds"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <name>
+          <family value="Doe"/>
+          <given value="John"/>
+        </name>
+      </Patient>
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient/xds"/>
+      <ifMatch value="W/1"/>
+    </transaction>
+  </entry>
+  <!-- - 6 update an existing resource conditionally (where nothing does) -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">    
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:0.1.2.3.4.5.6.7"/>
+          <value value="123456xx"/>
+        </identifier>
+        <name>
+          <family value="Donald"/>
+          <given value="Duck"/>
+          <given value="D"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient?identifier=urn:oid:0.1.2.3.4.5.6.7|123456xx"/>
+    </transaction>
+  </entry>
+  <!-- - 7 update an existing resource conditionally (where something does) -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <id value="patx1"/>    
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:0.1.2.3.4.5.6.7"/>
+          <value value="654321"/>
+        </identifier>
+        <name>
+          <family value="Donald"/>
+          <given value="Duck"/>
+        </name>
+      </Patient>
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient?identifier=urn:oid:0.1.2.3.4.5.6.7|654321"/>
+    </transaction>
+  </entry>
+  <!-- - 8 delete an existing resource -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient/glossy"/>
+    </transaction>
+  </entry>
+  <!-- - 9 delete an existing resource version dependently  -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient/us01"/>
+      <ifMatch value="W/1"/>
+    </transaction>
+  </entry>
+  <!-- - 10 delete an existing resource conditionally (where nothing does) -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient?identifier=http://www.maroondah.vic.gov.au/AnimalRegFees.aspx|1234123x"/>
+    </transaction>
+  </entry>
+  <!-- - 11 delete an existing resource conditionally (where something does) -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient?identifier=http://www.maroondah.vic.gov.au/AnimalRegFees.aspx|1234123"/>
+    </transaction>
+  </entry>
+  <!-- - 12 read a resource  -->
+  <entry>
+    <transaction>
+      <method value="GET"/>
+      <url value="Patient/dicom"/>
+    </transaction>
+  </entry>
+  <!-- - 13 read a resource for something in the transaction -->
+  <entry>
+    <transaction>
+      <method value="GET"/>
+      <url value="patient/xcda"/>
+    </transaction>
+  </entry>
+  <!-- - 14 vread a resource  -->
+  <entry>
+    <transaction>
+      <method value="GET"/>
+      <url value="Patient/xcda/_history/1"/>
+    </transaction>
+  </entry>
+  <!-- - 15 do a search  -->
+  <entry>
+    <transaction>
+      <method value="GET"/>
+      <url value="Patient?name=peter"/>
+    </transaction>
+  </entry>
+ 
+  <!-- error conditionas -->  
+  <!-- - 16 create a resource with multiple matches -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <id value="xdfsdsg"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped for brevity</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:1.2.36.146.595.217.0.1"/>
+          <value value="xdfsdsg"/>
+        </identifier>
+ 
+        <!--   Peter James Chalmers, but called &quot;Jim&quot;   -->
+        <name>
+          <family value="Chalmers"/>
+          <given value="Peter"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="POST"/>
+      <url value="Patient"/>
+      <ifNoneExist value="Patient?name=peter"/>
+    </transaction>
+  </entry>
+  <!-- - 18 update a duplicate resource  -->
+  <entry>
+    <resource>
+      <Patient>
+        <id value="xcda"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <name>
+          <family value="Levin1"/>
+          <given value="Henry"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient/xcda"/>
+    </transaction>
+  </entry>
+  <!-- - 19 update a resource specifying a wrong version -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <id value="ihe-pcd"/>
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <name>
+          <family value="Doe"/>
+          <given value="John"/>
+        </name>
+      </Patient>
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient/xds"/>
+      <ifMatch value="W/2"/>
+    </transaction>
+  </entry>
+  <!-- - 20 update a resource conditionally with multiple matches -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">    
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:0.1.2.3.4.5.6.7"/>
+          <value value="123456xx"/>
+        </identifier>
+        <name>
+          <family value="Donald"/>
+          <given value="Duck"/>
+          <given value="D"/>
+        </name>
+      </Patient>  
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient?name=peter"/>
+    </transaction>
+  </entry>
+  <!-- - 21 delete a resource that doesn't exist -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient/xxxxxxxxxxxxxxxxxxxxxx"/>
+    </transaction>
+  </entry>
+  <!-- - 22 delete a duplicate resource  -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient/us01"/>
+    </transaction>
+  </entry>
+  <!-- - 23 delete a duplicate with update -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient/xcda"/>
+    </transaction>
+  </entry>
+  <!-- - 24 delete a resource specifying a wrong version -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient/proband"/>
+      <ifMatch value="W/2"/>
+    </transaction>
+  </entry>
+  <!-- - 25 delete a resource conditionally with multiple matches -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient?name=peter"/>
+    </transaction>
+  </entry>
+  <!-- - 26 conditionally delete a resource created in the transaction -->
+  <entry>
+    <transaction>
+      <method value="DELETE"/>
+      <url value="Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|xdfsdsg"/>
+    </transaction>
+  </entry>
+  <!-- - 27 conditionally update a resource created in the transaction  -->
+  <entry>
+    <resource>
+      <Patient xmlns="http://hl7.org/fhir">
+        <id value="patx1"/>    
+        <text>
+          <status value="generated"/>
+          <div xmlns="http://www.w3.org/1999/xhtml">Snipped</div>
+        </text>
+        <identifier>
+          <system value="urn:oid:0.1.2.3.4.5.6.7"/>
+          <value value="654321"/>
+        </identifier>
+        <name>
+          <family value="Donald1"/>
+          <given value="Duck"/>
+        </name>
+      </Patient>
+    </resource>
+    <transaction>
+      <method value="PUT"/>
+      <url value="Patient?identifier=urn:oid:0.1.2.3.4.5.6.7|xdfsdsg"/>
+    </transaction>
+  </entry>
+</Bundle>

@@ -195,7 +195,11 @@
 			<action type="add" issue="164">
 				Add support for :missing qualifier in JPA server.
 			</action>
-					</release>
+			<action type="fix">
+				Transaction server operations incorrectly used the "Accept" header instead of the "Content-Type" header to determine the
+				POST request encoding. Thanks to Rene Spronk for providing a test case!
+			</action>
+		</release>
 		<release version="0.9" date="2015-Mar-14">
 			<action type="add">
 				Support for DSTU2 features introduced: New resource definitions, Bundle resource, 
