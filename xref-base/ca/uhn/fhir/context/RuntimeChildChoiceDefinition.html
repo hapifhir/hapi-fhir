@@ -37,8 +37,8 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.IBase;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.IBaseResource;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.Child;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.Description;
@@ -93,57 +93,62 @@
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  		<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; next : myChoiceTypes) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  			String elementName;
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			String alternateElementName = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			BaseRuntimeElementDefinition&lt;?&gt; nextDef;
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			<strong class="jxr_keyword">if</strong> (IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(next)) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  				alternateElementName = getElementName() + <span class="jxr_string">"Resource"</span>;
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  				List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; types = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;();
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  				types.add((Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;) next);
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  				nextDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceReferenceDefinition.html">RuntimeResourceReferenceDefinition</a>(elementName, types);
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  				nextDef = theClassToElementDefinitions.get(next);
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			}
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			myNameToChildDefinition.put(elementName, nextDef);
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			<strong class="jxr_keyword">if</strong> (alternateElementName != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 				myNameToChildDefinition.put(alternateElementName, nextDef);
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			}
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			<strong class="jxr_keyword">if</strong> (IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(next)) {
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; refType = theContext.getVersion().getResourceReferenceType();
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 				myDatatypeToElementDefinition.put(refType, nextDef);
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 				alternateElementName = getElementName() + <span class="jxr_string">"Resource"</span>;
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 				myDatatypeToElementName.put(refType, alternateElementName);
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			}
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			myDatatypeToElementDefinition.put(next, nextDef);
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			myDatatypeToElementName.put(next, elementName);
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 		}
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	}
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	@Override
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<strong class="jxr_keyword">public</strong> String getChildNameByDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theDatatype) {
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">return</strong> myDatatypeToElementName.get(theDatatype);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			BaseRuntimeElementDefinition&lt;?&gt; nextDef;
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			<strong class="jxr_keyword">if</strong> (IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(next)) {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  				elementName = getElementName() + StringUtils.capitalize(next.getSimpleName());
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				List&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt; types = <strong class="jxr_keyword">new</strong> ArrayList&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;&gt;();
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  				types.add((Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;) next);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  				nextDef = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceReferenceDefinition.html">RuntimeResourceReferenceDefinition</a>(elementName, types, false);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  				nextDef.sealAndInitialize(theContext, theClassToElementDefinitions);
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  				
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  				myNameToChildDefinition.put(getElementName() + <span class="jxr_string">"Reference"</span>, nextDef);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  				myNameToChildDefinition.put(getElementName() + <span class="jxr_string">"Resource"</span>, nextDef);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  				
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 				nextDef = theClassToElementDefinitions.get(next);
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 				elementName = getElementName() + StringUtils.capitalize(nextDef.getName());
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			}
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 			myNameToChildDefinition.put(elementName, nextDef);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 			
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 			<strong class="jxr_keyword">if</strong> (IBaseResource.<strong class="jxr_keyword">class</strong>.isAssignableFrom(next)) {
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 				Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; refType = theContext.getVersion().getResourceReferenceType();
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 				myDatatypeToElementDefinition.put(refType, nextDef);
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 				
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 				String alternateElementName;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 				<strong class="jxr_keyword">if</strong> (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 					alternateElementName = getElementName() + <span class="jxr_string">"Resource"</span>;
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 					alternateElementName = getElementName() + <span class="jxr_string">"Reference"</span>;
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 				}
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				myDatatypeToElementName.put(refType, alternateElementName);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 			}
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			myDatatypeToElementDefinition.put(next, nextDef);
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			myDatatypeToElementName.put(next, elementName);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		}
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		myDatatypeToElementDefinition = Collections.unmodifiableMap(myDatatypeToElementDefinition);
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 	@Override
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">public</strong> BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theDatatype) {
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		<strong class="jxr_keyword">return</strong> myDatatypeToElementDefinition.get(theDatatype);
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">public</strong> String getChildNameByDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theDatatype) {
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		<strong class="jxr_keyword">return</strong> myDatatypeToElementName.get(theDatatype);
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 	}
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	<strong class="jxr_keyword">public</strong> Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; getValidChildTypes() {
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		<strong class="jxr_keyword">return</strong> Collections.unmodifiableSet((myDatatypeToElementDefinition.keySet()));
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 	}
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> }
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	@Override
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	<strong class="jxr_keyword">public</strong> BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theDatatype) {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">return</strong> myDatatypeToElementDefinition.get(theDatatype);
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	}
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	<strong class="jxr_keyword">public</strong> Set&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;&gt; getValidChildTypes() {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		<strong class="jxr_keyword">return</strong> Collections.unmodifiableSet((myDatatypeToElementDefinition.keySet()));
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 	}
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

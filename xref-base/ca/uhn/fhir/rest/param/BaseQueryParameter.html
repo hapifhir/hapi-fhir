@@ -36,14 +36,14 @@
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.IBaseResource;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.dstu.valueset.RestSearchParameterType;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.IParameter;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.QualifiedParamList;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.Request;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.RequestDetails;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.IParameter;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.QualifiedParamList;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.Request;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.RequestDetails;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.RestSearchParameterTypeEnum;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.SearchMethodBinding;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.SearchMethodBinding.QualifierDetails;
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.InternalErrorException;
@@ -57,7 +57,7 @@
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> String getName();
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/model/dstu/valueset/RestSearchParameterType.html">RestSearchParameterType</a> getParamType();
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <a href="../../../../../ca/uhn/fhir/rest/method/RestSearchParameterTypeEnum.html">RestSearchParameterTypeEnum</a> getParamType();
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  <em class="jxr_javadoccomment">	 * Returns null if blacklist is "none"</em>
@@ -107,7 +107,7 @@
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  	}
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 	@Override
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> translateClientArgumentIntoQueryArgument(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theSourceClientArgument, Map&lt;String, List&lt;String&gt;&gt; theTargetQueryArguments, <a href="../../../../../org/hl7/fhir/instance/model/IBaseResource.html">IBaseResource</a> theTargetResource) <strong class="jxr_keyword">throws</strong> InternalErrorException {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> translateClientArgumentIntoQueryArgument(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Object theSourceClientArgument, Map&lt;String, List&lt;String&gt;&gt; theTargetQueryArguments, <a href="../../../../../org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a> theTargetResource) <strong class="jxr_keyword">throws</strong> InternalErrorException {
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 		<strong class="jxr_keyword">if</strong> (theSourceClientArgument == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			<strong class="jxr_keyword">if</strong> (isRequired()) {
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NullPointerException(<span class="jxr_string">"SearchParameter '"</span> + getName() + <span class="jxr_string">"' is required and may not be null"</span>);

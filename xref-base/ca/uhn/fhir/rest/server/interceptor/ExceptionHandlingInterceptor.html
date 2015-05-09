@@ -137,7 +137,7 @@
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 		<strong class="jxr_keyword">boolean</strong> requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 		String fhirServerBase = ((Request) theRequestDetails).getFhirServerBase();
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), <strong class="jxr_keyword">true</strong>, requestIsBrowser,
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 				NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase);
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 				NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase, false);
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> <em class="jxr_comment">//		theResponse.setStatus(statusCode);</em>
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_comment">//		theRequestDetails.getServer().addHeadersToResponse(theResponse);</em>

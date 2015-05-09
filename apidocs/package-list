@@ -26,5 +26,4 @@ ca.uhn.fhir.rest.server.interceptor
 ca.uhn.fhir.store
 ca.uhn.fhir.util
 ca.uhn.fhir.validation
-org.hl7.fhir.instance.model
 org.hl7.fhir.instance.model.api

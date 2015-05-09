@@ -39,8 +39,8 @@
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.io.IOUtils;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.Validate;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.IBaseResource;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseBinary;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseBinary;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.ConfigurationException;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
@@ -213,12 +213,12 @@
 <a class="jxr_linenumber" name="L205" href="#L205">205</a> 		<strong class="jxr_keyword">if</strong> (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> 			String ifNoneMatch = ((Request)theRequest).getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 <a class="jxr_linenumber" name="L207" href="#L207">207</a> 			<strong class="jxr_keyword">if</strong> (retVal.size() == 1 &amp;&amp; StringUtils.isNotBlank(ifNoneMatch)) {
-<a class="jxr_linenumber" name="L208" href="#L208">208</a> 				List&lt;IResource&gt; responseResources = retVal.getResources(0, 1);
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> 				IResource responseResource = responseResources.get(0);
+<a class="jxr_linenumber" name="L208" href="#L208">208</a> 				List&lt;IBaseResource&gt; responseResources = retVal.getResources(0, 1);
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 				IBaseResource responseResource = responseResources.get(0);
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 				
 <a class="jxr_linenumber" name="L211" href="#L211">211</a> 				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
-<a class="jxr_linenumber" name="L212" href="#L212">212</a> 				<strong class="jxr_keyword">if</strong> (responseResource.getId() != <strong class="jxr_keyword">null</strong> &amp;&amp; responseResource.getId().hasVersionIdPart()) {
-<a class="jxr_linenumber" name="L213" href="#L213">213</a> 					<strong class="jxr_keyword">if</strong> (responseResource.getId().getVersionIdPart().equals(ifNoneMatch)) {
+<a class="jxr_linenumber" name="L212" href="#L212">212</a> 				<strong class="jxr_keyword">if</strong> (responseResource.getIdElement() != <strong class="jxr_keyword">null</strong> &amp;&amp; responseResource.getIdElement().hasVersionIdPart()) {
+<a class="jxr_linenumber" name="L213" href="#L213">213</a> 					<strong class="jxr_keyword">if</strong> (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 						ourLog.debug(<span class="jxr_string">"Returning HTTP 301 because request specified {}={}"</span>, Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/rest/server/exceptions/NotModifiedException.html">NotModifiedException</a>(<span class="jxr_string">"Not Modified"</span>);
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 					}

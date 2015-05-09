@@ -105,87 +105,91 @@
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L98" href="#L98">98</a>  <em class="jxr_javadoccomment">	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance</em>
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId, <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theVersionId) {
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		myId = theId;
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		myVersionId = theVersionId;
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	}
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> <em class="jxr_javadoccomment">	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance</em>
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId, <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theVersionId, <a href="../../../../../ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html">BaseOperationOutcome</a> theBaseOperationOutcome) {
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		myId = theId;
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		myVersionId = theVersionId;
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		myOperationOutcome = theBaseOperationOutcome;
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 	}
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> getId() {
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">return</strong> myId;
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	}
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> <em class="jxr_javadoccomment">	 * Returns the {@link BaseOperationOutcome} resource to return to the client or &lt;code&gt;null&lt;/code&gt; if none.</em>
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">	 * @return This method &lt;b&gt;will return null&lt;/b&gt;, unlike many methods in the API.</em>
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html">BaseOperationOutcome</a> getOperationOutcome() {
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		<strong class="jxr_keyword">return</strong> myOperationOutcome;
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	}
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> <em class="jxr_javadoccomment">	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available</em>
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> getVersionId() {
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		<strong class="jxr_keyword">return</strong> myVersionId;
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	}
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> <em class="jxr_javadoccomment">	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are </em>
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> <em class="jxr_javadoccomment">	 * returned to client instances, if the server has responded with an HTTP 201 Created.</em>
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 	<strong class="jxr_keyword">public</strong> Boolean getCreated() {
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 		<strong class="jxr_keyword">return</strong> myCreated;
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 	}
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> <em class="jxr_javadoccomment">	 * If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called whether the</em>
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> <em class="jxr_javadoccomment">	 * result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.</em>
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">	 * Users of HAPI should only interact with this method in Server applications</em>
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">	 * </em>
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">	 * @param theCreated</em>
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called</em>
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.</em>
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> setCreated(Boolean theCreated) {
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 		myCreated = theCreated;
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 	}
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> <em class="jxr_javadoccomment">	 * @param theId</em>
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">	 *            The ID of the created/updated resource</em>
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setId(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId) {
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 		myId = theId;
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 	}
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> <em class="jxr_javadoccomment">	 * Sets the {@link BaseOperationOutcome} resource to return to the client. Set to &lt;code&gt;null&lt;/code&gt; (which is the default) if none.</em>
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setOperationOutcome(<a href="../../../../../ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html">BaseOperationOutcome</a> theBaseOperationOutcome) {
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		myOperationOutcome = theBaseOperationOutcome;
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> 	}
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 
-<a class="jxr_linenumber" name="L173" href="#L173">173</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> <em class="jxr_javadoccomment">	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IdDt)}</em>
-<a class="jxr_linenumber" name="L175" href="#L175">175</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setVersionId(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theVersionId) {
-<a class="jxr_linenumber" name="L177" href="#L177">177</a> 		myVersionId = theVersionId;
-<a class="jxr_linenumber" name="L178" href="#L178">178</a> 	}
-<a class="jxr_linenumber" name="L179" href="#L179">179</a> 
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> }
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 	@Deprecated
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId, <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theVersionId) {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		myId = theId;
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		myVersionId = theVersionId;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 	}
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 * @deprecated Use the constructor which accepts a single IdDt parameter, and include the logical ID and version ID in that IdDt instance</em>
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	@Deprecated
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a>(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId, <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theVersionId, <a href="../../../../../ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html">BaseOperationOutcome</a> theBaseOperationOutcome) {
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		myId = theId;
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		myVersionId = theVersionId;
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		myOperationOutcome = theBaseOperationOutcome;
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	}
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> getId() {
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">return</strong> myId;
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	}
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> <em class="jxr_javadoccomment">	 * Returns the {@link BaseOperationOutcome} resource to return to the client or &lt;code&gt;null&lt;/code&gt; if none.</em>
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> <em class="jxr_javadoccomment">	 * @return This method &lt;b&gt;will return null&lt;/b&gt;, unlike many methods in the API.</em>
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html">BaseOperationOutcome</a> getOperationOutcome() {
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">return</strong> myOperationOutcome;
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> <em class="jxr_javadoccomment">	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available</em>
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	@Deprecated
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> getVersionId() {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		<strong class="jxr_keyword">return</strong> myVersionId;
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	}
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> <em class="jxr_javadoccomment">	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are</em>
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> <em class="jxr_javadoccomment">	 * returned to client instances, if the server has responded with an HTTP 201 Created.</em>
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 	<strong class="jxr_keyword">public</strong> Boolean getCreated() {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 		<strong class="jxr_keyword">return</strong> myCreated;
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	}
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> <em class="jxr_javadoccomment">	 * If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called whether the</em>
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> <em class="jxr_javadoccomment">	 * result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.</em>
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> <em class="jxr_javadoccomment">	 * &lt;p&gt;</em>
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> <em class="jxr_javadoccomment">	 * Users of HAPI should only interact with this method in Server applications</em>
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> <em class="jxr_javadoccomment">	 * &lt;/p&gt;</em>
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> <em class="jxr_javadoccomment">	 * </em>
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> <em class="jxr_javadoccomment">	 * @param theCreated</em>
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> <em class="jxr_javadoccomment">	 *            If not null, indicates whether the resource was created (as opposed to being updated). This is generally not needed, since the server can assume based on the method being called</em>
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> <em class="jxr_javadoccomment">	 *            whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.</em>
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/api/MethodOutcome.html">MethodOutcome</a> setCreated(Boolean theCreated) {
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 		myCreated = theCreated;
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 	}
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> <em class="jxr_javadoccomment">	 * @param theId</em>
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> <em class="jxr_javadoccomment">	 *            The ID of the created/updated resource</em>
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setId(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theId) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		myId = theId;
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 	}
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> <em class="jxr_javadoccomment">	 * Sets the {@link BaseOperationOutcome} resource to return to the client. Set to &lt;code&gt;null&lt;/code&gt; (which is the default) if none.</em>
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setOperationOutcome(<a href="../../../../../ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html">BaseOperationOutcome</a> theBaseOperationOutcome) {
+<a class="jxr_linenumber" name="L173" href="#L173">173</a> 		myOperationOutcome = theBaseOperationOutcome;
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 	}
+<a class="jxr_linenumber" name="L175" href="#L175">175</a> 
+<a class="jxr_linenumber" name="L176" href="#L176">176</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L177" href="#L177">177</a> <em class="jxr_javadoccomment">	 * @deprecated Put the ID and version ID into the same IdDt instance and pass it to {@link #setId(IdDt)}</em>
+<a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L179" href="#L179">179</a> 	@Deprecated
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setVersionId(<a href="../../../../../ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a> theVersionId) {
+<a class="jxr_linenumber" name="L181" href="#L181">181</a> 		myVersionId = theVersionId;
+<a class="jxr_linenumber" name="L182" href="#L182">182</a> 	}
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 
+<a class="jxr_linenumber" name="L184" href="#L184">184</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
