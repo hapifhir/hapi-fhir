@@ -718,7 +718,7 @@ public class JsonParser extends BaseParser implements IParser {
 				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
 			}
 
-			if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, profiles) == false) {
+			if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 				theEventWriter.writeStartObject("meta");
 				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
 				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);

@@ -10,6 +10,11 @@
 			<action type="add">
 				Add support for reference implementation structures.
 			</action>
+			<action type="fix">
+				Parsers did not encode the resource meta element if the resource 
+				had tags but no other meta elements. Thanks to Bill de Beaubien and
+				Claude Nanjo for finding this.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

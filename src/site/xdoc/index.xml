@@ -45,7 +45,27 @@
 		</section>
 
 		<section name="Announcements">
-
+			<p>
+				<b>May 8, 2015 - HAPI FHIR 1.0 Released</b> - HAPI 1.0 has been released! As always, 1.0 brings lots of fixes and features, and also brings the DSTU2 model classes up to the May 2015 DSTU2 ballot candidate structure definitions. Upgrading is recommended.
+			</p>
+			<p>
+				At the same time, I am uploading the first builds of HAPI FHIR 1.1-SNAPSHOT. In the next release cycle we are introducing support for the FHIR reference implementation structures. This is an exciting development because it marks the beginning of an effort to merge the two libraries. This will mean that RI users can take advantage of HAPI's powerful client and server frameworks, and HAPI users can take advantage of the RI's powerful validation tooling.
+			</p>
+			<p>
+				I will note that 1.1 will bring a few minor API changes, so upgrading your application to this level may require a few tweaks. Specifically, a new interface (IBaseResource) has been introduced which acts as a superinterface for both HAPI's structures and the RI ones.
+			</p>
+			<p>
+				The existing IResource (HAPI's resource interface) extends this new interface, as does an interface called IRefImplInterface which marks RI structures. Some methods in the parser and in the client which previously returned IResource (HAPI's resource interface) now return IBaseResource, so a cast to IResource may be required in some cases. If you are feeling adventurous and want to give these structures a spin, go for it! Feel free to post questions here.
+			</p>
+			<p>
+				As always, you can see the complete list of what has
+				changed by consulting the <a href="./changes-report.html">changelog</a>, and the
+				<a href="./download.html">download page</a> has information on where to get it.
+			</p>
+			<p>
+				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
+			</p>
+	
 			<p>
 				<b>March 14, 2015 - HAPI FHIR 0.9 Released</b> - HAPI 0.9 has now been released. This 
 				release is an important one. It brings a number of fixes and new features, and most importantly

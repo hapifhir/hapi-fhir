@@ -797,7 +797,7 @@ public class XmlParser extends BaseParser implements IParser {
 				List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
 				List<IdDt> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
 				TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(resource);
-				if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, profiles) == false) {
+				if (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 					theEventWriter.writeStartElement("meta");
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
 					if (updated != null) {

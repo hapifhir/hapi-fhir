@@ -959,6 +959,52 @@ public class XmlParserDstu2Test {
 	}
 	
 	@Test
+	public void testEncodeAndParseMetaProfiles() {
+		Patient p = new Patient();
+		p.addName().addFamily("FAMILY");
+		
+		TagList tagList = new TagList();
+		tagList.addTag("scheme1", "term1", "label1");
+		tagList.addTag("scheme2", "term2", "label2");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+		
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder("<Patient xmlns=\"http://hl7.org/fhir\">", 
+			"<meta>",
+			"<meta>",
+			"<tag>",
+			"<system value=\"scheme1\"/>",
+			"<code value=\"term1\"/>",
+			"<display value=\"label1\"/>",
+			"</tag>",
+			"<tag>",
+			"<system value=\"scheme2\"/>",
+			"<code value=\"term2\"/>",
+			"<display value=\"label2\"/>",
+			"</tag>",
+			"</meta>",
+			"</meta>",
+			"<name>",
+			"<family value=\"FAMILY\"/>",
+			"</name>", 
+			"</Patient>"));
+		//@formatter:on
+		
+		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
+		List<IdDt> gotLabels = ResourceMetadataKeyEnum.PROFILES.get(parsed);
+		assertNull(gotLabels);
+
+		tagList = ResourceMetadataKeyEnum.TAG_LIST.get(parsed);
+		assertEquals(2, tagList.size());
+		
+		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
+		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
+	}
+
+	@Test
 	public void testDuration() {
 		Encounter enc = new Encounter();
 		DurationDt duration = new DurationDt();
