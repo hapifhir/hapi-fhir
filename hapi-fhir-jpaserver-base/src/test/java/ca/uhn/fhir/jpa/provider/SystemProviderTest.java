@@ -46,7 +46,9 @@ public class SystemProviderTest {
 		ourLog.info(response);
 	}
 	
-	// TODO: enable!
+	/**
+	 * This is Gramahe's test transaction - it requires some set up in order to work
+	 */
 //	@Test
 	public void testTransactionFromBundle3() throws Exception {
 

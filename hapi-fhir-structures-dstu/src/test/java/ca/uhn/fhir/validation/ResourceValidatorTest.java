@@ -60,8 +60,7 @@ public class ResourceValidatorTest {
 		 */
 		ourDefaultLocale = Locale.getDefault();
 		
-		Locale[] available = Locale.getAvailableLocales();
-		Locale newLocale = available[(int)(Math.random() * available.length)];
+		Locale newLocale = Locale.GERMANY;
 		Locale.setDefault(newLocale);
 		
 		ourLog.info("Tests are running in locale: " + newLocale.getDisplayName());
