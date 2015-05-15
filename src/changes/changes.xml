@@ -22,6 +22,11 @@
 				The self link in the Bundle returned by searches on the server does not respect the
 				server's address strategy (which resulted in an internal IP being shown on fhirtest.uhn.ca)
 			</action>
+			<action type="add">
+				Introduce ResponseHighlighterInterceptor, which provides syntax highlighting on RESTful server responses
+				if the server detects that the request is coming from a browser. This interceptor has been added
+				to fhirtest.uhn.ca responses.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

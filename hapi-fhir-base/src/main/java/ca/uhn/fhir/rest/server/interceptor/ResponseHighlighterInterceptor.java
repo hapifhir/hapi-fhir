@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -153,11 +154,30 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 			throws AuthenticationException {
+
+		/*
+		 * It's not a browser...
+		 */
 		String accept = theServletRequest.getHeader(Constants.HEADER_ACCEPT);
 		if (accept == null || !accept.toLowerCase().contains("html")) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
+		
+		/*
+		 * It's an AJAX request, so no HTML 
+		 */
+		String requestedWith = theServletRequest.getHeader("X-Requested-With");
+		if (requestedWith != null) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
 
+		/*
+		 * Not a GET
+		 */
+		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+		}
+		
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
 

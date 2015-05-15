@@ -42,6 +42,8 @@ public class SearchWithDstu2BundleTest {
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
+		responseContent = responseContent.replace("_pretty=true&amp;_format=xml", "_format=xml&amp;_pretty=true");
+		
 		ourLog.info(responseContent);
 
 		//@formatter:off

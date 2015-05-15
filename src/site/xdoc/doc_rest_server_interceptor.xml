@@ -172,7 +172,30 @@
 				</macro>
 				
 			</subsection>
+
+			<subsection name="Response Syntax Highlighting">
 			
+				<p>
+					The 
+					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.html">ResponseHighlighterInterceptor</a>
+					(<a href="./xref/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.html">code</a>)
+					detects when a request is coming from a browser and returns HTML with syntax highlighted XML/JSON instead
+					of just the raw text. In other words, if a user uses a browser to request "http://foo/Patient/1" by typing
+					this address into their URL bar, they will get nice formatted HTML back with a human readable version
+					of the content. This is helpful for testers.
+				</p>
+				
+				<p>
+					The following example shows how to register this interceptor within
+					a FHIR RESTful server.
+				</p>					
+				<macro name="snippet">
+					<param name="id" value="responseHighlighterInterceptor" />
+					<param name="file" value="examples/src/main/java/example/ServletExamples.java" />
+				</macro>
+				
+			</subsection>
+
 		</section>
 				
 		<section name="Creating Interceptors">

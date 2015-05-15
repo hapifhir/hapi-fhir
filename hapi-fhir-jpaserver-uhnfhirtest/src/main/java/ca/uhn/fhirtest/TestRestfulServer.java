@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 public class TestRestfulServer extends RestfulServer {
 
@@ -120,7 +121,7 @@ public class TestRestfulServer extends RestfulServer {
 		}
 		setResourceProviders(beans);
 
-		List provList = new ArrayList();
+		List<Object> provList = new ArrayList<Object>();
 		if (systemProviderDstu1 != null)
 			provList.add(systemProviderDstu1);
 		if (systemProviderDstu2 != null)
@@ -128,13 +129,11 @@ public class TestRestfulServer extends RestfulServer {
 		setPlainProviders(provList);
 
 		/*
-		 * This tells the server to use "incorrect" MIME types if it detects that the
-		 * request is coming from a browser in the hopes that the browser won't just treat
-		 * the content as a binary payload and try to download it (which is what generally
-		 * happens if you load a FHIR URL in a browser)
+		 * We want to format the response using nice HTML if it's a browser, since this
+		 * makes things a little easier for testers.
 		 */
-		setUseBrowserFriendlyContentTypes(true);
-
+		registerInterceptor(new ResponseHighlighterInterceptor());
+		
 		/*
 		 * Default to XML and pretty printing
 		 */

@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
 @SuppressWarnings("serial")
 public class ServletExamples {
@@ -47,7 +48,7 @@ public class ServletExamples {
          
          // ... define your resource providers here ...
          
-         // Now register the logging interceptor
+         // Now register the interceptor
          ExceptionHandlingInterceptor interceptor = new ExceptionHandlingInterceptor();
          registerInterceptor(interceptor);
 
@@ -58,5 +59,23 @@ public class ServletExamples {
       
    }
    // END SNIPPET: exceptionInterceptor
+
+   // START SNIPPET: responseHighlighterInterceptor
+   @WebServlet(urlPatterns = { "/fhir/*" }, displayName = "FHIR Server")
+   public class RestfulServerWithResponseHighlighter extends RestfulServer {
+
+      @Override
+      protected void initialize() throws ServletException {
+         
+         // ... define your resource providers here ...
+         
+         // Now register the interceptor
+         ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
+         registerInterceptor(interceptor);
+
+      }
+      
+   }
+   // END SNIPPET: responseHighlighterInterceptor
 
 }

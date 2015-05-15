@@ -170,7 +170,7 @@ public class RestfulServerUtils {
 
 	public static boolean prettyPrintResponse(RestfulServer theServer, RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] pretty = requestParams.remove(Constants.PARAM_PRETTY);
+		String[] pretty = requestParams.get(Constants.PARAM_PRETTY);
 		boolean prettyPrint;
 		if (pretty != null && pretty.length > 0) {
 			if (Constants.PARAM_PRETTY_VALUE_TRUE.equals(pretty[0])) {
@@ -304,7 +304,7 @@ public class RestfulServerUtils {
 
 	public static RestfulServer.NarrativeModeEnum determineNarrativeMode(RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
-		String[] narrative = requestParams.remove(Constants.PARAM_NARRATIVE);
+		String[] narrative = requestParams.get(Constants.PARAM_NARRATIVE);
 		RestfulServer.NarrativeModeEnum narrativeMode = null;
 		if (narrative != null && narrative.length > 0) {
 			try {

@@ -134,7 +134,7 @@ public class RestfulServerSelfReferenceTest {
 			Patient patient = (Patient) bundle.getEntries().get(0).getResource();
 			assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
 
-			assertEquals(uri, bundle.getLinkSelf().getValue());
+			assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLinkSelf().getValue());
 			assertEquals(baseUri, bundle.getLinkBase().getValue());
 		} finally {
 			hServer.stop();

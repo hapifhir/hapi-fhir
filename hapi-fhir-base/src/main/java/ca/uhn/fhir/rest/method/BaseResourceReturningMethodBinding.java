@@ -277,7 +277,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge 
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				boolean first = true;
-				for (Entry<String, String[]> nextParams : theRequest.getParameters().entrySet()) {
+				Map<String, String[]> parameters = theRequest.getParameters();
+				for (Entry<String, String[]> nextParams : parameters.entrySet()) {
 					for (String nextParamValue : nextParams.getValue()) {
 						if (first) {
 							b.append('?');
