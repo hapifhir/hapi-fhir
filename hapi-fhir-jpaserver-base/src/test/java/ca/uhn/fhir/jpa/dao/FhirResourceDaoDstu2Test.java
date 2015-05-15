@@ -1676,7 +1676,7 @@ public class FhirResourceDaoDstu2Test {
 
 	@Test
 	public void testSearchWithMissingReference() {
-		IdDt orgId = ourOrganizationDao.create(new Organization()).getId();
+		IdDt orgId = ourOrganizationDao.create(new Organization()).getId().toUnqualifiedVersionless();
 		IdDt notMissing;
 		IdDt missing;
 		{
@@ -1710,6 +1710,7 @@ public class FhirResourceDaoDstu2Test {
 			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients, not(containsInRelativeOrder(orgId)));
 		}
 	}
 

@@ -53,70 +53,31 @@ public class ResourceProviderDstu1Test {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
+	private static DaoConfig ourDaoConfig;
 	private static FhirContext ourFhirCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu1Test.class);
+	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	// private static IFhirResourceDao<Observation> ourObservationDao;
 	// private static IFhirResourceDao<Patient> ourPatientDao;
 	// private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
-	private static IFhirResourceDao<Organization> ourOrganizationDao;
-	private static DaoConfig ourDaoConfig;
 
 	// private static JpaConformanceProvider ourConfProvider;
 
-	/**
-	 * Test for issue #60
-	 */
-	@Test
-	public void testStoreUtf8Characters() throws Exception {
-		Organization org = new Organization();
-		org.setName("測試醫院");
-		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
-		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
-
-		// Read back directly from the DAO
-		{
-			Organization returned = ourOrganizationDao.read(orgId);
-			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
-			ourLog.info(val);
-			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
-		}
-		// Read back through the HTTP API
-		{
-			Organization returned = ourClient.read(Organization.class, orgId);
-			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
-			ourLog.info(val);
-			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+	private void delete(String theResourceType, String theParamName, String theParamValue) {
+		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
+		for (IResource next : resources.toListOfResources()) {
+			ourLog.info("Deleting resource: {}", next.getId());
+			ourClient.delete().resource(next).execute();
 		}
 	}
 
-	@Test
-	public void testSearchWithInclude() throws Exception {
-		Organization org = new Organization();
-		org.addIdentifier().setSystem("urn:system").setValue( "testSearchWithInclude01");
-		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
-
-		Patient pat = new Patient();
-		pat.addIdentifier().setSystem("urn:system").setValue("testSearchWithInclude02");
-		pat.getManagingOrganization().setReference(orgId);
-		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
-
-		//@formatter:off
-		Bundle found = ourClient
-				.search()
-				.forResource(Patient.class)
-				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system","testSearchWithInclude02"))
-				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
-				.execute();
-		//@formatter:on
-		
-		assertEquals(2, found.size());
-		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
-		assertEquals(null, found.getEntries().get(0).getSearchMode().getValueAsEnum());
-		assertEquals(null, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
-		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
-		assertEquals(null, found.getEntries().get(1).getSearchMode().getValueAsEnum());
-		assertEquals(null, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
+		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
+		for (IResource next : resources.toListOfResources()) {
+			ourLog.info("Deleting resource: {}", next.getId());
+			ourClient.delete().resource(next).execute();
+		}
 	}
 
 	
@@ -141,96 +102,6 @@ public class ResourceProviderDstu1Test {
 		assertEquals(100, found.getTotalResults().getValue().intValue());
 		assertEquals(50, found.getEntries().size());
 
-	}
-
-	/**
-	 * See issue #52
-	 */
-	@Test
-	public void testImagingStudyResources() throws Exception {
-		IGenericClient client = ourClient;
-
-		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
-
-		String resBody = IOUtils.toString(ResourceProviderDstu1Test.class.getResource("/imagingstudy.json"));
-		client.create().resource(resBody).execute();
-
-		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
-
-		assertEquals(1, newSize - initialSize);
-
-	}
-
-	/**
-	 * See issue #52
-	 */
-	@Test
-	public void testDocumentManifestResources() throws Exception {
-		IGenericClient client = ourClient;
-
-		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
-
-		String resBody = IOUtils.toString(ResourceProviderDstu1Test.class.getResource("/documentmanifest.json"));
-		client.create().resource(resBody).execute();
-
-		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
-
-		assertEquals(1, newSize - initialSize);
-
-	}
-
-	/**
-	 * See issue #52
-	 */
-	@Test
-	public void testDocumentReferenceResources() throws Exception {
-		IGenericClient client = ourClient;
-
-		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
-
-		String resBody = IOUtils.toString(ResourceProviderDstu1Test.class.getResource("/documentreference.json"));
-		client.create().resource(resBody).execute();
-
-		int newSize = client.search().forResource(DocumentReference.class).execute().size();
-
-		assertEquals(1, newSize - initialSize);
-
-	}
-
-	/**
-	 * See issue #52
-	 */
-	@Test
-	public void testDiagnosticOrderResources() throws Exception {
-		IGenericClient client = ourClient;
-
-		int initialSize = client.search().forResource(DiagnosticOrder.class).execute().size();
-
-		DiagnosticOrder res = new DiagnosticOrder();
-		res.addIdentifier().setSystem("urn:foo").setValue( "123");
-
-		client.create().resource(res).execute();
-
-		int newSize = client.search().forResource(DiagnosticOrder.class).execute().size();
-
-		assertEquals(1, newSize - initialSize);
-
-	}
-
-	private void delete(String theResourceType, String theParamName, String theParamValue) {
-		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
-		for (IResource next : resources.toListOfResources()) {
-			ourLog.info("Deleting resource: {}", next.getId());
-			ourClient.delete().resource(next).execute();
-		}
-	}
-
-	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
-		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
-		for (IResource next : resources.toListOfResources()) {
-			ourLog.info("Deleting resource: {}", next.getId());
-			ourClient.delete().resource(next).execute();
-		}
 	}
 
 	@Test
@@ -299,6 +170,80 @@ public class ResourceProviderDstu1Test {
 		assertEquals(3, res.size());
 		assertEquals(1, res.getResources(Encounter.class).size());
 		assertEquals(e1id.toUnqualifiedVersionless(), res.getResources(Encounter.class).get(0).getId().toUnqualifiedVersionless());
+
+	}
+
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testDiagnosticOrderResources() throws Exception {
+		IGenericClient client = ourClient;
+
+		int initialSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+
+		DiagnosticOrder res = new DiagnosticOrder();
+		res.addIdentifier().setSystem("urn:foo").setValue( "123");
+
+		client.create().resource(res).execute();
+
+		int newSize = client.search().forResource(DiagnosticOrder.class).execute().size();
+
+		assertEquals(1, newSize - initialSize);
+
+	}
+
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testDocumentManifestResources() throws Exception {
+		IGenericClient client = ourClient;
+
+		int initialSize = client.search().forResource(DocumentManifest.class).execute().size();
+
+		String resBody = IOUtils.toString(ResourceProviderDstu1Test.class.getResource("/documentmanifest.json"));
+		client.create().resource(resBody).execute();
+
+		int newSize = client.search().forResource(DocumentManifest.class).execute().size();
+
+		assertEquals(1, newSize - initialSize);
+
+	}
+
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testDocumentReferenceResources() throws Exception {
+		IGenericClient client = ourClient;
+
+		int initialSize = client.search().forResource(DocumentReference.class).execute().size();
+
+		String resBody = IOUtils.toString(ResourceProviderDstu1Test.class.getResource("/documentreference.json"));
+		client.create().resource(resBody).execute();
+
+		int newSize = client.search().forResource(DocumentReference.class).execute().size();
+
+		assertEquals(1, newSize - initialSize);
+
+	}
+
+	/**
+	 * See issue #52
+	 */
+	@Test
+	public void testImagingStudyResources() throws Exception {
+		IGenericClient client = ourClient;
+
+		int initialSize = client.search().forResource(ImagingStudy.class).execute().size();
+
+		String resBody = IOUtils.toString(ResourceProviderDstu1Test.class.getResource("/imagingstudy.json"));
+		client.create().resource(resBody).execute();
+
+		int newSize = client.search().forResource(ImagingStudy.class).execute().size();
+
+		assertEquals(1, newSize - initialSize);
 
 	}
 
@@ -416,6 +361,61 @@ public class ResourceProviderDstu1Test {
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getId().getIdPart());
 
+	}
+
+	@Test
+	public void testSearchWithInclude() throws Exception {
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system").setValue( "testSearchWithInclude01");
+		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+
+		Patient pat = new Patient();
+		pat.addIdentifier().setSystem("urn:system").setValue("testSearchWithInclude02");
+		pat.getManagingOrganization().setReference(orgId);
+		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
+
+		//@formatter:off
+		Bundle found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system","testSearchWithInclude02"))
+				.include(Patient.INCLUDE_MANAGINGORGANIZATION)
+				.execute();
+		//@formatter:on
+		
+		assertEquals(2, found.size());
+		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
+		assertEquals(null, found.getEntries().get(0).getSearchMode().getValueAsEnum());
+		assertEquals(null, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
+		assertEquals(null, found.getEntries().get(1).getSearchMode().getValueAsEnum());
+		assertEquals(null, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+	}
+
+	/**
+	 * Test for issue #60
+	 */
+	@Test
+	public void testStoreUtf8Characters() throws Exception {
+		Organization org = new Organization();
+		org.setName("測試醫院");
+		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
+		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+
+		// Read back directly from the DAO
+		{
+			Organization returned = ourOrganizationDao.read(orgId);
+			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			ourLog.info(val);
+			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+		}
+		// Read back through the HTTP API
+		{
+			Organization returned = ourClient.read(Organization.class, orgId);
+			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			ourLog.info(val);
+			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
+		}
 	}
 
 	@Test

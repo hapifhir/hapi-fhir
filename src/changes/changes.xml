@@ -15,6 +15,9 @@
 				had tags but no other meta elements. Thanks to Bill de Beaubien and
 				Claude Nanjo for finding this.
 			</action>
+			<action type="fix" issue="164">
+				Correct performance issue with :missing=true search requests where the parameter is a resource link. Thanks to wanghaisheng for all his help in testing this.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

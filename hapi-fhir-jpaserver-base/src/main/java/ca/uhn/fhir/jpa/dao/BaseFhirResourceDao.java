@@ -368,18 +368,6 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	private Set<Long> addPredicateParamMissing(Set<Long> thePids, String joinName, String theParamName, Class<? extends BaseResourceIndexedSearchParam> theParamTable) {
 		String resourceType = getContext().getResourceDefinition(getResourceType()).getName();
 
-		{ // TODO: rmeove this!
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Object> cq = builder.createQuery();
-			Root<? extends BaseResourceIndexedSearchParam> subQfrom = cq.from(theParamTable); 
-			cq.select(subQfrom);
-			Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
-			Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), resourceType);
-			cq.where(builder.and(subQtype, subQname));
-			List<Object> results = myEntityManager.createQuery(cq).getResultList();
-			ourLog.info("All results: {}", results);
-		}
-		
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
@@ -424,12 +412,13 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		subQ.where(createResourceLinkPathPredicate(theParamName, builder, subQfrom));
 		
 		Predicate joinPredicate = builder.not(builder.in(from.get("myId")).value(subQ));
-		
+		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
+
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(inPids, joinPredicate));
+			cq.where(builder.and(inPids, typePredicate, joinPredicate));
 		} else {
-			cq.where(joinPredicate);
+			cq.where(builder.and(typePredicate, joinPredicate));
 		}
 		
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
