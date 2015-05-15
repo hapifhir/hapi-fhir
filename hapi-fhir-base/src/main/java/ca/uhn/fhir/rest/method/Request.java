@@ -39,6 +39,7 @@ public class Request extends RequestDetails {
 
 	private String myFhirServerBase;
 	private String myOperation;
+	private String myRequestPath;
 	private boolean myRespondGzip;
 	private String mySecondaryOperation;
 	private HttpServletRequest myServletRequest;
@@ -53,6 +54,16 @@ public class Request extends RequestDetails {
 		return myOperation;
 	}
 
+
+	/**
+	 * The part of the request URL that comes after the server base.
+	 * <p>
+	 * Will not contain a leading '/'
+	 * </p>
+	 */
+	public String getRequestPath() {
+		return myRequestPath;
+	}
 
 	public String getSecondaryOperation() {
 		return mySecondaryOperation;
@@ -109,6 +120,11 @@ public class Request extends RequestDetails {
 			myUnqualifiedToQualifiedNames = Collections.emptyMap();
 		}
 
+	}
+
+	public void setRequestPath(String theRequestPath) {
+		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
+		myRequestPath = theRequestPath;
 	}
 
 	public void setRespondGzip(boolean theRespondGzip) {

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 /*
  * #%L
@@ -137,6 +138,20 @@ public class UrlUtil {
 			return URLDecoder.decode(theString, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			throw new Error("UTF-8 not supported, this shouldn't happen", e);
+		}
+	}
+
+	/**
+	 * URL encode a value
+	 */
+	public static String escape(String theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		try {
+			return URLEncoder.encode(theValue, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new Error("UTF-8 not supported on this platform");
 		}
 	}
 

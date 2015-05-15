@@ -18,6 +18,10 @@
 			<action type="fix" issue="164">
 				Correct performance issue with :missing=true search requests where the parameter is a resource link. Thanks to wanghaisheng for all his help in testing this.
 			</action>
+			<action type="fix" issue="149">
+				The self link in the Bundle returned by searches on the server does not respect the
+				server's address strategy (which resulted in an internal IP being shown on fhirtest.uhn.ca)
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

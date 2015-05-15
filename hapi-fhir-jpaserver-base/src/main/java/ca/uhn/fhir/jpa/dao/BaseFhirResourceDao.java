@@ -409,7 +409,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		subQ.select(subQfrom.get("mySourceResourcePid").as(Long.class));
 		
 //		subQ.where(builder.equal(subQfrom.get("myParamName"), theParamName));
-		subQ.where(createResourceLinkPathPredicate(theParamName, builder, subQfrom));
+		Predicate path = createResourceLinkPathPredicate(theParamName, builder, subQfrom);
+		subQ.where(path);
 		
 		Predicate joinPredicate = builder.not(builder.in(from.get("myId")).value(subQ));
 		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
@@ -646,9 +647,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 	private Predicate createResourceLinkPathPredicate(String theParamName, CriteriaBuilder builder, Root<? extends ResourceLink> from) {
 		RuntimeSearchParam param = getContext().getResourceDefinition(getResourceType()).getSearchParam(theParamName);
-		String path = param.getPath();
-
-		Predicate type = builder.equal(from.get("mySourcePath"), path);
+		List<String> path = param.getPathsSplit();
+		Predicate type = from.get("mySourcePath").in(path);
 		return type;
 	}
 

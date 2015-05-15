@@ -379,6 +379,9 @@ public class RestfulServer extends HttpServlet {
 		return myServerAddressStrategy;
 	}
 
+	/**
+	 * Returns the server base URL (with no trailing '/') for a given request
+	 */
 	public String getServerBaseForRequest(HttpServletRequest theRequest) {
 		String fhirServerBase;
 		fhirServerBase = myServerAddressStrategy.determineServerBase(getServletContext(), theRequest);
@@ -645,6 +648,7 @@ public class RestfulServer extends HttpServlet {
 			requestDetails.setCompleteUrl(completeUrl);
 			requestDetails.setServletRequest(theRequest);
 			requestDetails.setServletResponse(theResponse);
+			requestDetails.setRequestPath(requestPath);
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {

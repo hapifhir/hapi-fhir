@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
@@ -30,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -45,7 +48,9 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -59,6 +64,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.UrlUtil;
 
 abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
 	protected static final Set<String> ALLOWED_PARAMS;
@@ -92,7 +98,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
+							+ collectionType);
 				}
 			}
 			myResourceListCollectionType = collectionType;
@@ -108,7 +115,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else {
-			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
+					+ theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -255,6 +263,36 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		switch (getReturnType()) {
 		case BUNDLE: {
 
+			/*
+			 * Figure out the self-link for this request
+			 */
+			String serverBase = theServer.getServerBaseForRequest(theRequest.getServletRequest());
+			String linkSelf;
+			StringBuilder b = new StringBuilder();
+			b.append(serverBase);
+			if (isNotBlank(theRequest.getRequestPath())) {
+				b.append('/');
+				b.append(theRequest.getRequestPath());
+			}
+			// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge 
+			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+				boolean first = true;
+				for (Entry<String, String[]> nextParams : theRequest.getParameters().entrySet()) {
+					for (String nextParamValue : nextParams.getValue()) {
+						if (first) {
+							b.append('?');
+							first = false;
+						} else {
+							b.append('&');
+						}
+						b.append(UrlUtil.escape(nextParams.getKey()));
+						b.append('=');
+						b.append(UrlUtil.escape(nextParamValue));
+					}
+				}
+			}
+			linkSelf = b.toString();
+
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 				IBaseResource resource;
 				if (resultObj instanceof IBundleProvider) {
@@ -265,12 +303,11 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 
 				/*
-				 * We assume that the bundle we got back from the handling method may not have everything populated
-				 * (e.g. self links, bundle type, etc) so we do that here.
+				 * We assume that the bundle we got back from the handling method may not have everything populated (e.g. self links, bundle type, etc) so we do that here.
 				 */
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 				bundleFactory.initializeWithBundleResource(resource);
-				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), count, getResponseBundleType());
+				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, count, getResponseBundleType());
 
 				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 					IServerInterceptor next = theServer.getInterceptors().get(i);
@@ -280,7 +317,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 						return;
 					}
 				}
-				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip, theRequest.getFhirServerBase(), isAddContentLocationHeader());
+				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip,
+						theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				break;
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
@@ -291,7 +329,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
-				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, 0, count, null, getResponseBundleType(), includes);
+				bundleFactory.initializeBundleFromBundleProvider(theServer, result, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, 0, count, null, getResponseBundleType(),
+						includes);
 				Bundle bundle = bundleFactory.getDstu1Bundle();
 				if (bundle != null) {
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
@@ -313,7 +352,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 							return;
 						}
 					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader());
+					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode,
+							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				}
 
 				break;
@@ -337,7 +377,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 			}
 
-			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip, theRequest.getFhirServerBase(), isAddContentLocationHeader());
+			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip,
+					theRequest.getFhirServerBase(), isAddContentLocationHeader());
 			break;
 		}
 		}

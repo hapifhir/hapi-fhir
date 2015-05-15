@@ -70,10 +70,13 @@ public class SearchTest {
 
 	private static Server ourServer;
 	private static NarrativeModeEnum ourLastNarrativeMode;
+	private static RestfulServer ourServlet;
+	private static IServerAddressStrategy ourDefaultAddressStrategy;
 
 	@Before
 	public void before() {
 		ourLastNarrativeMode=null;
+		ourServlet.setServerAddressStrategy(ourDefaultAddressStrategy);
 	}
 	
 	@Test
@@ -134,6 +137,7 @@ public class SearchTest {
 		assertEquals(null, p.getNameFirstRep().getFamilyFirstRep().getValue());
 	}
 
+	
 	@Test
 	public void testReturnLinks() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=findWithLinks");
@@ -155,6 +159,38 @@ public class SearchTest {
 
 	}
 
+	/**
+	 * #149
+	 */
+	@Test
+	public void testReturnLinksWithAddressStrategy() throws Exception {
+		ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("https://blah.com/base"));
+		
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=findWithLinks");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		ourLog.info(responseContent);
+		
+		assertEquals(1, bundle.getEntries().size());
+		assertEquals("https://blah.com/base", bundle.getLinkBase().getValue());
+		assertEquals("https://blah.com/base/Patient?_query=findWithLinks", bundle.getLinkSelf().getValue());
+
+		Patient p = bundle.getResources(Patient.class).get(0);
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
+		assertEquals("http://foo/Patient?_id=1", bundle.getEntries().get(0).getLinkSearch().getValue());
+		assertEquals("https://blah.com/base/Patient/9988", bundle.getEntries().get(0).getLinkAlternate().getValue());
+		assertEquals("http://foo/Patient?_id=1", ResourceMetadataKeyEnum.LINK_SEARCH.get(p));
+		assertEquals("https://blah.com/base/Patient/9988", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
+
+	}
+
+	
 	@Test
 	public void testSearchById() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa");
@@ -385,11 +421,11 @@ public class SearchTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ourServlet = new RestfulServer();
+		ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
-		servlet.setResourceProviders(patientProvider, new DummyObservationResourceProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet.setResourceProviders(patientProvider, new DummyObservationResourceProvider());
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
@@ -399,8 +435,10 @@ public class SearchTest {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
+		ourDefaultAddressStrategy = ourServlet.getServerAddressStrategy();
 	}
 
+	
 	public static class DummyObservationResourceProvider implements IResourceProvider {
 
 		@Override
@@ -491,6 +529,7 @@ public class SearchTest {
 			retVal.add(patient);
 			return retVal;
 		}
+
 
 		@Search(queryName = "findPatientByAAA")
 		public List<Patient> findPatientByAAA02Named(@OptionalParam(name = "AAA") StringParam theParam) {
