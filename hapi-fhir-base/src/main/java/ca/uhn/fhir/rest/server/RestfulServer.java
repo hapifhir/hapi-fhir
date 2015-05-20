@@ -469,7 +469,10 @@ public class RestfulServer extends HttpServlet {
 			}
 		}
 
-		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), theRequest.getCompleteUrl(), prettyPrint, start, count, thePagingAction,
+		String linkSelfBase = getServerAddressStrategy().determineServerBase(getServletContext(), theRequest.getServletRequest());
+		String linkSelf = linkSelfBase + theRequest.getCompleteUrl().substring(theRequest.getCompleteUrl().indexOf('?'));
+		
+		bundleFactory.initializeBundleFromBundleProvider(this, resultList, responseEncoding, theRequest.getFhirServerBase(), linkSelf, prettyPrint, start, count, thePagingAction,
 				null, includes);
 
 		Bundle bundle = bundleFactory.getDstu1Bundle();
@@ -653,6 +656,15 @@ public class RestfulServer extends HttpServlet {
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
 				requestDetails.setOtherOperationType(OtherOperationTypeEnum.GET_PAGE);
+				if (theRequestType != RequestTypeEnum.GET) {
+					/*
+					 * We reconstruct the link-self URL using the request parameters, and
+					 * this would break if the parameters came in using a POST. We could
+					 * probably work around that but why bother unless someone comes up with
+					 * a reason for needing it.
+					 */
+					throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(RestfulServer.class, "getPagesNonHttpGet"));
+				}
 				handlePagingRequest(requestDetails, theResponse, pagingAction);
 				return;
 			}

@@ -1,10 +1,13 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +20,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -166,7 +171,6 @@ public class SearchTest {
 	public void testReturnLinksWithAddressStrategy() throws Exception {
 		ourServlet.setServerAddressStrategy(new HardcodedServerAddressStrategy("https://blah.com/base"));
 		
-		
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=findWithLinks");
 
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -177,17 +181,65 @@ public class SearchTest {
 
 		ourLog.info(responseContent);
 		
-		assertEquals(1, bundle.getEntries().size());
+		assertEquals(10, bundle.getEntries().size());
 		assertEquals("https://blah.com/base", bundle.getLinkBase().getValue());
 		assertEquals("https://blah.com/base/Patient?_query=findWithLinks", bundle.getLinkSelf().getValue());
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
 		assertEquals("http://foo/Patient?_id=1", bundle.getEntries().get(0).getLinkSearch().getValue());
-		assertEquals("https://blah.com/base/Patient/9988", bundle.getEntries().get(0).getLinkAlternate().getValue());
+		assertEquals("https://blah.com/base/Patient/99881", bundle.getEntries().get(0).getLinkAlternate().getValue());
 		assertEquals("http://foo/Patient?_id=1", ResourceMetadataKeyEnum.LINK_SEARCH.get(p));
-		assertEquals("https://blah.com/base/Patient/9988", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
+		assertEquals("https://blah.com/base/Patient/99881", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
 
+		String linkNext = bundle.getLinkNext().getValue();
+		ourLog.info(linkNext);
+		assertThat(linkNext, startsWith("https://blah.com/base?_getpages="));
+		
+		/*
+		 * Load the second page
+		 */
+		String urlPart = linkNext.substring(linkNext.indexOf('?'));
+		String link = "http://localhost:" + ourPort + urlPart;
+		httpGet = new HttpGet(link);
+
+		status = ourClient.execute(httpGet);
+		responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
+
+		ourLog.info(responseContent);
+		
+		assertEquals(10, bundle.getEntries().size());
+		assertEquals("https://blah.com/base", bundle.getLinkBase().getValue());
+		assertEquals(linkNext, bundle.getLinkSelf().getValue());
+
+		p = bundle.getResources(Patient.class).get(0);
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
+		assertEquals("http://foo/Patient?_id=11", bundle.getEntries().get(0).getLinkSearch().getValue());
+		assertEquals("https://blah.com/base/Patient/998811", bundle.getEntries().get(0).getLinkAlternate().getValue());
+		assertEquals("http://foo/Patient?_id=11", ResourceMetadataKeyEnum.LINK_SEARCH.get(p));
+		assertEquals("https://blah.com/base/Patient/998811", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
+
+	}
+	
+	/**
+	 * Try loading the page as a POST just to make sure we get the right error
+	 */
+	@Test
+	public void testGetPagesWithPost() throws Exception {
+		
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort);
+		List<? extends NameValuePair> parameters = Collections.singletonList(new BasicNameValuePair("_getpages", "AAA"));
+		httpPost.setEntity(new UrlEncodedFormEntity(parameters));
+		
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Requests for _getpages must use HTTP GET"));
 	}
 
 	
@@ -423,6 +475,7 @@ public class SearchTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer();
 		ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
 
 		ourServlet.setResourceProviders(patientProvider, new DummyObservationResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
@@ -572,12 +625,15 @@ public class SearchTest {
 		public List<Patient> findWithLinks() {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
-			Patient patient = new Patient();
-			patient.setId("1");
-			patient.addIdentifier("system", "AAANamed");
-			ResourceMetadataKeyEnum.LINK_SEARCH.put(patient, ("http://foo/Patient?_id=1"));
-			ResourceMetadataKeyEnum.LINK_ALTERNATE.put(patient, ("Patient/9988"));
-			retVal.add(patient);
+			for (int i = 1; i <= 20; i++) {
+				Patient patient = new Patient();
+				patient.setId(""+i);
+				patient.addIdentifier("system", "AAANamed");
+				ResourceMetadataKeyEnum.LINK_SEARCH.put(patient, ("http://foo/Patient?_id="+i));
+				ResourceMetadataKeyEnum.LINK_ALTERNATE.put(patient, ("Patient/9988" + i));
+				retVal.add(patient);
+			}
+			
 			return retVal;
 		}
 
