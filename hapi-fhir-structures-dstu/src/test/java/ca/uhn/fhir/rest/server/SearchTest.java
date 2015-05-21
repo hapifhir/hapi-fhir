@@ -152,15 +152,15 @@ public class SearchTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		assertEquals(1, bundle.getEntries().size());
+		assertEquals(10, bundle.getEntries().size());
 
 		Patient p = bundle.getResources(Patient.class).get(0);
 		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue().getValue());
 		assertEquals("http://foo/Patient?_id=1", bundle.getEntries().get(0).getLinkSearch().getValue());
-		assertEquals("http://localhost:" + ourPort + "/Patient/9988", bundle.getEntries().get(0).getLinkAlternate().getValue());
+		assertEquals("http://localhost:" + ourPort + "/Patient/99881", bundle.getEntries().get(0).getLinkAlternate().getValue());
 
 		assertEquals("http://foo/Patient?_id=1", ResourceMetadataKeyEnum.LINK_SEARCH.get(p));
-		assertEquals("http://localhost:" + ourPort + "/Patient/9988", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
+		assertEquals("http://localhost:" + ourPort + "/Patient/99881", ResourceMetadataKeyEnum.LINK_ALTERNATE.get(p));
 
 	}
 

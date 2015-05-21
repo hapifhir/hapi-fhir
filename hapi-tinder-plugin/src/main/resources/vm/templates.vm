@@ -158,6 +158,23 @@
 	}
 
 	/**
+	 * Adds a given new value for <b>${child.elementName}</b> ($esc.html(${child.shortName}))
+	 *
+	 * <p>
+	 * <b>Definition:</b>
+	 * $esc.html(${child.definition})
+	 * </p>
+	 * @param theValue The ${child.elementName} to add (must not be <code>null</code>)
+	 */
+	public ${child.declaringClassNameComplete} add${child.methodName}(${child.singleType} theValue) {
+		if (theValue == null) {
+			throw new NullPointerException("theValue must not be null");
+		}
+		get${child.methodName}().add(theValue);
+		return this;
+	}
+
+	/**
 	 * Gets the first repetition for <b>${child.elementName}</b> ($esc.html(${child.shortName})),
 	 * creating it if it does not already exist.
 	 *

@@ -54,6 +54,19 @@ public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 
 	@Test
+	public void testOmitResourceId() {
+		Patient p = new Patient();
+		p.setId("123");
+		p.addName().addFamily("ABC");
+		
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
+	}
+
+
+	
+	@Test
 	public void testParseBundleWithBinary() {
 		Binary patient = new Binary();
 		patient.setId(new IdDt("http://base/Binary/11/_history/22"));

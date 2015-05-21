@@ -757,6 +757,10 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		}
 
+		if (isOmitResourceId() && !theIncludedResource) {
+			resourceId = null;
+		}
+		
 		encodeResourceToXmlStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId);
 	}
 

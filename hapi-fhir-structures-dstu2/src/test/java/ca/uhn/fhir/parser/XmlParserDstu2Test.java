@@ -68,6 +68,18 @@ public class XmlParserDstu2Test {
 	}
 
 	@Test
+	public void testOmitResourceId() {
+		Patient p = new Patient();
+		p.setId("123");
+		p.addName().addFamily("ABC");
+		
+		assertThat(ourCtx.newXmlParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
+		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
+		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
+	}
+
+	
+	@Test
 	public void testEncodeExtensionWithResourceContent() {
 		IParser parser = ourCtx.newXmlParser();
 

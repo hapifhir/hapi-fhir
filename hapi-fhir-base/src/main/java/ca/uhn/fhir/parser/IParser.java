@@ -186,7 +186,7 @@ public interface IParser {
 	 * 
 	 * @param theStripVersionsFromReferences Set this to <code>false<code> to prevent the parser from removing
 	 * resource versions from references.
-	 * @return Returns an instance of <code>this</code> parser so that method calls can be chained together
+	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
 	 */
 	IParser setStripVersionsFromReferences(boolean theStripVersionsFromReferences);
 	
@@ -200,5 +200,24 @@ public interface IParser {
 	 * @return Returns the parser instance's configuration setting for stripping versions from resource references when encoding. Default is <code>true</code>.
 	 */
 	boolean isStripVersionsFromReferences();
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>) the ID of any resources being encoded
+	 * will not be included in the output. Note that this does not apply to contained resources, only to root resources.
+	 * In other words, if this is set to <code>true</code>, contained resources will still have local IDs but the
+	 * outer/containing ID will not have an ID.
+	 * 
+	 * @param theOmitResourceId Should resource IDs be omitted
+	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
+	 * @since 1.1
+	 */
+	IParser setOmitResourceId(boolean theOmitResourceId);
+
+	/**
+	 * Returns true if resource IDs should be omitted
+	 * @see #setOmitResourceId(boolean)
+	 * @since 1.1
+	 */
+	boolean isOmitResourceId();
 
 }

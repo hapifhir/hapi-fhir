@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -24,10 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IRefImplResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -136,11 +137,17 @@ public class MethodUtil {
 		StringBuilder urlExtension = new StringBuilder();
 		urlExtension.append(resourceName);
 
-		if (StringUtils.isNotBlank(theId)) {
-			urlExtension.append('/');
-			urlExtension.append(theId);
+		boolean dstu1 = theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1);
+		if (dstu1) {
+			/*
+			 * This was allowable at one point, but as of DSTU2 it isn't.
+			 */
+			if (StringUtils.isNotBlank(theId)) {
+				urlExtension.append('/');
+				urlExtension.append(theId);
+			}
 		}
-
+		
 		HttpPostClientInvocation retVal;
 		if (StringUtils.isBlank(theResourceBody)) {
 			retVal = new HttpPostClientInvocation(theContext, theResource, urlExtension.toString());
@@ -149,6 +156,9 @@ public class MethodUtil {
 		}
 		addTagsToPostOrPut(theContext, theResource, retVal);
 
+		if (!dstu1) {
+			retVal.setOmitResourceId(true);
+		}
 		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
 
 		return retVal;

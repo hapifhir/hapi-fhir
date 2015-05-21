@@ -27,6 +27,15 @@
 				if the server detects that the request is coming from a browser. This interceptor has been added
 				to fhirtest.uhn.ca responses.
 			</action>
+			<action type="fix">
+				Performing a create operation in a client used an incorrect URL if the
+				resource had an ID set. ID should be ignored for creates. Thanks to 
+				Peter Girard for reporting!
+			</action>
+			<action type="add" issue="170">
+				Add better addXXX() methods to structures, which take the datatype being added as a parameter. Thanks to Claude Nanjo for the
+				suggestion!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

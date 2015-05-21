@@ -113,5 +113,54 @@ public class ${className} extends ca.uhn.fhir.model.${version}.resource.BaseReso
 	}
 
 #end
+#if ( ${className} ==  "Bundle" )
+	/**
+	 * Returns the {@link ${hash}getLink() link} which matches a given {@link Link${hash}getRelation() relation}. 
+	 * If no link is found which matches the given relation, returns <code>null</code>. If more than one
+	 * link is found which matches the given relation, returns the first matching Link.
+	 * 
+	 * @param theRelation
+	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+	 * @return Returns a matching Link, or <code>null</code>
+	 * @see IBaseBundle#LINK_NEXT
+	 * @see IBaseBundle#LINK_PREV
+	 * @see IBaseBundle#LINK_SELF
+	 */
+	public Link getLink(String theRelation) {
+		org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+		for (Link next : getLink()) {
+			if (theRelation.equals(next.getRelation())) {
+				return next;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the {@link ${hash}getLink() link} which matches a given {@link Link${hash}getRelation() relation}. 
+	 * If no link is found which matches the given relation, creates a new Link with the
+	 * given relation and adds it to this Bundle. If more than one
+	 * link is found which matches the given relation, returns the first matching Link.
+	 * 
+	 * @param theRelation
+	 *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+	 * @return Returns a matching Link, or <code>null</code>
+	 * @see IBaseBundle#LINK_NEXT
+	 * @see IBaseBundle#LINK_PREV
+	 * @see IBaseBundle#LINK_SELF
+	 */
+	public Link getLinkOrCreate(String theRelation) {
+		org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+		for (Link next : getLink()) {
+			if (theRelation.equals(next.getRelation())) {
+				return next;
+			}
+		}
+		Link retVal = new Link();
+		retVal.setRelation(theRelation);
+		getLink().add(retVal);
+		return retVal;
+	}
+#end
 
 }

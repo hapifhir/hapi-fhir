@@ -53,7 +53,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().addFamily("blow").addGiven("joe").addGiven(null).addGiven("john");
+		value.addName().addFamily("blow").addGiven("joe").addGiven((String)null).addGiven("john");
 		value.getAddressFirstRep().addLine("123 Fake Street").addLine("Unit 1");
 		value.getAddressFirstRep().setCity("Toronto").setState("ON").setCountry("Canada");
 

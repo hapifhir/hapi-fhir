@@ -65,6 +65,7 @@ public abstract class BaseParser implements IParser {
 
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
+	private boolean myOmitResourceId;
 	private String myServerBaseUrl;
 	private boolean myStripVersionsFromReferences = true;
 	private boolean mySuppressNarratives;
@@ -259,6 +260,10 @@ public abstract class BaseParser implements IParser {
 				&& theIncludedResource == false;
 	}
 
+	public boolean isOmitResourceId() {
+		return myOmitResourceId;
+	}
+
 	@Override
 	public boolean isStripVersionsFromReferences() {
 		return myStripVersionsFromReferences;
@@ -343,6 +348,11 @@ public abstract class BaseParser implements IParser {
 	@Override
 	public TagList parseTagList(String theString) {
 		return parseTagList(new StringReader(theString));
+	}
+
+	public BaseParser setOmitResourceId(boolean theOmitResourceId) {
+		myOmitResourceId = theOmitResourceId;
+		return this;
 	}
 
 	@Override

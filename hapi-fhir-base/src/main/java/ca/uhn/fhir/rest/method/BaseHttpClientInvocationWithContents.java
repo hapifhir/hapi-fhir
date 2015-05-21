@@ -63,6 +63,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	private final FhirContext myContext;
 	private Map<String, List<String>> myIfNoneExistParams;
 	private String myIfNoneExistString;
+	private boolean myOmitResourceId = false;
 	private Map<String, List<String>> myParams;
 	private final IBaseResource myResource;
 	private final List<? extends IBaseResource> myResources;
@@ -234,6 +235,8 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 			encoding = EncodingEnum.XML;
 			parser = myContext.newXmlParser();
 		}
+		
+		parser.setOmitResourceId(myOmitResourceId);
 
 		AbstractHttpEntity entity;
 		if (myParams != null) {
@@ -303,6 +306,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	}
 
 	protected abstract HttpRequestBase createRequest(StringBuilder theUrl, AbstractHttpEntity theEntity);
+
 	private StringBuilder newHeaderBuilder(StringBuilder theUrlBase) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
@@ -311,13 +315,16 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 		return b;
 	}
-
 	public void setIfNoneExistParams(Map<String, List<String>> theIfNoneExist) {
 		myIfNoneExistParams = theIfNoneExist;
 	}
 
 	public void setIfNoneExistString(String theIfNoneExistString) {
 		myIfNoneExistString = theIfNoneExistString;
+	}
+
+	public void setOmitResourceId(boolean theOmitResourceId) {
+		myOmitResourceId = theOmitResourceId;
 	}
 
 }

@@ -683,6 +683,10 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		}
 
+		if (isOmitResourceId() && !theContainedResource) {
+			resourceId = null;
+		}
+		
 		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);
 	}
 

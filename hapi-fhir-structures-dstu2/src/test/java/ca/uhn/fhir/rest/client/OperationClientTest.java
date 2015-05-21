@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.io.StringReader;
@@ -51,7 +52,7 @@ public class OperationClientTest {
 
 		ourHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(ourHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ourHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -227,7 +228,6 @@ public class OperationClientTest {
 		assertEquals("http://foo/$OP_SERVER_LIST_PARAM", value.getURI().toASCIIString());
 		assertEquals(0, request.getParameter().size());
 		idx++;
-
 
 	}
 
