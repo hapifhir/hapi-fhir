@@ -1,0 +1,94 @@
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title/>
+	<id/>
+	<entry>
+		<id>cid:2</id>
+		<content type="text/xml">
+			<Condition xmlns="http://hl7.org/fhir">
+				<subject>
+					<reference value="Patient/cid:1"/>
+					<display value="Davidson, Harley"/>
+				</subject>
+				<dateAsserted value="2005-08-10"/>
+				<code>
+					<coding>
+						<system value="SNOMED CT"/>
+						<version value="2.16.840.1.113883.6.96"/>
+						<code value="59621000"/>
+						<display value="SNOMED CT"/>
+						<primary value="false"/>
+					</coding>
+					<coding>
+						<system value="ICD-9CM"/>
+						<version value="2.16.840.1.113883.6.103"/>
+						<code value="401.9"/>
+						<display value="ICD-9CM"/>
+						<primary value="false"/>
+					</coding>
+					<coding>
+						<system value="ICD-10-CM"/>
+						<version value="2.16.840.1.113883.6.90"/>
+						<code value="I10"/>
+						<display value="ICD-10-CM"/>
+						<primary value="false"/>
+					</coding>
+					<text value="Essential hypertension"/>
+				</code>
+				<status value="confirmed"/>
+				<onsetDate value="2005-08-18"/>
+			</Condition>
+		</content>
+	</entry>
+	<entry>
+		<id>cid:1</id>
+		<content type="text/xml">
+			<Patient xmlns="http://hl7.org/fhir">
+				<identifier>
+					<system value=""/>
+					<value value="NEED"/>
+					<assigner>
+						<display value="FHIR"/>
+					</assigner>
+				</identifier>
+				<identifier>
+					<system value=""/>
+					<value value="E3289"/>
+					<assigner>
+						<display value="EPIC"/>
+					</assigner>
+				</identifier>
+				<name>
+					<text value="Davidson, Harley"/>
+					<family value="Davidson"/>
+					<given value="Harley"/>
+				</name>
+				<telecom>
+					<value value="(801)555-1212"/>
+				</telecom>
+				<gender>
+					<text value="M"/>
+				</gender>
+				<birthDate value="1948-05-17"/>
+				<deceasedBoolean value="false"/>
+				<address>
+					<line value="123 Beehive Rd"/>
+					<city value="Park City"/>
+					<state value="UT"/>
+					<zip value="84098"/>
+					<country value="US"/>
+				</address>
+				<maritalStatus>
+					<text value="MARRIED"/>
+				</maritalStatus>
+				<multipleBirthBoolean value="false"/>
+				<communication>
+					<text value="English"/>
+				</communication>
+				<careProvider>
+					<display value="Dr. EPIC PHYSICIAN"/>
+				</careProvider>
+				<active value="true"/>
+			</Patient>
+		</content>
+	</entry>
+</feed>

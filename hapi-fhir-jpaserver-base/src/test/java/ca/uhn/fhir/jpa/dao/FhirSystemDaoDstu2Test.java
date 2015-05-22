@@ -26,7 +26,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.provider.SystemProviderTest;
+import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
@@ -103,7 +103,7 @@ public class FhirSystemDaoDstu2Test {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 
-		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve.xml");
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundleStr = IOUtils.toString(bundleRes);
 		Bundle bundle = ourFhirContext.newXmlParser().parseResource(Bundle.class, bundleStr);
 		

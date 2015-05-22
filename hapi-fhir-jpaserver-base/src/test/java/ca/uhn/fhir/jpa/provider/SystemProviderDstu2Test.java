@@ -29,9 +29,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-public class SystemProviderTest {
+public class SystemProviderDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu2Test.class);
 	private static Server ourServer;
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static FhirContext ourCtx;
@@ -40,7 +40,7 @@ public class SystemProviderTest {
 	@Test
 	public void testTransactionFromBundle() throws Exception {
 
-		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve.xml");
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
@@ -52,7 +52,7 @@ public class SystemProviderTest {
 //	@Test
 	public void testTransactionFromBundle3() throws Exception {
 
-		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/grahame-transaction.xml");
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/grahame-transaction.xml");
 		String bundle = IOUtils.toString(bundleRes);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
@@ -61,7 +61,7 @@ public class SystemProviderTest {
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 
-		InputStream bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		String bundle = IOUtils.toString(bundleRes);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
@@ -77,7 +77,7 @@ public class SystemProviderTest {
 		 * Same bundle!
 		 */
 		
-		bundleRes = SystemProviderTest.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
+		bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve_temp.xml");
 		bundle = IOUtils.toString(bundleRes);
 		response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		ourLog.info(response);
