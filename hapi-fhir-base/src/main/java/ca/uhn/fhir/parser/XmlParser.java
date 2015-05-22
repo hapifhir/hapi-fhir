@@ -50,7 +50,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -751,7 +751,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 		} else {
 			// HL7 structs
-			IRefImplResource resource = (IRefImplResource) theResource;
+			IAnyResource resource = (IAnyResource) theResource;
 			if (StringUtils.isNotBlank(resource.getIdElement().getIdPart())) {
 				resourceId = resource.getIdElement().getIdPart();
 			}
@@ -777,7 +777,7 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.writeStartElement(resDef.getName());
 		theEventWriter.writeDefaultNamespace(FHIR_NS);
 
-		if (theResource instanceof IRefImplResource) {
+		if (theResource instanceof IAnyResource) {
 			
 			// HL7.org Structures
 			writeOptionalTagWithValue(theEventWriter, "id", theResourceId);

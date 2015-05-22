@@ -40,7 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -95,8 +95,8 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 		} else if (theTarget instanceof IDomainResource) {
-			List<? extends IRefImplResource> containedResources = ((IDomainResource) theTarget).getContained();
-			for (IRefImplResource next : containedResources) {
+			List<? extends IAnyResource> containedResources = ((IDomainResource) theTarget).getContained();
+			for (IAnyResource next : containedResources) {
 				String nextId = next.getIdElement().getValue();
 				if (StringUtils.isNotBlank(nextId)) {
 					if (!nextId.startsWith("#")) {

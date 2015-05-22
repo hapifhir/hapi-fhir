@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -2440,24 +2419,24 @@ public class CarePlan extends DomainResource {
     return ResourceType.CarePlan;
    }
 
-  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token" )
-  public static final String SP_ACTIVITYCODE = "activitycode";
-  @SearchParamDefinition(name="patient", path="CarePlan.patient", description="Who care plan is for", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="condition", path="CarePlan.concern", description="Health issues this plan addresses", type="reference" )
-  public static final String SP_CONDITION = "condition";
-  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
-  public static final String SP_ACTIVITYDATE = "activitydate";
-  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the 'simple' activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference" )
-  public static final String SP_PERFORMER = "performer";
-  @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference" )
-  public static final String SP_PARTICIPANT = "participant";
   @SearchParamDefinition(name="date", path="CarePlan.period", description="Time period plan covers", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference" )
-  public static final String SP_GOAL = "goal";
+  @SearchParamDefinition(name="activitycode", path="CarePlan.activity.detail.code", description="Detail type of activity", type="token" )
+  public static final String SP_ACTIVITYCODE = "activitycode";
+  @SearchParamDefinition(name="activitydate", path="CarePlan.activity.detail.scheduled[x]", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
+  public static final String SP_ACTIVITYDATE = "activitydate";
+  @SearchParamDefinition(name="condition", path="CarePlan.concern", description="Health issues this plan addresses", type="reference" )
+  public static final String SP_CONDITION = "condition";
   @SearchParamDefinition(name="activityreference", path="CarePlan.activity.reference", description="Activity details defined in specific resource", type="reference" )
   public static final String SP_ACTIVITYREFERENCE = "activityreference";
+  @SearchParamDefinition(name="performer", path="CarePlan.activity.detail.performer", description="Matches if the practitioner is listed as a performer in any of the 'simple' activities.  (For performers of the detailed activities, chain through the activitydetail search parameter.)", type="reference" )
+  public static final String SP_PERFORMER = "performer";
+  @SearchParamDefinition(name="goal", path="CarePlan.goal", description="Desired outcome of plan", type="reference" )
+  public static final String SP_GOAL = "goal";
+  @SearchParamDefinition(name="patient", path="CarePlan.patient", description="Who care plan is for", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="participant", path="CarePlan.participant.member", description="Who is involved", type="reference" )
+  public static final String SP_PARTICIPANT = "participant";
 
 }
 

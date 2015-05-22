@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1689,40 +1668,40 @@ public class DiagnosticOrder extends DomainResource {
     return ResourceType.DiagnosticOrder;
    }
 
-  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
-  public static final String SP_ORDERER = "orderer";
-  @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
-  public static final String SP_ITEMSTATUS = "item-status";
-  @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
-  public static final String SP_EVENTSTATUS = "event-status";
-  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor|DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
-  public static final String SP_ACTOR = "actor";
-  @SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="Code to indicate the item (test or panel) being ordered", type="token" )
-  public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="item-past-status", path="DiagnosticOrder.item.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
   public static final String SP_ITEMPASTSTATUS = "item-past-status";
-  @SearchParamDefinition(name="patient", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite[x]", description="Location of requested test (if applicable)", type="token" )
-  public static final String SP_BODYSITE = "bodysite";
-  @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date" )
-  public static final String SP_ITEMDATE = "item-date";
-  @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen|DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
-  public static final String SP_SPECIMEN = "specimen";
-  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite" )
-  public static final String SP_EVENTSTATUSDATE = "event-status-date";
-  @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date" )
-  public static final String SP_EVENTDATE = "event-date";
   @SearchParamDefinition(name="identifier", path="DiagnosticOrder.identifier", description="Identifiers assigned to this order", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="bodysite", path="DiagnosticOrder.item.bodySite[x]", description="Location of requested test (if applicable)", type="token" )
+  public static final String SP_BODYSITE = "bodysite";
+  @SearchParamDefinition(name="code", path="DiagnosticOrder.item.code", description="Code to indicate the item (test or panel) being ordered", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="event-date", path="DiagnosticOrder.event.dateTime", description="The date at which the event happened", type="date" )
+  public static final String SP_EVENTDATE = "event-date";
+  @SearchParamDefinition(name="event-status-date", path="", description="A combination of past-status and date", type="composite" )
+  public static final String SP_EVENTSTATUSDATE = "event-status-date";
+  @SearchParamDefinition(name="subject", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="encounter", path="DiagnosticOrder.encounter", description="The encounter that this diagnostic order is associated with", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="actor", path="DiagnosticOrder.event.actor|DiagnosticOrder.item.event.actor", description="Who recorded or did this", type="reference" )
+  public static final String SP_ACTOR = "actor";
+  @SearchParamDefinition(name="item-date", path="DiagnosticOrder.item.event.dateTime", description="The date at which the event happened", type="date" )
+  public static final String SP_ITEMDATE = "item-date";
   @SearchParamDefinition(name="item-status-date", path="", description="A combination of item-past-status and item-date", type="composite" )
   public static final String SP_ITEMSTATUSDATE = "item-status-date";
+  @SearchParamDefinition(name="event-status", path="DiagnosticOrder.event.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  public static final String SP_EVENTSTATUS = "event-status";
+  @SearchParamDefinition(name="item-status", path="DiagnosticOrder.item.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  public static final String SP_ITEMSTATUS = "item-status";
+  @SearchParamDefinition(name="patient", path="DiagnosticOrder.subject", description="Who and/or what test is about", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="orderer", path="DiagnosticOrder.orderer", description="Who ordered the test", type="reference" )
+  public static final String SP_ORDERER = "orderer";
+  @SearchParamDefinition(name="specimen", path="DiagnosticOrder.specimen|DiagnosticOrder.item.specimen", description="If the whole order relates to specific specimens", type="reference" )
+  public static final String SP_SPECIMEN = "specimen";
+  @SearchParamDefinition(name="status", path="DiagnosticOrder.status", description="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

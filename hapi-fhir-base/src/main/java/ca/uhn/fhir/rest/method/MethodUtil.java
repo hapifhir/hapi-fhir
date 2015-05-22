@@ -28,7 +28,7 @@ import org.apache.http.client.utils.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -460,8 +460,8 @@ public class MethodUtil {
 				if (resource instanceof IResource) {
 					InstantDt lmValue = new InstantDt(headerDateValue);
 					((IResource) resource).getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
-				} else if (resource instanceof IRefImplResource) {
-					((IRefImplResource) resource).getMeta().setLastUpdated(headerDateValue);
+				} else if (resource instanceof IAnyResource) {
+					((IAnyResource) resource).getMeta().setLastUpdated(headerDateValue);
 				}
 			} catch (Exception e) {
 				ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());
@@ -505,8 +505,8 @@ public class MethodUtil {
 			}
 			if (resource instanceof IResource) {
 				ResourceMetadataKeyEnum.TAG_LIST.put((IResource) resource, tagList);
-			} else if (resource instanceof IRefImplResource) {
-				IBaseMetaType meta = ((IRefImplResource) resource).getMeta();
+			} else if (resource instanceof IAnyResource) {
+				IBaseMetaType meta = ((IAnyResource) resource).getMeta();
 				for (Tag next : tagList) {
 					meta.addTag().setSystem(next.getScheme()).setCode(next.getTerm()).setDisplay(next.getLabel());
 				}

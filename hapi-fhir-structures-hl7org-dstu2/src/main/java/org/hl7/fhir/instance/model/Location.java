@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1098,24 +1077,24 @@ public class Location extends DomainResource {
     return ResourceType.Location;
    }
 
-  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
-  public static final String SP_ORGANIZATION = "organization";
-  @SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
-  public static final String SP_NEAR = "near";
-  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference" )
-  public static final String SP_PARTOF = "partof";
-  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
-  public static final String SP_ADDRESS = "address";
-  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
-  public static final String SP_NEARDISTANCE = "near-distance";
-  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="Location.identifier", description="Unique code or number identifying the location to its users", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="partof", path="Location.partOf", description="The location of which this location is a part", type="reference" )
+  public static final String SP_PARTOF = "partof";
+  @SearchParamDefinition(name="near-distance", path="", description="A distance quantity to limit the near search to locations within a specific distance", type="token" )
+  public static final String SP_NEARDISTANCE = "near-distance";
+  @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
+  public static final String SP_ADDRESS = "address";
+  @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
+  public static final String SP_ORGANIZATION = "organization";
+  @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
+  public static final String SP_NEAR = "near";
+  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

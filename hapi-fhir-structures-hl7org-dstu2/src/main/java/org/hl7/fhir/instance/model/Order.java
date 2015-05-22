@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -712,24 +691,24 @@ public class Order extends DomainResource {
     return ResourceType.Order;
    }
 
-  @SearchParamDefinition(name="authority", path="Order.authority", description="If required by policy", type="reference" )
-  public static final String SP_AUTHORITY = "authority";
-  @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
-  public static final String SP_DETAIL = "detail";
-  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
-  public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="authority", path="Order.authority", description="If required by policy", type="reference" )
+  public static final String SP_AUTHORITY = "authority";
+  @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
+  public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )
+  public static final String SP_DETAIL = "detail";
   @SearchParamDefinition(name="when", path="Order.when.schedule", description="A formal schedule", type="date" )
   public static final String SP_WHEN = "when";
   @SearchParamDefinition(name="target", path="Order.target", description="Who is intended to fulfill the order", type="reference" )
   public static final String SP_TARGET = "target";
   @SearchParamDefinition(name="when_code", path="Order.when.code", description="Code specifies when request should be done. The code may simply be a priority code", type="token" )
   public static final String SP_WHENCODE = "when_code";
-  @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
-  public static final String SP_DATE = "date";
 
 }
 

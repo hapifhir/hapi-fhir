@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1097,32 +1076,32 @@ public class DocumentManifest extends DomainResource {
     return ResourceType.DocumentManifest;
    }
 
-  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the document", type="reference" )
-  public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="relatedref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
-  public static final String SP_RELATEDREF = "relatedref";
-  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
-  public static final String SP_SOURCE = "source";
-  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superceded | entered-in-error", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
-  public static final String SP_CREATED = "created";
-  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="contentref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
-  public static final String SP_CONTENTREF = "contentref";
-  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="What kind of document set this is", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="DocumentManifest.masterIdentifier|DocumentManifest.identifier", description="Unique Identifier for the set of documents", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
-  public static final String SP_RECIPIENT = "recipient";
+  @SearchParamDefinition(name="subject", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="author", path="DocumentManifest.author", description="Who and/or what authored the document", type="reference" )
+  public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name="created", path="DocumentManifest.created", description="When this document manifest created", type="date" )
+  public static final String SP_CREATED = "created";
+  @SearchParamDefinition(name="relatedref", path="DocumentManifest.related.ref", description="Related Resource", type="reference" )
+  public static final String SP_RELATEDREF = "relatedref";
+  @SearchParamDefinition(name="description", path="DocumentManifest.description", description="Human-readable description (title)", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="source", path="DocumentManifest.source", description="The source system/application/software", type="uri" )
+  public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="type", path="DocumentManifest.type", description="What kind of document set this is", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="relatedid", path="DocumentManifest.related.identifier", description="Related Identifier", type="token" )
   public static final String SP_RELATEDID = "relatedid";
+  @SearchParamDefinition(name="patient", path="DocumentManifest.subject", description="The subject of the set of documents", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
+  public static final String SP_RECIPIENT = "recipient";
+  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superceded | entered-in-error", type="token" )
+  public static final String SP_STATUS = "status";
+  @SearchParamDefinition(name="contentref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
+  public static final String SP_CONTENTREF = "contentref";
 
 }
 

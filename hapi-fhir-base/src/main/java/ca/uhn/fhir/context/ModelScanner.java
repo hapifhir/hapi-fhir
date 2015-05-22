@@ -52,7 +52,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
@@ -510,7 +510,7 @@ class ModelScanner {
 				RuntimeChildContainedResources def = new RuntimeChildContainedResources(next, childAnnotation, descriptionAnnotation, elementName);
 				orderMap.put(order, def);
 
-			} else if (IRefImplResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
+			} else if (IAnyResource.class.isAssignableFrom(nextElementType) || IResource.class.equals(nextElementType)) {
 				/*
 				 * Child is a resource as a direct child, as in Bundle.entry.resource
 				 */

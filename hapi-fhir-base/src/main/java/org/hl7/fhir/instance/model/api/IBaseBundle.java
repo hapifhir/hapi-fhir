@@ -43,5 +43,5 @@ public interface IBaseBundle extends IBaseResource {
 	 * this bundle.  
 	 */
 	public static final String LINK_SELF = "self";
-	
+
 }

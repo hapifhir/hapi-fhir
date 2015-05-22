@@ -27,26 +27,21 @@
 			<version>${servlet_api_version}</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		
-		<!-- 
+
+
+		<!-- <dependency> <groupId>net.sf.saxon</groupId> <artifactId>saxon</artifactId> 
+			<version>8.7</version> </dependency> -->
+
+		<dependency>
+			<groupId>xpp3</groupId>
+			<artifactId>xpp3_min</artifactId>
+			<version>1.1.4c</version>
+		</dependency>
 		<dependency>
 			<groupId>net.sf.saxon</groupId>
-			<artifactId>saxon</artifactId>
-			<version>8.7</version>
+			<artifactId>Saxon-HE</artifactId>
+			<version>9.6.0-4</version>
 		</dependency>
-		-->
-		
-	<dependency>
-		<groupId>xpp3</groupId>
-		<artifactId>xpp3_min</artifactId>
-		<version>1.1.4c</version>
-	</dependency>
-	<dependency>
-		<groupId>net.sf.saxon</groupId>
-		<artifactId>Saxon-HE</artifactId>
-		<version>9.6.0-4</version>
-	</dependency>
 
 		<!-- Testing -->
 		<dependency>
@@ -192,6 +187,15 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<version>${maven_license_plugin_version}</version>
+				<configuration>
+					<!-- Don't add UHN licenses to RI structures -->
+					<skipUpdateLicense>true</skipUpdateLicense>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

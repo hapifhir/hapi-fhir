@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -627,16 +606,16 @@ public class Substance extends DomainResource {
     return ResourceType.Substance;
    }
 
-  @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
-  public static final String SP_SUBSTANCE = "substance";
-  @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="number" )
-  public static final String SP_QUANTITY = "quantity";
-  @SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="number" )
+  public static final String SP_QUANTITY = "quantity";
+  @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
+  public static final String SP_SUBSTANCE = "substance";
   @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="When no longer valid to use", type="date" )
   public static final String SP_EXPIRY = "expiry";
+  @SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token" )
+  public static final String SP_TYPE = "type";
 
 }
 

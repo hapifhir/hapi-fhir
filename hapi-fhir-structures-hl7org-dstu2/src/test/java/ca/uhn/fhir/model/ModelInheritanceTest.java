@@ -57,7 +57,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Test;
 
@@ -252,7 +252,7 @@ public class ModelInheritanceTest {
 
     @Test
     public void testResource() {
-        assertTrue(IRefImplResource.class.isAssignableFrom(Resource.class));
+        assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
     }
 
     @Test

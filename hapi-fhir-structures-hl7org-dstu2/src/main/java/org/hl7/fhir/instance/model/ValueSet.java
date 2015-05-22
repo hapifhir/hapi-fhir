@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -2184,10 +2163,10 @@ public class ValueSet extends DomainResource {
         protected DateTimeType timestamp;
 
         /**
-         * A Parameter that controlled the expansion process. These paameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.
+         * A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.
          */
         @Child(name = "parameter", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Parameter that controlled the expansion process", formalDefinition="A Parameter that controlled the expansion process. These paameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion." )
+        @Description(shortDefinition="Parameter that controlled the expansion process", formalDefinition="A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion." )
         protected List<ValueSetExpansionParameterComponent> parameter;
 
         /**
@@ -2306,7 +2285,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #parameter} (A Parameter that controlled the expansion process. These paameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.)
+         * @return {@link #parameter} (A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.)
          */
         public List<ValueSetExpansionParameterComponent> getParameter() { 
           if (this.parameter == null)
@@ -2324,7 +2303,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #parameter} (A Parameter that controlled the expansion process. These paameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.)
+         * @return {@link #parameter} (A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.)
          */
     // syntactic sugar
         public ValueSetExpansionParameterComponent addParameter() { //3
@@ -2389,7 +2368,7 @@ public class ValueSet extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("identifier", "uri", "An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("timestamp", "dateTime", "The time at which the expansion was produced by the expanding system.", 0, java.lang.Integer.MAX_VALUE, timestamp));
-          childrenList.add(new Property("parameter", "", "A Parameter that controlled the expansion process. These paameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.", 0, java.lang.Integer.MAX_VALUE, parameter));
+          childrenList.add(new Property("parameter", "", "A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.", 0, java.lang.Integer.MAX_VALUE, parameter));
           childrenList.add(new Property("contains", "", "The codes that are contained in the value set expansion.", 0, java.lang.Integer.MAX_VALUE, contains));
         }
 
@@ -4078,32 +4057,32 @@ public class ValueSet extends DomainResource {
     return ResourceType.ValueSet;
    }
 
-  @SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="uri" )
-  public static final String SP_SYSTEM = "system";
-  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri" )
-  public static final String SP_EXPANSION = "expansion";
-  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token" )
-  public static final String SP_CONTEXT = "context";
-  @SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="ValueSet.date", description="The value set publication date", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
-  public static final String SP_REFERENCE = "reference";
-  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical url for the value set", type="uri" )
-  public static final String SP_URL = "url";
-  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
+  public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="version", path="ValueSet.version", description="The version identifier of the value set", type="token" )
   public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="url", path="ValueSet.url", description="The logical url for the value set", type="uri" )
+  public static final String SP_URL = "url";
+  @SearchParamDefinition(name="expansion", path="ValueSet.expansion.identifier", description="Uniquely identifies this expansion", type="uri" )
+  public static final String SP_EXPANSION = "expansion";
+  @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
+  public static final String SP_REFERENCE = "reference";
+  @SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="uri" )
+  public static final String SP_SYSTEM = "system";
+  @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="context", path="ValueSet.useContext", description="A use context assigned to the value set", type="token" )
+  public static final String SP_CONTEXT = "context";
+  @SearchParamDefinition(name="publisher", path="ValueSet.publisher", description="Name of the publisher of the value set", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="status", path="ValueSet.status", description="The status of the value set", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

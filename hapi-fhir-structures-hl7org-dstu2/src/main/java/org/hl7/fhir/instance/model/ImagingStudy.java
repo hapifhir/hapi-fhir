@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -3574,24 +3553,24 @@ public class ImagingStudy extends DomainResource {
 
   @SearchParamDefinition(name="uid", path="ImagingStudy.series.instance.uid", description="Formal identifier for this instance (0008,0018)", type="token" )
   public static final String SP_UID = "uid";
-  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token" )
-  public static final String SP_SERIES = "series";
-  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference" )
-  public static final String SP_ORDER = "order";
-  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="Body part examined (Map from 0018,0015)", type="token" )
-  public static final String SP_BODYSITE = "bodysite";
-  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession id for the image", type="token" )
-  public static final String SP_ACCESSION = "accession";
   @SearchParamDefinition(name="study", path="ImagingStudy.uid", description="The study id for the image", type="token" )
   public static final String SP_STUDY = "study";
-  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token" )
-  public static final String SP_MODALITY = "modality";
-  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
-  public static final String SP_STARTED = "started";
   @SearchParamDefinition(name="dicom-class", path="ImagingStudy.series.instance.sopclass", description="DICOM class type (0008,0016)", type="token" )
   public static final String SP_DICOMCLASS = "dicom-class";
+  @SearchParamDefinition(name="modality", path="ImagingStudy.series.modality", description="The modality of the image", type="token" )
+  public static final String SP_MODALITY = "modality";
+  @SearchParamDefinition(name="bodysite", path="ImagingStudy.series.bodySite", description="Body part examined (Map from 0018,0015)", type="token" )
+  public static final String SP_BODYSITE = "bodysite";
+  @SearchParamDefinition(name="patient", path="ImagingStudy.patient", description="Who the study is about", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="series", path="ImagingStudy.series.uid", description="The series id for the image", type="token" )
+  public static final String SP_SERIES = "series";
+  @SearchParamDefinition(name="started", path="ImagingStudy.started", description="When the study was started", type="date" )
+  public static final String SP_STARTED = "started";
+  @SearchParamDefinition(name="accession", path="ImagingStudy.accession", description="The accession id for the image", type="token" )
+  public static final String SP_ACCESSION = "accession";
+  @SearchParamDefinition(name="order", path="ImagingStudy.order", description="The order for the image", type="reference" )
+  public static final String SP_ORDER = "order";
 
 }
 

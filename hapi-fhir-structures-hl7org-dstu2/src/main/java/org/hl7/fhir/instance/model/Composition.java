@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1753,38 +1732,38 @@ public class Composition extends DomainResource {
     return ResourceType.Composition;
    }
 
-  @SearchParamDefinition(name="section-code", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
-  public static final String SP_SECTIONCODE = "section-code";
-  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | appended | amended | entered-in-error", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
-  public static final String SP_CLASS = "class";
-  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the conposition", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
-  public static final String SP_PERIOD = "period";
-  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="date", path="Composition.date", description="Composition editing time", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="section", path="Composition.section.content", description="The Content of the section (narrative + data entries)", type="reference" )
-  public static final String SP_SECTION = "section";
-  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference" )
-  public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
-  public static final String SP_TITLE = "title";
-  @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
-  public static final String SP_ATTESTER = "attester";
-  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
-  public static final String SP_CONFIDENTIALITY = "confidentiality";
-  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
-  public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="identifier", path="Composition.identifier", description="Logical identifier of composition (version-independent)", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="period", path="Composition.event.period", description="The period covered by the documentation", type="date" )
+  public static final String SP_PERIOD = "period";
+  @SearchParamDefinition(name="subject", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="author", path="Composition.author", description="Who and/or what authored the composition", type="reference" )
+  public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
+  public static final String SP_CONFIDENTIALITY = "confidentiality";
+  @SearchParamDefinition(name="section-code", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
+  public static final String SP_SECTIONCODE = "section-code";
+  @SearchParamDefinition(name="section", path="Composition.section.content", description="The Content of the section (narrative + data entries)", type="reference" )
+  public static final String SP_SECTION = "section";
+  @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the conposition", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="type", path="Composition.type", description="Kind of composition (LOINC if possible)", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="title", path="Composition.title", description="Human Readable name/title", type="string" )
+  public static final String SP_TITLE = "title";
+  @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
+  public static final String SP_ATTESTER = "attester";
+  @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )
+  public static final String SP_CONTEXT = "context";
+  @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
+  public static final String SP_CLASS = "class";
+  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | appended | amended | entered-in-error", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

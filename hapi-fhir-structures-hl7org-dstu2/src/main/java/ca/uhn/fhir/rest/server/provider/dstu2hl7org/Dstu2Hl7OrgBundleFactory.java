@@ -40,7 +40,7 @@ import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -93,7 +93,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			IDomainResource next = (IDomainResource) nextBaseRes;
 
 			Set<String> containedIds = new HashSet<String>();
-			for (IRefImplResource nextContained : next.getContained()) {
+			for (IAnyResource nextContained : next.getContained()) {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getIdElement().getValue());
 				}

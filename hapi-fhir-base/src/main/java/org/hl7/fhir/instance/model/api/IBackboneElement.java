@@ -21,14 +21,6 @@ package org.hl7.fhir.instance.model.api;
  */
 
 
-public interface IRefImplResource extends IBaseResource {
+public interface IBackboneElement extends IBase {
 
-	String getId();
-
-	IRefImplResource setId(String theId);
-
-	IIdType getIdElement();
-
-	IBaseMetaType getMeta();
-	
 }

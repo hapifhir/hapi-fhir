@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1164,32 +1143,32 @@ public class CommunicationRequest extends DomainResource {
     return ResourceType.CommunicationRequest;
    }
 
-  @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference" )
-  public static final String SP_SENDER = "sender";
-  @SearchParamDefinition(name="time", path="CommunicationRequest.scheduledTime", description="When scheduled", type="date" )
-  public static final String SP_TIME = "time";
   @SearchParamDefinition(name="requester", path="CommunicationRequest.requester", description="Requester of communication", type="reference" )
   public static final String SP_REQUESTER = "requester";
-  @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token" )
-  public static final String SP_CATEGORY = "category";
-  @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="CommunicationRequest.status", description="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
-  public static final String SP_PRIORITY = "priority";
-  @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="ordered", path="CommunicationRequest.orderedOn", description="When ordered or proposed", type="date" )
-  public static final String SP_ORDERED = "ordered";
-  @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="identifier", path="CommunicationRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="ordered", path="CommunicationRequest.orderedOn", description="When ordered or proposed", type="date" )
+  public static final String SP_ORDERED = "ordered";
+  @SearchParamDefinition(name="subject", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
+  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="medium", path="CommunicationRequest.medium", description="Communication medium", type="token" )
   public static final String SP_MEDIUM = "medium";
+  @SearchParamDefinition(name="encounter", path="CommunicationRequest.encounter", description="Encounter leading to message", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="priority", path="CommunicationRequest.priority", description="Message urgency", type="token" )
+  public static final String SP_PRIORITY = "priority";
+  @SearchParamDefinition(name="sender", path="CommunicationRequest.sender", description="Message sender", type="reference" )
+  public static final String SP_SENDER = "sender";
+  @SearchParamDefinition(name="patient", path="CommunicationRequest.subject", description="Focus of message", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="recipient", path="CommunicationRequest.recipient", description="Message recipient", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+  @SearchParamDefinition(name="time", path="CommunicationRequest.scheduledTime", description="When scheduled", type="date" )
+  public static final String SP_TIME = "time";
+  @SearchParamDefinition(name="category", path="CommunicationRequest.category", description="Message category", type="token" )
+  public static final String SP_CATEGORY = "category";
+  @SearchParamDefinition(name="status", path="CommunicationRequest.status", description="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | failed", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

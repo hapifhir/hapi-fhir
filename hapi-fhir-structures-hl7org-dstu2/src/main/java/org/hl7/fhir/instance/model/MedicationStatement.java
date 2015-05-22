@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -170,10 +149,10 @@ public class MedicationStatement extends DomainResource {
         protected Timing schedule;
 
         /**
-         * If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.
+         * If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.
          */
         @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Take 'as needed' f(or x)", formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication." )
+        @Description(shortDefinition="Take 'as needed' f(or x)", formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication." )
         protected Type asNeeded;
 
         /**
@@ -191,9 +170,7 @@ public class MedicationStatement extends DomainResource {
         protected CodeableConcept route;
 
         /**
-         * A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
-
-Terminologies used often pre-coordinate this term with the route and or form of administration.
+         * A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.
          */
         @Child(name = "method", type = {CodeableConcept.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Technique used to administer medication", formalDefinition="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.\r\rTerminologies used often pre-coordinate this term with the route and or form of administration." )
@@ -303,14 +280,14 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         }
 
         /**
-         * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
+         * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.)
          */
         public Type getAsNeeded() { 
           return this.asNeeded;
         }
 
         /**
-         * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
+         * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.)
          */
         public BooleanType getAsNeededBooleanType() throws Exception { 
           if (!(this.asNeeded instanceof BooleanType))
@@ -319,7 +296,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         }
 
         /**
-         * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
+         * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.)
          */
         public CodeableConcept getAsNeededCodeableConcept() throws Exception { 
           if (!(this.asNeeded instanceof CodeableConcept))
@@ -332,7 +309,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         }
 
         /**
-         * @param value {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
+         * @param value {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.)
          */
         public MedicationStatementDosageComponent setAsNeeded(Type value) { 
           this.asNeeded = value;
@@ -388,9 +365,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         }
 
         /**
-         * @return {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
-
-Terminologies used often pre-coordinate this term with the route and or form of administration.)
+         * @return {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.)
          */
         public CodeableConcept getMethod() { 
           if (this.method == null)
@@ -406,9 +381,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         }
 
         /**
-         * @param value {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
-
-Terminologies used often pre-coordinate this term with the route and or form of administration.)
+         * @param value {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.)
          */
         public MedicationStatementDosageComponent setMethod(CodeableConcept value) { 
           this.method = value;
@@ -491,7 +464,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
           super.listChildren(childrenList);
           childrenList.add(new Property("text", "string", "Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("schedule", "Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, schedule));
-          childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
+          childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
           childrenList.add(new Property("site", "CodeableConcept", "A coded specification of the anatomic site where the medication first enters the body.", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.", 0, java.lang.Integer.MAX_VALUE, route));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.\r\rTerminologies used often pre-coordinate this term with the route and or form of administration.", 0, java.lang.Integer.MAX_VALUE, method));
@@ -595,16 +568,16 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     /**
      * Set this to true if the record is saying that the medication was NOT taken.
      */
-    @Child(name = "wasNotGiven", type = {BooleanType.class}, order=5, min=0, max=1)
+    @Child(name = "wasNotTaken", type = {BooleanType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="True if medication is/was not being taken", formalDefinition="Set this to true if the record is saying that the medication was NOT taken." )
-    protected BooleanType wasNotGiven;
+    protected BooleanType wasNotTaken;
 
     /**
      * A code indicating why the medication was not taken.
      */
-    @Child(name = "reasonNotGiven", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reasonNotTaken", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="True if asserting medication was not given", formalDefinition="A code indicating why the medication was not taken." )
-    protected List<CodeableConcept> reasonNotGiven;
+    protected List<CodeableConcept> reasonNotTaken;
 
     /**
      * A reason for why the medication is being/was taken.
@@ -630,14 +603,9 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     /**
      * Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.
      */
-    @Child(name = "medication", type = {Medication.class}, order=10, min=0, max=1)
+    @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=10, min=1, max=1)
     @Description(shortDefinition="What medication was taken?", formalDefinition="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications." )
-    protected Reference medication;
-
-    /**
-     * The actual object that is the target of the reference (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    protected Medication medicationTarget;
+    protected Type medication;
 
     /**
      * Indicates how the medication is/was used by the patient.
@@ -646,7 +614,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     @Description(shortDefinition="Details of how medication was taken", formalDefinition="Indicates how the medication is/was used by the patient." )
     protected List<MedicationStatementDosageComponent> dosage;
 
-    private static final long serialVersionUID = -1525633004L;
+    private static final long serialVersionUID = 2101849334L;
 
   /*
    * Constructor
@@ -658,9 +626,10 @@ Terminologies used often pre-coordinate this term with the route and or form of 
   /*
    * Constructor
    */
-    public MedicationStatement(Enumeration<MedicationStatementStatus> status) {
+    public MedicationStatement(Enumeration<MedicationStatementStatus> status, Type medication) {
       super();
       this.status = status;
+      this.medication = medication;
     }
 
     /**
@@ -881,87 +850,87 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     }
 
     /**
-     * @return {@link #wasNotGiven} (Set this to true if the record is saying that the medication was NOT taken.). This is the underlying object with id, value and extensions. The accessor "getWasNotGiven" gives direct access to the value
+     * @return {@link #wasNotTaken} (Set this to true if the record is saying that the medication was NOT taken.). This is the underlying object with id, value and extensions. The accessor "getWasNotTaken" gives direct access to the value
      */
-    public BooleanType getWasNotGivenElement() { 
-      if (this.wasNotGiven == null)
+    public BooleanType getWasNotTakenElement() { 
+      if (this.wasNotTaken == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationStatement.wasNotGiven");
+          throw new Error("Attempt to auto-create MedicationStatement.wasNotTaken");
         else if (Configuration.doAutoCreate())
-          this.wasNotGiven = new BooleanType(); // bb
-      return this.wasNotGiven;
+          this.wasNotTaken = new BooleanType(); // bb
+      return this.wasNotTaken;
     }
 
-    public boolean hasWasNotGivenElement() { 
-      return this.wasNotGiven != null && !this.wasNotGiven.isEmpty();
+    public boolean hasWasNotTakenElement() { 
+      return this.wasNotTaken != null && !this.wasNotTaken.isEmpty();
     }
 
-    public boolean hasWasNotGiven() { 
-      return this.wasNotGiven != null && !this.wasNotGiven.isEmpty();
+    public boolean hasWasNotTaken() { 
+      return this.wasNotTaken != null && !this.wasNotTaken.isEmpty();
     }
 
     /**
-     * @param value {@link #wasNotGiven} (Set this to true if the record is saying that the medication was NOT taken.). This is the underlying object with id, value and extensions. The accessor "getWasNotGiven" gives direct access to the value
+     * @param value {@link #wasNotTaken} (Set this to true if the record is saying that the medication was NOT taken.). This is the underlying object with id, value and extensions. The accessor "getWasNotTaken" gives direct access to the value
      */
-    public MedicationStatement setWasNotGivenElement(BooleanType value) { 
-      this.wasNotGiven = value;
+    public MedicationStatement setWasNotTakenElement(BooleanType value) { 
+      this.wasNotTaken = value;
       return this;
     }
 
     /**
      * @return Set this to true if the record is saying that the medication was NOT taken.
      */
-    public boolean getWasNotGiven() { 
-      return this.wasNotGiven == null || this.wasNotGiven.isEmpty() ? false : this.wasNotGiven.getValue();
+    public boolean getWasNotTaken() { 
+      return this.wasNotTaken == null || this.wasNotTaken.isEmpty() ? false : this.wasNotTaken.getValue();
     }
 
     /**
      * @param value Set this to true if the record is saying that the medication was NOT taken.
      */
-    public MedicationStatement setWasNotGiven(boolean value) { 
-        if (this.wasNotGiven == null)
-          this.wasNotGiven = new BooleanType();
-        this.wasNotGiven.setValue(value);
+    public MedicationStatement setWasNotTaken(boolean value) { 
+        if (this.wasNotTaken == null)
+          this.wasNotTaken = new BooleanType();
+        this.wasNotTaken.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #reasonNotGiven} (A code indicating why the medication was not taken.)
+     * @return {@link #reasonNotTaken} (A code indicating why the medication was not taken.)
      */
-    public List<CodeableConcept> getReasonNotGiven() { 
-      if (this.reasonNotGiven == null)
-        this.reasonNotGiven = new ArrayList<CodeableConcept>();
-      return this.reasonNotGiven;
+    public List<CodeableConcept> getReasonNotTaken() { 
+      if (this.reasonNotTaken == null)
+        this.reasonNotTaken = new ArrayList<CodeableConcept>();
+      return this.reasonNotTaken;
     }
 
-    public boolean hasReasonNotGiven() { 
-      if (this.reasonNotGiven == null)
+    public boolean hasReasonNotTaken() { 
+      if (this.reasonNotTaken == null)
         return false;
-      for (CodeableConcept item : this.reasonNotGiven)
+      for (CodeableConcept item : this.reasonNotTaken)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #reasonNotGiven} (A code indicating why the medication was not taken.)
+     * @return {@link #reasonNotTaken} (A code indicating why the medication was not taken.)
      */
     // syntactic sugar
-    public CodeableConcept addReasonNotGiven() { //3
+    public CodeableConcept addReasonNotTaken() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.reasonNotGiven == null)
-        this.reasonNotGiven = new ArrayList<CodeableConcept>();
-      this.reasonNotGiven.add(t);
+      if (this.reasonNotTaken == null)
+        this.reasonNotTaken = new ArrayList<CodeableConcept>();
+      this.reasonNotTaken.add(t);
       return t;
     }
 
     // syntactic sugar
-    public MedicationStatement addReasonNotGiven(CodeableConcept t) { //3
+    public MedicationStatement addReasonNotTaken(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.reasonNotGiven == null)
-        this.reasonNotGiven = new ArrayList<CodeableConcept>();
-      this.reasonNotGiven.add(t);
+      if (this.reasonNotTaken == null)
+        this.reasonNotTaken = new ArrayList<CodeableConcept>();
+      this.reasonNotTaken.add(t);
       return this;
     }
 
@@ -1091,13 +1060,26 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public Reference getMedication() { 
-      if (this.medication == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationStatement.medication");
-        else if (Configuration.doAutoCreate())
-          this.medication = new Reference(); // cc
+    public Type getMedication() { 
       return this.medication;
+    }
+
+    /**
+     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
+     */
+    public CodeableConcept getMedicationCodeableConcept() throws Exception { 
+      if (!(this.medication instanceof CodeableConcept))
+        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.medication;
+    }
+
+    /**
+     * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
+     */
+    public Reference getMedicationReference() throws Exception { 
+      if (!(this.medication instanceof Reference))
+        throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
+      return (Reference) this.medication;
     }
 
     public boolean hasMedication() { 
@@ -1107,28 +1089,8 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     /**
      * @param value {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public MedicationStatement setMedication(Reference value) { 
+    public MedicationStatement setMedication(Type value) { 
       this.medication = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #medication} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    public Medication getMedicationTarget() { 
-      if (this.medicationTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationStatement.medication");
-        else if (Configuration.doAutoCreate())
-          this.medicationTarget = new Medication(); // aa
-      return this.medicationTarget;
-    }
-
-    /**
-     * @param value {@link #medication} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
-     */
-    public MedicationStatement setMedicationTarget(Medication value) { 
-      this.medicationTarget = value;
       return this;
     }
 
@@ -1179,12 +1141,12 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         childrenList.add(new Property("informationSource", "Reference(Patient|Practitioner|RelatedPerson)", "The person who provided the information about the taking of this medication.", 0, java.lang.Integer.MAX_VALUE, informationSource));
         childrenList.add(new Property("dateAsserted", "dateTime", "The date when the medication statement was asserted by the information source.", 0, java.lang.Integer.MAX_VALUE, dateAsserted));
         childrenList.add(new Property("status", "code", "A code specifying the state of the statement.  Generally this will be in-progress or completed state.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("wasNotGiven", "boolean", "Set this to true if the record is saying that the medication was NOT taken.", 0, java.lang.Integer.MAX_VALUE, wasNotGiven));
-        childrenList.add(new Property("reasonNotGiven", "CodeableConcept", "A code indicating why the medication was not taken.", 0, java.lang.Integer.MAX_VALUE, reasonNotGiven));
+        childrenList.add(new Property("wasNotTaken", "boolean", "Set this to true if the record is saying that the medication was NOT taken.", 0, java.lang.Integer.MAX_VALUE, wasNotTaken));
+        childrenList.add(new Property("reasonNotTaken", "CodeableConcept", "A code indicating why the medication was not taken.", 0, java.lang.Integer.MAX_VALUE, reasonNotTaken));
         childrenList.add(new Property("reasonForUse[x]", "CodeableConcept|Reference(Condition)", "A reason for why the medication is being/was taken.", 0, java.lang.Integer.MAX_VALUE, reasonForUse));
         childrenList.add(new Property("effective[x]", "dateTime|Period", "The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the 'wasNotGiven' attribute is true).", 0, java.lang.Integer.MAX_VALUE, effective));
         childrenList.add(new Property("note", "string", "Provides extra information about the medication statement that is not conveyed by the other attributes.", 0, java.lang.Integer.MAX_VALUE, note));
-        childrenList.add(new Property("medication", "Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
+        childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
         childrenList.add(new Property("dosage", "", "Indicates how the medication is/was used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosage));
       }
 
@@ -1200,11 +1162,11 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         dst.informationSource = informationSource == null ? null : informationSource.copy();
         dst.dateAsserted = dateAsserted == null ? null : dateAsserted.copy();
         dst.status = status == null ? null : status.copy();
-        dst.wasNotGiven = wasNotGiven == null ? null : wasNotGiven.copy();
-        if (reasonNotGiven != null) {
-          dst.reasonNotGiven = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : reasonNotGiven)
-            dst.reasonNotGiven.add(i.copy());
+        dst.wasNotTaken = wasNotTaken == null ? null : wasNotTaken.copy();
+        if (reasonNotTaken != null) {
+          dst.reasonNotTaken = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonNotTaken)
+            dst.reasonNotTaken.add(i.copy());
         };
         dst.reasonForUse = reasonForUse == null ? null : reasonForUse.copy();
         dst.effective = effective == null ? null : effective.copy();
@@ -1230,8 +1192,8 @@ Terminologies used often pre-coordinate this term with the route and or form of 
           return false;
         MedicationStatement o = (MedicationStatement) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(informationSource, o.informationSource, true)
-           && compareDeep(dateAsserted, o.dateAsserted, true) && compareDeep(status, o.status, true) && compareDeep(wasNotGiven, o.wasNotGiven, true)
-           && compareDeep(reasonNotGiven, o.reasonNotGiven, true) && compareDeep(reasonForUse, o.reasonForUse, true)
+           && compareDeep(dateAsserted, o.dateAsserted, true) && compareDeep(status, o.status, true) && compareDeep(wasNotTaken, o.wasNotTaken, true)
+           && compareDeep(reasonNotTaken, o.reasonNotTaken, true) && compareDeep(reasonForUse, o.reasonForUse, true)
            && compareDeep(effective, o.effective, true) && compareDeep(note, o.note, true) && compareDeep(medication, o.medication, true)
            && compareDeep(dosage, o.dosage, true);
       }
@@ -1243,15 +1205,15 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         if (!(other instanceof MedicationStatement))
           return false;
         MedicationStatement o = (MedicationStatement) other;
-        return compareValues(dateAsserted, o.dateAsserted, true) && compareValues(status, o.status, true) && compareValues(wasNotGiven, o.wasNotGiven, true)
+        return compareValues(dateAsserted, o.dateAsserted, true) && compareValues(status, o.status, true) && compareValues(wasNotTaken, o.wasNotTaken, true)
            && compareValues(note, o.note, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (patient == null || patient.isEmpty())
            && (informationSource == null || informationSource.isEmpty()) && (dateAsserted == null || dateAsserted.isEmpty())
-           && (status == null || status.isEmpty()) && (wasNotGiven == null || wasNotGiven.isEmpty())
-           && (reasonNotGiven == null || reasonNotGiven.isEmpty()) && (reasonForUse == null || reasonForUse.isEmpty())
+           && (status == null || status.isEmpty()) && (wasNotTaken == null || wasNotTaken.isEmpty())
+           && (reasonNotTaken == null || reasonNotTaken.isEmpty()) && (reasonForUse == null || reasonForUse.isEmpty())
            && (effective == null || effective.isEmpty()) && (note == null || note.isEmpty()) && (medication == null || medication.isEmpty())
            && (dosage == null || dosage.isEmpty());
       }
@@ -1261,18 +1223,18 @@ Terminologies used often pre-coordinate this term with the route and or form of 
     return ResourceType.MedicationStatement;
    }
 
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medication", description="Code for medicine or text in medicine name", type="reference" )
-  public static final String SP_MEDICATION = "medication";
-  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference" )
-  public static final String SP_SOURCE = "source";
-  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token" )
-  public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identity", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medicationReference", description="Code for medicine or text in medicine name", type="reference" )
+  public static final String SP_MEDICATION = "medication";
+  @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference" )
+  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="effectivedate", path="MedicationStatement.effective[x]", description="Date when patient was taking (or not taking) the medication", type="date" )
   public static final String SP_EFFECTIVEDATE = "effectivedate";
+  @SearchParamDefinition(name="status", path="MedicationStatement.status", description="Return statements that match the given status", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

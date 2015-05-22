@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1819,42 +1798,42 @@ public class Condition extends DomainResource {
     return ResourceType.Condition;
    }
 
+  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
+  public static final String SP_SEVERITY = "severity";
+  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
+  public static final String SP_CLINICALSTATUS = "clinicalstatus";
+  @SearchParamDefinition(name="onset-info", path="Condition.onset[x]", description="Other onsets (boolean, age, range, string)", type="string" )
+  public static final String SP_ONSETINFO = "onset-info";
+  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
+  public static final String SP_EVIDENCE = "evidence";
+  @SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="When first detected/suspected/entered", type="date" )
+  public static final String SP_DATEASSERTED = "date-asserted";
+  @SearchParamDefinition(name="subject", path="Condition.patient", description="Who has the condition?", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="dueto-item", path="Condition.dueTo.target", description="Relationship target resource", type="reference" )
+  public static final String SP_DUETOITEM = "dueto-item";
+  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
+  @SearchParamDefinition(name="onset", path="Condition.onset[x]", description="Date related onsets (dateTime and Period)", type="date" )
+  public static final String SP_ONSET = "onset";
   @SearchParamDefinition(name="asserter", path="Condition.asserter", description="Person who asserts this condition", type="reference" )
   public static final String SP_ASSERTER = "asserter";
-  @SearchParamDefinition(name="following-code", path="Condition.occurredFollowing.code", description="Relationship target by means of a predefined code", type="token" )
-  public static final String SP_FOLLOWINGCODE = "following-code";
+  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
+  public static final String SP_STAGE = "stage";
+  @SearchParamDefinition(name="following-item", path="Condition.occurredFollowing.target", description="Relationship target resource", type="reference" )
+  public static final String SP_FOLLOWINGITEM = "following-item";
+  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="dueto-code", path="Condition.dueTo.code", description="Relationship target by means of a predefined code", type="token" )
   public static final String SP_DUETOCODE = "dueto-code";
   @SearchParamDefinition(name="location", path="Condition.location.site[x]", description="Location - may include laterality", type="token" )
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="subject", path="Condition.patient", description="Who has the condition?", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="onset", path="Condition.onset[x]", description="Date related onsets (dateTime and Period)", type="date" )
-  public static final String SP_ONSET = "onset";
-  @SearchParamDefinition(name="evidence", path="Condition.evidence.code", description="Manifestation/symptom", type="token" )
-  public static final String SP_EVIDENCE = "evidence";
-  @SearchParamDefinition(name="onset-info", path="Condition.onset[x]", description="Other onsets (boolean, age, range, string)", type="string" )
-  public static final String SP_ONSETINFO = "onset-info";
-  @SearchParamDefinition(name="following-item", path="Condition.occurredFollowing.target", description="Relationship target resource", type="reference" )
-  public static final String SP_FOLLOWINGITEM = "following-item";
-  @SearchParamDefinition(name="severity", path="Condition.severity", description="The severity of the condition", type="token" )
-  public static final String SP_SEVERITY = "severity";
-  @SearchParamDefinition(name="code", path="Condition.code", description="Code for the condition", type="token" )
-  public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="When first detected/suspected/entered", type="date" )
-  public static final String SP_DATEASSERTED = "date-asserted";
-  @SearchParamDefinition(name="stage", path="Condition.stage.summary", description="Simple summary (disease specific)", type="token" )
-  public static final String SP_STAGE = "stage";
   @SearchParamDefinition(name="category", path="Condition.category", description="The category of the condition", type="token" )
   public static final String SP_CATEGORY = "category";
-  @SearchParamDefinition(name="patient", path="Condition.patient", description="Who has the condition?", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="dueto-item", path="Condition.dueTo.target", description="Relationship target resource", type="reference" )
-  public static final String SP_DUETOITEM = "dueto-item";
-  @SearchParamDefinition(name="clinicalstatus", path="Condition.clinicalStatus", description="The clinical status of the condition", type="token" )
-  public static final String SP_CLINICALSTATUS = "clinicalstatus";
+  @SearchParamDefinition(name="following-code", path="Condition.occurredFollowing.code", description="Relationship target by means of a predefined code", type="token" )
+  public static final String SP_FOLLOWINGCODE = "following-code";
 
 }
 

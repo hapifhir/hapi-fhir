@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1027,18 +1006,18 @@ public class ReferralRequest extends DomainResource {
 
   @SearchParamDefinition(name="requester", path="ReferralRequest.requester", description="Requester of referral / transfer of care", type="reference" )
   public static final String SP_REQUESTER = "requester";
-  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token" )
-  public static final String SP_PRIORITY = "priority";
-  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="specialty", path="ReferralRequest.specialty", description="The specialty that the referral is for", type="token" )
   public static final String SP_SPECIALTY = "specialty";
+  @SearchParamDefinition(name="patient", path="ReferralRequest.patient", description="Who the referral is about", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="recipient", path="ReferralRequest.recipient", description="The person that the referral was sent to", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
+  @SearchParamDefinition(name="type", path="ReferralRequest.type", description="The type of the referral", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="priority", path="ReferralRequest.priority", description="The priority assigned to the referral", type="token" )
+  public static final String SP_PRIORITY = "priority";
+  @SearchParamDefinition(name="status", path="ReferralRequest.status", description="The status of the referral", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

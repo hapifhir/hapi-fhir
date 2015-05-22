@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1578,36 +1557,36 @@ public class MessageHeader extends DomainResource {
     return ResourceType.MessageHeader;
    }
 
-  @SearchParamDefinition(name="destination-uri", path="MessageHeader.destination.endpoint", description="Actual destination address or id", type="uri" )
-  public static final String SP_DESTINATIONURI = "destination-uri";
-  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference" )
-  public static final String SP_RESPONSIBLE = "responsible";
-  @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended 'real-world' recipient for the data", type="reference" )
-  public static final String SP_RECEIVER = "receiver";
-  @SearchParamDefinition(name="data", path="MessageHeader.data", description="The actual content of the message", type="reference" )
-  public static final String SP_DATA = "data";
   @SearchParamDefinition(name="code", path="MessageHeader.response.code", description="ok | transient-error | fatal-error", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="response-id", path="MessageHeader.response.identifier", description="Id of original message", type="token" )
-  public static final String SP_RESPONSEID = "response-id";
-  @SearchParamDefinition(name="src-id", path="MessageHeader.identifier", description="Id of this message", type="token" )
-  public static final String SP_SRCID = "src-id";
-  @SearchParamDefinition(name="destination", path="MessageHeader.destination.name", description="Name of system", type="string" )
-  public static final String SP_DESTINATION = "destination";
-  @SearchParamDefinition(name="timestamp", path="MessageHeader.timestamp", description="Time that the message was sent", type="date" )
-  public static final String SP_TIMESTAMP = "timestamp";
+  @SearchParamDefinition(name="data", path="MessageHeader.data", description="The actual content of the message", type="reference" )
+  public static final String SP_DATA = "data";
+  @SearchParamDefinition(name="receiver", path="MessageHeader.receiver", description="Intended 'real-world' recipient for the data", type="reference" )
+  public static final String SP_RECEIVER = "receiver";
   @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference" )
   public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="source-uri", path="MessageHeader.source.endpoint", description="Actual message source address or id", type="uri" )
-  public static final String SP_SOURCEURI = "source-uri";
+  @SearchParamDefinition(name="destination", path="MessageHeader.destination.name", description="Name of system", type="string" )
+  public static final String SP_DESTINATION = "destination";
   @SearchParamDefinition(name="source", path="MessageHeader.source.name", description="Name of system", type="string" )
   public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference" )
+  public static final String SP_TARGET = "target";
+  @SearchParamDefinition(name="destination-uri", path="MessageHeader.destination.endpoint", description="Actual destination address or id", type="uri" )
+  public static final String SP_DESTINATIONURI = "destination-uri";
+  @SearchParamDefinition(name="src-id", path="MessageHeader.identifier", description="Id of this message", type="token" )
+  public static final String SP_SRCID = "src-id";
+  @SearchParamDefinition(name="source-uri", path="MessageHeader.source.endpoint", description="Actual message source address or id", type="uri" )
+  public static final String SP_SOURCEURI = "source-uri";
+  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference" )
+  public static final String SP_RESPONSIBLE = "responsible";
+  @SearchParamDefinition(name="response-id", path="MessageHeader.response.identifier", description="Id of original message", type="token" )
+  public static final String SP_RESPONSEID = "response-id";
   @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference" )
   public static final String SP_ENTERER = "enterer";
   @SearchParamDefinition(name="event", path="MessageHeader.event", description="Code for the event this message represents", type="token" )
   public static final String SP_EVENT = "event";
-  @SearchParamDefinition(name="target", path="MessageHeader.destination.target", description="Particular delivery destination within the destination", type="reference" )
-  public static final String SP_TARGET = "target";
+  @SearchParamDefinition(name="timestamp", path="MessageHeader.timestamp", description="Time that the message was sent", type="date" )
+  public static final String SP_TIMESTAMP = "timestamp";
 
 }
 

@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1566,16 +1545,16 @@ public class VisionPrescription extends DomainResource {
     return ResourceType.VisionPrescription;
    }
 
-  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
-  public static final String SP_DATEWRITTEN = "datewritten";
-  @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference" )
-  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="prescriber", path="VisionPrescription.prescriber", description="Who authorizes the Vision product", type="reference" )
   public static final String SP_PRESCRIBER = "prescriber";
-  @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference" )
-  public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="identifier", path="VisionPrescription.identifier", description="Return prescriptions with this external identity", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="VisionPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="datewritten", path="VisionPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
+  public static final String SP_DATEWRITTEN = "datewritten";
+  @SearchParamDefinition(name="encounter", path="VisionPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
 
 }
 

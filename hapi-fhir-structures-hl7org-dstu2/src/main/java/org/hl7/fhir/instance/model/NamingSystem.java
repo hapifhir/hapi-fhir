@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1445,34 +1424,34 @@ public class NamingSystem extends DomainResource {
     return ResourceType.NamingSystem;
    }
 
-  @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
-  public static final String SP_RESPONSIBLE = "responsible";
-  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="idtype", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
-  public static final String SP_IDTYPE = "idtype";
+  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
+  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="country", path="NamingSystem.country", description="ISO 3-char country code", type="token" )
+  public static final String SP_COUNTRY = "country";
+  @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date" )
+  public static final String SP_PERIOD = "period";
   @SearchParamDefinition(name="replacedby", path="NamingSystem.replacedBy", description="Use this instead", type="reference" )
   public static final String SP_REPLACEDBY = "replacedby";
   @SearchParamDefinition(name="type", path="NamingSystem.type", description="codesystem | identifier | root", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="date", path="NamingSystem.date", description="Publication Date(/time)", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="period", path="NamingSystem.uniqueId.period", description="When is identifier valid?", type="date" )
-  public static final String SP_PERIOD = "period";
+  @SearchParamDefinition(name="idtype", path="NamingSystem.uniqueId.type", description="oid | uuid | uri | other", type="token" )
+  public static final String SP_IDTYPE = "idtype";
+  @SearchParamDefinition(name="responsible", path="NamingSystem.responsible", description="Who maintains system namespace?", type="string" )
+  public static final String SP_RESPONSIBLE = "responsible";
   @SearchParamDefinition(name="contact", path="NamingSystem.contact.name", description="Name of a individual to contact", type="string" )
   public static final String SP_CONTACT = "contact";
-  @SearchParamDefinition(name="country", path="NamingSystem.country", description="ISO 3-char country code", type="token" )
-  public static final String SP_COUNTRY = "country";
-  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
-  @SearchParamDefinition(name="category", path="NamingSystem.category", description="e.g. driver,  provider,  patient, bank etc", type="token" )
-  public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="name", path="NamingSystem.name", description="Human-readable label", type="string" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="publisher", path="NamingSystem.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
   @SearchParamDefinition(name="telecom", path="NamingSystem.contact.telecom", description="Contact details for individual or publisher", type="token" )
   public static final String SP_TELECOM = "telecom";
+  @SearchParamDefinition(name="category", path="NamingSystem.category", description="e.g. driver,  provider,  patient, bank etc", type="token" )
+  public static final String SP_CATEGORY = "category";
   @SearchParamDefinition(name="value", path="NamingSystem.uniqueId.value", description="The unique identifier", type="string" )
   public static final String SP_VALUE = "value";
+  @SearchParamDefinition(name="status", path="NamingSystem.status", description="draft | active | retired", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

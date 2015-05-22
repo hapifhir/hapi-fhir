@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -815,20 +794,20 @@ public class Media extends DomainResource {
     return ResourceType.Media;
    }
 
-  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view e.g Lateral or Antero-posterior", type="token" )
+  public static final String SP_VIEW = "view";
+  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token" )
+  public static final String SP_SUBTYPE = "subtype";
   @SearchParamDefinition(name="created", path="Media.content.creation", description="Date attachment was first created", type="date" )
   public static final String SP_CREATED = "created";
   @SearchParamDefinition(name="subject", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="subtype", path="Media.subtype", description="The type of acquisition equipment/process", type="token" )
-  public static final String SP_SUBTYPE = "subtype";
-  @SearchParamDefinition(name="view", path="Media.view", description="Imaging view e.g Lateral or Antero-posterior", type="token" )
-  public static final String SP_VIEW = "view";
+  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference" )
+  public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="type", path="Media.type", description="photo | video | audio", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="identifier", path="Media.identifier", description="Identifier(s) for the image", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="operator", path="Media.operator", description="The person who generated the image", type="reference" )
   public static final String SP_OPERATOR = "operator";
 

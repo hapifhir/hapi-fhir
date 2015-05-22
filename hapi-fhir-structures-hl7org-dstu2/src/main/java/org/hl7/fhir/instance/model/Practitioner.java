@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1367,32 +1346,32 @@ public class Practitioner extends DomainResource {
     return ResourceType.Practitioner;
    }
 
-  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
-  public static final String SP_PHONETIC = "phonetic";
-  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
-  public static final String SP_COMMUNICATION = "communication";
-  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
-  public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.managingOrganization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
-  public static final String SP_ORGANIZATION = "organization";
+  @SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="given", path="Practitioner.name", description="A portion of the given name", type="string" )
   public static final String SP_GIVEN = "given";
+  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specailty at an organization", type="token" )
+  public static final String SP_SPECIALTY = "specialty";
   @SearchParamDefinition(name="address", path="Practitioner.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
-  @SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name", type="string" )
-  public static final String SP_FAMILY = "family";
-  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="token" )
-  public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="role", path="Practitioner.practitionerRole.role", description="The practitioner can perform this role at for the organization", type="token" )
   public static final String SP_ROLE = "role";
   @SearchParamDefinition(name="gender", path="Practitioner.gender", description="Gender of the practitioner", type="token" )
   public static final String SP_GENDER = "gender";
-  @SearchParamDefinition(name="identifier", path="Practitioner.identifier", description="A practitioner's Identifier", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="specialty", path="Practitioner.practitionerRole.specialty", description="The practitioner has this specailty at an organization", type="token" )
-  public static final String SP_SPECIALTY = "specialty";
+  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
+  public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.managingOrganization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
+  public static final String SP_ORGANIZATION = "organization";
+  @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="telecom", path="Practitioner.telecom", description="The value in any kind of contact", type="token" )
+  public static final String SP_TELECOM = "telecom";
+  @SearchParamDefinition(name="location", path="Practitioner.practitionerRole.location", description="One of the locations at which this practitioner provides care", type="reference" )
+  public static final String SP_LOCATION = "location";
+  @SearchParamDefinition(name="family", path="Practitioner.name", description="A portion of the family name", type="string" )
+  public static final String SP_FAMILY = "family";
+  @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
+  public static final String SP_COMMUNICATION = "communication";
 
 }
 

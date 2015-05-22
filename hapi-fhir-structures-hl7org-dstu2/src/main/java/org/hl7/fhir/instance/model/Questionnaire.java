@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1833,20 +1812,20 @@ public class Questionnaire extends DomainResource {
     return ResourceType.Questionnaire;
    }
 
-  @SearchParamDefinition(name="title", path="", description="All or part of the name of the questionnaire (title for the root group of the questionnaire)", type="string" )
-  public static final String SP_TITLE = "title";
-  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="code", path="Questionnaire.group.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="Questionnaire.date", description="When the questionnaire was last changed", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="Questionnaire.identifier", description="An identifier for the questionnaire", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
-  public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="code", path="Questionnaire.group.concept", description="A code that corresponds to the questionnaire or one of its groups", type="token" )
+  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="publisher", path="Questionnaire.publisher", description="The author of the questionnaire", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="title", path="", description="All or part of the name of the questionnaire (title for the root group of the questionnaire)", type="string" )
+  public static final String SP_TITLE = "title";
+  @SearchParamDefinition(name="version", path="Questionnaire.version", description="The business version of the questionnaire", type="string" )
+  public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="status", path="Questionnaire.status", description="The status of the questionnaire", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

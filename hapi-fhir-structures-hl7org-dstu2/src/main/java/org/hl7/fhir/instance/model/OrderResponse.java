@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -752,16 +731,16 @@ public class OrderResponse extends DomainResource {
     return ResourceType.OrderResponse;
    }
 
-  @SearchParamDefinition(name="patient", path="", description="The patient the reuqest order is related to", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="Details of the outcome of performing the order", type="reference" )
-  public static final String SP_FULFILLMENT = "fulfillment";
+  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="request", path="OrderResponse.request", description="The order that this is a response to", type="reference" )
   public static final String SP_REQUEST = "request";
   @SearchParamDefinition(name="code", path="OrderResponse.orderStatus", description="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="date", path="OrderResponse.date", description="When the response was made", type="date" )
-  public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="patient", path="", description="The patient the reuqest order is related to", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="fulfillment", path="OrderResponse.fulfillment", description="Details of the outcome of performing the order", type="reference" )
+  public static final String SP_FULFILLMENT = "fulfillment";
   @SearchParamDefinition(name="who", path="OrderResponse.who", description="Who made the response", type="reference" )
   public static final String SP_WHO = "who";
 

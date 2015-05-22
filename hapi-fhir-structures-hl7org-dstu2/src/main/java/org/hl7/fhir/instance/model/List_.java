@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1177,26 +1156,26 @@ public class List_ extends DomainResource {
     return ResourceType.List;
    }
 
-  @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
-  public static final String SP_TITLE = "title";
-  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents", type="reference" )
-  public static final String SP_SOURCE = "source";
-  @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
-  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="item", path="List.entry.item", description="Actual entry", type="reference" )
   public static final String SP_ITEM = "item";
+  @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token" )
+  public static final String SP_EMPTYREASON = "empty-reason";
   @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="notes", path="List.note", description="Comments about the note", type="string" )
   public static final String SP_NOTES = "notes";
-  @SearchParamDefinition(name="date", path="List.date", description="When the list was prepared", type="date" )
-  public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="empty-reason", path="List.emptyReason", description="Why list is empty", type="token" )
-  public static final String SP_EMPTYREASON = "empty-reason";
+  @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents", type="reference" )
+  public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
+  public static final String SP_TITLE = "title";
+  @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

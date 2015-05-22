@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -2585,42 +2564,42 @@ The indication will typically be a Condition (with other resources referenced in
     return ResourceType.Encounter;
    }
 
-  @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token" )
-  public static final String SP_PARTICIPANTTYPE = "participant-type";
-  @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="An episode of care that this encounter should be recorded against", type="reference" )
-  public static final String SP_EPISODEOFCARE = "episodeofcare";
-  @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="reason", path="Encounter.reason", description="Reason the encounter takes place (code)", type="token" )
-  public static final String SP_REASON = "reason";
-  @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference" )
-  public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="fulfills", path="Encounter.fulfills", description="The appointment that scheduled this encounter", type="reference" )
-  public static final String SP_FULFILLS = "fulfills";
-  @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
-  public static final String SP_INDICATION = "indication";
   @SearchParamDefinition(name="date", path="Encounter.period", description="A date within the period the Encounter lasted", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token" )
-  public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc", type="token" )
-  public static final String SP_SPECIALARRANGEMENT = "special-arrangement";
-  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference" )
-  public static final String SP_PARTOF = "part-of";
-  @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference" )
-  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="identifier", path="Encounter.identifier", description="Identifier(s) by which this encounter is known", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="reason", path="Encounter.reason", description="Reason the encounter takes place (code)", type="token" )
+  public static final String SP_REASON = "reason";
+  @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="An episode of care that this encounter should be recorded against", type="reference" )
+  public static final String SP_EPISODEOFCARE = "episodeofcare";
+  @SearchParamDefinition(name="participant-type", path="Encounter.participant.type", description="Role of participant in encounter", type="token" )
+  public static final String SP_PARTICIPANTTYPE = "participant-type";
+  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferralRequest", description="Incoming Referral Request", type="reference" )
+  public static final String SP_INCOMINGREFERRAL = "incomingreferral";
   @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
   @SearchParamDefinition(name="length", path="Encounter.length", description="Length of encounter in days", type="number" )
   public static final String SP_LENGTH = "length";
+  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference" )
+  public static final String SP_PARTOF = "part-of";
+  @SearchParamDefinition(name="type", path="Encounter.type", description="Specific type of encounter", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference" )
   public static final String SP_PARTICIPANT = "participant";
-  @SearchParamDefinition(name="incomingreferral", path="Encounter.incomingReferralRequest", description="Incoming Referral Request", type="reference" )
-  public static final String SP_INCOMINGREFERRAL = "incomingreferral";
-  @SearchParamDefinition(name="identifier", path="Encounter.identifier", description="Identifier(s) by which this encounter is known", type="token" )
-  public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="patient", path="Encounter.patient", description="The patient present at the encounter", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="fulfills", path="Encounter.fulfills", description="The appointment that scheduled this encounter", type="reference" )
+  public static final String SP_FULFILLS = "fulfills";
   @SearchParamDefinition(name="location-period", path="Encounter.location.period", description="Time period during which the patient was present at the location", type="date" )
   public static final String SP_LOCATIONPERIOD = "location-period";
+  @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference" )
+  public static final String SP_LOCATION = "location";
+  @SearchParamDefinition(name="indication", path="Encounter.indication", description="Reason the encounter takes place (resource)", type="reference" )
+  public static final String SP_INDICATION = "indication";
+  @SearchParamDefinition(name="special-arrangement", path="Encounter.hospitalization.specialArrangement", description="Wheelchair, translator, stretcher, etc", type="token" )
+  public static final String SP_SPECIALARRANGEMENT = "special-arrangement";
+  @SearchParamDefinition(name="status", path="Encounter.status", description="planned | arrived | in-progress | onleave | finished | cancelled", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

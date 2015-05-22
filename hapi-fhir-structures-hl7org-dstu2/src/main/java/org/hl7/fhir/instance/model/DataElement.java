@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1472,26 +1451,26 @@ public class DataElement extends DomainResource {
     return ResourceType.DataElement;
    }
 
-  @SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="description", path="DataElement.element.definition", description="Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="context", path="DataElement.useContext", description="A use context assigned to the data element", type="token" )
-  public static final String SP_CONTEXT = "context";
-  @SearchParamDefinition(name="code", path="DataElement.element.code", description="A code for the data element (server may choose to do subsumption)", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="DataElement.date", description="The data element publication date", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="DataElement.identifier", description="The identifier of the data element", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="url", path="DataElement.url", description="The official URL for the data element", type="uri" )
-  public static final String SP_URL = "url";
+  @SearchParamDefinition(name="code", path="DataElement.element.code", description="A code for the data element (server may choose to do subsumption)", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="name", path="DataElement.name", description="Name of the data element", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="context", path="DataElement.useContext", description="A use context assigned to the data element", type="token" )
+  public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="publisher", path="DataElement.publisher", description="Name of the publisher of the data element", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="description", path="DataElement.element.definition", description="Text search in the description of the data element.  This corresponds to the definition of the first DataElement.element.", type="string" )
+  public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="version", path="DataElement.version", description="The version identifier of the data element", type="string" )
   public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="url", path="DataElement.url", description="The official URL for the data element", type="uri" )
+  public static final String SP_URL = "url";
+  @SearchParamDefinition(name="status", path="DataElement.status", description="The current status of the data element", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

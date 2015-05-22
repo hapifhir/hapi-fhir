@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1442,30 +1421,30 @@ public class Specimen extends DomainResource {
     return ResourceType.Specimen;
    }
 
-  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
-  public static final String SP_COLLECTOR = "collector";
-  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="site-code", path="Specimen.collection.bodySiteCodeableConcept", description="The code for the body site from where the specimen originated", type="token" )
-  public static final String SP_SITECODE = "site-code";
   @SearchParamDefinition(name="container", path="Specimen.container.type", description="The kind of specimen container", type="token" )
   public static final String SP_CONTAINER = "container";
-  @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
-  public static final String SP_COLLECTED = "collected";
-  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
-  public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
-  public static final String SP_CONTAINERID = "containerid";
-  @SearchParamDefinition(name="site-reference", path="Specimen.collection.bodySiteReference", description="BodySite resource for the body site from where the specimen originated", type="reference" )
-  public static final String SP_SITEREFERENCE = "site-reference";
-  @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
-  public static final String SP_ACCESSION = "accession";
-  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
-  public static final String SP_PARENT = "parent";
-  @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="Specimen.identifier", description="The unique identifier associated with the specimen", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
+  public static final String SP_PARENT = "parent";
+  @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
+  public static final String SP_SUBJECT = "subject";
+  @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="site-reference", path="Specimen.collection.bodySiteReference", description="BodySite resource for the body site from where the specimen originated", type="reference" )
+  public static final String SP_SITEREFERENCE = "site-reference";
+  @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
+  public static final String SP_COLLECTED = "collected";
+  @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
+  public static final String SP_ACCESSION = "accession";
+  @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
+  public static final String SP_CONTAINERID = "containerid";
+  @SearchParamDefinition(name="site-code", path="Specimen.collection.bodySiteCodeableConcept", description="The code for the body site from where the specimen originated", type="token" )
+  public static final String SP_SITECODE = "site-code";
+  @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
+  public static final String SP_COLLECTOR = "collector";
 
 }
 

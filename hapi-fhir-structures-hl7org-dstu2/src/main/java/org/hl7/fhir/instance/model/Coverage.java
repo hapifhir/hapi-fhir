@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -824,22 +803,22 @@ public class Coverage extends DomainResource {
     return ResourceType.Coverage;
    }
 
-  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token" )
-  public static final String SP_PLAN = "plan";
-  @SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference" )
-  public static final String SP_ISSUER = "issuer";
-  @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
-  public static final String SP_SEQUENCE = "sequence";
-  @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token" )
-  public static final String SP_DEPENDENT = "dependent";
-  @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
-  public static final String SP_GROUP = "group";
-  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token" )
-  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="identifier", path="Coverage.identifier", description="The primary identifier of the insured", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="sequence", path="Coverage.sequence", description="Sequence number", type="token" )
+  public static final String SP_SEQUENCE = "sequence";
   @SearchParamDefinition(name="subplan", path="Coverage.subPlan", description="Sub-plan identifier", type="token" )
   public static final String SP_SUBPLAN = "subplan";
+  @SearchParamDefinition(name="type", path="Coverage.type", description="The kind of coverage", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="plan", path="Coverage.plan", description="A plan or policy identifier", type="token" )
+  public static final String SP_PLAN = "plan";
+  @SearchParamDefinition(name="dependent", path="Coverage.dependent", description="Dependent number", type="token" )
+  public static final String SP_DEPENDENT = "dependent";
+  @SearchParamDefinition(name="issuer", path="Coverage.issuer", description="The identity of the insurer", type="reference" )
+  public static final String SP_ISSUER = "issuer";
+  @SearchParamDefinition(name="group", path="Coverage.group", description="Group identifier", type="token" )
+  public static final String SP_GROUP = "group";
 
 }
 

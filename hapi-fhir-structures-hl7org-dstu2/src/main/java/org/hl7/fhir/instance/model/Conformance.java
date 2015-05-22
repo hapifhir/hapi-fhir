@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -6140,38 +6119,38 @@ public class Conformance extends DomainResource {
     return ResourceType.Conformance;
    }
 
-  @SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement", type="token" )
-  public static final String SP_RESOURCE = "resource";
-  @SearchParamDefinition(name="security", path="Conformance.rest.security", description="Information about security of implementation", type="token" )
-  public static final String SP_SECURITY = "security";
-  @SearchParamDefinition(name="format", path="Conformance.format", description="formats supported (xml | json | mime type)", type="token" )
-  public static final String SP_FORMAT = "format";
   @SearchParamDefinition(name="date", path="Conformance.date", description="The conformance statement publication date", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="url", path="Conformance.url", description="The uri that identifies the conformance statement", type="uri" )
-  public static final String SP_URL = "url";
-  @SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement", type="token" )
-  public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
-  @SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token" )
-  public static final String SP_MODE = "mode";
   @SearchParamDefinition(name="software", path="Conformance.software.name", description="Part of a the name of a software application", type="string" )
   public static final String SP_SOFTWARE = "software";
-  @SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string" )
-  public static final String SP_DESCRIPTION = "description";
-  @SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement", type="token" )
-  public static final String SP_EVENT = "event";
-  @SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement", type="string" )
-  public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="Profiles supported by the system", type="reference" )
-  public static final String SP_SUPPORTEDPROFILE = "supported-profile";
-  @SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR", type="token" )
-  public static final String SP_FHIRVERSION = "fhirversion";
+  @SearchParamDefinition(name="resource", path="Conformance.rest.resource.type", description="Name of a resource mentioned in a conformance statement", type="token" )
+  public static final String SP_RESOURCE = "resource";
   @SearchParamDefinition(name="profile", path="Conformance.rest.resource.profile", description="A profile id invoked in a conformance statement", type="reference" )
   public static final String SP_PROFILE = "profile";
+  @SearchParamDefinition(name="format", path="Conformance.format", description="formats supported (xml | json | mime type)", type="token" )
+  public static final String SP_FORMAT = "format";
+  @SearchParamDefinition(name="description", path="Conformance.description", description="Text search in the description of the conformance statement", type="string" )
+  public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="fhirversion", path="Conformance.version", description="The version of FHIR", type="token" )
+  public static final String SP_FHIRVERSION = "fhirversion";
+  @SearchParamDefinition(name="version", path="Conformance.version", description="The version identifier of the conformance statement", type="token" )
+  public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="url", path="Conformance.url", description="The uri that identifies the conformance statement", type="uri" )
+  public static final String SP_URL = "url";
+  @SearchParamDefinition(name="supported-profile", path="Conformance.profile", description="Profiles supported by the system", type="reference" )
+  public static final String SP_SUPPORTEDPROFILE = "supported-profile";
+  @SearchParamDefinition(name="mode", path="Conformance.rest.mode", description="Mode - restful (server/client) or messaging (sender/receiver)", type="token" )
+  public static final String SP_MODE = "mode";
+  @SearchParamDefinition(name="security", path="Conformance.rest.security", description="Information about security of implementation", type="token" )
+  public static final String SP_SECURITY = "security";
+  @SearchParamDefinition(name="name", path="Conformance.name", description="Name of the conformance statement", type="string" )
+  public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="publisher", path="Conformance.publisher", description="Name of the publisher of the conformance statement", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="event", path="Conformance.messaging.event.code", description="Event code in a conformance statement", type="token" )
+  public static final String SP_EVENT = "event";
+  @SearchParamDefinition(name="status", path="Conformance.status", description="The current status of the conformance statement", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 

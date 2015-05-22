@@ -54,7 +54,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.instance.model.api.IRefImplResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -676,8 +676,8 @@ public class JsonParser extends BaseParser implements IParser {
 					resourceId = res.getId().getIdPart();
 				}
 			}
-		} else if (theResource instanceof IRefImplResource) {
-			IRefImplResource res = (IRefImplResource) theResource;
+		} else if (theResource instanceof IAnyResource) {
+			IAnyResource res = (IAnyResource) theResource;
 			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
 				resourceId = res.getIdElement().getIdPart();
 			}

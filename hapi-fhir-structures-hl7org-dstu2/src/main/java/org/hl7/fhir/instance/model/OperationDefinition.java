@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -2426,32 +2405,32 @@ public class OperationDefinition extends DomainResource {
     return ResourceType.OperationDefinition;
    }
 
-  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token" )
-  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="date", path="OperationDefinition.date", description="Date for this version of the operation definition", type="date" )
   public static final String SP_DATE = "date";
-  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
-  public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical url to reference this operation definition", type="uri" )
-  public static final String SP_URL = "url";
+  @SearchParamDefinition(name="code", path="OperationDefinition.code", description="Name used to invoke the operation", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
+  public static final String SP_INSTANCE = "instance";
   @SearchParamDefinition(name="kind", path="OperationDefinition.kind", description="operation | query", type="token" )
   public static final String SP_KIND = "kind";
+  @SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
+  public static final String SP_PROFILE = "profile";
+  @SearchParamDefinition(name="type", path="OperationDefinition.type", description="Invoke at resource level for these type", type="token" )
+  public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="version", path="OperationDefinition.version", description="Logical id for this version of the operation definition", type="token" )
   public static final String SP_VERSION = "version";
-  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="url", path="OperationDefinition.url", description="Logical url to reference this operation definition", type="uri" )
+  public static final String SP_URL = "url";
   @SearchParamDefinition(name="system", path="OperationDefinition.system", description="Invoke at the system level?", type="token" )
   public static final String SP_SYSTEM = "system";
   @SearchParamDefinition(name="name", path="OperationDefinition.name", description="Informal name for this profile", type="string" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="publisher", path="OperationDefinition.publisher", description="Name of the publisher (Organization or individual)", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="status", path="OperationDefinition.status", description="draft | active | retired", type="token" )
+  public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="base", path="OperationDefinition.base", description="Marks this as a profile of the base", type="reference" )
   public static final String SP_BASE = "base";
-  @SearchParamDefinition(name="instance", path="OperationDefinition.instance", description="Invoke on an instance?", type="token" )
-  public static final String SP_INSTANCE = "instance";
-  @SearchParamDefinition(name="profile", path="OperationDefinition.parameter.profile", description="Profile on the type", type="reference" )
-  public static final String SP_PROFILE = "profile";
 
 }
 

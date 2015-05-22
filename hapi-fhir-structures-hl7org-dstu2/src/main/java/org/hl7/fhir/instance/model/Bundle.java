@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -2016,6 +1995,53 @@ public class Bundle extends Resource implements IBaseBundle {
       return this;
     }
 
+ /**
+   * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
+   * If no link is found which matches the given relation, returns <code>null</code>. If more than one
+   * link is found which matches the given relation, returns the first matching BundleLinkComponent.
+   * 
+   * @param theRelation
+   *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+   * @return Returns a matching BundleLinkComponent, or <code>null</code>
+   * @see IBaseBundle#LINK_NEXT
+   * @see IBaseBundle#LINK_PREV
+   * @see IBaseBundle#LINK_SELF
+   */
+  public BundleLinkComponent getLink(String theRelation) {
+    org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+    for (BundleLinkComponent next : getLink()) {
+      if (theRelation.equals(next.getRelation())) {
+        return next;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns the {@link #getLink() link} which matches a given {@link BundleLinkComponent#getRelation() relation}. 
+   * If no link is found which matches the given relation, creates a new BundleLinkComponent with the
+   * given relation and adds it to this Bundle. If more than one
+   * link is found which matches the given relation, returns the first matching BundleLinkComponent.
+   * 
+   * @param theRelation
+   *            The relation, such as "next", or "self. See the constants such as {@link IBaseBundle#LINK_SELF} and {@link IBaseBundle#LINK_NEXT}.
+   * @return Returns a matching BundleLinkComponent, or <code>null</code>
+   * @see IBaseBundle#LINK_NEXT
+   * @see IBaseBundle#LINK_PREV
+   * @see IBaseBundle#LINK_SELF
+   */
+  public BundleLinkComponent getLinkOrCreate(String theRelation) {
+    org.apache.commons.lang3.Validate.notBlank(theRelation, "theRelation may not be null or empty");
+    for (BundleLinkComponent next : getLink()) {
+      if (theRelation.equals(next.getRelation())) {
+        return next;
+      }
+    }
+    BundleLinkComponent retVal = new BundleLinkComponent();
+    retVal.setRelation(theRelation);
+    getLink().add(retVal);
+    return retVal;
+  }
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "code", "Indicates the purpose of this bundle- how it was intended to be used.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -2084,12 +2110,12 @@ public class Bundle extends Resource implements IBaseBundle {
     return ResourceType.Bundle;
    }
 
-  @SearchParamDefinition(name="message", path="", description="The first resource in the bundle, if the bundle type is 'message' - this is a message header, and this parameter provides access to search its contents", type="reference" )
-  public static final String SP_MESSAGE = "message";
   @SearchParamDefinition(name="composition", path="", description="The first resource in the bundle, if the bundle type is 'document' - this is a composition, and this parameter provides access to searches its contents", type="reference" )
   public static final String SP_COMPOSITION = "composition";
   @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | history | searchset | collection", type="token" )
   public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="message", path="", description="The first resource in the bundle, if the bundle type is 'message' - this is a message header, and this parameter provides access to search its contents", type="reference" )
+  public static final String SP_MESSAGE = "message";
 
 }
 

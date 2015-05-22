@@ -1,27 +1,6 @@
 package org.hl7.fhir.instance.model;
 
 /*
- * #%L
- * HAPI FHIR Structures - HL7.org DSTU2
- * %%
- * Copyright (C) 2014 - 2015 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-
-/*
   Copyright (c) 2011+, HL7, Inc.
   All rights reserved.
   
@@ -50,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, May 5, 2015 16:13-0400 for FHIR v0.5.0
+// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1162,20 +1141,20 @@ public class Supply extends DomainResource {
     return ResourceType.Supply;
    }
 
-  @SearchParamDefinition(name="patient", path="Supply.patient", description="Patient for whom the item is supplied", type="reference" )
-  public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="status", path="Supply.status", description="requested | dispensed | received | failed | cancelled", type="token" )
-  public static final String SP_STATUS = "status";
-  @SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="External identifier", type="token" )
-  public static final String SP_DISPENSEID = "dispenseid";
   @SearchParamDefinition(name="identifier", path="Supply.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="Dispenser", type="reference" )
-  public static final String SP_SUPPLIER = "supplier";
   @SearchParamDefinition(name="kind", path="Supply.kind", description="The kind of supply (central, non-stock, etc)", type="token" )
   public static final String SP_KIND = "kind";
+  @SearchParamDefinition(name="patient", path="Supply.patient", description="Patient for whom the item is supplied", type="reference" )
+  public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="supplier", path="Supply.dispense.supplier", description="Dispenser", type="reference" )
+  public static final String SP_SUPPLIER = "supplier";
+  @SearchParamDefinition(name="dispenseid", path="Supply.dispense.identifier", description="External identifier", type="token" )
+  public static final String SP_DISPENSEID = "dispenseid";
   @SearchParamDefinition(name="dispensestatus", path="Supply.dispense.status", description="in-progress | dispensed | abandoned", type="token" )
   public static final String SP_DISPENSESTATUS = "dispensestatus";
+  @SearchParamDefinition(name="status", path="Supply.status", description="requested | dispensed | received | failed | cancelled", type="token" )
+  public static final String SP_STATUS = "status";
 
 }
 
