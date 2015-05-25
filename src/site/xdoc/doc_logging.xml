@@ -16,9 +16,42 @@
 				different one. These dependencies can cause conflicts and be very irritating to solve.
 			</p>
 
-			<p>
-				Unfortunately HAPI is not immune to this issue.
-			</p>
+			<subsection name="Quick Start: Using Logback">
+			
+				<p>
+					If you don't want to spend much time worrying about logging, it's probably
+					easiest to just include the <a href="http://logback.qos.ch/">Logback</a>
+					JAR along with your application.
+				</p>
+				<p>
+					Logback is a powerful and flexible framework. To configure it, simply
+					include a "logback.xml" file on your classpath. The following contents
+					may be placed in this file to simply log at a suitable level
+					to the console:
+				</p>
+				<source><![CDATA[<configuration scan="true" scanPeriod="30 seconds">
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>]]></source>
+				
+				<p>
+					For more detail on how logging can be configured, see the 
+					following section.
+				</p>
+				
+			</subsection>
 
 			<subsection name="Configuring HAPI's Logging - SLF4j">
 				

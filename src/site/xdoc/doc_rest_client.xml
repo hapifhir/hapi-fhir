@@ -93,8 +93,24 @@
 				
 				<p>
 					Searching for resources is probably the most common initial scenario for
-					client applications, so we'll start the demonstration there.
+					client applications, so we'll start the demonstration there. The FHIR search
+					operation generally uses a URL with a set of predefined search parameters,
+					and returns a Bundle containing zero-or-more resources which matched the
+					given search criteria. 
 				</p>
+				<p>
+					Search is a very powerful mechanism, with advanced features such as paging,
+					including linked resources, etc. See the FHIR 
+					<a href="http://hl7.org/fhir/search.html">search specification</a>
+					for more information.
+				</p>
+				
+				<p>
+					<notclosed ! colour this section differently>
+					<b>Note on Bundle types: </b> As of DSTU2, FHIR defines Bundle as a resource
+					instead of an Atom feed as it was in DSTU1.  
+				</p>
+				
 				<p>
 					The following example shows how to query using the generic client:
 				</p>

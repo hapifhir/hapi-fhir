@@ -20,9 +20,21 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 
-public interface IGetPageTyped<T> extends IClientExecutable<IGetPageTyped<T>, T> {
+import ca.uhn.fhir.model.api.Bundle;
+
+public interface IGetPageUntyped {
+
+	/**
+	 * Return a DSTU1 Atom feed
+	 */
+	IGetPageTyped<Bundle> andReturnDstu1Bundle();
 	
-	// nothing for now
-
+	/**
+	 * Return a Bundle resource of the given type
+	 */
+	<T extends IBaseBundle> IGetPageTyped<T> andReturnBundle(Class<T> theBundleType);
+	
+	
 }

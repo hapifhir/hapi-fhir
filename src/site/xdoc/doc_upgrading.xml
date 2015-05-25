@@ -8,8 +8,18 @@
 
 	<body>
 
-		<section name="Upgrading to HAPI FHIR 0.8">
+		<section name="Upgrading to HAPI 1.1">
+			
+			<p>
+				HAPI 1.1 introduces support for the "reference i"
+			</p>
+			
+			<img src="./images/hapi-1.1-structs-resource.png" alt="Structures"/>
+			
+		</section>
+
 <!-- 
+		<section name="Upgrading to HAPI FHIR 0.8">
 			
 			<p>
 				<b>This section is still incomplete: </b> Note that HAPI 0.8 has not 
@@ -123,8 +133,8 @@
 				
 			</subsection>
 					
--->
 		</section>
+-->
 		
 	</body>
 

@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -32,7 +33,6 @@ import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -57,7 +57,7 @@ public class GenericClientDstu2Test {
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
@@ -83,13 +83,10 @@ public class GenericClientDstu2Test {
 				.execute();
 		//@formatter:on
 
-		assertEquals(
-				"http://example.com/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json",
-				capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", capt.getValue().getURI().toString());
 
 	}
 
-	
 	private String getPatientFeedWithOneResult() {
 		//@formatter:off
 		String msg = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -615,7 +612,6 @@ public class GenericClientDstu2Test {
 		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
 	}
 
-	
 	@Test
 	public void testTransactionWithString() throws Exception {
 
@@ -638,8 +634,9 @@ public class GenericClientDstu2Test {
 			@Override
 			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
 				return new ReaderInputStream(new StringReader(respStringJson), Charset.forName("UTF-8"));
-			}});
-		
+			}
+		});
+
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		//@formatter:off
@@ -654,7 +651,7 @@ public class GenericClientDstu2Test {
 		IOUtils.closeQuietly(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
 		assertEquals(reqStringJson, requestString);
 		assertEquals("application/json+fhir; charset=UTF-8", capt.getValue().getFirstHeader("Content-Type").getValue());
-		
+
 		//@formatter:off
         response = client.transaction()
                 .withBundle(reqStringJson)
@@ -670,9 +667,7 @@ public class GenericClientDstu2Test {
 		assertEquals("application/xml+fhir; charset=UTF-8", capt.getValue().getFirstHeader("Content-Type").getValue());
 
 	}
-	
-	
-	
+
 	@Test
 	public void testTransactionWithTransactionResource() throws Exception {
 
@@ -808,7 +803,7 @@ public class GenericClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		client.create().resource(p).execute();
-		
+
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertThat(extractBody(capt, idx), containsString("<family value=\"FOOFAMILY\"/>"));
@@ -817,7 +812,7 @@ public class GenericClientDstu2Test {
 		idx++;
 
 		p.setId("123");
-		
+
 		client.create().resource(p).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
@@ -886,6 +881,103 @@ public class GenericClientDstu2Test {
 	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
 		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(count)).getEntity().getContent(), "UTF-8");
 		return body;
+	}
+
+	@Test
+	public void testPageNext() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(getPatientFeedWithOneResult()), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://foo.bar/prev");
+		sourceBundle.getLinkOrCreate(IBaseBundle.LINK_NEXT).setUrl("http://foo.bar/next");
+
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = client
+				.loadPage()
+				.next(sourceBundle)
+				.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals("http://foo.bar/next", capt.getAllValues().get(idx).getURI().toASCIIString());
+		idx++;
+
+	}
+
+	@Test
+	public void testPagePrev() throws Exception {
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(getPatientFeedWithOneResult()), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		sourceBundle.getLinkOrCreate("previous").setUrl("http://foo.bar/prev");
+
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle resp = client
+				.loadPage()
+				.previous(sourceBundle)
+				.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals("http://foo.bar/prev", capt.getAllValues().get(idx).getURI().toASCIIString());
+		idx++;
+
+		/*
+		 * Try with "prev" instead of "previous"
+		 */
+		
+		sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		sourceBundle.getLinkOrCreate("prev").setUrl("http://foo.bar/prev");
+
+		//@formatter:off
+		resp = client
+				.loadPage()
+				.previous(sourceBundle)
+				.execute();
+		//@formatter:on
+
+		assertEquals(1, resp.getEntry().size());
+		assertEquals("http://foo.bar/prev", capt.getAllValues().get(idx).getURI().toASCIIString());
+		idx++;
+
+	}
+
+	@Test
+	public void testPageNextNoLink() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle sourceBundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		try {
+		client.loadPage().next(sourceBundle).execute();
+		} catch (IllegalArgumentException e) {
+			assertThat(e.getMessage(), containsString("Can not perform paging operation because no link was found in Bundle with relation \"next\""));
+		}
 	}
 
 }

@@ -43,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -79,6 +80,7 @@ import ca.uhn.fhir.rest.gclient.IFetchConformanceTyped;
 import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetPageTyped;
+import ca.uhn.fhir.rest.gclient.IGetPageUntyped;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
@@ -402,7 +404,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (def == null) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
 		}
-		return (IBaseResource) read(def.getImplementingClass(), id);
+		return read(def.getImplementingClass(), id);
 	}
 
 	@Override
@@ -841,23 +843,33 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
-	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped, Bundle> implements IGetPageTyped {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private class GetPageInternal extends BaseClientExecutable<IGetPageTyped<Object>, Object> implements IGetPageTyped<Object> {
 
 		private String myUrl;
+		private Class<? extends IBaseBundle> myBundleType;
 
 		public GetPageInternal(String theUrl) {
 			myUrl = theUrl;
 		}
 
-		@Override
-		public Bundle execute() {
+		public GetPageInternal(String theUrl, Class<? extends IBaseBundle> theBundleType) {
+			myUrl = theUrl;
+			myBundleType = theBundleType;
+		}
 
-			BundleResponseHandler binding = new BundleResponseHandler(null);
+		@Override
+		public Object execute() {
+			IClientResponseHandler binding;
+			if (myBundleType == null) {
+				binding = new BundleResponseHandler(null);
+			} else {
+				binding = new ResourceResponseHandler(myBundleType, null);
+			}
 			HttpSimpleGetClientInvocation invocation = new HttpSimpleGetClientInvocation(myUrl);
 
 			Map<String, List<String>> params = null;
 			return invoke(params, binding, invocation);
-
 		}
 
 	}
@@ -1022,7 +1034,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
-	private final class LoadPageInternal implements IGetPage {
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private final class LoadPageInternal implements IGetPage, IGetPageUntyped {
+
+		private static final String PREVIOUS = "previous";
+		private static final String PREV = "prev";
+		private String myPageUrl;
 
 		@Override
 		public IGetPageTyped next(Bundle theBundle) {
@@ -1037,6 +1054,64 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IGetPageTyped url(String thePageUrl) {
 			return new GetPageInternal(thePageUrl);
+		}
+
+		@Override
+		public <T extends IBaseBundle> IGetPageTyped<T> next(T theBundle) {
+			return nextOrPrevious("next", theBundle);
+		}
+
+		private <T extends IBaseBundle> IGetPageTyped<T> nextOrPrevious(String theWantRel, T theBundle) {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(theBundle);
+			List<IBase> links = def.getChildByName("link").getAccessor().getValues(theBundle);
+			if (links == null || links.isEmpty()) {
+				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
+			}
+			for (IBase nextLink : links) {
+				BaseRuntimeElementCompositeDefinition linkDef = (BaseRuntimeElementCompositeDefinition) myContext.getElementDefinition(nextLink.getClass());
+				List<IBase> rel = linkDef.getChildByName("relation").getAccessor().getValues(nextLink);
+				if (rel == null || rel.isEmpty()) {
+					continue;
+				}
+				String relation = ((IPrimitiveType<?>)rel.get(0)).getValueAsString();
+				if (theWantRel.equals(relation) || (theWantRel == PREVIOUS && PREV.equals(relation))) {
+					List<IBase> urls = linkDef.getChildByName("url").getAccessor().getValues(nextLink);
+					if (urls == null || urls.isEmpty()) {
+						continue;
+					}
+					String url = ((IPrimitiveType<?>)urls.get(0)).getValueAsString();
+					if (isBlank(url)) {
+						continue;
+					}
+					return (IGetPageTyped<T>) byUrl(url).andReturnBundle(theBundle.getClass());
+				}
+			}
+			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
+		}
+		
+		@Override
+		public <T extends IBaseBundle> IGetPageTyped<T> previous(T theBundle) {
+			return nextOrPrevious(PREVIOUS, theBundle);
+		}
+
+		@Override
+		public IGetPageUntyped byUrl(String thePageUrl) {
+			if (isBlank(thePageUrl)) {
+				throw new IllegalArgumentException("thePagingUrl must not be blank or null");
+			}
+			myPageUrl = thePageUrl;
+			return this;
+		}
+
+		@Override
+		public IGetPageTyped andReturnDstu1Bundle() {
+			return new GetPageInternal(myPageUrl);
+		}
+
+		@Override
+		public <T extends IBaseBundle> IGetPageTyped andReturnBundle(Class<T> theBundleType) {
+			Validate.notNull(theBundleType, "theBundleType must not be null");
+			return new GetPageInternal(myPageUrl, theBundleType);
 		}
 
 	}
@@ -1326,7 +1401,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType, null);
 				IBaseResource response = handler.invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders);
 				IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
-				bundleFactory.initializeWithBundleResource((IBaseResource) response);
+				bundleFactory.initializeWithBundleResource(response);
 				return bundleFactory.toListOfResources();
 			} else {
 				return new ArrayList<IBaseResource>(new BundleResponseHandler(myType).invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders).toListOfResources());
