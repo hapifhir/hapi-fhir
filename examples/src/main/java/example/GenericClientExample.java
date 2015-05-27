@@ -205,7 +205,7 @@ public class GenericClientExample {
                .forResource(Patient.class)
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2011-01-01"))
                .and(Patient.CAREPROVIDER.hasChainedProperty(Organization.NAME.matches().value("Health")))
-               .returnBundle(Bundle.class)
+               .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
                .execute();
          // END SNIPPET: search
 

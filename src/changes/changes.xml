@@ -36,6 +36,12 @@
 				Add better addXXX() methods to structures, which take the datatype being added as a parameter. Thanks to Claude Nanjo for the
 				suggestion!
 			</action>
+			<action type="add" issue="152">
+				Add a new parser validation mechanism (see the 
+				<![CDATA[<a href="./doc_validation.html">validation page</a>]]> for info) which can be 
+				used to validate resources as they are being parsed, and optionally fail if invalid/unexpected
+				elements are found in resource bodies during parsing. 
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

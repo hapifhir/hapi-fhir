@@ -40,8 +40,10 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.IParserErrorHandler;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.JsonParser;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.parser.XmlParser;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.IRestfulClientFactory;
@@ -81,6 +83,7 @@ public class FhirContext {
 	private volatile Map<String, RuntimeResourceDefinition> myNameToResourceDefinition = Collections.emptyMap();
 	private volatile Map<String, Class<? extends IBaseResource>> myNameToResourceType;
 	private volatile INarrativeGenerator myNarrativeGenerator;
+	private volatile IParserErrorHandler myParserErrorHandler = new LenientErrorHandler();
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private final IFhirVersion myVersion;
@@ -140,14 +143,6 @@ public class FhirContext {
 	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
 	 * for extending the core library.
 	 */
-	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName) {
-		return myNameToElementDefinition.get(theElementName);
-	}
-	
-	/**
-	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
-	 * for extending the core library.
-	 */
 	@SuppressWarnings("unchecked")
 	public BaseRuntimeElementDefinition<?> getElementDefinition(Class<? extends IBase> theElementType) {
 		BaseRuntimeElementDefinition<?> retVal = myClassToElementDefinition.get(theElementType);
@@ -157,9 +152,24 @@ public class FhirContext {
 		return retVal;
 	}
 
+	/**
+	 * Returns the scanned runtime model for the given type. This is an advanced feature which is generally only needed
+	 * for extending the core library.
+	 */
+	public BaseRuntimeElementDefinition<?> getElementDefinition(String theElementName) {
+		return myNameToElementDefinition.get(theElementName);
+	}
+	
 	/** For unit tests only */
 	int getElementDefinitionCount() {
 		return myClassToElementDefinition.size();
+	}
+
+	/**
+	 * Returns all element definitions (resources, datatypes, etc.)
+	 */
+	public Collection<BaseRuntimeElementDefinition<?>> getElementDefinitions() {
+		return Collections.unmodifiableCollection(myClassToElementDefinition.values());
 	}
 
 	/**
@@ -316,7 +326,7 @@ public class FhirContext {
 	 * </p>
 	 */
 	public IParser newJsonParser() {
-		return new JsonParser(this);
+		return new JsonParser(this, myParserErrorHandler);
 	}
 
 	/**
@@ -393,7 +403,7 @@ public class FhirContext {
 	 * </p>
 	 */
 	public IParser newXmlParser() {
-		return new XmlParser(this);
+		return new XmlParser(this, myParserErrorHandler);
 	}
 
 	private BaseRuntimeElementDefinition<?> scanDatatype(Class<? extends IElement> theResourceType) {
@@ -457,6 +467,16 @@ public class FhirContext {
 		myNarrativeGenerator = theNarrativeGenerator;
 	}
 
+	/**
+	 * Sets a parser error handler to use by default on all parsers
+	 * 
+	 * @param theParserErrorHandler The error handler
+	 */
+	public void setParserErrorHandler(IParserErrorHandler theParserErrorHandler) {
+		Validate.notNull(theParserErrorHandler, "theParserErrorHandler must not be null");
+		myParserErrorHandler = theParserErrorHandler;
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends IElement>> toElementList(Collection<Class<? extends IBaseResource>> theResourceTypes) {
 		if (theResourceTypes == null) {
@@ -513,13 +533,6 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	/**
-	 * Returns all element definitions (resources, datatypes, etc.)
-	 */
-	public Collection<BaseRuntimeElementDefinition<?>> getElementDefinitions() {
-		return Collections.unmodifiableCollection(myClassToElementDefinition.values());
 	}
 
 }

@@ -39,6 +39,12 @@ import ca.uhn.fhir.model.api.TagList;
  */
 public interface IParser {
 
+	/**
+	 * Registers an error handler which will be invoked when any parse errors are found
+	 * @param theErrorHandler The error handler to set. Must not be null. 
+	 */
+	IParser setParserErrorHandler(IParserErrorHandler theErrorHandler);
+	
 	String encodeBundleToString(Bundle theBundle) throws DataFormatException;
 
 	void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;

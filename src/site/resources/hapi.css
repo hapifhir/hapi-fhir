@@ -43,6 +43,14 @@
 
 */
 
+.doc_info_bubble {
+	border: 1px dashed #808080;
+	border-radius: 6px;
+	padding: 8px;
+	margin: 8px;
+	background: #EEE;
+}
+
 TABLE.pagenavlinks {
 	border: 0px;
 }

@@ -10,11 +10,30 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ValidatorExamples {
 
+   public void enableValidation() {
+      // START SNIPPET: enableValidation
+      FhirContext ctx = FhirContext.forDstu2();
+      
+      ctx.setParserErrorHandler(new StrictErrorHandler());
+      
+      // This client will have strict parser validation enabled
+      IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+      
+      // This server will have strict parser validation enabled
+      RestfulServer server = new RestfulServer();
+      server.setFhirContext(ctx);
+      
+      // END SNIPPET: enableValidation
+   }
+   
    public void validateResource() {
       // START SNIPPET: basicValidation
       // As always, you need a context

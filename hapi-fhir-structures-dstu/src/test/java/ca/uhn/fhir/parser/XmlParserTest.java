@@ -76,6 +76,40 @@ public class XmlParserTest {
 	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserTest.class);
 	
+	@Test
+	public void testParseErrorHandlerNoError() {
+		String input = "<Patient></Patient>";
+		ourCtx.newXmlParser().setParserErrorHandler(new StrictErrorHandler()).parseResource(Patient.class, input);
+	}
+
+	@Test
+	public void testParseErrorHandlerUnexpectedElement() {
+		String input = "<Patient><foo><bar/></foo><name><family value=\"AAA\"/></name></Patient>";
+		try {
+			ourCtx.newXmlParser().setParserErrorHandler(new StrictErrorHandler()).parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertThat(e.getMessage(), containsString("'foo'"));
+		}
+
+		Patient p = ourCtx.newXmlParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(Patient.class, input);
+		assertEquals(p.getName().get(0).getFamily().get(0).getValue(), "AAA");
+	}
+
+	@Test
+	public void testParseErrorHandlerUnexpectedAttribute() {
+		String input = "<Patient><name><family foo=\"FOO\" value=\"AAA\" bar=\"BAR\"/></name></Patient>";
+		try {
+			ourCtx.newXmlParser().setParserErrorHandler(new StrictErrorHandler()).parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertThat(e.getMessage(), containsString("'foo'"));
+		}
+
+		Patient p = ourCtx.newXmlParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(Patient.class, input);
+		assertEquals(p.getName().get(0).getFamily().get(0).getValue(), "AAA");
+	}
+
 	/**
 	 * see #144 and #146
 	 */

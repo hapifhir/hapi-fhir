@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -65,13 +66,19 @@ public abstract class BaseParser implements IParser {
 
 	private ContainedResources myContainedResources;
 	private FhirContext myContext;
+	private IParserErrorHandler myErrorHandler;
 	private boolean myOmitResourceId;
 	private String myServerBaseUrl;
 	private boolean myStripVersionsFromReferences = true;
 	private boolean mySuppressNarratives;
 
-	public BaseParser(FhirContext theContext) {
+	/**
+	 * Constructor
+	 * @param theParserErrorHandler 
+	 */
+	public BaseParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		myContext = theContext;
+		myErrorHandler = theParserErrorHandler;
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
@@ -248,6 +255,10 @@ public abstract class BaseParser implements IParser {
 		return myContainedResources;
 	}
 
+	protected IParserErrorHandler getErrorHandler() {
+		return myErrorHandler;
+	}
+
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>), narratives will not be included in the encoded values.
 	 */
@@ -260,6 +271,7 @@ public abstract class BaseParser implements IParser {
 				&& theIncludedResource == false;
 	}
 
+	@Override
 	public boolean isOmitResourceId() {
 		return myOmitResourceId;
 	}
@@ -280,6 +292,7 @@ public abstract class BaseParser implements IParser {
 		return parseBundle(reader);
 	}
 
+	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException {
 		T retVal = doParseResource(theResourceType, theReader);
 
@@ -288,7 +301,7 @@ public abstract class BaseParser implements IParser {
 			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
 			if (base != null && base.size() > 0) {
 				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
-				IBaseResource res = ((IBaseResource) retVal);
+				IBaseResource res = (retVal);
 				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getIdElement().getIdPart(), res.getIdElement().getVersionIdPart()));
 			}
 
@@ -350,6 +363,14 @@ public abstract class BaseParser implements IParser {
 		return parseTagList(new StringReader(theString));
 	}
 
+	@Override
+	public BaseParser setParserErrorHandler(IParserErrorHandler theErrorHandler) {
+		Validate.notNull(theErrorHandler, "theErrorHandler must not be null");
+		myErrorHandler = theErrorHandler;
+		return this;
+	}
+
+	@Override
 	public BaseParser setOmitResourceId(boolean theOmitResourceId) {
 		myOmitResourceId = theOmitResourceId;
 		return this;

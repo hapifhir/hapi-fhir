@@ -38,11 +38,11 @@ import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
@@ -62,7 +62,6 @@ import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
@@ -90,10 +89,12 @@ class ParserState<T> {
 	private boolean myJsonMode;
 	private T myObject;
 	private BaseState myState;
+	private IParserErrorHandler myErrorHandler;
 
-	private ParserState(FhirContext theContext, boolean theJsonMode) {
+	private ParserState(FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		myContext = theContext;
 		myJsonMode = theJsonMode;
+		myErrorHandler = theErrorHandler;
 	}
 
 	public void attributeValue(String theName, String theValue) throws DataFormatException {
@@ -212,8 +213,8 @@ class ParserState<T> {
 		myState.xmlEvent(theNextEvent);
 	}
 
-	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode) throws DataFormatException {
-		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode);
+	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode, theErrorHandler);
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
 			retVal.push(retVal.new PreAtomState(theResourceType));
 		} else {
@@ -226,8 +227,8 @@ class ParserState<T> {
 	 * @param theResourceType
 	 *            May be null
 	 */
-	public static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode) throws DataFormatException {
-		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode);
+	public static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) throws DataFormatException {
+		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
 			if (theContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
 				retVal.push(retVal.new PreResourceStateHapi(theResourceType));
@@ -244,8 +245,8 @@ class ParserState<T> {
 		return retVal;
 	}
 
-	public static ParserState<TagList> getPreTagListInstance(FhirContext theContext, boolean theJsonMode) {
-		ParserState<TagList> retVal = new ParserState<TagList>(theContext, theJsonMode);
+	public static ParserState<TagList> getPreTagListInstance(FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
+		ParserState<TagList> retVal = new ParserState<TagList>(theContext, theJsonMode, theErrorHandler);
 		retVal.push(retVal.new PreTagListState());
 		return retVal;
 	}
@@ -795,7 +796,7 @@ class ParserState<T> {
 
 		@SuppressWarnings("unused")
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
-			// ignore by default
+			myErrorHandler.unknownAttribute(null, theName);
 		}
 
 		public void endingElement() throws DataFormatException {
@@ -804,7 +805,7 @@ class ParserState<T> {
 
 		@SuppressWarnings("unused")
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			// ignore by default
+			myErrorHandler.unknownElement(null, theLocalPart);
 		}
 
 		/**
@@ -1422,7 +1423,9 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> target = myDefinition.getChildByName(theLocalPart);
 			if (target == null) {
-				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
+				myErrorHandler.unknownElement(null, theLocalPart);
+				push(new SwallowChildrenWholeState(getPreResourceState()));
+				return;
 			}
 
 			switch (target.getChildType()) {
@@ -1494,11 +1497,6 @@ class ParserState<T> {
 	private class ElementCompositeState extends BaseState {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
-
-		public BaseRuntimeElementCompositeDefinition<?> getDefinition() {
-			return myDefinition;
-		}
-
 		private IBase myInstance;
 
 		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
@@ -1537,15 +1535,17 @@ class ParserState<T> {
 			try {
 				child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			} catch (DataFormatException e) {
-				if (false) {// TODO: make this configurable
-					throw e;
-				}
-				ourLog.warn(e.getMessage());
+				/* This means we've found an element that doesn't exist on the structure.
+				 * If the error handler doesn't throw an exception, swallow the element silently along
+				 * with any child elements
+				 */
+				myErrorHandler.unknownElement(null, theChildName);
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 				return;
 			}
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
+				// This is a bug with the structures and shouldn't happen..
 				throw new DataFormatException("Found unexpected element '" + theChildName + "' in parent element '" + myDefinition.getName() + "'. Valid names are: " + child.getValidChildNames());
 			}
 
@@ -1676,7 +1676,9 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			BaseRuntimeElementDefinition<?> target = myContext.getRuntimeChildUndeclaredExtensionDefinition().getChildByName(theLocalPart);
 			if (target == null) {
-				throw new DataFormatException("Unknown extension element name: " + theLocalPart);
+				myErrorHandler.unknownElement(null, theLocalPart);
+				push(new SwallowChildrenWholeState(getPreResourceState()));
+				return;
 			}
 
 			switch (target.getChildType()) {
@@ -1793,7 +1795,9 @@ class ParserState<T> {
 				}
 				push(new TagState(tagList));
 			} else {
-				throw new DataFormatException("Unexpected element '" + theLocalPart + "' found in 'meta' element");
+				myErrorHandler.unknownElement(null, theLocalPart);
+				push(new SwallowChildrenWholeState(getPreResourceState()));
+				return;
 			}
 		}
 
@@ -1820,7 +1824,9 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			throw new DataFormatException("Unexpected child element '" + theLocalPart + "' in element 'meta'");
+			myErrorHandler.unknownElement(null, theLocalPart);
+			push(new SwallowChildrenWholeState(getPreResourceState()));
+			return;
 		}
 
 	}
@@ -2193,7 +2199,11 @@ class ParserState<T> {
 					((IBaseElement) myInstance).setId(theValue);
 				} else if (myInstance instanceof IBaseResource) {
 					new IdDt(theValue).applyTo((org.hl7.fhir.instance.model.api.IBaseResource) myInstance);
+				} else {
+					myErrorHandler.unknownAttribute(null, theName);
 				}
+			} else {
+				myErrorHandler.unknownAttribute(null, theName);
 			}
 		}
 
@@ -2215,10 +2225,7 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			if (false) {// TODO: make this configurable
-				throw new Error("Element " + theLocalPart + " in primitive!"); // TODO:
-			}
-			ourLog.warn("Ignoring element {} in primitive tag", theLocalPart);
+			myErrorHandler.unknownElement(null, theLocalPart);
 			push(new SwallowChildrenWholeState(getPreResourceState()));
 			return;
 		}
