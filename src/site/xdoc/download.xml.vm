@@ -91,6 +91,21 @@ compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu:${hapi_stable_version}']]></
 compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${hapi_stable_version}']]></source>
 			</subsection>
 
+			<subsection name="Using Reference Implementation Structures">
+			
+				<p>
+					To use the HL7.org reference implementation structures
+					(see the <a href="./doc_upgrading.html">upgrading page</a> for more information),
+					use the following dependency.
+				</p>
+			<source><![CDATA[<dependency>
+   <groupId>ca.uhn.hapi.fhir</groupId>
+   <artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
+   <version>${hapi_stable_version}</version>
+</dependency>]]></source>
+				
+			</subsection>
+
 		</section>
 
 		<section name="Using Snapshot Builds">

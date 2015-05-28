@@ -11,11 +11,64 @@
 		<section name="Upgrading to HAPI 1.1">
 			
 			<p>
-				HAPI 1.1 introduces support for the "reference i"
+				Since the early days of FHIR, HL7.org has provided an
+				open source "Java Reference Implementation", which is an implementation
+				of a FHIR data model, parser, and client in Java.
+			</p>
+			<p>
+				HAPI was originally started as a separate Java implementation of FHIR,
+				but with a fairly different focus: implementing servers with an easily 
+				extendible data model. Over time though, the two Java implementations have
+				shown a fair bit of overlap, so at the 2014
+				<a href="http://fhir.furore.com/Events/DevDaysEval2014">DevDays</a> we decided
+				to try and harmonize the two libraries.
+			</p>
+			<p>  
+				HAPI FHIR 1.1 begins the availability of a harmonized library. Note that 
+				this version has not yet been formally released, but is currently available in 
+				"snapshot" development builds. 
+			</p>
+			<p>
+				<b>For HAPI FHIR users:</b> This integration will bring the ability to use powerful features
+				from the RI in your applications, such as the resource validator and the narrative
+				generator. 
+			</p>
+			<p>
+				<b>For RI users:</b> This integration will bring the ability to use HAPI's client
+				and server frameworks in your application, as well as the ability to take advantage 
+				of HAPI's code-first statically bound extension mechanism. 
 			</p>
 			
-			<img src="./images/hapi-1.1-structs-resource.png" alt="Structures"/>
-			
+			<subsection name="How it Works">
+				<p>
+					At this point, the RI integration consists of a new parallel set of
+					classes representing the FHIR data model. For example, in addition to the
+					Patient classes representing HAPI's DSTU1 and DSTU2 models there is now
+					a new Patient class representing the RI structure (which is also a DSTU2
+					structure).
+				</p>
+				<p>
+					The reference implementation (RI) structures have been added as a new 
+					maven dependency library called <code>hapi-fhir-structures-hl7org-dstu2</code>. See
+					the <a href="./download.html">download page</a> for information on the Maven
+					dependencies for this version of the structures.
+				</p>
+				<p>
+					A new interface has been added which serves as a master interface
+					for all resource classes: <code>org.hl7.fhir.instance.model.api.IBaseResource</code>.
+					All RI resource classes will be in the package <code>org.hl7.fhir.instance.model</code>,
+					as shown below.
+				</p>
+				<img src="./images/hapi-1.1-structs-resource.png" alt="Structures"/>
+	
+				<p>
+					Datatypes will also be found inthe same package. Unlike HAPI datatype structures,
+					which all end with "Dt", the RI primitive structure names end with "Type" and the
+					RI composite structures have no suffix, as shown below.
+				</p>
+				<img src="./images/hapi-1.1-structs-datatypes.png" alt="Structures"/>
+
+			</subsection>
 		</section>
 
 <!-- 

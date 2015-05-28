@@ -26,11 +26,15 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public interface IPrimitiveDatatype<T> extends IDatatype, IPrimitiveType<T> {
 
+	@Override
 	void setValueAsString(String theValue) throws DataFormatException;
 
+	@Override
 	String getValueAsString() throws DataFormatException;
 
+	@Override
 	T getValue();
 	
+	@Override
 	IPrimitiveType<T> setValue(T theValue) throws DataFormatException;
 }

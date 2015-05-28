@@ -1,32 +1,33 @@
+package org.hl7.fhir.instance.model;
+
 /*
-Copyright (c) 2011+, HL7, Inc
-All rights reserved.
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, 
-are permitted provided that the following conditions are met:
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
 
- * Redistributions of source code must retain the above copyright notice, this 
-   list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright notice, 
-   this list of conditions and the following disclaimer in the documentation 
-   and/or other materials provided with the distribution.
- * Neither the name of HL7 nor the names of its contributors may be used to 
-   endorse or promote products derived from this software without specific 
-   prior written permission.
+   * Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to
+     endorse or promote products derived from this software without specific
+     prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
 
 */
-package org.hl7.fhir.instance.model;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -37,23 +38,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
- * Primitive type "id" in FHIR: a string from 1 to 64 characters, only containing letters, digits, "-" and "."
+ * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs, Resource References, etc. to represent a specific instance of a resource.
+ * 
+ * <p>
+ * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
+ * limit of 36 characters.
+ * </p>
+ * <p>
+ * regex: [a-z0-9\-\.]{1,36}
+ * </p>
  */
 @DatatypeDef(name = "id")
-public class IdType extends UriType implements IIdType {
+public final class IdType extends UriType implements IPrimitiveType<String>, IIdType {
 
-	public static final int MAX_LENGTH = 64;
-	private static final long serialVersionUID = 4L;
-	
+	private static final long serialVersionUID = 2L;
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
 	private String myResourceType;
 	private String myUnqualifiedId;
 	private String myUnqualifiedVersionId;
-	private volatile String myValue;
 
 	/**
 	 * Create a new empty ID
@@ -142,14 +150,14 @@ public class IdType extends UriType implements IIdType {
 	 *            The version ID ("e.g. "456")
 	 */
 	public IdType(String theResourceType, String theId, String theVersionId) {
-		this(null,theResourceType,theId,theVersionId);
+		this(null, theResourceType, theId, theVersionId);
 	}
 
 	/**
 	 * Constructor
 	 * 
 	 * @param theBaseUrl
-	 * 	The server base URL (e.g. "http://example.com/fhir")
+	 *            The server base URL (e.g. "http://example.com/fhir")
 	 * @param theResourceType
 	 *            The resource type (e.g. "Patient")
 	 * @param theId
@@ -172,6 +180,14 @@ public class IdType extends UriType implements IIdType {
 		setValue(theUrl.getValueAsString());
 	}
 
+	public void applyTo(IBaseResource theResouce) {
+		if (theResouce == null) {
+			throw new NullPointerException("theResource can not be null");
+		} else {
+			theResouce.setId(new IdType(getValue()));
+		}
+	}
+
 	/**
 	 * @deprecated Use {@link #getIdPartAsBigDecimal()} instead (this method was deprocated because its name is ambiguous)
 	 */
@@ -180,8 +196,22 @@ public class IdType extends UriType implements IIdType {
 		return getIdPartAsBigDecimal();
 	}
 
+	@Override
+	public IdType copy() {
+		return new IdType(getValue());
+	}
+
+	@Override
+	public boolean equals(Object theArg0) {
+		if (!(theArg0 instanceof IdType)) {
+			return false;
+		}
+		IdType id = (IdType) theArg0;
+		return StringUtils.equals(getValueAsString(), id.getValueAsString());
+	}
+
 	/**
-	 * Returns true if this IdDt matches the given IdDt in terms of resource type and ID, but ignores the URL base
+	 * Returns true if this IdType matches the given IdType in terms of resource type and ID, but ignores the URL base
 	 */
 	@SuppressWarnings("deprecation")
 	public boolean equalsIgnoreBase(IdType theId) {
@@ -194,24 +224,6 @@ public class IdType extends UriType implements IIdType {
 		return ObjectUtils.equals(getResourceType(), theId.getResourceType()) && ObjectUtils.equals(getIdPart(), theId.getIdPart()) && ObjectUtils.equals(getVersionIdPart(), theId.getVersionIdPart());
 	}
 
-
-	
-	@Override
-	public boolean equals(Object theArg0) {
-		if (!(theArg0 instanceof IdType)) {
-			return false;
-		}
-		IdType id = (IdType)theArg0;
-		return StringUtils.equals(getValueAsString(), id.getValueAsString());
-	}
-
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getValueAsString());
-		return b.toHashCode();
-	}
-
 	/**
 	 * Returns the portion of this resource ID which corresponds to the server base URL. For example given the resource ID <code>http://example.com/fhir/Patient/123</code> the base URL would be
 	 * <code>http://example.com/fhir</code>.
@@ -219,10 +231,15 @@ public class IdType extends UriType implements IIdType {
 	 * This method may return null if the ID contains no base (e.g. "Patient/123")
 	 * </p>
 	 */
+	@Override
 	public String getBaseUrl() {
 		return myBaseUrl;
 	}
 
+	/**
+	 * Returns only the logical ID part of this ID. For example, given the ID "http://example,.com/fhir/Patient/123/_history/456", this method would return "123".
+	 */
+	@Override
 	public String getIdPart() {
 		return myUnqualifiedId;
 	}
@@ -247,6 +264,7 @@ public class IdType extends UriType implements IIdType {
 	 * @throws NumberFormatException
 	 *             If the value is not a valid Long
 	 */
+	@Override
 	public Long getIdPartAsLong() {
 		String val = getIdPart();
 		if (isBlank(val)) {
@@ -255,6 +273,7 @@ public class IdType extends UriType implements IIdType {
 		return Long.parseLong(val);
 	}
 
+	@Override
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -266,32 +285,35 @@ public class IdType extends UriType implements IIdType {
 	 */
 	@Override
 	public String getValue() {
-		if (myValue == null && myHaveComponentParts) {
+		String retVal = super.getValue();
+		if (retVal == null && myHaveComponentParts) {
 			StringBuilder b = new StringBuilder();
 			if (isNotBlank(myBaseUrl)) {
 				b.append(myBaseUrl);
-				if (myBaseUrl.charAt(myBaseUrl.length()-1)!='/') {
+				if (myBaseUrl.charAt(myBaseUrl.length() - 1) != '/') {
 					b.append('/');
 				}
 			}
-			
+
 			if (isNotBlank(myResourceType)) {
 				b.append(myResourceType);
 			}
-			
+
 			if (b.length() > 0) {
 				b.append('/');
 			}
-			
+
 			b.append(myUnqualifiedId);
 			if (isNotBlank(myUnqualifiedVersionId)) {
-				b.append("/_history/");
+				b.append('/');
+				b.append("_history");
+				b.append('/');
 				b.append(myUnqualifiedVersionId);
 			}
-			String value = b.toString();
-			myValue = value;
+			retVal = b.toString();
+			super.setValue(retVal);
 		}
-		return myValue;
+		return retVal;
 	}
 
 	@Override
@@ -299,6 +321,7 @@ public class IdType extends UriType implements IIdType {
 		return getValue();
 	}
 
+	@Override
 	public String getVersionIdPart() {
 		return myUnqualifiedVersionId;
 	}
@@ -320,14 +343,24 @@ public class IdType extends UriType implements IIdType {
 		return isNotBlank(myBaseUrl);
 	}
 
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getValueAsString());
+		return b.toHashCode();
+	}
+
+	@Override
 	public boolean hasIdPart() {
 		return isNotBlank(getIdPart());
 	}
 
+	@Override
 	public boolean hasResourceType() {
 		return isNotBlank(myResourceType);
 	}
 
+	@Override
 	public boolean hasVersionIdPart() {
 		return isNotBlank(getVersionIdPart());
 	}
@@ -335,16 +368,24 @@ public class IdType extends UriType implements IIdType {
 	/**
 	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or "https://"
 	 */
+	@Override
 	public boolean isAbsolute() {
 		if (StringUtils.isBlank(getValue())) {
 			return false;
 		}
-		return isAbsolute(getValue());
+		return isUrlAbsolute(getValue());
+	}
+
+	
+	@Override
+	public boolean isEmpty() {
+		return isBlank(getValue());
 	}
 
 	/**
 	 * Returns <code>true</code> if the unqualified ID is a valid {@link Long} value (in other words, it consists only of digits)
 	 */
+	@Override
 	public boolean isIdPartValidLong() {
 		String id = getIdPart();
 		if (StringUtils.isBlank(id)) {
@@ -361,15 +402,9 @@ public class IdType extends UriType implements IIdType {
 	/**
 	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
 	 */
+	@Override
 	public boolean isLocal() {
 		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
-	}
-
-	/**
-	 * Copies the value from the given IdDt to <code>this</code> IdDt. It is generally not neccesary to use this method but it is provided for consistency with the rest of the API.
-	 */
-	public void setId(IdType theId) {
-		setValue(theId.getValue());
 	}
 
 	/**
@@ -386,18 +421,18 @@ public class IdType extends UriType implements IIdType {
 	@Override
 	public IdType setValue(String theValue) {
 		// TODO: add validation
-		myValue = theValue;
+		super.setValue(theValue);
 		myHaveComponentParts = false;
 		if (StringUtils.isBlank(theValue)) {
 			myBaseUrl = null;
-			myValue = null;
+			super.setValue(null);
 			myUnqualifiedId = null;
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
-		} else if (theValue.charAt(0)== '#') {
-			myValue = theValue;
+		} else if (theValue.charAt(0) == '#') {
+			super.setValue(theValue);
 			myUnqualifiedId = theValue;
-			myUnqualifiedVersionId=null;
+			myUnqualifiedVersionId = null;
 			myResourceType = null;
 			myHaveComponentParts = true;
 		} else {
@@ -456,29 +491,32 @@ public class IdType extends UriType implements IIdType {
 	}
 
 	/**
-	 * Returns a new IdDt containing this IdDt's values but with no server base URL if one 
-	 * is present in this IdDt. For example, if this IdDt contains the ID "http://foo/Patient/1",
-	 * this method will return a new IdDt containing ID "Patient/1". 
+	 * Returns a new IdType containing this IdType's values but with no server base URL if one is present in this IdType. For example, if this IdType contains the ID "http://foo/Patient/1", this method will
+	 * return a new IdType containing ID "Patient/1".
 	 */
+	@Override
 	public IdType toUnqualified() {
 		return new IdType(getResourceType(), getIdPart(), getVersionIdPart());
 	}
 
+	@Override
 	public IdType toUnqualifiedVersionless() {
 		return new IdType(getResourceType(), getIdPart());
 	}
 
+	@Override
 	public IdType toVersionless() {
 		return new IdType(getBaseUrl(), getResourceType(), getIdPart(), null);
 	}
 
+	@Override
 	public IdType withResourceType(String theResourceName) {
 		return new IdType(theResourceName, getIdPart(), getVersionIdPart());
 	}
 
 	/**
 	 * Returns a view of this ID as a fully qualified URL, given a server base and resource name (which will only be used if the ID does not already contain those respective parts). Essentially,
-	 * because IdDt can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.
+	 * because IdType can contain either a complete URL or a partial one (or even jut a simple ID), this method may be used to translate into a complete URL.
 	 * 
 	 * @param theServerBase
 	 *            The server base (e.g. "http://example.com/fhir")
@@ -486,6 +524,7 @@ public class IdType extends UriType implements IIdType {
 	 *            The resource name (e.g. "Patient")
 	 * @return A fully qualified URL for this ID (e.g. "http://example.com/fhir/Patient/1")
 	 */
+	@Override
 	public IdType withServerBase(String theServerBase, String theResourceType) {
 		return new IdType(theServerBase, theResourceType, getIdPart(), getVersionIdPart());
 	}
@@ -495,7 +534,7 @@ public class IdType extends UriType implements IIdType {
 	 * 
 	 * @param theVersion
 	 *            The actual version string, e.g. "1"
-	 * @return A new instance of IdDt which is identical, but refers to the specific version of this resource ID noted by theVersion.
+	 * @return A new instance of IdType which is identical, but refers to the specific version of this resource ID noted by theVersion.
 	 */
 	public IdType withVersion(String theVersion) {
 		Validate.notBlank(theVersion, "Version may not be null or empty");
@@ -510,7 +549,30 @@ public class IdType extends UriType implements IIdType {
 			value = existingValue;
 		}
 
-		return new IdType(value + "/_history/" + theVersion);
+		return new IdType(value + '/' + "_history" + '/' + theVersion);
+	}
+
+	private static boolean isUrlAbsolute(String theValue) {
+		String value = theValue.toLowerCase();
+		return value.startsWith("http://") || value.startsWith("https://");
+	}
+
+	/**
+	 * Retrieves the ID from the given resource instance
+	 */
+	public static IdType of(IBaseResource theResouce) {
+		if (theResouce == null) {
+			throw new NullPointerException("theResource can not be null");
+		} else {
+			IIdType retVal = theResouce.getIdElement();
+			if (retVal == null) {
+				return null;
+			} else if (retVal instanceof IdType) {
+				return (IdType) retVal;
+			} else {
+				return new IdType(retVal.getValue());
+			}
+		}
 	}
 
 	private static String toPlainStringWithNpeThrowIfNeeded(BigDecimal theIdPart) {
@@ -519,7 +581,7 @@ public class IdType extends UriType implements IIdType {
 		}
 		return theIdPart.toPlainString();
 	}
-
+	
 	private static String toPlainStringWithNpeThrowIfNeeded(Long theIdPart) {
 		if (theIdPart == null) {
 			throw new NullPointerException("Long ID can not be null");
@@ -527,21 +589,4 @@ public class IdType extends UriType implements IIdType {
 		return theIdPart.toString();
 	}
 
-	@Override
-	public boolean isEmpty() {
-		return isBlank(getValue());
-	}
-
-	@Override
-	public IdType copy() {
-		return new IdType(getValue());
-	}
-
-	
-	private static boolean isAbsolute(String theValue) {
-		String value = theValue.toLowerCase();
-		return value.startsWith("http://") || value.startsWith("https://");
-	}
-
-	
 }
