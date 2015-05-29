@@ -1221,15 +1221,8 @@ public class JsonParser extends BaseParser implements IParser {
 			assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 			String resourceType = ((JsonString) resourceTypeObj).getString();
 	
-			RuntimeResourceDefinition def;
-			if (theResourceType != null) {
-				def = myContext.getResourceDefinition(theResourceType);
-			} else {
-				def = myContext.getResourceDefinition(resourceType);
-			}
-	
-			ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(def.getImplementingClass(), myContext, true, getErrorHandler());
-			state.enteringNewElement(null, def.getName());
+			ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(theResourceType, myContext, true, getErrorHandler());
+			state.enteringNewElement(null, resourceType);
 	
 			parseChildren(object, state);
 	

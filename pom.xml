@@ -465,6 +465,9 @@
 								<copy todir="target/site/apidocs-dstu">
 									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
+								<copy todir="target/site/apidocs-hl7org-dstu2">
+									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs"/>
+								</copy>
 								<copy todir="target/site/apidocs-dstu2">
 									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
 								</copy>
@@ -833,6 +836,7 @@
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-structures-dstu</module>
 				<module>hapi-fhir-structures-dstu2</module>
+				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>examples</module>
 			</modules>

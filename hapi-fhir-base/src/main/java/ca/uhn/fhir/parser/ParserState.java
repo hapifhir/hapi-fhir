@@ -488,7 +488,7 @@ class ParserState<T> {
 			} else if ("author".equals(theLocalPart)) {
 				push(new AtomAuthorState(myEntry));
 			} else if ("content".equals(theLocalPart)) {
-				push(new PreResourceStateHapi(myEntry, myResourceType));
+				push(new PreResourceStateHapi(myEntry, myResourceType).setRequireResourceType(false));
 			} else if ("summary".equals(theLocalPart)) {
 				push(new XhtmlState(getPreResourceState(), myEntry.getSummary(), false));
 			} else if ("category".equals(theLocalPart)) {
@@ -794,7 +794,6 @@ class ParserState<T> {
 			myPreResourceState = thePreResourceState;
 		}
 
-		@SuppressWarnings("unused")
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			myErrorHandler.unknownAttribute(null, theName);
 		}
@@ -803,7 +802,6 @@ class ParserState<T> {
 			// ignore by default
 		}
 
-		@SuppressWarnings("unused")
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			myErrorHandler.unknownElement(null, theLocalPart);
 		}
@@ -1053,7 +1051,7 @@ class ParserState<T> {
 			} else if ("score".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getScore()));
 			} else if ("resource".equals(theLocalPart)) {
-				push(new PreResourceStateHapi(myEntry, myResourceType));
+				push(new PreResourceStateHapi(myEntry, myResourceType).setRequireResourceType(false));
 			} else if ("deleted".equals(theLocalPart)) {
 				push(new BundleEntryDeletedState(getPreResourceState(), myEntry));
 			} else {
@@ -1987,6 +1985,12 @@ class ParserState<T> {
 		private IBaseResource myInstance;
 		private FhirVersionEnum myParentVersion;
 		private Class<? extends IBaseResource> myResourceType;
+		private boolean myRequireResourceType = true;
+
+		public ParserState<T>.PreResourceState setRequireResourceType(boolean theRequireResourceType) {
+			myRequireResourceType = theRequireResourceType;
+			return this;
+		}
 
 		public PreResourceState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
@@ -2020,6 +2024,9 @@ class ParserState<T> {
 			} else {
 				definition = myContext.getResourceDefinition(myResourceType);
 				if (!StringUtils.equals(theLocalPart, definition.getName())) {
+					if (myRequireResourceType) {
+						throw new DataFormatException(myContext.getLocalizer().getMessage(ParserState.class, "wrongResourceTypeFound", definition.getName(), theLocalPart));
+					}
 					definition = myContext.getResourceDefinition(theLocalPart);
 					if (!(definition instanceof RuntimeResourceDefinition)) {
 						throw new DataFormatException("Element '" + theLocalPart + "' is not a resource, expected a resource at this position");
@@ -2574,12 +2581,18 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
+			// IGNORE - don't handle this as an error, we process these as XML events  
+		}
+
+		@Override
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			if (myJsonMode) {
 				myDt.setValueAsString(theValue);
 				return;
+			} else {
+				// IGNORE - don't handle this as an error, we process these as XML events  
 			}
-			super.attributeValue(theName, theValue);
 		}
 
 		protected void doPop() {

@@ -42,6 +42,16 @@
 				used to validate resources as they are being parsed, and optionally fail if invalid/unexpected
 				elements are found in resource bodies during parsing. 
 			</action>
+			<action type="fix">
+				IParser#parseResource(Class, String) method, which is used to parse a resource into the given
+				structure will now throw a DataFormatException if the structure is for the wrong type of
+				resource for the one actually found in the input String (or Reader). For example, if a Patient
+				resource is being parsed into Organization.class this will now cause an error. Previously,
+				the XML parser would ignore the type and the JSON parser would fail. This also caused 
+				operations to not parse correctly if they returned a resource type other than
+				parameters with JSON encoding (e.g. the $everything operation on UHN's test server).
+				Thanks to Avinash Shanbhag for reporting!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

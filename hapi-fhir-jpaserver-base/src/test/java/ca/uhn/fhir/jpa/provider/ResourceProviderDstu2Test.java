@@ -76,6 +76,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -388,6 +389,7 @@ public class ResourceProviderDstu2Test {
 		assertEquals(Patient.class, found.getEntries().get(0).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.MATCH, found.getEntries().get(0).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
+		assertThat(found.getEntries().get(0).getResource().getText().getDiv().getValueAsString(), containsString("<table class=\"hapiPropertyTable"));
 		assertEquals(Organization.class, found.getEntries().get(1).getResource().getClass());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getSearchMode().getValueAsEnum());
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
@@ -981,6 +983,7 @@ public class ResourceProviderDstu2Test {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
+		ourFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
 //		ourClient.registerInterceptor(new LoggingInterceptor(true));

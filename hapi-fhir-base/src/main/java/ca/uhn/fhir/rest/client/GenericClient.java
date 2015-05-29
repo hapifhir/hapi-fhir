@@ -1144,7 +1144,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			BaseHttpClientInvocation invocation = OperationMethodBinding.createOperationInvocation(myContext, resourceName, id, myOperationName, myParameters, myUseHttpGet);
 
 			IClientResponseHandler handler;
-			handler = new ResourceResponseHandler(myParameters.getClass(), null);
+			handler = new ResourceResponseHandler(null, null);
 
 			Object retVal = invoke(null, handler, invocation);
 			if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
