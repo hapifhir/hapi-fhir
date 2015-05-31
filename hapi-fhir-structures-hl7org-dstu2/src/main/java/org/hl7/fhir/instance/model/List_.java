@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class List_ extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CURRENT: return "";
-            case RETIRED: return "";
-            case ENTEREDINERROR: return "";
+            case CURRENT: return "http://hl7.org.fhir/list-status";
+            case RETIRED: return "http://hl7.org.fhir/list-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/list-status";
             default: return "?";
           }
         }
@@ -134,15 +134,15 @@ public class List_ extends DomainResource {
 
     public enum ListMode {
         /**
-         * This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes.
+         * This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes
          */
         WORKING, 
         /**
-         * This list was prepared as a snapshot. It should not be assumed to be current.
+         * This list was prepared as a snapshot. It should not be assumed to be current
          */
         SNAPSHOT, 
         /**
-         * The list is prepared as a statement of changes that have been made or recommended.
+         * The list is prepared as a statement of changes that have been made or recommended
          */
         CHANGES, 
         /**
@@ -170,17 +170,17 @@ public class List_ extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case WORKING: return "";
-            case SNAPSHOT: return "";
-            case CHANGES: return "";
+            case WORKING: return "http://hl7.org.fhir/list-mode";
+            case SNAPSHOT: return "http://hl7.org.fhir/list-mode";
+            case CHANGES: return "http://hl7.org.fhir/list-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes.";
-            case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current.";
-            case CHANGES: return "The list is prepared as a statement of changes that have been made or recommended.";
+            case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes";
+            case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current";
+            case CHANGES: return "The list is prepared as a statement of changes that have been made or recommended";
             default: return "?";
           }
         }

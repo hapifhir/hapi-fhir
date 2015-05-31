@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -64,7 +64,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         REFUTED, 
         /**
-         * The statement was entered in error and Is not valid.
+         * The statement was entered in error and Is not valid
          */
         ENTEREDINERROR, 
         /**
@@ -98,11 +98,11 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UNCONFIRMED: return "";
-            case CONFIRMED: return "";
-            case RESOLVED: return "";
-            case REFUTED: return "";
-            case ENTEREDINERROR: return "";
+            case UNCONFIRMED: return "http://hl7.org.fhir/allergy-intolerance-status";
+            case CONFIRMED: return "http://hl7.org.fhir/allergy-intolerance-status";
+            case RESOLVED: return "http://hl7.org.fhir/allergy-intolerance-status";
+            case REFUTED: return "http://hl7.org.fhir/allergy-intolerance-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/allergy-intolerance-status";
             default: return "?";
           }
         }
@@ -112,7 +112,7 @@ public class AllergyIntolerance extends DomainResource {
             case CONFIRMED: return "A high level of certainty about the propensity for a reaction to the identified Substance, which may include clinical evidence by testing or rechallenge.";
             case RESOLVED: return "A reaction to the identified Substance has been clinically reassessed by testing or rechallenge and considered to be resolved.";
             case REFUTED: return "A propensity for a reaction to the identified Substance has been disproven with a high level of clinical certainty, which may include testing or rechallenge, and is refuted.";
-            case ENTEREDINERROR: return "The statement was entered in error and Is not valid.";
+            case ENTEREDINERROR: return "The statement was entered in error and Is not valid";
             default: return "?";
           }
         }
@@ -170,7 +170,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         HIGH, 
         /**
-         * Unable to assess the potential clinical impact with the information available.
+         * Unable to assess the potential clinical impact with the information available
          */
         UNASSESSIBLE, 
         /**
@@ -198,9 +198,9 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case LOW: return "";
-            case HIGH: return "";
-            case UNASSESSIBLE: return "";
+            case LOW: return "http://hl7.org.fhir/allergy-intolerance-criticality";
+            case HIGH: return "http://hl7.org.fhir/allergy-intolerance-criticality";
+            case UNASSESSIBLE: return "http://hl7.org.fhir/allergy-intolerance-criticality";
             default: return "?";
           }
         }
@@ -208,7 +208,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case LOW: return "The potential clinical impact of a future reaction is estimated as low risk: exposure to substance is unlikely to result in a life threatening or organ system threatening outcome. Future exposure to the Substance is considered a relative contra-indication.";
             case HIGH: return "The potential clinical impact of a future reaction is estimated as high risk: exposure to substance may result in a life threatening or organ system threatening outcome. Future exposure to the Substance may be considered an absolute contra-indication.";
-            case UNASSESSIBLE: return "Unable to assess the potential clinical impact with the information available.";
+            case UNASSESSIBLE: return "Unable to assess the potential clinical impact with the information available";
             default: return "?";
           }
         }
@@ -277,8 +277,8 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case IMMUNE: return "";
-            case NONIMMUNE: return "";
+            case IMMUNE: return "http://hl7.org.fhir/allergy-intolerance-type";
+            case NONIMMUNE: return "http://hl7.org.fhir/allergy-intolerance-type";
             default: return "?";
           }
         }
@@ -320,15 +320,15 @@ public class AllergyIntolerance extends DomainResource {
 
     public enum AllergyIntoleranceCategory {
         /**
-         * Any substance consumed to provide nutritional support for the body.
+         * Any substance consumed to provide nutritional support for the body
          */
         FOOD, 
         /**
-         * Substances administered to achieve a physiological effect.
+         * Substances administered to achieve a physiological effect
          */
         MEDICATION, 
         /**
-         * Substances that are encountered in the environment.
+         * Substances that are encountered in the environment
          */
         ENVIRONMENT, 
         /**
@@ -356,17 +356,17 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case FOOD: return "";
-            case MEDICATION: return "";
-            case ENVIRONMENT: return "";
+            case FOOD: return "http://hl7.org.fhir/allergy-intolerance-category";
+            case MEDICATION: return "http://hl7.org.fhir/allergy-intolerance-category";
+            case ENVIRONMENT: return "http://hl7.org.fhir/allergy-intolerance-category";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case FOOD: return "Any substance consumed to provide nutritional support for the body.";
-            case MEDICATION: return "Substances administered to achieve a physiological effect.";
-            case ENVIRONMENT: return "Substances that are encountered in the environment.";
+            case FOOD: return "Any substance consumed to provide nutritional support for the body";
+            case MEDICATION: return "Substances administered to achieve a physiological effect";
+            case ENVIRONMENT: return "Substances that are encountered in the environment";
             default: return "?";
           }
         }
@@ -404,7 +404,7 @@ public class AllergyIntolerance extends DomainResource {
       }
     }
 
-    public enum ReactionEventCertainty {
+    public enum AllergyIntoleranceCertainty {
         /**
          * There is a low level of clinical certainty that the reaction was caused by the identified Substance.
          */
@@ -421,7 +421,7 @@ public class AllergyIntolerance extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static ReactionEventCertainty fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceCertainty fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("unlikely".equals(codeString))
@@ -430,7 +430,7 @@ public class AllergyIntolerance extends DomainResource {
           return LIKELY;
         if ("confirmed".equals(codeString))
           return CONFIRMED;
-        throw new Exception("Unknown ReactionEventCertainty code '"+codeString+"'");
+        throw new Exception("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -442,9 +442,9 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UNLIKELY: return "";
-            case LIKELY: return "";
-            case CONFIRMED: return "";
+            case UNLIKELY: return "http://hl7.org.fhir/reaction-event-certainty";
+            case LIKELY: return "http://hl7.org.fhir/reaction-event-certainty";
+            case CONFIRMED: return "http://hl7.org.fhir/reaction-event-certainty";
             default: return "?";
           }
         }
@@ -466,48 +466,48 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class ReactionEventCertaintyEnumFactory implements EnumFactory<ReactionEventCertainty> {
-    public ReactionEventCertainty fromCode(String codeString) throws IllegalArgumentException {
+  public static class AllergyIntoleranceCertaintyEnumFactory implements EnumFactory<AllergyIntoleranceCertainty> {
+    public AllergyIntoleranceCertainty fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("unlikely".equals(codeString))
-          return ReactionEventCertainty.UNLIKELY;
+          return AllergyIntoleranceCertainty.UNLIKELY;
         if ("likely".equals(codeString))
-          return ReactionEventCertainty.LIKELY;
+          return AllergyIntoleranceCertainty.LIKELY;
         if ("confirmed".equals(codeString))
-          return ReactionEventCertainty.CONFIRMED;
-        throw new IllegalArgumentException("Unknown ReactionEventCertainty code '"+codeString+"'");
+          return AllergyIntoleranceCertainty.CONFIRMED;
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceCertainty code '"+codeString+"'");
         }
-    public String toCode(ReactionEventCertainty code) {
-      if (code == ReactionEventCertainty.UNLIKELY)
+    public String toCode(AllergyIntoleranceCertainty code) {
+      if (code == AllergyIntoleranceCertainty.UNLIKELY)
         return "unlikely";
-      if (code == ReactionEventCertainty.LIKELY)
+      if (code == AllergyIntoleranceCertainty.LIKELY)
         return "likely";
-      if (code == ReactionEventCertainty.CONFIRMED)
+      if (code == AllergyIntoleranceCertainty.CONFIRMED)
         return "confirmed";
       return "?";
       }
     }
 
-    public enum ReactionEventSeverity {
+    public enum AllergyIntoleranceSeverity {
         /**
-         * Causes mild physiological effects.
+         * Causes mild physiological effects
          */
         MILD, 
         /**
-         * Causes moderate physiological effects.
+         * Causes moderate physiological effects
          */
         MODERATE, 
         /**
-         * Causes severe physiological effects.
+         * Causes severe physiological effects
          */
         SEVERE, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ReactionEventSeverity fromCode(String codeString) throws Exception {
+        public static AllergyIntoleranceSeverity fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("mild".equals(codeString))
@@ -516,7 +516,7 @@ public class AllergyIntolerance extends DomainResource {
           return MODERATE;
         if ("severe".equals(codeString))
           return SEVERE;
-        throw new Exception("Unknown ReactionEventSeverity code '"+codeString+"'");
+        throw new Exception("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -528,17 +528,17 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case MILD: return "";
-            case MODERATE: return "";
-            case SEVERE: return "";
+            case MILD: return "http://hl7.org.fhir/reaction-event-severity";
+            case MODERATE: return "http://hl7.org.fhir/reaction-event-severity";
+            case SEVERE: return "http://hl7.org.fhir/reaction-event-severity";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case MILD: return "Causes mild physiological effects.";
-            case MODERATE: return "Causes moderate physiological effects.";
-            case SEVERE: return "Causes severe physiological effects.";
+            case MILD: return "Causes mild physiological effects";
+            case MODERATE: return "Causes moderate physiological effects";
+            case SEVERE: return "Causes severe physiological effects";
             default: return "?";
           }
         }
@@ -552,25 +552,25 @@ public class AllergyIntolerance extends DomainResource {
         }
     }
 
-  public static class ReactionEventSeverityEnumFactory implements EnumFactory<ReactionEventSeverity> {
-    public ReactionEventSeverity fromCode(String codeString) throws IllegalArgumentException {
+  public static class AllergyIntoleranceSeverityEnumFactory implements EnumFactory<AllergyIntoleranceSeverity> {
+    public AllergyIntoleranceSeverity fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("mild".equals(codeString))
-          return ReactionEventSeverity.MILD;
+          return AllergyIntoleranceSeverity.MILD;
         if ("moderate".equals(codeString))
-          return ReactionEventSeverity.MODERATE;
+          return AllergyIntoleranceSeverity.MODERATE;
         if ("severe".equals(codeString))
-          return ReactionEventSeverity.SEVERE;
-        throw new IllegalArgumentException("Unknown ReactionEventSeverity code '"+codeString+"'");
+          return AllergyIntoleranceSeverity.SEVERE;
+        throw new IllegalArgumentException("Unknown AllergyIntoleranceSeverity code '"+codeString+"'");
         }
-    public String toCode(ReactionEventSeverity code) {
-      if (code == ReactionEventSeverity.MILD)
+    public String toCode(AllergyIntoleranceSeverity code) {
+      if (code == AllergyIntoleranceSeverity.MILD)
         return "mild";
-      if (code == ReactionEventSeverity.MODERATE)
+      if (code == AllergyIntoleranceSeverity.MODERATE)
         return "moderate";
-      if (code == ReactionEventSeverity.SEVERE)
+      if (code == AllergyIntoleranceSeverity.SEVERE)
         return "severe";
       return "?";
       }
@@ -590,7 +590,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         @Child(name = "certainty", type = {CodeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="unlikely | likely | confirmed - clinical certainty about the specific substance", formalDefinition="Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event." )
-        protected Enumeration<ReactionEventCertainty> certainty;
+        protected Enumeration<AllergyIntoleranceCertainty> certainty;
 
         /**
          * Clinical symptoms and/or signs that are observed or associated with the Adverse Reaction Event.
@@ -625,7 +625,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         @Child(name = "severity", type = {CodeType.class}, order=7, min=0, max=1)
         @Description(shortDefinition="mild | moderate | severe (of event as a whole)", formalDefinition="Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations." )
-        protected Enumeration<ReactionEventSeverity> severity;
+        protected Enumeration<AllergyIntoleranceSeverity> severity;
 
         /**
          * Identification of the route by which the subject was exposed to the substance.
@@ -641,7 +641,7 @@ public class AllergyIntolerance extends DomainResource {
         @Description(shortDefinition="Text about event not captured in other fields", formalDefinition="Additional text about the Adverse Reaction event not captured in other fields." )
         protected StringType comment;
 
-        private static final long serialVersionUID = -1773271720L;
+        private static final long serialVersionUID = -1046669732L;
 
     /*
      * Constructor
@@ -677,12 +677,12 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @return {@link #certainty} (Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event.). This is the underlying object with id, value and extensions. The accessor "getCertainty" gives direct access to the value
          */
-        public Enumeration<ReactionEventCertainty> getCertaintyElement() { 
+        public Enumeration<AllergyIntoleranceCertainty> getCertaintyElement() { 
           if (this.certainty == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create AllergyIntoleranceEventComponent.certainty");
             else if (Configuration.doAutoCreate())
-              this.certainty = new Enumeration<ReactionEventCertainty>(new ReactionEventCertaintyEnumFactory()); // bb
+              this.certainty = new Enumeration<AllergyIntoleranceCertainty>(new AllergyIntoleranceCertaintyEnumFactory()); // bb
           return this.certainty;
         }
 
@@ -697,7 +697,7 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @param value {@link #certainty} (Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event.). This is the underlying object with id, value and extensions. The accessor "getCertainty" gives direct access to the value
          */
-        public AllergyIntoleranceEventComponent setCertaintyElement(Enumeration<ReactionEventCertainty> value) { 
+        public AllergyIntoleranceEventComponent setCertaintyElement(Enumeration<AllergyIntoleranceCertainty> value) { 
           this.certainty = value;
           return this;
         }
@@ -705,19 +705,19 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @return Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event.
          */
-        public ReactionEventCertainty getCertainty() { 
+        public AllergyIntoleranceCertainty getCertainty() { 
           return this.certainty == null ? null : this.certainty.getValue();
         }
 
         /**
          * @param value Statement about the degree of clinical certainty that the Specific Substance was the cause of the Manifestation in this reaction event.
          */
-        public AllergyIntoleranceEventComponent setCertainty(ReactionEventCertainty value) { 
+        public AllergyIntoleranceEventComponent setCertainty(AllergyIntoleranceCertainty value) { 
           if (value == null)
             this.certainty = null;
           else {
             if (this.certainty == null)
-              this.certainty = new Enumeration<ReactionEventCertainty>(new ReactionEventCertaintyEnumFactory());
+              this.certainty = new Enumeration<AllergyIntoleranceCertainty>(new AllergyIntoleranceCertaintyEnumFactory());
             this.certainty.setValue(value);
           }
           return this;
@@ -888,12 +888,12 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @return {@link #severity} (Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.). This is the underlying object with id, value and extensions. The accessor "getSeverity" gives direct access to the value
          */
-        public Enumeration<ReactionEventSeverity> getSeverityElement() { 
+        public Enumeration<AllergyIntoleranceSeverity> getSeverityElement() { 
           if (this.severity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create AllergyIntoleranceEventComponent.severity");
             else if (Configuration.doAutoCreate())
-              this.severity = new Enumeration<ReactionEventSeverity>(new ReactionEventSeverityEnumFactory()); // bb
+              this.severity = new Enumeration<AllergyIntoleranceSeverity>(new AllergyIntoleranceSeverityEnumFactory()); // bb
           return this.severity;
         }
 
@@ -908,7 +908,7 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @param value {@link #severity} (Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.). This is the underlying object with id, value and extensions. The accessor "getSeverity" gives direct access to the value
          */
-        public AllergyIntoleranceEventComponent setSeverityElement(Enumeration<ReactionEventSeverity> value) { 
+        public AllergyIntoleranceEventComponent setSeverityElement(Enumeration<AllergyIntoleranceSeverity> value) { 
           this.severity = value;
           return this;
         }
@@ -916,19 +916,19 @@ public class AllergyIntolerance extends DomainResource {
         /**
          * @return Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.
          */
-        public ReactionEventSeverity getSeverity() { 
+        public AllergyIntoleranceSeverity getSeverity() { 
           return this.severity == null ? null : this.severity.getValue();
         }
 
         /**
          * @param value Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.
          */
-        public AllergyIntoleranceEventComponent setSeverity(ReactionEventSeverity value) { 
+        public AllergyIntoleranceEventComponent setSeverity(AllergyIntoleranceSeverity value) { 
           if (value == null)
             this.severity = null;
           else {
             if (this.severity == null)
-              this.severity = new Enumeration<ReactionEventSeverity>(new ReactionEventSeverityEnumFactory());
+              this.severity = new Enumeration<AllergyIntoleranceSeverity>(new AllergyIntoleranceSeverityEnumFactory());
             this.severity.setValue(value);
           }
           return this;

@@ -29,11 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Child;
@@ -45,92 +46,6 @@ import org.hl7.fhir.instance.model.api.*;
  */
 @ResourceDef(name="DocumentManifest", profile="http://hl7.org/fhir/Profile/DocumentManifest")
 public class DocumentManifest extends DomainResource {
-
-    public enum DocumentReferenceStatus {
-        /**
-         * This is the current reference for this document.
-         */
-        CURRENT, 
-        /**
-         * This reference has been superceded by another reference.
-         */
-        SUPERCEDED, 
-        /**
-         * This reference was created in error.
-         */
-        ENTEREDINERROR, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static DocumentReferenceStatus fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("current".equals(codeString))
-          return CURRENT;
-        if ("superceded".equals(codeString))
-          return SUPERCEDED;
-        if ("entered-in-error".equals(codeString))
-          return ENTEREDINERROR;
-        throw new Exception("Unknown DocumentReferenceStatus code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case CURRENT: return "current";
-            case SUPERCEDED: return "superceded";
-            case ENTEREDINERROR: return "entered-in-error";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case CURRENT: return "";
-            case SUPERCEDED: return "";
-            case ENTEREDINERROR: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case CURRENT: return "This is the current reference for this document.";
-            case SUPERCEDED: return "This reference has been superceded by another reference.";
-            case ENTEREDINERROR: return "This reference was created in error.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case CURRENT: return "Current";
-            case SUPERCEDED: return "Superceded";
-            case ENTEREDINERROR: return "Entered In Error";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class DocumentReferenceStatusEnumFactory implements EnumFactory<DocumentReferenceStatus> {
-    public DocumentReferenceStatus fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("current".equals(codeString))
-          return DocumentReferenceStatus.CURRENT;
-        if ("superceded".equals(codeString))
-          return DocumentReferenceStatus.SUPERCEDED;
-        if ("entered-in-error".equals(codeString))
-          return DocumentReferenceStatus.ENTEREDINERROR;
-        throw new IllegalArgumentException("Unknown DocumentReferenceStatus code '"+codeString+"'");
-        }
-    public String toCode(DocumentReferenceStatus code) {
-      if (code == DocumentReferenceStatus.CURRENT)
-        return "current";
-      if (code == DocumentReferenceStatus.SUPERCEDED)
-        return "superceded";
-      if (code == DocumentReferenceStatus.ENTEREDINERROR)
-        return "entered-in-error";
-      return "?";
-      }
-    }
 
     @Block()
     public static class DocumentManifestContentComponent extends BackboneElement implements IBaseBackboneElement {

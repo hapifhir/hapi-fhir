@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,13 +47,13 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="DataElement", profile="http://hl7.org/fhir/Profile/DataElement")
 public class DataElement extends DomainResource {
 
-    public enum DataelementSpecificity {
+    public enum DataElementSpecificity {
         /**
          * The data element is sufficiently well-constrained that multiple pieces of data captured according to the constraints of the data element will be comparable (though in some cases, a degree of automated conversion/normalization may be required).
          */
         COMPARABLE, 
         /**
-         * The data element is fully specified down to a single value set, single unit of measure, single data type, etc.  Multiple pieces of data associated with this data element are fully compareable.
+         * The data element is fully specified down to a single value set, single unit of measure, single data type, etc.  Multiple pieces of data associated with this data element are fully compareable
          */
         FULLYSPECIFIED, 
         /**
@@ -61,11 +61,11 @@ public class DataElement extends DomainResource {
          */
         EQUIVALENT, 
         /**
-         * The data element allows multiple units of measure that are convertable between each other (e.g. Inches and centimeters) and/or allows data to be captured in multiple value sets for which a known mapping exists allowing conversion of meaning.
+         * The data element allows multiple units of measure that are convertable between each other (e.g. Inches and centimeters) and/or allows data to be captured in multiple value sets for which a known mapping exists allowing conversion of meaning
          */
         CONVERTABLE, 
         /**
-         * A convertable data element where unit conversions are different only by a power of 10.  E.g. g, mg, kg.
+         * A convertable data element where unit conversions are different only by a power of 10.  E.g. g, mg, kg
          */
         SCALEABLE, 
         /**
@@ -76,7 +76,7 @@ public class DataElement extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static DataelementSpecificity fromCode(String codeString) throws Exception {
+        public static DataElementSpecificity fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("comparable".equals(codeString))
@@ -91,7 +91,7 @@ public class DataElement extends DomainResource {
           return SCALEABLE;
         if ("flexible".equals(codeString))
           return FLEXIBLE;
-        throw new Exception("Unknown DataelementSpecificity code '"+codeString+"'");
+        throw new Exception("Unknown DataElementSpecificity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -106,22 +106,22 @@ public class DataElement extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case COMPARABLE: return "";
-            case FULLYSPECIFIED: return "";
-            case EQUIVALENT: return "";
-            case CONVERTABLE: return "";
-            case SCALEABLE: return "";
-            case FLEXIBLE: return "";
+            case COMPARABLE: return "http://hl7.org.fhir/dataelement-specificity";
+            case FULLYSPECIFIED: return "http://hl7.org.fhir/dataelement-specificity";
+            case EQUIVALENT: return "http://hl7.org.fhir/dataelement-specificity";
+            case CONVERTABLE: return "http://hl7.org.fhir/dataelement-specificity";
+            case SCALEABLE: return "http://hl7.org.fhir/dataelement-specificity";
+            case FLEXIBLE: return "http://hl7.org.fhir/dataelement-specificity";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case COMPARABLE: return "The data element is sufficiently well-constrained that multiple pieces of data captured according to the constraints of the data element will be comparable (though in some cases, a degree of automated conversion/normalization may be required).";
-            case FULLYSPECIFIED: return "The data element is fully specified down to a single value set, single unit of measure, single data type, etc.  Multiple pieces of data associated with this data element are fully compareable.";
+            case FULLYSPECIFIED: return "The data element is fully specified down to a single value set, single unit of measure, single data type, etc.  Multiple pieces of data associated with this data element are fully compareable";
             case EQUIVALENT: return "The data element allows multiple units of measure having equivalent meaning.  E.g. 'cc' (cubic centimeter) and 'mL'.";
-            case CONVERTABLE: return "The data element allows multiple units of measure that are convertable between each other (e.g. Inches and centimeters) and/or allows data to be captured in multiple value sets for which a known mapping exists allowing conversion of meaning.";
-            case SCALEABLE: return "A convertable data element where unit conversions are different only by a power of 10.  E.g. g, mg, kg.";
+            case CONVERTABLE: return "The data element allows multiple units of measure that are convertable between each other (e.g. Inches and centimeters) and/or allows data to be captured in multiple value sets for which a known mapping exists allowing conversion of meaning";
+            case SCALEABLE: return "A convertable data element where unit conversions are different only by a power of 10.  E.g. g, mg, kg";
             case FLEXIBLE: return "The data element is unconstrained in units, choice of data types and/or choice of vocabulary such that automated comparison of data captured using the data element is not possible.";
             default: return "?";
           }
@@ -139,37 +139,37 @@ public class DataElement extends DomainResource {
         }
     }
 
-  public static class DataelementSpecificityEnumFactory implements EnumFactory<DataelementSpecificity> {
-    public DataelementSpecificity fromCode(String codeString) throws IllegalArgumentException {
+  public static class DataElementSpecificityEnumFactory implements EnumFactory<DataElementSpecificity> {
+    public DataElementSpecificity fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("comparable".equals(codeString))
-          return DataelementSpecificity.COMPARABLE;
+          return DataElementSpecificity.COMPARABLE;
         if ("fully-specified".equals(codeString))
-          return DataelementSpecificity.FULLYSPECIFIED;
+          return DataElementSpecificity.FULLYSPECIFIED;
         if ("equivalent".equals(codeString))
-          return DataelementSpecificity.EQUIVALENT;
+          return DataElementSpecificity.EQUIVALENT;
         if ("convertable".equals(codeString))
-          return DataelementSpecificity.CONVERTABLE;
+          return DataElementSpecificity.CONVERTABLE;
         if ("scaleable".equals(codeString))
-          return DataelementSpecificity.SCALEABLE;
+          return DataElementSpecificity.SCALEABLE;
         if ("flexible".equals(codeString))
-          return DataelementSpecificity.FLEXIBLE;
-        throw new IllegalArgumentException("Unknown DataelementSpecificity code '"+codeString+"'");
+          return DataElementSpecificity.FLEXIBLE;
+        throw new IllegalArgumentException("Unknown DataElementSpecificity code '"+codeString+"'");
         }
-    public String toCode(DataelementSpecificity code) {
-      if (code == DataelementSpecificity.COMPARABLE)
+    public String toCode(DataElementSpecificity code) {
+      if (code == DataElementSpecificity.COMPARABLE)
         return "comparable";
-      if (code == DataelementSpecificity.FULLYSPECIFIED)
+      if (code == DataElementSpecificity.FULLYSPECIFIED)
         return "fully-specified";
-      if (code == DataelementSpecificity.EQUIVALENT)
+      if (code == DataElementSpecificity.EQUIVALENT)
         return "equivalent";
-      if (code == DataelementSpecificity.CONVERTABLE)
+      if (code == DataElementSpecificity.CONVERTABLE)
         return "convertable";
-      if (code == DataelementSpecificity.SCALEABLE)
+      if (code == DataElementSpecificity.SCALEABLE)
         return "scaleable";
-      if (code == DataelementSpecificity.FLEXIBLE)
+      if (code == DataElementSpecificity.FLEXIBLE)
         return "flexible";
       return "?";
       }
@@ -702,7 +702,7 @@ public class DataElement extends DomainResource {
      */
     @Child(name = "specificity", type = {CodeType.class}, order=11, min=0, max=1)
     @Description(shortDefinition="comparable | fully-specified | equivalent | convertable | scaleable | flexible", formalDefinition="Identifies how precise the data element is in its definition." )
-    protected Enumeration<DataelementSpecificity> specificity;
+    protected Enumeration<DataElementSpecificity> specificity;
 
     /**
      * Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with.
@@ -718,7 +718,7 @@ public class DataElement extends DomainResource {
     @Description(shortDefinition="Definition of element", formalDefinition="Defines the structure, type, allowed values and other constraining characteristics of the data element." )
     protected List<ElementDefinition> element;
 
-    private static final long serialVersionUID = -1444116299L;
+    private static final long serialVersionUID = 576052437L;
 
   /*
    * Constructor
@@ -1226,12 +1226,12 @@ public class DataElement extends DomainResource {
     /**
      * @return {@link #specificity} (Identifies how precise the data element is in its definition.). This is the underlying object with id, value and extensions. The accessor "getSpecificity" gives direct access to the value
      */
-    public Enumeration<DataelementSpecificity> getSpecificityElement() { 
+    public Enumeration<DataElementSpecificity> getSpecificityElement() { 
       if (this.specificity == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create DataElement.specificity");
         else if (Configuration.doAutoCreate())
-          this.specificity = new Enumeration<DataelementSpecificity>(new DataelementSpecificityEnumFactory()); // bb
+          this.specificity = new Enumeration<DataElementSpecificity>(new DataElementSpecificityEnumFactory()); // bb
       return this.specificity;
     }
 
@@ -1246,7 +1246,7 @@ public class DataElement extends DomainResource {
     /**
      * @param value {@link #specificity} (Identifies how precise the data element is in its definition.). This is the underlying object with id, value and extensions. The accessor "getSpecificity" gives direct access to the value
      */
-    public DataElement setSpecificityElement(Enumeration<DataelementSpecificity> value) { 
+    public DataElement setSpecificityElement(Enumeration<DataElementSpecificity> value) { 
       this.specificity = value;
       return this;
     }
@@ -1254,19 +1254,19 @@ public class DataElement extends DomainResource {
     /**
      * @return Identifies how precise the data element is in its definition.
      */
-    public DataelementSpecificity getSpecificity() { 
+    public DataElementSpecificity getSpecificity() { 
       return this.specificity == null ? null : this.specificity.getValue();
     }
 
     /**
      * @param value Identifies how precise the data element is in its definition.
      */
-    public DataElement setSpecificity(DataelementSpecificity value) { 
+    public DataElement setSpecificity(DataElementSpecificity value) { 
       if (value == null)
         this.specificity = null;
       else {
         if (this.specificity == null)
-          this.specificity = new Enumeration<DataelementSpecificity>(new DataelementSpecificityEnumFactory());
+          this.specificity = new Enumeration<DataElementSpecificity>(new DataElementSpecificityEnumFactory());
         this.specificity.setValue(value);
       }
       return this;

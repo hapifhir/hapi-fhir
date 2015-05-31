@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,43 +48,43 @@ public class DeviceUseRequest extends DomainResource {
 
     public enum DeviceUseRequestStatus {
         /**
-         * The request has been proposed.
+         * The request has been proposed
          */
         PROPOSED, 
         /**
-         * The request has been planned.
+         * The request has been planned
          */
         PLANNED, 
         /**
-         * The request has been placed.
+         * The request has been placed
          */
         REQUESTED, 
         /**
-         * The receiving system has received the request but not yet decided whether it will be performed.
+         * The receiving system has received the request but not yet decided whether it will be performed
          */
         RECEIVED, 
         /**
-         * The receiving system has accepted the request but work has not yet commenced.
+         * The receiving system has accepted the request but work has not yet commenced
          */
         ACCEPTED, 
         /**
-         * The work to fulfill the order is happening.
+         * The work to fulfill the order is happening
          */
         INPROGRESS, 
         /**
-         * The work has been complete, the report(s) released, and no further work is planned.
+         * The work has been complete, the report(s) released, and no further work is planned
          */
         COMPLETED, 
         /**
-         * The request has been held by originating system/user request.
+         * The request has been held by originating system/user request
          */
         SUSPENDED, 
         /**
-         * The receiving system has declined to fulfill the request.
+         * The receiving system has declined to fulfill the request
          */
         REJECTED, 
         /**
-         * The request was attempted, but due to some procedural error, it could not be completed.
+         * The request was attempted, but due to some procedural error, it could not be completed
          */
         ABORTED, 
         /**
@@ -133,31 +133,31 @@ public class DeviceUseRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "";
-            case PLANNED: return "";
-            case REQUESTED: return "";
-            case RECEIVED: return "";
-            case ACCEPTED: return "";
-            case INPROGRESS: return "";
-            case COMPLETED: return "";
-            case SUSPENDED: return "";
-            case REJECTED: return "";
-            case ABORTED: return "";
+            case PROPOSED: return "http://hl7.org.fhir/device-use-request-status";
+            case PLANNED: return "http://hl7.org.fhir/device-use-request-status";
+            case REQUESTED: return "http://hl7.org.fhir/device-use-request-status";
+            case RECEIVED: return "http://hl7.org.fhir/device-use-request-status";
+            case ACCEPTED: return "http://hl7.org.fhir/device-use-request-status";
+            case INPROGRESS: return "http://hl7.org.fhir/device-use-request-status";
+            case COMPLETED: return "http://hl7.org.fhir/device-use-request-status";
+            case SUSPENDED: return "http://hl7.org.fhir/device-use-request-status";
+            case REJECTED: return "http://hl7.org.fhir/device-use-request-status";
+            case ABORTED: return "http://hl7.org.fhir/device-use-request-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The request has been proposed.";
-            case PLANNED: return "The request has been planned.";
-            case REQUESTED: return "The request has been placed.";
-            case RECEIVED: return "The receiving system has received the request but not yet decided whether it will be performed.";
-            case ACCEPTED: return "The receiving system has accepted the request but work has not yet commenced.";
-            case INPROGRESS: return "The work to fulfill the order is happening.";
-            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned.";
-            case SUSPENDED: return "The request has been held by originating system/user request.";
-            case REJECTED: return "The receiving system has declined to fulfill the request.";
-            case ABORTED: return "The request was attempted, but due to some procedural error, it could not be completed.";
+            case PROPOSED: return "The request has been proposed";
+            case PLANNED: return "The request has been planned";
+            case REQUESTED: return "The request has been placed";
+            case RECEIVED: return "The receiving system has received the request but not yet decided whether it will be performed";
+            case ACCEPTED: return "The receiving system has accepted the request but work has not yet commenced";
+            case INPROGRESS: return "The work to fulfill the order is happening";
+            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned";
+            case SUSPENDED: return "The request has been held by originating system/user request";
+            case REJECTED: return "The receiving system has declined to fulfill the request";
+            case ABORTED: return "The request was attempted, but due to some procedural error, it could not be completed";
             default: return "?";
           }
         }
@@ -275,10 +275,10 @@ public class DeviceUseRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ROUTINE: return "";
-            case URGENT: return "";
-            case STAT: return "";
-            case ASAP: return "";
+            case ROUTINE: return "http://hl7.org.fhir/device-use-request-priority";
+            case URGENT: return "http://hl7.org.fhir/device-use-request-priority";
+            case STAT: return "http://hl7.org.fhir/device-use-request-priority";
+            case ASAP: return "http://hl7.org.fhir/device-use-request-priority";
             default: return "?";
           }
         }

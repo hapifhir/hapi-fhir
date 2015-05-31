@@ -29,11 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
@@ -47,7 +48,7 @@ public class ElementDefinition extends Type implements ICompositeType {
 
     public enum PropertyRepresentation {
         /**
-         * In XML, this property is represented as an attribute not an element.
+         * In XML, this property is represented as an attribute not an element
          */
         XMLATTR, 
         /**
@@ -69,13 +70,13 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case XMLATTR: return "";
+            case XMLATTR: return "http://hl7.org.fhir/property-representation";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case XMLATTR: return "In XML, this property is represented as an attribute not an element.";
+            case XMLATTR: return "In XML, this property is represented as an attribute not an element";
             default: return "?";
           }
         }
@@ -103,24 +104,24 @@ public class ElementDefinition extends Type implements ICompositeType {
       }
     }
 
-    public enum ResourceSlicingRules {
+    public enum SlicingRules {
         /**
-         * No additional content is allowed other than that described by the slices in this profile.
+         * No additional content is allowed other than that described by the slices in this profile
          */
         CLOSED, 
         /**
-         * Additional content is allowed anywhere in the list.
+         * Additional content is allowed anywhere in the list
          */
         OPEN, 
         /**
-         * Additional content is allowed, but only at the end of the list. Note that using this requires that the slices be ordered, which makes it hard to share uses. This should only be done where absolutely required.
+         * Additional content is allowed, but only at the end of the list. Note that using this requires that the slices be ordered, which makes it hard to share uses. This should only be done where absolutely required
          */
         OPENATEND, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ResourceSlicingRules fromCode(String codeString) throws Exception {
+        public static SlicingRules fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("closed".equals(codeString))
@@ -129,7 +130,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           return OPEN;
         if ("openAtEnd".equals(codeString))
           return OPENATEND;
-        throw new Exception("Unknown ResourceSlicingRules code '"+codeString+"'");
+        throw new Exception("Unknown SlicingRules code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -141,17 +142,17 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case CLOSED: return "";
-            case OPEN: return "";
-            case OPENATEND: return "";
+            case CLOSED: return "http://hl7.org.fhir/resource-slicing-rules";
+            case OPEN: return "http://hl7.org.fhir/resource-slicing-rules";
+            case OPENATEND: return "http://hl7.org.fhir/resource-slicing-rules";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case CLOSED: return "No additional content is allowed other than that described by the slices in this profile.";
-            case OPEN: return "Additional content is allowed anywhere in the list.";
-            case OPENATEND: return "Additional content is allowed, but only at the end of the list. Note that using this requires that the slices be ordered, which makes it hard to share uses. This should only be done where absolutely required.";
+            case CLOSED: return "No additional content is allowed other than that described by the slices in this profile";
+            case OPEN: return "Additional content is allowed anywhere in the list";
+            case OPENATEND: return "Additional content is allowed, but only at the end of the list. Note that using this requires that the slices be ordered, which makes it hard to share uses. This should only be done where absolutely required";
             default: return "?";
           }
         }
@@ -165,48 +166,48 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
     }
 
-  public static class ResourceSlicingRulesEnumFactory implements EnumFactory<ResourceSlicingRules> {
-    public ResourceSlicingRules fromCode(String codeString) throws IllegalArgumentException {
+  public static class SlicingRulesEnumFactory implements EnumFactory<SlicingRules> {
+    public SlicingRules fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("closed".equals(codeString))
-          return ResourceSlicingRules.CLOSED;
+          return SlicingRules.CLOSED;
         if ("open".equals(codeString))
-          return ResourceSlicingRules.OPEN;
+          return SlicingRules.OPEN;
         if ("openAtEnd".equals(codeString))
-          return ResourceSlicingRules.OPENATEND;
-        throw new IllegalArgumentException("Unknown ResourceSlicingRules code '"+codeString+"'");
+          return SlicingRules.OPENATEND;
+        throw new IllegalArgumentException("Unknown SlicingRules code '"+codeString+"'");
         }
-    public String toCode(ResourceSlicingRules code) {
-      if (code == ResourceSlicingRules.CLOSED)
+    public String toCode(SlicingRules code) {
+      if (code == SlicingRules.CLOSED)
         return "closed";
-      if (code == ResourceSlicingRules.OPEN)
+      if (code == SlicingRules.OPEN)
         return "open";
-      if (code == ResourceSlicingRules.OPENATEND)
+      if (code == SlicingRules.OPENATEND)
         return "openAtEnd";
       return "?";
       }
     }
 
-    public enum ResourceAggregationMode {
+    public enum AggregationMode {
         /**
-         * The reference is a local reference to a contained resource.
+         * The reference is a local reference to a contained resource
          */
         CONTAINED, 
         /**
-         * The reference to a resource that has to be resolved externally to the resource that includes the reference.
+         * The reference to a resource that has to be resolved externally to the resource that includes the reference
          */
         REFERENCED, 
         /**
-         * The resource the reference points to will be found in the same bundle as the resource that includes the reference.
+         * The resource the reference points to will be found in the same bundle as the resource that includes the reference
          */
         BUNDLED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ResourceAggregationMode fromCode(String codeString) throws Exception {
+        public static AggregationMode fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("contained".equals(codeString))
@@ -215,7 +216,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           return REFERENCED;
         if ("bundled".equals(codeString))
           return BUNDLED;
-        throw new Exception("Unknown ResourceAggregationMode code '"+codeString+"'");
+        throw new Exception("Unknown AggregationMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -227,17 +228,17 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case CONTAINED: return "";
-            case REFERENCED: return "";
-            case BUNDLED: return "";
+            case CONTAINED: return "http://hl7.org.fhir/resource-aggregation-mode";
+            case REFERENCED: return "http://hl7.org.fhir/resource-aggregation-mode";
+            case BUNDLED: return "http://hl7.org.fhir/resource-aggregation-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case CONTAINED: return "The reference is a local reference to a contained resource.";
-            case REFERENCED: return "The reference to a resource that has to be resolved externally to the resource that includes the reference.";
-            case BUNDLED: return "The resource the reference points to will be found in the same bundle as the resource that includes the reference.";
+            case CONTAINED: return "The reference is a local reference to a contained resource";
+            case REFERENCED: return "The reference to a resource that has to be resolved externally to the resource that includes the reference";
+            case BUNDLED: return "The resource the reference points to will be found in the same bundle as the resource that includes the reference";
             default: return "?";
           }
         }
@@ -251,25 +252,25 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
     }
 
-  public static class ResourceAggregationModeEnumFactory implements EnumFactory<ResourceAggregationMode> {
-    public ResourceAggregationMode fromCode(String codeString) throws IllegalArgumentException {
+  public static class AggregationModeEnumFactory implements EnumFactory<AggregationMode> {
+    public AggregationMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("contained".equals(codeString))
-          return ResourceAggregationMode.CONTAINED;
+          return AggregationMode.CONTAINED;
         if ("referenced".equals(codeString))
-          return ResourceAggregationMode.REFERENCED;
+          return AggregationMode.REFERENCED;
         if ("bundled".equals(codeString))
-          return ResourceAggregationMode.BUNDLED;
-        throw new IllegalArgumentException("Unknown ResourceAggregationMode code '"+codeString+"'");
+          return AggregationMode.BUNDLED;
+        throw new IllegalArgumentException("Unknown AggregationMode code '"+codeString+"'");
         }
-    public String toCode(ResourceAggregationMode code) {
-      if (code == ResourceAggregationMode.CONTAINED)
+    public String toCode(AggregationMode code) {
+      if (code == AggregationMode.CONTAINED)
         return "contained";
-      if (code == ResourceAggregationMode.REFERENCED)
+      if (code == AggregationMode.REFERENCED)
         return "referenced";
-      if (code == ResourceAggregationMode.BUNDLED)
+      if (code == AggregationMode.BUNDLED)
         return "bundled";
       return "?";
       }
@@ -277,7 +278,7 @@ public class ElementDefinition extends Type implements ICompositeType {
 
     public enum ConstraintSeverity {
         /**
-         * If the constraint is violated, the resource is not conformant.
+         * If the constraint is violated, the resource is not conformant
          */
         ERROR, 
         /**
@@ -306,14 +307,14 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case ERROR: return "";
-            case WARNING: return "";
+            case ERROR: return "http://hl7.org.fhir/constraint-severity";
+            case WARNING: return "http://hl7.org.fhir/constraint-severity";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ERROR: return "If the constraint is violated, the resource is not conformant.";
+            case ERROR: return "If the constraint is violated, the resource is not conformant";
             case WARNING: return "If the constraint is violated, the resource is conformant, but it is not necessarily following best practice.";
             default: return "?";
           }
@@ -349,7 +350,7 @@ public class ElementDefinition extends Type implements ICompositeType {
 
     public enum BindingStrength {
         /**
-         * To be conformant, instances of this element SHALL include a code from the specified value set.
+         * To be conformant, instances of this element SHALL include a code from the specified value set
          */
         REQUIRED, 
         /**
@@ -357,11 +358,11 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         EXTENSIBLE, 
         /**
-         * Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant.
+         * Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant
          */
         PREFERRED, 
         /**
-         * Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.
+         * Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included
          */
         EXAMPLE, 
         /**
@@ -392,19 +393,19 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case REQUIRED: return "";
-            case EXTENSIBLE: return "";
-            case PREFERRED: return "";
-            case EXAMPLE: return "";
+            case REQUIRED: return "http://hl7.org.fhir/binding-strength";
+            case EXTENSIBLE: return "http://hl7.org.fhir/binding-strength";
+            case PREFERRED: return "http://hl7.org.fhir/binding-strength";
+            case EXAMPLE: return "http://hl7.org.fhir/binding-strength";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case REQUIRED: return "To be conformant, instances of this element SHALL include a code from the specified value set.";
+            case REQUIRED: return "To be conformant, instances of this element SHALL include a code from the specified value set";
             case EXTENSIBLE: return "To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.";
-            case PREFERRED: return "Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant.";
-            case EXAMPLE: return "Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.";
+            case PREFERRED: return "Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant";
+            case EXAMPLE: return "Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included";
             default: return "?";
           }
         }
@@ -475,9 +476,9 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "rules", type = {CodeType.class}, order=4, min=1, max=1)
         @Description(shortDefinition="closed | open | openAtEnd", formalDefinition="Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end." )
-        protected Enumeration<ResourceSlicingRules> rules;
+        protected Enumeration<SlicingRules> rules;
 
-        private static final long serialVersionUID = -321298491L;
+        private static final long serialVersionUID = 233544215L;
 
     /*
      * Constructor
@@ -489,7 +490,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     /*
      * Constructor
      */
-      public ElementDefinitionSlicingComponent(Enumeration<ResourceSlicingRules> rules) {
+      public ElementDefinitionSlicingComponent(Enumeration<SlicingRules> rules) {
         super();
         this.rules = rules;
       }
@@ -645,12 +646,12 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @return {@link #rules} (Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end.). This is the underlying object with id, value and extensions. The accessor "getRules" gives direct access to the value
          */
-        public Enumeration<ResourceSlicingRules> getRulesElement() { 
+        public Enumeration<SlicingRules> getRulesElement() { 
           if (this.rules == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ElementDefinitionSlicingComponent.rules");
             else if (Configuration.doAutoCreate())
-              this.rules = new Enumeration<ResourceSlicingRules>(new ResourceSlicingRulesEnumFactory()); // bb
+              this.rules = new Enumeration<SlicingRules>(new SlicingRulesEnumFactory()); // bb
           return this.rules;
         }
 
@@ -665,7 +666,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #rules} (Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end.). This is the underlying object with id, value and extensions. The accessor "getRules" gives direct access to the value
          */
-        public ElementDefinitionSlicingComponent setRulesElement(Enumeration<ResourceSlicingRules> value) { 
+        public ElementDefinitionSlicingComponent setRulesElement(Enumeration<SlicingRules> value) { 
           this.rules = value;
           return this;
         }
@@ -673,16 +674,16 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @return Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end.
          */
-        public ResourceSlicingRules getRules() { 
+        public SlicingRules getRules() { 
           return this.rules == null ? null : this.rules.getValue();
         }
 
         /**
          * @param value Whether additional slices are allowed or not. When the slices are ordered, profile authors can also say that additional slices are only allowed at the end.
          */
-        public ElementDefinitionSlicingComponent setRules(ResourceSlicingRules value) { 
+        public ElementDefinitionSlicingComponent setRules(SlicingRules value) { 
             if (this.rules == null)
-              this.rules = new Enumeration<ResourceSlicingRules>(new ResourceSlicingRulesEnumFactory());
+              this.rules = new Enumeration<SlicingRules>(new SlicingRulesEnumFactory());
             this.rules.setValue(value);
           return this;
         }
@@ -759,9 +760,9 @@ public class ElementDefinition extends Type implements ICompositeType {
          */
         @Child(name = "aggregation", type = {CodeType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="contained | referenced | bundled - how aggregated", formalDefinition="If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle." )
-        protected List<Enumeration<ResourceAggregationMode>> aggregation;
+        protected List<Enumeration<AggregationMode>> aggregation;
 
-        private static final long serialVersionUID = -1527133887L;
+        private static final long serialVersionUID = -345007341L;
 
     /*
      * Constructor
@@ -875,16 +876,16 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @return {@link #aggregation} (If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.)
          */
-        public List<Enumeration<ResourceAggregationMode>> getAggregation() { 
+        public List<Enumeration<AggregationMode>> getAggregation() { 
           if (this.aggregation == null)
-            this.aggregation = new ArrayList<Enumeration<ResourceAggregationMode>>();
+            this.aggregation = new ArrayList<Enumeration<AggregationMode>>();
           return this.aggregation;
         }
 
         public boolean hasAggregation() { 
           if (this.aggregation == null)
             return false;
-          for (Enumeration<ResourceAggregationMode> item : this.aggregation)
+          for (Enumeration<AggregationMode> item : this.aggregation)
             if (!item.isEmpty())
               return true;
           return false;
@@ -894,10 +895,10 @@ public class ElementDefinition extends Type implements ICompositeType {
          * @return {@link #aggregation} (If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.)
          */
     // syntactic sugar
-        public Enumeration<ResourceAggregationMode> addAggregationElement() {//2 
-          Enumeration<ResourceAggregationMode> t = new Enumeration<ResourceAggregationMode>(new ResourceAggregationModeEnumFactory());
+        public Enumeration<AggregationMode> addAggregationElement() {//2 
+          Enumeration<AggregationMode> t = new Enumeration<AggregationMode>(new AggregationModeEnumFactory());
           if (this.aggregation == null)
-            this.aggregation = new ArrayList<Enumeration<ResourceAggregationMode>>();
+            this.aggregation = new ArrayList<Enumeration<AggregationMode>>();
           this.aggregation.add(t);
           return t;
         }
@@ -905,11 +906,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #aggregation} (If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.)
          */
-        public TypeRefComponent addAggregation(ResourceAggregationMode value) { //1
-          Enumeration<ResourceAggregationMode> t = new Enumeration<ResourceAggregationMode>(new ResourceAggregationModeEnumFactory());
+        public TypeRefComponent addAggregation(AggregationMode value) { //1
+          Enumeration<AggregationMode> t = new Enumeration<AggregationMode>(new AggregationModeEnumFactory());
           t.setValue(value);
           if (this.aggregation == null)
-            this.aggregation = new ArrayList<Enumeration<ResourceAggregationMode>>();
+            this.aggregation = new ArrayList<Enumeration<AggregationMode>>();
           this.aggregation.add(t);
           return this;
         }
@@ -917,10 +918,10 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * @param value {@link #aggregation} (If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.)
          */
-        public boolean hasAggregation(ResourceAggregationMode value) { 
+        public boolean hasAggregation(AggregationMode value) { 
           if (this.aggregation == null)
             return false;
-          for (Enumeration<ResourceAggregationMode> v : this.aggregation)
+          for (Enumeration<AggregationMode> v : this.aggregation)
             if (v.equals(value)) // code
               return true;
           return false;
@@ -939,8 +940,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         dst.code = code == null ? null : code.copy();
         dst.profile = profile == null ? null : profile.copy();
         if (aggregation != null) {
-          dst.aggregation = new ArrayList<Enumeration<ResourceAggregationMode>>();
-          for (Enumeration<ResourceAggregationMode> i : aggregation)
+          dst.aggregation = new ArrayList<Enumeration<AggregationMode>>();
+          for (Enumeration<AggregationMode> i : aggregation)
             dst.aggregation.add(i.copy());
         };
         return dst;
@@ -1853,7 +1854,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification).
      */
-    @Child(name = "short_", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "short", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Concise definition for xml presentation", formalDefinition="A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification)." )
     protected StringType short_;
 

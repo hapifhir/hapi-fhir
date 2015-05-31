@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,35 +48,35 @@ public class Goal extends DomainResource {
 
     public enum GoalStatus {
         /**
-         * A goal is proposed for this patient.
+         * A goal is proposed for this patient
          */
         PROPOSED, 
         /**
-         * A goal is planned for this patient.
+         * A goal is planned for this patient
          */
         PLANNED, 
         /**
-         * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).
+         * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)
          */
         INPROGRESS, 
         /**
-         * The goal has been met and no further action is needed.
+         * The goal has been met and no further action is needed
          */
         ACHIEVED, 
         /**
-         * The goal has been met, but ongoing activity is needed to sustain the goal objective.
+         * The goal has been met, but ongoing activity is needed to sustain the goal objective
          */
         SUSTAINING, 
         /**
-         * The goal is no longer being sought.
+         * The goal is no longer being sought
          */
         CANCELLED, 
         /**
-         * A proposed goal was accepted.
+         * A proposed goal was accepted
          */
         ACCEPTED, 
         /**
-         * A proposed goal was rejected.
+         * A proposed goal was rejected
          */
         REJECTED, 
         /**
@@ -119,27 +119,27 @@ public class Goal extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "";
-            case PLANNED: return "";
-            case INPROGRESS: return "";
-            case ACHIEVED: return "";
-            case SUSTAINING: return "";
-            case CANCELLED: return "";
-            case ACCEPTED: return "";
-            case REJECTED: return "";
+            case PROPOSED: return "http://hl7.org.fhir/goal-status";
+            case PLANNED: return "http://hl7.org.fhir/goal-status";
+            case INPROGRESS: return "http://hl7.org.fhir/goal-status";
+            case ACHIEVED: return "http://hl7.org.fhir/goal-status";
+            case SUSTAINING: return "http://hl7.org.fhir/goal-status";
+            case CANCELLED: return "http://hl7.org.fhir/goal-status";
+            case ACCEPTED: return "http://hl7.org.fhir/goal-status";
+            case REJECTED: return "http://hl7.org.fhir/goal-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "A goal is proposed for this patient.";
-            case PLANNED: return "A goal is planned for this patient.";
-            case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).";
-            case ACHIEVED: return "The goal has been met and no further action is needed.";
-            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective.";
-            case CANCELLED: return "The goal is no longer being sought.";
-            case ACCEPTED: return "A proposed goal was accepted.";
-            case REJECTED: return "A proposed goal was rejected.";
+            case PROPOSED: return "A goal is proposed for this patient";
+            case PLANNED: return "A goal is planned for this patient";
+            case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)";
+            case ACHIEVED: return "The goal has been met and no further action is needed";
+            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective";
+            case CANCELLED: return "The goal is no longer being sought";
+            case ACCEPTED: return "A proposed goal was accepted";
+            case REJECTED: return "A proposed goal was rejected";
             default: return "?";
           }
         }

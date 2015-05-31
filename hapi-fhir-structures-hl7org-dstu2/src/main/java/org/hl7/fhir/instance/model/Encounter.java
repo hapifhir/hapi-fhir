@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,27 +48,27 @@ public class Encounter extends DomainResource {
 
     public enum EncounterState {
         /**
-         * The Encounter has not yet started.
+         * The Encounter has not yet started
          */
         PLANNED, 
         /**
-         * The Patient is present for the encounter, however is not currently meeting with a practitioner.
+         * The Patient is present for the encounter, however is not currently meeting with a practitioner
          */
         ARRIVED, 
         /**
-         * The Encounter has begun and the patient is present / the practitioner and the patient are meeting.
+         * The Encounter has begun and the patient is present / the practitioner and the patient are meeting
          */
         INPROGRESS, 
         /**
-         * The Encounter has begun, but the patient is temporarily on leave.
+         * The Encounter has begun, but the patient is temporarily on leave
          */
         ONLEAVE, 
         /**
-         * The Encounter has ended.
+         * The Encounter has ended
          */
         FINISHED, 
         /**
-         * The Encounter has ended before it has begun.
+         * The Encounter has ended before it has begun
          */
         CANCELLED, 
         /**
@@ -105,23 +105,23 @@ public class Encounter extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PLANNED: return "";
-            case ARRIVED: return "";
-            case INPROGRESS: return "";
-            case ONLEAVE: return "";
-            case FINISHED: return "";
-            case CANCELLED: return "";
+            case PLANNED: return "http://hl7.org.fhir/encounter-state";
+            case ARRIVED: return "http://hl7.org.fhir/encounter-state";
+            case INPROGRESS: return "http://hl7.org.fhir/encounter-state";
+            case ONLEAVE: return "http://hl7.org.fhir/encounter-state";
+            case FINISHED: return "http://hl7.org.fhir/encounter-state";
+            case CANCELLED: return "http://hl7.org.fhir/encounter-state";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "The Encounter has not yet started.";
-            case ARRIVED: return "The Patient is present for the encounter, however is not currently meeting with a practitioner.";
-            case INPROGRESS: return "The Encounter has begun and the patient is present / the practitioner and the patient are meeting.";
-            case ONLEAVE: return "The Encounter has begun, but the patient is temporarily on leave.";
-            case FINISHED: return "The Encounter has ended.";
-            case CANCELLED: return "The Encounter has ended before it has begun.";
+            case PLANNED: return "The Encounter has not yet started";
+            case ARRIVED: return "The Patient is present for the encounter, however is not currently meeting with a practitioner";
+            case INPROGRESS: return "The Encounter has begun and the patient is present / the practitioner and the patient are meeting";
+            case ONLEAVE: return "The Encounter has begun, but the patient is temporarily on leave";
+            case FINISHED: return "The Encounter has ended";
+            case CANCELLED: return "The Encounter has ended before it has begun";
             default: return "?";
           }
         }
@@ -176,39 +176,39 @@ public class Encounter extends DomainResource {
 
     public enum EncounterClass {
         /**
-         * An encounter during which the patient is hospitalized and stays overnight.
+         * An encounter during which the patient is hospitalized and stays overnight
          */
         INPATIENT, 
         /**
-         * An encounter during which the patient is not hospitalized overnight.
+         * An encounter during which the patient is not hospitalized overnight
          */
         OUTPATIENT, 
         /**
-         * An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit.
+         * An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit
          */
         AMBULATORY, 
         /**
-         * An encounter where the patient needs urgent care.
+         * An encounter where the patient needs urgent care
          */
         EMERGENCY, 
         /**
-         * An encounter where the practitioner visits the patient at his/her home.
+         * An encounter where the practitioner visits the patient at his/her home
          */
         HOME, 
         /**
-         * An encounter taking place outside the regular environment for giving care.
+         * An encounter taking place outside the regular environment for giving care
          */
         FIELD, 
         /**
-         * An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight.
+         * An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight
          */
         DAYTIME, 
         /**
-         * An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact.
+         * An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact
          */
         VIRTUAL, 
         /**
-         * Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is.
+         * Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is
          */
         OTHER, 
         /**
@@ -254,29 +254,29 @@ public class Encounter extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPATIENT: return "";
-            case OUTPATIENT: return "";
-            case AMBULATORY: return "";
-            case EMERGENCY: return "";
-            case HOME: return "";
-            case FIELD: return "";
-            case DAYTIME: return "";
-            case VIRTUAL: return "";
-            case OTHER: return "";
+            case INPATIENT: return "http://hl7.org.fhir/encounter-class";
+            case OUTPATIENT: return "http://hl7.org.fhir/encounter-class";
+            case AMBULATORY: return "http://hl7.org.fhir/encounter-class";
+            case EMERGENCY: return "http://hl7.org.fhir/encounter-class";
+            case HOME: return "http://hl7.org.fhir/encounter-class";
+            case FIELD: return "http://hl7.org.fhir/encounter-class";
+            case DAYTIME: return "http://hl7.org.fhir/encounter-class";
+            case VIRTUAL: return "http://hl7.org.fhir/encounter-class";
+            case OTHER: return "http://hl7.org.fhir/encounter-class";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INPATIENT: return "An encounter during which the patient is hospitalized and stays overnight.";
-            case OUTPATIENT: return "An encounter during which the patient is not hospitalized overnight.";
-            case AMBULATORY: return "An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit.";
-            case EMERGENCY: return "An encounter where the patient needs urgent care.";
-            case HOME: return "An encounter where the practitioner visits the patient at his/her home.";
-            case FIELD: return "An encounter taking place outside the regular environment for giving care.";
-            case DAYTIME: return "An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight.";
-            case VIRTUAL: return "An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact.";
-            case OTHER: return "Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is.";
+            case INPATIENT: return "An encounter during which the patient is hospitalized and stays overnight";
+            case OUTPATIENT: return "An encounter during which the patient is not hospitalized overnight";
+            case AMBULATORY: return "An encounter where the patient visits the practitioner in his/her office, e.g. a G.P. visit";
+            case EMERGENCY: return "An encounter where the patient needs urgent care";
+            case HOME: return "An encounter where the practitioner visits the patient at his/her home";
+            case FIELD: return "An encounter taking place outside the regular environment for giving care";
+            case DAYTIME: return "An encounter where the patient needs more prolonged treatment or investigations than outpatients, but who do not need to stay in the hospital overnight";
+            case VIRTUAL: return "An encounter that takes place where the patient and practitioner do not physically meet but use electronic means for contact";
+            case OTHER: return "Any other encounter type that is not described by one of the other values. Where this is used it is expected that an implementer will include an extension value to define what the actual other type is";
             default: return "?";
           }
         }
@@ -346,15 +346,15 @@ public class Encounter extends DomainResource {
 
     public enum EncounterLocationStatus {
         /**
-         * The patient is planned to be moved to this location at some point in the future.
+         * The patient is planned to be moved to this location at some point in the future
          */
         PLANNED, 
         /**
-         * The patient is currently at this location, or was between the period specified.
+         * The patient is currently at this location, or was between the period specified
          */
         PRESENT, 
         /**
-         * This location is held empty for this patient.
+         * This location is held empty for this patient
          */
         RESERVED, 
         /**
@@ -382,17 +382,17 @@ public class Encounter extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PLANNED: return "";
-            case PRESENT: return "";
-            case RESERVED: return "";
+            case PLANNED: return "http://hl7.org.fhir/encounter-location-status";
+            case PRESENT: return "http://hl7.org.fhir/encounter-location-status";
+            case RESERVED: return "http://hl7.org.fhir/encounter-location-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "The patient is planned to be moved to this location at some point in the future.";
-            case PRESENT: return "The patient is currently at this location, or was between the period specified.";
-            case RESERVED: return "This location is held empty for this patient.";
+            case PLANNED: return "The patient is planned to be moved to this location at some point in the future";
+            case PRESENT: return "The patient is currently at this location, or was between the period specified";
+            case RESERVED: return "This location is held empty for this patient";
             default: return "?";
           }
         }
@@ -1510,7 +1510,7 @@ public class Encounter extends DomainResource {
     /**
      * inpatient | outpatient | ambulatory | emergency +.
      */
-    @Child(name = "class_", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "class", type = {CodeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="inpatient | outpatient | ambulatory | emergency +", formalDefinition="inpatient | outpatient | ambulatory | emergency +." )
     protected Enumeration<EncounterClass> class_;
 

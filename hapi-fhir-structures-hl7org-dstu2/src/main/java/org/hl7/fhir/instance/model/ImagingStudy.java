@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,147 +48,147 @@ public class ImagingStudy extends DomainResource {
 
     public enum ImagingModality {
         /**
-         * 
+         * null
          */
         AR, 
         /**
-         * 
+         * null
          */
         BMD, 
         /**
-         * 
+         * null
          */
         BDUS, 
         /**
-         * 
+         * null
          */
         EPS, 
         /**
-         * 
+         * null
          */
         CR, 
         /**
-         * 
+         * null
          */
         CT, 
         /**
-         * 
+         * null
          */
         DX, 
         /**
-         * 
+         * null
          */
         ECG, 
         /**
-         * 
+         * null
          */
         ES, 
         /**
-         * 
+         * null
          */
         XC, 
         /**
-         * 
+         * null
          */
         GM, 
         /**
-         * 
+         * null
          */
         HD, 
         /**
-         * 
+         * null
          */
         IO, 
         /**
-         * 
+         * null
          */
         IVOCT, 
         /**
-         * 
+         * null
          */
         IVUS, 
         /**
-         * 
+         * null
          */
         KER, 
         /**
-         * 
+         * null
          */
         LEN, 
         /**
-         * 
+         * null
          */
         MR, 
         /**
-         * 
+         * null
          */
         MG, 
         /**
-         * 
+         * null
          */
         NM, 
         /**
-         * 
+         * null
          */
         OAM, 
         /**
-         * 
+         * null
          */
         OCT, 
         /**
-         * 
+         * null
          */
         OPM, 
         /**
-         * 
+         * null
          */
         OP, 
         /**
-         * 
+         * null
          */
         OPR, 
         /**
-         * 
+         * null
          */
         OPT, 
         /**
-         * 
+         * null
          */
         OPV, 
         /**
-         * 
+         * null
          */
         PX, 
         /**
-         * 
+         * null
          */
         PT, 
         /**
-         * 
+         * null
          */
         RF, 
         /**
-         * 
+         * null
          */
         RG, 
         /**
-         * 
+         * null
          */
         SM, 
         /**
-         * 
+         * null
          */
         SRF, 
         /**
-         * 
+         * null
          */
         US, 
         /**
-         * 
+         * null
          */
         VA, 
         /**
-         * 
+         * null
          */
         XA, 
         /**
@@ -397,42 +397,42 @@ public class ImagingStudy extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case AR: return "A R";
-            case BMD: return "B M D";
-            case BDUS: return "B D U S";
-            case EPS: return "E P S";
-            case CR: return "C R";
-            case CT: return "C T";
-            case DX: return "D X";
-            case ECG: return "E C G";
-            case ES: return "E S";
-            case XC: return "X C";
-            case GM: return "G M";
-            case HD: return "H D";
-            case IO: return "I O";
-            case IVOCT: return "I V O C T";
-            case IVUS: return "I V U S";
-            case KER: return "K E R";
-            case LEN: return "L E N";
-            case MR: return "M R";
-            case MG: return "M G";
-            case NM: return "N M";
-            case OAM: return "O A M";
-            case OCT: return "O C T";
-            case OPM: return "O P M";
-            case OP: return "O P";
-            case OPR: return "O P R";
-            case OPT: return "O P T";
-            case OPV: return "O P V";
-            case PX: return "P X";
-            case PT: return "P T";
-            case RF: return "R F";
-            case RG: return "R G";
-            case SM: return "S M";
-            case SRF: return "S R F";
-            case US: return "U S";
-            case VA: return "V A";
-            case XA: return "X A";
+            case AR: return "AR";
+            case BMD: return "BMD";
+            case BDUS: return "BDUS";
+            case EPS: return "EPS";
+            case CR: return "CR";
+            case CT: return "CT";
+            case DX: return "DX";
+            case ECG: return "ECG";
+            case ES: return "ES";
+            case XC: return "XC";
+            case GM: return "GM";
+            case HD: return "HD";
+            case IO: return "IO";
+            case IVOCT: return "IVOCT";
+            case IVUS: return "IVUS";
+            case KER: return "KER";
+            case LEN: return "LEN";
+            case MR: return "MR";
+            case MG: return "MG";
+            case NM: return "NM";
+            case OAM: return "OAM";
+            case OCT: return "OCT";
+            case OPM: return "OPM";
+            case OP: return "OP";
+            case OPR: return "OPR";
+            case OPT: return "OPT";
+            case OPV: return "OPV";
+            case PX: return "PX";
+            case PT: return "PT";
+            case RF: return "RF";
+            case RG: return "RG";
+            case SM: return "SM";
+            case SRF: return "SRF";
+            case US: return "US";
+            case VA: return "VA";
+            case XA: return "XA";
             default: return "?";
           }
         }
@@ -596,19 +596,19 @@ public class ImagingStudy extends DomainResource {
 
     public enum InstanceAvailability {
         /**
-         * Resources are immediately available,.
+         * null
          */
         ONLINE, 
         /**
-         * Resources need to be retrieved by manual intervention.
+         * null
          */
         OFFLINE, 
         /**
-         * Resources need to be retrieved from relatively slow media.
+         * null
          */
         NEARLINE, 
         /**
-         * Resources cannot be retrieved.
+         * null
          */
         UNAVAILABLE, 
         /**
@@ -648,19 +648,19 @@ public class ImagingStudy extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ONLINE: return "Resources are immediately available,.";
-            case OFFLINE: return "Resources need to be retrieved by manual intervention.";
-            case NEARLINE: return "Resources need to be retrieved from relatively slow media.";
-            case UNAVAILABLE: return "Resources cannot be retrieved.";
+            case ONLINE: return "";
+            case OFFLINE: return "";
+            case NEARLINE: return "";
+            case UNAVAILABLE: return "";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case ONLINE: return "O N L I N E";
-            case OFFLINE: return "O F F L I N E";
-            case NEARLINE: return "N E A R L I N E";
-            case UNAVAILABLE: return "U N A V A I L A B L E";
+            case ONLINE: return "ONLINE";
+            case OFFLINE: return "OFFLINE";
+            case NEARLINE: return "NEARLINE";
+            case UNAVAILABLE: return "UNAVAILABLE";
             default: return "?";
           }
         }
@@ -696,215 +696,215 @@ public class ImagingStudy extends DomainResource {
 
     public enum Modality {
         /**
-         * 
+         * null
          */
         AR, 
         /**
-         * 
+         * null
          */
         AU, 
         /**
-         * 
+         * null
          */
         BDUS, 
         /**
-         * 
+         * null
          */
         BI, 
         /**
-         * 
+         * null
          */
         BMD, 
         /**
-         * 
+         * null
          */
         CR, 
         /**
-         * 
+         * null
          */
         CT, 
         /**
-         * 
+         * null
          */
         DG, 
         /**
-         * 
+         * null
          */
         DX, 
         /**
-         * 
+         * null
          */
         ECG, 
         /**
-         * 
+         * null
          */
         EPS, 
         /**
-         * 
+         * null
          */
         ES, 
         /**
-         * 
+         * null
          */
         GM, 
         /**
-         * 
+         * null
          */
         HC, 
         /**
-         * 
+         * null
          */
         HD, 
         /**
-         * 
+         * null
          */
         IO, 
         /**
-         * 
+         * null
          */
         IVOCT, 
         /**
-         * 
+         * null
          */
         IVUS, 
         /**
-         * 
+         * null
          */
         KER, 
         /**
-         * 
+         * null
          */
         KO, 
         /**
-         * 
+         * null
          */
         LEN, 
         /**
-         * 
+         * null
          */
         LS, 
         /**
-         * 
+         * null
          */
         MG, 
         /**
-         * 
+         * null
          */
         MR, 
         /**
-         * 
+         * null
          */
         NM, 
         /**
-         * 
+         * null
          */
         OAM, 
         /**
-         * 
+         * null
          */
         OCT, 
         /**
-         * 
+         * null
          */
         OP, 
         /**
-         * 
+         * null
          */
         OPM, 
         /**
-         * 
+         * null
          */
         OPT, 
         /**
-         * 
+         * null
          */
         OPV, 
         /**
-         * 
+         * null
          */
         OT, 
         /**
-         * 
+         * null
          */
         PR, 
         /**
-         * 
+         * null
          */
         PT, 
         /**
-         * 
+         * null
          */
         PX, 
         /**
-         * 
+         * null
          */
         REG, 
         /**
-         * 
+         * null
          */
         RF, 
         /**
-         * 
+         * null
          */
         RG, 
         /**
-         * 
+         * null
          */
         RTDOSE, 
         /**
-         * 
+         * null
          */
         RTIMAGE, 
         /**
-         * 
+         * null
          */
         RTPLAN, 
         /**
-         * 
+         * null
          */
         RTRECORD, 
         /**
-         * 
+         * null
          */
         RTSTRUCT, 
         /**
-         * 
+         * null
          */
         SEG, 
         /**
-         * 
+         * null
          */
         SM, 
         /**
-         * 
+         * null
          */
         SMR, 
         /**
-         * 
+         * null
          */
         SR, 
         /**
-         * 
+         * null
          */
         SRF, 
         /**
-         * 
+         * null
          */
         TG, 
         /**
-         * 
+         * null
          */
         US, 
         /**
-         * 
+         * null
          */
         VA, 
         /**
-         * 
+         * null
          */
         XA, 
         /**
-         * 
+         * null
          */
         XC, 
         /**
@@ -1198,59 +1198,59 @@ public class ImagingStudy extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case AR: return "A R";
-            case AU: return "A U";
-            case BDUS: return "B D U S";
-            case BI: return "B I";
-            case BMD: return "B M D";
-            case CR: return "C R";
-            case CT: return "C T";
-            case DG: return "D G";
-            case DX: return "D X";
-            case ECG: return "E C G";
-            case EPS: return "E P S";
-            case ES: return "E S";
-            case GM: return "G M";
-            case HC: return "H C";
-            case HD: return "H D";
-            case IO: return "I O";
-            case IVOCT: return "I V O C T";
-            case IVUS: return "I V U S";
-            case KER: return "K E R";
-            case KO: return "K O";
-            case LEN: return "L E N";
-            case LS: return "L S";
-            case MG: return "M G";
-            case MR: return "M R";
-            case NM: return "N M";
-            case OAM: return "O A M";
-            case OCT: return "O C T";
-            case OP: return "O P";
-            case OPM: return "O P M";
-            case OPT: return "O P T";
-            case OPV: return "O P V";
-            case OT: return "O T";
-            case PR: return "P R";
-            case PT: return "P T";
-            case PX: return "P X";
-            case REG: return "R E G";
-            case RF: return "R F";
-            case RG: return "R G";
-            case RTDOSE: return "R T D O S E";
-            case RTIMAGE: return "R T I M A G E";
-            case RTPLAN: return "R T P L A N";
-            case RTRECORD: return "R T R E C O R D";
-            case RTSTRUCT: return "R T S T R U C T";
-            case SEG: return "S E G";
-            case SM: return "S M";
-            case SMR: return "S M R";
-            case SR: return "S R";
-            case SRF: return "S R F";
-            case TG: return "T G";
-            case US: return "U S";
-            case VA: return "V A";
-            case XA: return "X A";
-            case XC: return "X C";
+            case AR: return "AR";
+            case AU: return "AU";
+            case BDUS: return "BDUS";
+            case BI: return "BI";
+            case BMD: return "BMD";
+            case CR: return "CR";
+            case CT: return "CT";
+            case DG: return "DG";
+            case DX: return "DX";
+            case ECG: return "ECG";
+            case EPS: return "EPS";
+            case ES: return "ES";
+            case GM: return "GM";
+            case HC: return "HC";
+            case HD: return "HD";
+            case IO: return "IO";
+            case IVOCT: return "IVOCT";
+            case IVUS: return "IVUS";
+            case KER: return "KER";
+            case KO: return "KO";
+            case LEN: return "LEN";
+            case LS: return "LS";
+            case MG: return "MG";
+            case MR: return "MR";
+            case NM: return "NM";
+            case OAM: return "OAM";
+            case OCT: return "OCT";
+            case OP: return "OP";
+            case OPM: return "OPM";
+            case OPT: return "OPT";
+            case OPV: return "OPV";
+            case OT: return "OT";
+            case PR: return "PR";
+            case PT: return "PT";
+            case PX: return "PX";
+            case REG: return "REG";
+            case RF: return "RF";
+            case RG: return "RG";
+            case RTDOSE: return "RTDOSE";
+            case RTIMAGE: return "RTIMAGE";
+            case RTPLAN: return "RTPLAN";
+            case RTRECORD: return "RTRECORD";
+            case RTSTRUCT: return "RTSTRUCT";
+            case SEG: return "SEG";
+            case SM: return "SM";
+            case SMR: return "SMR";
+            case SR: return "SR";
+            case SRF: return "SRF";
+            case TG: return "TG";
+            case US: return "US";
+            case VA: return "VA";
+            case XA: return "XA";
+            case XC: return "XC";
             default: return "?";
           }
         }

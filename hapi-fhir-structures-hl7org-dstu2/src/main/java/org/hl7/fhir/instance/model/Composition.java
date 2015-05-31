@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,7 +48,7 @@ public class Composition extends DomainResource {
 
     public enum CompositionStatus {
         /**
-         * This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified.
+         * This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified
          */
         PRELIMINARY, 
         /**
@@ -56,15 +56,15 @@ public class Composition extends DomainResource {
          */
         FINAL, 
         /**
-         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content.
+         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content
          */
         APPENDED, 
         /**
-         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person.
+         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person
          */
         AMENDED, 
         /**
-         * The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.
+         * The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid
          */
         ENTEREDINERROR, 
         /**
@@ -98,21 +98,21 @@ public class Composition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PRELIMINARY: return "";
-            case FINAL: return "";
-            case APPENDED: return "";
-            case AMENDED: return "";
-            case ENTEREDINERROR: return "";
+            case PRELIMINARY: return "http://hl7.org.fhir/composition-status";
+            case FINAL: return "http://hl7.org.fhir/composition-status";
+            case APPENDED: return "http://hl7.org.fhir/composition-status";
+            case AMENDED: return "http://hl7.org.fhir/composition-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/composition-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PRELIMINARY: return "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified.";
+            case PRELIMINARY: return "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified";
             case FINAL: return "This version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition.";
-            case APPENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content.";
-            case AMENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person.";
-            case ENTEREDINERROR: return "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.";
+            case APPENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content";
+            case AMENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person";
+            case ENTEREDINERROR: return "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid";
             default: return "?";
           }
         }
@@ -162,19 +162,19 @@ public class Composition extends DomainResource {
 
     public enum CompositionAttestationMode {
         /**
-         * The person authenticated the content in their personal capacity.
+         * The person authenticated the content in their personal capacity
          */
         PERSONAL, 
         /**
-         * The person authenticated the content in their professional capacity.
+         * The person authenticated the content in their professional capacity
          */
         PROFESSIONAL, 
         /**
-         * The person authenticated the content and accepted legal responsibility for its content.
+         * The person authenticated the content and accepted legal responsibility for its content
          */
         LEGAL, 
         /**
-         * The organization authenticated the content as consistent with their policies and procedures.
+         * The organization authenticated the content as consistent with their policies and procedures
          */
         OFFICIAL, 
         /**
@@ -205,19 +205,19 @@ public class Composition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PERSONAL: return "";
-            case PROFESSIONAL: return "";
-            case LEGAL: return "";
-            case OFFICIAL: return "";
+            case PERSONAL: return "http://hl7.org.fhir/composition-attestation-mode";
+            case PROFESSIONAL: return "http://hl7.org.fhir/composition-attestation-mode";
+            case LEGAL: return "http://hl7.org.fhir/composition-attestation-mode";
+            case OFFICIAL: return "http://hl7.org.fhir/composition-attestation-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PERSONAL: return "The person authenticated the content in their personal capacity.";
-            case PROFESSIONAL: return "The person authenticated the content in their professional capacity.";
-            case LEGAL: return "The person authenticated the content and accepted legal responsibility for its content.";
-            case OFFICIAL: return "The organization authenticated the content as consistent with their policies and procedures.";
+            case PERSONAL: return "The person authenticated the content in their personal capacity";
+            case PROFESSIONAL: return "The person authenticated the content in their professional capacity";
+            case LEGAL: return "The person authenticated the content and accepted legal responsibility for its content";
+            case OFFICIAL: return "The organization authenticated the content as consistent with their policies and procedures";
             default: return "?";
           }
         }
@@ -964,7 +964,7 @@ public class Composition extends DomainResource {
     /**
      * A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.
      */
-    @Child(name = "class_", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type." )
     protected CodeableConcept class_;
 

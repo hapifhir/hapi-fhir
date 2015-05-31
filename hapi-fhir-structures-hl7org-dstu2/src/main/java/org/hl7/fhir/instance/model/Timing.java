@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,31 +48,31 @@ public class Timing extends Type implements ICompositeType {
 
     public enum UnitsOfTime {
         /**
-         * second.
+         * null
          */
         S, 
         /**
-         * minute.
+         * null
          */
         MIN, 
         /**
-         * hour.
+         * null
          */
         H, 
         /**
-         * day.
+         * null
          */
         D, 
         /**
-         * week.
+         * null
          */
         WK, 
         /**
-         * month.
+         * null
          */
         MO, 
         /**
-         * year.
+         * null
          */
         A, 
         /**
@@ -124,25 +124,25 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case S: return "second.";
-            case MIN: return "minute.";
-            case H: return "hour.";
-            case D: return "day.";
-            case WK: return "week.";
-            case MO: return "month.";
-            case A: return "year.";
+            case S: return "";
+            case MIN: return "";
+            case H: return "";
+            case D: return "";
+            case WK: return "";
+            case MO: return "";
+            case A: return "";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case S: return "S";
-            case MIN: return "Min";
-            case H: return "H";
-            case D: return "D";
-            case WK: return "Wk";
-            case MO: return "Mo";
-            case A: return "A";
+            case S: return "s";
+            case MIN: return "min";
+            case H: return "h";
+            case D: return "d";
+            case WK: return "wk";
+            case MO: return "mo";
+            case A: return "a";
             default: return "?";
           }
         }
@@ -190,59 +190,59 @@ public class Timing extends Type implements ICompositeType {
 
     public enum EventTiming {
         /**
-         * event occurs [duration] before the hour of sleep (or trying to).
+         * null
          */
         HS, 
         /**
-         * event occurs [duration] after waking.
+         * null
          */
         WAKE, 
         /**
-         * event occurs at a meal (from the Latin cibus).
+         * null
          */
         C, 
         /**
-         * event occurs at breakfast (from the Latin cibus matutinus).
+         * null
          */
         CM, 
         /**
-         * event occurs at lunch (from the Latin cibus diurnus).
+         * null
          */
         CD, 
         /**
-         * event occurs at dinner (from the Latin ante cibus vespertinus).
+         * null
          */
         CV, 
         /**
-         * event occurs [duration] before a meal (from the Latin ante cibus).
+         * null
          */
         AC, 
         /**
-         * event occurs [duration] before breakfast (from the Latin ante cibus matutinus).
+         * null
          */
         ACM, 
         /**
-         * event occurs [duration] before lunch (from the Latin ante cibus diurnus).
+         * null
          */
         ACD, 
         /**
-         * event occurs [duration] before dinner (from the Latin ante cibus vespertinus).
+         * null
          */
         ACV, 
         /**
-         * event occurs [duration] after a meal (from the Latin post cibus).
+         * null
          */
         PC, 
         /**
-         * event occurs [duration] after breakfast (from the Latin post cibus matutinus).
+         * null
          */
         PCM, 
         /**
-         * event occurs [duration] after lunch (from the Latin post cibus diurnus).
+         * null
          */
         PCD, 
         /**
-         * event occurs [duration] after dinner (from the Latin post cibus vespertinus).
+         * null
          */
         PCV, 
         /**
@@ -322,39 +322,39 @@ public class Timing extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case HS: return "event occurs [duration] before the hour of sleep (or trying to).";
-            case WAKE: return "event occurs [duration] after waking.";
-            case C: return "event occurs at a meal (from the Latin cibus).";
-            case CM: return "event occurs at breakfast (from the Latin cibus matutinus).";
-            case CD: return "event occurs at lunch (from the Latin cibus diurnus).";
-            case CV: return "event occurs at dinner (from the Latin ante cibus vespertinus).";
-            case AC: return "event occurs [duration] before a meal (from the Latin ante cibus).";
-            case ACM: return "event occurs [duration] before breakfast (from the Latin ante cibus matutinus).";
-            case ACD: return "event occurs [duration] before lunch (from the Latin ante cibus diurnus).";
-            case ACV: return "event occurs [duration] before dinner (from the Latin ante cibus vespertinus).";
-            case PC: return "event occurs [duration] after a meal (from the Latin post cibus).";
-            case PCM: return "event occurs [duration] after breakfast (from the Latin post cibus matutinus).";
-            case PCD: return "event occurs [duration] after lunch (from the Latin post cibus diurnus).";
-            case PCV: return "event occurs [duration] after dinner (from the Latin post cibus vespertinus).";
+            case HS: return "";
+            case WAKE: return "";
+            case C: return "";
+            case CM: return "";
+            case CD: return "";
+            case CV: return "";
+            case AC: return "";
+            case ACM: return "";
+            case ACD: return "";
+            case ACV: return "";
+            case PC: return "";
+            case PCM: return "";
+            case PCD: return "";
+            case PCV: return "";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case HS: return "H S";
-            case WAKE: return "W A K E";
+            case HS: return "HS";
+            case WAKE: return "WAKE";
             case C: return "C";
-            case CM: return "C M";
-            case CD: return "C D";
-            case CV: return "C V";
-            case AC: return "A C";
-            case ACM: return "A C M";
-            case ACD: return "A C D";
-            case ACV: return "A C V";
-            case PC: return "P C";
-            case PCM: return "P C M";
-            case PCD: return "P C D";
-            case PCV: return "P C V";
+            case CM: return "CM";
+            case CD: return "CD";
+            case CV: return "CV";
+            case AC: return "AC";
+            case ACM: return "ACM";
+            case ACD: return "ACD";
+            case ACV: return "ACV";
+            case PC: return "PC";
+            case PCM: return "PCM";
+            case PCD: return "PCD";
+            case PCV: return "PCV";
             default: return "?";
           }
         }

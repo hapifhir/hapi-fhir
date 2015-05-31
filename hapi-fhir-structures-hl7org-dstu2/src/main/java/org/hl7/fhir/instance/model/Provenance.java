@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,7 +48,7 @@ public class Provenance extends DomainResource {
 
     public enum ProvenanceEntityRole {
         /**
-         * A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity.
+         * A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity
          */
         DERIVATION, 
         /**
@@ -56,7 +56,7 @@ public class Provenance extends DomainResource {
          */
         REVISION, 
         /**
-         * The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.
+         * The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author
          */
         QUOTATION, 
         /**
@@ -91,18 +91,18 @@ public class Provenance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DERIVATION: return "";
-            case REVISION: return "";
-            case QUOTATION: return "";
-            case SOURCE: return "";
+            case DERIVATION: return "http://hl7.org.fhir/provenance-entity-role";
+            case REVISION: return "http://hl7.org.fhir/provenance-entity-role";
+            case QUOTATION: return "http://hl7.org.fhir/provenance-entity-role";
+            case SOURCE: return "http://hl7.org.fhir/provenance-entity-role";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DERIVATION: return "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity.";
+            case DERIVATION: return "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a preexisting entity";
             case REVISION: return "A derivation for which the resulting entity is a revised version of some original.";
-            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author.";
+            case QUOTATION: return "The repeat of (some or all of) an entity, such as text or image, by someone who may or may not be its original author";
             case SOURCE: return "A primary source for a topic refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic's study, without benefit from hindsight.";
             default: return "?";
           }

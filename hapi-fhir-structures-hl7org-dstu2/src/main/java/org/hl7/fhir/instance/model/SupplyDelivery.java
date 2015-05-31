@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,24 +46,24 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="SupplyDelivery", profile="http://hl7.org/fhir/Profile/SupplyDelivery")
 public class SupplyDelivery extends DomainResource {
 
-    public enum ValuesetSupplydeliveryStatus {
+    public enum SupplyDeliveryStatus {
         /**
-         * Supply has been requested, but not delivered.
+         * Supply has been requested, but not delivered
          */
         INPROGRESS, 
         /**
-         * Supply has been delivered. ( "completed").
+         * Supply has been delivered. ( "completed")
          */
         COMPLETED, 
         /**
-         * Dispensing was not completed.
+         * Dispensing was not completed
          */
         ABANDONED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ValuesetSupplydeliveryStatus fromCode(String codeString) throws Exception {
+        public static SupplyDeliveryStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -72,7 +72,7 @@ public class SupplyDelivery extends DomainResource {
           return COMPLETED;
         if ("abandoned".equals(codeString))
           return ABANDONED;
-        throw new Exception("Unknown ValuesetSupplydeliveryStatus code '"+codeString+"'");
+        throw new Exception("Unknown SupplyDeliveryStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -84,17 +84,17 @@ public class SupplyDelivery extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case COMPLETED: return "";
-            case ABANDONED: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/valueset-supplydelivery-status";
+            case COMPLETED: return "http://hl7.org.fhir/valueset-supplydelivery-status";
+            case ABANDONED: return "http://hl7.org.fhir/valueset-supplydelivery-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "Supply has been requested, but not delivered.";
-            case COMPLETED: return "Supply has been delivered. ( 'completed').";
-            case ABANDONED: return "Dispensing was not completed.";
+            case INPROGRESS: return "Supply has been requested, but not delivered";
+            case COMPLETED: return "Supply has been delivered. ( 'completed')";
+            case ABANDONED: return "Dispensing was not completed";
             default: return "?";
           }
         }
@@ -108,25 +108,25 @@ public class SupplyDelivery extends DomainResource {
         }
     }
 
-  public static class ValuesetSupplydeliveryStatusEnumFactory implements EnumFactory<ValuesetSupplydeliveryStatus> {
-    public ValuesetSupplydeliveryStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class SupplyDeliveryStatusEnumFactory implements EnumFactory<SupplyDeliveryStatus> {
+    public SupplyDeliveryStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
-          return ValuesetSupplydeliveryStatus.INPROGRESS;
+          return SupplyDeliveryStatus.INPROGRESS;
         if ("completed".equals(codeString))
-          return ValuesetSupplydeliveryStatus.COMPLETED;
+          return SupplyDeliveryStatus.COMPLETED;
         if ("abandoned".equals(codeString))
-          return ValuesetSupplydeliveryStatus.ABANDONED;
-        throw new IllegalArgumentException("Unknown ValuesetSupplydeliveryStatus code '"+codeString+"'");
+          return SupplyDeliveryStatus.ABANDONED;
+        throw new IllegalArgumentException("Unknown SupplyDeliveryStatus code '"+codeString+"'");
         }
-    public String toCode(ValuesetSupplydeliveryStatus code) {
-      if (code == ValuesetSupplydeliveryStatus.INPROGRESS)
+    public String toCode(SupplyDeliveryStatus code) {
+      if (code == SupplyDeliveryStatus.INPROGRESS)
         return "in-progress";
-      if (code == ValuesetSupplydeliveryStatus.COMPLETED)
+      if (code == SupplyDeliveryStatus.COMPLETED)
         return "completed";
-      if (code == ValuesetSupplydeliveryStatus.ABANDONED)
+      if (code == SupplyDeliveryStatus.ABANDONED)
         return "abandoned";
       return "?";
       }
@@ -144,7 +144,7 @@ public class SupplyDelivery extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1)
     @Description(shortDefinition="in-progress | completed | abandoned", formalDefinition="A code specifying the state of the dispense event." )
-    protected Enumeration<ValuesetSupplydeliveryStatus> status;
+    protected Enumeration<SupplyDeliveryStatus> status;
 
     /**
      * A link to a resource representing the person whom the delivered item is for.
@@ -234,7 +234,7 @@ public class SupplyDelivery extends DomainResource {
     protected List<Practitioner> receiverTarget;
 
 
-    private static final long serialVersionUID = 1949206420L;
+    private static final long serialVersionUID = 1938067331L;
 
   /*
    * Constructor
@@ -270,12 +270,12 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @return {@link #status} (A code specifying the state of the dispense event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<ValuesetSupplydeliveryStatus> getStatusElement() { 
+    public Enumeration<SupplyDeliveryStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create SupplyDelivery.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ValuesetSupplydeliveryStatus>(new ValuesetSupplydeliveryStatusEnumFactory()); // bb
+          this.status = new Enumeration<SupplyDeliveryStatus>(new SupplyDeliveryStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -290,7 +290,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #status} (A code specifying the state of the dispense event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public SupplyDelivery setStatusElement(Enumeration<ValuesetSupplydeliveryStatus> value) { 
+    public SupplyDelivery setStatusElement(Enumeration<SupplyDeliveryStatus> value) { 
       this.status = value;
       return this;
     }
@@ -298,19 +298,19 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @return A code specifying the state of the dispense event.
      */
-    public ValuesetSupplydeliveryStatus getStatus() { 
+    public SupplyDeliveryStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value A code specifying the state of the dispense event.
      */
-    public SupplyDelivery setStatus(ValuesetSupplydeliveryStatus value) { 
+    public SupplyDelivery setStatus(SupplyDeliveryStatus value) { 
       if (value == null)
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<ValuesetSupplydeliveryStatus>(new ValuesetSupplydeliveryStatusEnumFactory());
+          this.status = new Enumeration<SupplyDeliveryStatus>(new SupplyDeliveryStatusEnumFactory());
         this.status.setValue(value);
       }
       return this;

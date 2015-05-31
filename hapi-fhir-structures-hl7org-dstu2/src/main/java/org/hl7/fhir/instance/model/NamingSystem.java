@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,24 +47,24 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="NamingSystem", profile="http://hl7.org/fhir/Profile/NamingSystem")
 public class NamingSystem extends DomainResource {
 
-    public enum NamingsystemType {
+    public enum NamingSystemType {
         /**
          * The namingsystem is used to define concepts and symbols to represent those concepts.  E.g. UCUM, LOINC, NDC code, local lab codes, etc.
          */
         CODESYSTEM, 
         /**
-         * The namingsystem is used to manage identifiers (e.g. license numbers, order numbers, etc.).
+         * The namingsystem is used to manage identifiers (e.g. license numbers, order numbers, etc.)
          */
         IDENTIFIER, 
         /**
-         * The namingsystem is used as the root for other identifiers and namingsystems.
+         * The namingsystem is used as the root for other identifiers and namingsystems
          */
         ROOT, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static NamingsystemType fromCode(String codeString) throws Exception {
+        public static NamingSystemType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("codesystem".equals(codeString))
@@ -73,7 +73,7 @@ public class NamingSystem extends DomainResource {
           return IDENTIFIER;
         if ("root".equals(codeString))
           return ROOT;
-        throw new Exception("Unknown NamingsystemType code '"+codeString+"'");
+        throw new Exception("Unknown NamingSystemType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -85,17 +85,17 @@ public class NamingSystem extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CODESYSTEM: return "";
-            case IDENTIFIER: return "";
-            case ROOT: return "";
+            case CODESYSTEM: return "http://hl7.org.fhir/namingsystem-type";
+            case IDENTIFIER: return "http://hl7.org.fhir/namingsystem-type";
+            case ROOT: return "http://hl7.org.fhir/namingsystem-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case CODESYSTEM: return "The namingsystem is used to define concepts and symbols to represent those concepts.  E.g. UCUM, LOINC, NDC code, local lab codes, etc.";
-            case IDENTIFIER: return "The namingsystem is used to manage identifiers (e.g. license numbers, order numbers, etc.).";
-            case ROOT: return "The namingsystem is used as the root for other identifiers and namingsystems.";
+            case IDENTIFIER: return "The namingsystem is used to manage identifiers (e.g. license numbers, order numbers, etc.)";
+            case ROOT: return "The namingsystem is used as the root for other identifiers and namingsystems";
             default: return "?";
           }
         }
@@ -109,52 +109,52 @@ public class NamingSystem extends DomainResource {
         }
     }
 
-  public static class NamingsystemTypeEnumFactory implements EnumFactory<NamingsystemType> {
-    public NamingsystemType fromCode(String codeString) throws IllegalArgumentException {
+  public static class NamingSystemTypeEnumFactory implements EnumFactory<NamingSystemType> {
+    public NamingSystemType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("codesystem".equals(codeString))
-          return NamingsystemType.CODESYSTEM;
+          return NamingSystemType.CODESYSTEM;
         if ("identifier".equals(codeString))
-          return NamingsystemType.IDENTIFIER;
+          return NamingSystemType.IDENTIFIER;
         if ("root".equals(codeString))
-          return NamingsystemType.ROOT;
-        throw new IllegalArgumentException("Unknown NamingsystemType code '"+codeString+"'");
+          return NamingSystemType.ROOT;
+        throw new IllegalArgumentException("Unknown NamingSystemType code '"+codeString+"'");
         }
-    public String toCode(NamingsystemType code) {
-      if (code == NamingsystemType.CODESYSTEM)
+    public String toCode(NamingSystemType code) {
+      if (code == NamingSystemType.CODESYSTEM)
         return "codesystem";
-      if (code == NamingsystemType.IDENTIFIER)
+      if (code == NamingSystemType.IDENTIFIER)
         return "identifier";
-      if (code == NamingsystemType.ROOT)
+      if (code == NamingSystemType.ROOT)
         return "root";
       return "?";
       }
     }
 
-    public enum NamingsystemIdentifierType {
+    public enum NamingSystemIdentifierType {
         /**
-         * An ISO object identifier.  E.g. 1.2.3.4.5.
+         * An ISO object identifier.  E.g. 1.2.3.4.5
          */
         OID, 
         /**
-         * A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11.
+         * A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11
          */
         UUID, 
         /**
-         * A uniform resource identifier (ideally a URL - uniform resource locator).  E.g. http://unitsofmeasure.org.
+         * A uniform resource identifier (ideally a URL - uniform resource locator).  E.g. http://unitsofmeasure.org
          */
         URI, 
         /**
-         * Some other type of unique identifier.  E.g HL7-assigned reserved string such as LN for LOINC.
+         * Some other type of unique identifier.  E.g HL7-assigned reserved string such as LN for LOINC
          */
         OTHER, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static NamingsystemIdentifierType fromCode(String codeString) throws Exception {
+        public static NamingSystemIdentifierType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("oid".equals(codeString))
@@ -165,7 +165,7 @@ public class NamingSystem extends DomainResource {
           return URI;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown NamingsystemIdentifierType code '"+codeString+"'");
+        throw new Exception("Unknown NamingSystemIdentifierType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -178,19 +178,19 @@ public class NamingSystem extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case OID: return "";
-            case UUID: return "";
-            case URI: return "";
-            case OTHER: return "";
+            case OID: return "http://hl7.org.fhir/namingsystem-identifier-type";
+            case UUID: return "http://hl7.org.fhir/namingsystem-identifier-type";
+            case URI: return "http://hl7.org.fhir/namingsystem-identifier-type";
+            case OTHER: return "http://hl7.org.fhir/namingsystem-identifier-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case OID: return "An ISO object identifier.  E.g. 1.2.3.4.5.";
-            case UUID: return "A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11.";
-            case URI: return "A uniform resource identifier (ideally a URL - uniform resource locator).  E.g. http://unitsofmeasure.org.";
-            case OTHER: return "Some other type of unique identifier.  E.g HL7-assigned reserved string such as LN for LOINC.";
+            case OID: return "An ISO object identifier.  E.g. 1.2.3.4.5";
+            case UUID: return "A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11";
+            case URI: return "A uniform resource identifier (ideally a URL - uniform resource locator).  E.g. http://unitsofmeasure.org";
+            case OTHER: return "Some other type of unique identifier.  E.g HL7-assigned reserved string such as LN for LOINC";
             default: return "?";
           }
         }
@@ -205,29 +205,29 @@ public class NamingSystem extends DomainResource {
         }
     }
 
-  public static class NamingsystemIdentifierTypeEnumFactory implements EnumFactory<NamingsystemIdentifierType> {
-    public NamingsystemIdentifierType fromCode(String codeString) throws IllegalArgumentException {
+  public static class NamingSystemIdentifierTypeEnumFactory implements EnumFactory<NamingSystemIdentifierType> {
+    public NamingSystemIdentifierType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("oid".equals(codeString))
-          return NamingsystemIdentifierType.OID;
+          return NamingSystemIdentifierType.OID;
         if ("uuid".equals(codeString))
-          return NamingsystemIdentifierType.UUID;
+          return NamingSystemIdentifierType.UUID;
         if ("uri".equals(codeString))
-          return NamingsystemIdentifierType.URI;
+          return NamingSystemIdentifierType.URI;
         if ("other".equals(codeString))
-          return NamingsystemIdentifierType.OTHER;
-        throw new IllegalArgumentException("Unknown NamingsystemIdentifierType code '"+codeString+"'");
+          return NamingSystemIdentifierType.OTHER;
+        throw new IllegalArgumentException("Unknown NamingSystemIdentifierType code '"+codeString+"'");
         }
-    public String toCode(NamingsystemIdentifierType code) {
-      if (code == NamingsystemIdentifierType.OID)
+    public String toCode(NamingSystemIdentifierType code) {
+      if (code == NamingSystemIdentifierType.OID)
         return "oid";
-      if (code == NamingsystemIdentifierType.UUID)
+      if (code == NamingSystemIdentifierType.UUID)
         return "uuid";
-      if (code == NamingsystemIdentifierType.URI)
+      if (code == NamingSystemIdentifierType.URI)
         return "uri";
-      if (code == NamingsystemIdentifierType.OTHER)
+      if (code == NamingSystemIdentifierType.OTHER)
         return "other";
       return "?";
       }
@@ -240,7 +240,7 @@ public class NamingSystem extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="oid | uuid | uri | other", formalDefinition="Identifies the unique identifier scheme used for this particular identifier." )
-        protected Enumeration<NamingsystemIdentifierType> type;
+        protected Enumeration<NamingSystemIdentifierType> type;
 
         /**
          * The string that should be sent over the wire to identify the code system or identifier system.
@@ -263,7 +263,7 @@ public class NamingSystem extends DomainResource {
         @Description(shortDefinition="When is identifier valid?", formalDefinition="Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic." )
         protected Period period;
 
-        private static final long serialVersionUID = -250649344L;
+        private static final long serialVersionUID = -193711840L;
 
     /*
      * Constructor
@@ -275,7 +275,7 @@ public class NamingSystem extends DomainResource {
     /*
      * Constructor
      */
-      public NamingSystemUniqueIdComponent(Enumeration<NamingsystemIdentifierType> type, StringType value) {
+      public NamingSystemUniqueIdComponent(Enumeration<NamingSystemIdentifierType> type, StringType value) {
         super();
         this.type = type;
         this.value = value;
@@ -284,12 +284,12 @@ public class NamingSystem extends DomainResource {
         /**
          * @return {@link #type} (Identifies the unique identifier scheme used for this particular identifier.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public Enumeration<NamingsystemIdentifierType> getTypeElement() { 
+        public Enumeration<NamingSystemIdentifierType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NamingSystemUniqueIdComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<NamingsystemIdentifierType>(new NamingsystemIdentifierTypeEnumFactory()); // bb
+              this.type = new Enumeration<NamingSystemIdentifierType>(new NamingSystemIdentifierTypeEnumFactory()); // bb
           return this.type;
         }
 
@@ -304,7 +304,7 @@ public class NamingSystem extends DomainResource {
         /**
          * @param value {@link #type} (Identifies the unique identifier scheme used for this particular identifier.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public NamingSystemUniqueIdComponent setTypeElement(Enumeration<NamingsystemIdentifierType> value) { 
+        public NamingSystemUniqueIdComponent setTypeElement(Enumeration<NamingSystemIdentifierType> value) { 
           this.type = value;
           return this;
         }
@@ -312,16 +312,16 @@ public class NamingSystem extends DomainResource {
         /**
          * @return Identifies the unique identifier scheme used for this particular identifier.
          */
-        public NamingsystemIdentifierType getType() { 
+        public NamingSystemIdentifierType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
          * @param value Identifies the unique identifier scheme used for this particular identifier.
          */
-        public NamingSystemUniqueIdComponent setType(NamingsystemIdentifierType value) { 
+        public NamingSystemUniqueIdComponent setType(NamingSystemIdentifierType value) { 
             if (this.type == null)
-              this.type = new Enumeration<NamingsystemIdentifierType>(new NamingsystemIdentifierTypeEnumFactory());
+              this.type = new Enumeration<NamingSystemIdentifierType>(new NamingSystemIdentifierTypeEnumFactory());
             this.type.setValue(value);
           return this;
         }
@@ -651,7 +651,7 @@ public class NamingSystem extends DomainResource {
      */
     @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the namingsystem - what kinds of things does it make unique?" )
-    protected Enumeration<NamingsystemType> type;
+    protected Enumeration<NamingSystemType> type;
 
     /**
      * The descriptive name of this particular identifier type or code system.
@@ -742,7 +742,7 @@ public class NamingSystem extends DomainResource {
      */
     protected NamingSystem replacedByTarget;
 
-    private static final long serialVersionUID = -241224889L;
+    private static final long serialVersionUID = -610416793L;
 
   /*
    * Constructor
@@ -754,7 +754,7 @@ public class NamingSystem extends DomainResource {
   /*
    * Constructor
    */
-    public NamingSystem(Enumeration<NamingsystemType> type, StringType name, DateTimeType date, Enumeration<ConformanceResourceStatus> status) {
+    public NamingSystem(Enumeration<NamingSystemType> type, StringType name, DateTimeType date, Enumeration<ConformanceResourceStatus> status) {
       super();
       this.type = type;
       this.name = name;
@@ -765,12 +765,12 @@ public class NamingSystem extends DomainResource {
     /**
      * @return {@link #type} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public Enumeration<NamingsystemType> getTypeElement() { 
+    public Enumeration<NamingSystemType> getTypeElement() { 
       if (this.type == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create NamingSystem.type");
         else if (Configuration.doAutoCreate())
-          this.type = new Enumeration<NamingsystemType>(new NamingsystemTypeEnumFactory()); // bb
+          this.type = new Enumeration<NamingSystemType>(new NamingSystemTypeEnumFactory()); // bb
       return this.type;
     }
 
@@ -785,7 +785,7 @@ public class NamingSystem extends DomainResource {
     /**
      * @param value {@link #type} (Indicates the purpose for the namingsystem - what kinds of things does it make unique?). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public NamingSystem setTypeElement(Enumeration<NamingsystemType> value) { 
+    public NamingSystem setTypeElement(Enumeration<NamingSystemType> value) { 
       this.type = value;
       return this;
     }
@@ -793,16 +793,16 @@ public class NamingSystem extends DomainResource {
     /**
      * @return Indicates the purpose for the namingsystem - what kinds of things does it make unique?
      */
-    public NamingsystemType getType() { 
+    public NamingSystemType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
      * @param value Indicates the purpose for the namingsystem - what kinds of things does it make unique?
      */
-    public NamingSystem setType(NamingsystemType value) { 
+    public NamingSystem setType(NamingSystemType value) { 
         if (this.type == null)
-          this.type = new Enumeration<NamingsystemType>(new NamingsystemTypeEnumFactory());
+          this.type = new Enumeration<NamingSystemType>(new NamingSystemTypeEnumFactory());
         this.type.setValue(value);
       return this;
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class MedicationStatement extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case COMPLETED: return "";
-            case ENTEREDINERROR: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/medication-statement-status";
+            case COMPLETED: return "http://hl7.org.fhir/medication-statement-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/medication-statement-status";
             default: return "?";
           }
         }

@@ -1,0 +1,2428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StructureDefinition xmlns="http://hl7.org/fhir">
+  <id value="Patient"/>
+  <meta>
+    <lastUpdated value="2015-05-29T15:34:23.579+00:00"/>
+  </meta>
+  <text>
+    <status value="generated"/>
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <table cellspacing="0" cellpadding="0" border="0" style="border: 0px; font-size: 11px; font-family: verdana; vertical-align: top;">
+        <tr style="border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;">
+          <th style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a title="The logical name of the element" href="http://hl7-fhir.github.io/formats.html#table">Name</a>
+          </th>
+          <th style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a title="Information about the use of the element" href="http://hl7-fhir.github.io/formats.html#table">Flags</a>
+          </th>
+          <th style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a title="Minimum and Maximum # of times the the element can appear in the instance" href="http://hl7-fhir.github.io/formats.html#table">Card.</a>
+          </th>
+          <th style="width: 100px" class="heirarchy">
+            <a title="Reference to the type of the element" href="http://hl7-fhir.github.io/formats.html#table">Type</a>
+          </th>
+          <th style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a title="Additional information about the element" href="http://hl7-fhir.github.io/formats.html#table">Description &amp; Constraints</a>
+            <span style="float: right">
+              <a title="Legend for this format" href="http://hl7-fhir.github.io/formats.html#table">
+                <img alt="doco" src="patient.profile_files/help16.png"/>
+              </a>
+            </span>
+          </th>
+        </tr>
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Resource" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJBSURBVDjLhdKxa5NBGMfx713yvkmbJnaoFiSF4mJTh06Kg4OgiyCCRXCof4YIdXdxFhQVHPo3OFSoUx0FySQttaVKYq2NbdO8ed/L3fM4JG3tYPvAcfBw9+HHPWdUlf/V0tLSqKo+EpEHInJFRIohhDUR+RBCeDM7O7ua55QSkRfVanVufHyckZERrLV0Op2Zra2tmXq9fg+YsmcAdyYnJykUCke9OI6ZmJgghHAZ4KwE3ntPs9mkVCohIjQaDWq1GiEEAM5KoHEcY62lVCrRarUoFotUKpUjIL/y/uqXYmV62ph/LSVrr30P4bEFcM4B0Ov1jk547/uAUTs1ceNdZIwB7V/GGHz6+9LXxY96eDiEgHMOY8xJAK8p4grZz5cElwNbwZgyxYu3EFM01lriOCZJEqIoIooiALIsGwA9Y1UcwcWoKNLdpLu9zvbnBWqNBhuvn5EDUmB0EH/1E2TZw5U+YLQovkun+Ytsaw1xCbnCOap334LC7s4Oe/ttvA+ICLmhMXRxDufczUECS37oAuevPwUEVFFp4/eXkXSdYc2IopSepnjtUh5/wg9gfn6+OQBUNaRIUkfDHhraSLoBKqikIF3yHJDLHaAkFOLciVHnyVAVj/S2Ub/XRyQD9aAZKgkaOohvo6ENgykcA07VEFDfQv1uf4W9Y8y30bCPhg4qKZJtMnjTPqBO/vhkZ7h3EJeRslWNQMqgY2jIAIfa/m5sIKSpqpPsGEiz599e3b+GchtD+bSvjQJm2SG6cNj6C+QmaxAek5tyAAAAAElFTkSuQmCC"/> 
+            <span title="Patient : Demographics and other administrative information about an individual or animal receiving care or other health-related services.">Patient</span>
+            <a name="Patient"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/domainresource.html">DomainResource</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Information about an individual or animal receiving health care services</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.identifier : An identifier for this patient.">identifier</span>
+            <a name="Patient.identifier"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#Identifier">Identifier</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">An identifier for this patient</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.name : A name associated with the individual.">name</span>
+            <a name="Patient.name"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#HumanName">HumanName</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">A name associated with the patient</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.telecom : A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.">telecom</span>
+            <a name="Patient.telecom"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#ContactPoint">ContactPoint</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">A contact detail for the individual</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.gender : Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.">gender</span>
+            <a name="Patient.gender"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">male | female | other | unknown
+            <br/>
+            <a title="The gender of a person used for administrative purposes" href="http://hl7-fhir.github.io/administrative-gender.html">AdministrativeGender</a> (
+            <a title="To be conformant, instances of this element SHALL include a code from the specified value set" href="http://hl7-fhir.github.io/terminologies.html#required">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.birthDate : The date of birth for the individual.">birthDate</span>
+            <a name="Patient.birthDate"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#date">date</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">The date of birth for the individual</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Choice of Types" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.deceased[x] : Indicates if the individual is deceased or not.">deceased[x]</span>
+            <a name="Patient.deceased_x_"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is a modifier element">?! </span>
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Indicates if the individual is deceased or not</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Value of &quot;true&quot; or &quot;false&quot;">deceasedBoolean</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#boolean">boolean</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  Dates SHALL be valid dates.">deceasedDateTime</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#dateTime">dateTime</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.address : Addresses for the individual.">address</span>
+            <a name="Patient.address"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#Address">Address</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Addresses for the individual</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.maritalStatus : This field contains a patient's most recent marital (civil) status.">maritalStatus</span>
+            <a name="Patient.maritalStatus"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Marital (civil) status of a patient
+            <br/>
+            <a title="The domestic partnership status of a person" href="http://hl7-fhir.github.io/valueset-marital-status.html">Marital Status Codes</a> (
+            <a title="To be conformant, instances of this element SHALL include a code from the specified value set" href="http://hl7-fhir.github.io/terminologies.html#required">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Choice of Types" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.multipleBirth[x] : Indicates whether the patient is part of a multiple or indicates the actual birth order.">multipleBirth[x]</span>
+            <a name="Patient.multipleBirth_x_"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Whether patient is part of a multiple birth</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Value of &quot;true&quot; or &quot;false&quot;">multipleBirthBoolean</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#boolean">boolean</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="A whole number">multipleBirthInteger</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#integer">integer</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.photo : Image of the patient.">photo</span>
+            <a name="Patient.photo"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#Attachment">Attachment</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Image of the patient</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Element" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact : A contact party (e.g. guardian, partner, friend) for the patient.">contact</span>
+            <a name="Patient.contact"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element has or is affected by some invariants">I</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/element.html">Element</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">A contact party (e.g. guardian, partner, friend) for the patient
+            <br/>
+            <span title="pat-1" style="font-style: italic">SHALL at least contain a contact's details or a reference to an organization</span>
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.relationship : The nature of the relationship between the patient and the contact person.">relationship</span>
+            <a name="Patient.contact.relationship"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">The kind of relationship
+            <br/>
+            <a title="The nature of the relationship between a patient and a contact person for that patient" href="http://hl7-fhir.github.io/valueset-patient-contact-relationship.html">PatientContactRelationship</a> (
+            <a title="To be conformant, instances of this element SHALL include a code from the specified value set" href="http://hl7-fhir.github.io/terminologies.html#required">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.name : A name associated with the contact person.">name</span>
+            <a name="Patient.contact.name"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#HumanName">HumanName</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">A name associated with the contact person</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.telecom : A contact detail for the person, e.g. a telephone number or an email address.">telecom</span>
+            <a name="Patient.contact.telecom"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#ContactPoint">ContactPoint</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">A contact detail for the person</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.address : Address for the contact person.">address</span>
+            <a name="Patient.contact.address"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#Address">Address</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Address for the contact person</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.gender : Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes.">gender</span>
+            <a name="Patient.contact.gender"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">male | female | other | unknown
+            <br/>
+            <a title="The gender of a person used for administrative purposes" href="http://hl7-fhir.github.io/administrative-gender.html">AdministrativeGender</a> (
+            <a title="To be conformant, instances of this element SHALL include a code from the specified value set" href="http://hl7-fhir.github.io/terminologies.html#required">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Reference to another Resource" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.organization : Organization on behalf of which the contact is acting or for which the contact is working.">organization</span>
+            <a name="Patient.contact.organization"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element has or is affected by some invariants">I</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/organization.html">Organization</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Organization that is associated with the contact</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.contact.period : The period during which this contact person or organization is valid to be contacted relating to this patient.">period</span>
+            <a name="Patient.contact.period"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#Period">Period</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">The period during which this contact person or organization is valid to be contacted relating to this patient</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Element" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.animal : This element has a value if the patient is an animal.">animal</span>
+            <a name="Patient.animal"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is a modifier element">?! </span>
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/element.html">Element</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">If this patient is an animal (non-human)</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.animal.species : Identifies the high level taxonomic categorization of the kind of animal.">species</span>
+            <a name="Patient.animal.species"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">E.g. Dog, Cow
+            <br/>
+            <a title="The species of an animal" href="http://hl7-fhir.github.io/valueset-animal-species.html">AnimalSpecies</a> (
+            <a title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included" href="http://hl7-fhir.github.io/terminologies.html#example">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.animal.breed : Identifies the detailed categorization of the kind of animal.">breed</span>
+            <a name="Patient.animal.breed"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">E.g. Poodle, Angus
+            <br/>
+            <a title="The breed of an animal" href="http://hl7-fhir.github.io/valueset-animal-breeds.html">AnimalBreeds</a> (
+            <a title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included" href="http://hl7-fhir.github.io/terminologies.html#example">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.animal.genderStatus : Indicates the current state of the animal's reproductive organs.">genderStatus</span>
+            <a name="Patient.animal.genderStatus"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">E.g. Neutered, Intact
+            <br/>
+            <a title="The state of the animal's reproductive organs" href="http://hl7-fhir.github.io/valueset-animal-genderstatus.html">GenderStatus</a> (
+            <a title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included" href="http://hl7-fhir.github.io/terminologies.html#example">Example</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Element" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.communication : Languages which may be used to communicate with the patient about his or her health.">communication</span>
+            <a name="Patient.communication"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/element.html">Element</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">A list of Languages which may be used to communicate with the patient about his or her health</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.communication.language : The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case. E.g. &quot;en&quot; for English, or &quot;en-US&quot; for American English versus &quot;en-EN&quot; for England English.">language</span>
+            <a name="Patient.communication.language"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">The language which can be used to communicate with the patient about his or her health
+            <br/>
+            <a title="A human language" href="http://tools.ietf.org/html/bcp47">Language</a> (
+            <a title="To be conformant, instances of this element SHALL include a code from the specified value set" href="http://hl7-fhir.github.io/terminologies.html#required">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.communication.preferred : Indicates whether or not the Patient prefers this language (over other languages he masters up a certain level).">preferred</span>
+            <a name="Patient.communication.preferred"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#boolean">boolean</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Language preference indicator</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Reference to another Resource" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.careProvider : Patient's nominated care provider.">careProvider</span>
+            <a name="Patient.careProvider"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/organization.html">Organization</a> | 
+            <a href="http://hl7-fhir.github.io/practitioner.html">Practitioner</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Patient's nominated care provider</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Reference to another Resource" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.managingOrganization : Organization that is the custodian of the patient record.">managingOrganization</span>
+            <a name="Patient.managingOrganization"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/organization.html">Organization</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Organization that is the custodian of the patient record</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Element" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.link : Link to another patient resource that concerns the same actual patient.">link</span>
+            <a name="Patient.link"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is a modifier element">?!</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/element.html">Element</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Link to another patient resource that concerns the same actual person</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAE0lEQVR42mP4/x0IaQwY/tMBAACSBMcpuec9bgAAAABJRU5ErkJggg==)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Reference to another Resource" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.link.other : The other patient resource that the link refers to.">other</span>
+            <a name="Patient.link.other"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is a modifier element">?!</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/patient.html">Patient</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">The other patient resource that the link refers to</td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAEklEQVR42mP4//0/zQHDfzoAAJg0xzGxXiQ9AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.link.type : The type of link between this patient resource and another patient resource.">type</span>
+            <a name="Patient.link.type"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is a modifier element">?!</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">replace | refer | seealso - type of link
+            <br/>
+            <a title="The type of link between this patient resource and another patient resource." href="http://hl7-fhir.github.io/link-type.html">LinkType</a> (
+            <a title="To be conformant, instances of this element SHALL include a code from the specified value set" href="http://hl7-fhir.github.io/terminologies.html#required">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACAQAAAACIh4VlAAAAD0lEQVR42mP4TwfAQA9LAJ50xzkA9NE0AAAAAElFTkSuQmCC)" class="heirarchy">
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img alt="." class="heirarchy" src="data: image/png;base64,"/>
+            <img title="Primitive Data Type" style="background-color: white;" alt="." class="heirarchy" src="data: image/png;base64,"/> 
+            <span title="Patient.active : Whether this patient record is in active use.">active</span>
+            <a name="Patient.active"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is a modifier element">?! </span>
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="http://hl7-fhir.github.io/datatypes.html#boolean">boolean</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; padding:0px 4px 0px 4px" class="heirarchy">Whether this patient's record is in active use</td>
+        </tr>
+
+      </table>
+    </div>
+  </text>
+  <url value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+  <name value="Patient"/>
+  <publisher value="HL7 FHIR Project (Patient Administration)"/>
+  <contact>
+    <telecom>
+      <system value="url"/>
+      <value value="http://hl7.org/fhir"/>
+    </telecom>
+  </contact>
+  <contact>
+    <telecom>
+      <system value="url"/>
+      <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
+    </telecom>
+  </contact>
+  <description value="Base StructureDefinition for Patient Resource"/>
+  <status value="draft"/>
+  <date value="2015-05-29T15:34:23+00:00"/>
+  <mapping>
+    <identity value="rim"/>
+    <uri value="http://hl7.org/v3"/>
+    <name value="RIM"/>
+  </mapping>
+  <mapping>
+    <identity value="v2"/>
+    <uri value="http://hl7.org/v2"/>
+    <name value="HL7 v2"/>
+  </mapping>
+  <mapping>
+    <identity value="loinc"/>
+    <uri value="http://loinc.org"/>
+    <name value="LOINC"/>
+  </mapping>
+  <type value="resource"/>
+  <abstract value="true"/>
+  <snapshot>
+    <element>
+      <path value="Patient"/>
+      <short value="Information about an individual or animal receiving health care services"/>
+      <definition value="Demographics and other administrative information about an individual or animal receiving care or other health-related services."/>
+      <requirements value="Tracking patient is the center of the healthcare process."/>
+      <alias value="SubjectOfCare Client Resident"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="DomainResource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Patient[classCode=PAT]"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.id"/>
+      <short value="Logical id of this artefact"/>
+      <definition value="The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes."/>
+      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+    </element>
+    <element>
+      <path value="Patient.meta"/>
+      <short value="Metadata about the resource"/>
+      <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Meta"/>
+      </type>
+    </element>
+    <element>
+      <path value="Patient.implicitRules"/>
+      <short value="A set of rules under which this content was created"/>
+      <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
+      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="uri"/>
+      </type>
+      <isModifier value="true"/>
+    </element>
+    <element>
+      <path value="Patient.language"/>
+      <short value="Language of the resource content"/>
+      <definition value="The base language in which the resource is written."/>
+      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource  Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <name value="Language"/>
+        <strength value="required"/>
+        <description value="A human language"/>
+        <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+      </binding>
+    </element>
+    <element>
+      <path value="Patient.text"/>
+      <short value="Text summary of the resource, for human interpretation"/>
+      <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
+      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
+      <alias value="narrative"/>
+      <alias value="html"/>
+      <alias value="xhtml"/>
+      <alias value="display"/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Narrative"/>
+      </type>
+      <condition value="dom-1"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Act.text?"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contained"/>
+      <short value="Contained, inline Resources"/>
+      <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
+      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
+      <alias value="inline resources"/>
+      <alias value="anonymous resources"/>
+      <alias value="contained resources"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Resource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.identifier"/>
+      <short value="An identifier for this patient"/>
+      <definition value="An identifier for this patient."/>
+      <requirements value="Patients are almost always assigned specific numerical identifiers."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-3"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.name"/>
+      <short value="A name associated with the patient"/>
+      <definition value="A name associated with the individual."/>
+      <comments value="A Patient may have multiple names with different uses or applicable periods. For animals, the name is a &quot;HumanName&quot; in the sense that is assigned and used by humans and has the same patterns."/>
+      <requirements value="Need to be able to track the patient by multiple names. Examples are your official name and a partner name."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="HumanName"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-5, PID-9"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="name"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.telecom"/>
+      <short value="A contact detail for the individual"/>
+      <definition value="A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted."/>
+      <comments value="A Patient may have multiple ways to be contacted with different uses or applicable periods.  May need to have options for contacting the person urgently and also to help with identification. The address may not go directly to the individual, but may reach another party that is able to proxy for the patient (i.e. home phone, or pet owner's phone)."/>
+      <requirements value="People have (primary) ways to contact them in some way such as phone, email."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="ContactPoint"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-13, PID-14, PID-40"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="telecom"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.gender"/>
+      <short value="male | female | other | unknown"/>
+      <definition value="Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes."/>
+      <comments value="The gender may not match the biological sex as determined by genetics, or the individual's preferred identification. Note that for both humans and particularly animals, there are other legitimate possibilities than M and F, though the vast majority of systems and contexts only support M and F.  Systems providing decision support or enforcing business rules should ideally do this on the basis of Observations dealing with the specific gender aspect of interest (anatomical, chromosonal, social, etc.)  However, because these observations are infrequently recorded, defaulting to the administrative gender is common practice.  Where such defaulting occurs, rule enforcement should allow for the variation between administrative and biological, chromosonal and other gender aspects.  For example, an alert about a hysterectomy on a male should be handled as a warning or overrideable error, not a &quot;hard&quot; error."/>
+      <requirements value="Needed for identification of the individual, in combination with (at least) name and birth date. Gender of individual drives many clinical processes."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AdministrativeGender"/>
+        <strength value="required"/>
+        <description value="The gender of a person used for administrative purposes"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/administrative-gender"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-8"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/administrativeGender"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.birthDate"/>
+      <short value="The date of birth for the individual"/>
+      <definition value="The date of birth for the individual."/>
+      <comments value="At least an estimated year should be provided as a guess if the real dob is unknown."/>
+      <requirements value="Age of the individual drives many clinical processes."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="date"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="loinc"/>
+        <map value="21112-8"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-7"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/birthTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.deceased[x]"/>
+      <short value="Indicates if the individual is deceased or not"/>
+      <definition value="Indicates if the individual is deceased or not."/>
+      <comments value="If there's no value in the instance it means there is no statement on whether or not the individual is deceased. Most systems will interpret the absence of a value as a sign of the person being alive."/>
+      <requirements value="The fact that a patient is deceased influences the clinical process. Also, in human communication and relation management it is necessary to know whether the person is alive."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-30  (bool) and PID-29 (datetime)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/deceasedInd, player[classCode=PSN|ANM and determinerCode=INSTANCE]/deceasedTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.address"/>
+      <short value="Addresses for the individual"/>
+      <definition value="Addresses for the individual."/>
+      <comments value="Patient may have multiple addresses with different uses or applicable periods."/>
+      <requirements value="May need to keep track of patient addresses for contacting, billing or reporting requirements and also to help with identification."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Address"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-11"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="addr"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.maritalStatus"/>
+      <short value="Marital (civil) status of a patient"/>
+      <definition value="This field contains a patient's most recent marital (civil) status."/>
+      <requirements value="Most, if not all systems capture it."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <name value="MaritalStatus"/>
+        <strength value="required"/>
+        <description value="The domestic partnership status of a person"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/marital-status"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-16"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN]/maritalStatusCode"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.multipleBirth[x]"/>
+      <short value="Whether patient is part of a multiple birth"/>
+      <definition value="Indicates whether the patient is part of a multiple or indicates the actual birth order."/>
+      <requirements value="For disambiguation of multiple-birth children, especially relevant where the care provider doesn't meet the patient, such as labs."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <type>
+        <code value="integer"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-24 (bool), PID-25 (integer)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/multipleBirthInd,  player[classCode=PSN|ANM and determinerCode=INSTANCE]/multipleBirthOrderNumber"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.photo"/>
+      <short value="Image of the patient"/>
+      <definition value="Image of the patient."/>
+      <requirements value="Many EHR systems have the capability to capture an image of the patient. Fits with newer social media usage too."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="OBX-5 - needs a profile"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/desc"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact"/>
+      <short value="A contact party (e.g. guardian, partner, friend) for the patient"/>
+      <definition value="A contact party (e.g. guardian, partner, friend) for the patient."/>
+      <comments value="Contact covers all kinds of contact parties: family members, business contacts, guardians, caregivers. Not applicable to register pedigree and family ties beyond use of having contact."/>
+      <requirements value="Need to track people you can contact about the patient."/>
+      <min value="0"/>
+      <max value="*"/>
+      <constraint>
+        <key value="pat-1"/>
+        <name value="ContactNeedsDetails"/>
+        <severity value="error"/>
+        <human value="SHALL at least contain a contact's details or a reference to an organization"/>
+        <xpath value="f:name or f:telecom or f:address or f:organization"/>
+      </constraint>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/scopedRole[classCode=CON]"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.relationship"/>
+      <short value="The kind of relationship"/>
+      <definition value="The nature of the relationship between the patient and the contact person."/>
+      <requirements value="Used to determine which contact person is the most relevant to approach, depending on circumstances."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <name value="ContactRelationship"/>
+        <strength value="required"/>
+        <description value="The nature of the relationship between a patient and a contact person for that patient"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/patient-contact-relationship"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-7, NK1-3"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.name"/>
+      <short value="A name associated with the contact person"/>
+      <definition value="A name associated with the contact person."/>
+      <requirements value="Contact persons need to be identified by name, but it is uncommon to need details about multiple other names for that contact person."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="HumanName"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-2"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="name"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.telecom"/>
+      <short value="A contact detail for the person"/>
+      <definition value="A contact detail for the person, e.g. a telephone number or an email address."/>
+      <comments value="Contact may have multiple ways to be contacted with different uses or applicable periods.  May need to have options for contacting the person urgently, and also to help with identification."/>
+      <requirements value="People have (primary) ways to contact them in some way such as phone, email."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="ContactPoint"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-5, NK1-6, NK1-40"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="telecom"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.address"/>
+      <short value="Address for the contact person"/>
+      <definition value="Address for the contact person."/>
+      <requirements value="Need to keep track where the contact person can be contacted per postal mail or visited."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Address"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-4"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="addr"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.gender"/>
+      <short value="male | female | other | unknown"/>
+      <definition value="Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes."/>
+      <requirements value="Needed to address the person correctly."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <name value="AdministrativeGender"/>
+        <strength value="required"/>
+        <description value="The gender of a person used for administrative purposes"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/administrative-gender"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-15"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/administrativeGender"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.organization"/>
+      <short value="Organization that is associated with the contact"/>
+      <definition value="Organization on behalf of which the contact is acting or for which the contact is working."/>
+      <requirements value="For guardians or business related contacts, the organization is relevant."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <condition value="pat-1"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-13, NK1-30, NK1-31, NK1-32, NK1-41"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="scoper"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.period"/>
+      <short value="The period during which this contact person or organization is valid to be contacted relating to this patient"/>
+      <definition value="The period during which this contact person or organization is valid to be contacted relating to this patient."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Period"/>
+      </type>
+    </element>
+    <element>
+      <path value="Patient.animal"/>
+      <short value="If this patient is an animal (non-human)"/>
+      <definition value="This element has a value if the patient is an animal."/>
+      <comments value="The animal element is labeled &quot;Is Modifier&quot; since patients may be non-human. Systems SHALL either handle patient details appropriately (e.g. inform users patient is not human) or reject non-human patient records."/>
+      <requirements value="Many clinical systems are extended to care for animal patients as well as human."/>
+      <min value="0"/>
+      <max value="1"/>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=ANM]"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.species"/>
+      <short value="E.g. Dog, Cow"/>
+      <definition value="Identifies the high level taxonomic categorization of the kind of animal."/>
+      <comments value="If the patient is non-human, at least a species SHALL be specified. Species SHALL be a widely recognised taxonomic classification.  It may or may not be Linnaean taxonomy and may or may not be at the level of species. If the level is finer than species--such as a breed code--the code system used SHALL allow inference of the species.  (The common example is that the word &quot;Hereford&quot; does not allow inference of the species Bos taurus, because there is a Hereford pig breed, but the SNOMED code for &quot;Hereford Cattle Breed&quot; does.)."/>
+      <requirements value="Need to know what kind of animal."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AnimalSpecies"/>
+        <strength value="example"/>
+        <description value="The species of an animal"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/animal-species"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-35"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.breed"/>
+      <short value="E.g. Poodle, Angus"/>
+      <definition value="Identifies the detailed categorization of the kind of animal."/>
+      <comments value="Breed MAY be used to provide further taxonomic or non-taxonomic classification.  It may involve local or proprietary designation--such as commercial strain--and/or additional information such as production type."/>
+      <requirements value="May need to know the specific kind within the species."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AnimalBreed"/>
+        <strength value="example"/>
+        <description value="The breed of an animal"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/animal-breeds"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-37"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="playedRole[classCode=GEN]/scoper[classCode=ANM, determinerCode=KIND]/code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.genderStatus"/>
+      <short value="E.g. Neutered, Intact"/>
+      <definition value="Indicates the current state of the animal's reproductive organs."/>
+      <requirements value="Gender status can affect housing and animal behavior."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AnimalGenderStatus"/>
+        <strength value="example"/>
+        <description value="The state of the animal's reproductive organs"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/animal-genderstatus"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="N/A"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="genderStatusCode"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication"/>
+      <short value="A list of Languages which may be used to communicate with the patient about his or her health"/>
+      <definition value="Languages which may be used to communicate with the patient about his or her health."/>
+      <comments value="If no language is specified, this *implies* that the default local language is spoken. If you need to convey proficiency for multiple modes than you need multiple Patient.Communication associations.   For animals, language is not a relevant field, and should be absent from the instance. If the Patient does not speak the default local language, then the Interpreter Required Standard can be used to explicitly declare that an interpreter is required."/>
+      <requirements value="If a patient does not speak the local language, interpreters may be required, so languages spoken and proficiency is an important things to keep track of both for patient and other persons of interest."/>
+      <min value="0"/>
+      <max value="*"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="LanguageCommunication"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.language"/>
+      <short value="The language which can be used to communicate with the patient about his or her health"/>
+      <definition value="The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case. E.g. &quot;en&quot; for English, or &quot;en-US&quot; for American English versus &quot;en-EN&quot; for England English."/>
+      <comments value="The structure aa-BB with this exact casing is one the most widely used notations for locale. However not all systems actually code this but instead have it as free text. Hence CodeableConcept instead of code as the data type."/>
+      <requirements value="Most systems in multilingual countries will want to convey language. Not all systems actually need the regional dialect."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <name value="Language"/>
+        <strength value="required"/>
+        <description value="A human language"/>
+        <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-15, LAN-2"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/languageCommunication/code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.preferred"/>
+      <short value="Language preference indicator"/>
+      <definition value="Indicates whether or not the Patient prefers this language (over other languages he masters up a certain level)."/>
+      <comments value="This language is specifically identified for communicating healthcare information."/>
+      <requirements value="People that master multiple languages up to certain level may prefer one or more, i.e. feel more confident in communicating in a particular language making other languages sort of a fall back method."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-15"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="preferenceInd"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.careProvider"/>
+      <short value="Patient's nominated care provider"/>
+      <definition value="Patient's nominated care provider."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="subjectOf.CareEvent.performer.AssignedEntity"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.managingOrganization"/>
+      <short value="Organization that is the custodian of the patient record"/>
+      <definition value="Organization that is the custodian of the patient record."/>
+      <requirements value="Need to know who recognizes this patient record, manages and updates it."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="scoper"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link"/>
+      <short value="Link to another patient resource that concerns the same actual person"/>
+      <definition value="Link to another patient resource that concerns the same actual patient."/>
+      <comments value="There is no assumption that linked patient records have mutual links."/>
+      <requirements value="There are multiple usecases: * Duplicate patient records due to the clerical errors associated with the difficulties of identifying humans consistently, and * Distribution of patient information across multiple servers."/>
+      <min value="0"/>
+      <max value="*"/>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="outboundLink"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.id"/>
+      <representation value="xmlAttr"/>
+      <short value="xml:id (or equivalent in JSON)"/>
+      <definition value="unique id for the element within a resource (for internal references)."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="id"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.extension"/>
+      <short value="Additional Content defined by implementations"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="n/a"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.modifierExtension"/>
+      <short value="Extensions that cannot be ignored"/>
+      <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
+      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
+      <alias value="extensions"/>
+      <alias value="user content"/>
+      <alias value="modifiers"/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Extension"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="N/A"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.other"/>
+      <short value="The other patient resource that the link refers to"/>
+      <definition value="The other patient resource that the link refers to."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-3, MRG-1"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.type"/>
+      <short value="replace | refer | seealso - type of link"/>
+      <definition value="The type of link between this patient resource and another patient resource."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isModifier value="true"/>
+      <binding>
+        <name value="LinkType"/>
+        <strength value="required"/>
+        <description value="The type of link between this patient resource and another patient resource."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/link-type"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="rim"/>
+        <map value="typeCode"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.active"/>
+      <short value="Whether this patient's record is in active use"/>
+      <definition value="Whether this patient record is in active use."/>
+      <comments value="Default is true. If a record is inactive, and linked to an active record, then future patient/record updates should occur on the other patient."/>
+      <requirements value="Need to be able to mark a patient record as not to be used because it was created in error."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <defaultValueBoolean value="true"/>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="statusCode"/>
+      </mapping>
+    </element>
+  </snapshot>
+  <differential>
+    <element>
+      <path value="Patient"/>
+      <short value="Information about an individual or animal receiving health care services"/>
+      <definition value="Demographics and other administrative information about an individual or animal receiving care or other health-related services."/>
+      <requirements value="Tracking patient is the center of the healthcare process."/>
+      <alias value="SubjectOfCare Client Resident"/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="DomainResource"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="Patient[classCode=PAT]"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.identifier"/>
+      <short value="An identifier for this patient"/>
+      <definition value="An identifier for this patient."/>
+      <requirements value="Patients are almost always assigned specific numerical identifiers."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Identifier"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-3"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.name"/>
+      <short value="A name associated with the patient"/>
+      <definition value="A name associated with the individual."/>
+      <comments value="A Patient may have multiple names with different uses or applicable periods. For animals, the name is a &quot;HumanName&quot; in the sense that is assigned and used by humans and has the same patterns."/>
+      <requirements value="Need to be able to track the patient by multiple names. Examples are your official name and a partner name."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="HumanName"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-5, PID-9"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="name"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.telecom"/>
+      <short value="A contact detail for the individual"/>
+      <definition value="A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted."/>
+      <comments value="A Patient may have multiple ways to be contacted with different uses or applicable periods.  May need to have options for contacting the person urgently and also to help with identification. The address may not go directly to the individual, but may reach another party that is able to proxy for the patient (i.e. home phone, or pet owner's phone)."/>
+      <requirements value="People have (primary) ways to contact them in some way such as phone, email."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="ContactPoint"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-13, PID-14, PID-40"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="telecom"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.gender"/>
+      <short value="male | female | other | unknown"/>
+      <definition value="Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes."/>
+      <comments value="The gender may not match the biological sex as determined by genetics, or the individual's preferred identification. Note that for both humans and particularly animals, there are other legitimate possibilities than M and F, though the vast majority of systems and contexts only support M and F.  Systems providing decision support or enforcing business rules should ideally do this on the basis of Observations dealing with the specific gender aspect of interest (anatomical, chromosonal, social, etc.)  However, because these observations are infrequently recorded, defaulting to the administrative gender is common practice.  Where such defaulting occurs, rule enforcement should allow for the variation between administrative and biological, chromosonal and other gender aspects.  For example, an alert about a hysterectomy on a male should be handled as a warning or overrideable error, not a &quot;hard&quot; error."/>
+      <requirements value="Needed for identification of the individual, in combination with (at least) name and birth date. Gender of individual drives many clinical processes."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AdministrativeGender"/>
+        <strength value="required"/>
+        <description value="The gender of a person used for administrative purposes"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/administrative-gender"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-8"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/administrativeGender"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.birthDate"/>
+      <short value="The date of birth for the individual"/>
+      <definition value="The date of birth for the individual."/>
+      <comments value="At least an estimated year should be provided as a guess if the real dob is unknown."/>
+      <requirements value="Age of the individual drives many clinical processes."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="date"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="loinc"/>
+        <map value="21112-8"/>
+      </mapping>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-7"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/birthTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.deceased[x]"/>
+      <short value="Indicates if the individual is deceased or not"/>
+      <definition value="Indicates if the individual is deceased or not."/>
+      <comments value="If there's no value in the instance it means there is no statement on whether or not the individual is deceased. Most systems will interpret the absence of a value as a sign of the person being alive."/>
+      <requirements value="The fact that a patient is deceased influences the clinical process. Also, in human communication and relation management it is necessary to know whether the person is alive."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <type>
+        <code value="dateTime"/>
+      </type>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-30  (bool) and PID-29 (datetime)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/deceasedInd, player[classCode=PSN|ANM and determinerCode=INSTANCE]/deceasedTime"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.address"/>
+      <short value="Addresses for the individual"/>
+      <definition value="Addresses for the individual."/>
+      <comments value="Patient may have multiple addresses with different uses or applicable periods."/>
+      <requirements value="May need to keep track of patient addresses for contacting, billing or reporting requirements and also to help with identification."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Address"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-11"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="addr"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.maritalStatus"/>
+      <short value="Marital (civil) status of a patient"/>
+      <definition value="This field contains a patient's most recent marital (civil) status."/>
+      <requirements value="Most, if not all systems capture it."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <name value="MaritalStatus"/>
+        <strength value="required"/>
+        <description value="The domestic partnership status of a person"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/marital-status"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-16"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN]/maritalStatusCode"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.multipleBirth[x]"/>
+      <short value="Whether patient is part of a multiple birth"/>
+      <definition value="Indicates whether the patient is part of a multiple or indicates the actual birth order."/>
+      <requirements value="For disambiguation of multiple-birth children, especially relevant where the care provider doesn't meet the patient, such as labs."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <type>
+        <code value="integer"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-24 (bool), PID-25 (integer)"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/multipleBirthInd,  player[classCode=PSN|ANM and determinerCode=INSTANCE]/multipleBirthOrderNumber"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.photo"/>
+      <short value="Image of the patient"/>
+      <definition value="Image of the patient."/>
+      <requirements value="Many EHR systems have the capability to capture an image of the patient. Fits with newer social media usage too."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Attachment"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="OBX-5 - needs a profile"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/desc"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact"/>
+      <short value="A contact party (e.g. guardian, partner, friend) for the patient"/>
+      <definition value="A contact party (e.g. guardian, partner, friend) for the patient."/>
+      <comments value="Contact covers all kinds of contact parties: family members, business contacts, guardians, caregivers. Not applicable to register pedigree and family ties beyond use of having contact."/>
+      <requirements value="Need to track people you can contact about the patient."/>
+      <min value="0"/>
+      <max value="*"/>
+      <constraint>
+        <key value="pat-1"/>
+        <name value="ContactNeedsDetails"/>
+        <severity value="error"/>
+        <human value="SHALL at least contain a contact's details or a reference to an organization"/>
+        <xpath value="f:name or f:telecom or f:address or f:organization"/>
+      </constraint>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/scopedRole[classCode=CON]"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.relationship"/>
+      <short value="The kind of relationship"/>
+      <definition value="The nature of the relationship between the patient and the contact person."/>
+      <requirements value="Used to determine which contact person is the most relevant to approach, depending on circumstances."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <name value="ContactRelationship"/>
+        <strength value="required"/>
+        <description value="The nature of the relationship between a patient and a contact person for that patient"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/patient-contact-relationship"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-7, NK1-3"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.name"/>
+      <short value="A name associated with the contact person"/>
+      <definition value="A name associated with the contact person."/>
+      <requirements value="Contact persons need to be identified by name, but it is uncommon to need details about multiple other names for that contact person."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="HumanName"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-2"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="name"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.telecom"/>
+      <short value="A contact detail for the person"/>
+      <definition value="A contact detail for the person, e.g. a telephone number or an email address."/>
+      <comments value="Contact may have multiple ways to be contacted with different uses or applicable periods.  May need to have options for contacting the person urgently, and also to help with identification."/>
+      <requirements value="People have (primary) ways to contact them in some way such as phone, email."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="ContactPoint"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-5, NK1-6, NK1-40"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="telecom"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.address"/>
+      <short value="Address for the contact person"/>
+      <definition value="Address for the contact person."/>
+      <requirements value="Need to keep track where the contact person can be contacted per postal mail or visited."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Address"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-4"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="addr"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.gender"/>
+      <short value="male | female | other | unknown"/>
+      <definition value="Administrative Gender - the gender that the contact person is considered to have for administration and record keeping purposes."/>
+      <requirements value="Needed to address the person correctly."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <name value="AdministrativeGender"/>
+        <strength value="required"/>
+        <description value="The gender of a person used for administrative purposes"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/administrative-gender"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-15"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/administrativeGender"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.organization"/>
+      <short value="Organization that is associated with the contact"/>
+      <definition value="Organization on behalf of which the contact is acting or for which the contact is working."/>
+      <requirements value="For guardians or business related contacts, the organization is relevant."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <condition value="pat-1"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="NK1-13, NK1-30, NK1-31, NK1-32, NK1-41"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="scoper"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.contact.period"/>
+      <short value="The period during which this contact person or organization is valid to be contacted relating to this patient"/>
+      <definition value="The period during which this contact person or organization is valid to be contacted relating to this patient."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Period"/>
+      </type>
+    </element>
+    <element>
+      <path value="Patient.animal"/>
+      <short value="If this patient is an animal (non-human)"/>
+      <definition value="This element has a value if the patient is an animal."/>
+      <comments value="The animal element is labeled &quot;Is Modifier&quot; since patients may be non-human. Systems SHALL either handle patient details appropriately (e.g. inform users patient is not human) or reject non-human patient records."/>
+      <requirements value="Many clinical systems are extended to care for animal patients as well as human."/>
+      <min value="0"/>
+      <max value="1"/>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=ANM]"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.species"/>
+      <short value="E.g. Dog, Cow"/>
+      <definition value="Identifies the high level taxonomic categorization of the kind of animal."/>
+      <comments value="If the patient is non-human, at least a species SHALL be specified. Species SHALL be a widely recognised taxonomic classification.  It may or may not be Linnaean taxonomy and may or may not be at the level of species. If the level is finer than species--such as a breed code--the code system used SHALL allow inference of the species.  (The common example is that the word &quot;Hereford&quot; does not allow inference of the species Bos taurus, because there is a Hereford pig breed, but the SNOMED code for &quot;Hereford Cattle Breed&quot; does.)."/>
+      <requirements value="Need to know what kind of animal."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AnimalSpecies"/>
+        <strength value="example"/>
+        <description value="The species of an animal"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/animal-species"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-35"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.breed"/>
+      <short value="E.g. Poodle, Angus"/>
+      <definition value="Identifies the detailed categorization of the kind of animal."/>
+      <comments value="Breed MAY be used to provide further taxonomic or non-taxonomic classification.  It may involve local or proprietary designation--such as commercial strain--and/or additional information such as production type."/>
+      <requirements value="May need to know the specific kind within the species."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AnimalBreed"/>
+        <strength value="example"/>
+        <description value="The breed of an animal"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/animal-breeds"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-37"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="playedRole[classCode=GEN]/scoper[classCode=ANM, determinerCode=KIND]/code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.animal.genderStatus"/>
+      <short value="E.g. Neutered, Intact"/>
+      <definition value="Indicates the current state of the animal's reproductive organs."/>
+      <requirements value="Gender status can affect housing and animal behavior."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <name value="AnimalGenderStatus"/>
+        <strength value="example"/>
+        <description value="The state of the animal's reproductive organs"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/animal-genderstatus"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="N/A"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="genderStatusCode"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication"/>
+      <short value="A list of Languages which may be used to communicate with the patient about his or her health"/>
+      <definition value="Languages which may be used to communicate with the patient about his or her health."/>
+      <comments value="If no language is specified, this *implies* that the default local language is spoken. If you need to convey proficiency for multiple modes than you need multiple Patient.Communication associations.   For animals, language is not a relevant field, and should be absent from the instance. If the Patient does not speak the default local language, then the Interpreter Required Standard can be used to explicitly declare that an interpreter is required."/>
+      <requirements value="If a patient does not speak the local language, interpreters may be required, so languages spoken and proficiency is an important things to keep track of both for patient and other persons of interest."/>
+      <min value="0"/>
+      <max value="*"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="LanguageCommunication"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.language"/>
+      <short value="The language which can be used to communicate with the patient about his or her health"/>
+      <definition value="The ISO-639-1 alpha 2 code in lower case for the language, optionally followed by a hyphen and the ISO-3166-1 alpha 2 code for the region in upper case. E.g. &quot;en&quot; for English, or &quot;en-US&quot; for American English versus &quot;en-EN&quot; for England English."/>
+      <comments value="The structure aa-BB with this exact casing is one the most widely used notations for locale. However not all systems actually code this but instead have it as free text. Hence CodeableConcept instead of code as the data type."/>
+      <requirements value="Most systems in multilingual countries will want to convey language. Not all systems actually need the regional dialect."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <binding>
+        <name value="Language"/>
+        <strength value="required"/>
+        <description value="A human language"/>
+        <valueSetUri value="http://tools.ietf.org/html/bcp47"/>
+      </binding>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-15, LAN-2"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="player[classCode=PSN|ANM and determinerCode=INSTANCE]/languageCommunication/code"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.communication.preferred"/>
+      <short value="Language preference indicator"/>
+      <definition value="Indicates whether or not the Patient prefers this language (over other languages he masters up a certain level)."/>
+      <comments value="This language is specifically identified for communicating healthcare information."/>
+      <requirements value="People that master multiple languages up to certain level may prefer one or more, i.e. feel more confident in communicating in a particular language making other languages sort of a fall back method."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-15"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="preferenceInd"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.careProvider"/>
+      <short value="Patient's nominated care provider"/>
+      <definition value="Patient's nominated care provider."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Practitioner"/>
+      </type>
+      <mapping>
+        <identity value="rim"/>
+        <map value="subjectOf.CareEvent.performer.AssignedEntity"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.managingOrganization"/>
+      <short value="Organization that is the custodian of the patient record"/>
+      <definition value="Organization that is the custodian of the patient record."/>
+      <requirements value="Need to know who recognizes this patient record, manages and updates it."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+      </type>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="scoper"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link"/>
+      <short value="Link to another patient resource that concerns the same actual person"/>
+      <definition value="Link to another patient resource that concerns the same actual patient."/>
+      <comments value="There is no assumption that linked patient records have mutual links."/>
+      <requirements value="There are multiple usecases: * Duplicate patient records due to the clerical errors associated with the difficulties of identifying humans consistently, and * Distribution of patient information across multiple servers."/>
+      <min value="0"/>
+      <max value="*"/>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="outboundLink"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.other"/>
+      <short value="The other patient resource that the link refers to"/>
+      <definition value="The other patient resource that the link refers to."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+      </type>
+      <isModifier value="true"/>
+      <mapping>
+        <identity value="v2"/>
+        <map value="PID-3, MRG-1"/>
+      </mapping>
+      <mapping>
+        <identity value="rim"/>
+        <map value="id"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.link.type"/>
+      <short value="replace | refer | seealso - type of link"/>
+      <definition value="The type of link between this patient resource and another patient resource."/>
+      <min value="1"/>
+      <max value="1"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <isModifier value="true"/>
+      <binding>
+        <name value="LinkType"/>
+        <strength value="required"/>
+        <description value="The type of link between this patient resource and another patient resource."/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/vs/link-type"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="rim"/>
+        <map value="typeCode"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Patient.active"/>
+      <short value="Whether this patient's record is in active use"/>
+      <definition value="Whether this patient record is in active use."/>
+      <comments value="Default is true. If a record is inactive, and linked to an active record, then future patient/record updates should occur on the other patient."/>
+      <requirements value="Need to be able to mark a patient record as not to be used because it was created in error."/>
+      <min value="0"/>
+      <max value="1"/>
+      <type>
+        <code value="boolean"/>
+      </type>
+      <defaultValueBoolean value="true"/>
+      <isModifier value="true"/>
+      <isSummary value="true"/>
+      <mapping>
+        <identity value="rim"/>
+        <map value="statusCode"/>
+      </mapping>
+    </element>
+  </differential>
+</StructureDefinition>

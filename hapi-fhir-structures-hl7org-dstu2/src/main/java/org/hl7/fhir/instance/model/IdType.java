@@ -43,19 +43,43 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
- * Represents the FHIR ID type. This is the actual resource ID, meaning the ID that will be used in RESTful URLs, Resource References, etc. to represent a specific instance of a resource.
- * 
+ * This class represents the logical identity for a resource, or as much of that
+ * identity is known. In FHIR, every resource must have a "logical ID" which 
+ * is defined by the FHIR specification as:
  * <p>
- * <b>Description</b>: A whole number in the range 0 to 2^64-1 (optionally represented in hex), a uuid, an oid, or any other combination of lowercase letters, numerals, "-" and ".", with a length
- * limit of 36 characters.
+ * <code>A whole number in the range 0 to 2^64-1 (optionally represented in hex), 
+ * a uuid, an oid, or any other combination of lowercase letters, numerals, "-" 
+ * and ".", with a length limit of 36 characters</code>
  * </p>
  * <p>
- * regex: [a-z0-9\-\.]{1,36}
+ * This class contains that logical ID, and can optionally also contain a relative
+ * or absolute URL representing the resource identity. For example, the following
+ * are all valid values for IdType, and all might represent the same resource:    
+ * </p>
+ * <ul>
+ * <li><code>123</code> (just a resource's ID)</li>
+ * <li><code>Patient/123</code> (a relative identity)</li>
+ * <li><code>http://example.com/Patient/123 (an absolute identity)</code></li>
+ * <li><code>http://example.com/Patient/123/_history/1 (an absolute identity with a version id)</code></li>
+ * <li><code>Patient/123/_history/1 (a relative identity with a version id)</code></li>
+ * </ul>
+ * <p>
+ * In most situations, you only need to populate the resource's ID (e.g. <code>123</code>) in 
+ * resources you are constructing and the encoder will infer the rest from the context in which
+ * the object is being used. On the other hand, the parser will always try to populate the
+ * complete absolute identity on objects it creates as a convenience. 
+ * </p>
+ * <p>
+ * Regex for ID: [a-z0-9\-\.]{1,36}
  * </p>
  */
 @DatatypeDef(name = "id")
 public final class IdType extends UriType implements IPrimitiveType<String>, IIdType {
-
+	/**
+	 * This is the maximum length for the ID 
+	 */
+	public static final int MAX_LENGTH = 64; // maximum length
+	
 	private static final long serialVersionUID = 2L;
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;

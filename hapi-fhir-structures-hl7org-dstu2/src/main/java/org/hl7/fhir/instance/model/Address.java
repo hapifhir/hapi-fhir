@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,19 +47,19 @@ public class Address extends Type implements ICompositeType {
 
     public enum AddressUse {
         /**
-         * A communication address at a home.
+         * A communication address at a home
          */
         HOME, 
         /**
-         * An office address. First choice for business related contacts during business hours.
+         * An office address. First choice for business related contacts during business hours
          */
         WORK, 
         /**
-         * A temporary address. The period can provide more detailed information.
+         * A temporary address. The period can provide more detailed information
          */
         TEMP, 
         /**
-         * This address is no longer in use (or was never correct, but retained for records).
+         * This address is no longer in use (or was never correct, but retained for records)
          */
         OLD, 
         /**
@@ -90,19 +90,19 @@ public class Address extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case HOME: return "";
-            case WORK: return "";
-            case TEMP: return "";
-            case OLD: return "";
+            case HOME: return "http://hl7.org.fhir/address-use";
+            case WORK: return "http://hl7.org.fhir/address-use";
+            case TEMP: return "http://hl7.org.fhir/address-use";
+            case OLD: return "http://hl7.org.fhir/address-use";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case HOME: return "A communication address at a home.";
-            case WORK: return "An office address. First choice for business related contacts during business hours.";
-            case TEMP: return "A temporary address. The period can provide more detailed information.";
-            case OLD: return "This address is no longer in use (or was never correct, but retained for records).";
+            case HOME: return "A communication address at a home";
+            case WORK: return "An office address. First choice for business related contacts during business hours";
+            case TEMP: return "A temporary address. The period can provide more detailed information";
+            case OLD: return "This address is no longer in use (or was never correct, but retained for records)";
             default: return "?";
           }
         }

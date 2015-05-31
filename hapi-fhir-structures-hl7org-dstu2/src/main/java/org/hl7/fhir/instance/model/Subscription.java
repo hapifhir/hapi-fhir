@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,19 +48,19 @@ public class Subscription extends DomainResource {
 
     public enum SubscriptionStatus {
         /**
-         * The client has requested the subscription, and the server has not yet set it up.
+         * The client has requested the subscription, and the server has not yet set it up
          */
         REQUESTED, 
         /**
-         * The subscription is active.
+         * The subscription is active
          */
         ACTIVE, 
         /**
-         * The server has an error executing the notification.
+         * The server has an error executing the notification
          */
         ERROR, 
         /**
-         * Too many errors have occurred or the subscription has expired.
+         * Too many errors have occurred or the subscription has expired
          */
         OFF, 
         /**
@@ -91,19 +91,19 @@ public class Subscription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REQUESTED: return "";
-            case ACTIVE: return "";
-            case ERROR: return "";
-            case OFF: return "";
+            case REQUESTED: return "http://hl7.org.fhir/subscription-status";
+            case ACTIVE: return "http://hl7.org.fhir/subscription-status";
+            case ERROR: return "http://hl7.org.fhir/subscription-status";
+            case OFF: return "http://hl7.org.fhir/subscription-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case REQUESTED: return "The client has requested the subscription, and the server has not yet set it up.";
-            case ACTIVE: return "The subscription is active.";
-            case ERROR: return "The server has an error executing the notification.";
-            case OFF: return "Too many errors have occurred or the subscription has expired.";
+            case REQUESTED: return "The client has requested the subscription, and the server has not yet set it up";
+            case ACTIVE: return "The subscription is active";
+            case ERROR: return "The server has an error executing the notification";
+            case OFF: return "Too many errors have occurred or the subscription has expired";
             default: return "?";
           }
         }
@@ -148,23 +148,23 @@ public class Subscription extends DomainResource {
 
     public enum SubscriptionChannelType {
         /**
-         * The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made.
+         * The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made
          */
         RESTHOOK, 
         /**
-         * The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL.
+         * The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL
          */
         WEBSOCKET, 
         /**
-         * The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:).
+         * The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:)
          */
         EMAIL, 
         /**
-         * The channel is executed by sending an SMS message to the phone number identified in the URL (tel:).
+         * The channel is executed by sending an SMS message to the phone number identified in the URL (tel:)
          */
         SMS, 
         /**
-         * The channel Is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc) to the application identified in the URI.
+         * The channel Is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc) to the application identified in the URI
          */
         MESSAGE, 
         /**
@@ -198,21 +198,21 @@ public class Subscription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case RESTHOOK: return "";
-            case WEBSOCKET: return "";
-            case EMAIL: return "";
-            case SMS: return "";
-            case MESSAGE: return "";
+            case RESTHOOK: return "http://hl7.org.fhir/subscription-channel-type";
+            case WEBSOCKET: return "http://hl7.org.fhir/subscription-channel-type";
+            case EMAIL: return "http://hl7.org.fhir/subscription-channel-type";
+            case SMS: return "http://hl7.org.fhir/subscription-channel-type";
+            case MESSAGE: return "http://hl7.org.fhir/subscription-channel-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case RESTHOOK: return "The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made.";
-            case WEBSOCKET: return "The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL.";
-            case EMAIL: return "The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:).";
-            case SMS: return "The channel is executed by sending an SMS message to the phone number identified in the URL (tel:).";
-            case MESSAGE: return "The channel Is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc) to the application identified in the URI.";
+            case RESTHOOK: return "The channel is executed by making a post to the URI. If a payload is included, the URL is interpreted as the service base, and an update (PUT) is made";
+            case WEBSOCKET: return "The channel is executed by sending a packet across a web socket connection maintained by the client. The URL identifies the websocket, and the client binds to this URL";
+            case EMAIL: return "The channel is executed by sending an email to the email addressed in the URI (which must be a mailto:)";
+            case SMS: return "The channel is executed by sending an SMS message to the phone number identified in the URL (tel:)";
+            case MESSAGE: return "The channel Is executed by sending a message (e.g. a Bundle with a MessageHeader resource etc) to the application identified in the URI";
             default: return "?";
           }
         }

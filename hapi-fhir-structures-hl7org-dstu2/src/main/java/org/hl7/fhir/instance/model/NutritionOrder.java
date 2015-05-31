@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,19 +48,19 @@ public class NutritionOrder extends DomainResource {
 
     public enum NutritionOrderStatus {
         /**
-         * The request has been proposed.
+         * The request has been proposed
          */
         PROPOSED, 
         /**
-         * The request is in preliminary form prior to being sent.
+         * The request is in preliminary form prior to being sent
          */
         DRAFT, 
         /**
-         * The request has been planned.
+         * The request has been planned
          */
         PLANNED, 
         /**
-         * The request has been placed.
+         * The request has been placed
          */
         REQUESTED, 
         /**
@@ -119,23 +119,23 @@ public class NutritionOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "";
-            case DRAFT: return "";
-            case PLANNED: return "";
-            case REQUESTED: return "";
-            case ACTIVE: return "";
-            case ONHOLD: return "";
-            case COMPLETED: return "";
-            case CANCELLED: return "";
+            case PROPOSED: return "http://hl7.org.fhir/nutrition-order-status";
+            case DRAFT: return "http://hl7.org.fhir/nutrition-order-status";
+            case PLANNED: return "http://hl7.org.fhir/nutrition-order-status";
+            case REQUESTED: return "http://hl7.org.fhir/nutrition-order-status";
+            case ACTIVE: return "http://hl7.org.fhir/nutrition-order-status";
+            case ONHOLD: return "http://hl7.org.fhir/nutrition-order-status";
+            case COMPLETED: return "http://hl7.org.fhir/nutrition-order-status";
+            case CANCELLED: return "http://hl7.org.fhir/nutrition-order-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The request has been proposed.";
-            case DRAFT: return "The request is in preliminary form prior to being sent.";
-            case PLANNED: return "The request has been planned.";
-            case REQUESTED: return "The request has been placed.";
+            case PROPOSED: return "The request has been proposed";
+            case DRAFT: return "The request is in preliminary form prior to being sent";
+            case PLANNED: return "The request has been planned";
+            case REQUESTED: return "The request has been placed";
             case ACTIVE: return "The request is 'actionable', but not all actions that are implied by it have occurred yet.";
             case ONHOLD: return "Actions implied by the request have been temporarily halted, but are expected to continue later. May also be called 'suspended'.";
             case COMPLETED: return "All actions that are implied by the order have occurred and no continuation is planned (this will rarely be made explicit).";

@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,17 +32,17 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.instance.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.instance.model.Bundle.HttpVerb;
+import org.hl7.fhir.instance.model.Bundle.HTTPVerb;
 import org.hl7.fhir.instance.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -295,9 +294,9 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 				nextEntry.setResource((Resource) next);
 				if (next.getIdElement().isEmpty()) {
-					nextEntry.getTransaction().setMethod(HttpVerb.POST);
+					nextEntry.getTransaction().setMethod(HTTPVerb.POST);
 				} else {
-					nextEntry.getTransaction().setMethod(HttpVerb.PUT);
+					nextEntry.getTransaction().setMethod(HTTPVerb.PUT);
 					if (next.getIdElement().isAbsolute()) {
 						nextEntry.getTransaction().setUrl(next.getIdElement().getValue());
 					} else {

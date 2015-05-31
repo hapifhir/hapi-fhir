@@ -2432,6 +2432,11 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			// ignore
+		}
+
+		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
 			myDepth++;
 		}

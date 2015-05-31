@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,40 +46,40 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="ReferralRequest", profile="http://hl7.org/fhir/Profile/ReferralRequest")
 public class ReferralRequest extends DomainResource {
 
-    public enum Referralstatus {
+    public enum ReferralStatus {
         /**
-         * A draft referral that has yet to be send.
+         * A draft referral that has yet to be send
          */
         DRAFT, 
         /**
-         * The referral has been transmitted, but not yet acknowledged by the recipient.
+         * The referral has been transmitted, but not yet acknowledged by the recipient
          */
         REQUESTED, 
         /**
-         * The referral has been acknowledged by the recipient, and is in the process of being actioned.
+         * The referral has been acknowledged by the recipient, and is in the process of being actioned
          */
         ACTIVE, 
         /**
-         * The referral has been cancelled without being completed. For example it is no longer needed.
+         * The referral has been cancelled without being completed. For example it is no longer needed
          */
         CANCELLED, 
         /**
-         * The recipient has agreed to deliver the care requested by the referral.
+         * The recipient has agreed to deliver the care requested by the referral
          */
         ACCEPTED, 
         /**
-         * The recipient has declined to accept the referral.
+         * The recipient has declined to accept the referral
          */
         REJECTED, 
         /**
-         * The referral has been completely actioned.
+         * The referral has been completely actioned
          */
         COMPLETED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static Referralstatus fromCode(String codeString) throws Exception {
+        public static ReferralStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
@@ -96,7 +96,7 @@ public class ReferralRequest extends DomainResource {
           return REJECTED;
         if ("completed".equals(codeString))
           return COMPLETED;
-        throw new Exception("Unknown Referralstatus code '"+codeString+"'");
+        throw new Exception("Unknown ReferralStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -112,25 +112,25 @@ public class ReferralRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "";
-            case REQUESTED: return "";
-            case ACTIVE: return "";
-            case CANCELLED: return "";
-            case ACCEPTED: return "";
-            case REJECTED: return "";
-            case COMPLETED: return "";
+            case DRAFT: return "http://hl7.org.fhir/referralstatus";
+            case REQUESTED: return "http://hl7.org.fhir/referralstatus";
+            case ACTIVE: return "http://hl7.org.fhir/referralstatus";
+            case CANCELLED: return "http://hl7.org.fhir/referralstatus";
+            case ACCEPTED: return "http://hl7.org.fhir/referralstatus";
+            case REJECTED: return "http://hl7.org.fhir/referralstatus";
+            case COMPLETED: return "http://hl7.org.fhir/referralstatus";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "A draft referral that has yet to be send.";
-            case REQUESTED: return "The referral has been transmitted, but not yet acknowledged by the recipient.";
-            case ACTIVE: return "The referral has been acknowledged by the recipient, and is in the process of being actioned.";
-            case CANCELLED: return "The referral has been cancelled without being completed. For example it is no longer needed.";
-            case ACCEPTED: return "The recipient has agreed to deliver the care requested by the referral.";
-            case REJECTED: return "The recipient has declined to accept the referral.";
-            case COMPLETED: return "The referral has been completely actioned.";
+            case DRAFT: return "A draft referral that has yet to be send";
+            case REQUESTED: return "The referral has been transmitted, but not yet acknowledged by the recipient";
+            case ACTIVE: return "The referral has been acknowledged by the recipient, and is in the process of being actioned";
+            case CANCELLED: return "The referral has been cancelled without being completed. For example it is no longer needed";
+            case ACCEPTED: return "The recipient has agreed to deliver the care requested by the referral";
+            case REJECTED: return "The recipient has declined to accept the referral";
+            case COMPLETED: return "The referral has been completely actioned";
             default: return "?";
           }
         }
@@ -148,41 +148,41 @@ public class ReferralRequest extends DomainResource {
         }
     }
 
-  public static class ReferralstatusEnumFactory implements EnumFactory<Referralstatus> {
-    public Referralstatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class ReferralStatusEnumFactory implements EnumFactory<ReferralStatus> {
+    public ReferralStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("draft".equals(codeString))
-          return Referralstatus.DRAFT;
+          return ReferralStatus.DRAFT;
         if ("requested".equals(codeString))
-          return Referralstatus.REQUESTED;
+          return ReferralStatus.REQUESTED;
         if ("active".equals(codeString))
-          return Referralstatus.ACTIVE;
+          return ReferralStatus.ACTIVE;
         if ("cancelled".equals(codeString))
-          return Referralstatus.CANCELLED;
+          return ReferralStatus.CANCELLED;
         if ("accepted".equals(codeString))
-          return Referralstatus.ACCEPTED;
+          return ReferralStatus.ACCEPTED;
         if ("rejected".equals(codeString))
-          return Referralstatus.REJECTED;
+          return ReferralStatus.REJECTED;
         if ("completed".equals(codeString))
-          return Referralstatus.COMPLETED;
-        throw new IllegalArgumentException("Unknown Referralstatus code '"+codeString+"'");
+          return ReferralStatus.COMPLETED;
+        throw new IllegalArgumentException("Unknown ReferralStatus code '"+codeString+"'");
         }
-    public String toCode(Referralstatus code) {
-      if (code == Referralstatus.DRAFT)
+    public String toCode(ReferralStatus code) {
+      if (code == ReferralStatus.DRAFT)
         return "draft";
-      if (code == Referralstatus.REQUESTED)
+      if (code == ReferralStatus.REQUESTED)
         return "requested";
-      if (code == Referralstatus.ACTIVE)
+      if (code == ReferralStatus.ACTIVE)
         return "active";
-      if (code == Referralstatus.CANCELLED)
+      if (code == ReferralStatus.CANCELLED)
         return "cancelled";
-      if (code == Referralstatus.ACCEPTED)
+      if (code == ReferralStatus.ACCEPTED)
         return "accepted";
-      if (code == Referralstatus.REJECTED)
+      if (code == ReferralStatus.REJECTED)
         return "rejected";
-      if (code == Referralstatus.COMPLETED)
+      if (code == ReferralStatus.COMPLETED)
         return "completed";
       return "?";
       }
@@ -193,7 +193,7 @@ public class ReferralRequest extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="draft | requested | active | cancelled | accepted | rejected | completed", formalDefinition="The workflow status of the referral or transfer of care request." )
-    protected Enumeration<Referralstatus> status;
+    protected Enumeration<ReferralStatus> status;
 
     /**
      * Business Id that uniquely identifies the referral/care transfer request instance.
@@ -318,7 +318,7 @@ public class ReferralRequest extends DomainResource {
     @Description(shortDefinition="Requested service(s) fulfillment time", formalDefinition="The period of time within which the services identified in the referral/transfer of care is specified or required to occur." )
     protected Period fulfillmentTime;
 
-    private static final long serialVersionUID = -1139252216L;
+    private static final long serialVersionUID = -1262938072L;
 
   /*
    * Constructor
@@ -330,7 +330,7 @@ public class ReferralRequest extends DomainResource {
   /*
    * Constructor
    */
-    public ReferralRequest(Enumeration<Referralstatus> status) {
+    public ReferralRequest(Enumeration<ReferralStatus> status) {
       super();
       this.status = status;
     }
@@ -338,12 +338,12 @@ public class ReferralRequest extends DomainResource {
     /**
      * @return {@link #status} (The workflow status of the referral or transfer of care request.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<Referralstatus> getStatusElement() { 
+    public Enumeration<ReferralStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ReferralRequest.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<Referralstatus>(new ReferralstatusEnumFactory()); // bb
+          this.status = new Enumeration<ReferralStatus>(new ReferralStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -358,7 +358,7 @@ public class ReferralRequest extends DomainResource {
     /**
      * @param value {@link #status} (The workflow status of the referral or transfer of care request.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public ReferralRequest setStatusElement(Enumeration<Referralstatus> value) { 
+    public ReferralRequest setStatusElement(Enumeration<ReferralStatus> value) { 
       this.status = value;
       return this;
     }
@@ -366,16 +366,16 @@ public class ReferralRequest extends DomainResource {
     /**
      * @return The workflow status of the referral or transfer of care request.
      */
-    public Referralstatus getStatus() { 
+    public ReferralStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value The workflow status of the referral or transfer of care request.
      */
-    public ReferralRequest setStatus(Referralstatus value) { 
+    public ReferralRequest setStatus(ReferralStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<Referralstatus>(new ReferralstatusEnumFactory());
+          this.status = new Enumeration<ReferralStatus>(new ReferralStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }

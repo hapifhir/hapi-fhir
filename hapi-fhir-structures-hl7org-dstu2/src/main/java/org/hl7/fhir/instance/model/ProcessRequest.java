@@ -29,11 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Child;
@@ -46,13 +47,13 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="ProcessRequest", profile="http://hl7.org/fhir/Profile/ProcessRequest")
 public class ProcessRequest extends DomainResource {
 
-    public enum Actionlist {
+    public enum ActionList {
         /**
          * Cancel, Reverse or nullify the target resource.
          */
         CANCEL, 
         /**
-         * Check for previously un-read/ not-retrieved resources.
+         * Check for previously un-read/ not-retrieved resources
          */
         POLL, 
         /**
@@ -67,7 +68,7 @@ public class ProcessRequest extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static Actionlist fromCode(String codeString) throws Exception {
+        public static ActionList fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("cancel".equals(codeString))
@@ -78,7 +79,7 @@ public class ProcessRequest extends DomainResource {
           return REPROCESS;
         if ("status".equals(codeString))
           return STATUS;
-        throw new Exception("Unknown Actionlist code '"+codeString+"'");
+        throw new Exception("Unknown ActionList code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -91,17 +92,17 @@ public class ProcessRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CANCEL: return "";
-            case POLL: return "";
-            case REPROCESS: return "";
-            case STATUS: return "";
+            case CANCEL: return "http://hl7.org.fhir/actionlist";
+            case POLL: return "http://hl7.org.fhir/actionlist";
+            case REPROCESS: return "http://hl7.org.fhir/actionlist";
+            case STATUS: return "http://hl7.org.fhir/actionlist";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case CANCEL: return "Cancel, Reverse or nullify the target resource.";
-            case POLL: return "Check for previously un-read/ not-retrieved resources.";
+            case POLL: return "Check for previously un-read/ not-retrieved resources";
             case REPROCESS: return "Re-process the target resource.";
             case STATUS: return "Retrieve the processing status of the target resource.";
             default: return "?";
@@ -118,29 +119,29 @@ public class ProcessRequest extends DomainResource {
         }
     }
 
-  public static class ActionlistEnumFactory implements EnumFactory<Actionlist> {
-    public Actionlist fromCode(String codeString) throws IllegalArgumentException {
+  public static class ActionListEnumFactory implements EnumFactory<ActionList> {
+    public ActionList fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("cancel".equals(codeString))
-          return Actionlist.CANCEL;
+          return ActionList.CANCEL;
         if ("poll".equals(codeString))
-          return Actionlist.POLL;
+          return ActionList.POLL;
         if ("reprocess".equals(codeString))
-          return Actionlist.REPROCESS;
+          return ActionList.REPROCESS;
         if ("status".equals(codeString))
-          return Actionlist.STATUS;
-        throw new IllegalArgumentException("Unknown Actionlist code '"+codeString+"'");
+          return ActionList.STATUS;
+        throw new IllegalArgumentException("Unknown ActionList code '"+codeString+"'");
         }
-    public String toCode(Actionlist code) {
-      if (code == Actionlist.CANCEL)
+    public String toCode(ActionList code) {
+      if (code == ActionList.CANCEL)
         return "cancel";
-      if (code == Actionlist.POLL)
+      if (code == ActionList.POLL)
         return "poll";
-      if (code == Actionlist.REPROCESS)
+      if (code == ActionList.REPROCESS)
         return "reprocess";
-      if (code == Actionlist.STATUS)
+      if (code == ActionList.STATUS)
         return "status";
       return "?";
       }
@@ -260,7 +261,7 @@ public class ProcessRequest extends DomainResource {
      */
     @Child(name = "action", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="cancel | poll | reprocess | status", formalDefinition="The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest." )
-    protected Enumeration<Actionlist> action;
+    protected Enumeration<ActionList> action;
 
     /**
      * The ProcessRequest Business Identifier.
@@ -392,7 +393,7 @@ public class ProcessRequest extends DomainResource {
     @Description(shortDefinition="Period", formalDefinition="A period of time during which the fulfilling resources would have been created." )
     protected Period period;
 
-    private static final long serialVersionUID = -1852083956L;
+    private static final long serialVersionUID = -1332331220L;
 
   /*
    * Constructor
@@ -404,7 +405,7 @@ public class ProcessRequest extends DomainResource {
   /*
    * Constructor
    */
-    public ProcessRequest(Enumeration<Actionlist> action) {
+    public ProcessRequest(Enumeration<ActionList> action) {
       super();
       this.action = action;
     }
@@ -412,12 +413,12 @@ public class ProcessRequest extends DomainResource {
     /**
      * @return {@link #action} (The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
      */
-    public Enumeration<Actionlist> getActionElement() { 
+    public Enumeration<ActionList> getActionElement() { 
       if (this.action == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ProcessRequest.action");
         else if (Configuration.doAutoCreate())
-          this.action = new Enumeration<Actionlist>(new ActionlistEnumFactory()); // bb
+          this.action = new Enumeration<ActionList>(new ActionListEnumFactory()); // bb
       return this.action;
     }
 
@@ -432,7 +433,7 @@ public class ProcessRequest extends DomainResource {
     /**
      * @param value {@link #action} (The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
      */
-    public ProcessRequest setActionElement(Enumeration<Actionlist> value) { 
+    public ProcessRequest setActionElement(Enumeration<ActionList> value) { 
       this.action = value;
       return this;
     }
@@ -440,16 +441,16 @@ public class ProcessRequest extends DomainResource {
     /**
      * @return The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
      */
-    public Actionlist getAction() { 
+    public ActionList getAction() { 
       return this.action == null ? null : this.action.getValue();
     }
 
     /**
      * @param value The type of procesing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
      */
-    public ProcessRequest setAction(Actionlist value) { 
+    public ProcessRequest setAction(ActionList value) { 
         if (this.action == null)
-          this.action = new Enumeration<Actionlist>(new ActionlistEnumFactory());
+          this.action = new Enumeration<ActionList>(new ActionListEnumFactory());
         this.action.setValue(value);
       return this;
     }

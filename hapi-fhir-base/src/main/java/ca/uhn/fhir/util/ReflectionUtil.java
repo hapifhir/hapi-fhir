@@ -26,10 +26,31 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 public class ReflectionUtil {
+
+	/**
+	 * For a field of type List<Enumeration<Foo>>, returns Foo
+	 */
+	public static Class<?> getGenericCollectionTypeOfFieldWithSecondOrderForList(Field next) {
+		if (!List.class.isAssignableFrom(next.getType())) {
+			return getGenericCollectionTypeOfField(next);
+		}
+		
+		Class<?> type;
+		ParameterizedType collectionType = (ParameterizedType) next.getGenericType();
+		Type firstArg = collectionType.getActualTypeArguments()[0];
+		if (ParameterizedType.class.isAssignableFrom(firstArg.getClass())) {
+			ParameterizedType pt = ((ParameterizedType) firstArg);
+			Type pt2 = pt.getActualTypeArguments()[0];
+			return (Class<?>) pt2;
+		} else {
+			type = (Class<?>) firstArg;
+		}
+		return type;
+	}
 
 	public static Class<?> getGenericCollectionTypeOfField(Field next) {
 		Class<?> type;

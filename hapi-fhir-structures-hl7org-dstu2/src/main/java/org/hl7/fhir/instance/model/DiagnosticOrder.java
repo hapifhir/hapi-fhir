@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,55 +48,55 @@ public class DiagnosticOrder extends DomainResource {
 
     public enum DiagnosticOrderStatus {
         /**
-         * The request has been proposed.
+         * The request has been proposed
          */
         PROPOSED, 
         /**
-         * the request is in preliminary form prior to being sent.
+         * the request is in preliminary form prior to being sent
          */
         DRAFT, 
         /**
-         * The request has been planned.
+         * The request has been planned
          */
         PLANNED, 
         /**
-         * The request has been placed.
+         * The request has been placed
          */
         REQUESTED, 
         /**
-         * The receiving system has received the order, but not yet decided whether it will be performed.
+         * The receiving system has received the order, but not yet decided whether it will be performed
          */
         RECEIVED, 
         /**
-         * The receiving system has accepted the order, but work has not yet commenced.
+         * The receiving system has accepted the order, but work has not yet commenced
          */
         ACCEPTED, 
         /**
-         * The work to fulfill the order is happening.
+         * The work to fulfill the order is happening
          */
         INPROGRESS, 
         /**
-         * The work is complete, and the outcomes are being reviewed for approval.
+         * The work is complete, and the outcomes are being reviewed for approval
          */
         REVIEW, 
         /**
-         * The work has been complete, the report(s) released, and no further work is planned.
+         * The work has been complete, the report(s) released, and no further work is planned
          */
         COMPLETED, 
         /**
-         * the request has been withdrawn.
+         * the request has been withdrawn
          */
         CANCELLED, 
         /**
-         * The request has been held by originating system/user request.
+         * The request has been held by originating system/user request
          */
         SUSPENDED, 
         /**
-         * The receiving system has declined to fulfill the request.
+         * The receiving system has declined to fulfill the request
          */
         REJECTED, 
         /**
-         * The diagnostic investigation was attempted, but due to some procedural error, it could not be completed.
+         * The diagnostic investigation was attempted, but due to some procedural error, it could not be completed
          */
         FAILED, 
         /**
@@ -154,37 +154,37 @@ public class DiagnosticOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "";
-            case DRAFT: return "";
-            case PLANNED: return "";
-            case REQUESTED: return "";
-            case RECEIVED: return "";
-            case ACCEPTED: return "";
-            case INPROGRESS: return "";
-            case REVIEW: return "";
-            case COMPLETED: return "";
-            case CANCELLED: return "";
-            case SUSPENDED: return "";
-            case REJECTED: return "";
-            case FAILED: return "";
+            case PROPOSED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case DRAFT: return "http://hl7.org.fhir/diagnostic-order-status";
+            case PLANNED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case REQUESTED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case RECEIVED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case ACCEPTED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case INPROGRESS: return "http://hl7.org.fhir/diagnostic-order-status";
+            case REVIEW: return "http://hl7.org.fhir/diagnostic-order-status";
+            case COMPLETED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case CANCELLED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case SUSPENDED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case REJECTED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case FAILED: return "http://hl7.org.fhir/diagnostic-order-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The request has been proposed.";
-            case DRAFT: return "the request is in preliminary form prior to being sent.";
-            case PLANNED: return "The request has been planned.";
-            case REQUESTED: return "The request has been placed.";
-            case RECEIVED: return "The receiving system has received the order, but not yet decided whether it will be performed.";
-            case ACCEPTED: return "The receiving system has accepted the order, but work has not yet commenced.";
-            case INPROGRESS: return "The work to fulfill the order is happening.";
-            case REVIEW: return "The work is complete, and the outcomes are being reviewed for approval.";
-            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned.";
-            case CANCELLED: return "the request has been withdrawn.";
-            case SUSPENDED: return "The request has been held by originating system/user request.";
-            case REJECTED: return "The receiving system has declined to fulfill the request.";
-            case FAILED: return "The diagnostic investigation was attempted, but due to some procedural error, it could not be completed.";
+            case PROPOSED: return "The request has been proposed";
+            case DRAFT: return "the request is in preliminary form prior to being sent";
+            case PLANNED: return "The request has been planned";
+            case REQUESTED: return "The request has been placed";
+            case RECEIVED: return "The receiving system has received the order, but not yet decided whether it will be performed";
+            case ACCEPTED: return "The receiving system has accepted the order, but work has not yet commenced";
+            case INPROGRESS: return "The work to fulfill the order is happening";
+            case REVIEW: return "The work is complete, and the outcomes are being reviewed for approval";
+            case COMPLETED: return "The work has been complete, the report(s) released, and no further work is planned";
+            case CANCELLED: return "the request has been withdrawn";
+            case SUSPENDED: return "The request has been held by originating system/user request";
+            case REJECTED: return "The receiving system has declined to fulfill the request";
+            case FAILED: return "The diagnostic investigation was attempted, but due to some procedural error, it could not be completed";
             default: return "?";
           }
         }
@@ -274,19 +274,19 @@ public class DiagnosticOrder extends DomainResource {
 
     public enum DiagnosticOrderPriority {
         /**
-         * The order has a normal priority.
+         * The order has a normal priority
          */
         ROUTINE, 
         /**
-         * The order should be urgently.
+         * The order should be urgently
          */
         URGENT, 
         /**
-         * The order is time-critical.
+         * The order is time-critical
          */
         STAT, 
         /**
-         * The order should be acted on as soon as possible.
+         * The order should be acted on as soon as possible
          */
         ASAP, 
         /**
@@ -317,19 +317,19 @@ public class DiagnosticOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ROUTINE: return "";
-            case URGENT: return "";
-            case STAT: return "";
-            case ASAP: return "";
+            case ROUTINE: return "http://hl7.org.fhir/diagnostic-order-priority";
+            case URGENT: return "http://hl7.org.fhir/diagnostic-order-priority";
+            case STAT: return "http://hl7.org.fhir/diagnostic-order-priority";
+            case ASAP: return "http://hl7.org.fhir/diagnostic-order-priority";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ROUTINE: return "The order has a normal priority.";
-            case URGENT: return "The order should be urgently.";
-            case STAT: return "The order is time-critical.";
-            case ASAP: return "The order should be acted on as soon as possible.";
+            case ROUTINE: return "The order has a normal priority";
+            case URGENT: return "The order should be urgently";
+            case STAT: return "The order is time-critical";
+            case ASAP: return "The order should be acted on as soon as possible";
             default: return "?";
           }
         }
@@ -976,10 +976,10 @@ public class DiagnosticOrder extends DomainResource {
     protected Practitioner ordererTarget;
 
     /**
-     * Identifiers assigned to this order by the order or by the receiver.
+     * Identifiers assigned to this order by the orderer and/or  the receiver and/or order fulfiller.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Identifiers assigned to this order", formalDefinition="Identifiers assigned to this order by the order or by the receiver." )
+    @Description(shortDefinition="Identifiers assigned to this order", formalDefinition="Identifiers assigned to this order by the orderer and/or  the receiver and/or order fulfiller." )
     protected List<Identifier> identifier;
 
     /**
@@ -1154,7 +1154,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifiers assigned to this order by the order or by the receiver.)
+     * @return {@link #identifier} (Identifiers assigned to this order by the orderer and/or  the receiver and/or order fulfiller.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1172,7 +1172,7 @@ public class DiagnosticOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (Identifiers assigned to this order by the order or by the receiver.)
+     * @return {@link #identifier} (Identifiers assigned to this order by the orderer and/or  the receiver and/or order fulfiller.)
      */
     // syntactic sugar
     public Identifier addIdentifier() { //3
@@ -1578,7 +1578,7 @@ public class DiagnosticOrder extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("orderer", "Reference(Practitioner)", "The practitioner that holds legal responsibility for ordering the investigation.", 0, java.lang.Integer.MAX_VALUE, orderer));
-        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the order or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer and/or  the receiver and/or order fulfiller.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("clinicalNotes", "string", "An explanation or justification for why this diagnostic investigation is being requested.", 0, java.lang.Integer.MAX_VALUE, clinicalNotes));
         childrenList.add(new Property("supportingInformation", "Reference(Observation|Condition|DocumentReference)", "Additional clinical information about the patient or specimen that may influence test interpretations.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));

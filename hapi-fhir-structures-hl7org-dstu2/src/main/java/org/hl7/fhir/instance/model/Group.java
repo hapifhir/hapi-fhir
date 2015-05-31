@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,27 +48,27 @@ public class Group extends DomainResource {
 
     public enum GroupType {
         /**
-         * Group contains "person" Patient resources.
+         * Group contains "person" Patient resources
          */
         PERSON, 
         /**
-         * Group contains "animal" Patient resources.
+         * Group contains "animal" Patient resources
          */
         ANIMAL, 
         /**
-         * Group contains healthcare practitioner resources.
+         * Group contains healthcare practitioner resources
          */
         PRACTITIONER, 
         /**
-         * Group contains Device resources.
+         * Group contains Device resources
          */
         DEVICE, 
         /**
-         * Group contains Medication resources.
+         * Group contains Medication resources
          */
         MEDICATION, 
         /**
-         * Group contains Substance resources.
+         * Group contains Substance resources
          */
         SUBSTANCE, 
         /**
@@ -105,23 +105,23 @@ public class Group extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PERSON: return "";
-            case ANIMAL: return "";
-            case PRACTITIONER: return "";
-            case DEVICE: return "";
-            case MEDICATION: return "";
-            case SUBSTANCE: return "";
+            case PERSON: return "http://hl7.org.fhir/group-type";
+            case ANIMAL: return "http://hl7.org.fhir/group-type";
+            case PRACTITIONER: return "http://hl7.org.fhir/group-type";
+            case DEVICE: return "http://hl7.org.fhir/group-type";
+            case MEDICATION: return "http://hl7.org.fhir/group-type";
+            case SUBSTANCE: return "http://hl7.org.fhir/group-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "Group contains 'person' Patient resources.";
-            case ANIMAL: return "Group contains 'animal' Patient resources.";
-            case PRACTITIONER: return "Group contains healthcare practitioner resources.";
-            case DEVICE: return "Group contains Device resources.";
-            case MEDICATION: return "Group contains Medication resources.";
-            case SUBSTANCE: return "Group contains Substance resources.";
+            case PERSON: return "Group contains 'person' Patient resources";
+            case ANIMAL: return "Group contains 'animal' Patient resources";
+            case PRACTITIONER: return "Group contains healthcare practitioner resources";
+            case DEVICE: return "Group contains Device resources";
+            case MEDICATION: return "Group contains Medication resources";
+            case SUBSTANCE: return "Group contains Substance resources";
             default: return "?";
           }
         }

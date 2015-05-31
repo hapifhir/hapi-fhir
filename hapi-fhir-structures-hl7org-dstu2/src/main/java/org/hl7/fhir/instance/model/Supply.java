@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,32 +46,32 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="Supply", profile="http://hl7.org/fhir/Profile/Supply")
 public class Supply extends DomainResource {
 
-    public enum ValuesetSupplyStatus {
+    public enum SupplyStatus {
         /**
-         * Supply has been requested, but not dispensed.
+         * Supply has been requested, but not dispensed
          */
         REQUESTED, 
         /**
-         * Supply is part of a pharmacy order and has been dispensed.
+         * Supply is part of a pharmacy order and has been dispensed
          */
         DISPENSED, 
         /**
-         * Supply has been received by the requestor.
+         * Supply has been received by the requestor
          */
         RECEIVED, 
         /**
-         * The supply will not be completed because the supplier was unable or unwilling to supply the item.
+         * The supply will not be completed because the supplier was unable or unwilling to supply the item
          */
         FAILED, 
         /**
-         * The orderer of the supply cancelled the request.
+         * The orderer of the supply cancelled the request
          */
         CANCELLED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ValuesetSupplyStatus fromCode(String codeString) throws Exception {
+        public static SupplyStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
@@ -84,7 +84,7 @@ public class Supply extends DomainResource {
           return FAILED;
         if ("cancelled".equals(codeString))
           return CANCELLED;
-        throw new Exception("Unknown ValuesetSupplyStatus code '"+codeString+"'");
+        throw new Exception("Unknown SupplyStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -98,21 +98,21 @@ public class Supply extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REQUESTED: return "";
-            case DISPENSED: return "";
-            case RECEIVED: return "";
-            case FAILED: return "";
-            case CANCELLED: return "";
+            case REQUESTED: return "http://hl7.org.fhir/valueset-supply-status";
+            case DISPENSED: return "http://hl7.org.fhir/valueset-supply-status";
+            case RECEIVED: return "http://hl7.org.fhir/valueset-supply-status";
+            case FAILED: return "http://hl7.org.fhir/valueset-supply-status";
+            case CANCELLED: return "http://hl7.org.fhir/valueset-supply-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case REQUESTED: return "Supply has been requested, but not dispensed.";
-            case DISPENSED: return "Supply is part of a pharmacy order and has been dispensed.";
-            case RECEIVED: return "Supply has been received by the requestor.";
-            case FAILED: return "The supply will not be completed because the supplier was unable or unwilling to supply the item.";
-            case CANCELLED: return "The orderer of the supply cancelled the request.";
+            case REQUESTED: return "Supply has been requested, but not dispensed";
+            case DISPENSED: return "Supply is part of a pharmacy order and has been dispensed";
+            case RECEIVED: return "Supply has been received by the requestor";
+            case FAILED: return "The supply will not be completed because the supplier was unable or unwilling to supply the item";
+            case CANCELLED: return "The orderer of the supply cancelled the request";
             default: return "?";
           }
         }
@@ -128,56 +128,56 @@ public class Supply extends DomainResource {
         }
     }
 
-  public static class ValuesetSupplyStatusEnumFactory implements EnumFactory<ValuesetSupplyStatus> {
-    public ValuesetSupplyStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class SupplyStatusEnumFactory implements EnumFactory<SupplyStatus> {
+    public SupplyStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("requested".equals(codeString))
-          return ValuesetSupplyStatus.REQUESTED;
+          return SupplyStatus.REQUESTED;
         if ("dispensed".equals(codeString))
-          return ValuesetSupplyStatus.DISPENSED;
+          return SupplyStatus.DISPENSED;
         if ("received".equals(codeString))
-          return ValuesetSupplyStatus.RECEIVED;
+          return SupplyStatus.RECEIVED;
         if ("failed".equals(codeString))
-          return ValuesetSupplyStatus.FAILED;
+          return SupplyStatus.FAILED;
         if ("cancelled".equals(codeString))
-          return ValuesetSupplyStatus.CANCELLED;
-        throw new IllegalArgumentException("Unknown ValuesetSupplyStatus code '"+codeString+"'");
+          return SupplyStatus.CANCELLED;
+        throw new IllegalArgumentException("Unknown SupplyStatus code '"+codeString+"'");
         }
-    public String toCode(ValuesetSupplyStatus code) {
-      if (code == ValuesetSupplyStatus.REQUESTED)
+    public String toCode(SupplyStatus code) {
+      if (code == SupplyStatus.REQUESTED)
         return "requested";
-      if (code == ValuesetSupplyStatus.DISPENSED)
+      if (code == SupplyStatus.DISPENSED)
         return "dispensed";
-      if (code == ValuesetSupplyStatus.RECEIVED)
+      if (code == SupplyStatus.RECEIVED)
         return "received";
-      if (code == ValuesetSupplyStatus.FAILED)
+      if (code == SupplyStatus.FAILED)
         return "failed";
-      if (code == ValuesetSupplyStatus.CANCELLED)
+      if (code == SupplyStatus.CANCELLED)
         return "cancelled";
       return "?";
       }
     }
 
-    public enum ValuesetSupplyDispenseStatus {
+    public enum SupplyDispenseStatus {
         /**
-         * Supply has been requested, but not dispensed.
+         * Supply has been requested, but not dispensed
          */
         INPROGRESS, 
         /**
-         * Supply is part of a pharmacy order and has been dispensed.
+         * Supply is part of a pharmacy order and has been dispensed
          */
         DISPENSED, 
         /**
-         * Dispensing was not completed.
+         * Dispensing was not completed
          */
         ABANDONED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ValuesetSupplyDispenseStatus fromCode(String codeString) throws Exception {
+        public static SupplyDispenseStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -186,7 +186,7 @@ public class Supply extends DomainResource {
           return DISPENSED;
         if ("abandoned".equals(codeString))
           return ABANDONED;
-        throw new Exception("Unknown ValuesetSupplyDispenseStatus code '"+codeString+"'");
+        throw new Exception("Unknown SupplyDispenseStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -198,17 +198,17 @@ public class Supply extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case DISPENSED: return "";
-            case ABANDONED: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/valueset-supply-dispense-status";
+            case DISPENSED: return "http://hl7.org.fhir/valueset-supply-dispense-status";
+            case ABANDONED: return "http://hl7.org.fhir/valueset-supply-dispense-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "Supply has been requested, but not dispensed.";
-            case DISPENSED: return "Supply is part of a pharmacy order and has been dispensed.";
-            case ABANDONED: return "Dispensing was not completed.";
+            case INPROGRESS: return "Supply has been requested, but not dispensed";
+            case DISPENSED: return "Supply is part of a pharmacy order and has been dispensed";
+            case ABANDONED: return "Dispensing was not completed";
             default: return "?";
           }
         }
@@ -222,25 +222,25 @@ public class Supply extends DomainResource {
         }
     }
 
-  public static class ValuesetSupplyDispenseStatusEnumFactory implements EnumFactory<ValuesetSupplyDispenseStatus> {
-    public ValuesetSupplyDispenseStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class SupplyDispenseStatusEnumFactory implements EnumFactory<SupplyDispenseStatus> {
+    public SupplyDispenseStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
-          return ValuesetSupplyDispenseStatus.INPROGRESS;
+          return SupplyDispenseStatus.INPROGRESS;
         if ("dispensed".equals(codeString))
-          return ValuesetSupplyDispenseStatus.DISPENSED;
+          return SupplyDispenseStatus.DISPENSED;
         if ("abandoned".equals(codeString))
-          return ValuesetSupplyDispenseStatus.ABANDONED;
-        throw new IllegalArgumentException("Unknown ValuesetSupplyDispenseStatus code '"+codeString+"'");
+          return SupplyDispenseStatus.ABANDONED;
+        throw new IllegalArgumentException("Unknown SupplyDispenseStatus code '"+codeString+"'");
         }
-    public String toCode(ValuesetSupplyDispenseStatus code) {
-      if (code == ValuesetSupplyDispenseStatus.INPROGRESS)
+    public String toCode(SupplyDispenseStatus code) {
+      if (code == SupplyDispenseStatus.INPROGRESS)
         return "in-progress";
-      if (code == ValuesetSupplyDispenseStatus.DISPENSED)
+      if (code == SupplyDispenseStatus.DISPENSED)
         return "dispensed";
-      if (code == ValuesetSupplyDispenseStatus.ABANDONED)
+      if (code == SupplyDispenseStatus.ABANDONED)
         return "abandoned";
       return "?";
       }
@@ -260,7 +260,7 @@ public class Supply extends DomainResource {
          */
         @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="in-progress | dispensed | abandoned", formalDefinition="A code specifying the state of the dispense event." )
-        protected Enumeration<ValuesetSupplyDispenseStatus> status;
+        protected Enumeration<SupplyDispenseStatus> status;
 
         /**
          * Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.
@@ -338,7 +338,7 @@ public class Supply extends DomainResource {
         protected List<Practitioner> receiverTarget;
 
 
-        private static final long serialVersionUID = -1941592649L;
+        private static final long serialVersionUID = 315252678L;
 
     /*
      * Constructor
@@ -374,12 +374,12 @@ public class Supply extends DomainResource {
         /**
          * @return {@link #status} (A code specifying the state of the dispense event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
-        public Enumeration<ValuesetSupplyDispenseStatus> getStatusElement() { 
+        public Enumeration<SupplyDispenseStatus> getStatusElement() { 
           if (this.status == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SupplyDispenseComponent.status");
             else if (Configuration.doAutoCreate())
-              this.status = new Enumeration<ValuesetSupplyDispenseStatus>(new ValuesetSupplyDispenseStatusEnumFactory()); // bb
+              this.status = new Enumeration<SupplyDispenseStatus>(new SupplyDispenseStatusEnumFactory()); // bb
           return this.status;
         }
 
@@ -394,7 +394,7 @@ public class Supply extends DomainResource {
         /**
          * @param value {@link #status} (A code specifying the state of the dispense event.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
-        public SupplyDispenseComponent setStatusElement(Enumeration<ValuesetSupplyDispenseStatus> value) { 
+        public SupplyDispenseComponent setStatusElement(Enumeration<SupplyDispenseStatus> value) { 
           this.status = value;
           return this;
         }
@@ -402,19 +402,19 @@ public class Supply extends DomainResource {
         /**
          * @return A code specifying the state of the dispense event.
          */
-        public ValuesetSupplyDispenseStatus getStatus() { 
+        public SupplyDispenseStatus getStatus() { 
           return this.status == null ? null : this.status.getValue();
         }
 
         /**
          * @param value A code specifying the state of the dispense event.
          */
-        public SupplyDispenseComponent setStatus(ValuesetSupplyDispenseStatus value) { 
+        public SupplyDispenseComponent setStatus(SupplyDispenseStatus value) { 
           if (value == null)
             this.status = null;
           else {
             if (this.status == null)
-              this.status = new Enumeration<ValuesetSupplyDispenseStatus>(new ValuesetSupplyDispenseStatusEnumFactory());
+              this.status = new Enumeration<SupplyDispenseStatus>(new SupplyDispenseStatusEnumFactory());
             this.status.setValue(value);
           }
           return this;
@@ -816,7 +816,7 @@ public class Supply extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="requested | dispensed | received | failed | cancelled", formalDefinition="Status of the supply request." )
-    protected Enumeration<ValuesetSupplyStatus> status;
+    protected Enumeration<SupplyStatus> status;
 
     /**
      * The item that is requested to be supplied.
@@ -849,7 +849,7 @@ public class Supply extends DomainResource {
     @Description(shortDefinition="Supply details", formalDefinition="Indicates the details of the dispense event such as the days supply and quantity of a supply dispensed." )
     protected List<SupplyDispenseComponent> dispense;
 
-    private static final long serialVersionUID = 1122115505L;
+    private static final long serialVersionUID = -1441571262L;
 
   /*
    * Constructor
@@ -909,12 +909,12 @@ public class Supply extends DomainResource {
     /**
      * @return {@link #status} (Status of the supply request.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<ValuesetSupplyStatus> getStatusElement() { 
+    public Enumeration<SupplyStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Supply.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<ValuesetSupplyStatus>(new ValuesetSupplyStatusEnumFactory()); // bb
+          this.status = new Enumeration<SupplyStatus>(new SupplyStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -929,7 +929,7 @@ public class Supply extends DomainResource {
     /**
      * @param value {@link #status} (Status of the supply request.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Supply setStatusElement(Enumeration<ValuesetSupplyStatus> value) { 
+    public Supply setStatusElement(Enumeration<SupplyStatus> value) { 
       this.status = value;
       return this;
     }
@@ -937,19 +937,19 @@ public class Supply extends DomainResource {
     /**
      * @return Status of the supply request.
      */
-    public ValuesetSupplyStatus getStatus() { 
+    public SupplyStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value Status of the supply request.
      */
-    public Supply setStatus(ValuesetSupplyStatus value) { 
+    public Supply setStatus(SupplyStatus value) { 
       if (value == null)
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<ValuesetSupplyStatus>(new ValuesetSupplyStatusEnumFactory());
+          this.status = new Enumeration<SupplyStatus>(new SupplyStatusEnumFactory());
         this.status.setValue(value);
       }
       return this;

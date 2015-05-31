@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class Questionnaire extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "";
-            case PUBLISHED: return "";
-            case RETIRED: return "";
+            case DRAFT: return "http://hl7.org.fhir/questionnaire-status";
+            case PUBLISHED: return "http://hl7.org.fhir/questionnaire-status";
+            case RETIRED: return "http://hl7.org.fhir/questionnaire-status";
             default: return "?";
           }
         }
@@ -134,51 +134,51 @@ public class Questionnaire extends DomainResource {
 
     public enum AnswerFormat {
         /**
-         * Answer is a yes/no answer.
+         * Answer is a yes/no answer
          */
         BOOLEAN, 
         /**
-         * Answer is a floating point number.
+         * Answer is a floating point number
          */
         DECIMAL, 
         /**
-         * Answer is an integer.
+         * Answer is an integer
          */
         INTEGER, 
         /**
-         * Answer is a date.
+         * Answer is a date
          */
         DATE, 
         /**
-         * Answer is a date and time.
+         * Answer is a date and time
          */
         DATETIME, 
         /**
-         * Answer is a system timestamp.
+         * Answer is a system timestamp
          */
         INSTANT, 
         /**
-         * Answer is a time independent of date.
+         * Answer is a time independent of date
          */
         TIME, 
         /**
-         * Answer is a short (few words to short sentence) free-text entry.
+         * Answer is a short (few words to short sentence) free-text entry
          */
         STRING, 
         /**
-         * Answer is a long (potentially multi-paragram) free-text entry.
+         * Answer is a long (potentially multi-paragram) free-text entry
          */
         TEXT, 
         /**
-         * Answer is a url (website, FTP site, etc.).
+         * Answer is a url (website, FTP site, etc.)
          */
         URL, 
         /**
-         * Answer is a choice from a list of options.
+         * Answer is a choice from a list of options
          */
         CHOICE, 
         /**
-         * Answer is a choice from a list of options or a free-text entry.
+         * Answer is a choice from a list of options or a free-text entry
          */
         OPENCHOICE, 
         /**
@@ -186,11 +186,11 @@ public class Questionnaire extends DomainResource {
          */
         ATTACHMENT, 
         /**
-         * Answer is a reference to another resource (practitioner, organization, etc.).
+         * Answer is a reference to another resource (practitioner, organization, etc.)
          */
         REFERENCE, 
         /**
-         * Answer is a combination of a numeric value and unit.
+         * Answer is a combination of a numeric value and unit
          */
         QUANTITY, 
         /**
@@ -254,41 +254,41 @@ public class Questionnaire extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case BOOLEAN: return "";
-            case DECIMAL: return "";
-            case INTEGER: return "";
-            case DATE: return "";
-            case DATETIME: return "";
-            case INSTANT: return "";
-            case TIME: return "";
-            case STRING: return "";
-            case TEXT: return "";
-            case URL: return "";
-            case CHOICE: return "";
-            case OPENCHOICE: return "";
-            case ATTACHMENT: return "";
-            case REFERENCE: return "";
-            case QUANTITY: return "";
+            case BOOLEAN: return "http://hl7.org.fhir/answer-format";
+            case DECIMAL: return "http://hl7.org.fhir/answer-format";
+            case INTEGER: return "http://hl7.org.fhir/answer-format";
+            case DATE: return "http://hl7.org.fhir/answer-format";
+            case DATETIME: return "http://hl7.org.fhir/answer-format";
+            case INSTANT: return "http://hl7.org.fhir/answer-format";
+            case TIME: return "http://hl7.org.fhir/answer-format";
+            case STRING: return "http://hl7.org.fhir/answer-format";
+            case TEXT: return "http://hl7.org.fhir/answer-format";
+            case URL: return "http://hl7.org.fhir/answer-format";
+            case CHOICE: return "http://hl7.org.fhir/answer-format";
+            case OPENCHOICE: return "http://hl7.org.fhir/answer-format";
+            case ATTACHMENT: return "http://hl7.org.fhir/answer-format";
+            case REFERENCE: return "http://hl7.org.fhir/answer-format";
+            case QUANTITY: return "http://hl7.org.fhir/answer-format";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case BOOLEAN: return "Answer is a yes/no answer.";
-            case DECIMAL: return "Answer is a floating point number.";
-            case INTEGER: return "Answer is an integer.";
-            case DATE: return "Answer is a date.";
-            case DATETIME: return "Answer is a date and time.";
-            case INSTANT: return "Answer is a system timestamp.";
-            case TIME: return "Answer is a time independent of date.";
-            case STRING: return "Answer is a short (few words to short sentence) free-text entry.";
-            case TEXT: return "Answer is a long (potentially multi-paragram) free-text entry.";
-            case URL: return "Answer is a url (website, FTP site, etc.).";
-            case CHOICE: return "Answer is a choice from a list of options.";
-            case OPENCHOICE: return "Answer is a choice from a list of options or a free-text entry.";
+            case BOOLEAN: return "Answer is a yes/no answer";
+            case DECIMAL: return "Answer is a floating point number";
+            case INTEGER: return "Answer is an integer";
+            case DATE: return "Answer is a date";
+            case DATETIME: return "Answer is a date and time";
+            case INSTANT: return "Answer is a system timestamp";
+            case TIME: return "Answer is a time independent of date";
+            case STRING: return "Answer is a short (few words to short sentence) free-text entry";
+            case TEXT: return "Answer is a long (potentially multi-paragram) free-text entry";
+            case URL: return "Answer is a url (website, FTP site, etc.)";
+            case CHOICE: return "Answer is a choice from a list of options";
+            case OPENCHOICE: return "Answer is a choice from a list of options or a free-text entry";
             case ATTACHMENT: return "Answer is binary content such as a image, PDF, etc.";
-            case REFERENCE: return "Answer is a reference to another resource (practitioner, organization, etc.).";
-            case QUANTITY: return "Answer is a combination of a numeric value and unit.";
+            case REFERENCE: return "Answer is a reference to another resource (practitioner, organization, etc.)";
+            case QUANTITY: return "Answer is a combination of a numeric value and unit";
             default: return "?";
           }
         }

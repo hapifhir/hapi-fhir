@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,27 +47,27 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="VisionPrescription", profile="http://hl7.org/fhir/Profile/VisionPrescription")
 public class VisionPrescription extends DomainResource {
 
-    public enum EyeCodes {
+    public enum VisionEyes {
         /**
-         * right eye.
+         * right eye
          */
         RIGHT, 
         /**
-         * left eye.
+         * left eye
          */
         LEFT, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static EyeCodes fromCode(String codeString) throws Exception {
+        public static VisionEyes fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("right".equals(codeString))
           return RIGHT;
         if ("left".equals(codeString))
           return LEFT;
-        throw new Exception("Unknown EyeCodes code '"+codeString+"'");
+        throw new Exception("Unknown VisionEyes code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -78,15 +78,15 @@ public class VisionPrescription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case RIGHT: return "";
-            case LEFT: return "";
+            case RIGHT: return "http://hl7.org.fhir/eye-codes";
+            case LEFT: return "http://hl7.org.fhir/eye-codes";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case RIGHT: return "right eye.";
-            case LEFT: return "left eye.";
+            case RIGHT: return "right eye";
+            case LEFT: return "left eye";
             default: return "?";
           }
         }
@@ -99,48 +99,48 @@ public class VisionPrescription extends DomainResource {
         }
     }
 
-  public static class EyeCodesEnumFactory implements EnumFactory<EyeCodes> {
-    public EyeCodes fromCode(String codeString) throws IllegalArgumentException {
+  public static class VisionEyesEnumFactory implements EnumFactory<VisionEyes> {
+    public VisionEyes fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("right".equals(codeString))
-          return EyeCodes.RIGHT;
+          return VisionEyes.RIGHT;
         if ("left".equals(codeString))
-          return EyeCodes.LEFT;
-        throw new IllegalArgumentException("Unknown EyeCodes code '"+codeString+"'");
+          return VisionEyes.LEFT;
+        throw new IllegalArgumentException("Unknown VisionEyes code '"+codeString+"'");
         }
-    public String toCode(EyeCodes code) {
-      if (code == EyeCodes.RIGHT)
+    public String toCode(VisionEyes code) {
+      if (code == VisionEyes.RIGHT)
         return "right";
-      if (code == EyeCodes.LEFT)
+      if (code == VisionEyes.LEFT)
         return "left";
       return "?";
       }
     }
 
-    public enum BaseCodes {
+    public enum VisionBase {
         /**
-         * top.
+         * top
          */
         UP, 
         /**
-         * bottom.
+         * bottom
          */
         DOWN, 
         /**
-         * inner edge.
+         * inner edge
          */
         IN, 
         /**
-         * outer edge.
+         * outer edge
          */
         OUT, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static BaseCodes fromCode(String codeString) throws Exception {
+        public static VisionBase fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("up".equals(codeString))
@@ -151,7 +151,7 @@ public class VisionPrescription extends DomainResource {
           return IN;
         if ("out".equals(codeString))
           return OUT;
-        throw new Exception("Unknown BaseCodes code '"+codeString+"'");
+        throw new Exception("Unknown VisionBase code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -164,19 +164,19 @@ public class VisionPrescription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UP: return "";
-            case DOWN: return "";
-            case IN: return "";
-            case OUT: return "";
+            case UP: return "http://hl7.org.fhir/base-codes";
+            case DOWN: return "http://hl7.org.fhir/base-codes";
+            case IN: return "http://hl7.org.fhir/base-codes";
+            case OUT: return "http://hl7.org.fhir/base-codes";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case UP: return "top.";
-            case DOWN: return "bottom.";
-            case IN: return "inner edge.";
-            case OUT: return "outer edge.";
+            case UP: return "top";
+            case DOWN: return "bottom";
+            case IN: return "inner edge";
+            case OUT: return "outer edge";
             default: return "?";
           }
         }
@@ -191,29 +191,29 @@ public class VisionPrescription extends DomainResource {
         }
     }
 
-  public static class BaseCodesEnumFactory implements EnumFactory<BaseCodes> {
-    public BaseCodes fromCode(String codeString) throws IllegalArgumentException {
+  public static class VisionBaseEnumFactory implements EnumFactory<VisionBase> {
+    public VisionBase fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("up".equals(codeString))
-          return BaseCodes.UP;
+          return VisionBase.UP;
         if ("down".equals(codeString))
-          return BaseCodes.DOWN;
+          return VisionBase.DOWN;
         if ("in".equals(codeString))
-          return BaseCodes.IN;
+          return VisionBase.IN;
         if ("out".equals(codeString))
-          return BaseCodes.OUT;
-        throw new IllegalArgumentException("Unknown BaseCodes code '"+codeString+"'");
+          return VisionBase.OUT;
+        throw new IllegalArgumentException("Unknown VisionBase code '"+codeString+"'");
         }
-    public String toCode(BaseCodes code) {
-      if (code == BaseCodes.UP)
+    public String toCode(VisionBase code) {
+      if (code == VisionBase.UP)
         return "up";
-      if (code == BaseCodes.DOWN)
+      if (code == VisionBase.DOWN)
         return "down";
-      if (code == BaseCodes.IN)
+      if (code == VisionBase.IN)
         return "in";
-      if (code == BaseCodes.OUT)
+      if (code == VisionBase.OUT)
         return "out";
       return "?";
       }
@@ -233,7 +233,7 @@ public class VisionPrescription extends DomainResource {
          */
         @Child(name = "eye", type = {CodeType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="right | left", formalDefinition="The eye for which the lens applies." )
-        protected Enumeration<EyeCodes> eye;
+        protected Enumeration<VisionEyes> eye;
 
         /**
          * Lens power measured in diopters (0.25 units).
@@ -268,7 +268,7 @@ public class VisionPrescription extends DomainResource {
          */
         @Child(name = "base", type = {CodeType.class}, order=7, min=0, max=1)
         @Description(shortDefinition="up | down | in | out", formalDefinition="The relative base, or reference lens edge, for the prism." )
-        protected Enumeration<BaseCodes> base;
+        protected Enumeration<VisionBase> base;
 
         /**
          * Power adjustment for multifocal lenses measured in diopters (0.25 units).
@@ -326,7 +326,7 @@ public class VisionPrescription extends DomainResource {
         @Description(shortDefinition="Notes for coatings", formalDefinition="Notes for special requirements such as coatings and lens materials." )
         protected StringType notes;
 
-        private static final long serialVersionUID = 548964753L;
+        private static final long serialVersionUID = -946795088L;
 
     /*
      * Constructor
@@ -370,12 +370,12 @@ public class VisionPrescription extends DomainResource {
         /**
          * @return {@link #eye} (The eye for which the lens applies.). This is the underlying object with id, value and extensions. The accessor "getEye" gives direct access to the value
          */
-        public Enumeration<EyeCodes> getEyeElement() { 
+        public Enumeration<VisionEyes> getEyeElement() { 
           if (this.eye == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create VisionPrescriptionDispenseComponent.eye");
             else if (Configuration.doAutoCreate())
-              this.eye = new Enumeration<EyeCodes>(new EyeCodesEnumFactory()); // bb
+              this.eye = new Enumeration<VisionEyes>(new VisionEyesEnumFactory()); // bb
           return this.eye;
         }
 
@@ -390,7 +390,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * @param value {@link #eye} (The eye for which the lens applies.). This is the underlying object with id, value and extensions. The accessor "getEye" gives direct access to the value
          */
-        public VisionPrescriptionDispenseComponent setEyeElement(Enumeration<EyeCodes> value) { 
+        public VisionPrescriptionDispenseComponent setEyeElement(Enumeration<VisionEyes> value) { 
           this.eye = value;
           return this;
         }
@@ -398,19 +398,19 @@ public class VisionPrescription extends DomainResource {
         /**
          * @return The eye for which the lens applies.
          */
-        public EyeCodes getEye() { 
+        public VisionEyes getEye() { 
           return this.eye == null ? null : this.eye.getValue();
         }
 
         /**
          * @param value The eye for which the lens applies.
          */
-        public VisionPrescriptionDispenseComponent setEye(EyeCodes value) { 
+        public VisionPrescriptionDispenseComponent setEye(VisionEyes value) { 
           if (value == null)
             this.eye = null;
           else {
             if (this.eye == null)
-              this.eye = new Enumeration<EyeCodes>(new EyeCodesEnumFactory());
+              this.eye = new Enumeration<VisionEyes>(new VisionEyesEnumFactory());
             this.eye.setValue(value);
           }
           return this;
@@ -611,12 +611,12 @@ public class VisionPrescription extends DomainResource {
         /**
          * @return {@link #base} (The relative base, or reference lens edge, for the prism.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
          */
-        public Enumeration<BaseCodes> getBaseElement() { 
+        public Enumeration<VisionBase> getBaseElement() { 
           if (this.base == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create VisionPrescriptionDispenseComponent.base");
             else if (Configuration.doAutoCreate())
-              this.base = new Enumeration<BaseCodes>(new BaseCodesEnumFactory()); // bb
+              this.base = new Enumeration<VisionBase>(new VisionBaseEnumFactory()); // bb
           return this.base;
         }
 
@@ -631,7 +631,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * @param value {@link #base} (The relative base, or reference lens edge, for the prism.). This is the underlying object with id, value and extensions. The accessor "getBase" gives direct access to the value
          */
-        public VisionPrescriptionDispenseComponent setBaseElement(Enumeration<BaseCodes> value) { 
+        public VisionPrescriptionDispenseComponent setBaseElement(Enumeration<VisionBase> value) { 
           this.base = value;
           return this;
         }
@@ -639,19 +639,19 @@ public class VisionPrescription extends DomainResource {
         /**
          * @return The relative base, or reference lens edge, for the prism.
          */
-        public BaseCodes getBase() { 
+        public VisionBase getBase() { 
           return this.base == null ? null : this.base.getValue();
         }
 
         /**
          * @param value The relative base, or reference lens edge, for the prism.
          */
-        public VisionPrescriptionDispenseComponent setBase(BaseCodes value) { 
+        public VisionPrescriptionDispenseComponent setBase(VisionBase value) { 
           if (value == null)
             this.base = null;
           else {
             if (this.base == null)
-              this.base = new Enumeration<BaseCodes>(new BaseCodesEnumFactory());
+              this.base = new Enumeration<VisionBase>(new VisionBaseEnumFactory());
             this.base.setValue(value);
           }
           return this;

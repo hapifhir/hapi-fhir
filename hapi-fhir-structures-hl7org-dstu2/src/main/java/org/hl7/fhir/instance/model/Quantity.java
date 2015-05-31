@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,19 +48,19 @@ public class Quantity extends Type implements ICompositeType {
 
     public enum QuantityComparator {
         /**
-         * The actual value is less than the given value.
+         * The actual value is less than the given value
          */
         LESS_THAN, 
         /**
-         * The actual value is less than or equal to the given value.
+         * The actual value is less than or equal to the given value
          */
         LESS_OR_EQUAL, 
         /**
-         * The actual value is greater than or equal to the given value.
+         * The actual value is greater than or equal to the given value
          */
         GREATER_OR_EQUAL, 
         /**
-         * The actual value is greater than the given value.
+         * The actual value is greater than the given value
          */
         GREATER_THAN, 
         /**
@@ -91,19 +91,19 @@ public class Quantity extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case LESS_THAN: return "";
-            case LESS_OR_EQUAL: return "";
-            case GREATER_OR_EQUAL: return "";
-            case GREATER_THAN: return "";
+            case LESS_THAN: return "http://hl7.org.fhir/quantity-comparator";
+            case LESS_OR_EQUAL: return "http://hl7.org.fhir/quantity-comparator";
+            case GREATER_OR_EQUAL: return "http://hl7.org.fhir/quantity-comparator";
+            case GREATER_THAN: return "http://hl7.org.fhir/quantity-comparator";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case LESS_THAN: return "The actual value is less than the given value.";
-            case LESS_OR_EQUAL: return "The actual value is less than or equal to the given value.";
-            case GREATER_OR_EQUAL: return "The actual value is greater than or equal to the given value.";
-            case GREATER_THAN: return "The actual value is greater than the given value.";
+            case LESS_THAN: return "The actual value is less than the given value";
+            case LESS_OR_EQUAL: return "The actual value is less than or equal to the given value";
+            case GREATER_OR_EQUAL: return "The actual value is greater than or equal to the given value";
+            case GREATER_THAN: return "The actual value is greater than the given value";
             default: return "?";
           }
         }

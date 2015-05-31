@@ -29,11 +29,12 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Child;
@@ -46,7 +47,7 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
 public class TestScript extends DomainResource {
 
-    public enum TestOperationCodes {
+    public enum TestOperationType {
         /**
          * Read the current state of the resource.
          */
@@ -111,7 +112,7 @@ public class TestScript extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static TestOperationCodes fromCode(String codeString) throws Exception {
+        public static TestOperationType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("read".equals(codeString))
@@ -144,7 +145,7 @@ public class TestScript extends DomainResource {
           return ASSERTIONFALSE;
         if ("assertion_warning".equals(codeString))
           return ASSERTIONWARNING;
-        throw new Exception("Unknown TestOperationCodes code '"+codeString+"'");
+        throw new Exception("Unknown TestOperationType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -168,21 +169,21 @@ public class TestScript extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case READ: return "";
-            case VREAD: return "";
-            case UPDATE: return "";
-            case DELETE: return "";
-            case HISTORY: return "";
-            case CREATE: return "";
-            case SEARCH: return "";
-            case TRANSACTION: return "";
-            case CONFORMANCE: return "";
-            case TAGS: return "";
-            case MAILBOX: return "";
-            case DOCUMENT: return "";
-            case ASSERTION: return "";
-            case ASSERTIONFALSE: return "";
-            case ASSERTIONWARNING: return "";
+            case READ: return "http://hl7.org.fhir/test-operation-codes";
+            case VREAD: return "http://hl7.org.fhir/test-operation-codes";
+            case UPDATE: return "http://hl7.org.fhir/test-operation-codes";
+            case DELETE: return "http://hl7.org.fhir/test-operation-codes";
+            case HISTORY: return "http://hl7.org.fhir/test-operation-codes";
+            case CREATE: return "http://hl7.org.fhir/test-operation-codes";
+            case SEARCH: return "http://hl7.org.fhir/test-operation-codes";
+            case TRANSACTION: return "http://hl7.org.fhir/test-operation-codes";
+            case CONFORMANCE: return "http://hl7.org.fhir/test-operation-codes";
+            case TAGS: return "http://hl7.org.fhir/test-operation-codes";
+            case MAILBOX: return "http://hl7.org.fhir/test-operation-codes";
+            case DOCUMENT: return "http://hl7.org.fhir/test-operation-codes";
+            case ASSERTION: return "http://hl7.org.fhir/test-operation-codes";
+            case ASSERTIONFALSE: return "http://hl7.org.fhir/test-operation-codes";
+            case ASSERTIONWARNING: return "http://hl7.org.fhir/test-operation-codes";
             default: return "?";
           }
         }
@@ -228,73 +229,73 @@ public class TestScript extends DomainResource {
         }
     }
 
-  public static class TestOperationCodesEnumFactory implements EnumFactory<TestOperationCodes> {
-    public TestOperationCodes fromCode(String codeString) throws IllegalArgumentException {
+  public static class TestOperationTypeEnumFactory implements EnumFactory<TestOperationType> {
+    public TestOperationType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("read".equals(codeString))
-          return TestOperationCodes.READ;
+          return TestOperationType.READ;
         if ("vread".equals(codeString))
-          return TestOperationCodes.VREAD;
+          return TestOperationType.VREAD;
         if ("update".equals(codeString))
-          return TestOperationCodes.UPDATE;
+          return TestOperationType.UPDATE;
         if ("delete".equals(codeString))
-          return TestOperationCodes.DELETE;
+          return TestOperationType.DELETE;
         if ("history".equals(codeString))
-          return TestOperationCodes.HISTORY;
+          return TestOperationType.HISTORY;
         if ("create".equals(codeString))
-          return TestOperationCodes.CREATE;
+          return TestOperationType.CREATE;
         if ("search".equals(codeString))
-          return TestOperationCodes.SEARCH;
+          return TestOperationType.SEARCH;
         if ("transaction".equals(codeString))
-          return TestOperationCodes.TRANSACTION;
+          return TestOperationType.TRANSACTION;
         if ("conformance".equals(codeString))
-          return TestOperationCodes.CONFORMANCE;
+          return TestOperationType.CONFORMANCE;
         if ("tags".equals(codeString))
-          return TestOperationCodes.TAGS;
+          return TestOperationType.TAGS;
         if ("mailbox".equals(codeString))
-          return TestOperationCodes.MAILBOX;
+          return TestOperationType.MAILBOX;
         if ("document".equals(codeString))
-          return TestOperationCodes.DOCUMENT;
+          return TestOperationType.DOCUMENT;
         if ("assertion".equals(codeString))
-          return TestOperationCodes.ASSERTION;
+          return TestOperationType.ASSERTION;
         if ("assertion_false".equals(codeString))
-          return TestOperationCodes.ASSERTIONFALSE;
+          return TestOperationType.ASSERTIONFALSE;
         if ("assertion_warning".equals(codeString))
-          return TestOperationCodes.ASSERTIONWARNING;
-        throw new IllegalArgumentException("Unknown TestOperationCodes code '"+codeString+"'");
+          return TestOperationType.ASSERTIONWARNING;
+        throw new IllegalArgumentException("Unknown TestOperationType code '"+codeString+"'");
         }
-    public String toCode(TestOperationCodes code) {
-      if (code == TestOperationCodes.READ)
+    public String toCode(TestOperationType code) {
+      if (code == TestOperationType.READ)
         return "read";
-      if (code == TestOperationCodes.VREAD)
+      if (code == TestOperationType.VREAD)
         return "vread";
-      if (code == TestOperationCodes.UPDATE)
+      if (code == TestOperationType.UPDATE)
         return "update";
-      if (code == TestOperationCodes.DELETE)
+      if (code == TestOperationType.DELETE)
         return "delete";
-      if (code == TestOperationCodes.HISTORY)
+      if (code == TestOperationType.HISTORY)
         return "history";
-      if (code == TestOperationCodes.CREATE)
+      if (code == TestOperationType.CREATE)
         return "create";
-      if (code == TestOperationCodes.SEARCH)
+      if (code == TestOperationType.SEARCH)
         return "search";
-      if (code == TestOperationCodes.TRANSACTION)
+      if (code == TestOperationType.TRANSACTION)
         return "transaction";
-      if (code == TestOperationCodes.CONFORMANCE)
+      if (code == TestOperationType.CONFORMANCE)
         return "conformance";
-      if (code == TestOperationCodes.TAGS)
+      if (code == TestOperationType.TAGS)
         return "tags";
-      if (code == TestOperationCodes.MAILBOX)
+      if (code == TestOperationType.MAILBOX)
         return "mailbox";
-      if (code == TestOperationCodes.DOCUMENT)
+      if (code == TestOperationType.DOCUMENT)
         return "document";
-      if (code == TestOperationCodes.ASSERTION)
+      if (code == TestOperationType.ASSERTION)
         return "assertion";
-      if (code == TestOperationCodes.ASSERTIONFALSE)
+      if (code == TestOperationType.ASSERTIONFALSE)
         return "assertion_false";
-      if (code == TestOperationCodes.ASSERTIONWARNING)
+      if (code == TestOperationType.ASSERTIONWARNING)
         return "assertion_warning";
       return "?";
       }
@@ -302,11 +303,11 @@ public class TestScript extends DomainResource {
 
     public enum ContentType {
         /**
-         * XML content-type corresponding to the application/xml+fhir mime-type.
+         * XML content-type corresponding to the application/xml+fhir mime-type
          */
         XML, 
         /**
-         * JSON content-type corresponding to the application/json+fhir mime-type.
+         * JSON content-type corresponding to the application/json+fhir mime-type
          */
         JSON, 
         /**
@@ -331,15 +332,15 @@ public class TestScript extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case XML: return "";
-            case JSON: return "";
+            case XML: return "http://hl7.org.fhir/content-type";
+            case JSON: return "http://hl7.org.fhir/content-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case XML: return "XML content-type corresponding to the application/xml+fhir mime-type.";
-            case JSON: return "JSON content-type corresponding to the application/json+fhir mime-type.";
+            case XML: return "XML content-type corresponding to the application/xml+fhir mime-type";
+            case JSON: return "JSON content-type corresponding to the application/json+fhir mime-type";
             default: return "?";
           }
         }
@@ -724,7 +725,7 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning", formalDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning." )
-        protected Enumeration<TestOperationCodes> type;
+        protected Enumeration<TestOperationType> type;
 
         /**
          * The internal id of the fixture used as the body of any operation.type that results in a PUT or POST.
@@ -768,7 +769,7 @@ public class TestScript extends DomainResource {
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation." )
         protected Enumeration<ContentType> contentType;
 
-        private static final long serialVersionUID = -1217888318L;
+        private static final long serialVersionUID = 1788056082L;
 
     /*
      * Constructor
@@ -780,7 +781,7 @@ public class TestScript extends DomainResource {
     /*
      * Constructor
      */
-      public TestScriptSetupOperationComponent(Enumeration<TestOperationCodes> type) {
+      public TestScriptSetupOperationComponent(Enumeration<TestOperationType> type) {
         super();
         this.type = type;
       }
@@ -788,12 +789,12 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #type} (read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public Enumeration<TestOperationCodes> getTypeElement() { 
+        public Enumeration<TestOperationType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TestScriptSetupOperationComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<TestOperationCodes>(new TestOperationCodesEnumFactory()); // bb
+              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory()); // bb
           return this.type;
         }
 
@@ -808,7 +809,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #type} (read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public TestScriptSetupOperationComponent setTypeElement(Enumeration<TestOperationCodes> value) { 
+        public TestScriptSetupOperationComponent setTypeElement(Enumeration<TestOperationType> value) { 
           this.type = value;
           return this;
         }
@@ -816,16 +817,16 @@ public class TestScript extends DomainResource {
         /**
          * @return read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.
          */
-        public TestOperationCodes getType() { 
+        public TestOperationType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
          * @param value read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.
          */
-        public TestScriptSetupOperationComponent setType(TestOperationCodes value) { 
+        public TestScriptSetupOperationComponent setType(TestOperationType value) { 
             if (this.type == null)
-              this.type = new Enumeration<TestOperationCodes>(new TestOperationCodesEnumFactory());
+              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory());
             this.type.setValue(value);
           return this;
         }
@@ -2263,7 +2264,7 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning", formalDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning." )
-        protected Enumeration<TestOperationCodes> type;
+        protected Enumeration<TestOperationType> type;
 
         /**
          * The internal id of the fixture used as the body of any operation.type that results in a PUT or POST.
@@ -2307,7 +2308,7 @@ public class TestScript extends DomainResource {
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation." )
         protected Enumeration<ContentType> contentType;
 
-        private static final long serialVersionUID = -1217888318L;
+        private static final long serialVersionUID = 1788056082L;
 
     /*
      * Constructor
@@ -2319,7 +2320,7 @@ public class TestScript extends DomainResource {
     /*
      * Constructor
      */
-      public TestScriptTestOperationComponent(Enumeration<TestOperationCodes> type) {
+      public TestScriptTestOperationComponent(Enumeration<TestOperationType> type) {
         super();
         this.type = type;
       }
@@ -2327,12 +2328,12 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #type} (read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public Enumeration<TestOperationCodes> getTypeElement() { 
+        public Enumeration<TestOperationType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TestScriptTestOperationComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<TestOperationCodes>(new TestOperationCodesEnumFactory()); // bb
+              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory()); // bb
           return this.type;
         }
 
@@ -2347,7 +2348,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #type} (read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public TestScriptTestOperationComponent setTypeElement(Enumeration<TestOperationCodes> value) { 
+        public TestScriptTestOperationComponent setTypeElement(Enumeration<TestOperationType> value) { 
           this.type = value;
           return this;
         }
@@ -2355,16 +2356,16 @@ public class TestScript extends DomainResource {
         /**
          * @return read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.
          */
-        public TestOperationCodes getType() { 
+        public TestOperationType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
          * @param value read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.
          */
-        public TestScriptTestOperationComponent setType(TestOperationCodes value) { 
+        public TestScriptTestOperationComponent setType(TestOperationType value) { 
             if (this.type == null)
-              this.type = new Enumeration<TestOperationCodes>(new TestOperationCodesEnumFactory());
+              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory());
             this.type.setValue(value);
           return this;
         }
@@ -2832,7 +2833,7 @@ public class TestScript extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning", formalDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning." )
-        protected Enumeration<TestOperationCodes> type;
+        protected Enumeration<TestOperationType> type;
 
         /**
          * The internal id of the fixture used as the body of any operation.type that results in a PUT or POST.
@@ -2876,7 +2877,7 @@ public class TestScript extends DomainResource {
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation." )
         protected Enumeration<ContentType> contentType;
 
-        private static final long serialVersionUID = -1217888318L;
+        private static final long serialVersionUID = 1788056082L;
 
     /*
      * Constructor
@@ -2888,7 +2889,7 @@ public class TestScript extends DomainResource {
     /*
      * Constructor
      */
-      public TestScriptTeardownOperationComponent(Enumeration<TestOperationCodes> type) {
+      public TestScriptTeardownOperationComponent(Enumeration<TestOperationType> type) {
         super();
         this.type = type;
       }
@@ -2896,12 +2897,12 @@ public class TestScript extends DomainResource {
         /**
          * @return {@link #type} (read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public Enumeration<TestOperationCodes> getTypeElement() { 
+        public Enumeration<TestOperationType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TestScriptTeardownOperationComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<TestOperationCodes>(new TestOperationCodesEnumFactory()); // bb
+              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory()); // bb
           return this.type;
         }
 
@@ -2916,7 +2917,7 @@ public class TestScript extends DomainResource {
         /**
          * @param value {@link #type} (read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public TestScriptTeardownOperationComponent setTypeElement(Enumeration<TestOperationCodes> value) { 
+        public TestScriptTeardownOperationComponent setTypeElement(Enumeration<TestOperationType> value) { 
           this.type = value;
           return this;
         }
@@ -2924,16 +2925,16 @@ public class TestScript extends DomainResource {
         /**
          * @return read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.
          */
-        public TestOperationCodes getType() { 
+        public TestOperationType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
          * @param value read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.
          */
-        public TestScriptTeardownOperationComponent setType(TestOperationCodes value) { 
+        public TestScriptTeardownOperationComponent setType(TestOperationType value) { 
             if (this.type == null)
-              this.type = new Enumeration<TestOperationCodes>(new TestOperationCodesEnumFactory());
+              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory());
             this.type.setValue(value);
           return this;
         }

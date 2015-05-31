@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,31 +48,31 @@ public class HealthcareService extends DomainResource {
 
     public enum DaysOfWeek {
         /**
-         * Monday.
+         * Monday
          */
         MON, 
         /**
-         * Tuesday.
+         * Tuesday
          */
         TUE, 
         /**
-         * Wednesday.
+         * Wednesday
          */
         WED, 
         /**
-         * Thursday.
+         * Thursday
          */
         THU, 
         /**
-         * Friday.
+         * Friday
          */
         FRI, 
         /**
-         * Saturday.
+         * Saturday
          */
         SAT, 
         /**
-         * Sunday.
+         * Sunday
          */
         SUN, 
         /**
@@ -112,25 +112,25 @@ public class HealthcareService extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case MON: return "";
-            case TUE: return "";
-            case WED: return "";
-            case THU: return "";
-            case FRI: return "";
-            case SAT: return "";
-            case SUN: return "";
+            case MON: return "http://hl7.org.fhir/days-of-week";
+            case TUE: return "http://hl7.org.fhir/days-of-week";
+            case WED: return "http://hl7.org.fhir/days-of-week";
+            case THU: return "http://hl7.org.fhir/days-of-week";
+            case FRI: return "http://hl7.org.fhir/days-of-week";
+            case SAT: return "http://hl7.org.fhir/days-of-week";
+            case SUN: return "http://hl7.org.fhir/days-of-week";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case MON: return "Monday.";
-            case TUE: return "Tuesday.";
-            case WED: return "Wednesday.";
-            case THU: return "Thursday.";
-            case FRI: return "Friday.";
-            case SAT: return "Saturday.";
-            case SUN: return "Sunday.";
+            case MON: return "Monday";
+            case TUE: return "Tuesday";
+            case WED: return "Wednesday";
+            case THU: return "Thursday";
+            case FRI: return "Friday";
+            case SAT: return "Saturday";
+            case SUN: return "Sunday";
             default: return "?";
           }
         }

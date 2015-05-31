@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,11 +48,11 @@ public class Medication extends DomainResource {
 
     public enum MedicationKind {
         /**
-         * The medication is a product.
+         * The medication is a product
          */
         PRODUCT, 
         /**
-         * The medication is a package - a contained group of one of more products.
+         * The medication is a package - a contained group of one of more products
          */
         PACKAGE, 
         /**
@@ -77,15 +77,15 @@ public class Medication extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PRODUCT: return "";
-            case PACKAGE: return "";
+            case PRODUCT: return "http://hl7.org.fhir/medication-kind";
+            case PACKAGE: return "http://hl7.org.fhir/medication-kind";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PRODUCT: return "The medication is a product.";
-            case PACKAGE: return "The medication is a package - a contained group of one of more products.";
+            case PRODUCT: return "The medication is a product";
+            case PACKAGE: return "The medication is a package - a contained group of one of more products";
             default: return "?";
           }
         }
@@ -945,7 +945,7 @@ public class Medication extends DomainResource {
     /**
      * Information that only applies to packages (not products).
      */
-    @Child(name = "package_", type = {}, order=6, min=0, max=1)
+    @Child(name = "package", type = {}, order=6, min=0, max=1)
     @Description(shortDefinition="Details about packaged medications", formalDefinition="Information that only applies to packages (not products)." )
     protected MedicationPackageComponent package_;
 

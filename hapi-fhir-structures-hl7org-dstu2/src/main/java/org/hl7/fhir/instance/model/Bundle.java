@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,31 +49,31 @@ public class Bundle extends Resource implements IBaseBundle {
 
     public enum BundleType {
         /**
-         * The bundle is a document. The first resource is a Composition.
+         * The bundle is a document. The first resource is a Composition
          */
         DOCUMENT, 
         /**
-         * The bundle is a message. The first resource is a MessageHeader.
+         * The bundle is a message. The first resource is a MessageHeader
          */
         MESSAGE, 
         /**
-         * The bundle is a transaction - intended to be processed by a server as an atomic commit.
+         * The bundle is a transaction - intended to be processed by a server as an atomic commit
          */
         TRANSACTION, 
         /**
-         * The bundle is a transaction response.
+         * The bundle is a transaction response
          */
         TRANSACTIONRESPONSE, 
         /**
-         * The bundle is a list of resources from a _history interaction on a server.
+         * The bundle is a list of resources from a _history interaction on a server
          */
         HISTORY, 
         /**
-         * The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.
+         * The bundle is a list of resources returned as a result of a search/query interaction, operation, or message
          */
         SEARCHSET, 
         /**
-         * The bundle is a set of resources collected into a single document for ease of distribution.
+         * The bundle is a set of resources collected into a single document for ease of distribution
          */
         COLLECTION, 
         /**
@@ -113,25 +113,25 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getSystem() {
           switch (this) {
-            case DOCUMENT: return "";
-            case MESSAGE: return "";
-            case TRANSACTION: return "";
-            case TRANSACTIONRESPONSE: return "";
-            case HISTORY: return "";
-            case SEARCHSET: return "";
-            case COLLECTION: return "";
+            case DOCUMENT: return "http://hl7.org.fhir/bundle-type";
+            case MESSAGE: return "http://hl7.org.fhir/bundle-type";
+            case TRANSACTION: return "http://hl7.org.fhir/bundle-type";
+            case TRANSACTIONRESPONSE: return "http://hl7.org.fhir/bundle-type";
+            case HISTORY: return "http://hl7.org.fhir/bundle-type";
+            case SEARCHSET: return "http://hl7.org.fhir/bundle-type";
+            case COLLECTION: return "http://hl7.org.fhir/bundle-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DOCUMENT: return "The bundle is a document. The first resource is a Composition.";
-            case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
-            case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
-            case TRANSACTIONRESPONSE: return "The bundle is a transaction response.";
-            case HISTORY: return "The bundle is a list of resources from a _history interaction on a server.";
-            case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
-            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution.";
+            case DOCUMENT: return "The bundle is a document. The first resource is a Composition";
+            case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader";
+            case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit";
+            case TRANSACTIONRESPONSE: return "The bundle is a transaction response";
+            case HISTORY: return "The bundle is a list of resources from a _history interaction on a server";
+            case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message";
+            case COLLECTION: return "The bundle is a set of resources collected into a single document for ease of distribution";
             default: return "?";
           }
         }
@@ -191,11 +191,11 @@ public class Bundle extends Resource implements IBaseBundle {
 
     public enum SearchEntryMode {
         /**
-         * This resource matched the search specification.
+         * This resource matched the search specification
          */
         MATCH, 
         /**
-         * This resource is returned because it is referred to from another resource in the search set.
+         * This resource is returned because it is referred to from another resource in the search set
          */
         INCLUDE, 
         /**
@@ -220,15 +220,15 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getSystem() {
           switch (this) {
-            case MATCH: return "";
-            case INCLUDE: return "";
+            case MATCH: return "http://hl7.org.fhir/search-entry-mode";
+            case INCLUDE: return "http://hl7.org.fhir/search-entry-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case MATCH: return "This resource matched the search specification.";
-            case INCLUDE: return "This resource is returned because it is referred to from another resource in the search set.";
+            case MATCH: return "This resource matched the search specification";
+            case INCLUDE: return "This resource is returned because it is referred to from another resource in the search set";
             default: return "?";
           }
         }
@@ -261,28 +261,28 @@ public class Bundle extends Resource implements IBaseBundle {
       }
     }
 
-    public enum HttpVerb {
+    public enum HTTPVerb {
         /**
-         * HTTP GET.
+         * HTTP GET
          */
         GET, 
         /**
-         * HTTP POST.
+         * HTTP POST
          */
         POST, 
         /**
-         * HTTP PUT.
+         * HTTP PUT
          */
         PUT, 
         /**
-         * HTTP DELETE.
+         * HTTP DELETE
          */
         DELETE, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static HttpVerb fromCode(String codeString) throws Exception {
+        public static HTTPVerb fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("GET".equals(codeString))
@@ -293,7 +293,7 @@ public class Bundle extends Resource implements IBaseBundle {
           return PUT;
         if ("DELETE".equals(codeString))
           return DELETE;
-        throw new Exception("Unknown HttpVerb code '"+codeString+"'");
+        throw new Exception("Unknown HTTPVerb code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -306,19 +306,19 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getSystem() {
           switch (this) {
-            case GET: return "";
-            case POST: return "";
-            case PUT: return "";
-            case DELETE: return "";
+            case GET: return "http://hl7.org.fhir/http-verb";
+            case POST: return "http://hl7.org.fhir/http-verb";
+            case PUT: return "http://hl7.org.fhir/http-verb";
+            case DELETE: return "http://hl7.org.fhir/http-verb";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case GET: return "HTTP GET.";
-            case POST: return "HTTP POST.";
-            case PUT: return "HTTP PUT.";
-            case DELETE: return "HTTP DELETE.";
+            case GET: return "HTTP GET";
+            case POST: return "HTTP POST";
+            case PUT: return "HTTP PUT";
+            case DELETE: return "HTTP DELETE";
             default: return "?";
           }
         }
@@ -333,29 +333,29 @@ public class Bundle extends Resource implements IBaseBundle {
         }
     }
 
-  public static class HttpVerbEnumFactory implements EnumFactory<HttpVerb> {
-    public HttpVerb fromCode(String codeString) throws IllegalArgumentException {
+  public static class HTTPVerbEnumFactory implements EnumFactory<HTTPVerb> {
+    public HTTPVerb fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("GET".equals(codeString))
-          return HttpVerb.GET;
+          return HTTPVerb.GET;
         if ("POST".equals(codeString))
-          return HttpVerb.POST;
+          return HTTPVerb.POST;
         if ("PUT".equals(codeString))
-          return HttpVerb.PUT;
+          return HTTPVerb.PUT;
         if ("DELETE".equals(codeString))
-          return HttpVerb.DELETE;
-        throw new IllegalArgumentException("Unknown HttpVerb code '"+codeString+"'");
+          return HTTPVerb.DELETE;
+        throw new IllegalArgumentException("Unknown HTTPVerb code '"+codeString+"'");
         }
-    public String toCode(HttpVerb code) {
-      if (code == HttpVerb.GET)
+    public String toCode(HTTPVerb code) {
+      if (code == HTTPVerb.GET)
         return "GET";
-      if (code == HttpVerb.POST)
+      if (code == HTTPVerb.POST)
         return "POST";
-      if (code == HttpVerb.PUT)
+      if (code == HTTPVerb.PUT)
         return "PUT";
-      if (code == HttpVerb.DELETE)
+      if (code == HTTPVerb.DELETE)
         return "DELETE";
       return "?";
       }
@@ -986,7 +986,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="GET | POST | PUT | DELETE", formalDefinition="The HTTP verb for this entry in either a update history, or a transaction/ transaction response." )
-        protected Enumeration<HttpVerb> method;
+        protected Enumeration<HTTPVerb> method;
 
         /**
          * A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).
@@ -1023,7 +1023,7 @@ public class Bundle extends Resource implements IBaseBundle {
         @Description(shortDefinition="For conditional creates", formalDefinition="Instruct the server not to perform the create if a specified resource already exists. For further information, see 'Conditional Create'." )
         protected StringType ifNoneExist;
 
-        private static final long serialVersionUID = -769185862L;
+        private static final long serialVersionUID = 1355750298L;
 
     /*
      * Constructor
@@ -1035,7 +1035,7 @@ public class Bundle extends Resource implements IBaseBundle {
     /*
      * Constructor
      */
-      public BundleEntryTransactionComponent(Enumeration<HttpVerb> method, UriType url) {
+      public BundleEntryTransactionComponent(Enumeration<HTTPVerb> method, UriType url) {
         super();
         this.method = method;
         this.url = url;
@@ -1044,12 +1044,12 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * @return {@link #method} (The HTTP verb for this entry in either a update history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
          */
-        public Enumeration<HttpVerb> getMethodElement() { 
+        public Enumeration<HTTPVerb> getMethodElement() { 
           if (this.method == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create BundleEntryTransactionComponent.method");
             else if (Configuration.doAutoCreate())
-              this.method = new Enumeration<HttpVerb>(new HttpVerbEnumFactory()); // bb
+              this.method = new Enumeration<HTTPVerb>(new HTTPVerbEnumFactory()); // bb
           return this.method;
         }
 
@@ -1064,7 +1064,7 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * @param value {@link #method} (The HTTP verb for this entry in either a update history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
          */
-        public BundleEntryTransactionComponent setMethodElement(Enumeration<HttpVerb> value) { 
+        public BundleEntryTransactionComponent setMethodElement(Enumeration<HTTPVerb> value) { 
           this.method = value;
           return this;
         }
@@ -1072,16 +1072,16 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * @return The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
          */
-        public HttpVerb getMethod() { 
+        public HTTPVerb getMethod() { 
           return this.method == null ? null : this.method.getValue();
         }
 
         /**
          * @param value The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
          */
-        public BundleEntryTransactionComponent setMethod(HttpVerb value) { 
+        public BundleEntryTransactionComponent setMethod(HTTPVerb value) { 
             if (this.method == null)
-              this.method = new Enumeration<HttpVerb>(new HttpVerbEnumFactory());
+              this.method = new Enumeration<HTTPVerb>(new HTTPVerbEnumFactory());
             this.method.setValue(value);
           return this;
         }

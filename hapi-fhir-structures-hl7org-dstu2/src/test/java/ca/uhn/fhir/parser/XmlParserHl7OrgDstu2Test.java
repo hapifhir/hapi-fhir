@@ -1,14 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -41,17 +34,15 @@ import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
 import org.hl7.fhir.instance.model.DiagnosticReport;
 import org.hl7.fhir.instance.model.DocumentManifest;
-import org.hl7.fhir.instance.model.DocumentManifest.DocumentReferenceStatus;
 import org.hl7.fhir.instance.model.EnumFactory;
 import org.hl7.fhir.instance.model.Enumeration;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -60,6 +51,8 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -622,7 +615,7 @@ public class XmlParserHl7OrgDstu2Test {
 		manifest.setType(cc);
 		manifest.setMasterIdentifier(new Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
 		manifest.addContent().setP(new Reference(binary));
-		manifest.setStatus(DocumentReferenceStatus.CURRENT);
+		manifest.setStatus(org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus.CURRENT);
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
 		ourLog.info(encoded);
@@ -668,7 +661,7 @@ public class XmlParserHl7OrgDstu2Test {
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
 
-		patient.getGenderElement().setValue(org.hl7.fhir.instance.model.Patient.AdministrativeGender.MALE);
+		patient.getGenderElement().setValue(AdministrativeGender.MALE);
 
 		String val = ourCtx.newXmlParser().encodeResourceToString(patient);
 		ourLog.info(val);

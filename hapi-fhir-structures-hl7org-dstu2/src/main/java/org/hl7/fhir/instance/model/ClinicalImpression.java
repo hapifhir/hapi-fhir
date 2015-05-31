@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,11 +52,11 @@ public class ClinicalImpression extends DomainResource {
          */
         INPROGRESS, 
         /**
-         * The assessment is done and the results are final.
+         * The assessment is done and the results are final
          */
         COMPLETED, 
         /**
-         * This assessment was never actually done and the record is erroneous (e.g. Wrong patient).
+         * This assessment was never actually done and the record is erroneous (e.g. Wrong patient)
          */
         ENTEREDINERROR, 
         /**
@@ -84,17 +84,17 @@ public class ClinicalImpression extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case COMPLETED: return "";
-            case ENTEREDINERROR: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/clinical-impression-status";
+            case COMPLETED: return "http://hl7.org.fhir/clinical-impression-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/clinical-impression-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The assessment is still on-going and results are not yet final.";
-            case COMPLETED: return "The assessment is done and the results are final.";
-            case ENTEREDINERROR: return "This assessment was never actually done and the record is erroneous (e.g. Wrong patient).";
+            case COMPLETED: return "The assessment is done and the results are final";
+            case ENTEREDINERROR: return "This assessment was never actually done and the record is erroneous (e.g. Wrong patient)";
             default: return "?";
           }
         }
@@ -583,14 +583,14 @@ public class ClinicalImpression extends DomainResource {
   }
 
     /**
-     * The patient being asssesed.
+     * The patient being assessed.
      */
     @Child(name = "patient", type = {Patient.class}, order=0, min=1, max=1)
-    @Description(shortDefinition="The patient being asssesed", formalDefinition="The patient being asssesed." )
+    @Description(shortDefinition="The patient being assessed", formalDefinition="The patient being assessed." )
     protected Reference patient;
 
     /**
-     * The actual object that is the target of the reference (The patient being asssesed.)
+     * The actual object that is the target of the reference (The patient being assessed.)
      */
     protected Patient patientTarget;
 
@@ -750,7 +750,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (The patient being asssesed.)
+     * @return {@link #patient} (The patient being assessed.)
      */
     public Reference getPatient() { 
       if (this.patient == null)
@@ -766,7 +766,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} (The patient being asssesed.)
+     * @param value {@link #patient} (The patient being assessed.)
      */
     public ClinicalImpression setPatient(Reference value) { 
       this.patient = value;
@@ -774,7 +774,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient being asssesed.)
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient being assessed.)
      */
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
@@ -786,7 +786,7 @@ public class ClinicalImpression extends DomainResource {
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient being asssesed.)
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient being assessed.)
      */
     public ClinicalImpression setPatientTarget(Patient value) { 
       this.patientTarget = value;
@@ -1517,7 +1517,7 @@ public class ClinicalImpression extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("patient", "Reference(Patient)", "The patient being asssesed.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("patient", "Reference(Patient)", "The patient being assessed.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("assessor", "Reference(Practitioner)", "The clinician performing the assessment.", 0, java.lang.Integer.MAX_VALUE, assessor));
         childrenList.add(new Property("status", "code", "Identifies the workflow status of the assessment.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("date", "dateTime", "The point in time at which the assessment was concluded (not when it was recorded).", 0, java.lang.Integer.MAX_VALUE, date));
@@ -1647,7 +1647,7 @@ public class ClinicalImpression extends DomainResource {
   public static final String SP_RULEDOUT = "ruledout";
   @SearchParamDefinition(name="problem", path="ClinicalImpression.problem", description="General assessment of patient state", type="reference" )
   public static final String SP_PROBLEM = "problem";
-  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being asssesed", type="reference" )
+  @SearchParamDefinition(name="patient", path="ClinicalImpression.patient", description="The patient being assessed", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="investigation", path="ClinicalImpression.investigations.item", description="Record of a specific investigation", type="reference" )
   public static final String SP_INVESTIGATION = "investigation";

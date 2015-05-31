@@ -29,12 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Child;
@@ -47,7 +48,7 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="Claim", profile="http://hl7.org/fhir/Profile/Claim")
 public class Claim extends DomainResource {
 
-    public enum TypeLink {
+    public enum ClaimType {
         /**
          * A claim for Institution based, typically in-patient, goods and services.
          */
@@ -72,7 +73,7 @@ public class Claim extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static TypeLink fromCode(String codeString) throws Exception {
+        public static ClaimType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("institutional".equals(codeString))
@@ -85,7 +86,7 @@ public class Claim extends DomainResource {
           return PROFESSIONAL;
         if ("vision".equals(codeString))
           return VISION;
-        throw new Exception("Unknown TypeLink code '"+codeString+"'");
+        throw new Exception("Unknown ClaimType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -99,11 +100,11 @@ public class Claim extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INSTITUTIONAL: return "";
-            case ORAL: return "";
-            case PHARMACY: return "";
-            case PROFESSIONAL: return "";
-            case VISION: return "";
+            case INSTITUTIONAL: return "http://hl7.org.fhir/type-link";
+            case ORAL: return "http://hl7.org.fhir/type-link";
+            case PHARMACY: return "http://hl7.org.fhir/type-link";
+            case PROFESSIONAL: return "http://hl7.org.fhir/type-link";
+            case VISION: return "http://hl7.org.fhir/type-link";
             default: return "?";
           }
         }
@@ -129,39 +130,39 @@ public class Claim extends DomainResource {
         }
     }
 
-  public static class TypeLinkEnumFactory implements EnumFactory<TypeLink> {
-    public TypeLink fromCode(String codeString) throws IllegalArgumentException {
+  public static class ClaimTypeEnumFactory implements EnumFactory<ClaimType> {
+    public ClaimType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("institutional".equals(codeString))
-          return TypeLink.INSTITUTIONAL;
+          return ClaimType.INSTITUTIONAL;
         if ("oral".equals(codeString))
-          return TypeLink.ORAL;
+          return ClaimType.ORAL;
         if ("pharmacy".equals(codeString))
-          return TypeLink.PHARMACY;
+          return ClaimType.PHARMACY;
         if ("professional".equals(codeString))
-          return TypeLink.PROFESSIONAL;
+          return ClaimType.PROFESSIONAL;
         if ("vision".equals(codeString))
-          return TypeLink.VISION;
-        throw new IllegalArgumentException("Unknown TypeLink code '"+codeString+"'");
+          return ClaimType.VISION;
+        throw new IllegalArgumentException("Unknown ClaimType code '"+codeString+"'");
         }
-    public String toCode(TypeLink code) {
-      if (code == TypeLink.INSTITUTIONAL)
+    public String toCode(ClaimType code) {
+      if (code == ClaimType.INSTITUTIONAL)
         return "institutional";
-      if (code == TypeLink.ORAL)
+      if (code == ClaimType.ORAL)
         return "oral";
-      if (code == TypeLink.PHARMACY)
+      if (code == ClaimType.PHARMACY)
         return "pharmacy";
-      if (code == TypeLink.PROFESSIONAL)
+      if (code == ClaimType.PROFESSIONAL)
         return "professional";
-      if (code == TypeLink.VISION)
+      if (code == ClaimType.VISION)
         return "vision";
       return "?";
       }
     }
 
-    public enum UseLink {
+    public enum Use {
         /**
          * The treatment is complete and this represents a Claim for the services.
          */
@@ -182,7 +183,7 @@ public class Claim extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static UseLink fromCode(String codeString) throws Exception {
+        public static Use fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("complete".equals(codeString))
@@ -193,7 +194,7 @@ public class Claim extends DomainResource {
           return EXPLORATORY;
         if ("other".equals(codeString))
           return OTHER;
-        throw new Exception("Unknown UseLink code '"+codeString+"'");
+        throw new Exception("Unknown Use code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -206,10 +207,10 @@ public class Claim extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case COMPLETE: return "";
-            case PROPOSED: return "";
-            case EXPLORATORY: return "";
-            case OTHER: return "";
+            case COMPLETE: return "http://hl7.org.fhir/use-link";
+            case PROPOSED: return "http://hl7.org.fhir/use-link";
+            case EXPLORATORY: return "http://hl7.org.fhir/use-link";
+            case OTHER: return "http://hl7.org.fhir/use-link";
             default: return "?";
           }
         }
@@ -233,29 +234,29 @@ public class Claim extends DomainResource {
         }
     }
 
-  public static class UseLinkEnumFactory implements EnumFactory<UseLink> {
-    public UseLink fromCode(String codeString) throws IllegalArgumentException {
+  public static class UseEnumFactory implements EnumFactory<Use> {
+    public Use fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("complete".equals(codeString))
-          return UseLink.COMPLETE;
+          return Use.COMPLETE;
         if ("proposed".equals(codeString))
-          return UseLink.PROPOSED;
+          return Use.PROPOSED;
         if ("exploratory".equals(codeString))
-          return UseLink.EXPLORATORY;
+          return Use.EXPLORATORY;
         if ("other".equals(codeString))
-          return UseLink.OTHER;
-        throw new IllegalArgumentException("Unknown UseLink code '"+codeString+"'");
+          return Use.OTHER;
+        throw new IllegalArgumentException("Unknown Use code '"+codeString+"'");
         }
-    public String toCode(UseLink code) {
-      if (code == UseLink.COMPLETE)
+    public String toCode(Use code) {
+      if (code == Use.COMPLETE)
         return "complete";
-      if (code == UseLink.PROPOSED)
+      if (code == Use.PROPOSED)
         return "proposed";
-      if (code == UseLink.EXPLORATORY)
+      if (code == Use.EXPLORATORY)
         return "exploratory";
-      if (code == UseLink.OTHER)
+      if (code == Use.OTHER)
         return "other";
       return "?";
       }
@@ -3288,7 +3289,7 @@ public class Claim extends DomainResource {
      */
     @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
     @Description(shortDefinition="institutional | oral | pharmacy | professional | vision", formalDefinition="The category of claim this is." )
-    protected Enumeration<TypeLink> type;
+    protected Enumeration<ClaimType> type;
 
     /**
      * The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number.
@@ -3359,7 +3360,7 @@ public class Claim extends DomainResource {
      */
     @Child(name = "use", type = {CodeType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="complete | proposed | exploratory | other", formalDefinition="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)." )
-    protected Enumeration<UseLink> use;
+    protected Enumeration<Use> use;
 
     /**
      * Immediate (STAT), best effort (NORMAL), deferred (DEFER).
@@ -3531,7 +3532,7 @@ public class Claim extends DomainResource {
     @Description(shortDefinition="Only if type = oral", formalDefinition="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons." )
     protected List<MissingTeethComponent> missingTeeth;
 
-    private static final long serialVersionUID = 764017933L;
+    private static final long serialVersionUID = 1120349447L;
 
   /*
    * Constructor
@@ -3543,7 +3544,7 @@ public class Claim extends DomainResource {
   /*
    * Constructor
    */
-    public Claim(Enumeration<TypeLink> type, Reference patient) {
+    public Claim(Enumeration<ClaimType> type, Reference patient) {
       super();
       this.type = type;
       this.patient = patient;
@@ -3552,12 +3553,12 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #type} (The category of claim this is.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public Enumeration<TypeLink> getTypeElement() { 
+    public Enumeration<ClaimType> getTypeElement() { 
       if (this.type == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Claim.type");
         else if (Configuration.doAutoCreate())
-          this.type = new Enumeration<TypeLink>(new TypeLinkEnumFactory()); // bb
+          this.type = new Enumeration<ClaimType>(new ClaimTypeEnumFactory()); // bb
       return this.type;
     }
 
@@ -3572,7 +3573,7 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #type} (The category of claim this is.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
-    public Claim setTypeElement(Enumeration<TypeLink> value) { 
+    public Claim setTypeElement(Enumeration<ClaimType> value) { 
       this.type = value;
       return this;
     }
@@ -3580,16 +3581,16 @@ public class Claim extends DomainResource {
     /**
      * @return The category of claim this is.
      */
-    public TypeLink getType() { 
+    public ClaimType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
      * @param value The category of claim this is.
      */
-    public Claim setType(TypeLink value) { 
+    public Claim setType(ClaimType value) { 
         if (this.type == null)
-          this.type = new Enumeration<TypeLink>(new TypeLinkEnumFactory());
+          this.type = new Enumeration<ClaimType>(new ClaimTypeEnumFactory());
         this.type.setValue(value);
       return this;
     }
@@ -3866,12 +3867,12 @@ public class Claim extends DomainResource {
     /**
      * @return {@link #use} (Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
-    public Enumeration<UseLink> getUseElement() { 
+    public Enumeration<Use> getUseElement() { 
       if (this.use == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Claim.use");
         else if (Configuration.doAutoCreate())
-          this.use = new Enumeration<UseLink>(new UseLinkEnumFactory()); // bb
+          this.use = new Enumeration<Use>(new UseEnumFactory()); // bb
       return this.use;
     }
 
@@ -3886,7 +3887,7 @@ public class Claim extends DomainResource {
     /**
      * @param value {@link #use} (Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
-    public Claim setUseElement(Enumeration<UseLink> value) { 
+    public Claim setUseElement(Enumeration<Use> value) { 
       this.use = value;
       return this;
     }
@@ -3894,19 +3895,19 @@ public class Claim extends DomainResource {
     /**
      * @return Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
      */
-    public UseLink getUse() { 
+    public Use getUse() { 
       return this.use == null ? null : this.use.getValue();
     }
 
     /**
      * @param value Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
      */
-    public Claim setUse(UseLink value) { 
+    public Claim setUse(Use value) { 
       if (value == null)
         this.use = null;
       else {
         if (this.use == null)
-          this.use = new Enumeration<UseLink>(new UseLinkEnumFactory());
+          this.use = new Enumeration<Use>(new UseEnumFactory());
         this.use.setValue(value);
       }
       return this;

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,11 +49,11 @@ public class OperationDefinition extends DomainResource {
 
     public enum OperationKind {
         /**
-         * This operation is invoked as an operation.
+         * This operation is invoked as an operation
          */
         OPERATION, 
         /**
-         * This operation is a named query, invoked using the search mechanism.
+         * This operation is a named query, invoked using the search mechanism
          */
         QUERY, 
         /**
@@ -78,15 +78,15 @@ public class OperationDefinition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case OPERATION: return "";
-            case QUERY: return "";
+            case OPERATION: return "http://hl7.org.fhir/operation-kind";
+            case QUERY: return "http://hl7.org.fhir/operation-kind";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case OPERATION: return "This operation is invoked as an operation.";
-            case QUERY: return "This operation is a named query, invoked using the search mechanism.";
+            case OPERATION: return "This operation is invoked as an operation";
+            case QUERY: return "This operation is a named query, invoked using the search mechanism";
             default: return "?";
           }
         }
@@ -121,11 +121,11 @@ public class OperationDefinition extends DomainResource {
 
     public enum OperationParameterUse {
         /**
-         * This is an input parameter.
+         * This is an input parameter
          */
         IN, 
         /**
-         * This is an output parameter.
+         * This is an output parameter
          */
         OUT, 
         /**
@@ -150,15 +150,15 @@ public class OperationDefinition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case IN: return "";
-            case OUT: return "";
+            case IN: return "http://hl7.org.fhir/operation-parameter-use";
+            case OUT: return "http://hl7.org.fhir/operation-parameter-use";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case IN: return "This is an input parameter.";
-            case OUT: return "This is an output parameter.";
+            case IN: return "This is an input parameter";
+            case OUT: return "This is an output parameter";
             default: return "?";
           }
         }

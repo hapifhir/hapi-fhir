@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,27 +48,27 @@ public class EpisodeOfCare extends DomainResource {
 
     public enum EpisodeOfCareStatus {
         /**
-         * This episode of care is planned to start at the date specified in the period.start. During this status an organization may perform assessments to determine if they are eligible to receive services, or be organizing to make resources available to provide care services.
+         * This episode of care is planned to start at the date specified in the period.start. During this status an organization may perform assessments to determine if they are eligible to receive services, or be organizing to make resources available to provide care services
          */
         PLANNED, 
         /**
-         * This episode has been placed on a waitlist, pending the episode being made active (or cancelled).
+         * This episode has been placed on a waitlist, pending the episode being made active (or cancelled)
          */
         WAITLIST, 
         /**
-         * This episode of care is current.
+         * This episode of care is current
          */
         ACTIVE, 
         /**
-         * This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).
+         * This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite)
          */
         ONHOLD, 
         /**
-         * This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as "closed", "completed" or other similar terms.
+         * This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as "closed", "completed" or other similar terms
          */
         FINISHED, 
         /**
-         * The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow.
+         * The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow
          */
         CANCELLED, 
         /**
@@ -105,23 +105,23 @@ public class EpisodeOfCare extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PLANNED: return "";
-            case WAITLIST: return "";
-            case ACTIVE: return "";
-            case ONHOLD: return "";
-            case FINISHED: return "";
-            case CANCELLED: return "";
+            case PLANNED: return "http://hl7.org.fhir/episode-of-care-status";
+            case WAITLIST: return "http://hl7.org.fhir/episode-of-care-status";
+            case ACTIVE: return "http://hl7.org.fhir/episode-of-care-status";
+            case ONHOLD: return "http://hl7.org.fhir/episode-of-care-status";
+            case FINISHED: return "http://hl7.org.fhir/episode-of-care-status";
+            case CANCELLED: return "http://hl7.org.fhir/episode-of-care-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "This episode of care is planned to start at the date specified in the period.start. During this status an organization may perform assessments to determine if they are eligible to receive services, or be organizing to make resources available to provide care services.";
-            case WAITLIST: return "This episode has been placed on a waitlist, pending the episode being made active (or cancelled).";
-            case ACTIVE: return "This episode of care is current.";
-            case ONHOLD: return "This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).";
-            case FINISHED: return "This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as 'closed', 'completed' or other similar terms.";
-            case CANCELLED: return "The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow.";
+            case PLANNED: return "This episode of care is planned to start at the date specified in the period.start. During this status an organization may perform assessments to determine if they are eligible to receive services, or be organizing to make resources available to provide care services";
+            case WAITLIST: return "This episode has been placed on a waitlist, pending the episode being made active (or cancelled)";
+            case ACTIVE: return "This episode of care is current";
+            case ONHOLD: return "This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite)";
+            case FINISHED: return "This episode of care is finished at the organization is not expecting to be providing care to the patient. Can also be known as 'closed', 'completed' or other similar terms";
+            case CANCELLED: return "The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow";
             default: return "?";
           }
         }

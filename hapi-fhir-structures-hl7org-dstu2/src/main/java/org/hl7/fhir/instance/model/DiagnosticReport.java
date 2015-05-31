@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,31 +48,31 @@ public class DiagnosticReport extends DomainResource {
 
     public enum DiagnosticReportStatus {
         /**
-         * The existence of the report is registered, but there is nothing yet available.
+         * The existence of the report is registered, but there is nothing yet available
          */
         REGISTERED, 
         /**
-         * This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.
+         * This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified
          */
         PARTIAL, 
         /**
-         * The report is complete and verified by an authorized person.
+         * The report is complete and verified by an authorized person
          */
         FINAL, 
         /**
-         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person.
+         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person
          */
         CORRECTED, 
         /**
-         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed.
+         * The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed
          */
         APPENDED, 
         /**
-         * The report is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
+         * The report is unavailable because the measurement was not started or not completed (also sometimes called "aborted")
          */
         CANCELLED, 
         /**
-         * The report has been withdrawn following previous Final release.
+         * The report has been withdrawn following previous Final release
          */
         ENTEREDINERROR, 
         /**
@@ -112,25 +112,25 @@ public class DiagnosticReport extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REGISTERED: return "";
-            case PARTIAL: return "";
-            case FINAL: return "";
-            case CORRECTED: return "";
-            case APPENDED: return "";
-            case CANCELLED: return "";
-            case ENTEREDINERROR: return "";
+            case REGISTERED: return "http://hl7.org.fhir/diagnostic-report-status";
+            case PARTIAL: return "http://hl7.org.fhir/diagnostic-report-status";
+            case FINAL: return "http://hl7.org.fhir/diagnostic-report-status";
+            case CORRECTED: return "http://hl7.org.fhir/diagnostic-report-status";
+            case APPENDED: return "http://hl7.org.fhir/diagnostic-report-status";
+            case CANCELLED: return "http://hl7.org.fhir/diagnostic-report-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/diagnostic-report-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case REGISTERED: return "The existence of the report is registered, but there is nothing yet available.";
-            case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.";
-            case FINAL: return "The report is complete and verified by an authorized person.";
-            case CORRECTED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person.";
-            case APPENDED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed.";
-            case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called 'aborted').";
-            case ENTEREDINERROR: return "The report has been withdrawn following previous Final release.";
+            case REGISTERED: return "The existence of the report is registered, but there is nothing yet available";
+            case PARTIAL: return "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified";
+            case FINAL: return "The report is complete and verified by an authorized person";
+            case CORRECTED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person";
+            case APPENDED: return "The report has been modified subsequent to being Final, and is complete and verified by an authorized person. New content has been added, but existing content hasn't changed";
+            case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called 'aborted')";
+            case ENTEREDINERROR: return "The report has been withdrawn following previous Final release";
             default: return "?";
           }
         }
@@ -375,11 +375,11 @@ public class DiagnosticReport extends DomainResource {
     protected Enumeration<DiagnosticReportStatus> status;
 
     /**
-     * The date and/or time that this version of the report was released from the source diagnostic service.
+     * The date and time that this version of the report was released from the source diagnostic service.
      */
-    @Child(name = "issued", type = {DateTimeType.class}, order=2, min=1, max=1)
-    @Description(shortDefinition="Date this version was released", formalDefinition="The date and/or time that this version of the report was released from the source diagnostic service." )
-    protected DateTimeType issued;
+    @Child(name = "issued", type = {InstantType.class}, order=2, min=1, max=1)
+    @Description(shortDefinition="DateTime this version was released", formalDefinition="The date and time that this version of the report was released from the source diagnostic service." )
+    protected InstantType issued;
 
     /**
      * The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.
@@ -444,11 +444,11 @@ public class DiagnosticReport extends DomainResource {
     protected CodeableConcept serviceCategory;
 
     /**
-     * The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.
+     * The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.
      */
-    @Child(name = "diagnostic", type = {DateTimeType.class, Period.class}, order=9, min=1, max=1)
-    @Description(shortDefinition="Physiologically Relevant time/time-period for report", formalDefinition="The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself." )
-    protected Type diagnostic;
+    @Child(name = "effective", type = {DateTimeType.class, Period.class}, order=9, min=1, max=1)
+    @Description(shortDefinition="Clinically Relevant time/time-period for report", formalDefinition="The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself." )
+    protected Type effective;
 
     /**
      * Details about the specimens on which this diagnostic report is based.
@@ -514,7 +514,7 @@ public class DiagnosticReport extends DomainResource {
     @Description(shortDefinition="Entire Report as issued", formalDefinition="Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent." )
     protected List<Attachment> presentedForm;
 
-    private static final long serialVersionUID = 140402748L;
+    private static final long serialVersionUID = 486295410L;
 
   /*
    * Constructor
@@ -526,14 +526,14 @@ public class DiagnosticReport extends DomainResource {
   /*
    * Constructor
    */
-    public DiagnosticReport(CodeableConcept name, Enumeration<DiagnosticReportStatus> status, DateTimeType issued, Reference subject, Reference performer, Type diagnostic) {
+    public DiagnosticReport(CodeableConcept name, Enumeration<DiagnosticReportStatus> status, InstantType issued, Reference subject, Reference performer, Type effective) {
       super();
       this.name = name;
       this.status = status;
       this.issued = issued;
       this.subject = subject;
       this.performer = performer;
-      this.diagnostic = diagnostic;
+      this.effective = effective;
     }
 
     /**
@@ -606,14 +606,14 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #issued} (The date and/or time that this version of the report was released from the source diagnostic service.). This is the underlying object with id, value and extensions. The accessor "getIssued" gives direct access to the value
+     * @return {@link #issued} (The date and time that this version of the report was released from the source diagnostic service.). This is the underlying object with id, value and extensions. The accessor "getIssued" gives direct access to the value
      */
-    public DateTimeType getIssuedElement() { 
+    public InstantType getIssuedElement() { 
       if (this.issued == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create DiagnosticReport.issued");
         else if (Configuration.doAutoCreate())
-          this.issued = new DateTimeType(); // bb
+          this.issued = new InstantType(); // bb
       return this.issued;
     }
 
@@ -626,26 +626,26 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #issued} (The date and/or time that this version of the report was released from the source diagnostic service.). This is the underlying object with id, value and extensions. The accessor "getIssued" gives direct access to the value
+     * @param value {@link #issued} (The date and time that this version of the report was released from the source diagnostic service.). This is the underlying object with id, value and extensions. The accessor "getIssued" gives direct access to the value
      */
-    public DiagnosticReport setIssuedElement(DateTimeType value) { 
+    public DiagnosticReport setIssuedElement(InstantType value) { 
       this.issued = value;
       return this;
     }
 
     /**
-     * @return The date and/or time that this version of the report was released from the source diagnostic service.
+     * @return The date and time that this version of the report was released from the source diagnostic service.
      */
     public Date getIssued() { 
       return this.issued == null ? null : this.issued.getValue();
     }
 
     /**
-     * @param value The date and/or time that this version of the report was released from the source diagnostic service.
+     * @param value The date and time that this version of the report was released from the source diagnostic service.
      */
     public DiagnosticReport setIssued(Date value) { 
         if (this.issued == null)
-          this.issued = new DateTimeType();
+          this.issued = new InstantType();
         this.issued.setValue(value);
       return this;
     }
@@ -898,39 +898,39 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #diagnostic} (The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
+     * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Type getDiagnostic() { 
-      return this.diagnostic;
+    public Type getEffective() { 
+      return this.effective;
     }
 
     /**
-     * @return {@link #diagnostic} (The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
+     * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public DateTimeType getDiagnosticDateTimeType() throws Exception { 
-      if (!(this.diagnostic instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.diagnostic.getClass().getName()+" was encountered");
-      return (DateTimeType) this.diagnostic;
+    public DateTimeType getEffectiveDateTimeType() throws Exception { 
+      if (!(this.effective instanceof DateTimeType))
+        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (DateTimeType) this.effective;
     }
 
     /**
-     * @return {@link #diagnostic} (The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
+     * @return {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Period getDiagnosticPeriod() throws Exception { 
-      if (!(this.diagnostic instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.diagnostic.getClass().getName()+" was encountered");
-      return (Period) this.diagnostic;
+    public Period getEffectivePeriod() throws Exception { 
+      if (!(this.effective instanceof Period))
+        throw new Exception("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (Period) this.effective;
     }
 
-    public boolean hasDiagnostic() { 
-      return this.diagnostic != null && !this.diagnostic.isEmpty();
+    public boolean hasEffective() { 
+      return this.effective != null && !this.effective.isEmpty();
     }
 
     /**
-     * @param value {@link #diagnostic} (The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
+     * @param value {@link #effective} (The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public DiagnosticReport setDiagnostic(Type value) { 
-      this.diagnostic = value;
+    public DiagnosticReport setEffective(Type value) { 
+      this.effective = value;
       return this;
     }
 
@@ -1290,14 +1290,14 @@ public class DiagnosticReport extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("name", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("status", "code", "The status of the diagnostic report as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("issued", "dateTime", "The date and/or time that this version of the report was released from the source diagnostic service.", 0, java.lang.Integer.MAX_VALUE, issued));
+        childrenList.add(new Property("issued", "instant", "The date and time that this version of the report was released from the source diagnostic service.", 0, java.lang.Integer.MAX_VALUE, issued));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("performer", "Reference(Practitioner|Organization)", "The diagnostic service that is responsible for issuing the report.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The link to the health care event (encounter) when the order was made.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("identifier", "Identifier", "The local ID assigned to the report by the order filler, usually by the Information System of the diagnostic service provider.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("requestDetail", "Reference(DiagnosticOrder)", "Details concerning a test requested.", 0, java.lang.Integer.MAX_VALUE, requestDetail));
         childrenList.add(new Property("serviceCategory", "CodeableConcept", "The section of the diagnostic service that performs the examination e.g. biochemistry, hematology, MRI.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
-        childrenList.add(new Property("diagnostic[x]", "dateTime|Period", "The time or time-period the observed values are related to. This is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, diagnostic));
+        childrenList.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, effective));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "Details about the specimens on which this diagnostic report is based.", 0, java.lang.Integer.MAX_VALUE, specimen));
         childrenList.add(new Property("result", "Reference(Observation)", "Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. 'atomic' results), or they can be grouping observations that include references to other members of the group (e.g. 'panels').", 0, java.lang.Integer.MAX_VALUE, result));
         childrenList.add(new Property("imagingStudy", "Reference(ImagingStudy)", "One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
@@ -1327,7 +1327,7 @@ public class DiagnosticReport extends DomainResource {
             dst.requestDetail.add(i.copy());
         };
         dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
-        dst.diagnostic = diagnostic == null ? null : diagnostic.copy();
+        dst.effective = effective == null ? null : effective.copy();
         if (specimen != null) {
           dst.specimen = new ArrayList<Reference>();
           for (Reference i : specimen)
@@ -1376,7 +1376,7 @@ public class DiagnosticReport extends DomainResource {
         return compareDeep(name, o.name, true) && compareDeep(status, o.status, true) && compareDeep(issued, o.issued, true)
            && compareDeep(subject, o.subject, true) && compareDeep(performer, o.performer, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(identifier, o.identifier, true) && compareDeep(requestDetail, o.requestDetail, true)
-           && compareDeep(serviceCategory, o.serviceCategory, true) && compareDeep(diagnostic, o.diagnostic, true)
+           && compareDeep(serviceCategory, o.serviceCategory, true) && compareDeep(effective, o.effective, true)
            && compareDeep(specimen, o.specimen, true) && compareDeep(result, o.result, true) && compareDeep(imagingStudy, o.imagingStudy, true)
            && compareDeep(image, o.image, true) && compareDeep(conclusion, o.conclusion, true) && compareDeep(codedDiagnosis, o.codedDiagnosis, true)
            && compareDeep(presentedForm, o.presentedForm, true);
@@ -1398,7 +1398,7 @@ public class DiagnosticReport extends DomainResource {
            && (issued == null || issued.isEmpty()) && (subject == null || subject.isEmpty()) && (performer == null || performer.isEmpty())
            && (encounter == null || encounter.isEmpty()) && (identifier == null || identifier.isEmpty())
            && (requestDetail == null || requestDetail.isEmpty()) && (serviceCategory == null || serviceCategory.isEmpty())
-           && (diagnostic == null || diagnostic.isEmpty()) && (specimen == null || specimen.isEmpty())
+           && (effective == null || effective.isEmpty()) && (specimen == null || specimen.isEmpty())
            && (result == null || result.isEmpty()) && (imagingStudy == null || imagingStudy.isEmpty())
            && (image == null || image.isEmpty()) && (conclusion == null || conclusion.isEmpty()) && (codedDiagnosis == null || codedDiagnosis.isEmpty())
            && (presentedForm == null || presentedForm.isEmpty());
@@ -1409,7 +1409,7 @@ public class DiagnosticReport extends DomainResource {
     return ResourceType.DiagnosticReport;
    }
 
-  @SearchParamDefinition(name="date", path="DiagnosticReport.diagnostic[x]", description="The clinically relevant time of the report", type="date" )
+  @SearchParamDefinition(name="date", path="DiagnosticReport.effective[x]", description="The clinically relevant time of the report", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token" )
   public static final String SP_IDENTIFIER = "identifier";

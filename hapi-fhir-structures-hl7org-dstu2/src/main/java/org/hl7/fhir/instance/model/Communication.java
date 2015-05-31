@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -98,11 +98,11 @@ public class Communication extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case COMPLETED: return "";
-            case SUSPENDED: return "";
-            case REJECTED: return "";
-            case FAILED: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/communication-status";
+            case COMPLETED: return "http://hl7.org.fhir/communication-status";
+            case SUSPENDED: return "http://hl7.org.fhir/communication-status";
+            case REJECTED: return "http://hl7.org.fhir/communication-status";
+            case FAILED: return "http://hl7.org.fhir/communication-status";
             default: return "?";
           }
         }

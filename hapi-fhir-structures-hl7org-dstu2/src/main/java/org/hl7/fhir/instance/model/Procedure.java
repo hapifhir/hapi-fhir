@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,19 +48,19 @@ public class Procedure extends DomainResource {
 
     public enum ProcedureStatus {
         /**
-         * The procedure is still occurring.
+         * The procedure is still occurring
          */
         INPROGRESS, 
         /**
-         * The procedure was terminated without completing successfully.
+         * The procedure was terminated without completing successfully
          */
         ABORTED, 
         /**
-         * All actions involved in the procedure have taken place.
+         * All actions involved in the procedure have taken place
          */
         COMPLETED, 
         /**
-         * The statement was entered in error and Is not valid.
+         * The statement was entered in error and Is not valid
          */
         ENTEREDINERROR, 
         /**
@@ -91,19 +91,19 @@ public class Procedure extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case ABORTED: return "";
-            case COMPLETED: return "";
-            case ENTEREDINERROR: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/procedure-status";
+            case ABORTED: return "http://hl7.org.fhir/procedure-status";
+            case COMPLETED: return "http://hl7.org.fhir/procedure-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/procedure-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "The procedure is still occurring.";
-            case ABORTED: return "The procedure was terminated without completing successfully.";
-            case COMPLETED: return "All actions involved in the procedure have taken place.";
-            case ENTEREDINERROR: return "The statement was entered in error and Is not valid.";
+            case INPROGRESS: return "The procedure is still occurring";
+            case ABORTED: return "The procedure was terminated without completing successfully";
+            case COMPLETED: return "All actions involved in the procedure have taken place";
+            case ENTEREDINERROR: return "The statement was entered in error and Is not valid";
             default: return "?";
           }
         }
@@ -148,11 +148,11 @@ public class Procedure extends DomainResource {
 
     public enum ProcedureRelationshipType {
         /**
-         * This procedure had to be performed because of the related one.
+         * This procedure had to be performed because of the related one
          */
         CAUSEDBY, 
         /**
-         * This procedure caused the related one to be performed.
+         * This procedure caused the related one to be performed
          */
         BECAUSEOF, 
         /**
@@ -177,15 +177,15 @@ public class Procedure extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CAUSEDBY: return "";
-            case BECAUSEOF: return "";
+            case CAUSEDBY: return "http://hl7.org.fhir/procedure-relationship-type";
+            case BECAUSEOF: return "http://hl7.org.fhir/procedure-relationship-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case CAUSEDBY: return "This procedure had to be performed because of the related one.";
-            case BECAUSEOF: return "This procedure caused the related one to be performed.";
+            case CAUSEDBY: return "This procedure had to be performed because of the related one";
+            case BECAUSEOF: return "This procedure caused the related one to be performed";
             default: return "?";
           }
         }

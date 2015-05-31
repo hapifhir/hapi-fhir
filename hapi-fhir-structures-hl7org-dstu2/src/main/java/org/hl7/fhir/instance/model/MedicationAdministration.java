@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="MedicationAdministration", profile="http://hl7.org/fhir/Profile/MedicationAdministration")
 public class MedicationAdministration extends DomainResource {
 
-    public enum MedicationAdminStatus {
+    public enum MedicationAdministrationStatus {
         /**
          * The administration has started but has not yet completed.
          */
@@ -71,7 +71,7 @@ public class MedicationAdministration extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationAdminStatus fromCode(String codeString) throws Exception {
+        public static MedicationAdministrationStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -84,7 +84,7 @@ public class MedicationAdministration extends DomainResource {
           return ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return STOPPED;
-        throw new Exception("Unknown MedicationAdminStatus code '"+codeString+"'");
+        throw new Exception("Unknown MedicationAdministrationStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -98,11 +98,11 @@ public class MedicationAdministration extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case ONHOLD: return "";
-            case COMPLETED: return "";
-            case ENTEREDINERROR: return "";
-            case STOPPED: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/medication-admin-status";
+            case ONHOLD: return "http://hl7.org.fhir/medication-admin-status";
+            case COMPLETED: return "http://hl7.org.fhir/medication-admin-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/medication-admin-status";
+            case STOPPED: return "http://hl7.org.fhir/medication-admin-status";
             default: return "?";
           }
         }
@@ -128,33 +128,33 @@ public class MedicationAdministration extends DomainResource {
         }
     }
 
-  public static class MedicationAdminStatusEnumFactory implements EnumFactory<MedicationAdminStatus> {
-    public MedicationAdminStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class MedicationAdministrationStatusEnumFactory implements EnumFactory<MedicationAdministrationStatus> {
+    public MedicationAdministrationStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
-          return MedicationAdminStatus.INPROGRESS;
+          return MedicationAdministrationStatus.INPROGRESS;
         if ("on-hold".equals(codeString))
-          return MedicationAdminStatus.ONHOLD;
+          return MedicationAdministrationStatus.ONHOLD;
         if ("completed".equals(codeString))
-          return MedicationAdminStatus.COMPLETED;
+          return MedicationAdministrationStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
-          return MedicationAdminStatus.ENTEREDINERROR;
+          return MedicationAdministrationStatus.ENTEREDINERROR;
         if ("stopped".equals(codeString))
-          return MedicationAdminStatus.STOPPED;
-        throw new IllegalArgumentException("Unknown MedicationAdminStatus code '"+codeString+"'");
+          return MedicationAdministrationStatus.STOPPED;
+        throw new IllegalArgumentException("Unknown MedicationAdministrationStatus code '"+codeString+"'");
         }
-    public String toCode(MedicationAdminStatus code) {
-      if (code == MedicationAdminStatus.INPROGRESS)
+    public String toCode(MedicationAdministrationStatus code) {
+      if (code == MedicationAdministrationStatus.INPROGRESS)
         return "in-progress";
-      if (code == MedicationAdminStatus.ONHOLD)
+      if (code == MedicationAdministrationStatus.ONHOLD)
         return "on-hold";
-      if (code == MedicationAdminStatus.COMPLETED)
+      if (code == MedicationAdministrationStatus.COMPLETED)
         return "completed";
-      if (code == MedicationAdminStatus.ENTEREDINERROR)
+      if (code == MedicationAdministrationStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == MedicationAdminStatus.STOPPED)
+      if (code == MedicationAdministrationStatus.STOPPED)
         return "stopped";
       return "?";
       }
@@ -446,7 +446,7 @@ public class MedicationAdministration extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
     @Description(shortDefinition="in-progress | on-hold | completed | entered-in-error | stopped", formalDefinition="Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way." )
-    protected Enumeration<MedicationAdminStatus> status;
+    protected Enumeration<MedicationAdministrationStatus> status;
 
     /**
      * The person or animal to whom the medication was given.
@@ -557,7 +557,7 @@ public class MedicationAdministration extends DomainResource {
     @Description(shortDefinition="Details of how medication was taken", formalDefinition="Indicates how the medication is/was used by the patient." )
     protected MedicationAdministrationDosageComponent dosage;
 
-    private static final long serialVersionUID = -1612329478L;
+    private static final long serialVersionUID = 1854331183L;
 
   /*
    * Constructor
@@ -569,7 +569,7 @@ public class MedicationAdministration extends DomainResource {
   /*
    * Constructor
    */
-    public MedicationAdministration(Enumeration<MedicationAdminStatus> status, Reference patient, Type effectiveTime, Type medication) {
+    public MedicationAdministration(Enumeration<MedicationAdministrationStatus> status, Reference patient, Type effectiveTime, Type medication) {
       super();
       this.status = status;
       this.patient = patient;
@@ -620,12 +620,12 @@ public class MedicationAdministration extends DomainResource {
     /**
      * @return {@link #status} (Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<MedicationAdminStatus> getStatusElement() { 
+    public Enumeration<MedicationAdministrationStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MedicationAdministration.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<MedicationAdminStatus>(new MedicationAdminStatusEnumFactory()); // bb
+          this.status = new Enumeration<MedicationAdministrationStatus>(new MedicationAdministrationStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -640,7 +640,7 @@ public class MedicationAdministration extends DomainResource {
     /**
      * @param value {@link #status} (Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public MedicationAdministration setStatusElement(Enumeration<MedicationAdminStatus> value) { 
+    public MedicationAdministration setStatusElement(Enumeration<MedicationAdministrationStatus> value) { 
       this.status = value;
       return this;
     }
@@ -648,16 +648,16 @@ public class MedicationAdministration extends DomainResource {
     /**
      * @return Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
      */
-    public MedicationAdminStatus getStatus() { 
+    public MedicationAdministrationStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions it is possible for an administration to be started but not completed or it may be paused while some other process is under way.
      */
-    public MedicationAdministration setStatus(MedicationAdminStatus value) { 
+    public MedicationAdministration setStatus(MedicationAdministrationStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<MedicationAdminStatus>(new MedicationAdminStatusEnumFactory());
+          this.status = new Enumeration<MedicationAdministrationStatus>(new MedicationAdministrationStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }

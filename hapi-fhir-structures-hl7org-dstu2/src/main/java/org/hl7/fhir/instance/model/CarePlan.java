@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,11 +52,11 @@ public class CarePlan extends DomainResource {
          */
         PLANNED, 
         /**
-         * The plan is intended to be followed and used as part of patient care.
+         * The plan is intended to be followed and used as part of patient care
          */
         ACTIVE, 
         /**
-         * The plan is no longer in use and is not expected to be followed or used in patient care.
+         * The plan is no longer in use and is not expected to be followed or used in patient care
          */
         COMPLETED, 
         /**
@@ -84,17 +84,17 @@ public class CarePlan extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PLANNED: return "";
-            case ACTIVE: return "";
-            case COMPLETED: return "";
+            case PLANNED: return "http://hl7.org.fhir/care-plan-status";
+            case ACTIVE: return "http://hl7.org.fhir/care-plan-status";
+            case COMPLETED: return "http://hl7.org.fhir/care-plan-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case PLANNED: return "The plan is in development or awaiting use but is not yet intended to be acted upon.";
-            case ACTIVE: return "The plan is intended to be followed and used as part of patient care.";
-            case COMPLETED: return "The plan is no longer in use and is not expected to be followed or used in patient care.";
+            case ACTIVE: return "The plan is intended to be followed and used as part of patient care";
+            case COMPLETED: return "The plan is no longer in use and is not expected to be followed or used in patient care";
             default: return "?";
           }
         }
@@ -134,31 +134,31 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanActivityCategory {
         /**
-         * Plan for the patient to consume food of a specified nature.
+         * Plan for the patient to consume food of a specified nature
          */
         DIET, 
         /**
-         * Plan for the patient to consume/receive a drug, vaccine or other product.
+         * Plan for the patient to consume/receive a drug, vaccine or other product
          */
         DRUG, 
         /**
-         * Plan to meet or communicate with the patient (in-patient, out-patient, phone call, etc.).
+         * Plan to meet or communicate with the patient (in-patient, out-patient, phone call, etc.)
          */
         ENCOUNTER, 
         /**
-         * Plan to capture information about a patient (vitals, labs, diagnostic images, etc.).
+         * Plan to capture information about a patient (vitals, labs, diagnostic images, etc.)
          */
         OBSERVATION, 
         /**
-         * Plan to modify the patient in some way (surgery, physiotherapy, education, counseling, etc.).
+         * Plan to modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)
          */
         PROCEDURE, 
         /**
-         * Plan to provide something to the patient (medication, medical supply, etc.).
+         * Plan to provide something to the patient (medication, medical supply, etc.)
          */
         SUPPLY, 
         /**
-         * Some other form of action.
+         * Some other form of action
          */
         OTHER, 
         /**
@@ -198,25 +198,25 @@ public class CarePlan extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DIET: return "";
-            case DRUG: return "";
-            case ENCOUNTER: return "";
-            case OBSERVATION: return "";
-            case PROCEDURE: return "";
-            case SUPPLY: return "";
-            case OTHER: return "";
+            case DIET: return "http://hl7.org.fhir/care-plan-activity-category";
+            case DRUG: return "http://hl7.org.fhir/care-plan-activity-category";
+            case ENCOUNTER: return "http://hl7.org.fhir/care-plan-activity-category";
+            case OBSERVATION: return "http://hl7.org.fhir/care-plan-activity-category";
+            case PROCEDURE: return "http://hl7.org.fhir/care-plan-activity-category";
+            case SUPPLY: return "http://hl7.org.fhir/care-plan-activity-category";
+            case OTHER: return "http://hl7.org.fhir/care-plan-activity-category";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DIET: return "Plan for the patient to consume food of a specified nature.";
-            case DRUG: return "Plan for the patient to consume/receive a drug, vaccine or other product.";
-            case ENCOUNTER: return "Plan to meet or communicate with the patient (in-patient, out-patient, phone call, etc.).";
-            case OBSERVATION: return "Plan to capture information about a patient (vitals, labs, diagnostic images, etc.).";
-            case PROCEDURE: return "Plan to modify the patient in some way (surgery, physiotherapy, education, counseling, etc.).";
-            case SUPPLY: return "Plan to provide something to the patient (medication, medical supply, etc.).";
-            case OTHER: return "Some other form of action.";
+            case DIET: return "Plan for the patient to consume food of a specified nature";
+            case DRUG: return "Plan for the patient to consume/receive a drug, vaccine or other product";
+            case ENCOUNTER: return "Plan to meet or communicate with the patient (in-patient, out-patient, phone call, etc.)";
+            case OBSERVATION: return "Plan to capture information about a patient (vitals, labs, diagnostic images, etc.)";
+            case PROCEDURE: return "Plan to modify the patient in some way (surgery, physiotherapy, education, counseling, etc.)";
+            case SUPPLY: return "Plan to provide something to the patient (medication, medical supply, etc.)";
+            case OTHER: return "Some other form of action";
             default: return "?";
           }
         }
@@ -276,15 +276,15 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanActivityStatus {
         /**
-         * Activity is planned but no action has yet been taken.
+         * Activity is planned but no action has yet been taken
          */
         NOTSTARTED, 
         /**
-         * Appointment or other booking has occurred but activity has not yet begun.
+         * Appointment or other booking has occurred but activity has not yet begun
          */
         SCHEDULED, 
         /**
-         * Activity has been started but is not yet complete.
+         * Activity has been started but is not yet complete
          */
         INPROGRESS, 
         /**
@@ -292,11 +292,11 @@ public class CarePlan extends DomainResource {
          */
         ONHOLD, 
         /**
-         * The activities have been completed (more or less) as planned.
+         * The activities have been completed (more or less) as planned
          */
         COMPLETED, 
         /**
-         * The activities have been ended prior to completion (perhaps even before they were started).
+         * The activities have been ended prior to completion (perhaps even before they were started)
          */
         CANCELLED, 
         /**
@@ -333,23 +333,23 @@ public class CarePlan extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case NOTSTARTED: return "";
-            case SCHEDULED: return "";
-            case INPROGRESS: return "";
-            case ONHOLD: return "";
-            case COMPLETED: return "";
-            case CANCELLED: return "";
+            case NOTSTARTED: return "http://hl7.org.fhir/care-plan-activity-status";
+            case SCHEDULED: return "http://hl7.org.fhir/care-plan-activity-status";
+            case INPROGRESS: return "http://hl7.org.fhir/care-plan-activity-status";
+            case ONHOLD: return "http://hl7.org.fhir/care-plan-activity-status";
+            case COMPLETED: return "http://hl7.org.fhir/care-plan-activity-status";
+            case CANCELLED: return "http://hl7.org.fhir/care-plan-activity-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSTARTED: return "Activity is planned but no action has yet been taken.";
-            case SCHEDULED: return "Appointment or other booking has occurred but activity has not yet begun.";
-            case INPROGRESS: return "Activity has been started but is not yet complete.";
+            case NOTSTARTED: return "Activity is planned but no action has yet been taken";
+            case SCHEDULED: return "Appointment or other booking has occurred but activity has not yet begun";
+            case INPROGRESS: return "Activity has been started but is not yet complete";
             case ONHOLD: return "Activity was started but has temporarily ceased with an expectation of resumption at a future time.";
-            case COMPLETED: return "The activities have been completed (more or less) as planned.";
-            case CANCELLED: return "The activities have been ended prior to completion (perhaps even before they were started).";
+            case COMPLETED: return "The activities have been completed (more or less) as planned";
+            case CANCELLED: return "The activities have been ended prior to completion (perhaps even before they were started)";
             default: return "?";
           }
         }

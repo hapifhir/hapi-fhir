@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,36 +46,36 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="Condition", profile="http://hl7.org/fhir/Profile/Condition")
 public class Condition extends DomainResource {
 
-    public enum ConditionStatus {
+    public enum ConditionClinicalStatus {
         /**
-         * This is a tentative diagnosis - still a candidate that is under consideration.
+         * This is a tentative diagnosis - still a candidate that is under consideration
          */
         PROVISIONAL, 
         /**
-         * The patient is being treated on the basis that this is the condition, but it is still not confirmed.
+         * The patient is being treated on the basis that this is the condition, but it is still not confirmed
          */
         WORKING, 
         /**
-         * There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.
+         * There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition
          */
         CONFIRMED, 
         /**
-         * This condition has been ruled out by diagnostic and clinical evidence.
+         * This condition has been ruled out by diagnostic and clinical evidence
          */
         REFUTED, 
         /**
-         * The statement was entered in error and Is not valid.
+         * The statement was entered in error and Is not valid
          */
         ENTEREDINERROR, 
         /**
-         * The condition status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
+         * The condition status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown"
          */
         UNKNOWN, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ConditionStatus fromCode(String codeString) throws Exception {
+        public static ConditionClinicalStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("provisional".equals(codeString))
@@ -90,7 +90,7 @@ public class Condition extends DomainResource {
           return ENTEREDINERROR;
         if ("unknown".equals(codeString))
           return UNKNOWN;
-        throw new Exception("Unknown ConditionStatus code '"+codeString+"'");
+        throw new Exception("Unknown ConditionClinicalStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -105,23 +105,23 @@ public class Condition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROVISIONAL: return "";
-            case WORKING: return "";
-            case CONFIRMED: return "";
-            case REFUTED: return "";
-            case ENTEREDINERROR: return "";
-            case UNKNOWN: return "";
+            case PROVISIONAL: return "http://hl7.org.fhir/condition-status";
+            case WORKING: return "http://hl7.org.fhir/condition-status";
+            case CONFIRMED: return "http://hl7.org.fhir/condition-status";
+            case REFUTED: return "http://hl7.org.fhir/condition-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/condition-status";
+            case UNKNOWN: return "http://hl7.org.fhir/condition-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROVISIONAL: return "This is a tentative diagnosis - still a candidate that is under consideration.";
-            case WORKING: return "The patient is being treated on the basis that this is the condition, but it is still not confirmed.";
-            case CONFIRMED: return "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.";
-            case REFUTED: return "This condition has been ruled out by diagnostic and clinical evidence.";
-            case ENTEREDINERROR: return "The statement was entered in error and Is not valid.";
-            case UNKNOWN: return "The condition status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'.";
+            case PROVISIONAL: return "This is a tentative diagnosis - still a candidate that is under consideration";
+            case WORKING: return "The patient is being treated on the basis that this is the condition, but it is still not confirmed";
+            case CONFIRMED: return "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition";
+            case REFUTED: return "This condition has been ruled out by diagnostic and clinical evidence";
+            case ENTEREDINERROR: return "The statement was entered in error and Is not valid";
+            case UNKNOWN: return "The condition status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'";
             default: return "?";
           }
         }
@@ -138,37 +138,37 @@ public class Condition extends DomainResource {
         }
     }
 
-  public static class ConditionStatusEnumFactory implements EnumFactory<ConditionStatus> {
-    public ConditionStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class ConditionClinicalStatusEnumFactory implements EnumFactory<ConditionClinicalStatus> {
+    public ConditionClinicalStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("provisional".equals(codeString))
-          return ConditionStatus.PROVISIONAL;
+          return ConditionClinicalStatus.PROVISIONAL;
         if ("working".equals(codeString))
-          return ConditionStatus.WORKING;
+          return ConditionClinicalStatus.WORKING;
         if ("confirmed".equals(codeString))
-          return ConditionStatus.CONFIRMED;
+          return ConditionClinicalStatus.CONFIRMED;
         if ("refuted".equals(codeString))
-          return ConditionStatus.REFUTED;
+          return ConditionClinicalStatus.REFUTED;
         if ("entered-in-error".equals(codeString))
-          return ConditionStatus.ENTEREDINERROR;
+          return ConditionClinicalStatus.ENTEREDINERROR;
         if ("unknown".equals(codeString))
-          return ConditionStatus.UNKNOWN;
-        throw new IllegalArgumentException("Unknown ConditionStatus code '"+codeString+"'");
+          return ConditionClinicalStatus.UNKNOWN;
+        throw new IllegalArgumentException("Unknown ConditionClinicalStatus code '"+codeString+"'");
         }
-    public String toCode(ConditionStatus code) {
-      if (code == ConditionStatus.PROVISIONAL)
+    public String toCode(ConditionClinicalStatus code) {
+      if (code == ConditionClinicalStatus.PROVISIONAL)
         return "provisional";
-      if (code == ConditionStatus.WORKING)
+      if (code == ConditionClinicalStatus.WORKING)
         return "working";
-      if (code == ConditionStatus.CONFIRMED)
+      if (code == ConditionClinicalStatus.CONFIRMED)
         return "confirmed";
-      if (code == ConditionStatus.REFUTED)
+      if (code == ConditionClinicalStatus.REFUTED)
         return "refuted";
-      if (code == ConditionStatus.ENTEREDINERROR)
+      if (code == ConditionClinicalStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == ConditionStatus.UNKNOWN)
+      if (code == ConditionClinicalStatus.UNKNOWN)
         return "unknown";
       return "?";
       }
@@ -900,7 +900,7 @@ public class Condition extends DomainResource {
      */
     @Child(name = "clinicalStatus", type = {CodeType.class}, order=7, min=1, max=1)
     @Description(shortDefinition="provisional | working | confirmed | refuted | entered-in-error | unknown", formalDefinition="The clinical status of the condition." )
-    protected Enumeration<ConditionStatus> clinicalStatus;
+    protected Enumeration<ConditionClinicalStatus> clinicalStatus;
 
     /**
      * A subjective assessment of the severity of the condition as evaluated by the clinician.
@@ -965,7 +965,7 @@ public class Condition extends DomainResource {
     @Description(shortDefinition="Additional information about the Condition", formalDefinition="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis." )
     protected StringType notes;
 
-    private static final long serialVersionUID = -1018838673L;
+    private static final long serialVersionUID = -1214455844L;
 
   /*
    * Constructor
@@ -977,7 +977,7 @@ public class Condition extends DomainResource {
   /*
    * Constructor
    */
-    public Condition(Reference patient, CodeableConcept code, Enumeration<ConditionStatus> clinicalStatus) {
+    public Condition(Reference patient, CodeableConcept code, Enumeration<ConditionClinicalStatus> clinicalStatus) {
       super();
       this.patient = patient;
       this.code = code;
@@ -1251,12 +1251,12 @@ public class Condition extends DomainResource {
     /**
      * @return {@link #clinicalStatus} (The clinical status of the condition.). This is the underlying object with id, value and extensions. The accessor "getClinicalStatus" gives direct access to the value
      */
-    public Enumeration<ConditionStatus> getClinicalStatusElement() { 
+    public Enumeration<ConditionClinicalStatus> getClinicalStatusElement() { 
       if (this.clinicalStatus == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Condition.clinicalStatus");
         else if (Configuration.doAutoCreate())
-          this.clinicalStatus = new Enumeration<ConditionStatus>(new ConditionStatusEnumFactory()); // bb
+          this.clinicalStatus = new Enumeration<ConditionClinicalStatus>(new ConditionClinicalStatusEnumFactory()); // bb
       return this.clinicalStatus;
     }
 
@@ -1271,7 +1271,7 @@ public class Condition extends DomainResource {
     /**
      * @param value {@link #clinicalStatus} (The clinical status of the condition.). This is the underlying object with id, value and extensions. The accessor "getClinicalStatus" gives direct access to the value
      */
-    public Condition setClinicalStatusElement(Enumeration<ConditionStatus> value) { 
+    public Condition setClinicalStatusElement(Enumeration<ConditionClinicalStatus> value) { 
       this.clinicalStatus = value;
       return this;
     }
@@ -1279,16 +1279,16 @@ public class Condition extends DomainResource {
     /**
      * @return The clinical status of the condition.
      */
-    public ConditionStatus getClinicalStatus() { 
+    public ConditionClinicalStatus getClinicalStatus() { 
       return this.clinicalStatus == null ? null : this.clinicalStatus.getValue();
     }
 
     /**
      * @param value The clinical status of the condition.
      */
-    public Condition setClinicalStatus(ConditionStatus value) { 
+    public Condition setClinicalStatus(ConditionClinicalStatus value) { 
         if (this.clinicalStatus == null)
-          this.clinicalStatus = new Enumeration<ConditionStatus>(new ConditionStatusEnumFactory());
+          this.clinicalStatus = new Enumeration<ConditionClinicalStatus>(new ConditionClinicalStatusEnumFactory());
         this.clinicalStatus.setValue(value);
       return this;
     }

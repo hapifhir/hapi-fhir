@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -55,11 +55,11 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         FAX, 
         /**
-         * The value is an email address.
+         * The value is an email address
          */
         EMAIL, 
         /**
-         * The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses.
+         * The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses
          */
         URL, 
         /**
@@ -90,10 +90,10 @@ public class ContactPoint extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case PHONE: return "";
-            case FAX: return "";
-            case EMAIL: return "";
-            case URL: return "";
+            case PHONE: return "http://hl7.org.fhir/contact-point-system";
+            case FAX: return "http://hl7.org.fhir/contact-point-system";
+            case EMAIL: return "http://hl7.org.fhir/contact-point-system";
+            case URL: return "http://hl7.org.fhir/contact-point-system";
             default: return "?";
           }
         }
@@ -101,8 +101,8 @@ public class ContactPoint extends Type implements ICompositeType {
           switch (this) {
             case PHONE: return "The value is a telephone number used for voice calls. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
             case FAX: return "The value is a fax machine. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
-            case EMAIL: return "The value is an email address.";
-            case URL: return "The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses.";
+            case EMAIL: return "The value is an email address";
+            case URL: return "The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses";
             default: return "?";
           }
         }
@@ -159,11 +159,11 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         TEMP, 
         /**
-         * This contact point is no longer in use (or was never correct, but retained for records).
+         * This contact point is no longer in use (or was never correct, but retained for records)
          */
         OLD, 
         /**
-         * A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business.
+         * A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business
          */
         MOBILE, 
         /**
@@ -197,11 +197,11 @@ public class ContactPoint extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case HOME: return "";
-            case WORK: return "";
-            case TEMP: return "";
-            case OLD: return "";
-            case MOBILE: return "";
+            case HOME: return "http://hl7.org.fhir/contact-point-use";
+            case WORK: return "http://hl7.org.fhir/contact-point-use";
+            case TEMP: return "http://hl7.org.fhir/contact-point-use";
+            case OLD: return "http://hl7.org.fhir/contact-point-use";
+            case MOBILE: return "http://hl7.org.fhir/contact-point-use";
             default: return "?";
           }
         }
@@ -210,8 +210,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case HOME: return "A communication contact point at a home; attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available.";
             case WORK: return "An office contact point. First choice for business related contacts during business hours.";
             case TEMP: return "A temporary contact point. The period can provide more detailed information.";
-            case OLD: return "This contact point is no longer in use (or was never correct, but retained for records).";
-            case MOBILE: return "A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business.";
+            case OLD: return "This contact point is no longer in use (or was never correct, but retained for records)";
+            case MOBILE: return "A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business";
             default: return "?";
           }
         }

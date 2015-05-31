@@ -92,16 +92,18 @@ import ca.uhn.fhir.util.ReflectionUtil;
 class ModelScanner {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
 
+	private final Map<Class<? extends Annotation>, Class<? extends Annotation>> myAnnotationForwards = new HashMap<Class<? extends Annotation>, Class<? extends Annotation>>();
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
 	private FhirContext myContext;
 	private Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
+	private Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinitions = new HashMap<String, BaseRuntimeElementDefinition<?>>();
 	private Map<String, RuntimeResourceDefinition> myNameToResourceDefinitions = new HashMap<String, RuntimeResourceDefinition>();
 	private Map<String, Class<? extends IBaseResource>> myNameToResourceType = new HashMap<String, Class<? extends IBaseResource>>();
 	private RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private Set<Class<? extends IBase>> myScanAlso = new HashSet<Class<? extends IBase>>();
 	private Set<Class<? extends ICodeEnum>> myScanAlsoCodeTable = new HashSet<Class<? extends ICodeEnum>>();
 	private FhirVersionEnum myVersion;
-	private Map<String, BaseRuntimeElementDefinition<?>> myNameToElementDefinitions = new HashMap<String, BaseRuntimeElementDefinition<?>>();
+
 	private Set<Class<? extends IBase>> myVersionTypes;
 
 	ModelScanner(FhirContext theContext, FhirVersionEnum theVersion, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions, Collection<Class<? extends IElement>> theResourceTypes) throws ConfigurationException {
@@ -160,6 +162,14 @@ class ModelScanner {
 
 	public Map<String, RuntimeResourceDefinition> getIdToResourceDefinition() {
 		return myIdToResourceDefinition;
+	}
+
+	public Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinitions() {
+		return myNameToElementDefinitions;
+	}
+
+	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
+		return myNameToResourceDefinitions;
 	}
 
 	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinitions() {
@@ -222,6 +232,10 @@ class ModelScanner {
 		ourLog.debug("Done scanning FHIR library, found {} model entries in {}ms", size, time);
 	}
 
+	private boolean isStandardType(Class<? extends IBase> theClass) {
+		return myVersionTypes.contains(theClass);
+	}
+
 	/**
 	 * There are two implementations of all of the annotations (e.g. {@link Child} and
 	 * {@link org.hl7.fhir.instance.model.annotations.Child}) since the HL7.org ones will eventually replace the HAPI
@@ -238,33 +252,50 @@ class ModelScanner {
 		}
 
 		if (retVal == null) {
-			String sourceClassName = theAnnotationType.getName();
-			String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
-
-			if (!sourceClassName.equals(candidateAltClassName)) {
-				try {
-					final Class<? extends Annotation> altAnnotationClass = (Class<? extends Annotation>) Class.forName(candidateAltClassName);
-					final Annotation altAnnotation = theTarget.getAnnotation(altAnnotationClass);
-					if (altAnnotation == null) {
-						return null;
+			final Class<? extends Annotation> altAnnotationClass;
+			/*
+			 * Use a cache to minimize Class.forName calls, since they are slow and expensive..
+			 */
+			if (myAnnotationForwards.containsKey(theAnnotationType) == false) {
+				String sourceClassName = theAnnotationType.getName();
+				String candidateAltClassName = sourceClassName.replace("ca.uhn.fhir.model.api.annotation", "org.hl7.fhir.instance.model.annotations");
+				if (!sourceClassName.equals(candidateAltClassName)) {
+					Class<?> forName;
+					try {
+						forName = Class.forName(candidateAltClassName);
+						ourLog.debug("Forwarding annotation request for [{}] to class [{}]", theAnnotationType, forName);
+					} catch (ClassNotFoundException e) {
+						forName = null;
 					}
-
-					ourLog.debug("Forwarding annotation request for [{}] to class [{}]", sourceClassName, candidateAltClassName);
-
-					InvocationHandler h = new InvocationHandler() {
-
-						@Override
-						public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
-							Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
-							return altMethod.invoke(altAnnotation, theArgs);
-						}
-					};
-					retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
-
-				} catch (ClassNotFoundException e) {
-					return null;
+					altAnnotationClass = (Class<? extends Annotation>) forName;
+				} else {
+					altAnnotationClass = null;
 				}
+				myAnnotationForwards.put(theAnnotationType, altAnnotationClass);
+			} else {
+				altAnnotationClass = myAnnotationForwards.get(theAnnotationType);
 			}
+
+			if (altAnnotationClass == null) {
+				return null;
+			}
+
+			final Annotation altAnnotation;
+			altAnnotation = theTarget.getAnnotation(altAnnotationClass);
+			if (altAnnotation == null) {
+				return null;
+			}
+
+			InvocationHandler h = new InvocationHandler() {
+
+				@Override
+				public Object invoke(Object theProxy, Method theMethod, Object[] theArgs) throws Throwable {
+					Method altMethod = altAnnotationClass.getMethod(theMethod.getName(), theMethod.getParameterTypes());
+					return altMethod.invoke(altAnnotation, theArgs);
+				}
+			};
+			retVal = (T) Proxy.newProxyInstance(theAnnotationType.getClassLoader(), new Class<?>[] { theAnnotationType }, h);
+
 		}
 
 		return retVal;
@@ -342,10 +373,6 @@ class ModelScanner {
 		myClassToElementDefinitions.put(theClass, resourceDef);
 		myNameToElementDefinitions.put(resourceDef.getName(), resourceDef);
 		scanCompositeElementForChildren(theClass, resourceDef);
-	}
-
-	private boolean isStandardType(Class<? extends IBase> theClass) {
-		return myVersionTypes.contains(theClass);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -547,11 +574,11 @@ class ModelScanner {
 				}
 
 				RuntimeChildDeclaredExtensionDefinition def = new RuntimeChildDeclaredExtensionDefinition(next, childAnnotation, descriptionAnnotation, extensionAttr, elementName, extensionAttr.url(), et, binder);
-				
+
 				if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-					def.setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfField(next));
+					def.setEnumerationType(ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next));
 				}
-				
+
 				orderMap.put(order, def);
 				if (IBase.class.isAssignableFrom(nextElementType)) {
 					addScanAlso((Class<? extends IBase>) nextElementType);
@@ -598,7 +625,7 @@ class ModelScanner {
 						IValueSetEnumBinder<Enum<?>> binder = getBoundCodeBinder(next);
 						def = new RuntimeChildPrimitiveBoundCodeDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binder);
 					} else if (IBaseEnumeration.class.isAssignableFrom(nextElementType)) {
-						Class<?> binderType = ReflectionUtil.getGenericCollectionTypeOfField(next);
+						Class<?> binderType = ReflectionUtil.getGenericCollectionTypeOfFieldWithSecondOrderForList(next);
 						def = new RuntimeChildPrimitiveEnumerationDatatypeDefinition(next, elementName, childAnnotation, descriptionAnnotation, nextDatatype, binderType);
 					} else if (childAnnotation.enumFactory().getSimpleName().equals("NoEnumFactory") == false) {
 						Class<? extends IBaseEnumFactory<?>> enumFactory = childAnnotation.enumFactory();
@@ -770,7 +797,7 @@ class ModelScanner {
 
 	static Set<Class<? extends IBase>> scanVersionPropertyFile(Set<Class<? extends IBase>> theDatatypes, Map<String, Class<? extends IBaseResource>> theResourceTypes, FhirVersionEnum version) {
 		Set<Class<? extends IBase>> retVal = new HashSet<Class<? extends IBase>>();
-		
+
 		InputStream str = version.getVersionImplementation().getFhirVersionPropertiesFile();
 		Properties prop = new Properties();
 		try {
@@ -783,11 +810,11 @@ class ModelScanner {
 					if (theDatatypes != null) {
 						try {
 							// Datatypes
-							
+
 							@SuppressWarnings("unchecked")
 							Class<? extends IBase> dtType = (Class<? extends IBase>) Class.forName(nextValue);
 							retVal.add(dtType);
-							
+
 							if (IElement.class.isAssignableFrom(dtType)) {
 								@SuppressWarnings("unchecked")
 								Class<? extends IElement> nextClass = (Class<? extends IElement>) dtType;
@@ -826,16 +853,8 @@ class ModelScanner {
 		} catch (IOException e) {
 			throw new ConfigurationException("Failed to load model property file from classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
 		}
-		
+
 		return retVal;
-	}
-
-	public Map<String, BaseRuntimeElementDefinition<?>> getNameToElementDefinitions() {
-		return myNameToElementDefinitions;
-	}
-
-	public Map<String, RuntimeResourceDefinition> getNameToResourceDefinition() {
-		return myNameToResourceDefinitions;
 	}
 
 }

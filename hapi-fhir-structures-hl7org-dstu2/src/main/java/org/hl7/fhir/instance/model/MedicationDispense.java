@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,7 +52,7 @@ public class MedicationDispense extends DomainResource {
          */
         INPROGRESS, 
         /**
-         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended".
+         * Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called "suspended"
          */
         ONHOLD, 
         /**
@@ -98,18 +98,18 @@ public class MedicationDispense extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "";
-            case ONHOLD: return "";
-            case COMPLETED: return "";
-            case ENTEREDINERROR: return "";
-            case STOPPED: return "";
+            case INPROGRESS: return "http://hl7.org.fhir/medication-dispense-status";
+            case ONHOLD: return "http://hl7.org.fhir/medication-dispense-status";
+            case COMPLETED: return "http://hl7.org.fhir/medication-dispense-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/medication-dispense-status";
+            case STOPPED: return "http://hl7.org.fhir/medication-dispense-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The dispense has started but has not yet completed.";
-            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called 'suspended'.";
+            case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called 'suspended'";
             case COMPLETED: return "All actions that are implied by the dispense have occurred.";
             case ENTEREDINERROR: return "The dispense was entered in error and therefore nullified.";
             case STOPPED: return "Actions implied by the dispense have been permanently halted, before all of them occurred.";

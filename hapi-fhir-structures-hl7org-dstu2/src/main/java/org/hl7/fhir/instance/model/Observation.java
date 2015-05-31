@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,31 +48,31 @@ public class Observation extends DomainResource {
 
     public enum ObservationStatus {
         /**
-         * The existence of the observation is registered, but there is no result yet available.
+         * The existence of the observation is registered, but there is no result yet available
          */
         REGISTERED, 
         /**
-         * This is an initial or interim observation: data may be incomplete or unverified.
+         * This is an initial or interim observation: data may be incomplete or unverified
          */
         PRELIMINARY, 
         /**
-         * The observation is complete and verified by an authorized person.
+         * The observation is complete and verified by an authorized person
          */
         FINAL, 
         /**
-         * The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.
+         * The observation has been modified subsequent to being Final, and is complete and verified by an authorized person
          */
         AMENDED, 
         /**
-         * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted").
+         * The observation is unavailable because the measurement was not started or not completed (also sometimes called "aborted")
          */
         CANCELLED, 
         /**
-         * The observation has been withdrawn following previous Final release.
+         * The observation has been withdrawn following previous Final release
          */
         ENTEREDINERROR, 
         /**
-         * The observation status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown".
+         * The observation status is unknown.  Note that "unknown" is a value of last resort and every attempt should be made to provide a meaningful value other than "unknown"
          */
         UNKNOWN, 
         /**
@@ -112,25 +112,25 @@ public class Observation extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REGISTERED: return "";
-            case PRELIMINARY: return "";
-            case FINAL: return "";
-            case AMENDED: return "";
-            case CANCELLED: return "";
-            case ENTEREDINERROR: return "";
-            case UNKNOWN: return "";
+            case REGISTERED: return "http://hl7.org.fhir/observation-status";
+            case PRELIMINARY: return "http://hl7.org.fhir/observation-status";
+            case FINAL: return "http://hl7.org.fhir/observation-status";
+            case AMENDED: return "http://hl7.org.fhir/observation-status";
+            case CANCELLED: return "http://hl7.org.fhir/observation-status";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/observation-status";
+            case UNKNOWN: return "http://hl7.org.fhir/observation-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case REGISTERED: return "The existence of the observation is registered, but there is no result yet available.";
-            case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified.";
-            case FINAL: return "The observation is complete and verified by an authorized person.";
-            case AMENDED: return "The observation has been modified subsequent to being Final, and is complete and verified by an authorized person.";
-            case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called 'aborted').";
-            case ENTEREDINERROR: return "The observation has been withdrawn following previous Final release.";
-            case UNKNOWN: return "The observation status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'.";
+            case REGISTERED: return "The existence of the observation is registered, but there is no result yet available";
+            case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified";
+            case FINAL: return "The observation is complete and verified by an authorized person";
+            case AMENDED: return "The observation has been modified subsequent to being Final, and is complete and verified by an authorized person";
+            case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called 'aborted')";
+            case ENTEREDINERROR: return "The observation has been withdrawn following previous Final release";
+            case UNKNOWN: return "The observation status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'";
             default: return "?";
           }
         }
@@ -190,31 +190,31 @@ public class Observation extends DomainResource {
 
     public enum ObservationReliability {
         /**
-         * The result has no reliability concerns.
+         * The result has no reliability concerns
          */
         OK, 
         /**
-         * An early estimate of value; measurement is still occurring.
+         * An early estimate of value; measurement is still occurring
          */
         ONGOING, 
         /**
-         * An early estimate of value; processing is still occurring.
+         * An early estimate of value; processing is still occurring
          */
         EARLY, 
         /**
-         * The observation value should be treated with care.
+         * The observation value should be treated with care
          */
         QUESTIONABLE, 
         /**
-         * The result has been generated while calibration is occurring.
+         * The result has been generated while calibration is occurring
          */
         CALIBRATING, 
         /**
-         * The observation could not be completed because of an error.
+         * The observation could not be completed because of an error
          */
         ERROR, 
         /**
-         * No observation  reliability value was available.
+         * No observation  reliability value was available
          */
         UNKNOWN, 
         /**
@@ -254,25 +254,25 @@ public class Observation extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case OK: return "";
-            case ONGOING: return "";
-            case EARLY: return "";
-            case QUESTIONABLE: return "";
-            case CALIBRATING: return "";
-            case ERROR: return "";
-            case UNKNOWN: return "";
+            case OK: return "http://hl7.org.fhir/observation-reliability";
+            case ONGOING: return "http://hl7.org.fhir/observation-reliability";
+            case EARLY: return "http://hl7.org.fhir/observation-reliability";
+            case QUESTIONABLE: return "http://hl7.org.fhir/observation-reliability";
+            case CALIBRATING: return "http://hl7.org.fhir/observation-reliability";
+            case ERROR: return "http://hl7.org.fhir/observation-reliability";
+            case UNKNOWN: return "http://hl7.org.fhir/observation-reliability";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case OK: return "The result has no reliability concerns.";
-            case ONGOING: return "An early estimate of value; measurement is still occurring.";
-            case EARLY: return "An early estimate of value; processing is still occurring.";
-            case QUESTIONABLE: return "The observation value should be treated with care.";
-            case CALIBRATING: return "The result has been generated while calibration is occurring.";
-            case ERROR: return "The observation could not be completed because of an error.";
-            case UNKNOWN: return "No observation  reliability value was available.";
+            case OK: return "The result has no reliability concerns";
+            case ONGOING: return "An early estimate of value; measurement is still occurring";
+            case EARLY: return "An early estimate of value; processing is still occurring";
+            case QUESTIONABLE: return "The observation value should be treated with care";
+            case CALIBRATING: return "The result has been generated while calibration is occurring";
+            case ERROR: return "The observation could not be completed because of an error";
+            case UNKNOWN: return "No observation  reliability value was available";
             default: return "?";
           }
         }
@@ -330,32 +330,32 @@ public class Observation extends DomainResource {
       }
     }
 
-    public enum ObservationRelationshiptypes {
+    public enum ObservationRelationshipType {
         /**
-         * This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.
+         * This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group
          */
         HASMEMBER, 
         /**
-         * This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test).
+         * This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test)
          */
         SEQUELTO, 
         /**
-         * This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete.
+         * This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete
          */
         REPLACES, 
         /**
-         * The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure).
+         * The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure)
          */
         QUALIFIEDBY, 
         /**
-         * The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value).
+         * The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value)
          */
         INTERFEREDBY, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static ObservationRelationshiptypes fromCode(String codeString) throws Exception {
+        public static ObservationRelationshipType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("has-member".equals(codeString))
@@ -368,7 +368,7 @@ public class Observation extends DomainResource {
           return QUALIFIEDBY;
         if ("interfered-by".equals(codeString))
           return INTERFEREDBY;
-        throw new Exception("Unknown ObservationRelationshiptypes code '"+codeString+"'");
+        throw new Exception("Unknown ObservationRelationshipType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -382,21 +382,21 @@ public class Observation extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case HASMEMBER: return "";
-            case SEQUELTO: return "";
-            case REPLACES: return "";
-            case QUALIFIEDBY: return "";
-            case INTERFEREDBY: return "";
+            case HASMEMBER: return "http://hl7.org.fhir/observation-relationshiptypes";
+            case SEQUELTO: return "http://hl7.org.fhir/observation-relationshiptypes";
+            case REPLACES: return "http://hl7.org.fhir/observation-relationshiptypes";
+            case QUALIFIEDBY: return "http://hl7.org.fhir/observation-relationshiptypes";
+            case INTERFEREDBY: return "http://hl7.org.fhir/observation-relationshiptypes";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case HASMEMBER: return "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.";
-            case SEQUELTO: return "This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test).";
-            case REPLACES: return "This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete.";
-            case QUALIFIEDBY: return "The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure).";
-            case INTERFEREDBY: return "The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value).";
+            case HASMEMBER: return "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group";
+            case SEQUELTO: return "This observation follows the target observation (e.g. timed tests such as Glucose Tolerance Test)";
+            case REPLACES: return "This observation replaces a previous observation (i.e. a revised value). The target observation is now obsolete";
+            case QUALIFIEDBY: return "The value of the target observation qualifies (refines) the semantics of the source observation (e.g. a lipaemia measure target from a plasma measure)";
+            case INTERFEREDBY: return "The value of the target observation interferes (degardes quality, or prevents valid observation) with the semantics of the source observation (e.g. a hemolysis measure target from a plasma potassium measure which has no value)";
             default: return "?";
           }
         }
@@ -412,33 +412,33 @@ public class Observation extends DomainResource {
         }
     }
 
-  public static class ObservationRelationshiptypesEnumFactory implements EnumFactory<ObservationRelationshiptypes> {
-    public ObservationRelationshiptypes fromCode(String codeString) throws IllegalArgumentException {
+  public static class ObservationRelationshipTypeEnumFactory implements EnumFactory<ObservationRelationshipType> {
+    public ObservationRelationshipType fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("has-member".equals(codeString))
-          return ObservationRelationshiptypes.HASMEMBER;
+          return ObservationRelationshipType.HASMEMBER;
         if ("sequel-to".equals(codeString))
-          return ObservationRelationshiptypes.SEQUELTO;
+          return ObservationRelationshipType.SEQUELTO;
         if ("replaces".equals(codeString))
-          return ObservationRelationshiptypes.REPLACES;
+          return ObservationRelationshipType.REPLACES;
         if ("qualified-by".equals(codeString))
-          return ObservationRelationshiptypes.QUALIFIEDBY;
+          return ObservationRelationshipType.QUALIFIEDBY;
         if ("interfered-by".equals(codeString))
-          return ObservationRelationshiptypes.INTERFEREDBY;
-        throw new IllegalArgumentException("Unknown ObservationRelationshiptypes code '"+codeString+"'");
+          return ObservationRelationshipType.INTERFEREDBY;
+        throw new IllegalArgumentException("Unknown ObservationRelationshipType code '"+codeString+"'");
         }
-    public String toCode(ObservationRelationshiptypes code) {
-      if (code == ObservationRelationshiptypes.HASMEMBER)
+    public String toCode(ObservationRelationshipType code) {
+      if (code == ObservationRelationshipType.HASMEMBER)
         return "has-member";
-      if (code == ObservationRelationshiptypes.SEQUELTO)
+      if (code == ObservationRelationshipType.SEQUELTO)
         return "sequel-to";
-      if (code == ObservationRelationshiptypes.REPLACES)
+      if (code == ObservationRelationshipType.REPLACES)
         return "replaces";
-      if (code == ObservationRelationshiptypes.QUALIFIEDBY)
+      if (code == ObservationRelationshipType.QUALIFIEDBY)
         return "qualified-by";
-      if (code == ObservationRelationshiptypes.INTERFEREDBY)
+      if (code == ObservationRelationshipType.INTERFEREDBY)
         return "interfered-by";
       return "?";
       }
@@ -691,7 +691,7 @@ public class Observation extends DomainResource {
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="has-member | sequel-to | replaces | qualified-by | interfered-by", formalDefinition="A code specifying the kind of relationship that exists with the target observation." )
-        protected Enumeration<ObservationRelationshiptypes> type;
+        protected Enumeration<ObservationRelationshipType> type;
 
         /**
          * A reference to the observation that is related to this observation.
@@ -705,7 +705,7 @@ public class Observation extends DomainResource {
          */
         protected Observation targetTarget;
 
-        private static final long serialVersionUID = 1078793488L;
+        private static final long serialVersionUID = 1755337013L;
 
     /*
      * Constructor
@@ -725,12 +725,12 @@ public class Observation extends DomainResource {
         /**
          * @return {@link #type} (A code specifying the kind of relationship that exists with the target observation.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public Enumeration<ObservationRelationshiptypes> getTypeElement() { 
+        public Enumeration<ObservationRelationshipType> getTypeElement() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ObservationRelatedComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<ObservationRelationshiptypes>(new ObservationRelationshiptypesEnumFactory()); // bb
+              this.type = new Enumeration<ObservationRelationshipType>(new ObservationRelationshipTypeEnumFactory()); // bb
           return this.type;
         }
 
@@ -745,7 +745,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #type} (A code specifying the kind of relationship that exists with the target observation.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
-        public ObservationRelatedComponent setTypeElement(Enumeration<ObservationRelationshiptypes> value) { 
+        public ObservationRelatedComponent setTypeElement(Enumeration<ObservationRelationshipType> value) { 
           this.type = value;
           return this;
         }
@@ -753,19 +753,19 @@ public class Observation extends DomainResource {
         /**
          * @return A code specifying the kind of relationship that exists with the target observation.
          */
-        public ObservationRelationshiptypes getType() { 
+        public ObservationRelationshipType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
          * @param value A code specifying the kind of relationship that exists with the target observation.
          */
-        public ObservationRelatedComponent setType(ObservationRelationshiptypes value) { 
+        public ObservationRelatedComponent setType(ObservationRelationshipType value) { 
           if (value == null)
             this.type = null;
           else {
             if (this.type == null)
-              this.type = new Enumeration<ObservationRelationshiptypes>(new ObservationRelationshiptypesEnumFactory());
+              this.type = new Enumeration<ObservationRelationshipType>(new ObservationRelationshipTypeEnumFactory());
             this.type.setValue(value);
           }
           return this;
@@ -1196,9 +1196,9 @@ public class Observation extends DomainResource {
     /**
      * The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.
      */
-    @Child(name = "applies", type = {DateTimeType.class, Period.class}, order=6, min=0, max=1)
-    @Description(shortDefinition="Physiologically Relevant time/time-period for observation", formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself." )
-    protected Type applies;
+    @Child(name = "effective", type = {DateTimeType.class, Period.class}, order=6, min=0, max=1)
+    @Description(shortDefinition="Clinically Relevant time/time-period for observation", formalDefinition="The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself." )
+    protected Type effective;
 
     /**
      * The date and time this observation was made available.
@@ -1243,15 +1243,15 @@ public class Observation extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
+     * The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, 
 other observer (for example a relative or EMT), or any observation made about the subject.
      */
     @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=13, min=0, max=1)
-    @Description(shortDefinition="Who and/or what this is about", formalDefinition="The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,\nother observer (for example a relative or EMT), or any observation made about the subject." )
+    @Description(shortDefinition="Who and/or what this is about", formalDefinition="The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, \nother observer (for example a relative or EMT), or any observation made about the subject." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
+     * The actual object that is the target of the reference (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, 
 other observer (for example a relative or EMT), or any observation made about the subject.)
      */
     protected Resource subjectTarget;
@@ -1331,13 +1331,13 @@ other observer (for example a relative or EMT), or any observation made about th
     protected List<ObservationRelatedComponent> related;
 
     /**
-     * Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same metadata.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.
+     * Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.
      */
     @Child(name = "component", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Component results", formalDefinition="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same metadata.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations." )
+    @Description(shortDefinition="Component results", formalDefinition="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations." )
     protected List<ObservationComponentComponent> component;
 
-    private static final long serialVersionUID = -1610317643L;
+    private static final long serialVersionUID = -1977481392L;
 
   /*
    * Constructor
@@ -1610,39 +1610,39 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @return {@link #applies} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
+     * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Type getApplies() { 
-      return this.applies;
+    public Type getEffective() { 
+      return this.effective;
     }
 
     /**
-     * @return {@link #applies} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
+     * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public DateTimeType getAppliesDateTimeType() throws Exception { 
-      if (!(this.applies instanceof DateTimeType))
-        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.applies.getClass().getName()+" was encountered");
-      return (DateTimeType) this.applies;
+    public DateTimeType getEffectiveDateTimeType() throws Exception { 
+      if (!(this.effective instanceof DateTimeType))
+        throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (DateTimeType) this.effective;
     }
 
     /**
-     * @return {@link #applies} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
+     * @return {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Period getAppliesPeriod() throws Exception { 
-      if (!(this.applies instanceof Period))
-        throw new Exception("Type mismatch: the type Period was expected, but "+this.applies.getClass().getName()+" was encountered");
-      return (Period) this.applies;
+    public Period getEffectivePeriod() throws Exception { 
+      if (!(this.effective instanceof Period))
+        throw new Exception("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
+      return (Period) this.effective;
     }
 
-    public boolean hasApplies() { 
-      return this.applies != null && !this.applies.isEmpty();
+    public boolean hasEffective() { 
+      return this.effective != null && !this.effective.isEmpty();
     }
 
     /**
-     * @param value {@link #applies} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
+     * @param value {@link #effective} (The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the "physiologically relevant time". This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.)
      */
-    public Observation setApplies(Type value) { 
-      this.applies = value;
+    public Observation setEffective(Type value) { 
+      this.effective = value;
       return this;
     }
 
@@ -1891,7 +1891,7 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @return {@link #subject} (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
+     * @return {@link #subject} (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, 
 other observer (for example a relative or EMT), or any observation made about the subject.)
      */
     public Reference getSubject() { 
@@ -1908,7 +1908,7 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @param value {@link #subject} (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
+     * @param value {@link #subject} (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, 
 other observer (for example a relative or EMT), or any observation made about the subject.)
      */
     public Observation setSubject(Reference value) { 
@@ -1917,7 +1917,7 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, 
 other observer (for example a relative or EMT), or any observation made about the subject.)
      */
     public Resource getSubjectTarget() { 
@@ -1925,7 +1925,7 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, 
 other observer (for example a relative or EMT), or any observation made about the subject.)
      */
     public Observation setSubjectTarget(Resource value) { 
@@ -2239,7 +2239,7 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same metadata.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.)
+     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.)
      */
     public List<ObservationComponentComponent> getComponent() { 
       if (this.component == null)
@@ -2257,7 +2257,7 @@ other observer (for example a relative or EMT), or any observation made about th
     }
 
     /**
-     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same metadata.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.)
+     * @return {@link #component} (Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.)
      */
     // syntactic sugar
     public ObservationComponentComponent addComponent() { //3
@@ -2286,14 +2286,14 @@ other observer (for example a relative or EMT), or any observation made about th
         childrenList.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, java.lang.Integer.MAX_VALUE, dataAbsentReason));
         childrenList.add(new Property("interpretation", "CodeableConcept", "The assessment made based on the result of the observation.", 0, java.lang.Integer.MAX_VALUE, interpretation));
         childrenList.add(new Property("comments", "string", "May include statements about significant, unexpected or unreliable values, or information about the source of the value where this may be relevant to the interpretation of the result.", 0, java.lang.Integer.MAX_VALUE, comments));
-        childrenList.add(new Property("applies[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, applies));
+        childrenList.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed value is asserted as being true. For biological subjects - e.g. human patients - this is usually called the 'physiologically relevant time'. This is usually either the time of the procedure or of specimen collection, but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, effective));
         childrenList.add(new Property("issued", "instant", "The date and time this observation was made available.", 0, java.lang.Integer.MAX_VALUE, issued));
         childrenList.add(new Property("status", "code", "The status of the result value.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("reliability", "code", "An estimate of the degree to which quality issues have impacted on the value reported.", 0, java.lang.Integer.MAX_VALUE, reliability));
         childrenList.add(new Property("bodySite[x]", "CodeableConcept|Reference(BodySite)", "Indicates the site on the subject's body where the observation was made ( i.e. the target site).", 0, java.lang.Integer.MAX_VALUE, bodySite));
         childrenList.add(new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, java.lang.Integer.MAX_VALUE, method));
         childrenList.add(new Property("identifier", "Identifier", "A unique identifier for the simple observation.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus,\nother observer (for example a relative or EMT), or any observation made about the subject.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The patient, or group of patients, location, or device whose characteristics (direct or indirect) are described by the observation and into whose record the observation is placed.  Comments: Indirect characteristics may be those of a specimen, fetus, donor, \nother observer (for example a relative or EMT), or any observation made about the subject.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, java.lang.Integer.MAX_VALUE, specimen));
         childrenList.add(new Property("performer", "Reference(Practitioner|Organization|Patient|RelatedPerson)", "Who was responsible for asserting the observed value as 'true'.", 0, java.lang.Integer.MAX_VALUE, performer));
         childrenList.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, java.lang.Integer.MAX_VALUE, device));
@@ -2301,7 +2301,7 @@ other observer (for example a relative or EMT), or any observation made about th
         childrenList.add(new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
         childrenList.add(new Property("derivedFrom", "Reference(AllergyIntolerance|Condition|FamilyMemberHistory|ImagingStudy|Immunization|MedicationStatement|Procedure|QuestionnaireAnswers|Observation)", "A reference to a resource from which this observation value is derived. For example an Observation resource for a calculated anion gap or Apgar score Observation or a QuestionnaireAnswer resource for an Assessment Tool Observation.( 5/18/2015 EH: TODO need to get a specific example /use cases for example using something other than Observtion).", 0, java.lang.Integer.MAX_VALUE, derivedFrom));
         childrenList.add(new Property("related", "", "A  reference to another observations whose relationship is defined by the relationship type code.", 0, java.lang.Integer.MAX_VALUE, related));
-        childrenList.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same metadata.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
+        childrenList.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
       }
 
       public Observation copy() {
@@ -2313,7 +2313,7 @@ other observer (for example a relative or EMT), or any observation made about th
         dst.dataAbsentReason = dataAbsentReason == null ? null : dataAbsentReason.copy();
         dst.interpretation = interpretation == null ? null : interpretation.copy();
         dst.comments = comments == null ? null : comments.copy();
-        dst.applies = applies == null ? null : applies.copy();
+        dst.effective = effective == null ? null : effective.copy();
         dst.issued = issued == null ? null : issued.copy();
         dst.status = status == null ? null : status.copy();
         dst.reliability = reliability == null ? null : reliability.copy();
@@ -2369,7 +2369,7 @@ other observer (for example a relative or EMT), or any observation made about th
         Observation o = (Observation) other;
         return compareDeep(code, o.code, true) && compareDeep(category, o.category, true) && compareDeep(value, o.value, true)
            && compareDeep(dataAbsentReason, o.dataAbsentReason, true) && compareDeep(interpretation, o.interpretation, true)
-           && compareDeep(comments, o.comments, true) && compareDeep(applies, o.applies, true) && compareDeep(issued, o.issued, true)
+           && compareDeep(comments, o.comments, true) && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true)
            && compareDeep(status, o.status, true) && compareDeep(reliability, o.reliability, true) && compareDeep(bodySite, o.bodySite, true)
            && compareDeep(method, o.method, true) && compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true)
            && compareDeep(specimen, o.specimen, true) && compareDeep(performer, o.performer, true) && compareDeep(device, o.device, true)
@@ -2393,7 +2393,7 @@ other observer (for example a relative or EMT), or any observation made about th
         return super.isEmpty() && (code == null || code.isEmpty()) && (category == null || category.isEmpty())
            && (value == null || value.isEmpty()) && (dataAbsentReason == null || dataAbsentReason.isEmpty())
            && (interpretation == null || interpretation.isEmpty()) && (comments == null || comments.isEmpty())
-           && (applies == null || applies.isEmpty()) && (issued == null || issued.isEmpty()) && (status == null || status.isEmpty())
+           && (effective == null || effective.isEmpty()) && (issued == null || issued.isEmpty()) && (status == null || status.isEmpty())
            && (reliability == null || reliability.isEmpty()) && (bodySite == null || bodySite.isEmpty())
            && (method == null || method.isEmpty()) && (identifier == null || identifier.isEmpty()) && (subject == null || subject.isEmpty())
            && (specimen == null || specimen.isEmpty()) && (performer == null || performer.isEmpty())
@@ -2407,7 +2407,7 @@ other observer (for example a relative or EMT), or any observation made about th
     return ResourceType.Observation;
    }
 
-  @SearchParamDefinition(name="date", path="Observation.applies[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date" )
+  @SearchParamDefinition(name="date", path="Observation.effective[x]", description="Obtained date/time. If the obtained element is a period, a date that falls in the period", type="date" )
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="code", path="Observation.code", description="The code of the observation type", type="token" )
   public static final String SP_CODE = "code";

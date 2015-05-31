@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.instance.model.api.*;
 @ResourceDef(name="Slot", profile="http://hl7.org/fhir/Profile/Slot")
 public class Slot extends DomainResource {
 
-    public enum Slotstatus {
+    public enum SlotStatus {
         /**
          * Indicates that the time interval is busy because one  or more events have been scheduled for that interval.
          */
@@ -60,14 +60,14 @@ public class Slot extends DomainResource {
          */
         BUSYUNAVAILABLE, 
         /**
-         * Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.
+         * Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval
          */
         BUSYTENTATIVE, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static Slotstatus fromCode(String codeString) throws Exception {
+        public static SlotStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("BUSY".equals(codeString))
@@ -78,7 +78,7 @@ public class Slot extends DomainResource {
           return BUSYUNAVAILABLE;
         if ("BUSY-TENTATIVE".equals(codeString))
           return BUSYTENTATIVE;
-        throw new Exception("Unknown Slotstatus code '"+codeString+"'");
+        throw new Exception("Unknown SlotStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -91,10 +91,10 @@ public class Slot extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case BUSY: return "";
-            case FREE: return "";
-            case BUSYUNAVAILABLE: return "";
-            case BUSYTENTATIVE: return "";
+            case BUSY: return "http://hl7.org.fhir/slotstatus";
+            case FREE: return "http://hl7.org.fhir/slotstatus";
+            case BUSYUNAVAILABLE: return "http://hl7.org.fhir/slotstatus";
+            case BUSYTENTATIVE: return "http://hl7.org.fhir/slotstatus";
             default: return "?";
           }
         }
@@ -103,7 +103,7 @@ public class Slot extends DomainResource {
             case BUSY: return "Indicates that the time interval is busy because one  or more events have been scheduled for that interval.";
             case FREE: return "Indicates that the time interval is free for scheduling.";
             case BUSYUNAVAILABLE: return "Indicates that the time interval is busy and that the interval can not be scheduled.";
-            case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.";
+            case BUSYTENTATIVE: return "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval";
             default: return "?";
           }
         }
@@ -118,29 +118,29 @@ public class Slot extends DomainResource {
         }
     }
 
-  public static class SlotstatusEnumFactory implements EnumFactory<Slotstatus> {
-    public Slotstatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class SlotStatusEnumFactory implements EnumFactory<SlotStatus> {
+    public SlotStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("BUSY".equals(codeString))
-          return Slotstatus.BUSY;
+          return SlotStatus.BUSY;
         if ("FREE".equals(codeString))
-          return Slotstatus.FREE;
+          return SlotStatus.FREE;
         if ("BUSY-UNAVAILABLE".equals(codeString))
-          return Slotstatus.BUSYUNAVAILABLE;
+          return SlotStatus.BUSYUNAVAILABLE;
         if ("BUSY-TENTATIVE".equals(codeString))
-          return Slotstatus.BUSYTENTATIVE;
-        throw new IllegalArgumentException("Unknown Slotstatus code '"+codeString+"'");
+          return SlotStatus.BUSYTENTATIVE;
+        throw new IllegalArgumentException("Unknown SlotStatus code '"+codeString+"'");
         }
-    public String toCode(Slotstatus code) {
-      if (code == Slotstatus.BUSY)
+    public String toCode(SlotStatus code) {
+      if (code == SlotStatus.BUSY)
         return "BUSY";
-      if (code == Slotstatus.FREE)
+      if (code == SlotStatus.FREE)
         return "FREE";
-      if (code == Slotstatus.BUSYUNAVAILABLE)
+      if (code == SlotStatus.BUSYUNAVAILABLE)
         return "BUSY-UNAVAILABLE";
-      if (code == Slotstatus.BUSYTENTATIVE)
+      if (code == SlotStatus.BUSYTENTATIVE)
         return "BUSY-TENTATIVE";
       return "?";
       }
@@ -177,7 +177,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "freeBusyType", type = {CodeType.class}, order=3, min=1, max=1)
     @Description(shortDefinition="BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE", formalDefinition="BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE." )
-    protected Enumeration<Slotstatus> freeBusyType;
+    protected Enumeration<SlotStatus> freeBusyType;
 
     /**
      * Date/Time that the slot is to begin.
@@ -207,7 +207,7 @@ public class Slot extends DomainResource {
     @Description(shortDefinition="Comments on the slot to describe any extended information. Such as custom constraints on the slot", formalDefinition="Comments on the slot to describe any extended information. Such as custom constraints on the slot." )
     protected StringType comment;
 
-    private static final long serialVersionUID = 1371243539L;
+    private static final long serialVersionUID = 1984269299L;
 
   /*
    * Constructor
@@ -219,7 +219,7 @@ public class Slot extends DomainResource {
   /*
    * Constructor
    */
-    public Slot(Reference schedule, Enumeration<Slotstatus> freeBusyType, InstantType start, InstantType end) {
+    public Slot(Reference schedule, Enumeration<SlotStatus> freeBusyType, InstantType start, InstantType end) {
       super();
       this.schedule = schedule;
       this.freeBusyType = freeBusyType;
@@ -338,12 +338,12 @@ public class Slot extends DomainResource {
     /**
      * @return {@link #freeBusyType} (BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.). This is the underlying object with id, value and extensions. The accessor "getFreeBusyType" gives direct access to the value
      */
-    public Enumeration<Slotstatus> getFreeBusyTypeElement() { 
+    public Enumeration<SlotStatus> getFreeBusyTypeElement() { 
       if (this.freeBusyType == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Slot.freeBusyType");
         else if (Configuration.doAutoCreate())
-          this.freeBusyType = new Enumeration<Slotstatus>(new SlotstatusEnumFactory()); // bb
+          this.freeBusyType = new Enumeration<SlotStatus>(new SlotStatusEnumFactory()); // bb
       return this.freeBusyType;
     }
 
@@ -358,7 +358,7 @@ public class Slot extends DomainResource {
     /**
      * @param value {@link #freeBusyType} (BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.). This is the underlying object with id, value and extensions. The accessor "getFreeBusyType" gives direct access to the value
      */
-    public Slot setFreeBusyTypeElement(Enumeration<Slotstatus> value) { 
+    public Slot setFreeBusyTypeElement(Enumeration<SlotStatus> value) { 
       this.freeBusyType = value;
       return this;
     }
@@ -366,16 +366,16 @@ public class Slot extends DomainResource {
     /**
      * @return BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.
      */
-    public Slotstatus getFreeBusyType() { 
+    public SlotStatus getFreeBusyType() { 
       return this.freeBusyType == null ? null : this.freeBusyType.getValue();
     }
 
     /**
      * @param value BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.
      */
-    public Slot setFreeBusyType(Slotstatus value) { 
+    public Slot setFreeBusyType(SlotStatus value) { 
         if (this.freeBusyType == null)
-          this.freeBusyType = new Enumeration<Slotstatus>(new SlotstatusEnumFactory());
+          this.freeBusyType = new Enumeration<SlotStatus>(new SlotStatusEnumFactory());
         this.freeBusyType.setValue(value);
       return this;
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,11 +49,11 @@ public class Conformance extends DomainResource {
 
     public enum RestfulConformanceMode {
         /**
-         * The application acts as a client for this resource.
+         * The application acts as a client for this resource
          */
         CLIENT, 
         /**
-         * The application acts as a server for this resource.
+         * The application acts as a server for this resource
          */
         SERVER, 
         /**
@@ -78,15 +78,15 @@ public class Conformance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CLIENT: return "";
-            case SERVER: return "";
+            case CLIENT: return "http://hl7.org.fhir/restful-conformance-mode";
+            case SERVER: return "http://hl7.org.fhir/restful-conformance-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case CLIENT: return "The application acts as a client for this resource.";
-            case SERVER: return "The application acts as a server for this resource.";
+            case CLIENT: return "The application acts as a client for this resource";
+            case SERVER: return "The application acts as a server for this resource";
             default: return "?";
           }
         }
@@ -121,39 +121,39 @@ public class Conformance extends DomainResource {
 
     public enum TypeRestfulInteraction {
         /**
-         * 
+         * null
          */
         READ, 
         /**
-         * 
+         * null
          */
         VREAD, 
         /**
-         * 
+         * null
          */
         UPDATE, 
         /**
-         * 
+         * null
          */
         DELETE, 
         /**
-         * 
+         * null
          */
         HISTORYINSTANCE, 
         /**
-         * 
+         * null
          */
         VALIDATE, 
         /**
-         * 
+         * null
          */
         HISTORYTYPE, 
         /**
-         * 
+         * null
          */
         CREATE, 
         /**
-         * 
+         * null
          */
         SEARCHTYPE, 
         /**
@@ -227,15 +227,15 @@ public class Conformance extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case READ: return "Read";
-            case VREAD: return "Vread";
-            case UPDATE: return "Update";
-            case DELETE: return "Delete";
-            case HISTORYINSTANCE: return "History Instance";
-            case VALIDATE: return "Validate";
-            case HISTORYTYPE: return "History Type";
-            case CREATE: return "Create";
-            case SEARCHTYPE: return "Search Type";
+            case READ: return "read";
+            case VREAD: return "vread";
+            case UPDATE: return "update";
+            case DELETE: return "delete";
+            case HISTORYINSTANCE: return "history-instance";
+            case VALIDATE: return "validate";
+            case HISTORYTYPE: return "history-type";
+            case CREATE: return "create";
+            case SEARCHTYPE: return "search-type";
             default: return "?";
           }
         }
@@ -289,24 +289,24 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum VersioningPolicy {
+    public enum ResourceVersionPolicy {
         /**
-         * VersionId meta-property is not suppoerted (server) or used (client).
+         * VersionId meta-property is not suppoerted (server) or used (client)
          */
         NOVERSION, 
         /**
-         * VersionId meta-property is suppoerted (server) or used (client).
+         * VersionId meta-property is suppoerted (server) or used (client)
          */
         VERSIONED, 
         /**
-         * VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client).
+         * VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client)
          */
         VERSIONEDUPDATE, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static VersioningPolicy fromCode(String codeString) throws Exception {
+        public static ResourceVersionPolicy fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("no-version".equals(codeString))
@@ -315,7 +315,7 @@ public class Conformance extends DomainResource {
           return VERSIONED;
         if ("versioned-update".equals(codeString))
           return VERSIONEDUPDATE;
-        throw new Exception("Unknown VersioningPolicy code '"+codeString+"'");
+        throw new Exception("Unknown ResourceVersionPolicy code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -327,17 +327,17 @@ public class Conformance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case NOVERSION: return "";
-            case VERSIONED: return "";
-            case VERSIONEDUPDATE: return "";
+            case NOVERSION: return "http://hl7.org.fhir/versioning-policy";
+            case VERSIONED: return "http://hl7.org.fhir/versioning-policy";
+            case VERSIONEDUPDATE: return "http://hl7.org.fhir/versioning-policy";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case NOVERSION: return "VersionId meta-property is not suppoerted (server) or used (client).";
-            case VERSIONED: return "VersionId meta-property is suppoerted (server) or used (client).";
-            case VERSIONEDUPDATE: return "VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client).";
+            case NOVERSION: return "VersionId meta-property is not suppoerted (server) or used (client)";
+            case VERSIONED: return "VersionId meta-property is suppoerted (server) or used (client)";
+            case VERSIONEDUPDATE: return "VersionId is must be correct for updates (server) or will be specified (If-match header) for updates (client)";
             default: return "?";
           }
         }
@@ -351,197 +351,41 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class VersioningPolicyEnumFactory implements EnumFactory<VersioningPolicy> {
-    public VersioningPolicy fromCode(String codeString) throws IllegalArgumentException {
+  public static class ResourceVersionPolicyEnumFactory implements EnumFactory<ResourceVersionPolicy> {
+    public ResourceVersionPolicy fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("no-version".equals(codeString))
-          return VersioningPolicy.NOVERSION;
+          return ResourceVersionPolicy.NOVERSION;
         if ("versioned".equals(codeString))
-          return VersioningPolicy.VERSIONED;
+          return ResourceVersionPolicy.VERSIONED;
         if ("versioned-update".equals(codeString))
-          return VersioningPolicy.VERSIONEDUPDATE;
-        throw new IllegalArgumentException("Unknown VersioningPolicy code '"+codeString+"'");
+          return ResourceVersionPolicy.VERSIONEDUPDATE;
+        throw new IllegalArgumentException("Unknown ResourceVersionPolicy code '"+codeString+"'");
         }
-    public String toCode(VersioningPolicy code) {
-      if (code == VersioningPolicy.NOVERSION)
+    public String toCode(ResourceVersionPolicy code) {
+      if (code == ResourceVersionPolicy.NOVERSION)
         return "no-version";
-      if (code == VersioningPolicy.VERSIONED)
+      if (code == ResourceVersionPolicy.VERSIONED)
         return "versioned";
-      if (code == VersioningPolicy.VERSIONEDUPDATE)
+      if (code == ResourceVersionPolicy.VERSIONEDUPDATE)
         return "versioned-update";
-      return "?";
-      }
-    }
-
-    public enum SearchParamType {
-        /**
-         * Search parameter SHALL be a number (a whole number, or a decimal).
-         */
-        NUMBER, 
-        /**
-         * Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.
-         */
-        DATE, 
-        /**
-         * Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.
-         */
-        STRING, 
-        /**
-         * Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a "|", depending on the modifier used.
-         */
-        TOKEN, 
-        /**
-         * A reference to another resource.
-         */
-        REFERENCE, 
-        /**
-         * A composite search parameter that combines a search on two values together.
-         */
-        COMPOSITE, 
-        /**
-         * A search parameter that searches on a quantity.
-         */
-        QUANTITY, 
-        /**
-         * A search parameter that searches on a URI (RFC 3986).
-         */
-        URI, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static SearchParamType fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("number".equals(codeString))
-          return NUMBER;
-        if ("date".equals(codeString))
-          return DATE;
-        if ("string".equals(codeString))
-          return STRING;
-        if ("token".equals(codeString))
-          return TOKEN;
-        if ("reference".equals(codeString))
-          return REFERENCE;
-        if ("composite".equals(codeString))
-          return COMPOSITE;
-        if ("quantity".equals(codeString))
-          return QUANTITY;
-        if ("uri".equals(codeString))
-          return URI;
-        throw new Exception("Unknown SearchParamType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case NUMBER: return "number";
-            case DATE: return "date";
-            case STRING: return "string";
-            case TOKEN: return "token";
-            case REFERENCE: return "reference";
-            case COMPOSITE: return "composite";
-            case QUANTITY: return "quantity";
-            case URI: return "uri";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case NUMBER: return "";
-            case DATE: return "";
-            case STRING: return "";
-            case TOKEN: return "";
-            case REFERENCE: return "";
-            case COMPOSITE: return "";
-            case QUANTITY: return "";
-            case URI: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case NUMBER: return "Search parameter SHALL be a number (a whole number, or a decimal).";
-            case DATE: return "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.";
-            case STRING: return "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.";
-            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a '|', depending on the modifier used.";
-            case REFERENCE: return "A reference to another resource.";
-            case COMPOSITE: return "A composite search parameter that combines a search on two values together.";
-            case QUANTITY: return "A search parameter that searches on a quantity.";
-            case URI: return "A search parameter that searches on a URI (RFC 3986).";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case NUMBER: return "Number";
-            case DATE: return "Date/DateTime";
-            case STRING: return "String";
-            case TOKEN: return "Token";
-            case REFERENCE: return "Reference";
-            case COMPOSITE: return "Composite";
-            case QUANTITY: return "Quantity";
-            case URI: return "URI";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class SearchParamTypeEnumFactory implements EnumFactory<SearchParamType> {
-    public SearchParamType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("number".equals(codeString))
-          return SearchParamType.NUMBER;
-        if ("date".equals(codeString))
-          return SearchParamType.DATE;
-        if ("string".equals(codeString))
-          return SearchParamType.STRING;
-        if ("token".equals(codeString))
-          return SearchParamType.TOKEN;
-        if ("reference".equals(codeString))
-          return SearchParamType.REFERENCE;
-        if ("composite".equals(codeString))
-          return SearchParamType.COMPOSITE;
-        if ("quantity".equals(codeString))
-          return SearchParamType.QUANTITY;
-        if ("uri".equals(codeString))
-          return SearchParamType.URI;
-        throw new IllegalArgumentException("Unknown SearchParamType code '"+codeString+"'");
-        }
-    public String toCode(SearchParamType code) {
-      if (code == SearchParamType.NUMBER)
-        return "number";
-      if (code == SearchParamType.DATE)
-        return "date";
-      if (code == SearchParamType.STRING)
-        return "string";
-      if (code == SearchParamType.TOKEN)
-        return "token";
-      if (code == SearchParamType.REFERENCE)
-        return "reference";
-      if (code == SearchParamType.COMPOSITE)
-        return "composite";
-      if (code == SearchParamType.QUANTITY)
-        return "quantity";
-      if (code == SearchParamType.URI)
-        return "uri";
       return "?";
       }
     }
 
     public enum SystemRestfulInteraction {
         /**
-         * 
+         * null
          */
         TRANSACTION, 
         /**
-         * 
+         * null
          */
         SEARCHSYSTEM, 
         /**
-         * 
+         * null
          */
         HISTORYSYSTEM, 
         /**
@@ -585,9 +429,9 @@ public class Conformance extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case TRANSACTION: return "Transaction";
-            case SEARCHSYSTEM: return "Search System";
-            case HISTORYSYSTEM: return "History System";
+            case TRANSACTION: return "transaction";
+            case SEARCHSYSTEM: return "search-system";
+            case HISTORYSYSTEM: return "history-system";
             default: return "?";
           }
         }
@@ -619,15 +463,15 @@ public class Conformance extends DomainResource {
 
     public enum MessageSignificanceCategory {
         /**
-         * The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment.
+         * The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment
          */
         CONSEQUENCE, 
         /**
-         * The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful.
+         * The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful
          */
         CURRENCY, 
         /**
-         * The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications.
+         * The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications
          */
         NOTIFICATION, 
         /**
@@ -655,17 +499,17 @@ public class Conformance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CONSEQUENCE: return "";
-            case CURRENCY: return "";
-            case NOTIFICATION: return "";
+            case CONSEQUENCE: return "http://hl7.org.fhir/message-significance-category";
+            case CURRENCY: return "http://hl7.org.fhir/message-significance-category";
+            case NOTIFICATION: return "http://hl7.org.fhir/message-significance-category";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case CONSEQUENCE: return "The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment.";
-            case CURRENCY: return "The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful.";
-            case NOTIFICATION: return "The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications.";
+            case CONSEQUENCE: return "The message represents/requests a change that should not be processed more than once. E.g. Making a booking for an appointment";
+            case CURRENCY: return "The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful";
+            case NOTIFICATION: return "The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications";
             default: return "?";
           }
         }
@@ -703,27 +547,27 @@ public class Conformance extends DomainResource {
       }
     }
 
-    public enum MessageConformanceEventMode {
+    public enum ConformanceEventMode {
         /**
-         * The application sends requests and receives responses.
+         * The application sends requests and receives responses
          */
         SENDER, 
         /**
-         * The application receives requests and sends responses.
+         * The application receives requests and sends responses
          */
         RECEIVER, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static MessageConformanceEventMode fromCode(String codeString) throws Exception {
+        public static ConformanceEventMode fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("sender".equals(codeString))
           return SENDER;
         if ("receiver".equals(codeString))
           return RECEIVER;
-        throw new Exception("Unknown MessageConformanceEventMode code '"+codeString+"'");
+        throw new Exception("Unknown ConformanceEventMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -734,15 +578,15 @@ public class Conformance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case SENDER: return "";
-            case RECEIVER: return "";
+            case SENDER: return "http://hl7.org.fhir/message-conformance-event-mode";
+            case RECEIVER: return "http://hl7.org.fhir/message-conformance-event-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case SENDER: return "The application sends requests and receives responses.";
-            case RECEIVER: return "The application receives requests and sends responses.";
+            case SENDER: return "The application sends requests and receives responses";
+            case RECEIVER: return "The application receives requests and sends responses";
             default: return "?";
           }
         }
@@ -755,21 +599,21 @@ public class Conformance extends DomainResource {
         }
     }
 
-  public static class MessageConformanceEventModeEnumFactory implements EnumFactory<MessageConformanceEventMode> {
-    public MessageConformanceEventMode fromCode(String codeString) throws IllegalArgumentException {
+  public static class ConformanceEventModeEnumFactory implements EnumFactory<ConformanceEventMode> {
+    public ConformanceEventMode fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("sender".equals(codeString))
-          return MessageConformanceEventMode.SENDER;
+          return ConformanceEventMode.SENDER;
         if ("receiver".equals(codeString))
-          return MessageConformanceEventMode.RECEIVER;
-        throw new IllegalArgumentException("Unknown MessageConformanceEventMode code '"+codeString+"'");
+          return ConformanceEventMode.RECEIVER;
+        throw new IllegalArgumentException("Unknown ConformanceEventMode code '"+codeString+"'");
         }
-    public String toCode(MessageConformanceEventMode code) {
-      if (code == MessageConformanceEventMode.SENDER)
+    public String toCode(ConformanceEventMode code) {
+      if (code == ConformanceEventMode.SENDER)
         return "sender";
-      if (code == MessageConformanceEventMode.RECEIVER)
+      if (code == ConformanceEventMode.RECEIVER)
         return "receiver";
       return "?";
       }
@@ -777,11 +621,11 @@ public class Conformance extends DomainResource {
 
     public enum DocumentMode {
         /**
-         * The application produces documents of the specified type.
+         * The application produces documents of the specified type
          */
         PRODUCER, 
         /**
-         * The application consumes documents of the specified type.
+         * The application consumes documents of the specified type
          */
         CONSUMER, 
         /**
@@ -806,15 +650,15 @@ public class Conformance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PRODUCER: return "";
-            case CONSUMER: return "";
+            case PRODUCER: return "http://hl7.org.fhir/document-mode";
+            case CONSUMER: return "http://hl7.org.fhir/document-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PRODUCER: return "The application produces documents of the specified type.";
-            case CONSUMER: return "The application consumes documents of the specified type.";
+            case PRODUCER: return "The application produces documents of the specified type";
+            case CONSUMER: return "The application consumes documents of the specified type";
             default: return "?";
           }
         }
@@ -2367,7 +2211,7 @@ public class Conformance extends DomainResource {
          */
         @Child(name = "versioning", type = {CodeType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="no-version | versioned | versioned-update", formalDefinition="Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources." )
-        protected Enumeration<VersioningPolicy> versioning;
+        protected Enumeration<ResourceVersionPolicy> versioning;
 
         /**
          * A flag for whether the server is able to return past versions as part of the vRead operation.
@@ -2418,7 +2262,7 @@ public class Conformance extends DomainResource {
         @Description(shortDefinition="Search params supported by implementation", formalDefinition="Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation." )
         protected List<ConformanceRestResourceSearchParamComponent> searchParam;
 
-        private static final long serialVersionUID = 1477462605L;
+        private static final long serialVersionUID = -1390359673L;
 
     /*
      * Constructor
@@ -2567,12 +2411,12 @@ public class Conformance extends DomainResource {
         /**
          * @return {@link #versioning} (Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
-        public Enumeration<VersioningPolicy> getVersioningElement() { 
+        public Enumeration<ResourceVersionPolicy> getVersioningElement() { 
           if (this.versioning == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ConformanceRestResourceComponent.versioning");
             else if (Configuration.doAutoCreate())
-              this.versioning = new Enumeration<VersioningPolicy>(new VersioningPolicyEnumFactory()); // bb
+              this.versioning = new Enumeration<ResourceVersionPolicy>(new ResourceVersionPolicyEnumFactory()); // bb
           return this.versioning;
         }
 
@@ -2587,7 +2431,7 @@ public class Conformance extends DomainResource {
         /**
          * @param value {@link #versioning} (Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
-        public ConformanceRestResourceComponent setVersioningElement(Enumeration<VersioningPolicy> value) { 
+        public ConformanceRestResourceComponent setVersioningElement(Enumeration<ResourceVersionPolicy> value) { 
           this.versioning = value;
           return this;
         }
@@ -2595,19 +2439,19 @@ public class Conformance extends DomainResource {
         /**
          * @return Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.
          */
-        public VersioningPolicy getVersioning() { 
+        public ResourceVersionPolicy getVersioning() { 
           return this.versioning == null ? null : this.versioning.getValue();
         }
 
         /**
          * @param value Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.
          */
-        public ConformanceRestResourceComponent setVersioning(VersioningPolicy value) { 
+        public ConformanceRestResourceComponent setVersioning(ResourceVersionPolicy value) { 
           if (value == null)
             this.versioning = null;
           else {
             if (this.versioning == null)
-              this.versioning = new Enumeration<VersioningPolicy>(new VersioningPolicyEnumFactory());
+              this.versioning = new Enumeration<ResourceVersionPolicy>(new ResourceVersionPolicyEnumFactory());
             this.versioning.setValue(value);
           }
           return this;
@@ -4235,7 +4079,7 @@ public class Conformance extends DomainResource {
          */
         @Child(name = "mode", type = {CodeType.class}, order=3, min=1, max=1)
         @Description(shortDefinition="sender | receiver", formalDefinition="The mode of this event declaration - whether application is sender or receiver." )
-        protected Enumeration<MessageConformanceEventMode> mode;
+        protected Enumeration<ConformanceEventMode> mode;
 
         /**
          * A list of the messaging transport protocol(s) identifiers, supported by this endpoint.
@@ -4282,7 +4126,7 @@ public class Conformance extends DomainResource {
         @Description(shortDefinition="Endpoint-specific event documentation", formalDefinition="Guidance on how this event is handled, such as internal system trigger points, business rules, etc." )
         protected StringType documentation;
 
-        private static final long serialVersionUID = 1680159501L;
+        private static final long serialVersionUID = 231905194L;
 
     /*
      * Constructor
@@ -4294,7 +4138,7 @@ public class Conformance extends DomainResource {
     /*
      * Constructor
      */
-      public ConformanceMessagingEventComponent(Coding code, Enumeration<MessageConformanceEventMode> mode, CodeType focus, Reference request, Reference response) {
+      public ConformanceMessagingEventComponent(Coding code, Enumeration<ConformanceEventMode> mode, CodeType focus, Reference request, Reference response) {
         super();
         this.code = code;
         this.mode = mode;
@@ -4379,12 +4223,12 @@ public class Conformance extends DomainResource {
         /**
          * @return {@link #mode} (The mode of this event declaration - whether application is sender or receiver.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public Enumeration<MessageConformanceEventMode> getModeElement() { 
+        public Enumeration<ConformanceEventMode> getModeElement() { 
           if (this.mode == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ConformanceMessagingEventComponent.mode");
             else if (Configuration.doAutoCreate())
-              this.mode = new Enumeration<MessageConformanceEventMode>(new MessageConformanceEventModeEnumFactory()); // bb
+              this.mode = new Enumeration<ConformanceEventMode>(new ConformanceEventModeEnumFactory()); // bb
           return this.mode;
         }
 
@@ -4399,7 +4243,7 @@ public class Conformance extends DomainResource {
         /**
          * @param value {@link #mode} (The mode of this event declaration - whether application is sender or receiver.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public ConformanceMessagingEventComponent setModeElement(Enumeration<MessageConformanceEventMode> value) { 
+        public ConformanceMessagingEventComponent setModeElement(Enumeration<ConformanceEventMode> value) { 
           this.mode = value;
           return this;
         }
@@ -4407,16 +4251,16 @@ public class Conformance extends DomainResource {
         /**
          * @return The mode of this event declaration - whether application is sender or receiver.
          */
-        public MessageConformanceEventMode getMode() { 
+        public ConformanceEventMode getMode() { 
           return this.mode == null ? null : this.mode.getValue();
         }
 
         /**
          * @param value The mode of this event declaration - whether application is sender or receiver.
          */
-        public ConformanceMessagingEventComponent setMode(MessageConformanceEventMode value) { 
+        public ConformanceMessagingEventComponent setMode(ConformanceEventMode value) { 
             if (this.mode == null)
-              this.mode = new Enumeration<MessageConformanceEventMode>(new MessageConformanceEventModeEnumFactory());
+              this.mode = new Enumeration<ConformanceEventMode>(new ConformanceEventModeEnumFactory());
             this.mode.setValue(value);
           return this;
         }

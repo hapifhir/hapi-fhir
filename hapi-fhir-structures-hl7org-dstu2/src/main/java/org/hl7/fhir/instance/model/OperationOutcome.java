@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,19 +48,19 @@ public class OperationOutcome extends DomainResource {
 
     public enum IssueSeverity {
         /**
-         * The issue caused the action to fail, and no further checking could be performed.
+         * The issue caused the action to fail, and no further checking could be performed
          */
         FATAL, 
         /**
-         * The issue is sufficiently important to cause the action to fail.
+         * The issue is sufficiently important to cause the action to fail
          */
         ERROR, 
         /**
-         * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
+         * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired
          */
         WARNING, 
         /**
-         * The issue has no relation to the degree of success of the action.
+         * The issue has no relation to the degree of success of the action
          */
         INFORMATION, 
         /**
@@ -91,19 +91,19 @@ public class OperationOutcome extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case FATAL: return "";
-            case ERROR: return "";
-            case WARNING: return "";
-            case INFORMATION: return "";
+            case FATAL: return "http://hl7.org.fhir/issue-severity";
+            case ERROR: return "http://hl7.org.fhir/issue-severity";
+            case WARNING: return "http://hl7.org.fhir/issue-severity";
+            case INFORMATION: return "http://hl7.org.fhir/issue-severity";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case FATAL: return "The issue caused the action to fail, and no further checking could be performed.";
-            case ERROR: return "The issue is sufficiently important to cause the action to fail.";
-            case WARNING: return "The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.";
-            case INFORMATION: return "The issue has no relation to the degree of success of the action.";
+            case FATAL: return "The issue caused the action to fail, and no further checking could be performed";
+            case ERROR: return "The issue is sufficiently important to cause the action to fail";
+            case WARNING: return "The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired";
+            case INFORMATION: return "The issue has no relation to the degree of success of the action";
             default: return "?";
           }
         }

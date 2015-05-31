@@ -34,6 +34,15 @@ private Map<String, Object> userData;
     userData.put(name, value);
   }
 
+  public void setUserDataINN(String name, Object value) {
+    if (value == null)
+      return;
+    
+    if (userData == null)
+      userData = new HashMap<String, Object>();
+    userData.put(name, value);
+  }
+
   public boolean hasUserData(String name) {
     if (userData == null)
       return false;

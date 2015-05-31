@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,19 +47,19 @@ public class Identifier extends Type implements ICompositeType {
 
     public enum IdentifierUse {
         /**
-         * the identifier recommended for display and use in real-world interactions.
+         * the identifier recommended for display and use in real-world interactions
          */
         USUAL, 
         /**
-         * the identifier considered to be most trusted for the identification of this item.
+         * the identifier considered to be most trusted for the identification of this item
          */
         OFFICIAL, 
         /**
-         * A temporary identifier.
+         * A temporary identifier
          */
         TEMP, 
         /**
-         * An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context.
+         * An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context
          */
         SECONDARY, 
         /**
@@ -90,19 +90,19 @@ public class Identifier extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case USUAL: return "";
-            case OFFICIAL: return "";
-            case TEMP: return "";
-            case SECONDARY: return "";
+            case USUAL: return "http://hl7.org.fhir/identifier-use";
+            case OFFICIAL: return "http://hl7.org.fhir/identifier-use";
+            case TEMP: return "http://hl7.org.fhir/identifier-use";
+            case SECONDARY: return "http://hl7.org.fhir/identifier-use";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case USUAL: return "the identifier recommended for display and use in real-world interactions.";
-            case OFFICIAL: return "the identifier considered to be most trusted for the identification of this item.";
-            case TEMP: return "A temporary identifier.";
-            case SECONDARY: return "An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context.";
+            case USUAL: return "the identifier recommended for display and use in real-world interactions";
+            case OFFICIAL: return "the identifier considered to be most trusted for the identification of this item";
+            case TEMP: return "A temporary identifier";
+            case SECONDARY: return "An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context";
             default: return "?";
           }
         }

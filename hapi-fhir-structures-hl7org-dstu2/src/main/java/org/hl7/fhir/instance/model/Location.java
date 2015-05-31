@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,11 +49,11 @@ public class Location extends DomainResource {
 
     public enum LocationMode {
         /**
-         * The Location resource represents a specific instance of a Location (e.g. Operating Theatre 1A).
+         * The Location resource represents a specific instance of a Location (e.g. Operating Theatre 1A)
          */
         INSTANCE, 
         /**
-         * The Location represents a class of Locations (e.g. Any Operating Theatre). Although this class of locations could be constrained within a specific boundary (such as organization, or parent location, address etc).
+         * The Location represents a class of Locations (e.g. Any Operating Theatre). Although this class of locations could be constrained within a specific boundary (such as organization, or parent location, address etc)
          */
         KIND, 
         /**
@@ -78,15 +78,15 @@ public class Location extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INSTANCE: return "";
-            case KIND: return "";
+            case INSTANCE: return "http://hl7.org.fhir/location-mode";
+            case KIND: return "http://hl7.org.fhir/location-mode";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INSTANCE: return "The Location resource represents a specific instance of a Location (e.g. Operating Theatre 1A).";
-            case KIND: return "The Location represents a class of Locations (e.g. Any Operating Theatre). Although this class of locations could be constrained within a specific boundary (such as organization, or parent location, address etc).";
+            case INSTANCE: return "The Location resource represents a specific instance of a Location (e.g. Operating Theatre 1A)";
+            case KIND: return "The Location represents a class of Locations (e.g. Any Operating Theatre). Although this class of locations could be constrained within a specific boundary (such as organization, or parent location, address etc)";
             default: return "?";
           }
         }
@@ -121,15 +121,15 @@ public class Location extends DomainResource {
 
     public enum LocationStatus {
         /**
-         * The location is operational.
+         * The location is operational
          */
         ACTIVE, 
         /**
-         * The location is temporarily closed.
+         * The location is temporarily closed
          */
         SUSPENDED, 
         /**
-         * The location is no longer used.
+         * The location is no longer used
          */
         INACTIVE, 
         /**
@@ -157,17 +157,17 @@ public class Location extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ACTIVE: return "";
-            case SUSPENDED: return "";
-            case INACTIVE: return "";
+            case ACTIVE: return "http://hl7.org.fhir/location-status";
+            case SUSPENDED: return "http://hl7.org.fhir/location-status";
+            case INACTIVE: return "http://hl7.org.fhir/location-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The location is operational.";
-            case SUSPENDED: return "The location is temporarily closed.";
-            case INACTIVE: return "The location is no longer used.";
+            case ACTIVE: return "The location is operational";
+            case SUSPENDED: return "The location is temporarily closed";
+            case INACTIVE: return "The location is no longer used";
             default: return "?";
           }
         }

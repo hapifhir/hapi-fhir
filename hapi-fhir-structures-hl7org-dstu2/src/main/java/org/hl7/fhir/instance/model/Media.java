@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,15 +48,15 @@ public class Media extends DomainResource {
 
     public enum DigitalMediaType {
         /**
-         * The media consists of one or more unmoving images, including photographs, computer-generated graphs and charts, and scanned documents.
+         * The media consists of one or more unmoving images, including photographs, computer-generated graphs and charts, and scanned documents
          */
         PHOTO, 
         /**
-         * The media consists of a series of frames that capture a moving image.
+         * The media consists of a series of frames that capture a moving image
          */
         VIDEO, 
         /**
-         * The media consists of a sound recording.
+         * The media consists of a sound recording
          */
         AUDIO, 
         /**
@@ -84,17 +84,17 @@ public class Media extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PHOTO: return "";
-            case VIDEO: return "";
-            case AUDIO: return "";
+            case PHOTO: return "http://hl7.org.fhir/digital-media-type";
+            case VIDEO: return "http://hl7.org.fhir/digital-media-type";
+            case AUDIO: return "http://hl7.org.fhir/digital-media-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PHOTO: return "The media consists of one or more unmoving images, including photographs, computer-generated graphs and charts, and scanned documents.";
-            case VIDEO: return "The media consists of a series of frames that capture a moving image.";
-            case AUDIO: return "The media consists of a sound recording.";
+            case PHOTO: return "The media consists of one or more unmoving images, including photographs, computer-generated graphs and charts, and scanned documents";
+            case VIDEO: return "The media consists of a series of frames that capture a moving image";
+            case AUDIO: return "The media consists of a sound recording";
             default: return "?";
           }
         }

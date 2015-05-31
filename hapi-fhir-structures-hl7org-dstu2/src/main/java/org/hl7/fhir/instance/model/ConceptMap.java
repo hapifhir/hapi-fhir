@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,176 +46,6 @@ import org.hl7.fhir.instance.model.api.*;
  */
 @ResourceDef(name="ConceptMap", profile="http://hl7.org/fhir/Profile/ConceptMap")
 public class ConceptMap extends DomainResource {
-
-    public enum ConceptEquivalence {
-        /**
-         * The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).
-         */
-        EQUIVALENT, 
-        /**
-         * The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identifical or irrelevant (i.e. intensionally identical).
-         */
-        EQUAL, 
-        /**
-         * The target mapping is wider in meaning than the source concept.
-         */
-        WIDER, 
-        /**
-         * The target mapping subsumes the meaning of the source concept (e.g. the source is-a target).
-         */
-        SUBSUMES, 
-        /**
-         * The target mapping is narrower in meaning that the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally.
-         */
-        NARROWER, 
-        /**
-         * The target mapping specialises the meaning of the source concept (e.g. the target is-a source).
-         */
-        SPECIALISES, 
-        /**
-         * The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally.
-         */
-        INEXACT, 
-        /**
-         * There is no match for this concept in the destination concept system.
-         */
-        UNMATCHED, 
-        /**
-         * This is an explicit assertion that there is no mapping between the source and target concept.
-         */
-        DISJOINT, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static ConceptEquivalence fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("equivalent".equals(codeString))
-          return EQUIVALENT;
-        if ("equal".equals(codeString))
-          return EQUAL;
-        if ("wider".equals(codeString))
-          return WIDER;
-        if ("subsumes".equals(codeString))
-          return SUBSUMES;
-        if ("narrower".equals(codeString))
-          return NARROWER;
-        if ("specialises".equals(codeString))
-          return SPECIALISES;
-        if ("inexact".equals(codeString))
-          return INEXACT;
-        if ("unmatched".equals(codeString))
-          return UNMATCHED;
-        if ("disjoint".equals(codeString))
-          return DISJOINT;
-        throw new Exception("Unknown ConceptEquivalence code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case EQUIVALENT: return "equivalent";
-            case EQUAL: return "equal";
-            case WIDER: return "wider";
-            case SUBSUMES: return "subsumes";
-            case NARROWER: return "narrower";
-            case SPECIALISES: return "specialises";
-            case INEXACT: return "inexact";
-            case UNMATCHED: return "unmatched";
-            case DISJOINT: return "disjoint";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case EQUIVALENT: return "";
-            case EQUAL: return "";
-            case WIDER: return "";
-            case SUBSUMES: return "";
-            case NARROWER: return "";
-            case SPECIALISES: return "";
-            case INEXACT: return "";
-            case UNMATCHED: return "";
-            case DISJOINT: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case EQUIVALENT: return "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).";
-            case EQUAL: return "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identifical or irrelevant (i.e. intensionally identical).";
-            case WIDER: return "The target mapping is wider in meaning than the source concept.";
-            case SUBSUMES: return "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target).";
-            case NARROWER: return "The target mapping is narrower in meaning that the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally.";
-            case SPECIALISES: return "The target mapping specialises the meaning of the source concept (e.g. the target is-a source).";
-            case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally.";
-            case UNMATCHED: return "There is no match for this concept in the destination concept system.";
-            case DISJOINT: return "This is an explicit assertion that there is no mapping between the source and target concept.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case EQUIVALENT: return "Equivalent";
-            case EQUAL: return "Equal";
-            case WIDER: return "Wider";
-            case SUBSUMES: return "Subsumes";
-            case NARROWER: return "Narrower";
-            case SPECIALISES: return "Specialises";
-            case INEXACT: return "Inexact";
-            case UNMATCHED: return "Unmatched";
-            case DISJOINT: return "Disjoint";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ConceptEquivalenceEnumFactory implements EnumFactory<ConceptEquivalence> {
-    public ConceptEquivalence fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("equivalent".equals(codeString))
-          return ConceptEquivalence.EQUIVALENT;
-        if ("equal".equals(codeString))
-          return ConceptEquivalence.EQUAL;
-        if ("wider".equals(codeString))
-          return ConceptEquivalence.WIDER;
-        if ("subsumes".equals(codeString))
-          return ConceptEquivalence.SUBSUMES;
-        if ("narrower".equals(codeString))
-          return ConceptEquivalence.NARROWER;
-        if ("specialises".equals(codeString))
-          return ConceptEquivalence.SPECIALISES;
-        if ("inexact".equals(codeString))
-          return ConceptEquivalence.INEXACT;
-        if ("unmatched".equals(codeString))
-          return ConceptEquivalence.UNMATCHED;
-        if ("disjoint".equals(codeString))
-          return ConceptEquivalence.DISJOINT;
-        throw new IllegalArgumentException("Unknown ConceptEquivalence code '"+codeString+"'");
-        }
-    public String toCode(ConceptEquivalence code) {
-      if (code == ConceptEquivalence.EQUIVALENT)
-        return "equivalent";
-      if (code == ConceptEquivalence.EQUAL)
-        return "equal";
-      if (code == ConceptEquivalence.WIDER)
-        return "wider";
-      if (code == ConceptEquivalence.SUBSUMES)
-        return "subsumes";
-      if (code == ConceptEquivalence.NARROWER)
-        return "narrower";
-      if (code == ConceptEquivalence.SPECIALISES)
-        return "specialises";
-      if (code == ConceptEquivalence.INEXACT)
-        return "inexact";
-      if (code == ConceptEquivalence.UNMATCHED)
-        return "unmatched";
-      if (code == ConceptEquivalence.DISJOINT)
-        return "disjoint";
-      return "?";
-      }
-    }
 
     @Block()
     public static class ConceptMapContactComponent extends BackboneElement implements IBaseBackboneElement {
@@ -890,7 +720,7 @@ public class ConceptMap extends DomainResource {
          */
         @Child(name = "equivalence", type = {CodeType.class}, order=3, min=1, max=1)
         @Description(shortDefinition="equivalent | equal | wider | subsumes | narrower | specialises | inexact | unmatched | disjoint", formalDefinition="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target." )
-        protected Enumeration<ConceptEquivalence> equivalence;
+        protected Enumeration<ConceptMapEquivalence> equivalence;
 
         /**
          * A description of status/issues in mapping that conveys additional information not represented in  the structured data.
@@ -906,7 +736,7 @@ public class ConceptMap extends DomainResource {
         @Description(shortDefinition="Other concepts that this mapping also produces", formalDefinition="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on." )
         protected List<OtherElementComponent> product;
 
-        private static final long serialVersionUID = 606421694L;
+        private static final long serialVersionUID = 949452924L;
 
     /*
      * Constructor
@@ -918,7 +748,7 @@ public class ConceptMap extends DomainResource {
     /*
      * Constructor
      */
-      public ConceptMapElementMapComponent(Enumeration<ConceptEquivalence> equivalence) {
+      public ConceptMapElementMapComponent(Enumeration<ConceptMapEquivalence> equivalence) {
         super();
         this.equivalence = equivalence;
       }
@@ -1024,12 +854,12 @@ public class ConceptMap extends DomainResource {
         /**
          * @return {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
          */
-        public Enumeration<ConceptEquivalence> getEquivalenceElement() { 
+        public Enumeration<ConceptMapEquivalence> getEquivalenceElement() { 
           if (this.equivalence == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ConceptMapElementMapComponent.equivalence");
             else if (Configuration.doAutoCreate())
-              this.equivalence = new Enumeration<ConceptEquivalence>(new ConceptEquivalenceEnumFactory()); // bb
+              this.equivalence = new Enumeration<ConceptMapEquivalence>(new ConceptMapEquivalenceEnumFactory()); // bb
           return this.equivalence;
         }
 
@@ -1044,7 +874,7 @@ public class ConceptMap extends DomainResource {
         /**
          * @param value {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
          */
-        public ConceptMapElementMapComponent setEquivalenceElement(Enumeration<ConceptEquivalence> value) { 
+        public ConceptMapElementMapComponent setEquivalenceElement(Enumeration<ConceptMapEquivalence> value) { 
           this.equivalence = value;
           return this;
         }
@@ -1052,16 +882,16 @@ public class ConceptMap extends DomainResource {
         /**
          * @return The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.
          */
-        public ConceptEquivalence getEquivalence() { 
+        public ConceptMapEquivalence getEquivalence() { 
           return this.equivalence == null ? null : this.equivalence.getValue();
         }
 
         /**
          * @param value The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.
          */
-        public ConceptMapElementMapComponent setEquivalence(ConceptEquivalence value) { 
+        public ConceptMapElementMapComponent setEquivalence(ConceptMapEquivalence value) { 
             if (this.equivalence == null)
-              this.equivalence = new Enumeration<ConceptEquivalence>(new ConceptEquivalenceEnumFactory());
+              this.equivalence = new Enumeration<ConceptMapEquivalence>(new ConceptMapEquivalenceEnumFactory());
             this.equivalence.setValue(value);
           return this;
         }

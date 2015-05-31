@@ -29,12 +29,13 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
 import java.math.*;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.Enumerations.*;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Child;
@@ -46,78 +47,6 @@ import org.hl7.fhir.instance.model.api.*;
  */
 @ResourceDef(name="ClaimResponse", profile="http://hl7.org/fhir/Profile/ClaimResponse")
 public class ClaimResponse extends DomainResource {
-
-    public enum RSLink {
-        /**
-         * The processing completed without errors.
-         */
-        COMPLETE, 
-        /**
-         * The processing identified with errors.
-         */
-        ERROR, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static RSLink fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("complete".equals(codeString))
-          return COMPLETE;
-        if ("error".equals(codeString))
-          return ERROR;
-        throw new Exception("Unknown RSLink code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case COMPLETE: return "complete";
-            case ERROR: return "error";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case COMPLETE: return "";
-            case ERROR: return "";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case COMPLETE: return "The processing completed without errors.";
-            case ERROR: return "The processing identified with errors.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case COMPLETE: return "Complete";
-            case ERROR: return "Error";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class RSLinkEnumFactory implements EnumFactory<RSLink> {
-    public RSLink fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("complete".equals(codeString))
-          return RSLink.COMPLETE;
-        if ("error".equals(codeString))
-          return RSLink.ERROR;
-        throw new IllegalArgumentException("Unknown RSLink code '"+codeString+"'");
-        }
-    public String toCode(RSLink code) {
-      if (code == RSLink.COMPLETE)
-        return "complete";
-      if (code == RSLink.ERROR)
-        return "error";
-      return "?";
-      }
-    }
 
     @Block()
     public static class ItemsComponent extends BackboneElement implements IBaseBackboneElement {
@@ -3245,7 +3174,7 @@ public class ClaimResponse extends DomainResource {
      */
     @Child(name = "outcome", type = {CodeType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="complete | error", formalDefinition="Transaction status: error, complete." )
-    protected Enumeration<RSLink> outcome;
+    protected Enumeration<RemittanceOutcome> outcome;
 
     /**
      * A description of the status of the adjudication.
@@ -3366,7 +3295,7 @@ public class ClaimResponse extends DomainResource {
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<CoverageComponent> coverage;
 
-    private static final long serialVersionUID = -1720247756L;
+    private static final long serialVersionUID = 2021598689L;
 
   /*
    * Constructor
@@ -3691,12 +3620,12 @@ public class ClaimResponse extends DomainResource {
     /**
      * @return {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public Enumeration<RSLink> getOutcomeElement() { 
+    public Enumeration<RemittanceOutcome> getOutcomeElement() { 
       if (this.outcome == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ClaimResponse.outcome");
         else if (Configuration.doAutoCreate())
-          this.outcome = new Enumeration<RSLink>(new RSLinkEnumFactory()); // bb
+          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory()); // bb
       return this.outcome;
     }
 
@@ -3711,7 +3640,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * @param value {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
-    public ClaimResponse setOutcomeElement(Enumeration<RSLink> value) { 
+    public ClaimResponse setOutcomeElement(Enumeration<RemittanceOutcome> value) { 
       this.outcome = value;
       return this;
     }
@@ -3719,19 +3648,19 @@ public class ClaimResponse extends DomainResource {
     /**
      * @return Transaction status: error, complete.
      */
-    public RSLink getOutcome() { 
+    public RemittanceOutcome getOutcome() { 
       return this.outcome == null ? null : this.outcome.getValue();
     }
 
     /**
      * @param value Transaction status: error, complete.
      */
-    public ClaimResponse setOutcome(RSLink value) { 
+    public ClaimResponse setOutcome(RemittanceOutcome value) { 
       if (value == null)
         this.outcome = null;
       else {
         if (this.outcome == null)
-          this.outcome = new Enumeration<RSLink>(new RSLinkEnumFactory());
+          this.outcome = new Enumeration<RemittanceOutcome>(new RemittanceOutcomeEnumFactory());
         this.outcome.setValue(value);
       }
       return this;

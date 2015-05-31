@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, May 22, 2015 17:15-0400 for FHIR v0.5.0
+// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -41,29 +41,29 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * This resource identifies an instance of a manufactured thing that is used in the provision of healthcare without being substantially changed through that activity. The device may be a machine, an insert, a computer, an application, etc. This includes durable (reusable) medical equipment as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.
+ * This resource identifies an instance of a manufactured thing that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices includes durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non medical devices may includes things such as a machine, a cellphone, a computer, an application, etc.
  */
 @ResourceDef(name="Device", profile="http://hl7.org/fhir/Profile/Device")
 public class Device extends DomainResource {
 
-    public enum Devicestatus {
+    public enum DeviceStatus {
         /**
-         * The Device is available for use.
+         * The Device is available for use
          */
         AVAILABLE, 
         /**
-         * The Device is no longer available for use ( e.g lost, expired, damaged).
+         * The Device is no longer available for use ( e.g lost, expired, damaged)
          */
         NOTAVAILABLE, 
         /**
-         * The Device was entered in error and voided.
+         * The Device was entered in error and voided
          */
         ENTEREDINERROR, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static Devicestatus fromCode(String codeString) throws Exception {
+        public static DeviceStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("available".equals(codeString))
@@ -72,7 +72,7 @@ public class Device extends DomainResource {
           return NOTAVAILABLE;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        throw new Exception("Unknown Devicestatus code '"+codeString+"'");
+        throw new Exception("Unknown DeviceStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -84,17 +84,17 @@ public class Device extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case AVAILABLE: return "";
-            case NOTAVAILABLE: return "";
-            case ENTEREDINERROR: return "";
+            case AVAILABLE: return "http://hl7.org.fhir/devicestatus";
+            case NOTAVAILABLE: return "http://hl7.org.fhir/devicestatus";
+            case ENTEREDINERROR: return "http://hl7.org.fhir/devicestatus";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case AVAILABLE: return "The Device is available for use.";
-            case NOTAVAILABLE: return "The Device is no longer available for use ( e.g lost, expired, damaged).";
-            case ENTEREDINERROR: return "The Device was entered in error and voided.";
+            case AVAILABLE: return "The Device is available for use";
+            case NOTAVAILABLE: return "The Device is no longer available for use ( e.g lost, expired, damaged)";
+            case ENTEREDINERROR: return "The Device was entered in error and voided";
             default: return "?";
           }
         }
@@ -108,25 +108,25 @@ public class Device extends DomainResource {
         }
     }
 
-  public static class DevicestatusEnumFactory implements EnumFactory<Devicestatus> {
-    public Devicestatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class DeviceStatusEnumFactory implements EnumFactory<DeviceStatus> {
+    public DeviceStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("available".equals(codeString))
-          return Devicestatus.AVAILABLE;
+          return DeviceStatus.AVAILABLE;
         if ("not-available".equals(codeString))
-          return Devicestatus.NOTAVAILABLE;
+          return DeviceStatus.NOTAVAILABLE;
         if ("entered-in-error".equals(codeString))
-          return Devicestatus.ENTEREDINERROR;
-        throw new IllegalArgumentException("Unknown Devicestatus code '"+codeString+"'");
+          return DeviceStatus.ENTEREDINERROR;
+        throw new IllegalArgumentException("Unknown DeviceStatus code '"+codeString+"'");
         }
-    public String toCode(Devicestatus code) {
-      if (code == Devicestatus.AVAILABLE)
+    public String toCode(DeviceStatus code) {
+      if (code == DeviceStatus.AVAILABLE)
         return "available";
-      if (code == Devicestatus.NOTAVAILABLE)
+      if (code == DeviceStatus.NOTAVAILABLE)
         return "not-available";
-      if (code == Devicestatus.ENTEREDINERROR)
+      if (code == DeviceStatus.ENTEREDINERROR)
         return "entered-in-error";
       return "?";
       }
@@ -151,7 +151,7 @@ public class Device extends DomainResource {
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="available | not-available | entered-in-error", formalDefinition="Status of the Device availability." )
-    protected Enumeration<Devicestatus> status;
+    protected Enumeration<DeviceStatus> status;
 
     /**
      * A name of the manufacturer.
@@ -252,7 +252,7 @@ public class Device extends DomainResource {
     @Description(shortDefinition="Network address to contact device", formalDefinition="A network address on which the device may be contacted directly." )
     protected UriType url;
 
-    private static final long serialVersionUID = -699591241L;
+    private static final long serialVersionUID = -612440681L;
 
   /*
    * Constructor
@@ -336,12 +336,12 @@ public class Device extends DomainResource {
     /**
      * @return {@link #status} (Status of the Device availability.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<Devicestatus> getStatusElement() { 
+    public Enumeration<DeviceStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Device.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<Devicestatus>(new DevicestatusEnumFactory()); // bb
+          this.status = new Enumeration<DeviceStatus>(new DeviceStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -356,7 +356,7 @@ public class Device extends DomainResource {
     /**
      * @param value {@link #status} (Status of the Device availability.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Device setStatusElement(Enumeration<Devicestatus> value) { 
+    public Device setStatusElement(Enumeration<DeviceStatus> value) { 
       this.status = value;
       return this;
     }
@@ -364,19 +364,19 @@ public class Device extends DomainResource {
     /**
      * @return Status of the Device availability.
      */
-    public Devicestatus getStatus() { 
+    public DeviceStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value Status of the Device availability.
      */
-    public Device setStatus(Devicestatus value) { 
+    public Device setStatus(DeviceStatus value) { 
       if (value == null)
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<Devicestatus>(new DevicestatusEnumFactory());
+          this.status = new Enumeration<DeviceStatus>(new DeviceStatusEnumFactory());
         this.status.setValue(value);
       }
       return this;
