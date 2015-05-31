@@ -20,30 +20,21 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
-
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
@@ -56,7 +47,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
@@ -149,24 +139,14 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	@Override
 	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
-		IBaseResource resource;
-		if (requestContainsResource()) {
-			resource = parseIncomingServerResource(theRequest);
-			if (theServer.getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
-				TagList tagList = new TagList();
-				for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
-					String nextTagComplete = enumeration.nextElement();
-					MethodUtil.parseTagValue(tagList, nextTagComplete);
-				}
-				if (tagList.isEmpty() == false) {
-					((IResource)resource).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
-				}
-			}
-		} else {
-			resource = null;
-		}
+		byte[] requestContents = loadRequestContents(theRequest);
+//		if (requestContainsResource()) {
+//			requestContents = parseIncomingServerResource(theRequest);
+//		} else {
+//			requestContents = null;
+//		}
 
-		Object[] params = createParametersForServerRequest(theRequest, resource);
+		Object[] params = createParametersForServerRequest(theRequest, requestContents);
 		addParametersForServerRequest(theRequest, params);
 
 		HttpServletResponse servletResponse = theRequest.getServletResponse();
@@ -274,72 +254,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		return myReturnVoid;
 	}
 
-	/**
-	 * @throws IOException
-	 */
-	protected IBaseResource parseIncomingServerResource(Request theRequest) throws IOException {
-
-		Reader requestReader;
-		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
-		if (encoding == null) {
-			String ctValue = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
-			if (ctValue != null) {
-				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
-					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBinding.class, "invalidContentTypeInRequest", ctValue, getResourceOrSystemOperationType());
-					throw new InvalidRequestException(msg);
-				}
-			}
-			if (isBlank(ctValue)) {
-				/*
-				 * If the client didn't send a content type, try to guess
-				 */
-				requestReader = theRequest.getServletRequest().getReader();
-				String body = IOUtils.toString(requestReader);
-				encoding = MethodUtil.detectEncodingNoDefault(body);
-				if (encoding == null) {
-					String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBinding.class, "noContentTypeInRequest", getResourceOrSystemOperationType());
-					throw new InvalidRequestException(msg);
-				} else {
-					requestReader = new StringReader(body);
-				}
-			} else {
-				String msg = getContext().getLocalizer().getMessage(BaseOutcomeReturningMethodBinding.class, "invalidContentTypeInRequest", ctValue, getResourceOrSystemOperationType());
-				throw new InvalidRequestException(msg);
-			}
-		} else {
-			requestReader = theRequest.getServletRequest().getReader();
-		}
-
-		IParser parser = encoding.newParser(getContext());
-
-		Class<? extends IBaseResource> wantedResourceType = requestContainsResourceType();
-		IBaseResource retVal;
-		if (wantedResourceType != null) {
-			retVal = parser.parseResource(wantedResourceType, requestReader);
-		} else {
-			retVal = parser.parseResource(requestReader);
-		}
-
-		retVal.setId(theRequest.getId());
-
-		return retVal;
-	}
-
 	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
-
-	/**
-	 * Subclasses may override if the incoming request should not contain a resource
-	 */
-	protected boolean requestContainsResource() {
-		return true;
-	}
-
-	/**
-	 * Subclasses may override to provide a specific resource type that this method wants as a parameter
-	 */
-	protected Class<? extends IBaseResource> requestContainsResourceType() {
-		return null;
-	}
 
 	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, Request theRequest)
 			throws IOException {

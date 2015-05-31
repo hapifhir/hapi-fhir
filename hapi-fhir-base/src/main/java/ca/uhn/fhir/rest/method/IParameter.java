@@ -45,9 +45,10 @@ public interface IParameter {
 	 *            The incoming request object
 	 * @param theRequestContents
 	 *            The parsed contents of the incoming request. E.g. if the request was an HTTP POST with a resource in the body, this argument would contain the parsed {@link IResource} instance.
+	 * @param theMethodBinding TODO
 	 * @return Returns the argument object as it will be passed to the {@link IResourceProvider} method.
 	 */
-	Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException;
+	Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException;
 
 	void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType);
 

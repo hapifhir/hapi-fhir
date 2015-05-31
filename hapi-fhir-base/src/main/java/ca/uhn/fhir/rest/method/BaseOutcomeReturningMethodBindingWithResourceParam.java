@@ -20,12 +20,9 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -34,14 +31,12 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
 	private int myResourceParameterIndex;
 	private String myResourceName;
-	private boolean myBinary;
 	private Class<? extends IBaseResource> myResourceType;
 	private Integer myIdParamIndex;
 
@@ -64,10 +59,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
 				}
 
-				if (IBaseBinary.class.isAssignableFrom(providerResourceType)) {
-					myBinary = true;
-				}
-
 				myResourceType = resourceParameter.getResourceType();
 				if (Modifier.isAbstract(myResourceType.getModifiers())) {
 					myResourceType = providerResourceType;
@@ -86,27 +77,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
-	}
-
-	@Override
-	protected Class<? extends IBaseResource> requestContainsResourceType() {
-		return myResourceType;
-	}
-
-	@Override
-	protected IBaseResource parseIncomingServerResource(Request theRequest) throws IOException {
-		if (myBinary) {
-			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
-			byte[] contents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
-			
-			IBaseBinary binary = (IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
-			binary.setContentType(ct);
-			binary.setContent(contents);
-			
-			return binary;
-		} else {
-			return super.parseIncomingServerResource(theRequest);
-		}
 	}
 
 	@Override

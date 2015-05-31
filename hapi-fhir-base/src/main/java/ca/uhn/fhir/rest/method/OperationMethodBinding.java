@@ -20,11 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -46,13 +43,10 @@ import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -194,20 +188,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		Object response = invokeServerMethod(theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 		return retVal;
-	}
-
-	@Override
-	protected Object parseRequestObject(Request theRequest) throws IOException {
-		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
-		IParser parser = encoding.newParser(getContext());
-		BufferedReader requestReader = theRequest.getServletRequest().getReader();
-
-		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
-			return null;
-		}
-
-		Class<? extends IBaseResource> wantedResourceType = getContext().getResourceDefinition("Parameters").getImplementingClass();
-		return parser.parseResource(wantedResourceType, requestReader);
 	}
 
 	public static BaseHttpClientInvocation createOperationInvocation(FhirContext theContext, String theResourceName, String theId, String theOperationName, IBaseParameters theInput,

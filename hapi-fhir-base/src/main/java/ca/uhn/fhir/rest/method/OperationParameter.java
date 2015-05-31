@@ -44,11 +44,14 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.CollectionBinder;
+import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
-class OperationParamBinder implements IParameter {
+class OperationParameter implements IParameter {
 
 	private final String myName;
 	private Class<?> myParameterType;
@@ -56,7 +59,7 @@ class OperationParamBinder implements IParameter {
 	private Class<? extends Collection> myInnerCollectionType;
 	private final String myOperationName;
 
-	OperationParamBinder(String theOperationName, OperationParam theAnnotation) {
+	OperationParameter(String theOperationName, OperationParam theAnnotation) {
 		myOperationName = theOperationName;
 		myName = theAnnotation.name();
 	}
@@ -109,7 +112,7 @@ class OperationParamBinder implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		List<Object> matchingParamValues = new ArrayList<Object>();
 
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
@@ -125,16 +128,21 @@ class OperationParamBinder implements IParameter {
 					}
 				} else {
 					HapiLocalizer localizer = theRequest.getServer().getFhirContext().getLocalizer();
-					String msg = localizer.getMessage(OperationParamBinder.class, "urlParamNotPrimitive", myOperationName, myName);
+					String msg = localizer.getMessage(OperationParameter.class, "urlParamNotPrimitive", myOperationName, myName);
 					throw new MethodNotAllowedException(msg, RequestTypeEnum.POST);
 				}
 			}
-		} else if (theRequestContents == null) {
-			return null;
 		} else {
 
 			FhirContext ctx = theRequest.getServer().getFhirContext();
-			IBaseResource requestContents = (IBaseResource) theRequestContents;
+			
+			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+				return null;
+			}
+
+			Class<? extends IBaseResource> wantedResourceType = theMethodBinding.getContext().getResourceDefinition("Parameters").getImplementingClass();
+			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theRequestContents, theMethodBinding, wantedResourceType);
+
 			RuntimeResourceDefinition def = ctx.getResourceDefinition(requestContents);
 
 			BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");

@@ -82,11 +82,6 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	protected boolean requestContainsResource() {
-		return false;
-	}
-
-	@Override
 	protected boolean allowVoidReturnType() {
 		return true;
 	}

@@ -78,7 +78,7 @@ public class BaseDateTimeDtTest {
 		 */
 		ourDefaultLocale = Locale.getDefault();
 
-		Locale[] available = Locale.getAvailableLocales();
+		Locale[] available = { Locale.CANADA, Locale.GERMANY, Locale.TAIWAN };
 		Locale newLocale = available[(int) (Math.random() * available.length)];
 		Locale.setDefault(newLocale);
 

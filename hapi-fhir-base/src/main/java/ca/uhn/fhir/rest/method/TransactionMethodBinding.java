@@ -20,9 +20,8 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -44,7 +43,8 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.method.TransactionParamBinder.ParamStyle;
+import ca.uhn.fhir.rest.param.TransactionParameter;
+import ca.uhn.fhir.rest.param.TransactionParameter.ParamStyle;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -60,13 +60,13 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		myTransactionParamIndex = -1;
 		int index = 0;
 		for (IParameter next : getParameters()) {
-			if (next instanceof TransactionParamBinder) {
+			if (next instanceof TransactionParameter) {
 				if (myTransactionParamIndex != -1) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @" + TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
 							+ " methods");
 				}
 				myTransactionParamIndex = index;
-				myTransactionParamStyle = ((TransactionParamBinder) next).getParamStyle();
+				myTransactionParamStyle = ((TransactionParameter) next).getParamStyle();
 			}
 			index++;
 		}
@@ -180,11 +180,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		return retVal;
-	}
-
-	@Override
-	protected Object parseRequestObject(Request theRequest) throws IOException {
-		return null; // This is parsed in TransactionParamBinder
 	}
 
 	public static BaseHttpClientInvocation createTransactionInvocation(Bundle theBundle, FhirContext theContext) {

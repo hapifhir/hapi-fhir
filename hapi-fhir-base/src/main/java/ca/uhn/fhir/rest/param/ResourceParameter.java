@@ -20,26 +20,69 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.entity.ContentType;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
+import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class ResourceParameter implements IParameter {
 
-	private Class<? extends IResource> myResourceType;
+	private boolean myBinary;
+	private Class<? extends IBaseResource> myResourceType;
 
-	public ResourceParameter(Class<? extends IResource> theParameterType) {
+	public ResourceParameter(Class<? extends IResource> theParameterType, Object theProvider) {
 		myResourceType = theParameterType;
+		myBinary = IBaseBinary.class.isAssignableFrom(theParameterType);
+		
+		Class<? extends IBaseResource> providerResourceType = null;
+		if (theProvider instanceof IResourceProvider) {
+			providerResourceType = ((IResourceProvider) theProvider).getResourceType();
+		}
+
+		if (Modifier.isAbstract(myResourceType.getModifiers()) && providerResourceType != null) {
+			myResourceType = providerResourceType;
+		}
+
+	}
+
+	public Class<? extends IBaseResource> getResourceType() {
+		return myResourceType;
+	}
+
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		// ignore for now
 	}
 
 	@Override
@@ -49,18 +92,110 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
-		IResource resource = (IResource) theRequestContents;
-		return resource;
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+		
+		if (myBinary) {
+			
+			FhirContext ctx = theRequest.getServer().getFhirContext();
+			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
+			binary.setContentType(ct);
+			binary.setContent(theRequestContents);
+			
+			return binary;
+		}
+		
+		IBaseResource retVal = loadResourceFromRequest(theRequest, theRequestContents, theMethodBinding, myResourceType);
+
+		return retVal;
 	}
 
-	public Class<? extends IResource> getResourceType() {
-		return myResourceType;
+	public static IBaseResource loadResourceFromRequest(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+		FhirContext ctx = theRequest.getServer().getFhirContext();
+
+		final Charset charset = determineRequestCharset(theRequest);
+		Reader requestReader = createRequestReader(theRequestContents, charset);
+		
+		EncodingEnum encoding = RestfulServerUtils.determineRequestEncodingNoDefault(theRequest);
+		if (encoding == null) {
+			String ctValue = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+			if (ctValue != null) {
+				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
+					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getResourceOrSystemOperationType());
+					throw new InvalidRequestException(msg);
+				}
+			}
+			if (isBlank(ctValue)) {
+				/*
+				 * If the client didn't send a content type, try to guess
+				 */
+				String body;
+				try {
+					body = IOUtils.toString(requestReader);
+				} catch (IOException e) {
+					// This shouldn't happen since we're reading from a byte array..
+					throw new InternalErrorException(e);
+				}
+				encoding = MethodUtil.detectEncodingNoDefault(body);
+				if (encoding == null) {
+					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", theMethodBinding.getResourceOrSystemOperationType());
+					throw new InvalidRequestException(msg);
+				} else {
+					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
+				}
+			} else {
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getResourceOrSystemOperationType());
+				throw new InvalidRequestException(msg);
+			}
+		} 
+		
+		IParser parser = encoding.newParser(ctx);
+
+		IBaseResource retVal;
+		if (theResourceType != null) {
+			retVal = parser.parseResource(theResourceType, requestReader);
+		} else {
+			retVal = parser.parseResource(requestReader);
+		}
+
+		if (theRequest.getId() != null && theRequest.getId().hasIdPart()) {
+			retVal.setId(theRequest.getId());
+		}
+
+		if (theRequest.getServer().getFhirContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+			TagList tagList = new TagList();
+			for (Enumeration<String> enumeration = theRequest.getServletRequest().getHeaders(Constants.HEADER_CATEGORY); enumeration.hasMoreElements();) {
+				String nextTagComplete = enumeration.nextElement();
+				MethodUtil.parseTagValue(tagList, nextTagComplete);
+			}
+			if (tagList.isEmpty() == false) {
+				((IResource)retVal).getResourceMetadata().put(ResourceMetadataKeyEnum.TAG_LIST, tagList);
+			}
+		}
+		return retVal;
 	}
 
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// ignore for now
+	static Reader createRequestReader(byte[] theRequestContents, Charset charset) {
+		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
+		return requestReader;
+	}
+
+	static Reader createRequestReader(Request theRequest, byte[] theRequestContents) {
+		return createRequestReader(theRequestContents, determineRequestCharset(theRequest));
+	}
+
+	static Charset determineRequestCharset(Request theRequest) {
+		String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+
+		Charset charset = null;
+		if (isNotBlank(ct)) {
+			ContentType parsedCt = ContentType.parse(ct);
+			charset = parsedCt.getCharset();
+		}
+		if (charset == null) {
+			charset = Charset.forName("UTF-8");
+		}
+		return charset;
 	}
 
 }

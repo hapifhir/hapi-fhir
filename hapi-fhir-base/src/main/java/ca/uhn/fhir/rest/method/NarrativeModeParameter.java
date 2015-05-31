@@ -47,7 +47,7 @@ class NarrativeModeParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String val = theRequest.getServletRequest().getParameter(Constants.PARAM_NARRATIVE);
 		if (val != null) {
 			try {

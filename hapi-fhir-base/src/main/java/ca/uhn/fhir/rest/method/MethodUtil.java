@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -25,10 +24,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.DateUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -76,6 +75,7 @@ import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
@@ -411,7 +411,7 @@ public class MethodUtil {
 						if (!IResource.class.isAssignableFrom(parameterType)) {
 							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
 						}
-						param = new ResourceParameter((Class<? extends IResource>) parameterType);
+						param = new ResourceParameter((Class<? extends IResource>) parameterType, theProvider);
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
@@ -423,12 +423,12 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter();
 					} else if (nextAnnotation instanceof TransactionParam) {
-						param = new TransactionParamBinder(theContext);
+						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
-						param = new OperationParamBinder(op.name(), (OperationParam) nextAnnotation);
+						param = new OperationParameter(op.name(), (OperationParam) nextAnnotation);
 					} else {
 						continue;
 					}

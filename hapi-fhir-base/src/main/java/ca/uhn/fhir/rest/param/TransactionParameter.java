@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.method;
+package ca.uhn.fhir.rest.param;
 
 /*
  * #%L
@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -39,18 +38,21 @@ import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.method.IParameter;
+import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class TransactionParamBinder implements IParameter {
+public class TransactionParameter implements IParameter {
 
 	private FhirContext myContext;
 	private ParamStyle myParamStyle;
 	private Class<? extends IBaseResource> myResourceBundleType;
 	
-	public TransactionParamBinder(FhirContext theContext) {
+	public TransactionParameter(FhirContext theContext) {
 		myContext = theContext;
 	}
 
@@ -96,20 +98,15 @@ class TransactionParamBinder implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		// TODO: don't use a default encoding, just fail!
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);
 
 		IParser parser = encoding.newParser(myContext);
 
-		BufferedReader reader;
-		try {
-			reader = theRequest.getServletRequest().getReader();
-		} catch (IOException e) {
-			throw new InternalErrorException("Failed to read incoming payload", e);
-		}
-
+		Reader reader = ResourceParameter.createRequestReader(theRequest, theRequestContents);
+		
 		switch (myParamStyle) {
 		case DSTU1_BUNDLE: {
 			Bundle bundle;
@@ -137,7 +134,7 @@ class TransactionParamBinder implements IParameter {
 		return myParamStyle;
 	}
 
-	enum ParamStyle {
+	public enum ParamStyle {
 		/** Old style bundle (defined in hapi-fhir-base) */
 		DSTU1_BUNDLE,
 		/** New style bundle (defined in hapi-fhir-structures-* as a resource definition itself */

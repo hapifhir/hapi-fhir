@@ -54,7 +54,7 @@ public class CountParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, Object theRequestContents) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String[] sinceParams = theRequest.getParameters().remove(Constants.PARAM_COUNT);
 		if (sinceParams != null) {
 			if (sinceParams.length > 0) {

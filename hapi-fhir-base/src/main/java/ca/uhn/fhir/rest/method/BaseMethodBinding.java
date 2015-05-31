@@ -98,6 +98,51 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getResourceOperationType());
 	}
 
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
+		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
+		if (encoding == null) {
+			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			populateException(ex, theResponseReader);
+			throw ex;
+		}
+
+		IParser parser = encoding.newParser(getContext());
+		return parser;
+	}
+
+	protected IParser createAppropriateParserForParsingServerRequest(Request theRequest) {
+		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
+		EncodingEnum encoding;
+		if (isBlank(contentTypeHeader)) {
+			encoding = EncodingEnum.XML;
+		} else {
+			int semicolon = contentTypeHeader.indexOf(';');
+			if (semicolon != -1) {
+				contentTypeHeader = contentTypeHeader.substring(0, semicolon);
+			}
+			encoding = EncodingEnum.forContentType(contentTypeHeader);
+		}
+
+		if (encoding == null) {
+			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
+		}
+
+		IParser parser = encoding.newParser(getContext());
+		return parser;
+	}
+
+	protected Object[] createParametersForServerRequest(Request theRequest, byte[] theRequestContents) {
+		Object[] params = new Object[getParameters().size()];
+		for (int i = 0; i < getParameters().size(); i++) {
+			IParameter param = getParameters().get(i);
+			if (param == null) {
+				continue;
+			}
+			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theRequestContents, this);
+		}
+		return params;
+	}
+
 	public List<Class<?>> getAllowableParamAnnotations() {
 		return null;
 	}
@@ -116,11 +161,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return retVal;
 	}
 
-	public Method getMethod() {
+    public Method getMethod() {
 		return myMethod;
 	}
 
-	public OtherOperationTypeEnum getOtherOperationType() {
+    public OtherOperationTypeEnum getOtherOperationType() {
 		return null;
 	}
 
@@ -128,7 +173,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return myParameters;
 	}
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public Object getProvider() {
+		return myProvider;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Set<Include> getRequestIncludesFromParams(Object[] params) {
         if (params == null || params.length == 0)
             return null;
@@ -163,15 +212,13 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
         return null;
     }
 
-    public Object getProvider() {
-		return myProvider;
-	}
-
 	/**
 	 * Returns the name of the resource this method handles, or <code>null</code> if this method is not resource
 	 * specific
 	 */
 	public abstract String getResourceName();
+
+	public abstract RestfulOperationTypeEnum getResourceOperationType();
 
 	/**
 	 * Returns the value of {@link #getResourceOperationType()} or {@link #getSystemOperationType()} or {@link #getOtherOperationType()}
@@ -192,8 +239,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return null;
 	}
 
-	public abstract RestfulOperationTypeEnum getResourceOperationType();
-
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
 
 	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
@@ -201,56 +246,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
 	public abstract void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException;
-
-	/** For unit tests only */
-	public void setParameters(List<IParameter> theParameters) {
-		myParameters = theParameters;
-	}
-
-	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode) {
-		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
-		if (encoding == null) {
-			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-			populateException(ex, theResponseReader);
-			throw ex;
-		}
-
-		IParser parser = encoding.newParser(getContext());
-		return parser;
-	}
-
-	protected IParser createAppropriateParserForParsingServerRequest(Request theRequest) {
-		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
-		EncodingEnum encoding;
-		if (isBlank(contentTypeHeader)) {
-			encoding = EncodingEnum.XML;
-		} else {
-			int semicolon = contentTypeHeader.indexOf(';');
-			if (semicolon != -1) {
-				contentTypeHeader = contentTypeHeader.substring(0, semicolon);
-			}
-			encoding = EncodingEnum.forContentType(contentTypeHeader);
-		}
-
-		if (encoding == null) {
-			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
-		}
-
-		IParser parser = encoding.newParser(getContext());
-		return parser;
-	}
-
-	protected Object[] createParametersForServerRequest(Request theRequest, IBaseResource theResource) {
-		Object[] params = new Object[getParameters().size()];
-		for (int i = 0; i < getParameters().size(); i++) {
-			IParameter param = getParameters().get(i);
-			if (param == null) {
-				continue;
-			}
-			params[i] = param.translateQueryParametersIntoServerArgument(theRequest, theResource);
-		}
-		return params;
-	}
 
 	protected Object invokeServerMethod(Object[] theMethodParams) {
 		try {
@@ -265,6 +260,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} catch (Exception e) {
 			throw new InternalErrorException("Failed to call access method", e);
 		}
+	}
+
+	protected byte[] loadRequestContents(Request theRequest) throws IOException {
+		byte[] requestContents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
+		return requestContents;
 	}
 
 	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
@@ -300,6 +300,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return ex;
 	}
 
+	/** For unit tests only */
+	public void setParameters(List<IParameter> theParameters) {
+		myParameters = theParameters;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static BaseMethodBinding<?> bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);
@@ -470,6 +475,52 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		// return sm;
 	}
 
+	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
+		try {
+			String responseText = IOUtils.toString(theResponseReader);
+			theEx.setResponseBody(responseText);
+		} catch (IOException e) {
+			ourLog.debug("Failed to read response", e);
+		}
+	}
+
+	private static String toLogString(Class<?> theType) {
+		if (theType == null) {
+			return null;
+		}
+		return theType.getCanonicalName();
+	}
+
+	protected static IBundleProvider toResourceList(Object response) throws InternalErrorException {
+		if (response == null) {
+			return BundleProviders.newEmptyList();
+		} else if (response instanceof IBundleProvider) {
+			return (IBundleProvider) response;
+		} else if (response instanceof IResource) {
+			return BundleProviders.newList((IResource) response);
+		} else if (response instanceof Collection) {
+			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			for (Object next : ((Collection<?>) response)) {
+				retVal.add((IBaseResource) next);
+			}
+			return BundleProviders.newList(retVal);
+		} else {
+			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
+		}
+	}
+
+	private static boolean verifyIsValidResourceReturnType(Class<?> theReturnType) {
+		if (theReturnType == null) {
+			return false;
+		}
+		if (!IBaseResource.class.isAssignableFrom(theReturnType)) {
+			return false;
+		}
+		return true;
+//		boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
+//		return retVal;
+	}
+
 	public static boolean verifyMethodHasZeroOrOneOperationAnnotation(Method theNextMethod, Object... theAnnotations) {
 		Object obj1 = null;
 		for (Object object : theAnnotations) {
@@ -491,52 +542,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			// " has no FHIR method annotations.");
 		}
 		return true;
-	}
-
-	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
-		try {
-			String responseText = IOUtils.toString(theResponseReader);
-			theEx.setResponseBody(responseText);
-		} catch (IOException e) {
-			ourLog.debug("Failed to read response", e);
-		}
-	}
-
-	private static String toLogString(Class<?> theType) {
-		if (theType == null) {
-			return null;
-		}
-		return theType.getCanonicalName();
-	}
-
-	private static boolean verifyIsValidResourceReturnType(Class<?> theReturnType) {
-		if (theReturnType == null) {
-			return false;
-		}
-		if (!IBaseResource.class.isAssignableFrom(theReturnType)) {
-			return false;
-		}
-		return true;
-//		boolean retVal = Modifier.isAbstract(theReturnType.getModifiers()) == false;
-//		return retVal;
-	}
-
-	protected static IBundleProvider toResourceList(Object response) throws InternalErrorException {
-		if (response == null) {
-			return BundleProviders.newEmptyList();
-		} else if (response instanceof IBundleProvider) {
-			return (IBundleProvider) response;
-		} else if (response instanceof IResource) {
-			return BundleProviders.newList((IResource) response);
-		} else if (response instanceof Collection) {
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-			for (Object next : ((Collection<?>) response)) {
-				retVal.add((IBaseResource) next);
-			}
-			return BundleProviders.newList(retVal);
-		} else {
-			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
-		}
 	}
 
 }

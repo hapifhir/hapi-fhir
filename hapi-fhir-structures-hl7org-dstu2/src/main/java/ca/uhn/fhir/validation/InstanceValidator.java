@@ -1,6 +1,5 @@
 package ca.uhn.fhir.validation;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Collections;
@@ -15,7 +14,6 @@ import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.utils.WorkerContext;
 import org.hl7.fhir.instance.validation.ValidationMessage;
-import org.hl7.fhir.utilities.xml.XMLUtil;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -28,7 +26,6 @@ public class InstanceValidator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InstanceValidator.class);
 
 	private FhirContext myCtx;
-
 	private DocumentBuilderFactory myDocBuilderFactory;
 
 	InstanceValidator(FhirContext theContext) {

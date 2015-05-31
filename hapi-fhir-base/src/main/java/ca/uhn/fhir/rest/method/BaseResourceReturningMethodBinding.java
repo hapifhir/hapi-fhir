@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -37,20 +37,18 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import ca.uhn.fhir.model.api.Include;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -244,14 +242,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			requestIsBrowser = true;
 		}
 
-		Object requestObject = parseRequestObject(theRequest);
-
+		byte[] requestContents = loadRequestContents(theRequest);
+		
 		// Method params
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
 			if (param != null) {
-				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, requestObject);
+				params[i] = param.translateQueryParametersIntoServerArgument(theRequest, requestContents, this);
 			}
 		}
 
@@ -390,18 +388,6 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	 */
 	protected boolean isAddContentLocationHeader() {
 		return true;
-	}
-
-	/**
-	 * Subclasses may override
-	 * 
-	 * @param theRequest
-	 *            The incoming request
-	 * @throws IOException
-	 *             Subclasses may throw this in the event of an IO exception
-	 */
-	protected Object parseRequestObject(Request theRequest) throws IOException {
-		return null;
 	}
 
 	protected void setResourceName(String theResourceName) {

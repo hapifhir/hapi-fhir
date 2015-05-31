@@ -27,7 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.server.Constants;
 
 public class ClientServerValidationTestDstu {
@@ -70,7 +70,7 @@ public class ClientServerValidationTestDstu {
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		myCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.ONCE);
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 		
 		// don't load the conformance until the first time the client is actually used 
@@ -98,11 +98,11 @@ public class ClientServerValidationTestDstu {
 
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
 
-		myCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.ONCE);
+		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/1"));
 			fail();
-		} catch (FhirClientConnectionException e) {
+		} catch (FhirClientInappropriateForServerException e) {
 			assertThat(e.toString(), containsString("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"0.4.0\" which corresponds to DSTU2, but this client is configured to use DSTU1 (via the FhirContext)"));
 		}
 	}

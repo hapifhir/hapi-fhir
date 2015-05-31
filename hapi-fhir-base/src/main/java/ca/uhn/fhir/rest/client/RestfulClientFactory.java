@@ -85,10 +85,12 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		myContext = theFhirContext;
 	}
 
+	@Override
 	public int getConnectionRequestTimeout() {
 		return myConnectionRequestTimeout;
 	}
 
+	@Override
 	public int getConnectTimeout() {
 		return myConnectTimeout;
 	}
@@ -274,6 +276,7 @@ public class RestfulClientFactory implements IRestfulClientFactory {
 		myHttpClient = null;
 	}
 
+	@SuppressWarnings("unchecked")
 	void validateServerBase(String theServerBase, HttpClient theHttpClient, BaseClient theClient) {
 
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
