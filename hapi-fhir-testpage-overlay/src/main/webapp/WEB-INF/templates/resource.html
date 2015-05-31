@@ -106,6 +106,8 @@
 												if (this.id) {
 													if (this.id.substring(0,4) == 'inc_') {
 														this.name = '_include';
+													} else if (this.id.substring(0,7) == 'revinc_') {
+														this.name = '_revinclude';
 													} else if (this.id.indexOf('autogen') == -1) {
 														this.name = this.id;
 													}	
@@ -127,15 +129,31 @@
 										<!-- Placeholder: gets populated by script below -->
 									</div>
 									
-									<div class="row-fluid">
-										<h4>Includes <small>Also load and include referenced resources in results</small></h4>
-									</div>
-									
 									<!-- Includes -->
+									<div class="row-fluid">
+										<h4>Includes <small>Also include resources which are referenced by the search results</small></h4>
+									</div>									
 									<div class="row-fluid">
 										<span th:each="include : ${includes}" class="includeCheckContainer">
 											<span class="includeCheckCheck">
 												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}" />
+											</span>
+											<span class="includeCheckName" th:text="${include}"/>
+										</span>
+									</div>
+
+									<!-- Includes -->
+									<div class="row-fluid">
+										<h4>Reverse Includes <small>Also include resources which reference to the search results</small></h4>
+									</div>									
+									<div class="row-fluid">
+										<span class="includeCheckCheck">
+											<input type="checkbox" th:value="'*'" th:id="'revinc_STAR'" />
+										</span>
+										<span class="includeCheckName" th:text="'*'"/>
+										<span th:each="include : ${revincludes}" class="includeCheckContainer">
+											<span class="includeCheckCheck">
+												<input type="checkbox" th:value="${include}" th:id="'revinc_' + ${include}" />
 											</span>
 											<span class="includeCheckName" th:text="${include}"/>
 										</span>

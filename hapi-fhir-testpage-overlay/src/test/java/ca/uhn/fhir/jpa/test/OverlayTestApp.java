@@ -61,7 +61,10 @@ public class OverlayTestApp {
 
 		}
 
-		ourAppCtx = new ClassPathXmlApplicationContext("hapi-fhir-server-resourceproviders-dstu2.xml", "hapi-fhir-server-resourceproviders-dstu1.xml", "fhir-jpabase-spring-test-config.xml");
+		ourAppCtx = new ClassPathXmlApplicationContext(
+				"hapi-fhir-server-resourceproviders-dstu2.xml", 
+				"hapi-fhir-server-resourceproviders-dstu1.xml", 
+				"fhir-jpabase-spring-test-config.xml");
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 

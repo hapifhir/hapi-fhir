@@ -52,6 +52,9 @@
 				parameters with JSON encoding (e.g. the $everything operation on UHN's test server).
 				Thanks to Avinash Shanbhag for reporting!
 			</action>
+			<action type="add">
+				Web tester UI now supports _revinclude
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

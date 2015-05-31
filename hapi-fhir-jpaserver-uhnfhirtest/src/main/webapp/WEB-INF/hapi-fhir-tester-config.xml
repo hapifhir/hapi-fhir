@@ -18,7 +18,7 @@
 				<value>hi       , DSTU1 , Health Intersections (DSTU1 FHIR)            , http://fhir.healthintersections.com.au/open</value>
 				<value>furored2 , DSTU2 , Spark - Furore (DSTU2 FHIR)                  , http://spark-dstu2.furore.com/fhir</value>
 				<value>furore   , DSTU1 , Spark - Furore (DSTU1 FHIR)                  , http://spark.furore.com/fhir</value>
-				<value>sof      , DSTU2 , SQL on FHIR - HealthConnex (DSTU2 FHIR)      , https://sqlonfhir.azurewebsites.net/api</value>
+				<value>sof      , DSTU2 , SQL on FHIR - HealthConnex (DSTU2 FHIR)      , http://sqlonfhir.azurewebsites.net/api</value>
 				<!--
 				<value>blaze    , DSTU1 , Blaze (Orion Health)                         , https://fhir.orionhealth.com/blaze/fhir</value>
 				<value>oridashi , DSTU1 , Oridashi                                     , http://demo.oridashi.com.au:8190</value>

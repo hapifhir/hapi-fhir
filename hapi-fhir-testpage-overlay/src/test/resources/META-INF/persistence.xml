@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+
+	<persistence-unit name="FHIR_UT" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<!-- <class>ca.uhn.fhir.jpa.entity.PatientResourceTable</class>  -->
+		
+		<class>ca.uhn.fhir.jpa.entity.ForcedId</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceTable</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTable</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceHistoryTag</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceLink</class>
+		<class>ca.uhn.fhir.jpa.entity.ResourceTag</class>
+		<class>ca.uhn.fhir.jpa.entity.TagDefinition</class>
+		
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+		<properties>
+			<property name="hibernate.connection.url" value="jdbc:hsqldb:mem:unit-testing-jpa" />
+			<property name="hibernate.connection.driver_class" value="org.hsqldb.jdbcDriver" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.DerbyTenSevenDialect" />
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.connection.username" value="sa" />
+			<property name="hibernate.connection.password" value="" />
+			<property name="hibernate.jdbc.batch_size" value="0" />
+			<property name="hibernate.cache.use_minimal_puts" value="false" />
+			<property name="hibernate.cache.use_query_cache" value="false" />
+			<property name="hibernate.cache.use_second_level_cache" value="false" />
+			<property name="hibernate.cache.use_structured_entries" value="false" />
+			<!-- 
+			<property name="hibernate.ejb.naming_strategy" value="ca.uhn.fhir.jpa.util.CustomNamingStrategy" />
+			 -->
+			<!-- 
+			<property name="hibernate.cache.region.factory_class" value="org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory" />
+			 -->
+		</properties>                                                    
+	</persistence-unit>
+
+</persistence>

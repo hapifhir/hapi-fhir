@@ -13,6 +13,9 @@
 	<context:annotation-config />
 	<context:mbean-server />
 
+	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
+	</bean>
+
 	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
 		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
 	</bean>
@@ -29,7 +32,7 @@
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />
-		<!-- <property name="persistenceUnitName" value="FHIR_UT" />  -->
+		<property name="persistenceUnitName" value="FHIR_UT" />
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 				<property name="showSql" value="false" />
@@ -39,11 +42,9 @@
 			</bean>
 		</property>
 	</bean>
-
 	<bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
-
 	<tx:annotation-driven transaction-manager="myTxManager" />
 
 </beans>
