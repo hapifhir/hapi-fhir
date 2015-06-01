@@ -71,6 +71,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -757,6 +758,23 @@ public MethodOutcome updatePatientConditional(
    return new MethodOutcome(); // populate this
 }
 //END SNIPPET: updateConditional
+
+//START SNIPPET: updateRaw
+@Update
+public MethodOutcome updatePatientWithRawValue (
+    @ResourceParam Patient thePatient, 
+    @IdParam IdDt theId, 
+    @ResourceParam String theRawBody,
+    @ResourceParam EncodingEnum theEncodingEnum) {
+
+   // Here, thePatient will have the parsed patient body, but
+   // theRawBody will also have the raw text of the resource 
+   // being created, and theEncodingEnum will tell you which
+   // encoding was used
+ 
+ return new MethodOutcome(); // populate this
+}
+//END SNIPPET: updateRaw
 
 //START SNIPPET: update
 @Update

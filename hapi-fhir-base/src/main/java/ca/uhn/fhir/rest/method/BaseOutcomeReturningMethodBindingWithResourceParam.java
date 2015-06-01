@@ -48,33 +48,33 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		int index = 0;
 		for (IParameter next : getParameters()) {
 			if (next instanceof ResourceParameter) {
+				resourceParameter = (ResourceParameter) next;
+				if (resourceParameter.getMode() != ResourceParameter.Mode.RESOURCE) {
+					continue;
+				}
 				if (myResourceType != null) {
 					throw new ConfigurationException("Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
 				}
 				
-				resourceParameter = (ResourceParameter) next;
-				Class<? extends IBaseResource> providerResourceType = resourceParameter.getResourceType();
-
-				if (theProvider instanceof IResourceProvider) {
-					providerResourceType = ((IResourceProvider) theProvider).getResourceType();
-				}
-
 				myResourceType = resourceParameter.getResourceType();
-				if (Modifier.isAbstract(myResourceType.getModifiers())) {
-					myResourceType = providerResourceType;
-				}
-				
-				myResourceName = theContext.getResourceDefinition(providerResourceType).getName();
 
 				myResourceParameterIndex = index;
 			}
 			index++;
 		}
-		
+
+		if ((myResourceType == null || Modifier.isAbstract(myResourceType.getModifiers())) && (theProvider instanceof IResourceProvider)) {
+			myResourceType = ((IResourceProvider) theProvider).getResourceType();
+		}
+		if (myResourceType == null) {
+			throw new ConfigurationException("Unable to determine resource type for method: " + theMethod);
+		}
+
+		myResourceName = theContext.getResourceDefinition(myResourceType).getName();
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 
 		if (resourceParameter == null) {
-			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with @" + ResourceParam.class.getSimpleName());
+			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
 	}

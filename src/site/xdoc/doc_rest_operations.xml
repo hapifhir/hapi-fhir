@@ -177,6 +177,24 @@
 				<code>http://fhir.example.com/Patient?identifier=system%7C00001</code>
 			</p>
 
+			<a name="raw_update_access"/>
+			<h4>Accessing The Raw Resource Payload</h4>
+			<p>
+				If you wish to have access to the raw resource payload as well as the parsed value
+				for any reason, you may also add parameters which have been annotated
+				with the <code>@ResourceParam</code> of type
+				<code>String</code> (to access the raw resource body) and/or
+				<code>EncodingEnum</code> (to determine which encoding was used) 
+			</p>
+			<p>
+				The following example shows how to use these additonal data elements.
+			</p>
+
+			<macro name="snippet">
+				<param name="id" value="updateRaw" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+
 			<a name="instance_delete" />
 		</section>
 
@@ -337,6 +355,13 @@
 				Example URL and HTTP header to perform a conditional create:
 				<br />
 				<code>http://fhir.example.com/Patient<br/>If-None-Exist: Patient?identifier=system%7C0001</code>
+			</p>
+			
+			<h4>Accessing The Raw Resource Payload</h4>
+			<p>
+				The create operation also supports access to the raw payload,
+				using the same semantics as raw payload access 
+				<a href="#raw_update_access">for the update operation</a>.
 			</p>
 			
 			<a name="type_search" />

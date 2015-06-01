@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.param.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -59,11 +61,16 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class ResourceParameter implements IParameter {
 
 	private boolean myBinary;
+	private Mode myMode;
 	private Class<? extends IBaseResource> myResourceType;
 
-	public ResourceParameter(Class<? extends IResource> theParameterType, Object theProvider) {
+	public ResourceParameter(Class<? extends IResource> theParameterType, Object theProvider, Mode theMode) {
+		Validate.notNull(theParameterType, "theParameterType can not be null");
+		Validate.notNull(theMode, "theMode can not be null");
+		
 		myResourceType = theParameterType;
 		myBinary = IBaseBinary.class.isAssignableFrom(theParameterType);
+		myMode = theMode;
 		
 		Class<? extends IBaseResource> providerResourceType = null;
 		if (theProvider instanceof IResourceProvider) {
@@ -76,6 +83,10 @@ public class ResourceParameter implements IParameter {
 
 	}
 
+	public Mode getMode() {
+		return myMode;
+	}
+	
 	public Class<? extends IBaseResource> getResourceType() {
 		return myResourceType;
 	}
@@ -93,9 +104,21 @@ public class ResourceParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+		switch (myMode) {
+		case BODY:
+			try {
+				return IOUtils.toString(createRequestReader(theRequest, theRequestContents));
+			} catch (IOException e) {
+				// Shouldn't happen since we're reading from a byte array
+				throw new InternalErrorException("Failed to load request");
+			}
+		case ENCODING:
+			return RestfulServerUtils.determineRequestEncoding(theRequest);
+		case RESOURCE:
+			break;
+		}
 		
 		if (myBinary) {
-			
 			FhirContext ctx = theRequest.getServer().getFhirContext();
 			String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			IBaseBinary binary = (IBaseBinary) ctx.getResourceDefinition("Binary").newInstance();
@@ -108,6 +131,29 @@ public class ResourceParameter implements IParameter {
 		IBaseResource retVal = loadResourceFromRequest(theRequest, theRequestContents, theMethodBinding, myResourceType);
 
 		return retVal;
+	}
+
+	static Reader createRequestReader(byte[] theRequestContents, Charset charset) {
+		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
+		return requestReader;
+	}
+
+	static Reader createRequestReader(Request theRequest, byte[] theRequestContents) {
+		return createRequestReader(theRequestContents, determineRequestCharset(theRequest));
+	}
+
+	static Charset determineRequestCharset(Request theRequest) {
+		String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
+
+		Charset charset = null;
+		if (isNotBlank(ct)) {
+			ContentType parsedCt = ContentType.parse(ct);
+			charset = parsedCt.getCharset();
+		}
+		if (charset == null) {
+			charset = Charset.forName("UTF-8");
+		}
+		return charset;
 	}
 
 	public static IBaseResource loadResourceFromRequest(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
@@ -175,27 +221,8 @@ public class ResourceParameter implements IParameter {
 		return retVal;
 	}
 
-	static Reader createRequestReader(byte[] theRequestContents, Charset charset) {
-		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
-		return requestReader;
-	}
-
-	static Reader createRequestReader(Request theRequest, byte[] theRequestContents) {
-		return createRequestReader(theRequestContents, determineRequestCharset(theRequest));
-	}
-
-	static Charset determineRequestCharset(Request theRequest) {
-		String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
-
-		Charset charset = null;
-		if (isNotBlank(ct)) {
-			ContentType parsedCt = ContentType.parse(ct);
-			charset = parsedCt.getCharset();
-		}
-		if (charset == null) {
-			charset = Charset.forName("UTF-8");
-		}
-		return charset;
+	public enum Mode{
+		BODY, ENCODING, RESOURCE
 	}
 
 }

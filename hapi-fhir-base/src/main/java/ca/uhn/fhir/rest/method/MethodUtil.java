@@ -73,6 +73,7 @@ import ca.uhn.fhir.rest.param.NumberAndListParam;
 import ca.uhn.fhir.rest.param.QuantityAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ResourceParameter;
+import ca.uhn.fhir.rest.param.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TransactionParameter;
@@ -408,10 +409,17 @@ public class MethodUtil {
 
 						param = new IncludeParameter((IncludeParam) nextAnnotation, instantiableCollectionType, specType);
 					} else if (nextAnnotation instanceof ResourceParam) {
-						if (!IResource.class.isAssignableFrom(parameterType)) {
+						Mode mode;
+						if (IBaseResource.class.isAssignableFrom(parameterType)) {
+							mode = Mode.RESOURCE;
+						} else if (String.class.equals(parameterType)) {
+							mode = ResourceParameter.Mode.BODY;
+						} else if (EncodingEnum.class.equals(parameterType)) {
+							mode = Mode.ENCODING;
+						} else {
 							throw new ConfigurationException("Method '" + theMethod.getName() + "' is annotated with @" + ResourceParam.class.getSimpleName() + " but has a type that is not an implemtation of " + IResource.class.getCanonicalName());
 						}
-						param = new ResourceParameter((Class<? extends IResource>) parameterType, theProvider);
+						param = new ResourceParameter((Class<? extends IResource>) parameterType, theProvider, mode);
 					} else if (nextAnnotation instanceof IdParam || nextAnnotation instanceof VersionIdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
