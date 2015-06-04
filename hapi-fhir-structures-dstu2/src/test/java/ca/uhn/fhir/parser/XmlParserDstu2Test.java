@@ -1053,6 +1053,7 @@ public class XmlParserDstu2Test {
 		assertEquals(2, parsed.getEntries().size());
 		assertEquals("http://foo?search", parsed.getEntries().get(0).getLinkSearch().getValue());
 
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", parsed.getEntries().get(0).getLinkAlternate().getValue());
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
 		assertEquals("Patient/347", p.getPatient().getReference().getValue());
 		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
@@ -1086,6 +1087,8 @@ public class XmlParserDstu2Test {
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
 		assertEquals(2, parsed.getEntry().size());
+		assertEquals("alternate", parsed.getEntry().get(0).getLink().get(0).getRelation());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", parsed.getEntry().get(0).getLink().get(0).getUrl());
 		assertEquals("http://foo?search", parsed.getEntry().get(0).getTransaction().getUrlElement().getValueAsString());
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
@@ -1212,6 +1215,41 @@ public class XmlParserDstu2Test {
 		
 		Diff d = new Diff(new StringReader(bundle), new StringReader(reEncoded));
 		assertTrue(d.toString(), d.identical());
+
+	}
+
+	@Test
+	public void testParseBundleOldStyleWithUnknownLinks() throws Exception {
+		//@formatter:off
+		String bundle = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+			"   <base value=\"http://foo/fhirBase1\"/>\n" + 
+			"   <total value=\"1\"/>\n" + 
+			"   <link>\n" + 
+			"      <relation value=\"foo\"/>\n" + 
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
+			"   </link>\n" + 
+			"   <entry>\n" + 
+			"   <link>\n" + 
+			"      <relation value=\"bar\"/>\n" + 
+			"      <url value=\"http://localhost:52788/Binary?_pretty=true\"/>\n" + 
+			"   </link>\n" + 
+			"      <resource>\n" + 
+			"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+			"            <id value=\"1\"/>\n" + 
+			"            <meta>\n" +
+			"               <versionId value=\"2\"/>\n" +
+			"               <lastUpdated value=\"2001-02-22T11:22:33-05:00\"/>\n" +
+			"            </meta>\n" + 
+			"            <birthDate value=\"2012-01-02\"/>\n" + 
+			"         </Patient>\n" + 
+			"      </resource>\n" + 
+			"   </entry>\n" + 
+			"</Bundle>";
+		//@formatter:on
+		
+		Bundle b = ourCtx.newXmlParser().parseBundle(bundle);
+		assertEquals(1, b.getEntries().size());
+		
 
 	}
 

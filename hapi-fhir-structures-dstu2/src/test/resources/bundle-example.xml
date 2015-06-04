@@ -16,6 +16,10 @@
     <url value="https://example.com/base/MedicationPrescription?patient=347&amp;_include=MedicationPrescription.medication"/>
   </link>
   <entry>
+  	<link>
+  		<relation value="alternate"/>
+  		<url value="http://example.com/base/MedicationPrescription/3123/_history/1"/>
+  	</link>
     <resource>
       <MedicationPrescription>
         <id value="3123"/>
