@@ -1,8 +1,11 @@
 package ca.uhn.fhir.model.primitive;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class XhtmlDtTest {
 
@@ -31,10 +34,9 @@ public class XhtmlDtTest {
 		XhtmlDt x = new XhtmlDt();
 		x.setValueAsString(div);
 
-		
 		XhtmlDt x2 = new XhtmlDt();
 		x2.setValue(x.getValue());
-		
+
 		String actual = x2.getValueAsString();
 
 		ourLog.info("Expected {}", div.replace("\r", "").replace("\n", "\\n"));
@@ -47,10 +49,10 @@ public class XhtmlDtTest {
 	@Test
 	public void testBasicCharacterEntity() {
 		String input = "amp &amp;";
-		
+
 		XhtmlDt x = new XhtmlDt();
 		x.setValueAsString(input);
-		
+
 		assertEquals("<div>amp &amp;</div>", x.getValueAsString());
 	}
 
@@ -62,24 +64,37 @@ public class XhtmlDtTest {
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>", x.getValueAsString());
 	}
 
-	
-	
 	@Test
 	public void testCharacterEntities() {
 		String input = "Sect: &sect; uuml: &uuml; &Uuml;";
-		
+
 		XhtmlDt x = new XhtmlDt();
 		x.setValueAsString(input);
 
 		// <div>Sect: § uuml: ü Ü</div>
 		// <div>Sect: &sect; uuml: &uuml; &Uuml;</div>
-		assertEquals("<div>"+input+"</div>", x.getValueAsString());
-		
+		assertEquals("<div>" + input + "</div>", x.getValueAsString());
+
 		XhtmlDt x2 = new XhtmlDt();
 		x2.setValue(x.getValue());
 		assertEquals("<div>Sect: § uuml: ü Ü</div>", x2.getValueAsString());
 
 	}
-	
+
+	/**
+	 * #175
+	 */
+	@Test
+	public void testCharacterEntityUnknown() {
+		String input = "Trade &AAAAA;";
+
+		XhtmlDt x = new XhtmlDt();
+		try {
+			x.setValueAsString(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertThat(e.toString(), containsString("AAAA"));
+		}
+	}
 
 }

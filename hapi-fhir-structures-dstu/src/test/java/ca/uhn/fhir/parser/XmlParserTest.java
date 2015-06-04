@@ -1719,6 +1719,24 @@ public class XmlParserTest {
 
 	}
 
+	/**
+	 * #175
+	 */
+//	@Test
+	public void testParseTextWithUnknownEntity() {
+		String msg = "<Patient xmlns=\"http://hl7.org/fhir\"><text><status value=\"generated\"/>"
+				+ "<div xmlns=\"http://www.w3.org/1999/xhtml\">Trade &trade;</div></text></Patient>";
+		Patient pt = ourCtx.newXmlParser().parseResource(Patient.class, msg);
+
+		ourLog.info(pt.getText().getDiv().getValueAsString());
+		assertThat(pt.getText().getDiv().getValueAsString(), containsString("Trade ™"));
+		
+		String enc = ourCtx.newXmlParser().encodeResourceToString(pt);
+		ourLog.info(enc);
+		assertThat(enc, containsString("Trade ™"));
+
+	}
+
 	@Test
 	public void testParseWithIncorrectResourceType() {
 		String input = "<Patient><foo><bar/></foo><name><family value=\"AAA\"/></name></Patient>";
