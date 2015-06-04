@@ -118,7 +118,7 @@ public class XmlParserTest {
 	}
 
 	
-//	@Test
+	@Test
 	public void testParseAndEncodeHugeValue() {
 		int len = 1000000;
 		byte[] bytes = new byte[len];
@@ -137,7 +137,7 @@ public class XmlParserTest {
 		
 		obs = ourCtx.newXmlParser().parseResource(Observation.class, str);
 		att = (AttachmentDt) obs.getValue();
-		assertEquals(bytes, att.getData().getValue());
+		assertArrayEquals(bytes, att.getData().getValue());
 	}
 	
 	

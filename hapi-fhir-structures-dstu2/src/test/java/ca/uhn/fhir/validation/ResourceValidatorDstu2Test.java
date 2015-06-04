@@ -66,7 +66,7 @@ public class ResourceValidatorDstu2Test {
 		ourLog.info(resultString);
 
 		assertEquals(2, result.getOperationOutcome().getIssue().size());
-		assertThat(resultString, StringContains.containsString("'2000-15-31'"));
+		assertThat(resultString, StringContains.containsString("2000-15-31"));
 	}
 
 	@SuppressWarnings("deprecation")

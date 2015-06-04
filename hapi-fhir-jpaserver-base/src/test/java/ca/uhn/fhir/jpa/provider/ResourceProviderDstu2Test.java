@@ -958,7 +958,7 @@ public class ResourceProviderDstu2Test {
 		}
 	}
 
-//	@Test
+	@Test
 	public void testValidateResourceHuge() throws IOException {
 
 		Patient patient = new Patient();

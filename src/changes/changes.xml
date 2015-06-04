@@ -58,6 +58,12 @@
 			<action type="add">
 				LoggingInterceptor for server now supports logging DSTU2 extended operations by name
 			</action>
+			<action type="fix">
+				Woodstox XML parser has a default setting to limit the maximum
+				length of an attribute to 512kb. This caused issues handling
+				large attachments, so this setting has been increased to 100Mb.
+				Thanks to Nikos Kyriakoulakos for reporting!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">
