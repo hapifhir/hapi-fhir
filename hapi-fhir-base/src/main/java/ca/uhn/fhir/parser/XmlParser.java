@@ -400,6 +400,8 @@ public class XmlParser extends BaseParser implements IParser {
 
 			writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
 
+			writeBundleResourceLink(theEventWriter, "alternate", nextEntry.getLinkAlternate());
+
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				theEventWriter.writeStartElement("resource");

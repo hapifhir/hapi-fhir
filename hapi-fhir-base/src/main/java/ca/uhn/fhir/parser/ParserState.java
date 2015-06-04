@@ -1054,6 +1054,8 @@ class ParserState<T> {
 				push(new PreResourceStateHapi(myEntry, myResourceType).setRequireResourceType(false));
 			} else if ("deleted".equals(theLocalPart)) {
 				push(new BundleEntryDeletedState(getPreResourceState(), myEntry));
+			} else if ("link".equals(theLocalPart)) {
+				push(new BundleLinkState(myEntry));
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
 			}

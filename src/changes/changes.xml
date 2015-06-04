@@ -55,6 +55,11 @@
 			<action type="add">
 				Web tester UI now supports _revinclude
 			</action>
+			<action type="fix" issue="178">
+				Support link elements in Bundle.entry when parsing in DSTU2 mode
+				using the old (non-resource) Bundle class. Thanks to GitHub user
+				@joedai for reporting!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">
