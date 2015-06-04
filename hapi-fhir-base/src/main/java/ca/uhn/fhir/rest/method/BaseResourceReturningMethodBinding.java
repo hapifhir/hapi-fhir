@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -45,8 +45,10 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
@@ -112,6 +114,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE;
 		} else if (IBundleProvider.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
+		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
+			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
 		} else {
 			throw new ConfigurationException("Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: "
 					+ theMethod.getDeclaringClass().getCanonicalName());
@@ -151,7 +155,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public abstract ReturnTypeEnum getReturnType();
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException {
+	public Object invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) {
 		IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
 
 		switch (getReturnType()) {
@@ -191,6 +195,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 			case BUNDLE_PROVIDER:
 				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
+			default:
+				break;
 			}
 			break;
 		}
@@ -213,6 +219,13 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				return resource;
 			case BUNDLE_PROVIDER:
 				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not supported in clients");
+			case BUNDLE_RESOURCE:
+				// TODO: we should support this
+				throw new IllegalStateException("Return type of " + IBundleProvider.class.getSimpleName() + " is not yet supported in clients");
+			case METHOD_OUTCOME:
+				MethodOutcome retVal = new MethodOutcome();
+				retVal.setOperationOutcome((BaseOperationOutcome) resource);
+				return retVal;
 			}
 			break;
 		}
@@ -224,7 +237,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	public abstract Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
@@ -351,7 +364,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 							return;
 						}
 					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode,
+					RestfulServerUtils.streamResponseAsResource(theServer, response, resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode,
 							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				}
 
@@ -395,7 +408,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 	}
 
 	public enum MethodReturnTypeEnum {
-		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, RESOURCE
+		BUNDLE, BUNDLE_PROVIDER, BUNDLE_RESOURCE, LIST_OF_RESOURCES, RESOURCE, METHOD_OUTCOME
 	}
 
 	public enum ReturnTypeEnum {

@@ -20,7 +20,15 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
@@ -32,14 +40,22 @@ public class RequestDetails {
 
 	private String myCompartmentName;
 	private String myCompleteUrl;
+	private String myFhirServerBase;
 	private IdDt myId;
+	private String myOperation;
 	private OtherOperationTypeEnum myOtherOperationType;
 	private Map<String, String[]> myParameters;
+	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
 	private RestfulOperationTypeEnum myResourceOperationType;
+	private boolean myRespondGzip;
+	private String mySecondaryOperation;
 	private RestfulServer myServer;
+	private HttpServletRequest myServletRequest;
+	private HttpServletResponse myServletResponse;
 	private RestfulOperationSystemEnum mySystemOperationType;
+	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 
 	public String getCompartmentName() {
 		return myCompartmentName;
@@ -49,8 +65,16 @@ public class RequestDetails {
 		return myCompleteUrl;
 	}
 
+	public String getFhirServerBase() {
+		return myFhirServerBase;
+	}
+
 	public IdDt getId() {
 		return myId;
+	}
+
+	public String getOperation() {
+		return myOperation;
 	}
 
 	public OtherOperationTypeEnum getOtherOperationType() {
@@ -59,6 +83,16 @@ public class RequestDetails {
 
 	public Map<String, String[]> getParameters() {
 		return myParameters;
+	}
+
+	/**
+	 * The part of the request URL that comes after the server base.
+	 * <p>
+	 * Will not contain a leading '/'
+	 * </p>
+	 */
+	public String getRequestPath() {
+		return myRequestPath;
 	}
 
 	public RequestTypeEnum getRequestType() {
@@ -73,12 +107,32 @@ public class RequestDetails {
 		return myResourceOperationType;
 	}
 
+	public String getSecondaryOperation() {
+		return mySecondaryOperation;
+	}
+
 	public RestfulServer getServer() {
 		return myServer;
 	}
 
+	public HttpServletRequest getServletRequest() {
+		return myServletRequest;
+	}
+
+	public HttpServletResponse getServletResponse() {
+		return myServletResponse;
+	}
+
 	public RestfulOperationSystemEnum getSystemOperationType() {
 		return mySystemOperationType;
+	}
+
+	public Map<String, List<String>> getUnqualifiedToQualifiedNames() {
+		return myUnqualifiedToQualifiedNames;
+	}
+
+	public boolean isRespondGzip() {
+		return myRespondGzip;
 	}
 
 	public void setCompartmentName(String theCompartmentName) {
@@ -89,8 +143,16 @@ public class RequestDetails {
 		myCompleteUrl = theCompleteUrl;
 	}
 
+	public void setFhirServerBase(String theFhirServerBase) {
+		myFhirServerBase = theFhirServerBase;
+	}
+
 	public void setId(IdDt theId) {
 		myId = theId;
+	}
+
+	public void setOperation(String theOperation) {
+		myOperation = theOperation;
 	}
 
 	public void setOtherOperationType(OtherOperationTypeEnum theOtherOperationType) {
@@ -99,6 +161,35 @@ public class RequestDetails {
 
 	public void setParameters(Map<String, String[]> theParams) {
 		myParameters = theParams;
+
+		for (String next : theParams.keySet()) {
+			for (int i = 0; i < next.length(); i++) {
+				char nextChar = next.charAt(i);
+				if (nextChar == ':' || nextChar == '.') {
+					if (myUnqualifiedToQualifiedNames == null) {
+						myUnqualifiedToQualifiedNames = new HashMap<String, List<String>>();
+					}
+					String unqualified = next.substring(0, i);
+					List<String> list = myUnqualifiedToQualifiedNames.get(unqualified);
+					if (list == null) {
+						list = new ArrayList<String>(4);
+						myUnqualifiedToQualifiedNames.put(unqualified, list);
+					}
+					list.add(next);
+					break;
+				}
+			}
+		}
+
+		if (myUnqualifiedToQualifiedNames == null) {
+			myUnqualifiedToQualifiedNames = Collections.emptyMap();
+		}
+
+	}
+
+	public void setRequestPath(String theRequestPath) {
+		assert theRequestPath.length() == 0 || theRequestPath.charAt(0) != '/';
+		myRequestPath = theRequestPath;
 	}
 
 	public void setRequestType(RequestTypeEnum theRequestType) {
@@ -113,12 +204,40 @@ public class RequestDetails {
 		myResourceOperationType = theResourceOperationType;
 	}
 
+	public void setRespondGzip(boolean theRespondGzip) {
+		myRespondGzip = theRespondGzip;
+	}
+
+	public void setSecondaryOperation(String theSecondaryOperation) {
+		mySecondaryOperation = theSecondaryOperation;
+	}
+
 	public void setServer(RestfulServer theServer) {
 		myServer = theServer;
 	}
 
+	public void setServletRequest(HttpServletRequest theRequest) {
+		myServletRequest = theRequest;
+	}
+
+	public void setServletResponse(HttpServletResponse theServletResponse) {
+		myServletResponse = theServletResponse;
+	}
+
 	public void setSystemOperationType(RestfulOperationSystemEnum theSystemOperationType) {
 		mySystemOperationType = theSystemOperationType;
+	}
+
+	public static RequestDetails withResourceAndParams(String theResourceName, RequestTypeEnum theRequestType, Set<String> theParamNames) {
+		RequestDetails retVal = new RequestDetails();
+		retVal.setResourceName(theResourceName);
+		retVal.setRequestType(theRequestType);
+		Map<String, String[]> paramNames = new HashMap<String, String[]>();
+		for (String next : theParamNames) {
+			paramNames.put(next, new String[0]);
+		}
+		retVal.setParameters(paramNames);
+		return retVal;
 	}
 
 }

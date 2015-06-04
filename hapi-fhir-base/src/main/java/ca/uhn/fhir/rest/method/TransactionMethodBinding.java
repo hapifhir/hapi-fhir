@@ -97,7 +97,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType() != RequestTypeEnum.POST) {
 			return false;
 		}

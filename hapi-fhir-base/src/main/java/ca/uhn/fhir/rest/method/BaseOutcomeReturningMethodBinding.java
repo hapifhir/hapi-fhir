@@ -67,7 +67,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 	}
 
-	private void addLocationHeader(Request theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation) {
+	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation) {
 		StringBuilder b = new StringBuilder();
 		b.append(theRequest.getFhirServerBase());
 		b.append('/');
@@ -84,7 +84,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		theResponse.addHeader(headerLocation, b.toString());
 	}
 
-	protected abstract void addParametersForServerRequest(Request theRequest, Object[] theParams);
+	protected abstract void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams);
 
 	/**
 	 * Subclasses may override to allow a void method return type, which is allowable for some methods (e.g. delete)
@@ -101,7 +101,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected abstract String getMatchingOperation();
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		Set<RequestTypeEnum> allowableRequestTypes = provideAllowableRequestTypes();
 		RequestTypeEnum requestType = theRequest.getRequestType();
 		if (!allowableRequestTypes.contains(requestType)) {
@@ -120,8 +120,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	}
 
 	@Override
-	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException,
-			BaseServerResponseException {
+	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 		switch (theResponseStatusCode) {
 		case Constants.STATUS_HTTP_200_OK:
 		case Constants.STATUS_HTTP_201_CREATED:
@@ -138,7 +137,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		byte[] requestContents = loadRequestContents(theRequest);
 //		if (requestContainsResource()) {
 //			requestContents = parseIncomingServerResource(theRequest);
@@ -243,7 +242,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		// getMethod().in
 	}
 
-	private void addContentLocationHeaders(Request theRequest, HttpServletResponse servletResponse, MethodOutcome response) {
+	private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response) {
 		if (response != null && response.getId() != null) {
 			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_LOCATION);
 			addLocationHeader(theRequest, servletResponse, response, Constants.HEADER_CONTENT_LOCATION);
@@ -256,7 +255,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 	protected abstract Set<RequestTypeEnum> provideAllowableRequestTypes();
 
-	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, Request theRequest)
+	protected void streamOperationOutcome(BaseServerResponseException theE, RestfulServer theServer, EncodingEnum theEncodingNotNull, HttpServletResponse theResponse, RequestDetails theRequest)
 			throws IOException {
 		theResponse.setStatus(theE.getStatusCode());
 

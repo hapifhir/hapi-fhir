@@ -1059,6 +1059,17 @@
 				operation tests whether a resource passes business validation, and would be
 				acceptable for saving to a server (e.g. by a create or update method).
 			</p>
+			<p class="doc_info_bubble">
+				<b>Note on FHIR versions:</b>
+				In FHIR DSTU1 the validate operation used a URL resembling <code>http://example.com/Patient/_validate</code>
+				with a resource in the HTTP POST body. In FHIR DSTU2, validate has been changed to use the
+				<a href="#extended_operations">extended operation</a> mechanism. It now uses a URL
+				resembling <code>http://example.com/Patient/$validate</code> and takes a 
+				Parameters resource as input in the method body.<br/><br/>
+				The mechanism described below may be used for both DSTU1 and DSTU2+ servers, and HAPI
+				will automatically use the correct form depending on what FHIR version the
+				server is configured to use.
+			</p>
 			<p>
 				Validate methods must be annotated with the
 				<a href="./apidocs/ca/uhn/fhir/rest/annotation/Validate.html">@Validate</a>
@@ -1108,10 +1119,19 @@
 			</macro>
 
 			<p>
+				In the example above, only the <code>@ResourceParam</code> parameter is technically required, but
+				in DSTU2 you are encouraged to also add the following parameters: 
+			</p>
+			<ul>
+				<li><b>@Validate.Mode ValidationModeEnum mode</b> - This is the validation mode (see the FHIR specification for information on this)</li>
+				<li><b>@Validate.Profile String profile</b> - This is the profile to validate against (see the FHIR specification for more information on this)</li>
+			</ul>
+			
+			<p>
 				Example URL to invoke this method (this would be invoked using an HTTP POST,
-				with the resource in the POST body):
+				with a Parameters resource in the POST body):
 				<br />
-				<code>http://fhir.example.com/Patient/_validate</code>
+				<code>http://fhir.example.com/Patient/$validate</code>
 			</p>
 
 			<a name="system_conformance" />
@@ -1508,6 +1528,7 @@
 				<code>http://fhir.example.com/Patient/123/Condition</code>
 			</p>
 			
+			<a name="extended_operations"/>
 		</section>
 
 		<section name="Extended Operations">

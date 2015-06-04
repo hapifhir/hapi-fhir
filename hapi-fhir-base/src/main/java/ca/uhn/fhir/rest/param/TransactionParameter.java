@@ -40,7 +40,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
-import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -98,7 +98,7 @@ public class TransactionParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		// TODO: don't use a default encoding, just fail!
 		EncodingEnum encoding = RestfulServerUtils.determineRequestEncoding(theRequest);

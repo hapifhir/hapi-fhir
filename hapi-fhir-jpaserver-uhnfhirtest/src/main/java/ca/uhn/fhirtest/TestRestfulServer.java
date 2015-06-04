@@ -135,7 +135,7 @@ public class TestRestfulServer extends RestfulServer {
 		registerInterceptor(new ResponseHighlighterInterceptor());
 		
 		/*
-		 * Default to XML and pretty printing
+		 * Default to JSON with pretty printing
 		 */
 		setDefaultPrettyPrint(true);
 		setDefaultResponseEncoding(EncodingEnum.JSON);

@@ -80,7 +80,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
-	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
+	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		if (myIdParamIndex != null) {
 			theParams[myIdParamIndex] = theRequest.getId();
 		}

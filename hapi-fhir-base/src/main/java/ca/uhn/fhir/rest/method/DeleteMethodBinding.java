@@ -143,7 +143,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
+	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		theParams[myIdParameterIndex] = theRequest.getId();
 	}
 

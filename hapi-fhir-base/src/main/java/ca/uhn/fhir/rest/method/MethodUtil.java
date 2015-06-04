@@ -48,6 +48,7 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -64,9 +65,12 @@ import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.annotation.Sort;
 import ca.uhn.fhir.rest.annotation.TagListParam;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.method.OperationParameter.IConverter;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
@@ -436,7 +440,37 @@ public class MethodUtil {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
-						param = new OperationParameter(op.name(), (OperationParam) nextAnnotation);
+						param = new OperationParameter(op.name(), ((OperationParam) nextAnnotation).name());
+					} else if (nextAnnotation instanceof Validate.Mode) {
+						if (parameterType.equals(ValidationModeEnum.class) == false) {
+							throw new ConfigurationException("Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
+						}
+						param = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE).setConverter(new IConverter() {
+							@Override
+							public Object outgoingClient(Object theObject) {
+								return new StringDt(((ValidationModeEnum)theObject).name().toLowerCase());
+							}
+							
+							@Override
+							public Object incomingServer(Object theObject) {
+								return ValidationModeEnum.valueOf(theObject.toString().toUpperCase());
+							}
+						});
+					} else if (nextAnnotation instanceof Validate.Profile) {
+						if (parameterType.equals(String.class) == false) {
+							throw new ConfigurationException("Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
+						}
+						param = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE).setConverter(new IConverter() {
+							@Override
+							public Object outgoingClient(Object theObject) {
+								return new StringDt(theObject.toString());
+							}
+							
+							@Override
+							public Object incomingServer(Object theObject) {
+								return theObject.toString();
+							}
+						});
 					} else {
 						continue;
 					}

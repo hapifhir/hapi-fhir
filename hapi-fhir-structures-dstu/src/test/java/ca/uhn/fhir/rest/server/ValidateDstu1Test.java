@@ -35,11 +35,11 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ValidateTest {
+public class ValidateDstu1Test {
 	private static CloseableHttpClient ourClient;
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu1Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 

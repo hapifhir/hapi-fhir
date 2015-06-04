@@ -27,7 +27,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -37,17 +46,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -55,11 +60,9 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
-import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
@@ -426,7 +429,7 @@ public class RestfulServer extends HttpServlet {
 		return myServerVersion;
 	}
 
-	private void handlePagingRequest(Request theRequest, HttpServletResponse theResponse, String thePagingAction) throws IOException {
+	private void handlePagingRequest(RequestDetails theRequest, HttpServletResponse theResponse, String thePagingAction) throws IOException {
 		IBundleProvider resultList = getPagingProvider().retrieveResultList(thePagingAction);
 		if (resultList == null) {
 			ourLog.info("Client requested unknown paging ID[{}]", thePagingAction);
@@ -496,7 +499,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, (IResource) resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false);
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false);
 		}
 	}
 
@@ -511,7 +514,7 @@ public class RestfulServer extends HttpServlet {
 
 		String fhirServerBase = null;
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
-		Request requestDetails = new Request();
+		RequestDetails requestDetails = new RequestDetails();
 		requestDetails.setServer(this);
 
 		try {
@@ -816,6 +819,7 @@ public class RestfulServer extends HttpServlet {
 	 *             (which extends {@link ServletException}), as this is a flag to the servlet container that the servlet
 	 *             is not usable.
 	 */
+	@SuppressWarnings("unused")
 	protected void initialize() throws ServletException {
 		// nothing by default
 	}

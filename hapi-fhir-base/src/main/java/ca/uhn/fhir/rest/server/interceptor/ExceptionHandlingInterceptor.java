@@ -35,7 +35,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -127,7 +126,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		}
 
 		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
-		String fhirServerBase = ((Request) theRequestDetails).getFhirServerBase();
+		String fhirServerBase = theRequestDetails.getFhirServerBase();
 		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser,
 				NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase, false);
 

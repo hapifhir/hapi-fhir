@@ -38,6 +38,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -110,7 +111,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return parser;
 	}
 
-	protected IParser createAppropriateParserForParsingServerRequest(Request theRequest) {
+	protected IParser createAppropriateParserForParsingServerRequest(RequestDetails theRequest) {
 		String contentTypeHeader = theRequest.getServletRequest().getHeader("content-type");
 		EncodingEnum encoding;
 		if (isBlank(contentTypeHeader)) {
@@ -131,7 +132,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return parser;
 	}
 
-	protected Object[] createParametersForServerRequest(Request theRequest, byte[] theRequestContents) {
+	protected Object[] createParametersForServerRequest(RequestDetails theRequest, byte[] theRequestContents) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
@@ -241,11 +242,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract RestfulOperationSystemEnum getSystemOperationType();
 
-	public abstract boolean incomingServerRequestMatchesMethod(Request theRequest);
+	public abstract boolean incomingServerRequestMatchesMethod(RequestDetails theRequest);
 
 	public abstract BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException;
 
-	public abstract void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException;
+	public abstract void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 
 	protected Object invokeServerMethod(Object[] theMethodParams) {
 		try {
@@ -262,7 +263,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 	}
 
-	protected byte[] loadRequestContents(Request theRequest) throws IOException {
+	protected byte[] loadRequestContents(RequestDetails theRequest) throws IOException {
 		byte[] requestContents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
 		return requestContents;
 	}
@@ -305,6 +306,30 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myParameters = theParameters;
 	}
 	
+	protected IBundleProvider toResourceList(Object response) throws InternalErrorException {
+		if (response == null) {
+			return BundleProviders.newEmptyList();
+		} else if (response instanceof IBundleProvider) {
+			return (IBundleProvider) response;
+		} else if (response instanceof IResource) {
+			return BundleProviders.newList((IResource) response);
+		} else if (response instanceof Collection) {
+			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
+			for (Object next : ((Collection<?>) response)) {
+				retVal.add((IBaseResource) next);
+			}
+			return BundleProviders.newList(retVal);
+		} else if (response instanceof MethodOutcome) {
+			IBaseResource retVal = ((MethodOutcome) response).getOperationOutcome();
+			if (retVal == null) {
+				retVal = getContext().getResourceDefinition("OperationOutcome").newInstance();
+			}
+			return BundleProviders.newList(retVal);
+		} else {
+			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static BaseMethodBinding<?> bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);
@@ -438,7 +463,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else if (history != null) {
 			return new HistoryMethodBinding(theMethod, theContext, theProvider);
 		} else if (validate != null) {
-			return new ValidateMethodBinding(theMethod, theContext, theProvider);
+			if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
+				return new ValidateMethodBindingDstu1(theMethod, theContext, theProvider);
+			} else {
+				return new ValidateMethodBindingDstu2(returnType, returnTypeFromRp, theMethod, theContext, theProvider, validate);
+			}
 		} else if (getTags != null) {
 			return new GetTagsMethodBinding(theMethod, theContext, theProvider, getTags);
 		} else if (addTags != null) {
@@ -489,24 +518,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return null;
 		}
 		return theType.getCanonicalName();
-	}
-
-	protected static IBundleProvider toResourceList(Object response) throws InternalErrorException {
-		if (response == null) {
-			return BundleProviders.newEmptyList();
-		} else if (response instanceof IBundleProvider) {
-			return (IBundleProvider) response;
-		} else if (response instanceof IResource) {
-			return BundleProviders.newList((IResource) response);
-		} else if (response instanceof Collection) {
-			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-			for (Object next : ((Collection<?>) response)) {
-				retVal.add((IBaseResource) next);
-			}
-			return BundleProviders.newList(retVal);
-		} else {
-			throw new InternalErrorException("Unexpected return type: " + response.getClass().getCanonicalName());
-		}
 	}
 
 	private static boolean verifyIsValidResourceReturnType(Class<?> theReturnType) {

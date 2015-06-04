@@ -54,7 +54,7 @@ class SinceParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String[] sinceParams = theRequest.getParameters().remove(Constants.PARAM_SINCE);
 		if (sinceParams != null) {
 			if (sinceParams.length > 0) {

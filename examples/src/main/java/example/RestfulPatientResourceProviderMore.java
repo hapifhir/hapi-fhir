@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -836,7 +837,9 @@ public abstract MethodOutcome updateSomePatient(@IdParam IdDt theId, @ResourcePa
 
 //START SNIPPET: validate
 @Validate
-public MethodOutcome validatePatient(@ResourceParam Patient thePatient) {
+public MethodOutcome validatePatient(@ResourceParam Patient thePatient, 
+                                     @Validate.Mode ValidationModeEnum theMode,
+                                     @Validate.Profile String theProfile) {
 
   // Actually do our validation: The UnprocessableEntityException
   // results in an HTTP 422, which is appropriate for business rule failure

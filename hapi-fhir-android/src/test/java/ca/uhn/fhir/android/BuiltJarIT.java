@@ -66,6 +66,16 @@ public class BuiltJarIT {
 		}
 
 		for (File file : files) {
+			if (file.getName().endsWith("sources.jar")) {
+				continue;
+			}
+			if (file.getName().endsWith("javadoc.jar")) {
+				continue;
+			}
+			if (file.getName().contains("original.jar")) {
+				continue;
+			}
+			
 			ourLog.info("Testing file: {}", file);
 
 			ZipFile zip = new ZipFile(file);

@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.rest.method.RequestDetails;
+import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 
 /**
@@ -52,8 +54,12 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * <td>The resource ID associated with this request, or the resource name if the request applies to a type but not an instance, or "" otherwise</td>
  * </tr>
  * <tr>
+ * <td>${operationName}</td>
+ * <td>If the request is an extended operation (e.g. "$validate") this value will be the operation name, or "" otherwise</td>
+ * </tr>
+ * <tr>
  * <td>${operationType}</td>
- * <td>A code indicating the operation type for this request, e.g. "read", "history-instance", etc.)</td>
+ * <td>A code indicating the operation type for this request, e.g. "read", "history-instance", "extended-operation-instance", etc.)</td>
  * </tr>
  * <tr>
  * <td>${remoteAddr}</td>
@@ -67,6 +73,10 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
  * <tr>
  * <td>${requestParameters}</td>
  * <td>The HTTP request parameters (or "")</td>
+ * </tr>
+ * <tr>
+ * <td>${responseEncodingNoDefault}</td>
+ * <td>The encoding format requested by the client via the _format parameter or the Accept header. Value will be "json" or "xml", or "" if the client did not explicitly request a format</td>
  * </tr>
  * <tr>
  * <td>${servletPath}</td>
@@ -125,6 +135,11 @@ public class LoggingInterceptor extends InterceptorAdapter {
 
 		@Override
 		public String lookup(String theKey) {
+
+			/*
+			 * TODO: this method could be made more efficient through some sort of lookup map
+			 */
+
 			if ("operationType".equals(theKey)) {
 				if (myRequestDetails.getResourceOperationType() != null) {
 					return myRequestDetails.getResourceOperationType().getCode();
@@ -136,6 +151,19 @@ public class LoggingInterceptor extends InterceptorAdapter {
 					return myRequestDetails.getOtherOperationType().getCode();
 				}
 				return "";
+			} else if ("operationName".equals(theKey)) {
+				if (myRequestDetails.getOtherOperationType() != null) {
+					switch (myRequestDetails.getOtherOperationType()) {
+					case EXTENDED_OPERATION_INSTANCE:
+					case EXTENDED_OPERATION_SERVER:
+					case EXTENDED_OPERATION_TYPE:
+						return myRequestDetails.getOperation();
+					default:
+						return "";
+					}
+				} else {
+					return "";
+				}
 			} else if ("id".equals(theKey)) {
 				if (myRequestDetails.getId() != null) {
 					return myRequestDetails.getId().getValue();
@@ -175,7 +203,15 @@ public class LoggingInterceptor extends InterceptorAdapter {
 				return StringUtils.defaultString(val);
 			} else if (theKey.startsWith("remoteAddr")) {
 				return StringUtils.defaultString(myRequest.getRemoteAddr());
+			} else if (theKey.equals("responseEncodingNoDefault")) {
+				EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingNoDefault(myRequest);
+				if (encoding != null) {
+					return encoding.name();
+				} else {
+					return "";
+				}
 			}
+
 			return "!VAL!";
 		}
 	}

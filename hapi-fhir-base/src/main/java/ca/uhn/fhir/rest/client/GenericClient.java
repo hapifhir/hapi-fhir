@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -116,7 +117,7 @@ import ca.uhn.fhir.rest.method.ReadMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
-import ca.uhn.fhir.rest.method.ValidateMethodBinding;
+import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -507,7 +508,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public MethodOutcome validate(IResource theResource) {
-		BaseHttpClientInvocation invocation = ValidateMethodBinding.createValidateInvocation(theResource, null, myContext);
+		BaseHttpClientInvocation invocation = ValidateMethodBindingDstu1.createValidateInvocation(theResource, null, myContext);
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}

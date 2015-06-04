@@ -65,7 +65,7 @@ public class SortParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		if (!theRequest.getParameters().containsKey(Constants.PARAM_SORT)) {
 			if (!theRequest.getParameters().containsKey(Constants.PARAM_SORT_ASC)) {
 				if (!theRequest.getParameters().containsKey(Constants.PARAM_SORT_DESC)) {

@@ -39,7 +39,7 @@ class NullParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		// nothing
 		return null;
 	}

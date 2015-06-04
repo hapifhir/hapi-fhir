@@ -59,23 +59,28 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final Integer myIdParamIndex;
 	private final String myName;
 	private final ReturnTypeEnum myReturnType;
+	private final OtherOperationTypeEnum myOtherOperatiopnType;
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 			Operation theAnnotation) {
+		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type());
+	}
+
+	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName,
+			Class<? extends IBaseResource> theOperationType) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
-		myHttpGetPermitted = theAnnotation.idempotent();
+		myHttpGetPermitted = theIdempotent;
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
 		
-		String name = theAnnotation.name();
-		if (isBlank(name)) {
+		if (isBlank(theOperationName)) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
 					+ " but this annotation has no name defined");
 		}
-		if (name.startsWith("$") == false) {
-			name = "$" + name;
+		if (theOperationName.startsWith("$") == false) {
+			theOperationName = "$" + theOperationName;
 		}
-		myName = name;
+		myName = theOperationName;
 		
 		if (theContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU1)) {
 			throw new ConfigurationException("@" + Operation.class.getSimpleName() + " methods are not supported on servers for FHIR version " + theContext.getVersion().getVersion().name());
@@ -84,8 +89,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theReturnTypeFromRp != null) {
 			setResourceName(theContext.getResourceDefinition(theReturnTypeFromRp).getName());
 		} else {
-			if (Modifier.isAbstract(theAnnotation.type().getModifiers()) == false) {
-				setResourceName(theContext.getResourceDefinition(theAnnotation.type()).getName());
+			if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+				setResourceName(theContext.getResourceDefinition(theOperationType).getName());
 			} else {
 				setResourceName(null);
 			}
@@ -102,6 +107,18 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myReturnType = ReturnTypeEnum.RESOURCE;
 		}
 		
+		if (getResourceName() == null) {
+			myOtherOperatiopnType = OtherOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+		} else if (myIdParamIndex == null) {
+			myOtherOperatiopnType = OtherOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+		} else {
+			myOtherOperatiopnType = OtherOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+		}
+	}
+
+	@Override
+	public OtherOperationTypeEnum getOtherOperationType() {
+		return myOtherOperatiopnType;
 	}
 
 	@Override
@@ -125,7 +142,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (getResourceName() == null) {
 			if (isNotBlank(theRequest.getResourceName())) {
 				return false;

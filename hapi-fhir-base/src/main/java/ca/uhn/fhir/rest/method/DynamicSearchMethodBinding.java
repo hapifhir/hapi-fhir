@@ -74,7 +74,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 		List<IParameter> retVal = new ArrayList<IParameter>(super.getParameters());
 		
 		for (RuntimeSearchParam next : mySearchParameters) {
-			
+			// TODO: what is this?
 		}
 		
 		return retVal;
@@ -108,7 +108,7 @@ public class DynamicSearchMethodBinding extends BaseResourceReturningMethodBindi
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DynamicSearchMethodBinding.class);
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
 			ourLog.trace("Method {} doesn't match because resource name {} != {}", getMethod().getName(), theRequest.getResourceName(), getResourceName());
 			return false;

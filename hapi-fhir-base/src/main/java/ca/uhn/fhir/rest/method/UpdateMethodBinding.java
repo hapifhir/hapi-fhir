@@ -59,7 +59,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	}
 
 	@Override
-	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
+	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		/*
 		 * We are being a bit lenient here, since technically the client is supposed to include the version in the
 		 * Content-Location header, but we allow it in the PUT URL as well..
@@ -122,7 +122,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	}
 
 	/*
-	 * @Override public boolean incomingServerRequestMatchesMethod(Request theRequest) { if
+	 * @Override public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) { if
 	 * (super.incomingServerRequestMatchesMethod(theRequest)) { if (myVersionIdParameterIndex != null) { if
 	 * (theRequest.getVersionId() == null) { return false; } } else { if (theRequest.getVersionId() != null) { return
 	 * false; } } return true; } else { return false; } }

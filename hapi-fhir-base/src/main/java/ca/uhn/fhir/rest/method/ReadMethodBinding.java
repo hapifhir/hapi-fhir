@@ -110,7 +110,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
 			return false;
 		}
@@ -186,7 +186,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		case RESOURCE:
 			return resource;
 		case BUNDLE_PROVIDER:
-			return new SimpleBundleProvider((IResource) resource);
+			return new SimpleBundleProvider(resource);
 		}
 
 		throw new IllegalStateException("" + getMethodReturnType()); // should not happen
@@ -203,7 +203,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		IBundleProvider retVal = toResourceList(response);
 
 		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {
-			String ifNoneMatch = ((Request)theRequest).getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
+			String ifNoneMatch = theRequest.getServletRequest().getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
 				List<IBaseResource> responseResources = retVal.getResources(0, 1);
 				IBaseResource responseResource = responseResources.get(0);

@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -66,7 +67,7 @@ public class DynamicSearchParameter implements IParameter {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		SearchParameterMap retVal = new SearchParameterMap();
 
 		for (String next : theRequest.getParameters().keySet()) {
@@ -132,6 +133,11 @@ public class DynamicSearchParameter implements IParameter {
 						TokenOrListParam tokenOrListParam = new TokenOrListParam();
 						tokenOrListParam.setValuesAsQueryTokens(paramList);
 						retVal.add(next, tokenOrListParam);
+						break;
+					case URI:
+						UriOrListParam uriOrListParam = new UriOrListParam();
+						uriOrListParam.setValuesAsQueryTokens(paramList);
+						retVal.add(next, uriOrListParam);
 						break;
 					}
 				}

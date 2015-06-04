@@ -230,8 +230,8 @@
 					<configuration>
 						<source>1.6</source>
 						<target>1.6</target>
-						<compilerId>javac-with-errorprone</compilerId>
-						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<!-- <compilerId>javac-with-errorprone</compilerId>
+						<forceJavacCompilerUse>true</forceJavacCompilerUse> -->
 					</configuration>
 					<dependencies>
 						<dependency>

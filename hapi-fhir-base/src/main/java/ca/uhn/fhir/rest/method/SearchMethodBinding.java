@@ -148,7 +148,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!theRequest.getResourceName().equals(getResourceName())) {
 			ourLog.trace("Method {} doesn't match because resource name {} != {}", getMethod().getName(), theRequest.getResourceName(), getResourceName());
 			return false;

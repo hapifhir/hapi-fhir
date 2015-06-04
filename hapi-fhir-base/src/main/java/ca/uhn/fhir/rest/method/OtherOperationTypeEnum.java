@@ -30,8 +30,23 @@ public enum OtherOperationTypeEnum {
 	
 	GET_TAGS("get-tags"), 
 	
-	GET_PAGE("get-page");
-	
+	GET_PAGE("get-page"),
+
+	/**
+	 * E.g. $everything, $validate, etc.
+	 */
+	EXTENDED_OPERATION_SERVER("extended-operation-server"),
+
+	/**
+	 * E.g. $everything, $validate, etc.
+	 */
+	EXTENDED_OPERATION_TYPE("extended-operation-type"),
+
+	/**
+	 * E.g. $everything, $validate, etc.
+	 */
+	EXTENDED_OPERATION_INSTANCE("extended-operation-instance");
+
 	private String myCode;
 
 	OtherOperationTypeEnum(String theName) {

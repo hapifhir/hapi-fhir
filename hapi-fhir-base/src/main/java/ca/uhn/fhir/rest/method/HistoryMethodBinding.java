@@ -114,7 +114,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	// ObjectUtils.equals is replaced by a JDK7 method..
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			return false;
 		}

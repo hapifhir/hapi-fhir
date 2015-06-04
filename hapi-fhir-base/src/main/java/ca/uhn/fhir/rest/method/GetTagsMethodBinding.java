@@ -82,7 +82,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+	public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 		if (theResponseStatusCode == Constants.STATUS_HTTP_200_OK) {
 			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theResponseStatusCode);
 			TagList retVal = parser.parseTagList(theResponseReader);
@@ -148,7 +148,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public void invokeServer(RestfulServer theServer, Request theRequest) throws BaseServerResponseException, IOException {
+	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		Object[] params = createParametersForServerRequest(theRequest, null);
 
 		if (myIdParamIndex != null) {
@@ -188,7 +188,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public boolean incomingServerRequestMatchesMethod(Request theRequest) {
+	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (theRequest.getRequestType()!=RequestTypeEnum.GET) {
 			return false;
 		}

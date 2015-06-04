@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.method.Request;
+import ca.uhn.fhir.rest.method.RequestDetails;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -44,7 +44,7 @@ public class ResourceBinding {
 		this.methods = methods;
 	}
 
-	public BaseMethodBinding<?> getMethod(Request theRequest) throws Exception {
+	public BaseMethodBinding<?> getMethod(RequestDetails theRequest) {
 		if (null == methods) {
 			ourLog.warn("No methods exist for resource: {}", resourceName);
 			return null;

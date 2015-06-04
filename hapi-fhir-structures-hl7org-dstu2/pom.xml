@@ -191,15 +191,34 @@
 
 	</dependencies>
 
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<show>public</show>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>${maven_license_plugin_version}</version>
 				<configuration>
 					<!-- Don't add UHN licenses to RI structures -->
 					<skipUpdateLicense>true</skipUpdateLicense>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+					<verbose>true</verbose>
 				</configuration>
 			</plugin>
 		</plugins>

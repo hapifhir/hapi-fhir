@@ -41,43 +41,25 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.ResourceParameter;
-import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
 class OperationParameter implements IParameter {
 
-	private final String myName;
-	private Class<?> myParameterType;
+	private IConverter myConverter;
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
+	private final String myName;
 	private final String myOperationName;
+	private Class<?> myParameterType;
 
-	OperationParameter(String theOperationName, OperationParam theAnnotation) {
+	OperationParameter(String theOperationName, String theParameterName) {
 		myOperationName = theOperationName;
-		myName = theAnnotation.name();
-	}
-
-	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
-			throws InternalErrorException {
-		assert theTargetResource != null;
-		if (theSourceClientArgument == null) {
-			return;
-		}
-
-		RuntimeResourceDefinition def = theContext.getResourceDefinition(theTargetResource);
-
-		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
-
-		addClientParameter(theContext, theSourceClientArgument, theTargetResource, paramChild, paramChildElem);
+		myName = theParameterName;
 	}
 
 	private void addClientParameter(FhirContext theContext, Object theSourceClientArgument, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
@@ -96,7 +78,7 @@ class OperationParameter implements IParameter {
 			throw new IllegalArgumentException("Don't know how to handle value of type " + theSourceClientArgument.getClass() + " for paramater " + myName);
 		}
 	}
-
+	
 	private IBase createParameterRepetition(FhirContext theContext, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
@@ -110,9 +92,43 @@ class OperationParameter implements IParameter {
 		return parameter;
 	}
 
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		myParameterType = theParameterType;
+		if (theInnerCollectionType != null) {
+			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, myName);
+		}
+	}
+
+	public OperationParameter setConverter(IConverter theConverter) {
+		myConverter = theConverter;
+		return this;
+	}
+
+	@Override
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
+			throws InternalErrorException {
+		assert theTargetResource != null;
+		Object sourceClientArgument = theSourceClientArgument;
+		if (sourceClientArgument == null) {
+			return;
+		}
+
+		if (myConverter != null) {
+			sourceClientArgument = myConverter.outgoingClient(sourceClientArgument);
+		}
+		
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theTargetResource);
+
+		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+
+		addClientParameter(theContext, sourceClientArgument, theTargetResource, paramChild, paramChildElem);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		List<Object> matchingParamValues = new ArrayList<Object>();
 
 		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
@@ -199,9 +215,12 @@ class OperationParameter implements IParameter {
 	}
 
 	private void tryToAddValues(List<IBase> theParamValues, List<Object> theMatchingParamValues) {
-		for (IBase nextValue : theParamValues) {
+		for (Object nextValue : theParamValues) {
 			if (nextValue == null) {
 				continue;
+			}
+			if (myConverter != null) {
+				nextValue = myConverter.incomingServer(nextValue);
 			}
 			if (!myParameterType.isAssignableFrom(nextValue.getClass())) {
 				throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type "
@@ -211,12 +230,12 @@ class OperationParameter implements IParameter {
 		}
 	}
 
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		myParameterType = theParameterType;
-		if (theInnerCollectionType != null) {
-			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, myName);
-		}
-	}
+	public interface IConverter {
+		
+		Object incomingServer(Object theObject);
 
+		Object outgoingClient(Object theObject);
+
+	}
+	
 }

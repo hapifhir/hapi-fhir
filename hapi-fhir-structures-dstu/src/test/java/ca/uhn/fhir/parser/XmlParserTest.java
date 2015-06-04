@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.dstu.composite.AddressDt;
+import ca.uhn.fhir.model.dstu.composite.AttachmentDt;
 import ca.uhn.fhir.model.dstu.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
@@ -116,6 +117,30 @@ public class XmlParserTest {
 		assertEquals("OrgName", ((MyOrganization) parse.getSomeOrganization().getResource()).getName().getValue());
 	}
 
+	
+//	@Test
+	public void testParseAndEncodeHugeValue() {
+		int len = 1000000;
+		byte[] bytes = new byte[len];
+		for (int i = 0; i < len; i++) {
+			bytes[i] = (byte) (Math.random() * Byte.MAX_VALUE);
+		}
+		
+		AttachmentDt att = new AttachmentDt();
+		att.setData(bytes);
+		
+		Observation obs = new Observation();
+		obs.setValue(att);
+		
+		String str = ourCtx.newXmlParser().encodeResourceToString(obs);
+		assertThat(str.length(), Matchers.greaterThan(len));
+		
+		obs = ourCtx.newXmlParser().parseResource(Observation.class, str);
+		att = (AttachmentDt) obs.getValue();
+		assertEquals(bytes, att.getData().getValue());
+	}
+	
+	
 	/**
 	 * Test for #82 - Not yet enabled because the test won't pass
 	 */

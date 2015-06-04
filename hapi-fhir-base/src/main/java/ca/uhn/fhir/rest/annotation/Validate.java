@@ -26,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
 /**
@@ -35,6 +36,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
  * <p>
  * Validate is used to accept a resource, and test whether it would be acceptable for
  * storing (e.g. using an update or create method)  
+ * </p>
+ * <p>
+ * <b>FHIR Version Note:</b> The validate operation was defined as a type operation in DSTU1
+ * using a URL syntax like <code>http://example.com/Patient/_validate</code>. In DSTU2, validation
+ * has been switched to being an extended operation using a URL syntax like 
+ * <code>http://example.com/Patient/$validate</code>, with a n 
  * </p>
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -50,4 +57,24 @@ public @interface Validate {
 	// NB: Read, Search (maybe others) share this annotation, so update the javadocs everywhere
 	Class<? extends IResource> type() default IResource.class;
 	
+	/**
+	 * Validation mode parameter annotation for the validation mode parameter (only supported
+	 * in FHIR DSTU2+). Parameter must be of type {@link ValidationModeEnum}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(value=ElementType.PARAMETER)
+	@interface Mode {
+		// nothing
+	}
+	
+	/**
+	 * Validation mode parameter annotation for the validation URI parameter (only supported
+	 * in FHIR DSTU2+). Parameter must be of type {@link String}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(value=ElementType.PARAMETER)
+	@interface Profile {
+		// nothing
+	}
+
 }

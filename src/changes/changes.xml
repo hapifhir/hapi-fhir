@@ -55,6 +55,9 @@
 			<action type="add">
 				Web tester UI now supports _revinclude
 			</action>
+			<action type="add">
+				LoggingInterceptor for server now supports logging DSTU2 extended operations by name
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -49,8 +50,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.MethodUtil;
-import ca.uhn.fhir.rest.method.Request;
-import ca.uhn.fhir.rest.param.ResourceParameter.Mode;
+import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -103,7 +103,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		switch (myMode) {
 		case BODY:
 			try {
@@ -138,11 +138,11 @@ public class ResourceParameter implements IParameter {
 		return requestReader;
 	}
 
-	static Reader createRequestReader(Request theRequest, byte[] theRequestContents) {
+	static Reader createRequestReader(RequestDetails theRequest, byte[] theRequestContents) {
 		return createRequestReader(theRequestContents, determineRequestCharset(theRequest));
 	}
 
-	static Charset determineRequestCharset(Request theRequest) {
+	static Charset determineRequestCharset(RequestDetails theRequest) {
 		String ct = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 
 		Charset charset = null;
@@ -156,7 +156,7 @@ public class ResourceParameter implements IParameter {
 		return charset;
 	}
 
-	public static IBaseResource loadResourceFromRequest(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+	public static IBaseResource loadResourceFromRequest(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);

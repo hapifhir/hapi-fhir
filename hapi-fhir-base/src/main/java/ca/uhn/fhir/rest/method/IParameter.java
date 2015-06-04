@@ -48,7 +48,7 @@ public interface IParameter {
 	 * @param theMethodBinding TODO
 	 * @return Returns the argument object as it will be passed to the {@link IResourceProvider} method.
 	 */
-	Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException;
+	Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException;
 
 	void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType);
 

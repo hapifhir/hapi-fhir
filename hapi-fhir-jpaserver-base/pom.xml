@@ -77,6 +77,19 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-schematron</artifactId>
+			<version>${phloc_schematron_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.phloc</groupId>
+			<artifactId>phloc-commons</artifactId>
+			<version>${phloc_commons_version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- For UCUM -->
 		<dependency>
 			<groupId>org.jscience</groupId>

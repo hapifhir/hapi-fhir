@@ -34,11 +34,11 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
+public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	private Integer myIdParameterIndex;
 
-	public ValidateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+	public ValidateMethodBindingDstu1(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod, theContext, Validate.class, theProvider);
 
 		myIdParameterIndex = MethodUtil.findIdParameterIndex(theMethod);
@@ -55,7 +55,7 @@ public class ValidateMethodBinding extends BaseOutcomeReturningMethodBindingWith
 	}
 
 	@Override
-	protected void addParametersForServerRequest(Request theRequest, Object[] theParams) {
+	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		if (myIdParameterIndex != null) {
 			theParams[myIdParameterIndex] = theRequest.getId();
 		}

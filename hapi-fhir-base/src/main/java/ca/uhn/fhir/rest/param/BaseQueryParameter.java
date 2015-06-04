@@ -34,7 +34,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
-import ca.uhn.fhir.rest.method.Request;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
@@ -130,7 +129,7 @@ public abstract class BaseQueryParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(Request theRequest, byte[] theRequestContents, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, byte[] theRequestContents, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 
 		List<QualifiedParamList> paramList = new ArrayList<QualifiedParamList>();
 		String name = getName();

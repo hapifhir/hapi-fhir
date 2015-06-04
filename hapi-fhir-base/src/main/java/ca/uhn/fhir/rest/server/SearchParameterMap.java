@@ -38,6 +38,8 @@ import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.UriAndListParam;
+import ca.uhn.fhir.rest.param.UriOrListParam;
 
 public class SearchParameterMap extends LinkedHashMap<String, BaseAndListParam<?>> {
 
@@ -71,10 +73,19 @@ public class SearchParameterMap extends LinkedHashMap<String, BaseAndListParam<?
 		andList.addValue(theOrListParam);
 	}
 
-	public void add(String theName, TokenOrListParam theOrListParam) {
-		TokenAndListParam andList = (TokenAndListParam) get(theName);
+	public void add(String theName, QuantityOrListParam theOrListParam) {
+		QuantityAndListParam andList = (QuantityAndListParam) get(theName);
 		if (andList == null) {
-			andList = new TokenAndListParam();
+			andList = new QuantityAndListParam();
+			put(theName, andList);
+		}
+		andList.addValue(theOrListParam);
+	}
+
+	public void add(String theName, ReferenceOrListParam theOrListParam) {
+		ReferenceAndListParam andList = (ReferenceAndListParam) get(theName);
+		if (andList == null) {
+			andList = new ReferenceAndListParam();
 			put(theName, andList);
 		}
 		andList.addValue(theOrListParam);
@@ -89,19 +100,19 @@ public class SearchParameterMap extends LinkedHashMap<String, BaseAndListParam<?
 		andList.addValue(theOrListParam);
 	}
 
-	public void add(String theName, QuantityOrListParam theOrListParam) {
-		QuantityAndListParam andList = (QuantityAndListParam) get(theName);
+	public void add(String theName, TokenOrListParam theOrListParam) {
+		TokenAndListParam andList = (TokenAndListParam) get(theName);
 		if (andList == null) {
-			andList = new QuantityAndListParam();
+			andList = new TokenAndListParam();
 			put(theName, andList);
 		}
 		andList.addValue(theOrListParam);
 	}
 
-	public void add(String theName, ReferenceOrListParam theOrListParam) {
-		ReferenceAndListParam andList = (ReferenceAndListParam) get(theName);
+	public void add(String theName, UriOrListParam theOrListParam) {
+		UriAndListParam andList = (UriAndListParam) get(theName);
 		if (andList == null) {
-			andList = new ReferenceAndListParam();
+			andList = new UriAndListParam();
 			put(theName, andList);
 		}
 		andList.addValue(theOrListParam);
