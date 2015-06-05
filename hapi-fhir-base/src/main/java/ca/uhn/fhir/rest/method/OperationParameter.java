@@ -40,7 +40,9 @@ import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.ResourceParameter;
@@ -48,18 +50,27 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
-class OperationParameter implements IParameter {
+public class OperationParameter implements IParameter {
 
 	private IConverter myConverter;
 	@SuppressWarnings("rawtypes")
 	private Class<? extends Collection> myInnerCollectionType;
+	private int myMax;
+	private int myMin;
 	private final String myName;
 	private final String myOperationName;
 	private Class<?> myParameterType;
+	private RestSearchParameterTypeEnum myParamType;
 
-	OperationParameter(String theOperationName, String theParameterName) {
+	public OperationParameter(String theOperationName, OperationParam theOperationParam) {
+		this(theOperationName, theOperationParam.name(), theOperationParam.min(), theOperationParam.max());
+	}
+
+	OperationParameter(String theOperationName, String theParameterName, int theMin, int theMax) {
 		myOperationName = theOperationName;
 		myName = theParameterName;
+		myMin = theMin;
+		myMax = theMax;
 	}
 
 	private void addClientParameter(FhirContext theContext, Object theSourceClientArgument, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
@@ -78,7 +89,7 @@ class OperationParameter implements IParameter {
 			throw new IllegalArgumentException("Don't know how to handle value of type " + theSourceClientArgument.getClass() + " for paramater " + myName);
 		}
 	}
-	
+
 	private IBase createParameterRepetition(FhirContext theContext, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem) {
 		IBase parameter = paramChildElem.newInstance();
 		paramChild.getMutator().addValue(theTargetResource, parameter);
@@ -92,11 +103,29 @@ class OperationParameter implements IParameter {
 		return parameter;
 	}
 
+	public int getMax() {
+		return myMax;
+	}
+
+	public int getMin() {
+		return myMin;
+	}
+
+	public String getName() {
+		return myName;
+	}
+
+	public RestSearchParameterTypeEnum getParamType() {
+		return myParamType;
+	}
+
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		myParameterType = theParameterType;
 		if (theInnerCollectionType != null) {
 			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, myName);
+		} else {
+			myMax = 1;
 		}
 	}
 
@@ -106,8 +135,7 @@ class OperationParameter implements IParameter {
 	}
 
 	@Override
-	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource)
-			throws InternalErrorException {
+	public void translateClientArgumentIntoQueryArgument(FhirContext theContext, Object theSourceClientArgument, Map<String, List<String>> theTargetQueryArguments, IBaseResource theTargetResource) throws InternalErrorException {
 		assert theTargetResource != null;
 		Object sourceClientArgument = theSourceClientArgument;
 		if (sourceClientArgument == null) {
@@ -117,7 +145,7 @@ class OperationParameter implements IParameter {
 		if (myConverter != null) {
 			sourceClientArgument = myConverter.outgoingClient(sourceClientArgument);
 		}
-		
+
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theTargetResource);
 
 		BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
@@ -151,7 +179,7 @@ class OperationParameter implements IParameter {
 		} else {
 
 			FhirContext ctx = theRequest.getServer().getFhirContext();
-			
+
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return null;
 			}
@@ -223,19 +251,18 @@ class OperationParameter implements IParameter {
 				nextValue = myConverter.incomingServer(nextValue);
 			}
 			if (!myParameterType.isAssignableFrom(nextValue.getClass())) {
-				throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type "
-						+ myParameterType.getSimpleName());
+				throw new InvalidRequestException("Request has parameter " + myName + " of type " + nextValue.getClass().getSimpleName() + " but method expects type " + myParameterType.getSimpleName());
 			}
 			theMatchingParamValues.add(nextValue);
 		}
 	}
 
 	public interface IConverter {
-		
+
 		Object incomingServer(Object theObject);
 
 		Object outgoingClient(Object theObject);
 
 	}
-	
+
 }

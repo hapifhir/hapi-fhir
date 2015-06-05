@@ -34,6 +34,11 @@ import org.hl7.fhir.instance.model.api.IBase;
 public @interface OperationParam {
 
 	/**
+	 * Value for {@link OperationParam#max()} indicating no maximum
+	 */
+	int MAX_UNLIMITED = -1;
+
+	/**
 	 * The name of the parameter
 	 */
 	String name();
@@ -43,5 +48,18 @@ public @interface OperationParam {
 	 * annotations specified as values for {@link Operation#returnParameters()}
 	 */
 	Class<? extends IBase> type() default IBase.class;
+	
+	/**
+	 * The minimum number of repetitions allowed for this child
+	 */
+	int min() default 0;
+
+	/**
+	 * The maximum number of repetitions allowed for this child. Should be
+	 * set to {@link #MAX_UNLIMITED} if there is no limit to the number of
+	 * repetitions.
+	 */
+	int max() default MAX_UNLIMITED;
+
 	
 }

@@ -41,6 +41,9 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceInteraction;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
+import ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
@@ -48,10 +51,12 @@ import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.method.OperationParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.server.Constants;
@@ -171,7 +176,28 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				} else if (nextMethodBinding instanceof OperationMethodBinding) {
 					OperationMethodBinding methodBinding = (OperationMethodBinding)nextMethodBinding;
 					OperationDefinition op = new OperationDefinition();
-//					op.
+					rest.addOperation().setName(methodBinding.getName()).getDefinition().setResource(op);;
+					
+					op.setStatus(ConformanceResourceStatusEnum.ACTIVE);
+					op.setDescription(methodBinding.getDescription());
+					op.setIdempotent(methodBinding.isIdempotent());
+					op.setCode(methodBinding.getName());
+					op.setInstance(methodBinding.isInstanceLevel());
+					op.addType().setValue(methodBinding.getResourceName());
+					
+					for (IParameter nextParamUntyped : methodBinding.getParameters()) {
+						if (nextParamUntyped instanceof OperationParameter) {
+							OperationParameter nextParam = (OperationParameter)nextParamUntyped;
+							Parameter param = op.addParameter();
+							param.setUse(OperationParameterUseEnum.IN);
+							if (nextParam.getParamType() != null) {
+								param.setType(nextParam.getParamType().getCode());
+							}
+							param.setMin(nextParam.getMin());
+							param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
+							param.setName(nextParam.getName());
+						}
+					}
 				}
 
 				Collections.sort(resource.getInteraction(), new Comparator<RestResourceInteraction>() {

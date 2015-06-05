@@ -26,16 +26,19 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
@@ -79,25 +82,6 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
-	public void testEverythingOperationDocumentation() throws Exception {
-
-		RestfulServer rs = new RestfulServer();
-		rs.setProviders(new ProviderWithOperations());
-
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-		
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-
-		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
-		ourLog.info(conf);
-
-		
-	}
-
-	@Test
 	public void testOperationDocumentation() throws Exception {
 
 		RestfulServer rs = new RestfulServer();
@@ -130,6 +114,23 @@ public class ServerConformanceProviderDstu2Test {
 		
 	}
 
+	@Test
+	public void testExtendedOperationReturningBundle() throws Exception {
+
+		RestfulServer rs = new RestfulServer();
+		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+		
+	}
 	
 	@Test
 	public void testValidateGeneratedStatement() throws Exception {
@@ -260,12 +261,14 @@ public class ServerConformanceProviderDstu2Test {
 
 	}
 	
-	public static class ProviderWithOperations implements IResourceProvider {
+	public static class ProviderWithExtendedOperationReturningBundle implements IResourceProvider {
 		
 		@Operation(name="everything", idempotent=true)
 		public ca.uhn.fhir.rest.server.IBundleProvider everything(
 				javax.servlet.http.HttpServletRequest theServletRequest, 
-				@IdParam ca.uhn.fhir.model.primitive.IdDt theId) {
+				@IdParam ca.uhn.fhir.model.primitive.IdDt theId,
+				@OperationParam(name="start") DateDt theStart,
+				@OperationParam(name="end") DateDt theEnd) {
 			return null;
 		}
 

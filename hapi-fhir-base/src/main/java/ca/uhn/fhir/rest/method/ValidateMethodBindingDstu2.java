@@ -27,7 +27,7 @@ public class ValidateMethodBindingDstu2 extends OperationMethodBinding {
 					if (String.class.equals(parameterType) || EncodingEnum.class.equals(parameterType)) {
 						newParams.add(next);
 					} else {
-						OperationParameter parameter = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE);
+						OperationParameter parameter = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_RESOURCE, 0, 1);
 						parameter.initializeTypes(theMethod, null, null, parameterType);
 						newParams.add(parameter);
 					}
