@@ -101,6 +101,44 @@ public class FhirSystemDaoDstu2Test {
 	}
 
 	@Test
+	public void testTransactionCreateWithInvalidReferenceNumeric() {
+		String methodName = "testTransactionCreateWithInvalidReferenceNumeric";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.getManagingOrganization().setReference("Organization/9999999999999999");
+		request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST);
+
+		try {
+			ourSystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Resource Organization/9999999999999999 not found, specified in path: Patient.managingOrganization"));
+		}
+	}
+
+	@Test
+	public void testTransactionCreateWithInvalidReferenceTextual() {
+		String methodName = "testTransactionCreateWithInvalidReferenceTextual";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Hello");
+		p.getManagingOrganization().setReference("Organization/" + methodName);
+		request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST);
+
+		try {
+			ourSystemDao.transaction(request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Resource Organization/" + methodName + " not found, specified in path: Patient.managingOrganization"));
+		}
+	}
+
+	@Test
 	public void testTransactionFromBundle() throws Exception {
 
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");

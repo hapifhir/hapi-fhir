@@ -713,6 +713,23 @@
 
 	<reporting>
 		<plugins>
+			<!--
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports><report>checkstyle-aggregate</report></reports>
+					</reportSet>
+				</reportSets>
+				<configuration>
+					<configLocation>config/sun_checks.xml</configLocation>
+					<includes>
+						hapi-fhir-base/src/main/java/**/*.java
+					</includes>
+				</configuration>
+			</plugin>
+			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>

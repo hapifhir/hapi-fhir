@@ -217,10 +217,9 @@ public abstract class BaseFhirDao implements IDao {
 					Long valueOf;
 					try {
 						valueOf = translateForcedIdToPid(nextValue.getReference());
-					} catch (Exception e) {
+					} catch (ResourceNotFoundException e) {
 						String resName = getContext().getResourceDefinition(type).getName();
-						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit
-								+ " (this is an invalid ID, must be numeric on this server)");
+						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 					}
 					ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
 					if (target == null) {
