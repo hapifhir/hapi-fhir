@@ -66,7 +66,7 @@ public class XhtmlDtTest {
 
 	@Test
 	public void testCharacterEntities() {
-		String input = "Sect: &sect; uuml: &uuml; &Uuml;";
+		String input = "&amp; Sect: &sect; uuml: &uuml; &Uuml; Trade: &trade;";
 
 		XhtmlDt x = new XhtmlDt();
 		x.setValueAsString(input);
@@ -77,7 +77,7 @@ public class XhtmlDtTest {
 
 		XhtmlDt x2 = new XhtmlDt();
 		x2.setValue(x.getValue());
-		assertEquals("<div>Sect: § uuml: ü Ü</div>", x2.getValueAsString());
+		assertEquals("<div>&amp; Sect: § uuml: ü Ü Trade: ™</div>", x2.getValueAsString());
 
 	}
 

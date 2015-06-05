@@ -69,6 +69,10 @@
 				large attachments, so this setting has been increased to 100Mb.
 				Thanks to Nikos Kyriakoulakos for reporting!
 			</action>
+			<action type="fix" issue="175">
+				Some HTML entities were not correctly converted during parsing. Thanks to
+				Nick Kitto for reporting!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">
