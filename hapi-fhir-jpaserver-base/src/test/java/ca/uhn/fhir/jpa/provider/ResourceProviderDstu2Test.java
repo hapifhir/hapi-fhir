@@ -840,13 +840,13 @@ public class ResourceProviderDstu2Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
 		p1.addName().addFamily("testTryToCreateResourceWithReferenceThatDoesntExistFamily01").addGiven("testTryToCreateResourceWithReferenceThatDoesntExistGiven01");
-		p1.setManagingOrganization(new ResourceReferenceDt("Organization/1323123232349875324987529835"));
+		p1.setManagingOrganization(new ResourceReferenceDt("Organization/99999999999"));
 
 		try {
 			ourClient.create().resource(p1).execute().getId();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Organization/1323123232349875324987529835"));
+			assertThat(e.getMessage(), containsString("Organization/99999999999"));
 		}
 
 	}
