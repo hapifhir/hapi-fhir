@@ -886,7 +886,8 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<!--<module>hapi-fhir-oauth2</module>-->
-				<module>hapi-fhir-base/testmindeps</module>
+				<module>hapi-fhir-base-test-mindeps-client</module>
+				<module>hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-structures-dstu</module>

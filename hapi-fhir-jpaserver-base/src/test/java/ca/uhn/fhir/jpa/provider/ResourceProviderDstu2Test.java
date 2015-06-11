@@ -58,6 +58,7 @@ import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
@@ -176,6 +177,33 @@ public class ResourceProviderDstu2Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertEquals(id.getValue(), newIdString); // version should match for conditional create
+		} finally {
+			response.close();
+		}
+
+	}
+
+	@Test
+	public void testCreateResourceWithInvalidData() throws IOException {
+		String methodName = "testCreateResourceWithInvalidData";
+
+		DiagnosticReport diagRept = new DiagnosticReport();
+		diagRept.getResult().get(0).getReference().isEmpty();
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		pt.setBirthDate(new DateDt("2011-01-01"));
+		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
 		} finally {
 			response.close();
 		}

@@ -2025,7 +2025,7 @@ class ParserState<T> {
 				}
 			} else {
 				definition = myContext.getResourceDefinition(myResourceType);
-				if (!StringUtils.equals(theLocalPart, definition.getName())) {
+			if (!StringUtils.equals(theLocalPart, definition.getName())) {
 					if (myRequireResourceType) {
 						throw new DataFormatException(myContext.getLocalizer().getMessage(ParserState.class, "wrongResourceTypeFound", definition.getName(), theLocalPart));
 					}

@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.method;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,6 +33,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.servlet.ServletInputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -264,7 +267,29 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	protected byte[] loadRequestContents(RequestDetails theRequest) throws IOException {
-		byte[] requestContents = IOUtils.toByteArray(theRequest.getServletRequest().getInputStream());
+		IRequestReader reader = ourRequestReader;
+		if (reader == null) {
+			try {
+				Class.forName("javax.servlet.ServletInputStream");
+				String className = BaseMethodBinding.class.getName() + "." + "ActiveRequestReader";
+				try {
+					reader = (IRequestReader) Class.forName(className).newInstance();
+				} catch (Exception e1) {
+					throw new ConfigurationException("Failed to instantiate class " + className, e1);
+				}
+			} catch (ClassNotFoundException e) {
+				String className = BaseMethodBinding.class.getName() + "." + "InactiveRequestReader";
+				try {
+					reader = (IRequestReader) Class.forName(className).newInstance();
+				} catch (Exception e1) {
+					throw new ConfigurationException("Failed to instantiate class " + className, e1);
+				}
+			}
+			ourRequestReader = reader;
+		}
+		
+		InputStream inputStream = reader.getInputStream(theRequest);
+		byte[] requestContents = IOUtils.toByteArray(inputStream);
 		return requestContents;
 	}
 
@@ -553,6 +578,40 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			// " has no FHIR method annotations.");
 		}
 		return true;
+	}
+	
+	/**
+	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 */
+	private static volatile IRequestReader ourRequestReader;
+	
+	/**
+	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 */
+	private static interface IRequestReader {
+		InputStream getInputStream(RequestDetails theRequestDetails) throws IOException;
+	}
+
+	/**
+	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 */
+	@SuppressWarnings("unused")
+	private static class ActiveRequestReader implements IRequestReader {
+		@Override
+		public InputStream getInputStream(RequestDetails theRequestDetails) throws IOException {
+			return theRequestDetails.getServletRequest().getInputStream();
+		}
+	}
+	
+	/**
+	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
+	 */
+	@SuppressWarnings("unused")
+	private static class InactiveRequestReader implements IRequestReader {
+		@Override
+		public InputStream getInputStream(RequestDetails theRequestDetails) {
+			throw new IllegalStateException("The servlet-api JAR is not found on the classpath. Please check that this library is available.");
+		}
 	}
 
 }

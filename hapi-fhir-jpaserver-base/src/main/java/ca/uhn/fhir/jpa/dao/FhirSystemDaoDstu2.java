@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -101,7 +102,13 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			}
 		}
 
-		RuntimeResourceDefinition resType = getContext().getResourceDefinition(retVal.getResourceType());
+		RuntimeResourceDefinition resType;
+		try {
+			resType = getContext().getResourceDefinition(retVal.getResourceType());
+		} catch (DataFormatException e) {
+			String msg = getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
+			throw new InvalidRequestException(msg);
+		}
 		IFhirResourceDao<? extends IResource> dao = null;
 		if (resType != null) {
 			dao = getDao(resType.getImplementingClass());

@@ -160,6 +160,21 @@ public class FhirSystemDaoDstu2Test {
 		assertEquals("Patient/temp6789", p.getLink().get(0).getOther().getReference().getValue());
 	}
 
+	@Test
+	public void testTransactionFromBundle2() throws Exception {
+
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/brokenbundle_dstu2.json");
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, bundleStr);
+		
+		try {
+			ourSystemDao.transaction(bundle);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Unable to perform PUT, URL provided is invalid: RWB_COMP_1"));
+		}
+		
+	}
 	
 	
 	@Test
