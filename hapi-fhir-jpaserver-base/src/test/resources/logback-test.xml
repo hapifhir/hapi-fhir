@@ -10,7 +10,7 @@
 	<logger name="org.eclipse" additivity="false">
 	</logger>
 
-	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="trace">
+	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
@@ -18,7 +18,7 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 	
-	<logger name="org.hibernate.SQL" additivity="false" level="DEBUG">
+	<logger name="org.hibernate.SQL" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

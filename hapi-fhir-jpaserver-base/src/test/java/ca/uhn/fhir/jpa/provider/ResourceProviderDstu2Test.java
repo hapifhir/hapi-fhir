@@ -110,15 +110,18 @@ public class ResourceProviderDstu2Test {
 	// private static JpaConformanceProvider ourConfProvider;
 
 	private void delete(String theResourceType, String theParamName, String theParamValue) {
-		IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
-		if (theParamName != null) {
-			forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
-		}
-		Bundle resources = forResource.execute();
-		for (IResource next : resources.toListOfResources()) {
-			ourLog.info("Deleting resource: {}", next.getId());
-			ourClient.delete().resource(next).execute();
-		}
+		Bundle resources;
+		do {
+			IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+			if (theParamName != null) {
+				forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+			}
+			resources = forResource.execute();
+			for (IResource next : resources.toListOfResources()) {
+				ourLog.info("Deleting resource: {}", next.getId());
+				ourClient.delete().resource(next).execute();
+			}
+		} while (resources.size() > 0);
 	}
 
 	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
@@ -182,33 +185,6 @@ public class ResourceProviderDstu2Test {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertEquals(id.getValue(), newIdString); // version should match for conditional create
-		} finally {
-			response.close();
-		}
-
-	}
-
-	@Test
-	public void testCreateResourceWithInvalidData() throws IOException {
-		String methodName = "testCreateResourceWithInvalidData";
-
-		DiagnosticReport diagRept = new DiagnosticReport();
-		diagRept.getResult().get(0).getReference().isEmpty();
-		
-		Patient pt = new Patient();
-		pt.addName().addFamily(methodName);
-		pt.setBirthDate(new DateDt("2011-01-01"));
-		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdDt id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-			id = new IdDt(newIdString);
 		} finally {
 			response.close();
 		}
@@ -335,8 +311,7 @@ public class ResourceProviderDstu2Test {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL
-		 * but we want to make sure that works too..  
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -345,26 +320,26 @@ public class ResourceProviderDstu2Test {
 			sock.getOutputStream().write(("DELETE /fhir/context/Patient?identifier=http://ghh.org/patient|" + methodName + " HTTP/1.1\n").getBytes("UTF-8"));
 			sock.getOutputStream().write("Host: localhost\n".getBytes("UTF-8"));
 			sock.getOutputStream().write("\n".getBytes("UTF-8"));
-			
+
 			BufferedReader socketInput = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
-            //String response = ""; 
-            StringBuilder b = new StringBuilder();
-            char[] buf = new char[1000];
-            while(socketInput.read(buf) != -1){
-            	b.append(buf);
-            }
+			// String response = "";
+			StringBuilder b = new StringBuilder();
+			char[] buf = new char[1000];
+			while (socketInput.read(buf) != -1) {
+				b.append(buf);
+			}
 			String resp = b.toString();
-						
+
 			ourLog.info("Resp: {}", resp);
 		} catch (SocketTimeoutException e) {
 			e.printStackTrace();
 		} finally {
 			sock.close();
 		}
-		
+
 		Thread.sleep(1000);
-		
+
 		HttpGet read = new HttpGet(ourServerBase + "/Patient/" + id.getIdPart());
 		response = ourHttpClient.execute(read);
 		try {
@@ -713,7 +688,8 @@ public class ResourceProviderDstu2Test {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -788,16 +764,20 @@ public class ResourceProviderDstu2Test {
 	@Test
 	public void testSearchWithMissing() throws Exception {
 		ourLog.info("Starting testSearchWithMissing");
-		
+
 		delete("Organization", null, null);
-		
-		ourLog.info("Starting testSearchWithMissing");
+
 		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
-		IdDt deletedId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
-		ourClient.delete().resourceById(deletedId).execute();
-		
+		IdDt deletedIdMissingTrue = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		ourClient.delete().resourceById(deletedIdMissingTrue).execute();
+
+		org = new Organization();
+		org.setName("Help I'm a Bug");
+		IdDt deletedIdMissingFalse = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
+
 		List<IResource> resources = new ArrayList<IResource>();
 		for (int i = 0; i < 20; i++) {
 			org = new Organization();
@@ -805,7 +785,7 @@ public class ResourceProviderDstu2Test {
 			resources.add(org);
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
-		
+
 		org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
 		org.setName(methodName + "name");
@@ -828,11 +808,13 @@ public class ResourceProviderDstu2Test {
 
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
 			ourLog.info(methodName + ": " + list.toString());
-			assertThat("Wanted " + orgNotMissing + " but got: " + list, list, containsInRelativeOrder(orgNotMissing));
+			ourLog.info("Wanted " + orgNotMissing + " and not " + deletedIdMissingFalse + " but got " + list.size() + ": " + list);
+			assertThat("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list, list, containsInRelativeOrder(orgNotMissing));
+			assertThat(list, not(containsInRelativeOrder(deletedIdMissingFalse)));
 			assertThat(list, not(containsInRelativeOrder(orgMissing)));
 		}
-		
-			//@formatter:off
+
+		//@formatter:off
 			Bundle found = ourClient
 					.search()
 					.forResource(Organization.class)
@@ -842,11 +824,11 @@ public class ResourceProviderDstu2Test {
 					.execute();
 			//@formatter:on
 
-			List<IdDt> list = toIdListUnqualifiedVersionless(found);
-			ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
-			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
-			assertThat(list, not(containsInRelativeOrder(deletedId)));
-			assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
+		List<IdDt> list = toIdListUnqualifiedVersionless(found);
+		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
+		assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
+		assertThat(list, not(containsInRelativeOrder(deletedIdMissingTrue)));
+		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
 	}
 
 	/**
@@ -967,7 +949,8 @@ public class ResourceProviderDstu2Test {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
+				.encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -979,13 +962,13 @@ public class ResourceProviderDstu2Test {
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDate(new DateDt("2011-02-02"));
-		
+
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
-		
+
 		String inputStr = ourFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
-		
+
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -1004,15 +987,16 @@ public class ResourceProviderDstu2Test {
 	public void testValidateResourceHuge() throws IOException {
 
 		Patient patient = new Patient();
-		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));;
+		patient.addName().addGiven("James" + StringUtils.leftPad("James", 1000000, 'A'));
+		;
 		patient.setBirthDate(new DateDt("2011-02-02"));
-		
+
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
-		
+
 		String inputStr = ourFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
-		
+
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -1084,7 +1068,7 @@ public class ResourceProviderDstu2Test {
 		ourFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
-//		ourClient.registerInterceptor(new LoggingInterceptor(true));
+		// ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

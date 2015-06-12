@@ -1059,8 +1059,6 @@ class ParserState<T> {
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
 			}
-
-			// TODO: handle category
 		}
 
 		protected BundleEntry getEntry() {
@@ -1317,10 +1315,20 @@ class ParserState<T> {
 				String resourceName = myContext.getResourceDefinition(nextResource).getName();
 				String bundleIdPart = nextResource.getId().getIdPart();
 				if (isNotBlank(bundleIdPart)) {
+					String baseUrl;
 					if (isNotBlank(entryBaseUrl)) {
-						nextResource.setId(new IdDt(entryBaseUrl, resourceName, bundleIdPart, version));
+						baseUrl = entryBaseUrl;
 					} else {
-						nextResource.setId(new IdDt(bundleBaseUrl, resourceName, bundleIdPart, version));
+						baseUrl = bundleBaseUrl;
+					}
+					if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
+						nextResource.setId(new IdDt(baseUrl, resourceName, bundleIdPart, version));
+					} else {
+						if (baseUrl.endsWith(":")) {
+							nextResource.setId(new IdDt(baseUrl + bundleIdPart));
+						} else {
+							nextResource.setId(new IdDt(baseUrl + ':' + bundleIdPart));
+						}
 					}
 				}
 			}
@@ -1535,9 +1543,9 @@ class ParserState<T> {
 			try {
 				child = myDefinition.getChildByNameOrThrowDataFormatException(theChildName);
 			} catch (DataFormatException e) {
-				/* This means we've found an element that doesn't exist on the structure.
-				 * If the error handler doesn't throw an exception, swallow the element silently along
-				 * with any child elements
+				/*
+				 * This means we've found an element that doesn't exist on the structure. If the error handler doesn't
+				 * throw an exception, swallow the element silently along with any child elements
 				 */
 				myErrorHandler.unknownElement(null, theChildName);
 				push(new SwallowChildrenWholeState(getPreResourceState()));
@@ -2093,7 +2101,7 @@ class ParserState<T> {
 								}
 							}
 						}
-					}else					if (theElement instanceof IBaseReference) {
+					} else if (theElement instanceof IBaseReference) {
 						IBaseReference nextRef = (IBaseReference) theElement;
 						String ref = nextRef.getReferenceElement().getValue();
 						if (isNotBlank(ref)) {
@@ -2589,7 +2597,7 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceURI, String theLocalPart) throws DataFormatException {
-			// IGNORE - don't handle this as an error, we process these as XML events  
+			// IGNORE - don't handle this as an error, we process these as XML events
 		}
 
 		@Override
@@ -2598,7 +2606,7 @@ class ParserState<T> {
 				myDt.setValueAsString(theValue);
 				return;
 			} else {
-				// IGNORE - don't handle this as an error, we process these as XML events  
+				// IGNORE - don't handle this as an error, we process these as XML events
 			}
 		}
 

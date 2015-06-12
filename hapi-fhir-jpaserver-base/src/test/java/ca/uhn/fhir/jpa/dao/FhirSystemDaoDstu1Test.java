@@ -1,7 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,7 +39,6 @@ import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.Location;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -305,7 +311,7 @@ public class FhirSystemDaoDstu1Test {
 	}
 
 	/**
-	 * Issue #55
+	 * Issue #55. Note that this is the incorrect way to do this but we'll leave it since people may depend on it.
 	 */
 	@Test
 	public void testTransactionWithCidIds() throws Exception {
@@ -344,16 +350,50 @@ public class FhirSystemDaoDstu1Test {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/dstu1_bundle.xml");
 		String bundleStr = IOUtils.toString(bundleRes);
 		Bundle bundle = ourFhirContext.newXmlParser().parseBundle(bundleStr);
-		
-		
+
 		List<IResource> res = new ArrayList<IResource>();
 		for (BundleEntry next : bundle.getEntries()) {
 			res.add(next.getResource());
 		}
-		
+
 		List<IResource> response = ourSystemDao.transaction(res);
-		
+
 		ourLog.info(ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response.get(0)));
+	}
+
+	/**
+	 * This is the correct way to do this, not {@link #testTransactionWithCidIds()}
+	 */
+	@Test
+	public void testTransactionWithCidIdsUnqualified() throws Exception {
+		List<IResource> res = new ArrayList<IResource>();
+
+		Patient p1 = new Patient();
+		p1.setId("cid:patient1");
+		p1.addIdentifier().setSystem("system").setValue("testTransactionWithCidIdsUnqualified01");
+		res.add(p1);
+
+		Observation o1 = new Observation();
+		o1.setId("cid:observation1");
+		o1.getIdentifier().setSystem("system").setValue("testTransactionWithCidIdsUnqualified02");
+		o1.setSubject(new ResourceReferenceDt("cid:patient1"));
+		res.add(o1);
+
+		Observation o2 = new Observation();
+		o2.setId("cid:observation2");
+		o2.getIdentifier().setSystem("system").setValue("testTransactionWithCidIdsUnqualified03");
+		o2.setSubject(new ResourceReferenceDt("cid:patient1"));
+		res.add(o2);
+
+		ourSystemDao.transaction(res);
+
+		assertTrue(p1.getId().getValue(), p1.getId().getIdPart().matches("^[0-9]+$"));
+		assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
+		assertTrue(o2.getId().getValue(), o2.getId().getIdPart().matches("^[0-9]+$"));
+
+		assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+		assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+
 	}
 
 	@Test

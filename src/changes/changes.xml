@@ -73,6 +73,22 @@
 				Some HTML entities were not correctly converted during parsing. Thanks to
 				Nick Kitto for reporting!
 			</action>
+			<action type="fix">
+				In the JPA Server:
+				Transactions creating resources with temporary/placeholder resource IDs
+				and other resources with references to those placeholder IDs previously
+				did not work if the reference did not contain the resource type
+				(e.g. Patient/urn:oid:0.1.2.3 instead of urn:oid:0.1.2.3). The
+				latter is actually the correct way of specifying a reference to a
+				placeholder, but the former was the only way that worked. Both forms
+				now work, in order to be lenient. Thanks to Bill De Beaubien for
+				reporting!
+			</action>
+			<action type="fix">
+				When parsing Bundles, if Bundle.entry.base is set to "cid:" (for DSTU1) 
+				or "urn:uuid:" / "urn:oid:" (for DSTU2) this is now correctly passed as
+				the base in resource.getId()
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

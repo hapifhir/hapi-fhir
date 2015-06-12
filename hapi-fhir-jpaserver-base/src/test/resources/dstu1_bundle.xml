@@ -499,7 +499,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_01"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -528,7 +528,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_02"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -557,7 +557,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_03"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -586,7 +586,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_04"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -615,7 +615,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_05"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -644,7 +644,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_06"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -673,7 +673,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_07"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -702,7 +702,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_08"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -731,7 +731,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_09"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -760,7 +760,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_10"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -789,7 +789,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_11"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -818,7 +818,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_12"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -847,7 +847,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_13"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -876,7 +876,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_14"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -905,7 +905,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_15"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -934,7 +934,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_16"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -963,7 +963,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_17"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>
@@ -992,7 +992,7 @@
             <dateWritten value="2015-03-01"/>
             <status value="active"/>
             <patient>
-               <reference value="Patient/cid:smsp_01"/>
+               <reference value="cid:smsp_01"/>
                <display value="Davidson, Harley"/>
             </patient>
             <medication>

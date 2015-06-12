@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryTransactionResponse;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -134,7 +136,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		ourLog.info("Beginning transaction with {} resources", theResources.getEntry().size());
 		long start = System.currentTimeMillis();
 
-		Set<IdDt> allIds = new HashSet<IdDt>();
+		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
 		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>();
 
@@ -172,257 +174,97 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			}
 
 			switch (verb) {
-				case POST: {
-					// CREATE
-					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDao(res.getClass());
-					res.setId((String)null);
-					DaoMethodOutcome outcome;
-					Entry newEntry = response.addEntry();
-					outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
-					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
-					break;
+			case POST: {
+				// CREATE
+				@SuppressWarnings("rawtypes")
+				IFhirResourceDao resourceDao = getDao(res.getClass());
+				res.setId((String) null);
+				DaoMethodOutcome outcome;
+				Entry newEntry = response.addEntry();
+				outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
+				break;
+			}
+			case DELETE: {
+				// DELETE
+				Entry newEntry = response.addEntry();
+				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+				UrlParts parts = parseUrl(verb.getCode(), url);
+				if (parts.getResourceId() != null) {
+					parts.getDao().delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
+				} else {
+					parts.getDao().deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
 				}
-				case DELETE: {
-					// DELETE
-					Entry newEntry = response.addEntry();
-					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-					UrlParts parts = parseUrl(verb.getCode(), url);
-					if (parts.getResourceId() != null) {
-						parts.getDao().delete(new IdDt(parts.getResourceType(), parts.getResourceId()));
+
+				newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_204_NO_CONTENT));
+				break;
+			}
+			case PUT: {
+				// UPDATE
+				@SuppressWarnings("rawtypes")
+				IFhirResourceDao resourceDao = getDao(res.getClass());
+
+				DaoMethodOutcome outcome;
+				Entry newEntry = response.addEntry();
+
+				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+
+				UrlParts parts = parseUrl(verb.getCode(), url);
+				if (isNotBlank(parts.getResourceId())) {
+					res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
+					outcome = resourceDao.update(res, null, false);
+				} else {
+					res.setId((String) null);
+					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
+				}
+
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
+				break;
+			}
+			case GET: {
+				// SEARCH/READ/VREAD
+				String url = extractTransactionUrlOrThrowException(nextEntry, verb);
+				UrlParts parts = parseUrl(verb.getCode(), url);
+
+				@SuppressWarnings("rawtypes")
+				IFhirResourceDao resourceDao = parts.getDao();
+
+				if (parts.getResourceId() != null && parts.getParams() == null) {
+					IResource found;
+					if (parts.getVersionId() != null) {
+						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
 					} else {
-						parts.getDao().deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
+						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
+					}
+					EntryTransactionResponse resp = response.addEntry().setResource(found).getTransactionResponse();
+					resp.setLocation(found.getId().toUnqualified().getValue());
+					resp.setEtag(found.getId().getVersionIdPart());
+				} else if (parts.getParams() != null) {
+					RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
+					SearchParameterMap params = translateMatchUrl(url, def);
+					IBundleProvider bundle = parts.getDao().search(params);
+
+					Bundle searchBundle = new Bundle();
+					searchBundle.setTotal(bundle.size());
+
+					int configuredMax = 100; // this should probably be configurable or something
+					if (bundle.size() > configuredMax) {
+						oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
+					}
+					List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
+					for (IBaseResource next : resourcesToAdd) {
+						searchBundle.addEntry().setResource((IResource) next);
 					}
 
-					newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_204_NO_CONTENT));
-					break;
+					response.addEntry().setResource(searchBundle);
 				}
-				case PUT: {
-					// UPDATE
-					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDao(res.getClass());
-
-					DaoMethodOutcome outcome;
-					Entry newEntry = response.addEntry();
-
-					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-
-					UrlParts parts = parseUrl(verb.getCode(), url);
-//					if (res.getId().hasIdPart() && isBlank(parts.getResourceId())) {
-//						parts.setResourceId(res.getId().getIdPart());
-//					}
-					if (isNotBlank(parts.getResourceId())) {
-						res.setId(new IdDt(parts.getResourceType(), parts.getResourceId()));
-						outcome = resourceDao.update(res, null, false);
-					} else {
-						res.setId((String)null);
-						outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
-					}
-
-					handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
-					break;
-				}
-				case GET: {
-					// SEARCH/READ/VREAD
-					String url = extractTransactionUrlOrThrowException(nextEntry, verb);
-					UrlParts parts = parseUrl(verb.getCode(), url);
-
-					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = parts.getDao();
-
-					if (parts.getResourceId() != null && parts.getParams() == null) {
-						IResource found;
-						if (parts.getVersionId() != null) {
-							found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
-						} else {
-							found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
-						}
-						EntryTransactionResponse resp = response.addEntry().setResource(found).getTransactionResponse();
-						resp.setLocation(found.getId().toUnqualified().getValue());
-						resp.setEtag(found.getId().getVersionIdPart());
-					} else if (parts.getParams() != null) {
-						RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
-						SearchParameterMap params = translateMatchUrl(url, def);
-						IBundleProvider bundle = parts.getDao().search(params);
-
-						Bundle searchBundle = new Bundle();
-						searchBundle.setTotal(bundle.size());
-
-						int configuredMax = 100; // this should probably be configurable or something
-						if (bundle.size() > configuredMax) {
-							oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
-						}
-						List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
-						for (IBaseResource next : resourcesToAdd) {
-							searchBundle.addEntry().setResource((IResource) next);
-						}
-
-						response.addEntry().setResource(searchBundle);
-					}
-				}
+			}
 			}
 
 		}
 
 		FhirTerser terser = getContext().newTerser();
 
-		// int creations = 0;
-		// int updates = 0;
-		//
-		// Map<IdDt, IdDt> idConversions = new HashMap<IdDt, IdDt>();
-		//
-		// List<ResourceTable> persistedResources = new ArrayList<ResourceTable>();
-		//
-		// List<IResource> retVal = new ArrayList<IResource>();
-		// OperationOutcome oo = new OperationOutcome();
-		// retVal.add(oo);
-		//
-		// for (int resourceIdx = 0; resourceIdx < theResources.size(); resourceIdx++) {
-		// IResource nextResource = theResources.get(resourceIdx);
-		//
-		// IdDt nextId = nextResource.getId();
-		// if (nextId == null) {
-		// nextId = new IdDt();
-		// }
-		//
-		// String resourceName = toResourceName(nextResource);
-		// BundleEntryTransactionOperationEnum nextResouceOperationIn =
-		// ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.get(nextResource);
-		// if (nextResouceOperationIn == null && hasValue(ResourceMetadataKeyEnum.DELETED_AT.get(nextResource))) {
-		// nextResouceOperationIn = BundleEntryTransactionOperationEnum.DELETE;
-		// }
-		//
-		// String matchUrl = ResourceMetadataKeyEnum.LINK_SEARCH.get(nextResource);
-		// Set<Long> candidateMatches = null;
-		// if (StringUtils.isNotBlank(matchUrl)) {
-		// candidateMatches = processMatchUrl(matchUrl, nextResource.getClass());
-		// }
-		//
-		// ResourceTable entity;
-		// if (nextResouceOperationIn == BundleEntryTransactionOperationEnum.CREATE) {
-		// entity = null;
-		// } else if (nextResouceOperationIn == BundleEntryTransactionOperationEnum.UPDATE || nextResouceOperationIn ==
-		// BundleEntryTransactionOperationEnum.DELETE) {
-		// if (candidateMatches == null || candidateMatches.size() == 0) {
-		// if (nextId == null || StringUtils.isBlank(nextId.getIdPart())) {
-		// throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirSystemDaoDstu2.class,
-		// "transactionOperationFailedNoId", nextResouceOperationIn.name()));
-		// }
-		// entity = tryToLoadEntity(nextId);
-		// if (entity == null) {
-		// if (nextResouceOperationIn == BundleEntryTransactionOperationEnum.UPDATE) {
-		// ourLog.debug("Attempting to UPDATE resource with unknown ID '{}', will CREATE instead", nextId);
-		// } else if (candidateMatches == null) {
-		// throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirSystemDaoDstu2.class,
-		// "transactionOperationFailedUnknownId", nextResouceOperationIn.name(), nextId));
-		// } else {
-		// ourLog.debug("Resource with match URL [{}] already exists, will be NOOP", matchUrl);
-		// ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.put(nextResource,
-		// BundleEntryTransactionOperationEnum.NOOP);
-		// persistedResources.add(null);
-		// retVal.add(nextResource);
-		// continue;
-		// }
-		// }
-		// } else if (candidateMatches.size() == 1) {
-		// entity = loadFirstEntityFromCandidateMatches(candidateMatches);
-		// } else {
-		// throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirSystemDaoDstu2.class,
-		// "transactionOperationWithMultipleMatchFailure", nextResouceOperationIn.name(), matchUrl,
-		// candidateMatches.size()));
-		// }
-		// } else if (nextResouceOperationIn == BundleEntryTransactionOperationEnum.NOOP) {
-		// throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirSystemDaoDstu2.class,
-		// "incomingNoopInTransaction"));
-		// } else if (nextId.isEmpty()) {
-		// entity = null;
-		// } else {
-		// entity = tryToLoadEntity(nextId);
-		// }
-		//
-		// BundleEntryTransactionOperationEnum nextResouceOperationOut;
-		// if (entity == null) {
-		// nextResouceOperationOut = BundleEntryTransactionOperationEnum.CREATE;
-		// entity = toEntity(nextResource);
-		// if (nextId.isEmpty() == false && nextId.getIdPart().startsWith("cid:")) {
-		// ourLog.debug("Resource in transaction has ID[{}], will replace with server assigned ID", nextId.getIdPart());
-		// } else if (nextResouceOperationIn == BundleEntryTransactionOperationEnum.CREATE) {
-		// if (nextId.isEmpty() == false) {
-		// ourLog.debug("Resource in transaction has ID[{}] but is marked for CREATE, will ignore ID",
-		// nextId.getIdPart());
-		// }
-		// if (candidateMatches != null) {
-		// if (candidateMatches.size() == 1) {
-		// ourLog.debug("Resource with match URL [{}] already exists, will be NOOP", matchUrl);
-		// BaseHasResource existingEntity = loadFirstEntityFromCandidateMatches(candidateMatches);
-		// IResource existing = (IResource) toResource(existingEntity);
-		// ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.put(existing, BundleEntryTransactionOperationEnum.NOOP);
-		// persistedResources.add(null);
-		// retVal.add(existing);
-		// continue;
-		// }
-		// if (candidateMatches.size() > 1) {
-		// throw new InvalidRequestException(getContext().getLocalizer().getMessage(FhirSystemDaoDstu2.class,
-		// "transactionOperationWithMultipleMatchFailure", BundleEntryTransactionOperationEnum.CREATE.name(), matchUrl,
-		// candidateMatches.size()));
-		// }
-		// }
-		// } else {
-		// createForcedIdIfNeeded(entity, nextId);
-		// }
-		// myEntityManager.persist(entity);
-		// if (entity.getForcedId() != null) {
-		// myEntityManager.persist(entity.getForcedId());
-		// }
-		// creations++;
-		// ourLog.info("Resource Type[{}] with ID[{}] does not exist, creating it", resourceName, nextId);
-		// } else {
-		// nextResouceOperationOut = nextResouceOperationIn;
-		// if (nextResouceOperationOut == null) {
-		// nextResouceOperationOut = BundleEntryTransactionOperationEnum.UPDATE;
-		// }
-		// updates++;
-		// ourLog.info("Resource Type[{}] with ID[{}] exists, updating it", resourceName, nextId);
-		// }
-		//
-		// persistedResources.add(entity);
-		// retVal.add(nextResource);
-		// ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.put(nextResource, nextResouceOperationOut);
-		// }
-		//
-		// ourLog.info("Flushing transaction to database");
-		// myEntityManager.flush();
-		//
-		// for (int i = 0; i < persistedResources.size(); i++) {
-		// ResourceTable entity = persistedResources.get(i);
-		//
-		// String resourceName = toResourceName(theResources.get(i));
-		// IdDt nextId = theResources.get(i).getId();
-		//
-		// IdDt newId;
-		//
-		// if (entity == null) {
-		// newId = retVal.get(i + 1).getId().toUnqualifiedVersionless();
-		// } else {
-		// newId = entity.getIdDt().toUnqualifiedVersionless();
-		// }
-		//
-		// if (nextId == null || nextId.isEmpty()) {
-		// ourLog.info("Transaction resource (with no preexisting ID) has been assigned new ID[{}]", nextId, newId);
-		// } else {
-		// if (nextId.toUnqualifiedVersionless().equals(newId)) {
-		// ourLog.info("Transaction resource ID[{}] is being updated", newId);
-		// } else {
-		// if (!nextId.getIdPart().startsWith("#")) {
-		// nextId = new IdDt(resourceName + '/' + nextId.getIdPart());
-		// ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
-		// idConversions.put(nextId, newId);
-		// }
-		// }
-		// }
-		//
-		// }
-		//
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
 			IResource nextResource = nextOutcome.getResource();
 			if (nextResource == null) {
@@ -445,49 +287,41 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			updateEntity(nextResource, nextOutcome.getEntity(), false, deletedTimestampOrNull, true, false);
 		}
-		//
-		// ourLog.info("Re-flushing updated resource references and extracting search criteria");
-		//
-		// for (int i = 0; i < theResources.size(); i++) {
-		// IResource resource = theResources.get(i);
-		// ResourceTable table = persistedResources.get(i);
-		// if (table == null) {
-		// continue;
-		// }
-		//
-		// InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(resource);
-		// Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-		// if (deletedInstantOrNull == null && ResourceMetadataKeyEnum.ENTRY_TRANSACTION_OPERATION.get(resource) ==
-		// BundleEntryTransactionOperationEnum.DELETE) {
-		// deletedTimestampOrNull = new Date();
-		// ResourceMetadataKeyEnum.DELETED_AT.put(resource, new InstantDt(deletedTimestampOrNull));
-		// }
-		//
-		// updateEntity(resource, table, table.getId() != null, deletedTimestampOrNull);
-		// }
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Transaction completed in {}ms", new Object[]{delay});
+		ourLog.info("Transaction completed in {}ms", new Object[] { delay });
 
 		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Transaction completed in " + delay + "ms");
 
+		for (IdDt next : allIds) {
+			IdDt replacement = idSubstitutions.get(next);
+			if (replacement == null) {
+				continue;
+			}
+			if (replacement.equals(next)) {
+				continue;
+			}
+			oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Placeholder resource ID \"" + next + "\" was replaced with permanent ID \"" + replacement + "\"");
+		}
+
 		notifyWriteCompleted();
 
+		response.setType(BundleTypeEnum.TRANSACTION_RESPONSE);
 		return response;
 	}
 
 	@Override
 	public MetaDt metaGetOperation() {
-		
+
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		List<TagDefinition> tagDefinitions = q.getResultList();
 
 		MetaDt retVal = super.toMetaDt(tagDefinitions);
-		
+
 		return retVal;
 	}
-	
+
 	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
 		String url = nextEntry.getTransaction().getUrl();
 		if (isBlank(url)) {
@@ -500,7 +334,12 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		IdDt newId = outcome.getId().toUnqualifiedVersionless();
 		IdDt resourceId = nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
+			/*
+			 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified
+			 * kind too just to be lenient.
+			 */
 			idSubstitutions.put(resourceId, newId);
+			idSubstitutions.put(resourceId.withResourceType(null), newId);
 		}
 		idToPersistedOutcome.put(newId, outcome);
 		if (outcome.getCreated().booleanValue()) {

@@ -210,9 +210,10 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 					ourLog.info("Transaction resource ID[{}] is being updated", newId);
 				} else {
 					if (!nextId.getIdPart().startsWith("#")) {
-						nextId = new IdDt(resourceName + '/' + nextId.getIdPart());
+						nextId = new IdDt(resourceName, nextId.getIdPart());
 						ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
 						idConversions.put(nextId, newId);
+						idConversions.put(new IdDt(nextId.getIdPart()), newId);
 					}
 				}
 			}
