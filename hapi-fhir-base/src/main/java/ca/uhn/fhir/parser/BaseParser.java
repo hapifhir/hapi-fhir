@@ -328,7 +328,19 @@ public abstract class BaseParser implements IParser {
 								versionIdPart = ResourceMetadataKeyEnum.VERSION.get((IResource) res);
 							}
 
-							res.setId(new IdDt(baseType.getValueAsString(), resDef.getName(), res.getIdElement().getIdPart(), versionIdPart));
+							String baseUrl = baseType.getValueAsString();
+							String idPart = res.getIdElement().getIdPart();
+							
+							String resourceName = resDef.getName();
+							if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
+								res.setId(new IdDt(baseUrl, resourceName, idPart, versionIdPart));
+							} else {
+								if (baseUrl.endsWith(":")) {
+									res.setId(new IdDt(baseUrl + idPart));
+								} else {
+									res.setId(new IdDt(baseUrl + ':' + idPart));
+								}
+							}
 						}
 
 					}

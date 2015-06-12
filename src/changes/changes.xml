@@ -84,6 +84,11 @@
 				now work, in order to be lenient. Thanks to Bill De Beaubien for
 				reporting!
 			</action>
+			<action type="fix">
+				When parsing Bundles, if Bundle.entry.base is set to "cid:" (for DSTU1) 
+				or "urn:uuid:" / "urn:oid:" (for DSTU2) this is now correctly passed as
+				the base in resource.getId()
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

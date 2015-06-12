@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,7 +129,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		ourLog.info("Beginning transaction with {} resources", theResources.getEntry().size());
 		long start = System.currentTimeMillis();
 
-		Set<IdDt> allIds = new HashSet<IdDt>();
+		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
 		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>();
 
