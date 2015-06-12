@@ -5,12 +5,7 @@ import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,6 +26,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -57,7 +53,7 @@ public class FhirSystemDaoDstu2Test {
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
 	private static IFhirResourceDao<Observation> ourObservationDao;
-	
+
 	@Test
 	public void testTransactionCreateMatchUrlWithOneMatch() {
 		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
@@ -144,24 +140,22 @@ public class FhirSystemDaoDstu2Test {
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundleStr = IOUtils.toString(bundleRes);
 		Bundle bundle = ourFhirContext.newXmlParser().parseResource(Bundle.class, bundleStr);
-		
+
 		Bundle resp = ourSystemDao.transaction(bundle);
-		
+
 		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		
+
 		OperationOutcome oo = (OperationOutcome) resp.getEntry().get(0).getResource();
 		assertThat(oo.getIssue().get(0).getDetailsElement().getValue(), containsString("Transaction completed"));
-		
+
 		assertThat(resp.getEntry().get(1).getTransactionResponse().getLocation(), startsWith("Patient/a555-44-4444/_history/"));
 		assertThat(resp.getEntry().get(2).getTransactionResponse().getLocation(), startsWith("Patient/temp6789/_history/"));
 		assertThat(resp.getEntry().get(3).getTransactionResponse().getLocation(), startsWith("Organization/GHH/_history/"));
-		
+
 		Patient p = ourPatientDao.read(new IdDt("Patient/a555-44-4444/_history/1"));
 		assertEquals("Patient/temp6789", p.getLink().get(0).getOther().getReference().getValue());
 	}
 
-	
-	
 	@Test
 	public void testTransactionReadAndSearch() {
 		String methodName = "testTransactionReadAndSearch";
@@ -561,7 +555,7 @@ public class FhirSystemDaoDstu2Test {
 
 		Observation o = new Observation();
 		o.getCode().setText("Some Observation");
-		o.getSubject().setReference("Patient/"+methodName);
+		o.getSubject().setReference("Patient/" + methodName);
 		request.addEntry().setResource(o).getTransaction().setMethod(HTTPVerbEnum.POST);
 
 		Bundle resp = ourSystemDao.transaction(request);
@@ -620,6 +614,99 @@ public class FhirSystemDaoDstu2Test {
 
 		o = ourObservationDao.read(new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()));
 		assertEquals(id.toVersionless(), o.getSubject().getReference());
+
+	}
+
+	@Test
+	public void testTransactionWithRelativeOidIds() throws Exception {
+		Bundle res = new Bundle();
+		res.setType(BundleTypeEnum.TRANSACTION);
+
+		Patient p1 = new Patient();
+		p1.setId("urn:oid:0.1.2.3");
+		p1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds01");
+		res.addEntry().setResource(p1).getTransaction().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
+
+		Observation o1 = new Observation();
+		o1.setId("cid:observation1");
+		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
+		o1.setSubject(new ResourceReferenceDt("urn:oid:0.1.2.3"));
+		res.addEntry().setResource(o1).getTransaction().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
+
+		Observation o2 = new Observation();
+		o2.setId("cid:observation2");
+		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
+		o2.setSubject(new ResourceReferenceDt("urn:oid:0.1.2.3"));
+		res.addEntry().setResource(o2).getTransaction().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
+
+		Bundle resp = ourSystemDao.transaction(res);
+		
+		ourLog.info(ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		assertEquals(BundleTypeEnum.TRANSACTION_RESPONSE, resp.getTypeElement().getValueAsEnum());
+		assertEquals(4, resp.getEntry().size());
+
+		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
+		
+		OperationOutcome outcome = (OperationOutcome) resp.getEntry().get(0).getResource();
+		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"Patient/urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
+		
+		assertTrue(resp.getEntry().get(1).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(resp.getEntry().get(2).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(resp.getEntry().get(3).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+
+		o1 = ourObservationDao.read(new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()));
+		o2 = ourObservationDao.read(new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation()));
+		assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+		assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+
+	}
+
+	/**
+	 * This is not the correct way to do it, but we'll allow it to be lenient
+	 */
+	@Test
+	public void testTransactionWithRelativeOidIdsQualified() throws Exception {
+		Bundle res = new Bundle();
+		res.setType(BundleTypeEnum.TRANSACTION);
+
+		Patient p1 = new Patient();
+		p1.setId("urn:oid:0.1.2.3");
+		p1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds01");
+		res.addEntry().setResource(p1).getTransaction().setMethod(HTTPVerbEnum.POST).setUrl("Patient");
+
+		Observation o1 = new Observation();
+		o1.setId("cid:observation1");
+		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
+		o1.setSubject(new ResourceReferenceDt("Patient/urn:oid:0.1.2.3"));
+		res.addEntry().setResource(o1).getTransaction().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
+
+		Observation o2 = new Observation();
+		o2.setId("cid:observation2");
+		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
+		o2.setSubject(new ResourceReferenceDt("Patient/urn:oid:0.1.2.3"));
+		res.addEntry().setResource(o2).getTransaction().setMethod(HTTPVerbEnum.POST).setUrl("Observation");
+
+		Bundle resp = ourSystemDao.transaction(res);
+		
+		ourLog.info(ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+		
+		assertEquals(BundleTypeEnum.TRANSACTION_RESPONSE, resp.getTypeElement().getValueAsEnum());
+		assertEquals(4, resp.getEntry().size());
+
+		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
+		
+		OperationOutcome outcome = (OperationOutcome) resp.getEntry().get(0).getResource();
+		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"Patient/urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
+		
+		assertTrue(resp.getEntry().get(1).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(resp.getEntry().get(2).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(resp.getEntry().get(3).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+
+		o1 = ourObservationDao.read(new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()));
+		o2 = ourObservationDao.read(new IdDt(resp.getEntry().get(3).getTransactionResponse().getLocation()));
+		assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+		assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
 
 	}
 
@@ -744,7 +831,7 @@ public class FhirSystemDaoDstu2Test {
 	@Test
 	public void testSystemMetaOperation() {
 		deleteEverything();
-		
+
 		MetaDt meta = ourSystemDao.metaGetOperation();
 		List<CodingDt> published = meta.getTag();
 		assertEquals(0, published.size());
@@ -841,7 +928,7 @@ public class FhirSystemDaoDstu2Test {
 		for (IBaseResource iResource : allRes) {
 			if (ResourceMetadataKeyEnum.DELETED_AT.get((IResource) iResource) == null) {
 				ourLog.info("Deleting: {}", iResource.getIdElement());
-				
+
 				Bundle b = new Bundle();
 				b.setType(BundleTypeEnum.TRANSACTION);
 				String url = iResource.getIdElement().toVersionless().getValue();
@@ -849,7 +936,7 @@ public class FhirSystemDaoDstu2Test {
 				systemDao.transaction(b);
 			}
 		}
-		
+
 		systemDao.deleteAllTagsOnServer();
 	}
 

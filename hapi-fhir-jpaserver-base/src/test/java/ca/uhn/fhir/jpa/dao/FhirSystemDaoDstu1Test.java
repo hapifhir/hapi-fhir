@@ -303,7 +303,8 @@ public class FhirSystemDaoDstu1Test {
 
 
     /**
-     * Issue #55
+     * Issue #55. Note that this is the incorrect way to 
+     * do this but we'll leave it since people may depend on it.
      */
     @Test
     public void testTransactionWithCidIds() throws Exception {
@@ -324,6 +325,41 @@ public class FhirSystemDaoDstu1Test {
         o2.setId("cid:observation2");
         o2.getIdentifier().setSystem("system").setValue("testTransactionWithCidIds03");
         o2.setSubject(new ResourceReferenceDt("Patient/cid:patient1"));
+        res.add(o2);
+
+        ourSystemDao.transaction(res);
+
+        assertTrue(p1.getId().getValue(), p1.getId().getIdPart().matches("^[0-9]+$"));
+        assertTrue(o1.getId().getValue(), o1.getId().getIdPart().matches("^[0-9]+$"));
+        assertTrue(o2.getId().getValue(), o2.getId().getIdPart().matches("^[0-9]+$"));
+
+        assertThat(o1.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+        assertThat(o2.getSubject().getReference().getValue(), endsWith("Patient/" + p1.getId().getIdPart()));
+
+    }
+
+    /**
+     * This is the correct way to do this, not {@link #testTransactionWithCidIds()}
+     */
+    @Test
+    public void testTransactionWithCidIdsUnqualified() throws Exception {
+        List<IResource> res = new ArrayList<IResource>();
+
+        Patient p1 = new Patient();
+        p1.setId("cid:patient1");
+        p1.addIdentifier().setSystem("system").setValue("testTransactionWithCidIdsUnqualified01");
+        res.add(p1);
+
+        Observation o1 = new Observation();
+        o1.setId("cid:observation1");
+        o1.getIdentifier().setSystem("system").setValue("testTransactionWithCidIdsUnqualified02");
+        o1.setSubject(new ResourceReferenceDt("cid:patient1"));
+        res.add(o1);
+
+        Observation o2 = new Observation();
+        o2.setId("cid:observation2");
+        o2.getIdentifier().setSystem("system").setValue("testTransactionWithCidIdsUnqualified03");
+        o2.setSubject(new ResourceReferenceDt("cid:patient1"));
         res.add(o2);
 
         ourSystemDao.transaction(res);
