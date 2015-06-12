@@ -24,10 +24,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 
 /**
@@ -120,11 +122,12 @@ public interface IParser {
 	<T extends IBaseResource> T parseResource(Class<T> theResourceType, String theString) throws DataFormatException;
 
 	/**
-	 * Parses a resource
+	 * Parses a resource 
 	 * 
 	 * @param theReader
 	 *            The reader to parse input from. Note that the Reader will not be closed by the parser upon completion.
-	 * @return A parsed resource
+	 * @return A parsed resource. Note that the returned object will be an instance of {@link IResource} or {@link IAnyResource} 
+	 * depending on the specific FhirContext which created this parser.
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
@@ -135,7 +138,8 @@ public interface IParser {
 	 * 
 	 * @param theMessageString
 	 *            The string to parse
-	 * @return A parsed resource
+	 * @return A parsed resource. Note that the returned object will be an instance of {@link IResource} or {@link IAnyResource} 
+	 * depending on the specific FhirContext which created this parser.
 	 * @throws DataFormatException
 	 *             If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */

@@ -17,13 +17,13 @@
 			</p>
 			<p>
 				HAPI was originally started as a separate Java implementation of FHIR,
-				but with a fairly different focus: implementing servers with an easily 
+				with a fairly different focus: implementing servers with an easily 
 				extendible data model. Over time though, the two Java implementations have
 				shown a fair bit of overlap, so at the 2014
 				<a href="http://fhir.furore.com/Events/DevDaysEval2014">DevDays</a> we decided
 				to try and harmonize the two libraries.
 			</p>
-			<p>  
+			<p>
 				HAPI FHIR 1.1 begins the availability of a harmonized library. Note that 
 				this version has not yet been formally released, but is currently available in 
 				"snapshot" development builds. 
@@ -39,7 +39,7 @@
 				of HAPI's code-first statically bound extension mechanism. 
 			</p>
 			
-			<subsection name="How it Works">
+			<subsection name="The RI Data Model">
 				<p>
 					At this point, the RI integration consists of a new parallel set of
 					classes representing the FHIR data model. For example, in addition to the
@@ -69,8 +69,45 @@
 				<img src="./images/hapi-1.1-structs-datatypes.png" alt="Structures"/>
 
 			</subsection>
+			
+			<subsection name="Using the RI Structures in Your Application">
+				
+				<p>
+					If you want to use the RI structures in your application,
+					you will need to use the "hapi-fhir-structures-hl7org-dstu2-[version].jar"
+					library.
+				</p>
+
+				<p>
+					Using these structures is then similar to using other structures.
+				</p>
+				
+				<macro name="snippet">
+					<param name="id" value="creatingContextHl7org" />
+					<param name="file" value="examples/src/main/java/example/FhirContextIntro.java" />
+				</macro>
+				
+			</subsection>
+			
 		</section>
 
+		<section name="Upgrading Existing Applications to HAPI FHIR 1.1">
+		
+			<p>
+				If you have an existing application built using a version of previous 
+				version of HAPI FHIR, there is one change that may affect you. As shown above,
+				a new interface called <code>IBaseResource</code> has been introduced, and the
+				<code>IResource</code> interface extends from it. Many methods in the API which 
+				previously returned <code>IResource</code> now return <code>IBaseResource</code>.
+			</p>
+			<p>
+				For these methods, you may cast the <code>IBaseResource</code> to
+				<code>IResource</code>. 
+			</p>
+			
+		</section>
+		
+		
 <!-- 
 		<section name="Upgrading to HAPI FHIR 0.8">
 			

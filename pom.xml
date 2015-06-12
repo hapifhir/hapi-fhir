@@ -161,7 +161,7 @@
 		is shown, so that we can deploy the site even if the project is on a
 		snapshot version.
 		-->
-		<hapi_stable_version>0.9</hapi_stable_version>
+		<hapi_stable_version>1.0</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		

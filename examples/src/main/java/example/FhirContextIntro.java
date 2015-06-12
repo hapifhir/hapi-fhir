@@ -14,11 +14,33 @@ public class FhirContextIntro {
 	@SuppressWarnings("unused")
 	public static void creatingContext() {
 // START SNIPPET: creatingContext
+// Create a context for DSTU1
 FhirContext ctx = FhirContext.forDstu1();
+
+// Alternately, create a context for DSTU2
+FhirContext ctxDstu2 = FhirContext.forDstu2();
 // END SNIPPET: creatingContext
 		
 	}
 	
+   @SuppressWarnings("unused")
+   public static void creatingContextHl7org() {
+// START SNIPPET: creatingContextHl7org
+// To use the RI structures, you need to specifically use a FhirContext configured
+// for HL7.org Structures
+FhirContext ctx = FhirContext.forDstu2Hl7Org();
+
+// Working with RI structures is similar to how it works with the HAPI structures
+org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+patient.addName().addGiven("John").addFamily("Smith");
+patient.getBirthDateElement().setValueAsString("1998-02-22");
+
+// Parsing and encoding works the same way too
+String encoded = ctx.newJsonParser().encodeResourceToString(patient);
+
+// END SNIPPET: creatingContextHl7org
+      
+   }
 	
 	public static void main(String[] args) throws DataFormatException {
 
