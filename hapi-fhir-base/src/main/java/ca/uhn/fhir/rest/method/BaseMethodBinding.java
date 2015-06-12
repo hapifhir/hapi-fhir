@@ -267,18 +267,26 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	protected byte[] loadRequestContents(RequestDetails theRequest) throws IOException {
+		/*
+		 * This is weird, but this class is used both in clients and in servers, and
+		 * we want to avoid needing to depend on servlet-api in clients since there is
+		 * no point. So we dynamically load a class that does the servlet processing in 
+		 * servers. Down the road it may make sense to just split the method binding
+		 * classes into server and client versions, but this isn't actually a huge deal
+		 * I don't think.
+		 */
 		IRequestReader reader = ourRequestReader;
 		if (reader == null) {
 			try {
 				Class.forName("javax.servlet.ServletInputStream");
-				String className = BaseMethodBinding.class.getName() + "." + "ActiveRequestReader";
+				String className = BaseMethodBinding.class.getName() + "$" + "ActiveRequestReader";
 				try {
 					reader = (IRequestReader) Class.forName(className).newInstance();
 				} catch (Exception e1) {
 					throw new ConfigurationException("Failed to instantiate class " + className, e1);
 				}
 			} catch (ClassNotFoundException e) {
-				String className = BaseMethodBinding.class.getName() + "." + "InactiveRequestReader";
+				String className = BaseMethodBinding.class.getName() + "$" + "InactiveRequestReader";
 				try {
 					reader = (IRequestReader) Class.forName(className).newInstance();
 				} catch (Exception e1) {
@@ -596,7 +604,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
 	 */
 	@SuppressWarnings("unused")
-	private static class ActiveRequestReader implements IRequestReader {
+	static class ActiveRequestReader implements IRequestReader {
 		@Override
 		public InputStream getInputStream(RequestDetails theRequestDetails) throws IOException {
 			return theRequestDetails.getServletRequest().getInputStream();
@@ -607,7 +615,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 * @see BaseMethodBinding#loadRequestContents(RequestDetails)
 	 */
 	@SuppressWarnings("unused")
-	private static class InactiveRequestReader implements IRequestReader {
+	static class InactiveRequestReader implements IRequestReader {
 		@Override
 		public InputStream getInputStream(RequestDetails theRequestDetails) {
 			throw new IllegalStateException("The servlet-api JAR is not found on the classpath. Please check that this library is available.");

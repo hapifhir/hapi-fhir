@@ -81,6 +81,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -109,7 +110,11 @@ public class ResourceProviderDstu2Test {
 	// private static JpaConformanceProvider ourConfProvider;
 
 	private void delete(String theResourceType, String theParamName, String theParamValue) {
-		Bundle resources = ourClient.search().forResource(theResourceType).where(new StringClientParam(theParamName).matches().value(theParamValue)).execute();
+		IQuery<Bundle> forResource = ourClient.search().forResource(theResourceType);
+		if (theParamName != null) {
+			forResource = forResource.where(new StringClientParam(theParamName).matches().value(theParamValue));
+		}
+		Bundle resources = forResource.execute();
 		for (IResource next : resources.toListOfResources()) {
 			ourLog.info("Deleting resource: {}", next.getId());
 			ourClient.delete().resource(next).execute();
@@ -783,17 +788,25 @@ public class ResourceProviderDstu2Test {
 	@Test
 	public void testSearchWithMissing() throws Exception {
 		ourLog.info("Starting testSearchWithMissing");
+		
+		delete("Organization", null, null);
+		
+		ourLog.info("Starting testSearchWithMissing");
 		String methodName = "testSearchWithMissing";
 
+		Organization org = new Organization();
+		IdDt deletedId = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		ourClient.delete().resourceById(deletedId).execute();
+		
 		List<IResource> resources = new ArrayList<IResource>();
 		for (int i = 0; i < 20; i++) {
-			Organization org = new Organization();
+			org = new Organization();
 			org.setName(methodName + "_0" + i);
 			resources.add(org);
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 		
-		Organization org = new Organization();
+		org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
 		org.setName(methodName + "name");
 		IdDt orgNotMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
@@ -832,6 +845,7 @@ public class ResourceProviderDstu2Test {
 			List<IdDt> list = toIdListUnqualifiedVersionless(found);
 			ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
 			assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
+			assertThat(list, not(containsInRelativeOrder(deletedId)));
 			assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
 	}
 

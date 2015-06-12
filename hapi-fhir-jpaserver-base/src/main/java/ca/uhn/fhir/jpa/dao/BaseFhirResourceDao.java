@@ -382,12 +382,13 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 		Predicate joinPredicate = builder.not(builder.in(from.get("myId")).value(subQ));
 		Predicate typePredicate = builder.equal(from.get("myResourceType"), resourceType);
+		Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
 		
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myId").in(thePids));
-			cq.where(builder.and(inPids, typePredicate, joinPredicate));
+			cq.where(builder.and(inPids, typePredicate, joinPredicate, notDeletedPredicate));
 		} else {
-			cq.where(builder.and(typePredicate, joinPredicate));
+			cq.where(builder.and(typePredicate, joinPredicate, notDeletedPredicate));
 		}
 		
 		ourLog.info("Adding :missing qualifier for parameter '{}'", theParamName);
