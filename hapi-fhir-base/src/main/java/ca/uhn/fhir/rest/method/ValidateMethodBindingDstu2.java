@@ -24,10 +24,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -62,5 +64,16 @@ public class ValidateMethodBindingDstu2 extends OperationMethodBinding {
 		setParameters(newParams);
 
 	}
+	
+	
+	public static BaseHttpClientInvocation createValidationMethodBinding(FhirContext theContext, IBaseResource theResource) {
+		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
+		
+		
+		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		String resourceId = theResource.getIdElement().getIdPart();
+		return createOperationInvocation(theContext, resourceName, resourceId, Constants.EXTOP_VALIDATE, parameters, false);
+	}
+	
 
 }

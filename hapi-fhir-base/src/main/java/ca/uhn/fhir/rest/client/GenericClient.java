@@ -20,8 +20,7 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -508,7 +507,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@Override
 	public MethodOutcome validate(IResource theResource) {
-		BaseHttpClientInvocation invocation = ValidateMethodBindingDstu1.createValidateInvocation(theResource, null, myContext);
+		BaseHttpClientInvocation invocation;
+//		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+			invocation = ValidateMethodBindingDstu1.createValidateInvocation(theResource, null, myContext);
+//		} else {
+//			invocation = ValidateMethodBindingDstu2.createOperationInvocation(theContext, theResourceName, theId, theOperationName, theInput, theUseHttpGet)
+//					//createValidateInvocation(theResource, null, myContext);
+//		}
+		
+		
 		if (isKeepResponses()) {
 			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
 		}
