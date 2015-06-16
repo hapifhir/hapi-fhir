@@ -1048,8 +1048,8 @@ public abstract class BaseFhirDao implements IDao {
 				quantityParams = extractSearchParamQuantity(entity, theResource);
 				dateParams = extractSearchParamDates(entity, theResource);
 
-				ourLog.info("Indexing resource: {}", entity.getId());
-				ourLog.info("Storing string indexes: {}", stringParams);
+//				ourLog.info("Indexing resource: {}", entity.getId());
+				ourLog.trace("Storing string indexes: {}", stringParams);
 				
 				tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
 				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(entity, theResource)) {

@@ -154,7 +154,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	@Validate
-	public MethodOutcome validate(@ResourceParam T theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
 			@Validate.Profile String theProfile) {
 
 		final OperationOutcome oo = new OperationOutcome();

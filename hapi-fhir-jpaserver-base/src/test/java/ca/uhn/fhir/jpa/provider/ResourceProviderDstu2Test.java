@@ -82,6 +82,7 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -410,6 +411,34 @@ public class ResourceProviderDstu2Test {
 
 	}
 
+	@Test
+	public void testBundleCreate() throws Exception {
+		IGenericClient client = ourClient;
+
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
+		IdDt id = client.create().resource(resBody).execute().getId();
+		
+		ourLog.info("Created: {}", id);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
+
+		ourLog.info(ourFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+	}
+
+	@Test
+	public void testBundleCreateWithTypeTransaction() throws Exception {
+		IGenericClient client = ourClient;
+
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
+		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
+		try {
+		client.create().resource(resBody).execute().getId();
+		fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value other than 'document' - Value was: transaction"));
+		}
+	}
+	
 	/**
 	 * See #147
 	 */

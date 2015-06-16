@@ -283,6 +283,11 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	@Override
 	public String getValue() {
 		if (super.getValue() == null && myHaveComponentParts) {
+			
+			if (determineLocalPrefix(myBaseUrl) != null && myResourceType == null && myUnqualifiedVersionId == null) {
+				return myBaseUrl + myUnqualifiedId;
+			}
+			
 			StringBuilder b = new StringBuilder();
 			if (isNotBlank(myBaseUrl)) {
 				b.append(myBaseUrl);
@@ -395,11 +400,15 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	}
 
 	/**
-	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character
+	 * or it begins with "cid:" or "urn:")
 	 */
 	@Override
 	public boolean isLocal() {
-		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
+		if (myBaseUrl == null) {
+			return false;
+		}
+		return "#".equals(myBaseUrl) || myBaseUrl.equals("cid:") || myBaseUrl.startsWith("urn:");
 	}
 
 	/**
@@ -410,6 +419,34 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		setValue(theId.getValue());
 	}
 
+	private String determineLocalPrefix(String theValue) {
+		if (theValue == null || theValue.isEmpty()) {
+			return null;
+		}
+		if (theValue.startsWith("#")) {
+			return "#";
+		}
+		int lastPrefix = -1;
+		for (int i = 0; i < theValue.length(); i++) {
+			char nextChar = theValue.charAt(i);
+			if (nextChar == ':') {
+				lastPrefix = i;
+			} else if (!Character.isLetter(nextChar) || !Character.isLowerCase(nextChar)) {
+				break;
+			}
+		}
+		if (lastPrefix != -1) {
+			String candidate = theValue.substring(0, lastPrefix + 1);
+			if (candidate.startsWith("cid:") || candidate.startsWith("urn:")) {
+				return candidate;
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Set the value
 	 * 
@@ -426,15 +463,25 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 		// TODO: add validation
 		super.setValue(theValue);
 		myHaveComponentParts = false;
+		
+		String localPrefix = determineLocalPrefix(theValue);
+		
 		if (StringUtils.isBlank(theValue)) {
 			myBaseUrl = null;
 			super.setValue(null);
 			myUnqualifiedId = null;
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
-		} else if (theValue.charAt(0) == '#') {
+		} else if (theValue.charAt(0) == '#' && theValue.length() > 1) {
 			super.setValue(theValue);
-			myUnqualifiedId = theValue;
+			myBaseUrl = "#";
+			myUnqualifiedId = theValue.substring(1);
+			myUnqualifiedVersionId = null;
+			myResourceType = null;
+			myHaveComponentParts = true;
+		} else if (localPrefix != null) {
+			myBaseUrl = localPrefix;
+			myUnqualifiedId = theValue.substring(localPrefix.length());
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
 			myHaveComponentParts = true;

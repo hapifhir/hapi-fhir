@@ -846,7 +846,7 @@ public class FhirSystemDaoDstu2Test {
 		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
 		
 		OperationOutcome outcome = (OperationOutcome) resp.getEntry().get(0).getResource();
-		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"Patient/urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
+		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
 		
 		assertTrue(resp.getEntry().get(1).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
 		assertTrue(resp.getEntry().get(2).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
@@ -894,7 +894,7 @@ public class FhirSystemDaoDstu2Test {
 		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
 		
 		OperationOutcome outcome = (OperationOutcome) resp.getEntry().get(0).getResource();
-		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"Patient/urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
+		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
 		
 		assertTrue(resp.getEntry().get(1).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
 		assertTrue(resp.getEntry().get(2).getTransactionResponse().getLocation(), new IdDt(resp.getEntry().get(2).getTransactionResponse().getLocation()).getIdPart().matches("^[0-9]+$"));

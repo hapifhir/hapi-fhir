@@ -1395,6 +1395,12 @@ public class FhirResourceDaoDstu2Test {
 		assertEquals(1, result.size());
 		assertEquals(obsId01.getIdPart(), result.get(0).getId().getIdPart());
 
+		result = toList(ourObservationDao.search(Observation.SP_PATIENT, new ReferenceParam(patientId01.getIdPart())));
+		assertEquals(1, result.size());
+
+		result = toList(ourObservationDao.search(Observation.SP_PATIENT, new ReferenceParam(patientId01.getIdPart())));
+		assertEquals(1, result.size());
+
 		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "999999999999")));
 		assertEquals(0, result.size());
 

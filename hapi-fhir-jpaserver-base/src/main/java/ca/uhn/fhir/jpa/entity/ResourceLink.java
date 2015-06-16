@@ -50,17 +50,17 @@ public class ResourceLink implements Serializable {
 	private String mySourcePath;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName="RES_ID")
+	@JoinColumn(name = "SRC_RESOURCE_ID", referencedColumnName="RES_ID", nullable=false)
 	private ResourceTable mySourceResource;
 
-	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false)
+	@Column(name = "SRC_RESOURCE_ID", insertable = false, updatable = false, nullable=false)
 	private Long mySourceResourcePid;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName="RES_ID")
+	@JoinColumn(name = "TARGET_RESOURCE_ID", referencedColumnName="RES_ID", nullable=false)
 	private ResourceTable myTargetResource;
 
-	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false)
+	@Column(name = "TARGET_RESOURCE_ID", insertable = false, updatable = false,nullable=false)
 	private Long myTargetResourcePid;
 
 	public ResourceLink() {

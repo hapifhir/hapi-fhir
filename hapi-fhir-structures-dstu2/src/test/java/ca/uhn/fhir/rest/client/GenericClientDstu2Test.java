@@ -1108,7 +1108,15 @@ public class GenericClientDstu2Test {
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
 		idx++;
-}
+
+		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
+		assertEquals("http://example.com/fhir/Patient/$validate?_format=json&_pretty=true", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertThat(extractBody(capt, idx), containsString("\"resourceType\":\"Parameters\",\n"));
+		assertNotNull(response.getOperationOutcome());
+		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		idx++;
+	}
 
 	@BeforeClass
 	public static void beforeClass() {

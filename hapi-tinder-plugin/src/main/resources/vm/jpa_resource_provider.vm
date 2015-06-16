@@ -7,7 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.jpa.provider.JpaResourceProvider${versionCapitalized};
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.*;
 import ca.uhn.fhir.model.${version}.composite.*;
 import ca.uhn.fhir.model.${version}.resource.*;
@@ -16,7 +17,7 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 // import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.api.Bundle;
+// import ca.uhn.fhir.model.api.Bundle;
 
 public class ${className}ResourceProvider extends JpaResourceProvider${versionCapitalized}<${className}> {
 

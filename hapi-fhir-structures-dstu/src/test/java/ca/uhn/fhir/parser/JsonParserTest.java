@@ -99,7 +99,7 @@ public class JsonParserTest {
 
 		assertEquals(exp, act);
 	}
-	
+		
 	@Test
 	public void testDecimalPrecisionPreserved() {
 		String number = "52.3779939997090374535378485873776474764643249869328698436986235758587";

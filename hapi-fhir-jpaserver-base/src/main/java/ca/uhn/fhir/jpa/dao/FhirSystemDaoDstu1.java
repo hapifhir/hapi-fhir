@@ -60,14 +60,18 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 
 		for (int i = 0; i < theResources.size(); i++) {
 			IResource res = theResources.get(i);
-			if (res.getId().hasIdPart() && !res.getId().hasResourceType()) {
+			if (res.getId().hasIdPart() && !res.getId().hasResourceType() && !res.getId().isLocal()) {
 				res.setId(new IdDt(toResourceName(res.getClass()), res.getId().getIdPart()));
 			}
 
 			/*
 			 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
 			 */
-			if (res.getId().hasResourceType() && res.getId().hasIdPart()) {
+			if (res.getId().isLocal()) {
+				if (!allIds.add(res.getId())) {
+					throw new InvalidRequestException("Transaction bundle contains multiple resources with ID: " + res.getId());
+				}
+			} else if (res.getId().hasResourceType() && res.getId().hasIdPart()) {
 				IdDt nextId = res.getId().toUnqualifiedVersionless();
 				if (!allIds.add(nextId)) {
 					throw new InvalidRequestException("Transaction bundle contains multiple resources with ID: " + nextId);
@@ -134,7 +138,7 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 				} else {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", nextResouceOperationIn.name(), matchUrl, candidateMatches.size()));
 				}
-			} else if (nextId.isEmpty()) {
+			} else if (nextId.isEmpty() || nextId.isLocal()) {
 				entity = null;
 			} else {
 				entity = tryToLoadEntity(nextId);
@@ -144,7 +148,7 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 			if (entity == null) {
 				nextResouceOperationOut = BundleEntryTransactionMethodEnum.POST;
 				entity = toEntity(nextResource);
-				if (nextId.isEmpty() == false && nextId.getIdPart().startsWith("cid:")) {
+				if (nextId.isEmpty() == false && "cid:".equals(nextId.getBaseUrl())) {
 					ourLog.debug("Resource in transaction has ID[{}], will replace with server assigned ID", nextId.getIdPart());
 				} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.POST) {
 					if (nextId.isEmpty() == false) {
@@ -209,11 +213,11 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 				if (nextId.toUnqualifiedVersionless().equals(newId)) {
 					ourLog.info("Transaction resource ID[{}] is being updated", newId);
 				} else {
-					if (!nextId.getIdPart().startsWith("#")) {
-						nextId = new IdDt(resourceName, nextId.getIdPart());
+					if (nextId.isLocal()) {
+//						nextId = new IdDt(resourceName, nextId.getIdPart());
 						ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
 						idConversions.put(nextId, newId);
-						idConversions.put(new IdDt(nextId.getIdPart()), newId);
+						idConversions.put(new IdDt(resourceName + "/" + nextId.getValue()), newId);
 					}
 				}
 			}

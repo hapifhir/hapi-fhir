@@ -188,7 +188,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) throws DataFormatException {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) throws DataFormatException {
 		StringBuilder url = new StringBuilder();
 
 		if (myUrlPath == null) {
@@ -234,6 +234,10 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		} else {
 			encoding = EncodingEnum.XML;
 			parser = myContext.newXmlParser();
+		}
+		
+		if (thePrettyPrint != null) {
+			parser.setPrettyPrint(thePrettyPrint);
 		}
 		
 		parser.setOmitResourceId(myOmitResourceId);

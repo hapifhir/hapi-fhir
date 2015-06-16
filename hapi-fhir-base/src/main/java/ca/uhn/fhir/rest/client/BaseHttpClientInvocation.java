@@ -56,7 +56,7 @@ public abstract class BaseHttpClientInvocation {
 	 *            The encoding to use for any serialized content sent to the
 	 *            server
 	 */
-	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding);
+	public abstract HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint);
 
 	protected static void appendExtraParamsWithQuestionMark(Map<String, List<String>> theExtraParams, StringBuilder theUrlBuilder, boolean theWithQuestionMark) {
 		if (theExtraParams == null) {

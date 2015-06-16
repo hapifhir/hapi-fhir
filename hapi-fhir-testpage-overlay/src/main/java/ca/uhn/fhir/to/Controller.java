@@ -597,6 +597,7 @@ public class Controller {
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theReq, getContext(theRequest), myConfig, interceptor);
+		client.setPrettyPrint(true);
 
 		Class<? extends IResource> type = null; // def.getImplementingClass();
 		if ("history-type".equals(theMethod)) {
@@ -616,8 +617,10 @@ public class Controller {
 		try {
 			if (body.startsWith("{")) {
 				resource = getContext(theRequest).newJsonParser().parseResource(type, body);
+				client.setEncoding(EncodingEnum.JSON);
 			} else if (body.startsWith("<")) {
 				resource = getContext(theRequest).newXmlParser().parseResource(type, body);
+				client.setEncoding(EncodingEnum.XML);
 			} else {
 				theModel.put("errorMsg", "Message body does not appear to be a valid FHIR resource instance document. Body should start with '<' (for XML encoding) or '{' (for JSON encoding).");
 				return;
@@ -637,7 +640,7 @@ public class Controller {
 		try {
 			if (validate) {
 				outcomeDescription = "Validate Resource";
-				client.validate(resource);
+				client.validate().resource(resource).prettyPrint().execute();
 			} else {
 				String id = theReq.getParameter("resource-create-id");
 				if ("update".equals(theMethod)) {

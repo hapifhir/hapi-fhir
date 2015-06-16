@@ -186,7 +186,7 @@ public abstract class BaseClient implements IRestfulClient {
 				encoding=theEncoding;
 			}
 			
-			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding);
+			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
 
 			if (theLogRequestAndResponse) {
 				ourLog.info("Client invoking: {}", httpRequest);

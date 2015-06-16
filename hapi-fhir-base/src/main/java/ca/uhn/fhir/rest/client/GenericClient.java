@@ -158,7 +158,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		HttpGetClientInvocation invocation = MethodUtil.createConformanceInvocation();
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -178,7 +178,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome create(IResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createCreateInvocation(theResource, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
@@ -200,7 +200,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome delete(final Class<? extends IResource> theType, IdDt theId) {
 		HttpDeleteClientInvocation invocation = DeleteMethodBinding.createDeleteInvocation(theId.withResourceType(toResourceName(theType)));
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		final String resourceName = myContext.getResourceDefinition(theType).getName();
@@ -236,7 +236,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		if (theIfVersionMatches != null) {
@@ -312,7 +312,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		String id = theIdDt != null && theIdDt.isEmpty() == false ? theIdDt.getValue() : null;
 		HttpGetClientInvocation invocation = HistoryMethodBinding.createHistoryInvocation(resourceName, id, theSince, theLimit);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		BundleResponseHandler binding = new BundleResponseHandler(theType);
@@ -430,7 +430,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		BaseHttpClientInvocation invocation = SearchMethodBinding.createSearchInvocation(myContext, toResourceName(theType), params, null, null, null);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		BundleResponseHandler binding = new BundleResponseHandler(theType);
@@ -474,7 +474,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public List<IBaseResource> transaction(List<IBaseResource> theResources) {
 		BaseHttpClientInvocation invocation = TransactionMethodBinding.createTransactionInvocation(theResources, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		Bundle resp = invokeClient(myContext, new BundleResponseHandler(null), invocation, myLogRequestAndResponse);
@@ -491,7 +491,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome update(IdDt theIdDt, IResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(theResource, null, theIdDt, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
@@ -522,7 +522,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
 		}
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
@@ -601,7 +601,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			// }
 
 			if (isKeepResponses()) {
-				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding());
+				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
 			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse);

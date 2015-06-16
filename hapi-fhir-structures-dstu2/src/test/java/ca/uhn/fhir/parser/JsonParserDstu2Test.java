@@ -1,7 +1,13 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +20,6 @@ import net.sf.json.JsonConfig;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -64,6 +69,87 @@ public class JsonParserDstu2Test {
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
 	}
 
+	@Test
+	public void testParseAndEncodeBundleWithUuidBase() {
+		//@formatter:off
+		String input = 
+				"{\n" + 
+				"    \"resourceType\":\"Bundle\",\n" + 
+				"    \"type\":\"document\",\n" + 
+				"    \"entry\":[\n" + 
+				"        {\n" + 
+				"            \"base\":\"urn:uuid:\",\n" + 
+				"            \"resource\":{\n" + 
+				"                \"resourceType\":\"Composition\",\n" + 
+				"                \"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\",\n" + 
+				"                \"meta\":{\n" + 
+				"                    \"lastUpdated\":\"2013-05-28T22:12:21Z\"\n" + 
+				"                },\n" + 
+				"                \"text\":{\n" + 
+				"                    \"status\":\"generated\",\n" + 
+				"                    \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 180f219f-97a8-486d-99d9-ed631fe4fc57</p><p><b>meta</b>: </p><p><b>date</b>: Feb 1, 2013 12:30:02 PM</p><p><b>type</b>: Discharge Summary from Responsible Clinician <span>(Details : {LOINC code '28655-9' = 'Physician attending Discharge summary)</span></p><p><b>status</b>: final</p><p><b>confidentiality</b>: N</p><p><b>author</b>: <a>Doctor Dave. Generated Summary: 23; Adam Careful </a></p><p><b>encounter</b>: <a>http://fhir.healthintersections.com.au/open/Encounter/doc-example</a></p></div>\"\n" + 
+				"                },\n" + 
+				"                \"date\":\"2013-02-01T12:30:02Z\",\n" + 
+				"                \"type\":{\n" + 
+				"                    \"coding\":[\n" + 
+				"                        {\n" + 
+				"                            \"system\":\"http://loinc.org\",\n" + 
+				"                            \"code\":\"28655-9\"\n" + 
+				"                        }\n" + 
+				"                    ],\n" + 
+				"                    \"text\":\"Discharge Summary from Responsible Clinician\"\n" + 
+				"                },\n" + 
+				"                \"status\":\"final\",\n" + 
+				"                \"confidentiality\":\"N\",\n" + 
+				"                \"subject\":{\n" + 
+				"                    \"reference\":\"http://fhir.healthintersections.com.au/open/Patient/d1\",\n" + 
+				"                    \"display\":\"Eve Everywoman\"\n" + 
+				"                },\n" + 
+				"                \"author\":[\n" + 
+				"                    {\n" + 
+				"                        \"reference\":\"Practitioner/example\",\n" + 
+				"                        \"display\":\"Doctor Dave\"\n" + 
+				"                    }\n" + 
+				"                ],\n" + 
+				"                \"encounter\":{\n" + 
+				"                    \"reference\":\"http://fhir.healthintersections.com.au/open/Encounter/doc-example\"\n" + 
+				"                },\n" + 
+				"                \"section\":[\n" + 
+				"                    {\n" + 
+				"                        \"title\":\"Reason for admission\",\n" + 
+				"                        \"content\":{\n" + 
+				"                            \"reference\":\"urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a\"\n" + 
+				"                        }\n" + 
+				"                    },\n" + 
+				"                    {\n" + 
+				"                        \"title\":\"Medications on Discharge\",\n" + 
+				"                        \"content\":{\n" + 
+				"                            \"reference\":\"urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1\"\n" + 
+				"                        }\n" + 
+				"                    },\n" + 
+				"                    {\n" + 
+				"                        \"title\":\"Known allergies\",\n" + 
+				"                        \"content\":{\n" + 
+				"                            \"reference\":\"urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b\"\n" + 
+				"                        }\n" + 
+				"                    }\n" + 
+				"                ]\n" + 
+				"            }\n" + 
+				"        }" +
+				"    ]" +
+				"}";
+		//@formatter:on
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
+		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
+		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
+		assertThat(encoded, containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\""));
+	}
 
 	
 	@Test

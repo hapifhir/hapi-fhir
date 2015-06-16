@@ -574,12 +574,12 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				ReferenceParam ref = (ReferenceParam) params;
 
 				String resourceId = ref.getValueAsQueryToken();
-				if (resourceId.contains("/")) {
-					IdDt dt = new IdDt(resourceId);
-					resourceId = dt.getIdPart();
-				}
 
 				if (isBlank(ref.getChain())) {
+					if (resourceId.contains("/")) {
+						IdDt dt = new IdDt(resourceId);
+						resourceId = dt.getIdPart();
+					}
 					Long targetPid = translateForcedIdToPid(new IdDt(resourceId));
 					ourLog.info("Searching for resource link with target PID: {}", targetPid);
 					Predicate eq = builder.equal(from.get("myTargetResourcePid"), targetPid);
@@ -1097,6 +1097,9 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
 		StopWatch w = new StopWatch();
+		
+		preProcessResourceForStorage(theResource);
+		
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
@@ -1112,7 +1115,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 		}
 
-		if (theResource.getId().isEmpty() == false) {
+		if (isNotBlank(theResource.getId().getIdPart())) {
 			if (isValidPid(theResource.getId())) {
 				throw new UnprocessableEntityException(
 						"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
@@ -1137,6 +1140,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		notifyWriteCompleted();
 		ourLog.info("Processed create on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return outcome;
+	}
+
+	protected void preProcessResourceForStorage(T theResource) {
+		// nothing by default
 	}
 
 	@Override
@@ -1994,6 +2001,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing) {
 		StopWatch w = new StopWatch();
+
+		preProcessResourceForStorage(theResource);
 
 		final ResourceTable entity;
 

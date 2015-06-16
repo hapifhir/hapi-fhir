@@ -50,7 +50,7 @@ public class HttpDeleteClientInvocation extends BaseHttpClientInvocation {
 	}
 
 	@Override
-	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding) {
+	public HttpRequestBase asHttpRequest(String theUrlBase, Map<String, List<String>> theExtraParams, EncodingEnum theEncoding, Boolean thePrettyPrint) {
 		StringBuilder b = new StringBuilder();
 		b.append(theUrlBase);
 		if (!theUrlBase.endsWith("/")) {

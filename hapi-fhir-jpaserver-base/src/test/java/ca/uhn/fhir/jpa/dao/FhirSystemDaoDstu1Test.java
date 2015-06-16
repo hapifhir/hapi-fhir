@@ -358,7 +358,10 @@ public class FhirSystemDaoDstu1Test {
 
 		List<IResource> response = ourSystemDao.transaction(res);
 
-		ourLog.info(ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response.get(0)));
+		String encodeResourceToString = ourFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(response.get(0));
+		ourLog.info(encodeResourceToString);
+		
+		assertThat(encodeResourceToString, not(containsString("smsp")));
 	}
 
 	/**

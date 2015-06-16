@@ -85,7 +85,11 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		if (myBase.getMissing()!=null) {
 			return myBase.getValueAsQueryToken();
 		}
-		return getIdPart();
+		if (isLocal()) {
+			return getValue();
+		} else {
+			return getIdPart();
+		}
 	}
 
 	public void setChain(String theChain) {

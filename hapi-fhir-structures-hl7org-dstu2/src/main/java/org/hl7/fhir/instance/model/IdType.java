@@ -29,7 +29,8 @@ package org.hl7.fhir.instance.model;
 
 */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 
@@ -41,6 +42,8 @@ import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import ca.uhn.fhir.parser.DataFormatException;
 
 /**
  * This class represents the logical identity for a resource, or as much of that
@@ -311,6 +314,11 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 	public String getValue() {
 		String retVal = super.getValue();
 		if (retVal == null && myHaveComponentParts) {
+
+			if (determineLocalPrefix(myBaseUrl) != null && myResourceType == null && myUnqualifiedVersionId == null) {
+				return myBaseUrl + myUnqualifiedId;
+			}
+
 			StringBuilder b = new StringBuilder();
 			if (isNotBlank(myBaseUrl)) {
 				b.append(myBaseUrl);
@@ -428,9 +436,37 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 	 */
 	@Override
 	public boolean isLocal() {
-		return myUnqualifiedId != null && myUnqualifiedId.isEmpty() == false && myUnqualifiedId.charAt(0) == '#';
+		return "#".equals(myBaseUrl);
 	}
 
+	private String determineLocalPrefix(String theValue) {
+		if (theValue == null || theValue.isEmpty()) {
+			return null;
+		}
+		if (theValue.startsWith("#")) {
+			return "#";
+		}
+		int lastPrefix = -1;
+		for (int i = 0; i < theValue.length(); i++) {
+			char nextChar = theValue.charAt(i);
+			if (nextChar == ':') {
+				lastPrefix = i;
+			} else if (!Character.isLetter(nextChar) || !Character.isLowerCase(nextChar)) {
+				break;
+			}
+		}
+		if (lastPrefix != -1) {
+			String candidate = theValue.substring(0, lastPrefix + 1);
+			if (candidate.startsWith("cid:") || candidate.startsWith("urn:")) {
+				return candidate;
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+	
 	/**
 	 * Set the value
 	 * 
@@ -443,22 +479,29 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 	 * </p>
 	 */
 	@Override
-	public IdType setValue(String theValue) {
+	public IdType setValue(String theValue) throws DataFormatException {
 		// TODO: add validation
 		super.setValue(theValue);
 		myHaveComponentParts = false;
+		
+		String localPrefix = determineLocalPrefix(theValue);
+		
 		if (StringUtils.isBlank(theValue)) {
 			myBaseUrl = null;
 			super.setValue(null);
 			myUnqualifiedId = null;
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
-		} else if (theValue.charAt(0) == '#') {
+		} else if (theValue.charAt(0) == '#' && theValue.length() > 1) {
 			super.setValue(theValue);
-			myUnqualifiedId = theValue;
+			myBaseUrl = "#";
+			myUnqualifiedId = theValue.substring(1);
 			myUnqualifiedVersionId = null;
 			myResourceType = null;
 			myHaveComponentParts = true;
+		} else if (localPrefix != null) {
+			myBaseUrl = localPrefix;
+			myUnqualifiedId = theValue.substring(localPrefix.length());
 		} else {
 			int vidIndex = theValue.indexOf("/_history/");
 			int idIndex;

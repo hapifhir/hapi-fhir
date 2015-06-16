@@ -92,9 +92,6 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			}
 			for (String next : keys) {
 				if (next.startsWith("resource.")) {
-					if (next.endsWith(".Bundle")) {
-						continue;
-					}
 					baseResourceNames.add(next.substring("resource.".length()).toLowerCase());
 				}
 			}

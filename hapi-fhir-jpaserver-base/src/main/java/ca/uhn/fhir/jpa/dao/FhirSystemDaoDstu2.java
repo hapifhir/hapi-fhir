@@ -151,7 +151,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			if (res != null) {
 
 				nextResourceId = res.getId();
-				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType()) {
+				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !nextResourceId.isLocal()) {
 					nextResourceId = new IdDt(toResourceName(res.getClass()), nextResourceId.getIdPart());
 					res.setId(nextResourceId);
 				}
@@ -159,7 +159,11 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 				/*
 				 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
 				 */
-				if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
+				if (nextResourceId.isLocal()) {
+					if (!allIds.add(nextResourceId)) {
+						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
+					}
+				} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
 					IdDt nextId = nextResourceId.toUnqualifiedVersionless();
 					if (!allIds.add(nextId)) {
 						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
@@ -173,6 +177,8 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextEntry.getTransaction().getMethod()));
 			}
 
+			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
+
 			switch (verb) {
 			case POST: {
 				// CREATE
@@ -182,7 +188,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 				DaoMethodOutcome outcome;
 				Entry newEntry = response.addEntry();
 				outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry, resourceType);
 				break;
 			}
 			case DELETE: {
@@ -218,7 +224,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 					outcome = resourceDao.update(res, parts.getResourceType() + '?' + parts.getParams(), false);
 				}
 
-				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry);
+				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry, resourceType);
 				break;
 			}
 			case GET: {
@@ -249,7 +255,8 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 					int configuredMax = 100; // this should probably be configurable or something
 					if (bundle.size() > configuredMax) {
-						oo.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
+						oo.addIssue().setSeverity(IssueSeverityEnum.WARNING)
+								.setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
 					}
 					List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
 					for (IBaseResource next : resourcesToAdd) {
@@ -330,16 +337,18 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		return url;
 	}
 
-	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome, Entry newEntry) {
+	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
+			Entry newEntry, String theResourceType) {
 		IdDt newId = outcome.getId().toUnqualifiedVersionless();
-		IdDt resourceId = nextResourceId.toUnqualifiedVersionless();
+		IdDt resourceId = nextResourceId.isLocal() ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
-			/*
-			 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified
-			 * kind too just to be lenient.
-			 */
 			idSubstitutions.put(resourceId, newId);
-			idSubstitutions.put(resourceId.withResourceType(null), newId);
+			if (resourceId.isLocal()) {
+				/*
+				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
+				 */
+				idSubstitutions.put(new IdDt(theResourceType + '/' + resourceId.getValue()), newId);
+			}
 		}
 		idToPersistedOutcome.put(newId, outcome);
 		if (outcome.getCreated().booleanValue()) {
