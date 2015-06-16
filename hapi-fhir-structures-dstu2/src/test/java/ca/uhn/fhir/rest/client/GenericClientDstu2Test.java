@@ -16,7 +16,6 @@ import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -36,12 +35,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
@@ -339,7 +340,7 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", capt.getAllValues().get(idx).getURI().toASCIIString());
 		idx++;
 	}
-
+	
 	@Test
 	public void testOperationAsGetWithNoInParameters() throws Exception {
 		IParser p = ourCtx.newXmlParser();
@@ -420,6 +421,48 @@ public class GenericClientDstu2Test {
 	}
 
 	@Test
+	public void testOperationWithBundleResponseJson() throws Exception {
+		
+		final String resp = "{\n" + 
+				"    \"resourceType\":\"Bundle\",\n" + 
+				"    \"id\":\"8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19\",\n" + 
+				"    \"base\":\"http://fhirtest.uhn.ca/baseDstu2\"\n" +
+				"}";
+		
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+		
+		client.registerInterceptor(new LoggingInterceptor(true));
+
+		// Create the input parameters to pass to the server
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
+		inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
+
+		// Invoke $everything on "Patient/1"
+		Parameters outParams = client.operation().onInstance(new IdDt("Patient", "18066")).named("$everything").withParameters(inParams).execute();
+
+		/*
+		 * Note that the $everything operation returns a Bundle instead of a Parameters resource. The client operation methods return a Parameters instance however, so HAPI creates a Parameters object
+		 * with a single parameter containing the value.
+		 */
+		ca.uhn.fhir.model.dstu2.resource.Bundle responseBundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) outParams.getParameter().get(0).getResource();
+
+		// Print the response bundle
+		assertEquals("8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId().getIdPart());
+	}
+
+	@Test
 	public void testOperationWithBundleResponseXml() throws Exception {
 		IParser p = ourCtx.newXmlParser();
 
@@ -462,48 +505,6 @@ public class GenericClientDstu2Test {
 		assertEquals(1, resp.getParameter().size());
 		assertEquals(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp.getParameter().get(0).getResource().getClass());
 		idx++;
-	}
-
-	@Test
-	public void testOperationWithBundleResponseJson() throws Exception {
-		
-		final String resp = "{\n" + 
-				"    \"resourceType\":\"Bundle\",\n" + 
-				"    \"id\":\"8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19\",\n" + 
-				"    \"base\":\"http://fhirtest.uhn.ca/baseDstu2\"\n" +
-				"}";
-		
-		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
-		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
-		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
-		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_JSON + "; charset=UTF-8"));
-		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
-			@Override
-			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8"));
-			}
-		});
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
-		
-		client.registerInterceptor(new LoggingInterceptor(true));
-
-		// Create the input parameters to pass to the server
-		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
-		inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
-
-		// Invoke $everything on "Patient/1"
-		Parameters outParams = client.operation().onInstance(new IdDt("Patient", "18066")).named("$everything").withParameters(inParams).execute();
-
-		/*
-		 * Note that the $everything operation returns a Bundle instead of a Parameters resource. The client operation methods return a Parameters instance however, so HAPI creates a Parameters object
-		 * with a single parameter containing the value.
-		 */
-		ca.uhn.fhir.model.dstu2.resource.Bundle responseBundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) outParams.getParameter().get(0).getResource();
-
-		// Print the response bundle
-		assertEquals("8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId().getIdPart());
 	}
 
 	@Test
@@ -1019,6 +1020,95 @@ public class GenericClientDstu2Test {
 		idx++;
 
 	}
+
+	@Test
+	public void testValidateNonFluent() throws Exception {
+
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setDetails("FOOBAR");
+		final String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Patient p = new Patient();
+		p.addName().addGiven("GIVEN");
+		
+		int idx = 0;
+		MethodOutcome response;
+
+		//@formatter:off
+		response = client.validate(p);
+		//@formatter:on
+		
+		assertEquals("http://example.com/fhir/Patient/$validate", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
+		assertNotNull(response.getOperationOutcome());
+		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		idx++;
+	}
+
+	@Test
+	public void testValidateFluent() throws Exception {
+
+		OperationOutcome oo = new OperationOutcome();
+		oo.addIssue().setDetails("FOOBAR");
+		final String msg = ourCtx.newXmlParser().encodeResourceToString(oo);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		Patient p = new Patient();
+		p.addName().addGiven("GIVEN");
+		
+		int idx = 0;
+		MethodOutcome response;
+
+		response = client.validate().resource(p).execute();
+		assertEquals("http://example.com/fhir/Patient/$validate", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
+		assertNotNull(response.getOperationOutcome());
+		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		idx++;
+
+		response = client.validate().resource(ourCtx.newXmlParser().encodeResourceToString(p)).execute();
+		assertEquals("http://example.com/fhir/Patient/$validate?_format=xml", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
+		assertNotNull(response.getOperationOutcome());
+		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		idx++;
+
+		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).execute();
+		assertEquals("http://example.com/fhir/Patient/$validate?_format=json", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", extractBody(capt, idx));
+		assertNotNull(response.getOperationOutcome());
+		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		idx++;
+}
 
 	@BeforeClass
 	public static void beforeClass() {

@@ -89,6 +89,12 @@
 				or "urn:uuid:" / "urn:oid:" (for DSTU2) this is now correctly passed as
 				the base in resource.getId()
 			</action>
+			<action type="add">
+				Add fluent client method for validate operation, and support the
+				new DSTU2 style extended operation for $validate if the client is
+				in DSTU2 mode. Thanks to Eric from the FHIR Skype Implementers chat for
+				reporting.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

@@ -12,10 +12,12 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -99,6 +101,29 @@ public class GenericClientExample {
           IdDt id = outcome.getId();
           // END SNIPPET: createConditional
       }
+      {
+         // START SNIPPET: validate
+         Patient patient = new Patient();
+         patient.addIdentifier().setSystem("http://hospital.com").setValue("123445");
+         patient.addName().addFamily("Smith").addGiven("John");
+         
+         // Validate the resource
+         MethodOutcome outcome = client.validate()
+            .resource(patient)
+            .execute();
+         
+         // The returned object will contain an operation outcome resource
+         OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+         
+         // If the OperationOutcome has any issues with a severity of ERROR or SEVERE,
+         // the validation failed.
+         for (Issue nextIssue : oo.getIssue()) {
+            if (nextIssue.getSeverityElement().getValueAsEnum().ordinal() >= IssueSeverityEnum.ERROR.ordinal()) {
+               System.out.println("We failed validation!");
+            }
+         }
+         // END SNIPPET: validate
+     }
        {
          // START SNIPPET: update
          Patient patient = new Patient();

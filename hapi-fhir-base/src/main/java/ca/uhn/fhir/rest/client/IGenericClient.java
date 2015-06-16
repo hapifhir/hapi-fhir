@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
+import ca.uhn.fhir.rest.gclient.IValidate;
 
 public interface IGenericClient extends IRestfulClient {
 
@@ -238,6 +239,7 @@ public interface IGenericClient extends IRestfulClient {
 	/**
 	 * Register a new interceptor for this client. An interceptor can be used to add additional logging, or add security headers, or pre-process responses, etc.
 	 */
+	@Override
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
 	IUntypedQuery search();
@@ -279,6 +281,11 @@ public interface IGenericClient extends IRestfulClient {
 	ITransaction transaction();
 
 	/**
+	 * Validate a resource
+	 */
+	IValidate validate();
+
+	/**
 	 * Implementation of the "transaction" method.
 	 * 
 	 * @param theResources
@@ -293,6 +300,7 @@ public interface IGenericClient extends IRestfulClient {
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
 	 */
+	@Override
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
 	/**

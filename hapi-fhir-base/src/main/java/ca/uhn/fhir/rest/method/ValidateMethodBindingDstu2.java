@@ -66,14 +66,16 @@ public class ValidateMethodBindingDstu2 extends OperationMethodBinding {
 	}
 	
 	
-	public static BaseHttpClientInvocation createValidationMethodBinding(FhirContext theContext, IBaseResource theResource) {
+	public static BaseHttpClientInvocation createValidateInvocation(FhirContext theContext, IBaseResource theResource) {
 		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
-		
+		OperationParameter.addParameterToParameters(theContext, parameters, theResource, "resource");
 		
 		String resourceName = theContext.getResourceDefinition(theResource).getName();
 		String resourceId = theResource.getIdElement().getIdPart();
-		return createOperationInvocation(theContext, resourceName, resourceId, Constants.EXTOP_VALIDATE, parameters, false);
+		
+		BaseHttpClientInvocation retVal = createOperationInvocation(theContext, resourceName, resourceId, Constants.EXTOP_VALIDATE, parameters, false);
+		return retVal;
 	}
-	
+
 
 }

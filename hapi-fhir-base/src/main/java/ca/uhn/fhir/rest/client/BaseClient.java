@@ -175,10 +175,12 @@ public abstract class BaseClient implements IRestfulClient {
 			} else if (theEncoding == EncodingEnum.JSON) {
 				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
 			}
+			
 			if (thePrettyPrint == Boolean.TRUE) {
 				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
 			}
 
+			
 			EncodingEnum encoding = getEncoding();
 			if (theEncoding != null) {
 				encoding=theEncoding;

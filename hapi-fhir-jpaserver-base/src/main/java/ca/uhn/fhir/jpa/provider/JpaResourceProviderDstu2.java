@@ -47,7 +47,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 
@@ -180,14 +179,6 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		ValidationResult result = validator.validateWithResult(theResource);
 		for (BaseIssue next : result.getOperationOutcome().getIssue()) {
 			oo.getIssue().add((Issue) next);
-		}
-
-		if (oo.getIssue().size() > 0) {
-			/*
-			 * It is also possible to pass an OperationOutcome resource to the UnprocessableEntityException if you want to return a custom populated OperationOutcome. Otherwise, a simple one is
-			 * created using the string supplied below.
-			 */
-			throw new UnprocessableEntityException("Validation failed", oo);
 		}
 
 		// This method returns a MethodOutcome object

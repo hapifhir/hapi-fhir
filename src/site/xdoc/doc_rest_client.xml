@@ -461,6 +461,23 @@
 				</macro>
 			</subsection>
 			
+			<subsection name="Built-In Operations - Validate">
+				<p>
+					The $validate operation asks the server to test a given resource
+					to see if it would be acceptable as a create/update on that server.
+					The client has built-in support for this operation.  
+				</p>
+				<p class="doc_info_bubble">
+					If the client is in DSTU1 mode, the method below will invoke the 
+					DSTU1 validation style instead.
+				</p>
+				<macro name="snippet">
+					<param name="id" value="validate" />
+					<param name="file" value="examples/src/main/java/example/GenericClientExample.java" />
+				</macro>
+				
+				
+			</subsection>
 		</section>
 
 	</body>

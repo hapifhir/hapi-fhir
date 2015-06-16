@@ -69,7 +69,7 @@ public class GenericClientTest {
 
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -291,7 +291,7 @@ public class GenericClientTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		MethodOutcome outcome = client.create(p1);
+		MethodOutcome outcome = client.create().resource(p1).execute();
 		assertEquals("44", outcome.getId().getIdPart());
 		assertEquals("22", outcome.getId().getVersionIdPart());
 
@@ -1177,7 +1177,7 @@ public class GenericClientTest {
 		//@formatter:on
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		assertEquals(bundle.getEntries().get(0).getId(), response.getEntries().get(0).getId());
+		assertEquals(bundle.getEntries().get(0).getResource().getId(), response.getEntries().get(0).getResource().getId());
 		assertEquals(EncodingEnum.XML.getBundleContentType() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
@@ -1210,7 +1210,7 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir?_format=json", value.getURI().toString());
 		assertThat(IOUtils.toString(value.getEntity().getContent()), StringContains.containsString("\"resourceType\""));
-		assertEquals(bundle.getEntries().get(0).getId(), response.getEntries().get(0).getId());
+		assertEquals(bundle.getEntries().get(0).getResource().getId(), response.getEntries().get(0).getResource().getId());
 	}
 
 	@Test
