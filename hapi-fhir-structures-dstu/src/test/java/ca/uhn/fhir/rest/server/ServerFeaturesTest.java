@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -145,11 +147,15 @@ public class ServerFeaturesTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
-
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+	}
+	
+	@Test
+	public void testAcceptHeaderWithMultipleJson() throws Exception {
+		
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_FHIR_JSON);
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent());
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));

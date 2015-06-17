@@ -224,7 +224,7 @@ public class RestfulServerUtils {
 						}
 					}
 					
-					if (q > bestQ) {
+					if (q > bestQ && encoding != null) {
 						retVal = encoding;
 						bestQ = q;
 					}
