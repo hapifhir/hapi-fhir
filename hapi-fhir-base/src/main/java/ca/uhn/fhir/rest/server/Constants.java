@@ -32,18 +32,22 @@ public class Constants {
 	public static final Charset CHARSET_UTF8;
 	public static final String CHARSETNAME_UTF_8 = "UTF-8";
 	public static final String CT_ATOM_XML = "application/atom+xml";
-
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+
+	public static final String CTSUFFIX_CHARSET_UTF8 = "; charset=" + CHARSETNAME_UTF_8;
 	public static final String CT_FHIR_XML = "application/xml+fhir";
 	public static final String CT_HTML = "text/html";
-	public static final String CT_HTML_WITH_UTF8 = "text/html; charset=UTF-8";
+	public static final String CT_HTML_WITH_UTF8 = "text/html" + CTSUFFIX_CHARSET_UTF8;
 	public static final String CT_JSON = "application/json";
 	public static final String CT_OCTET_STREAM = "application/octet-stream";
 	public static final String CT_TEXT = "text/plain";
-	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + "; charset=UTF-8";
+	public static final String CT_TEXT_WITH_UTF8 = CT_TEXT + CTSUFFIX_CHARSET_UTF8;
 	public static final String CT_XML = "application/xml";
 	public static final String ENCODING_GZIP = "gzip";
 	public static final String EXTOP_VALIDATE = "$validate";
+	public static final String EXTOP_VALIDATE_MODE = "mode";
+	public static final String EXTOP_VALIDATE_PROFILE = "profile";
+	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 	public static final String FORMAT_JSON = "json";
 	public static final Set<String> FORMAT_VAL_JSON;
 	public static final Map<String, EncodingEnum> FORMAT_VAL_TO_ENCODING;
@@ -128,9 +132,6 @@ public class Constants {
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String EXTOP_VALIDATE_MODE = "mode";
-	public static final String EXTOP_VALIDATE_PROFILE = "profile";
-	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();

@@ -107,12 +107,25 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 				}
 				final Method accessor = BeanUtils.findAccessor(declaringClass, targetReturnType, elementName);
 				if (accessor == null) {
-					throw new ConfigurationException("Could not find bean accessor/getter for property " + elementName + " on class " + declaringClass.getCanonicalName());
+					StringBuilder b = new StringBuilder();
+					b.append("Could not find bean accessor/getter for property ");
+					b.append(elementName);
+					b.append(" on class ");
+					b.append(declaringClass.getCanonicalName());
+					throw new ConfigurationException(b.toString());
 				}
 
 				final Method mutator = findMutator(declaringClass, targetReturnType, elementName);
 				if (mutator == null) {
-					throw new ConfigurationException("Could not find bean mutator/setter for property " + elementName + " on class " + declaringClass.getCanonicalName() + " (expected return type " + targetReturnType.getCanonicalName() + ")");
+					StringBuilder b = new StringBuilder();
+					b.append("Could not find bean mutator/setter for property ");
+					b.append(elementName);
+					b.append(" on class ");
+					b.append(declaringClass.getCanonicalName());
+					b.append(" (expected return type ");
+					b.append(targetReturnType.getCanonicalName());
+					b.append(")");
+					throw new ConfigurationException(b.toString());
 				}
 
 				if (List.class.isAssignableFrom(targetReturnType)) {
@@ -134,6 +147,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		return myAccessor;
 	}
 
+	@Override
 	public String getElementName() {
 		return myElementName;
 	}
