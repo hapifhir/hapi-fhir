@@ -32,6 +32,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletOutputStream;
@@ -59,6 +61,8 @@ import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public class RestfulServerUtils {
+	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
+	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
 	public static void addProfileToBundleEntry(FhirContext theContext, IBaseResource theResource, String theServerBase) {
@@ -188,27 +192,51 @@ public class RestfulServerUtils {
 			}
 		}
 
+		/*
+		 * The Accept header is kind of ridiculous, e.g.
+		 */
+		 // text/xml, application/xml, application/xhtml+xml, text/html;q=0.9, text/plain;q=0.8, image/png, */*;q=0.5
+		
 		Enumeration<String> acceptValues = theReq.getHeaders(Constants.HEADER_ACCEPT);
 		if (acceptValues != null) {
+			float bestQ = -1f;
+			EncodingEnum retVal = null;
 			while (acceptValues.hasMoreElements()) {
 				String nextAcceptHeaderValue = acceptValues.nextElement();
-				if (nextAcceptHeaderValue != null && isNotBlank(nextAcceptHeaderValue)) {
-					for (String nextPart : nextAcceptHeaderValue.split(",")) {
-						int scIdx = nextPart.indexOf(';');
-						if (scIdx == 0) {
-							continue;
-						}
-						if (scIdx != -1) {
-							nextPart = nextPart.substring(0, scIdx);
-						}
-						nextPart = nextPart.trim();
-						EncodingEnum retVal = Constants.FORMAT_VAL_TO_ENCODING.get(nextPart);
-						if (retVal != null) {
-							return retVal;
+				Matcher m = ACCEPT_HEADER_PATTERN.matcher(nextAcceptHeaderValue);
+				float q = 1.0f;
+				while (m.find()) {
+					String contentTypeGroup = m.group(1);
+					EncodingEnum encoding = Constants.FORMAT_VAL_TO_ENCODING.get(contentTypeGroup);
+					if (encoding != null) {
+						
+						String name = m.group(3);
+						String value = m.group(4);
+						if (name != null && value != null) {
+							if ("q".equals(name)) {
+								try {
+									q = Float.parseFloat(value);
+									q = Math.max(q, 0.0f);
+								} catch (NumberFormatException e) {
+									ourLog.debug("Invalid Accept header q value: {}", value);
+								}
+							}
 						}
 					}
+					
+					if (q > bestQ) {
+						retVal = encoding;
+						bestQ = q;
+					}
+
+					if (!",".equals(m.group(5))) {
+						break;
+					}
 				}
+				
 			}
+			
+			return retVal;
 		}
 		return null;
 	}

@@ -95,6 +95,10 @@
 				in DSTU2 mode. Thanks to Eric from the FHIR Skype Implementers chat for
 				reporting.
 			</action>
+			<action type="add">
+				Server now supports complete Accept header content negotiation, including
+				q values specifying order of preference. Previously the q value was ignored.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

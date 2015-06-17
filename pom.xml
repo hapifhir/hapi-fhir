@@ -230,8 +230,8 @@
 					<configuration>
 						<source>1.6</source>
 						<target>1.6</target>
-						<!-- <compilerId>javac-with-errorprone</compilerId>
-						<forceJavacCompilerUse>true</forceJavacCompilerUse> -->
+						<compilerId>javac-with-errorprone</compilerId>
+						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					</configuration>
 					<dependencies>
 						<dependency>
@@ -258,7 +258,6 @@
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
-						<!--<argLine>-Dfile.encoding=ISO-8859-1</argLine> -->
 						<argLine>-Dfile.encoding=UTF-8</argLine>
 					</configuration>
 				</plugin>
@@ -426,6 +425,21 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-checkstyle-plugin</artifactId>
+						<version>2.15</version>
+						<dependencies>
+							<dependency>
+								<groupId>com.puppycrawl.tools</groupId>
+								<artifactId>checkstyle</artifactId>
+								<version>6.7</version>
+							</dependency>
+						</dependencies>
+						<configuration>
+							<configLocation>src/checkstyle/checkstyle.xml</configLocation>
+						</configuration>
+					</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>

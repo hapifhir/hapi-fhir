@@ -130,7 +130,11 @@ public class FhirContext {
 			throw new IllegalStateException(getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
 
-		ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+		if (theVersion == null) {
+			ourLog.info("Creating new FhirContext with auto-detected version [{}]. It is recommended to explicitly select a version for future compatibility by invoking FhirContext.forDstuX()", myVersion.getVersion().name());
+		} else {
+			ourLog.info("Creating new FHIR context for FHIR version [{}]", myVersion.getVersion().name());
+		}
 
 		scanResourceTypes(toElementList(theResourceTypes));
 	}

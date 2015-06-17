@@ -600,7 +600,6 @@ public class RestfulServer extends HttpServlet {
 						operation = Constants.PARAM_HISTORY;
 					}
 				} else if (partIsOperation(nextString)) {
-					// FIXME: this would be untrue for _meta/_delete
 					if (operation != null) {
 						throw new InvalidRequestException("URL Path contains two operations: " + requestPath);
 					}
@@ -634,8 +633,6 @@ public class RestfulServer extends HttpServlet {
 			requestDetails.setOperation(operation);
 			requestDetails.setSecondaryOperation(secondaryOperation);
 			requestDetails.setCompartmentName(compartment);
-
-			// TODO: look for more tokens for version, compartments, etc...
 
 			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
 			boolean respondGzip = false;
@@ -819,7 +816,6 @@ public class RestfulServer extends HttpServlet {
 	 *             (which extends {@link ServletException}), as this is a flag to the servlet container that the servlet
 	 *             is not usable.
 	 */
-	@SuppressWarnings("unused")
 	protected void initialize() throws ServletException {
 		// nothing by default
 	}
