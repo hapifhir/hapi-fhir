@@ -87,7 +87,10 @@
 			<action type="fix">
 				When parsing Bundles, if Bundle.entry.base is set to "cid:" (for DSTU1) 
 				or "urn:uuid:" / "urn:oid:" (for DSTU2) this is now correctly passed as
-				the base in resource.getId()
+				the base in resource.getId(). Conversely, when
+				encoding bundles, if a resource ID has a base defined,
+				and Bundle.entry.base is empty, it will now be
+				automatically set by the parser.
 			</action>
 			<action type="add">
 				Add fluent client method for validate operation, and support the

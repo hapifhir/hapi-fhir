@@ -39,6 +39,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -61,6 +62,8 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ObjectUtil;
 
 public abstract class BaseParser implements IParser {
 
@@ -74,7 +77,8 @@ public abstract class BaseParser implements IParser {
 
 	/**
 	 * Constructor
-	 * @param theParserErrorHandler 
+	 * 
+	 * @param theParserErrorHandler
 	 */
 	public BaseParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		myContext = theContext;
@@ -205,6 +209,10 @@ public abstract class BaseParser implements IParser {
 		return resourceBaseUrl;
 	}
 
+	protected abstract void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException;
+
+	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
+
 	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
 
 	@Override
@@ -223,6 +231,13 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public final void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException, DataFormatException {
+		Validate.notNull(theBundle, "theBundle must not be null");
+		Validate.notNull(theWriter, "theWriter must not be null");
+		doEncodeBundleToWriter(theBundle, theWriter);
+	}
+
+	@Override
 	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
 		Writer stringWriter = new StringWriter();
 		try {
@@ -234,6 +249,18 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
+	public final void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException {
+		Validate.notNull(theResource, "theResource can not be null");
+		Validate.notNull(theWriter, "theWriter can not be null");
+
+		if (theResource instanceof IBaseBundle) {
+			fixBaseLinksForBundle((IBaseBundle) theResource);
+		}
+
+		doEncodeResourceToWriter(theResource, theWriter);
+	}
+
+	@Override
 	public String encodeTagListToString(TagList theTagList) {
 		Writer stringWriter = new StringWriter();
 		try {
@@ -242,6 +269,49 @@ public abstract class BaseParser implements IParser {
 			throw new Error("Encountered IOException during write to string - This should not happen!");
 		}
 		return stringWriter.toString();
+	}
+
+
+	/**
+	 * If individual resources in the bundle have an ID that has the base set, we make sure that Bundle.entry.base gets set as needed.
+	 */
+	private void fixBaseLinksForBundle(IBaseBundle theBundle) {
+		/*
+		 * ATTENTION IF YOU ARE EDITING THIS:
+		 * There are two versions of this method, one for DSTU1/atom bundle and
+		 * one for DSTU2/resource bundle. If you edit one, edit both and also
+		 * update unit tests for both.
+		 */
+		FhirTerser t = myContext.newTerser();
+		IPrimitiveType<?> element = t.getSingleValueOrNull(theBundle, "base", IPrimitiveType.class);
+		String bundleBase = element != null ? element.getValueAsString() : null;
+
+		for (IBase nextEntry : t.getValues(theBundle, "Bundle.entry", IBase.class)) {
+			IBaseResource resource = t.getSingleValueOrNull(nextEntry, "resource", IBaseResource.class);
+			if (resource == null) {
+				continue;
+			}
+
+			IPrimitiveType<?> baseElement = t.getSingleValueOrNull(nextEntry, "base", IPrimitiveType.class);
+			String entryBase = baseElement != null ? baseElement.getValueAsString() : null;
+			if (isNotBlank(entryBase)) {
+				continue;
+			}
+
+			IIdType resourceId = resource.getIdElement();
+			String resourceIdBase = resourceId.getBaseUrl();
+			if (isNotBlank(resourceIdBase)) {
+				if (!ObjectUtil.equals(bundleBase, resourceIdBase)) {
+					if (baseElement == null) {
+						baseElement = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
+						BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextEntry.getClass());
+						entryDef.getChildByNameOrThrowDataFormatException("base").getMutator().setValue(nextEntry, baseElement);
+					}
+
+					baseElement.setValueAsString(resourceIdBase);
+				}
+			}
+		}
 	}
 
 	protected String fixContainedResourceId(String theValue) {
@@ -330,7 +400,7 @@ public abstract class BaseParser implements IParser {
 
 							String baseUrl = baseType.getValueAsString();
 							String idPart = res.getIdElement().getIdPart();
-							
+
 							String resourceName = resDef.getName();
 							if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
 								res.setId(new IdDt(baseUrl, resourceName, idPart, versionIdPart));
@@ -376,15 +446,15 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public BaseParser setParserErrorHandler(IParserErrorHandler theErrorHandler) {
-		Validate.notNull(theErrorHandler, "theErrorHandler must not be null");
-		myErrorHandler = theErrorHandler;
+	public BaseParser setOmitResourceId(boolean theOmitResourceId) {
+		myOmitResourceId = theOmitResourceId;
 		return this;
 	}
 
 	@Override
-	public BaseParser setOmitResourceId(boolean theOmitResourceId) {
-		myOmitResourceId = theOmitResourceId;
+	public BaseParser setParserErrorHandler(IParserErrorHandler theErrorHandler) {
+		Validate.notNull(theErrorHandler, "theErrorHandler must not be null");
+		myErrorHandler = theErrorHandler;
 		return this;
 	}
 

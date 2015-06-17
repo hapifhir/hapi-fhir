@@ -180,7 +180,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public void encodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException {
+	public void doEncodeBundleToWriter(Bundle theBundle, Writer theWriter) throws IOException {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 		if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			encodeBundleToWriterInDstu2Format(theBundle, eventWriter);
@@ -777,9 +777,7 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	@Override
-	public void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException {
-		Validate.notNull(theResource, "Resource can not be null");
-
+	protected void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException {
 		JsonGenerator eventWriter = createJsonGenerator(theWriter);
 
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);

@@ -58,6 +58,8 @@ public abstract class BaseRuntimeChildDefinition {
 	public abstract int getMin();
 	
 	public interface IMutator {
+		void setValue(Object theTarget, IBase theValue);
+
 		void addValue(Object theTarget, IBase theValue);
 	}
 

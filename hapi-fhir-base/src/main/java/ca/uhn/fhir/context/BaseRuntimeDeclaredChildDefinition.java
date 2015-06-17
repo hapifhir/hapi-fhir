@@ -194,6 +194,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 				throw new ConfigurationException("Failed to set value", e);
 			}
 		}
+
+		@Override
+		public void setValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, theValue);
+		}
 	}
 
 	private final class FieldPlainAccessor implements IAccessor {
@@ -217,12 +222,24 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	protected final class FieldListMutator implements IMutator {
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, theValue, false);
+		}
+
+		@Override
+		public void setValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, theValue, true);
+		}
+
+		private void addValue(Object theTarget, IBase theValue, boolean theClear) {
 			try {
 				@SuppressWarnings("unchecked")
 				List<IBase> existingList = (List<IBase>) myField.get(theTarget);
 				if (existingList == null) {
 					existingList = new ArrayList<IBase>(2);
 					myField.set(theTarget, existingList);
+				}
+				if (theClear) {
+					existingList.clear();
 				}
 				existingList.add(theValue);
 			} catch (IllegalArgumentException e) {
@@ -283,6 +300,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, false, theValue);
+		}
+
+		private void addValue(Object theTarget, boolean theClear, IBase theValue) {
 			List<IBase> existingList = myAccessor.getValues(theTarget);
 			if (existingList == null) {
 				existingList = new ArrayList<IBase>();
@@ -296,7 +317,15 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 					throw new ConfigurationException("Failed to get value", e);
 				}
 			}
+			if (theClear) {
+				existingList.clear();
+			}
 			existingList.add(theValue);
+		}
+
+		@Override
+		public void setValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, true, theValue);
 		}
 	}
 
@@ -347,6 +376,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			} catch (InvocationTargetException e) {
 				throw new ConfigurationException("Failed to get value", e);
 			}
+		}
+
+		@Override
+		public void setValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, theValue);
 		}
 	}
 

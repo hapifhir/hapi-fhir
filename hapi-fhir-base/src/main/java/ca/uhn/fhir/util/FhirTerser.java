@@ -118,7 +118,7 @@ public class FhirTerser {
 		return retVal;
 	}
 
-    public <T extends IBase> List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
+    public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
         final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
         BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
         visit(theResource, null, null, def, new IModelVisitor() {
@@ -168,33 +168,44 @@ public class FhirTerser {
 
 	}
 
-	private List<Object> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList) {
+	@SuppressWarnings("unchecked")
+	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		String name = theSubList.get(0);
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
-		List<Object> retVal = new ArrayList<Object>();
+		List<T> retVal = new ArrayList<T>();
 
 		if (theSubList.size() == 1) {
 			if (nextDef instanceof RuntimeChildChoiceDefinition) {
 				for (IBase next : values) {
 					if (next != null) {
 						if (name.endsWith("[x]")) {
-							retVal.add(next);
+							if (theWantedClass == null || theWantedClass.isAssignableFrom(next.getClass())) {
+								retVal.add((T) next);
+							}
 						} else {
 							String childName = nextDef.getChildNameByDatatype(next.getClass());
 							if (theSubList.get(0).equals(childName)) {
-								retVal.add(next);
+								if (theWantedClass == null || theWantedClass.isAssignableFrom(next.getClass())) {
+									retVal.add((T) next);
+								}
 							}
 						}
 					}
 				}
 			} else {
-				retVal.addAll(values);
+				for (IBase next : values) {
+					if (next != null) {
+						if (theWantedClass == null || theWantedClass.isAssignableFrom(next.getClass())) {
+							retVal.add((T) next);
+						}
+					}
+				}
 			}
 		} else {
 			for (IBase nextElement : values) {
 				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
-				List<?> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()));
+				List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
 				retVal.addAll(foundValues);
 			}
 		}
@@ -202,6 +213,13 @@ public class FhirTerser {
 	}
 
 	public List<Object> getValues(IBaseResource theResource, String thePath) {
+		Class<Object> wantedClass = Object.class;
+		
+		return getValues(theResource, thePath, wantedClass);
+
+	}
+
+	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 
 		BaseRuntimeElementCompositeDefinition<?> currentDef = def;
@@ -212,8 +230,7 @@ public class FhirTerser {
 		if (subList.size() < 1) {
 			throw new ConfigurationException("Invalid path: " + thePath);
 		}
-		return getValues(currentDef, currentObj, subList);
-
+		return getValues(currentDef, currentObj, subList, theWantedClass);
 	}
 
     private List<String> addNameToList(List<String> theCurrentList, BaseRuntimeChildDefinition theChildDefinition) {
@@ -469,6 +486,12 @@ public class FhirTerser {
 	}
 
 	public Object getSingleValueOrNull(IBase theTarget, String thePath) {
+		Class<Object> wantedType = Object.class;
+		
+		return getSingleValueOrNull(theTarget, thePath, wantedType);
+	}
+
+	public <T> T getSingleValueOrNull(IBase theTarget, String thePath, Class<T> theWantedType) {
 		Validate.notNull(theTarget, "theTarget must not be null");
 		Validate.notBlank(thePath, "thePath must not be empty");
 
@@ -481,12 +504,13 @@ public class FhirTerser {
 		Object currentObj = theTarget;
 
 		List<String> parts = Arrays.asList(thePath.split("\\."));
-		List<Object> retVal = getValues(currentDef, currentObj, parts);
+		List<T> retVal = getValues(currentDef, currentObj, parts, theWantedType);
 		if (retVal.isEmpty()) {
 			return null;
 		} else {
 			return retVal.get(0);
 		}
 	}
+
 
 }

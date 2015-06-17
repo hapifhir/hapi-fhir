@@ -756,7 +756,7 @@ public class RestfulServer extends HttpServlet {
 	public final void init() throws ServletException {
 		initialize();
 		try {
-			ourLog.info("Initializing HAPI FHIR restful server");
+			ourLog.info("Initializing HAPI FHIR restful server running in " + getFhirContext().getVersion().getVersion().name() + " mode");
 
 			ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
 			providedResourceScanner.scanForProvidedResources(this);

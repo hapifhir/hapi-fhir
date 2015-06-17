@@ -127,7 +127,8 @@ public class XmlParserDstu2Test {
 		assertThat(str, not(containsString("meta")));
 		assertThat(str, containsString("<length><value value=\"123\"/><units value=\"day\"/></length>"));
 	}
-	
+
+
 	@Test
 	public void testEncodeAndParseBundleWithoutResourceIds() {
 		Organization org = new Organization();
@@ -211,6 +212,7 @@ public class XmlParserDstu2Test {
 
 	}
 
+	
 	@Test
 	public void testEncodeAndParseExtensionOnResourceReference() {
 		DataElement de = new DataElement();
@@ -235,6 +237,7 @@ public class XmlParserDstu2Test {
 		assertEquals("ORG", o.getName());
 
 	}
+
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -381,6 +384,7 @@ public class XmlParserDstu2Test {
 		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
+
 	
 	@Test
 	public void testEncodeAndParseMetaProfiles() {
@@ -427,7 +431,7 @@ public class XmlParserDstu2Test {
 		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
-
+	
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -485,7 +489,7 @@ public class XmlParserDstu2Test {
 		assertEquals(false, label.getPrimary());
 		assertEquals("VERSION2", label.getVersion());
 	}
-	
+
 	/**
 	 * See #103
 	 */
@@ -510,7 +514,7 @@ public class XmlParserDstu2Test {
 		parsed = parser.parseResource(Composition.class, string);
 		assertEquals(2, parsed.getContained().getContainedResources().size());
 	}
-	
+
 	/**
 	 * See #103
 	 */
@@ -536,7 +540,6 @@ public class XmlParserDstu2Test {
 		assertEquals(2, parsed.getContained().getContainedResources().size());
 	}
 
-	
 	@Test
 	public void testEncodeBinaryWithNoContentType() {
 		Binary b = new Binary();
@@ -546,6 +549,97 @@ public class XmlParserDstu2Test {
 		ourLog.info(output);
 		
 		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>", output);
+	}
+
+	@Test
+	public void testEncodeBundleContainingResourceWithUuidBase() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.addEntry().setResource(p);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<entry>", "<base value=\"urn:uuid:\"/>", "<Patient", "<id value="));
+	}
+	
+	@Test
+	public void testEncodeBundleContainingResourceWithUuidBaseBundleBaseIsSet() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.setBase("urn:uuid:");
+		b.addEntry().setResource(p);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, not(stringContainsInOrder("<Bundle", "<entry>", "<base value=\"urn:uuid:\"/>", "<Patient", "<id value=")));
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<base value=\"urn:uuid:\"/>", "<entry>", "<Patient", "<id value="));
+	}
+
+	@Test
+	public void testEncodeBundleContainingResourceWithUuidBaseBundleBaseIsSetDifferently() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.setBase("urn:oid:");
+		b.addEntry().setResource(p);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<base value=\"urn:oid:\"/>", "<entry>", "<base value=\"urn:uuid:\"/>", "<Patient", "<id value="));
+	}
+	
+	@Test
+	public void testEncodeBundleOldStyleContainingResourceWithUuidBase() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+		
+		Bundle b = new Bundle();
+		b.addEntry().setResource(p);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<entry>", "<base value=\"urn:uuid:\"/>", "<Patient", "<id value="));
+	}
+	
+	@Test
+	public void testEncodeBundleOldStyleContainingResourceWithUuidBaseBundleBaseIsSet() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+		
+		Bundle b = new Bundle();
+		b.getLinkBase().setValue("urn:uuid:");
+		b.addEntry().setResource(p);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, not(stringContainsInOrder("<Bundle", "<entry>", "<base value=\"urn:uuid:\"/>", "<Patient", "<id value=")));
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<base value=\"urn:uuid:\"/>", "<entry>", "<Patient", "<id value="));
+	}
+
+	
+	@Test
+	public void testEncodeBundleOldStyleContainingResourceWithUuidBaseBundleBaseIsSetDifferently() {
+		Patient p = new Patient();
+		p.setId(IdDt.newRandomUuid());
+		p.addName().addFamily("PATIENT");
+		
+		Bundle b = new Bundle();
+		b.getLinkBase().setValue("urn:oid:");
+		b.addEntry().setResource(p);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeBundleToString(b);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder("<Bundle", "<base value=\"urn:oid:\"/>", "<entry>", "<base value=\"urn:uuid:\"/>", "<Patient", "<id value="));
 	}
 
 	/**

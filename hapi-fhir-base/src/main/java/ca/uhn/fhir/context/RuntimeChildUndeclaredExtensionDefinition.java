@@ -104,6 +104,17 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
 				}
 			}
+
+			@Override
+			public void setValue(Object theTarget, IBase theValue) {
+				ExtensionDt target = (ExtensionDt) theTarget;
+				if (theValue instanceof IDatatype) {
+					target.setValue((IDatatype) theTarget);
+				} else {
+					target.getUndeclaredExtensions().clear();
+					target.getUndeclaredExtensions().add((ExtensionDt) theValue);
+				}
+			}
 		};
 	}
 
