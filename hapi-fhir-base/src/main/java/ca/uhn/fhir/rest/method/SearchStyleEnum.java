@@ -35,14 +35,15 @@ public enum SearchStyleEnum {
 	GET,
 	
 	/**
-	 * This is the most common (and generally the default) behaviour. Performs the search using the style:
+	 * Performs the search using the style below. Note that this style is less commonly supported
+	 * in servers so it should not be used unless there is a specific reason for needing to.
 	 * <br>
 	 * <code>GET [base]/[resource type]/_search?[params]</code>
 	 */
 	GET_WITH_SEARCH,
 
 	/**
-	 * This is the most common (and generally the default) behaviour. Performs the search using the style:
+	 * Performs the search using the style below. This style is useful when you have long search strings.
 	 * <br>
 	 * <code>POST [base]/[resource type]/_search</code>
 	 * <br>

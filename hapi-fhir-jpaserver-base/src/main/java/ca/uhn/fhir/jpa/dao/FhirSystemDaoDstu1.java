@@ -50,6 +50,11 @@ import ca.uhn.fhir.util.FhirTerser;
 public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1.class);
 
+	@Override
+	public MetaDt metaGetOperation() {
+		throw new NotImplementedOperationException("meta not supported in DSTU1");
+	}
+
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public List<IResource> transaction(List<IResource> theResources) {
@@ -60,14 +65,14 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 
 		for (int i = 0; i < theResources.size(); i++) {
 			IResource res = theResources.get(i);
-			if (res.getId().hasIdPart() && !res.getId().hasResourceType() && !res.getId().isLocal()) {
+			if (res.getId().hasIdPart() && !res.getId().hasResourceType() && !isPlaceholder(res.getId())) {
 				res.setId(new IdDt(toResourceName(res.getClass()), res.getId().getIdPart()));
 			}
 
 			/*
 			 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
 			 */
-			if (res.getId().isLocal()) {
+			if (isPlaceholder(res.getId())) {
 				if (!allIds.add(res.getId())) {
 					throw new InvalidRequestException("Transaction bundle contains multiple resources with ID: " + res.getId());
 				}
@@ -138,7 +143,7 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 				} else {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", nextResouceOperationIn.name(), matchUrl, candidateMatches.size()));
 				}
-			} else if (nextId.isEmpty() || nextId.isLocal()) {
+			} else if (nextId.isEmpty() || isPlaceholder(nextId)) {
 				entity = null;
 			} else {
 				entity = tryToLoadEntity(nextId);
@@ -213,8 +218,8 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 				if (nextId.toUnqualifiedVersionless().equals(newId)) {
 					ourLog.info("Transaction resource ID[{}] is being updated", newId);
 				} else {
-					if (nextId.isLocal()) {
-//						nextId = new IdDt(resourceName, nextId.getIdPart());
+					if (isPlaceholder(nextId)) {
+						// nextId = new IdDt(resourceName, nextId.getIdPart());
 						ourLog.info("Transaction resource ID[{}] has been assigned new ID[{}]", nextId, newId);
 						idConversions.put(nextId, newId);
 						idConversions.put(new IdDt(resourceName + "/" + nextId.getValue()), newId);
@@ -267,10 +272,11 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 		return retVal;
 	}
 
-	@Override
-	public MetaDt metaGetOperation() {
-		throw new NotImplementedOperationException("meta not supported in DSTU1");
+	private static boolean isPlaceholder(IdDt theId) {
+		if ("cid:".equals(theId.getBaseUrl())) {
+			return true;
+		}
+		return false;
 	}
-
 
 }

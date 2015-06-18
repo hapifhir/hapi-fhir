@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.dstu2.resource.DataElement;
+import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
@@ -55,6 +56,8 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class XmlParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
@@ -129,6 +132,8 @@ public class XmlParserDstu2Test {
 	}
 
 
+	
+	
 	@Test
 	public void testEncodeAndParseBundleWithoutResourceIds() {
 		Organization org = new Organization();
@@ -143,6 +148,42 @@ public class XmlParserDstu2Test {
 		assertTrue(parsed.getEntries().get(0).getResource().getId().isEmpty());
 	}
 
+	public static void main(String[] args) {
+		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
+//		c.registerInterceptor(new LoggingInterceptor(true));
+		c.read().resource("Patient").withId("324").execute();
+	}
+	
+	@Test
+	public void testEncodeBundleWithContained() {
+		DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addResult().setResource(new Observation().setCode(new CodeableConceptDt().setText("Sharp1")).setId("#1"));
+		rpt.addResult().setResource(new Observation().setCode(new CodeableConceptDt().setText("Uuid1")).setId("urn:uuid:UUID1"));
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.addEntry().setResource(rpt);
+		
+		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
+		ourLog.info(encoded);
+		
+		assertThat(encoded, stringContainsInOrder(
+				"<DiagnosticReport",
+				"<contained",
+				"<Observation",
+				"<text value=\"Sharp1\"",
+				"</DiagnosticReport"
+				));
+		assertThat(encoded, not(stringContainsInOrder(
+				"<DiagnosticReport",
+				"<contained",
+				"<Observation",
+				"<contained",
+				"<Observation",
+				"</DiagnosticReport"
+				)));
+	}
+	
+	
 	@Test
 	public void testEncodeAndParseContained() {
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);

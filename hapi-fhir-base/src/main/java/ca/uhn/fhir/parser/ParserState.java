@@ -1673,6 +1673,16 @@ class ParserState<T> {
 		}
 
 		@Override
+		public void attributeValue(String theName, String theValue) throws DataFormatException {
+			if ("url".equals(theName)) {
+				// The URL attribute is handles in the XML loop as a special case since it is "url" instead
+				// of "value" like every single other place
+				return;
+			}
+			super.attributeValue(theName, theValue);
+		}
+
+		@Override
 		public void endingElement() throws DataFormatException {
 			if (myExtension.getValue() != null && myExtension.getExtension().size() > 0) {
 				throw new DataFormatException("Extension must not have both a value and other contained extensions");

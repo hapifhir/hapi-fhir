@@ -401,15 +401,11 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 	}
 
 	/**
-	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character
-	 * or it begins with "cid:" or "urn:")
+	 * Returns <code>true</code> if the ID is a local reference (in other words, it begins with the '#' character)
 	 */
 	@Override
 	public boolean isLocal() {
-		if (myBaseUrl == null) {
-			return false;
-		}
-		return "#".equals(myBaseUrl) || myBaseUrl.equals("cid:") || myBaseUrl.startsWith("urn:");
+		return "#".equals(myBaseUrl);
 	}
 
 	/**
