@@ -24,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +58,26 @@ import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2.class);
+
+	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
+		String url = nextEntry.getTransaction().getUrl();
+		if (isBlank(url)) {
+			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionMissingUrl", verb.name()));
+		}
+		return url;
+	}
+
+	@Override
+	public MetaDt metaGetOperation() {
+
+		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
+		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
+		List<TagDefinition> tagDefinitions = q.getResultList();
+
+		MetaDt retVal = super.toMetaDt(tagDefinitions);
+
+		return retVal;
+	}
 
 	private UrlParts parseUrl(String theAction, String theUrl) {
 		UrlParts retVal = new UrlParts();
@@ -151,7 +170,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			if (res != null) {
 
 				nextResourceId = res.getId();
-				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !nextResourceId.isLocal()) {
+				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
 					nextResourceId = new IdDt(toResourceName(res.getClass()), nextResourceId.getIdPart());
 					res.setId(nextResourceId);
 				}
@@ -159,7 +178,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 				/*
 				 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
 				 */
-				if (nextResourceId.isLocal()) {
+				if (isPlaceholder(nextResourceId)) {
 					if (!allIds.add(nextResourceId)) {
 						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
 					}
@@ -317,33 +336,13 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		return response;
 	}
 
-	@Override
-	public MetaDt metaGetOperation() {
-
-		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
-		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
-		List<TagDefinition> tagDefinitions = q.getResultList();
-
-		MetaDt retVal = super.toMetaDt(tagDefinitions);
-
-		return retVal;
-	}
-
-	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
-		String url = nextEntry.getTransaction().getUrl();
-		if (isBlank(url)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionMissingUrl", verb.name()));
-		}
-		return url;
-	}
-
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
 			Entry newEntry, String theResourceType) {
 		IdDt newId = outcome.getId().toUnqualifiedVersionless();
-		IdDt resourceId = nextResourceId.isLocal() ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
+		IdDt resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);
-			if (resourceId.isLocal()) {
+			if (isPlaceholder(resourceId)) {
 				/*
 				 * The correct way for substitution IDs to be is to be with no resource type, but we'll accept the qualified kind too just to be lenient.
 				 */
@@ -358,6 +357,13 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		}
 		newEntry.getTransactionResponse().setLocation(outcome.getId().toUnqualified().getValue());
 		newEntry.getTransactionResponse().setEtag(outcome.getId().getVersionIdPart());
+	}
+
+	private static boolean isPlaceholder(IdDt theId) {
+		if ("urn:oid:".equals(theId.getBaseUrl()) || "urn:uuid:".equals(theId.getBaseUrl())) {
+			return true;
+		}
+		return false;
 	}
 
 	private static class UrlParts {

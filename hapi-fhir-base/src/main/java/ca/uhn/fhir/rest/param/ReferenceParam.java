@@ -85,8 +85,8 @@ public class ReferenceParam extends IdDt implements IQueryParameterType {
 		if (myBase.getMissing()!=null) {
 			return myBase.getValueAsQueryToken();
 		}
-		if (isLocal()) {
-			return getValue();
+		if (isBlank(getResourceType())) {
+			return getValue(); // e.g. urn:asdjd or 123 or cid:wieiuru or #1
 		} else {
 			return getIdPart();
 		}
