@@ -59,6 +59,8 @@ import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
@@ -71,6 +73,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -101,7 +104,27 @@ public class FhirResourceDaoDstu2Test {
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
+	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
+	@SuppressWarnings("unused")
+	private static IFhirResourceDao<QuestionnaireAnswers> ourQuestionnaireAnswersDao;
 
+	@Test
+	public void testQuestionnaireTitleGetsIndexed() {
+		Questionnaire q = new Questionnaire();
+		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_TITLE");
+		IdDt qid1 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless(); 
+		q = new Questionnaire();
+		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_NOTITLE");
+		IdDt qid2 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless();
+		
+		IBundleProvider results = ourQuestionnaireDao.search("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE"));
+		assertEquals(1, results.size());
+		assertEquals(qid1, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+		assertNotEquals(qid2, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+		
+	}
+
+	
 	@Test
 	public void testChoiceParamConcept() {
 		Observation o1 = new Observation();
@@ -2534,6 +2557,8 @@ public class FhirResourceDaoDstu2Test {
 		ourLocationDao = ourCtx.getBean("myLocationDaoDstu2", IFhirResourceDao.class);
 		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu2", IFhirResourceDao.class);
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
+		ourQuestionnaireDao = ourCtx.getBean("myQuestionnaireDaoDstu2", IFhirResourceDao.class);
+		ourQuestionnaireAnswersDao = ourCtx.getBean("myQuestionnaireAnswersDaoDstu2", IFhirResourceDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
 	}
 

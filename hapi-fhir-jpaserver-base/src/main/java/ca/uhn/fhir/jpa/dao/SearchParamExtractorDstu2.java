@@ -60,6 +60,7 @@ import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Patient.Communication;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -311,8 +312,17 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 			}
 
 			String nextPath = nextSpDef.getPath();
+			String resourceName = nextSpDef.getName();
+			
 			if (isBlank(nextPath)) {
+				
 				// TODO: implement phonetic, and any others that have no path
+				
+				if ("Questionnaire".equals(def.getName()) && nextSpDef.getName().equals("title")) {
+					Questionnaire q = (Questionnaire) theResource;
+					String title = q.getGroup().getTitle();
+					addSearchTerm(theEntity, retVal, resourceName, title);
+				}
 				continue;
 			}
 
@@ -321,7 +331,6 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 					continue;
 				}
 
-				String resourceName = nextSpDef.getName();
 				boolean multiType = false;
 				if (nextPath.endsWith("[x]")) {
 					multiType = true;
@@ -330,13 +339,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 				if (nextObject instanceof IPrimitiveDatatype<?>) {
 					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					String searchTerm = nextValue.getValueAsString();
-					if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-						searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-					}
-
-					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(searchTerm), searchTerm);
-					nextEntity.setResource(theEntity);
-					retVal.add(nextEntity);
+					addSearchTerm(theEntity, retVal, resourceName, searchTerm);
 				} else {
 					if (nextObject instanceof BaseHumanNameDt) {
 						ArrayList<StringDt> allNames = new ArrayList<StringDt>();
@@ -344,12 +347,7 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 						allNames.addAll(nextHumanName.getFamily());
 						allNames.addAll(nextHumanName.getGiven());
 						for (StringDt nextName : allNames) {
-							if (nextName.isEmpty()) {
-								continue;
-							}
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
-							nextEntity.setResource(theEntity);
-							retVal.add(nextEntity);
+							addSearchTerm(theEntity, retVal, resourceName, nextName.getValue());
 						}
 					} else if (nextObject instanceof AddressDt) {
 						ArrayList<StringDt> allNames = new ArrayList<StringDt>();
@@ -360,19 +358,12 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 						allNames.add(nextAddress.getCountryElement());
 						allNames.add(nextAddress.getPostalCodeElement());
 						for (StringDt nextName : allNames) {
-							if (nextName.isEmpty()) {
-								continue;
-							}
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
-							nextEntity.setResource(theEntity);
-							retVal.add(nextEntity);
+							addSearchTerm(theEntity, retVal, resourceName, nextName.getValue());
 						}
 					} else if (nextObject instanceof ContactPointDt) {
 						ContactPointDt nextContact = (ContactPointDt) nextObject;
 						if (nextContact.getValueElement().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextContact.getValueElement().getValueAsString()), nextContact.getValue());
-							nextEntity.setResource(theEntity);
-							retVal.add(nextEntity);
+							addSearchTerm(theEntity, retVal, resourceName, nextContact.getValue());
 						}
 					} else {
 						if (!multiType) {
@@ -386,6 +377,19 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 		theEntity.setParamsStringPopulated(retVal.size() > 0);
 
 		return retVal;
+	}
+
+	private void addSearchTerm(ResourceTable theEntity, ArrayList<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
+		if (isBlank(searchTerm)) {
+			return;
+		}
+		if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(searchTerm), searchTerm);
+		nextEntity.setResource(theEntity);
+		retVal.add(nextEntity);
 	}
 
 	/*

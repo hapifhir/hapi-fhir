@@ -1,20 +1,23 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -58,7 +61,6 @@ import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticOrder;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.DocumentManifest;
 import ca.uhn.fhir.model.dstu2.resource.DocumentReference;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
@@ -80,9 +82,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.gclient.IReadExecutable;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.Constants;
@@ -130,6 +130,34 @@ public class ResourceProviderDstu2Test {
 		for (IResource next : resources.toListOfResources()) {
 			ourLog.info("Deleting resource: {}", next.getId());
 			ourClient.delete().resource(next).execute();
+		}
+	}
+
+	@Test
+	public void testBundleCreate() throws Exception {
+		IGenericClient client = ourClient;
+
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
+		IdDt id = client.create().resource(resBody).execute().getId();
+
+		ourLog.info("Created: {}", id);
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
+
+		ourLog.info(ourFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+	}
+
+	@Test
+	public void testBundleCreateWithTypeTransaction() throws Exception {
+		IGenericClient client = ourClient;
+
+		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
+		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
+		try {
+			client.create().resource(resBody).execute().getId();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value other than 'document' - Value was: transaction"));
 		}
 	}
 
@@ -411,34 +439,6 @@ public class ResourceProviderDstu2Test {
 
 	}
 
-	@Test
-	public void testBundleCreate() throws Exception {
-		IGenericClient client = ourClient;
-
-		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
-		IdDt id = client.create().resource(resBody).execute().getId();
-		
-		ourLog.info("Created: {}", id);
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
-
-		ourLog.info(ourFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
-	}
-
-	@Test
-	public void testBundleCreateWithTypeTransaction() throws Exception {
-		IGenericClient client = ourClient;
-
-		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
-		resBody = resBody.replace("\"type\": \"document\"", "\"type\": \"transaction\"");
-		try {
-		client.create().resource(resBody).execute().getId();
-		fail();
-		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value other than 'document' - Value was: transaction"));
-		}
-	}
-	
 	/**
 	 * See #147
 	 */
@@ -472,9 +472,6 @@ public class ResourceProviderDstu2Test {
 			ourLog.info("$everything: " + ids.toString());
 
 			assertFalse(ids.toString(), dupes);
-
-			// Default size
-			assertEquals(10, ids.size());
 		}
 
 		/*
