@@ -22,13 +22,19 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestInteraction;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestOperation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.client.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -54,6 +60,21 @@ public class TransactionWithBundleResourceParamTest {
 		ourReturnOperationOutcome = false;
 	}
 
+	@Test
+	public void testConformance() {
+		ourCtx.getRestfulClientFactory().setSocketTimeout(500000);
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/");
+		Conformance rest = client.fetchConformance().ofType(Conformance.class).execute();
+		boolean supportsTransaction = false;
+		for (RestInteraction next : rest.getRest().get(0).getInteraction()) {
+			if (next.getCodeElement().getValueAsEnum() == SystemRestfulInteractionEnum.TRANSACTION) {
+				supportsTransaction = true;
+			}
+		}
+		
+		assertTrue(supportsTransaction);
+	}
+	
 	@Test
 	public void testTransactionWithXmlRequest() throws Exception {
 		Bundle b = new Bundle();

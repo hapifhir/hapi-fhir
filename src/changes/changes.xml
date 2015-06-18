@@ -102,6 +102,9 @@
 				Server now supports complete Accept header content negotiation, including
 				q values specifying order of preference. Previously the q value was ignored.
 			</action>
+			<action type="add">
+				Server in DSTU2 mode now indicates that whether it has support for Transaction operation or not. Thanks to Kevin Paschke for pointing out that this wasn't working!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

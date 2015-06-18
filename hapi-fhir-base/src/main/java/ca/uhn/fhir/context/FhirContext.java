@@ -251,6 +251,8 @@ public class FhirContext {
 	 */
 	@SuppressWarnings("unchecked")
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) {
+		Validate.notBlank(theResourceName, "theResourceName must not be blank");
+		
 		String resourceName = theResourceName;
 
 		/*
