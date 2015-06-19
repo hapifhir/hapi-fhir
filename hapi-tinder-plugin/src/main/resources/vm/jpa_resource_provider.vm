@@ -70,6 +70,9 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 #if ( $version != 'dstu' )
 			@IncludeParam(reverse=true)
 			Set<Include> theRevIncludes,
+			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
+			@OptionalParam(name="_lastUpdated")
+			DateRangeParam theLastUpdated, 
 #end
 
 			@IncludeParam(allow= {
@@ -105,6 +108,7 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 #end
 #if ( $version != 'dstu' )
 			paramMap.setRevIncludes(theRevIncludes);
+			paramMap.setLastUpdated(theLastUpdated);
 #end
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);

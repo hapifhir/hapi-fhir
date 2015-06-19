@@ -1620,9 +1620,34 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 		}
 
-		final List<Long> pids;
+		// Handle _lastUpdated
+		DateRangeParam lu = theParams.getLastUpdated();
+		if (lu != null && (lu.getLowerBoundAsInstant() != null || lu.getUpperBoundAsInstant() != null)) {
+
+			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+			Root<ResourceTable> from = cq.from(ResourceTable.class);
+			cq.select(from.get("myId").as(Long.class));
+			
+			Predicate predicateIds = (from.get("myId").in(loadPids));
+			Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date>get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
+			Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date>get("myUpdated"), lu.getUpperBoundAsInstant()) : null;
+			if (predicateLower != null && predicateUpper != null) {
+				cq.where(predicateIds, predicateLower, predicateUpper);
+			} else if (predicateLower != null) {
+				cq.where(predicateIds, predicateLower);
+			} else {
+				cq.where(predicateIds, predicateUpper);
+			}
+			TypedQuery<Long> query = myEntityManager.createQuery(cq);
+			loadPids.clear();
+			for (Long next : query.getResultList()) {
+				loadPids.add(next);
+			}
+		}
 
 		// Handle sorting if any was provided
+		final List<Long> pids;
 		if (theParams.getSort() != null && isNotBlank(theParams.getSort().getParamName())) {
 			List<Order> orders = new ArrayList<Order>();
 			List<Predicate> predicates = new ArrayList<Predicate>();

@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public class SearchParameterMap extends HashMap<String, List<List<? extends IQueryParameterType>>> {
 
@@ -41,7 +42,9 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 
 	private Integer myCount;
 	private Set<Include> myIncludes;
+	private DateRangeParam myLastUpdated;
 	private Set<Include> myRevIncludes;
+
 	private SortSpec mySort;
 
 	public void add(String theName, IQueryParameterAnd<?> theAnd) {
@@ -98,6 +101,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 		return myIncludes;
 	}
 
+	public DateRangeParam getLastUpdated() {
+		return myLastUpdated;
+	}
+
 	public Set<Include> getRevIncludes() {
 		return myRevIncludes;
 	}
@@ -112,6 +119,10 @@ public class SearchParameterMap extends HashMap<String, List<List<? extends IQue
 
 	public void setIncludes(Set<Include> theIncludes) {
 		myIncludes = theIncludes;
+	}
+
+	public void setLastUpdated(DateRangeParam theLastUpdated) {
+		myLastUpdated = theLastUpdated;
 	}
 
 	public void setRevIncludes(Set<Include> theRevIncludes) {

@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -74,6 +76,7 @@ import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -85,6 +88,7 @@ import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -1102,5 +1106,102 @@ public class ResourceProviderDstu2Test {
 		ourHttpClient = builder.build();
 
 	}
+	
+	
+	
+	@Test
+	public void testSearchLastUpdatedParamRp() throws InterruptedException {
+		String methodName = "testSearchLastUpdatedParamRp";
+		
+		int sleep = 100;
+		Thread.sleep(sleep);
+
+		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		IdDt id1a;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			id1a = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+		IdDt id1b;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily(methodName + "XXXX").addGiven("Joe");
+			id1b = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+
+		Thread.sleep(1100);
+		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		Thread.sleep(1100);
+		
+		IdDt id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily(methodName).addGiven("John");
+			id2 = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+		
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(beforeAny, null))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(beforeR2, null))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id2));
+			assertThat(patients, not(hasItems(id1a, id1b)));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(beforeAny, beforeR2))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(null, beforeR2))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, (hasItems(id1a, id1b)));
+			assertThat(patients, not(hasItems(id2)));
+		}
+	}
+
 
 }

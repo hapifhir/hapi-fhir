@@ -98,6 +98,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -635,7 +637,7 @@ public abstract class BaseFhirDao implements IDao {
 		return ids;
 	}
 
-	protected SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition resourceDef) {
+	static SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters;
 		try {
@@ -644,6 +646,10 @@ public abstract class BaseFhirDao implements IDao {
 				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: URL does not contain any parameters ('?' not detected)");
 			}
 			matchUrl = matchUrl.replace("|", "%7C");
+			matchUrl = matchUrl.replace("=>=", "=%3E%3D");
+			matchUrl = matchUrl.replace("=<=", "=%3C%3D");
+			matchUrl = matchUrl.replace("=>", "=%3E");
+			matchUrl = matchUrl.replace("=<", "=%3C");
 			parameters = URLEncodedUtils.parse(new URI(matchUrl), "UTF-8");
 		} catch (URISyntaxException e) {
 			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Error was: " + e.toString());
@@ -669,12 +675,25 @@ public abstract class BaseFhirDao implements IDao {
 		}
 
 		for (String nextParamName : nameToParamLists.keySet()) {
+			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);
+			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
+				if (paramList != null && paramList.size() > 0) {
+					if (paramList.size() > 2) {
+						throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
+					} else {
+						DateRangeParam p1 = new DateRangeParam();
+						p1.setValuesAsQueryTokens(paramList);
+						paramMap.setLastUpdated(p1);
+					}
+				}
+				continue;
+			}
+
 			RuntimeSearchParam paramDef = resourceDef.getSearchParam(nextParamName);
 			if (paramDef == null) {
 				throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
 			}
 
-			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);
 			IQueryParameterAnd<?> param = MethodUtil.parseQueryParams(paramDef, nextParamName, paramList);
 			paramMap.add(nextParamName, param);
 		}

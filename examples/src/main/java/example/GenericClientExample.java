@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Provenance;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
@@ -25,6 +26,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 
 public class GenericClientExample {
@@ -268,6 +270,8 @@ public class GenericClientExample {
                .where(Patient.BIRTHDATE.beforeOrEquals().day("2012-01-22"))
                .and(Patient.BIRTHDATE.after().day("2011-01-01"))
                .include(Patient.INCLUDE_ORGANIZATION)
+               .revInclude(Provenance.INCLUDE_TARGET)
+               .lastUpdated(new DateRangeParam("2011-01-01", null))
                .sort().ascending(Patient.BIRTHDATE)
                .sort().descending(Patient.NAME).limitTo(123)
                .returnBundle(Bundle.class)

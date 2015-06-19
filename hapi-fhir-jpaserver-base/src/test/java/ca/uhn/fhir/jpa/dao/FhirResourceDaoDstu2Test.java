@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -1307,6 +1309,75 @@ public class FhirResourceDaoDstu2Test {
 			assertEquals(0, patients.size());
 		}
 
+	}
+
+	@Test
+	public void testSearchLastUpdatedParam() throws InterruptedException {
+		String methodName = "testSearchLastUpdatedParam";
+		
+		int sleep = 100;
+		Thread.sleep(sleep);
+
+		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		IdDt id1a;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			id1a = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		IdDt id1b;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily(methodName + "XXXX").addGiven("Joe");
+			id1b = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		Thread.sleep(1100);
+		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		Thread.sleep(1100);
+		
+		IdDt id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily(methodName).addGiven("John");
+			id2 = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(beforeAny, null));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(beforeR2, null));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, hasItems(id2));
+			assertThat(patients, not(hasItems(id1a, id1b)));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(beforeAny, beforeR2));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLastUpdated(new DateRangeParam(null, beforeR2));
+			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, (hasItems(id1a, id1b)));
+			assertThat(patients, not(hasItems(id2)));
+		}
 	}
 
 	@Test

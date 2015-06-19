@@ -120,6 +120,8 @@ import ca.uhn.fhir.rest.method.SearchStyleEnum;
 import ca.uhn.fhir.rest.method.TransactionMethodBinding;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -634,7 +636,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public Bundle invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -1468,6 +1470,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseBundle> myReturnBundleType;
 		private List<Include> myRevInclude = new ArrayList<Include>();
 		private SearchStyleEnum mySearchStyle;
+		private DateRangeParam myLastUpdated;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
 
 		public SearchInternal() {
@@ -1506,6 +1509,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			if (myParamLimit != null) {
 				addParam(params, Constants.PARAM_COUNT, Integer.toString(myParamLimit));
+			}
+			
+			if (myLastUpdated != null) {
+				for (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
+					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken());
+				}
 			}
 
 			if (myReturnBundleType == null && myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
@@ -1609,6 +1618,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IQuery withIdAndCompartment(String theResourceId, String theCompartmentName) {
 			myResourceId = theResourceId;
 			myCompartmentName = theCompartmentName;
+			return this;
+		}
+
+		@Override
+		public IQuery lastUpdated(DateRangeParam theLastUpdated) {
+			myLastUpdated = theLastUpdated;
 			return this;
 		}
 

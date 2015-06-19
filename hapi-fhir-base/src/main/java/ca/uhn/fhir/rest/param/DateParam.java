@@ -61,6 +61,14 @@ public class DateParam extends DateTimeDt implements IQueryParameterType, IQuery
 	}
 
 	/**
+	 * Constructor
+	 */
+	public DateParam(QuantityCompararatorEnum theComparator, DateTimeDt theDate) {
+		myComparator = theComparator;
+		setValueAsString(theDate != null ? theDate.getValueAsString() : null);
+	}
+
+	/**
 	 * Constructor which takes a complete [qualifier]{date} string.
 	 * 
 	 * @param theString

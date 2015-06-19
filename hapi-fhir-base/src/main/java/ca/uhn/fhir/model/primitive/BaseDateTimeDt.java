@@ -445,7 +445,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * @throws DataFormatException
 	 */
 	public void setValue(Date theValue, TemporalPrecisionEnum thePrecision) throws DataFormatException {
-		clearTimeZone();
+		setTimeZone(TimeZone.getDefault());
 		myPrecision = thePrecision;
 		super.setValue(theValue);
 	}

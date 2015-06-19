@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.method.SearchStyleEnum;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 
 public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<IQuery<T>> {
 
@@ -50,9 +51,16 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	/**
 	 * Add a "_revinclude" specification
 	 * 
-	 * @since 1.0
+	 * @since HAPI FHIR 1.0 - Note that option was added to FHIR itself in DSTU2
 	 */
 	IQuery<T> revInclude(Include theIncludeTarget);
+
+	/**
+	 * Add a "_lastUpdated" specification
+	 * 
+	 * @since HAPI FHIR 1.1 - Note that option was added to FHIR itself in DSTU2
+	 */
+	IQuery<T> lastUpdated(DateRangeParam theLastUpdated);
 
 	/**
 	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>

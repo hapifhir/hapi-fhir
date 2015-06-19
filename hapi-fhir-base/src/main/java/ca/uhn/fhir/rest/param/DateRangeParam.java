@@ -26,6 +26,7 @@ import java.util.List;
 
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.method.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -48,12 +49,26 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * 
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(Date theLowerBound, Date theUpperBound) {
+		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
+	}
+
+	/**
+	 * Constructor which takes two Dates representing the lower and upper bounds of the range (inclusive on both ends)
+	 * 
+	 * @param theLowerBound
+	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound
+	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 */
+	public DateRangeParam(DateTimeDt theLowerBound, DateTimeDt theUpperBound) {
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
 	}
 
@@ -96,10 +111,10 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * 
 	 * @param theLowerBound
 	 *            An unqualified date param representing the lower date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00"
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 * @param theUpperBound
 	 *            An unqualified date param representing the upper date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00"
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public DateRangeParam(String theLowerBound, String theUpperBound) {
 		setRangeFromDatesInclusive(theLowerBound, theUpperBound);
@@ -177,14 +192,14 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * 
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(Date theLowerBound, Date theUpperBound) {
-		myLowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
-		myUpperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		myLowerBound = theLowerBound != null ? new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
+		myUpperBound = theUpperBound != null ? new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 
@@ -193,14 +208,30 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	 * 
 	 * @param theLowerBound
 	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 * @param theUpperBound
 	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
-	 *            "2011-02-22" or "2011-02-22T13:12:00". Will be treated inclusively.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 */
+	public void setRangeFromDatesInclusive(DateTimeDt theLowerBound, DateTimeDt theUpperBound) {
+		myLowerBound = theLowerBound != null ? new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
+		myUpperBound = theUpperBound != null ? new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
+		validateAndThrowDataFormatExceptionIfInvalid();
+	}
+
+	/**
+	 * Sets the range from a pair of dates, inclusive on both ends
+	 * 
+	 * @param theLowerBound
+	 *            A qualified date param representing the lower date bound (optionally may include time), e.g.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
+	 * @param theUpperBound
+	 *            A qualified date param representing the upper date bound (optionally may include time), e.g.
+	 *            "2011-02-22" or "2011-02-22T13:12:00Z". Will be treated inclusively. Either theLowerBound or theUpperBound may both be populated, or one may be null, but it is not valid for both to be null.
 	 */
 	public void setRangeFromDatesInclusive(String theLowerBound, String theUpperBound) {
-		myLowerBound = new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound);
-		myUpperBound = new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound);
+		myLowerBound = theLowerBound != null ? new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, theLowerBound) : null;
+		myUpperBound = theUpperBound != null ? new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, theUpperBound) : null;
 		validateAndThrowDataFormatExceptionIfInvalid();
 	}
 

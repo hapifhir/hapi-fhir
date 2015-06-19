@@ -111,6 +111,14 @@
 			<action type="add">
 				JPA server now supports ifNoneMatch in GET within a transaction request.
 			</action>
+			<action type="add">
+				DateRangeParam now supports null values in the constructor for lower or upper bounds (but 
+				still not both)
+			</action>
+			<action type="add">
+				Generic/fluent client and JPA server now both support _lastUpdated search parameter
+				which was added in DSTU2
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">
