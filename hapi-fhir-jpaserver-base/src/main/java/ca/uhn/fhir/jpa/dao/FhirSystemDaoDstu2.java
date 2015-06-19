@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.persistence.TypedQuery;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.jmx.access.InvalidInvocationException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -254,16 +256,37 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 				@SuppressWarnings("rawtypes")
 				IFhirResourceDao resourceDao = parts.getDao();
 
+				String ifNoneMatch = nextEntry.getTransaction().getIfNoneMatch();
+				if (isNotBlank(ifNoneMatch)) {
+					ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
+				}
+				
 				if (parts.getResourceId() != null && parts.getParams() == null) {
 					IResource found;
+					boolean notChanged = false;
 					if (parts.getVersionId() != null) {
+						if (isNotBlank(ifNoneMatch)) {
+							throw new InvalidRequestException("Unable to perform vread on '" + url + "' with ifNoneMatch also set. Do not include a version in the URL to perform a conditional read.");
+						}
 						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
 					} else {
 						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
+						if (isNotBlank(ifNoneMatch) && ifNoneMatch.equals(found.getId().getVersionIdPart())) {
+							notChanged = true;
+						}
 					}
-					EntryTransactionResponse resp = response.addEntry().setResource(found).getTransactionResponse();
+					Entry entry = response.addEntry();
+					if (notChanged == false) {
+						entry.setResource(found);
+					}
+					EntryTransactionResponse resp = entry.getTransactionResponse();
 					resp.setLocation(found.getId().toUnqualified().getValue());
 					resp.setEtag(found.getId().getVersionIdPart());
+					if (!notChanged) {
+						resp.setStatus(Integer.toString(Constants.STATUS_HTTP_200_OK));
+					} else {
+						resp.setStatus(Integer.toString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
+					}
 				} else if (parts.getParams() != null) {
 					RuntimeResourceDefinition def = getContext().getResourceDefinition(parts.getDao().getResourceType());
 					SearchParameterMap params = translateMatchUrl(url, def);
@@ -282,7 +305,9 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 						searchBundle.addEntry().setResource((IResource) next);
 					}
 
-					response.addEntry().setResource(searchBundle);
+					Entry newEntry = response.addEntry();
+					newEntry.setResource(searchBundle);
+					newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_200_OK));
 				}
 			}
 			}

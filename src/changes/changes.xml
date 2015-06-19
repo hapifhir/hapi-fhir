@@ -108,6 +108,9 @@
 			<action type="add">
 				Questionnaire.title now gets correctly indexed in JPA server (it has no path, so it is a special case)
 			</action>
+			<action type="add">
+				JPA server now supports ifNoneMatch in GET within a transaction request.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

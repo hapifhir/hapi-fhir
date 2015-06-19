@@ -559,6 +559,51 @@ public class FhirSystemDaoDstu2Test {
 	}
 
 	@Test
+	public void testTransactionReadWithIfNoneMatch() {
+		String methodName = "testTransactionReadWithIfNoneMatch";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IdDt idv1 = ourPatientDao.update(p).getId();
+		ourLog.info("Created patient, got id: {}", idv1);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Family Name");
+		p.setId("Patient/" + methodName);
+		IdDt idv2 = ourPatientDao.update(p).getId();
+		ourLog.info("Updated patient, got id: {}", idv2);
+
+		Bundle request = new Bundle();
+		request.addEntry().getTransaction().setMethod(HTTPVerbEnum.GET).setUrl(idv1.toUnqualifiedVersionless().getValue());
+		request.addEntry().getTransaction().setMethod(HTTPVerbEnum.GET).setUrl(idv1.toUnqualifiedVersionless().getValue()).setIfNoneMatch("W/\"" + idv1.getVersionIdPart() + "\"");
+		request.addEntry().getTransaction().setMethod(HTTPVerbEnum.GET).setUrl(idv1.toUnqualifiedVersionless().getValue()).setIfNoneMatch("W/\"" + idv2.getVersionIdPart() + "\"");
+		
+		Bundle resp = ourSystemDao.transaction(request);
+
+		assertEquals(4, resp.getEntry().size());
+
+		Entry nextEntry;
+
+		nextEntry = resp.getEntry().get(1);
+		assertNotNull(nextEntry.getResource());
+		assertEquals(Patient.class, nextEntry.getResource().getClass());
+		assertEquals(idv2.toUnqualified(), nextEntry.getResource().getId().toUnqualified());
+		assertEquals("200", nextEntry.getTransactionResponse().getStatus());
+
+		nextEntry = resp.getEntry().get(2);
+		assertNotNull(nextEntry.getResource());
+		assertEquals(Patient.class, nextEntry.getResource().getClass());
+		assertEquals(idv2.toUnqualified(), nextEntry.getResource().getId().toUnqualified());
+		assertEquals("200", nextEntry.getTransactionResponse().getStatus());
+
+		nextEntry = resp.getEntry().get(3);
+		assertNull(nextEntry.getResource());
+		assertEquals("304", nextEntry.getTransactionResponse().getStatus());
+	}
+
+	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatch() {
 		String methodName = "testTransactionUpdateMatchUrlWithOneMatch";
 		Bundle request = new Bundle();
