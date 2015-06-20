@@ -928,9 +928,6 @@
 		</profile>
 		<profile>
 			<id>COBERTURA</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<modules>
 				<module>hapi-fhir-testconsolidated</module>
 			</modules>
