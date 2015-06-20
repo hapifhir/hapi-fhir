@@ -210,6 +210,31 @@
 						<skipDeploy>true</skipDeploy>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<version>${maven_cobertura_plugin_version}</version>
+					<configuration>
+						<skip>false</skip>
+						<instrumentation>
+							<ignores>
+								<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
+							</ignores>
+							<excludes>
+								<ignore>**/valueset/*.class</ignore>
+								<ignore>**/exceptions/*.class</ignore>
+							</excludes>
+						</instrumentation>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>verify</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -218,6 +243,14 @@
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>3.1.0</version>
 				<configuration>
+					<coberturaReports>
+						<coberturaReport>
+							${basedir}/target/coverage.xml
+						</coberturaReport>
+					</coberturaReports>
+					<sourceEncoding>UTF-8</sourceEncoding>
+					<serviceName>travis-ci</serviceName>
+					<serviceJobId>${env.TRAVIS_JOB_ID} </serviceJobId>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -282,21 +315,6 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>${maven_cobertura_plugin_version}</version>
 				<configuration>
-					<skip>false</skip>
-					<instrumentation>
-						<ignores>
-							<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
-							<ignore>ca.uhn.fhir.model.valueset.*</ignore>
-							<ignore>ca.uhn.fhir.rest.client.exceptions.*</ignore>
-							<ignore>ca.uhn.fhir.rest.server.exceptions.*</ignore>
-						</ignores>
-						<excludes>
-							<ignore>ca/uhn/fhir/model/dstu/valueset/*.class</ignore>
-							<ignore>ca/uhn/fhir/model/valueset/*.class</ignore>
-							<ignore>ca/uhn/fhir/rest/client.exceptions/*.class</ignore>
-							<ignore>ca/uhn/fhir/rest/server.exceptions/*.class</ignore>
-						</excludes>
-					</instrumentation>
 				</configuration>
 				<executions>
 					<execution>

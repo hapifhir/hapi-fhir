@@ -3,5 +3,5 @@ jdk:
   - oraclejdk7
 
 install: mvn clean install -Dcobertura.skip=true
-script: mvn -P COBERTURA clean cobertura:cobertura
+script: mvn -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:check
 
