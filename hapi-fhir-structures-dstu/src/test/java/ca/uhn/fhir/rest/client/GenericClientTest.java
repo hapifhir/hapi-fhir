@@ -778,7 +778,7 @@ public class GenericClientTest {
 	@Test
 	public void testSearchByNumberExact() throws Exception {
 
-		String msg = new FhirContext().newXmlParser().encodeBundleToString(new Bundle());
+		String msg = ourCtx.newXmlParser().encodeBundleToString(new Bundle());
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1360,7 +1360,7 @@ public class GenericClientTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu1();
 	}
 
 }

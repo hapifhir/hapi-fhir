@@ -28,6 +28,7 @@ import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -294,13 +295,13 @@ public class JsonParserTest {
 		e.setResource(new Patient());
 		b.addCategory("scheme", "term", "label");
 
-		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
+		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
 		ourLog.info(val);
 
 		assertThat(val, StringContains.containsString("\"category\":[{\"term\":\"term\",\"label\":\"label\",\"scheme\":\"scheme\"}]"));
 		assertThat(val, not(containsString("text")));
 
-		b = new FhirContext().newJsonParser().parseBundle(val);
+		b = ourCtx.newJsonParser().parseBundle(val);
 		assertEquals(1, b.getEntries().size());
 		assertEquals(1, b.getCategories().size());
 		assertEquals("term", b.getCategories().get(0).getTerm());
@@ -489,7 +490,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -508,7 +509,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -620,7 +621,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testEncodeExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -751,7 +752,7 @@ public class JsonParserTest {
 		ExtensionDt parameter = q.addParameter();
 		parameter.setUrl("http://hl7.org/fhir/query#_query").setValue(new StringDt("example"));
 
-		String val = new FhirContext().newJsonParser().encodeResourceToString(q);
+		String val = ourCtx.newJsonParser().encodeResourceToString(q);
 		ourLog.info(val);
 
 		//@formatter:off
@@ -779,7 +780,7 @@ public class JsonParserTest {
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new ResourceReferenceDt());
 
-		IParser p = new FhirContext().newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
@@ -797,7 +798,7 @@ public class JsonParserTest {
 
 	@Test
 	public void testEncodeUndeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUseEnum.HOME);
@@ -845,15 +846,15 @@ public class JsonParserTest {
 		HumanNameDt given = name.addGiven("Joe");
 		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
 		given.addUndeclaredExtension(ext2);
-		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		assertEquals("{\"resourceType\":\"Patient\",\"name\":[{\"extension\":[{\"url\":\"http://examples.com#givenext\",\"valueString\":\"Hello\"}],\"family\":[\"Shmoe\"],\"given\":[\"Joe\"]}]}", enc);
 
-		IParser newJsonParser = new FhirContext().newJsonParser();
+		IParser newJsonParser = ourCtx.newJsonParser();
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
 		assertEquals(1, parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
 		ExtensionDt ext = parsed.getNameFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
@@ -872,7 +873,7 @@ public class JsonParserTest {
 
 		ExtensionDt ext2 = new ExtensionDt(false, "http://examples.com#givenext", new StringDt("Hello"));
 		family.addUndeclaredExtension(ext2);
-		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
 		assertThat(enc, containsString(("{\n" + 
@@ -897,7 +898,7 @@ public class JsonParserTest {
 				"}").replace("\n", "").replaceAll(" +", "")));
 		//@formatter:on
 
-		Patient parsed = new FhirContext().newJsonParser().parseResource(Patient.class, new StringReader(enc));
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").size());
 		ExtensionDt ext = parsed.getNameFirstRep().getFamilyFirstRep().getUndeclaredExtensionsByUrl("http://examples.com#givenext").get(0);
 		assertEquals("Hello", ext.getValueAsPrimitive().getValue());
@@ -956,7 +957,7 @@ public class JsonParserTest {
 				// nothing
 			}};
 			
-		FhirContext context = new FhirContext();
+		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newJsonParser();
 		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
@@ -967,6 +968,11 @@ public class JsonParserTest {
 		assertThat(str, StringContains.containsString(",\"text\":{\"status\":\"generated\",\"div\":\"<div>help</div>\"},"));
 	}
 
+	@Before
+	public void before() {
+		ourCtx.setNarrativeGenerator(null);
+	}
+	
 	@Test
 	public void testNestedContainedResources() {
 
@@ -1330,7 +1336,7 @@ public class JsonParserTest {
 				"}";
 		//@formatter:on
 
-		TagList tagList = new FhirContext().newJsonParser().parseTagList(tagListStr);
+		TagList tagList = ourCtx.newJsonParser().parseTagList(tagListStr);
 		assertEquals(3, tagList.size());
 		assertEquals("term0", tagList.get(0).getTerm());
 		assertEquals("label0", tagList.get(0).getLabel());
@@ -1367,14 +1373,14 @@ public class JsonParserTest {
 				"}";
 		//@formatter:on
 
-		String encoded = new FhirContext().newJsonParser().encodeTagListToString(tagList);
+		String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
 		assertEquals(expected, encoded);
 
 	}
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu1();
 	}
 
 	@ResourceDef(name = "Patient")

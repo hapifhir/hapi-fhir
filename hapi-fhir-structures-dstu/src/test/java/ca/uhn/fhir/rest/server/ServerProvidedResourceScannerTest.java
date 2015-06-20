@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.ProvidesResources;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -9,9 +10,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import junit.framework.TestCase;
+
 import org.junit.Test;
 
 import javax.servlet.ServletException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +22,9 @@ import java.util.List;
  * Created by Bill de Beaubien on 11/1/2014.
  */
 public class ServerProvidedResourceScannerTest extends TestCase {
-    @Test
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	
+	@Test
     public void testWhenRestfulServerInitialized_annotatedResources_shouldBeAddedToContext() throws ServletException {
         // Given
         MyServer server = new MyServer();
@@ -35,7 +40,7 @@ public class ServerProvidedResourceScannerTest extends TestCase {
     @Test
     public void testWhenUnannotatedServerInitialized_annotatedResources_shouldNotBeAddedToContext() throws ServletException {
         // Given
-        RestfulServer server = new RestfulServer();
+        RestfulServer server = new RestfulServer(ourCtx);
 
         // When
         server.init();
@@ -67,10 +72,23 @@ public class ServerProvidedResourceScannerTest extends TestCase {
 
     @ProvidesResources(resources={CustomPatient.class,CustomObservation.class})
     class MyServer extends RestfulServer {
+
+		private static final long serialVersionUID = 1L;
+		
+		public MyServer() {
+			super(ourCtx);
+		}
+		
     }
 
     class MyServerWithProvider extends RestfulServer {
-        @Override
+		private static final long serialVersionUID = 1L;
+		
+		public MyServerWithProvider() {
+			super(ourCtx);
+		}
+
+		@Override
         protected void initialize() throws ServletException {
             List<IResourceProvider> providers = new ArrayList<IResourceProvider>();
             providers.add(new MyObservationProvider());

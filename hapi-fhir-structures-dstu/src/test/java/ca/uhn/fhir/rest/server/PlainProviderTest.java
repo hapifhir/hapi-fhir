@@ -51,18 +51,17 @@ public class PlainProviderTest {
 	private int myPort;
 	private Server myServer;
 	private CloseableHttpClient myClient;
-	private FhirContext myCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private RestfulServer myRestfulServer;
 
 	@Before
 	public void before() throws Exception {
 		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
-		myCtx = new FhirContext(Patient.class);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ServletHolder servletHolder = new ServletHolder();
-		myRestfulServer = new RestfulServer();
+		myRestfulServer = new RestfulServer(ourCtx);
 		servletHolder.setServlet(myRestfulServer);
 		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
 		myServer.setHandler(proxyHandler);
@@ -95,7 +94,7 @@ public class PlainProviderTest {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = myCtx.newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 
 		assertEquals(1, bundle.getEntries().size());
 
@@ -121,7 +120,7 @@ public class PlainProviderTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = myCtx.newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());
 		
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
@@ -131,7 +130,7 @@ public class PlainProviderTest {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		bundle = myCtx.newXmlParser().parseBundle(responseContent);
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());
 		assertNull(provider.myLastSince.getValueAsString());
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
@@ -140,7 +139,7 @@ public class PlainProviderTest {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		bundle = myCtx.newXmlParser().parseBundle(responseContent);
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
 		assertNull(provider.myLastCount.getValueAsString());
@@ -149,7 +148,7 @@ public class PlainProviderTest {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		bundle = myCtx.newXmlParser().parseBundle(responseContent);
+		bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.getEntries().size());
 		assertNull(provider.myLastSince.getValueAsString());
 		assertNull(provider.myLastCount.getValueAsString());

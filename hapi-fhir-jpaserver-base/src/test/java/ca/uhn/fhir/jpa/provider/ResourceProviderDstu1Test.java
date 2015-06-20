@@ -54,7 +54,7 @@ public class ResourceProviderDstu1Test {
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
 	private static DaoConfig ourDaoConfig;
-	private static FhirContext ourFhirCtx;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu1Test.class);
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	// private static IFhirResourceDao<Observation> ourObservationDao;
@@ -405,14 +405,14 @@ public class ResourceProviderDstu1Test {
 		// Read back directly from the DAO
 		{
 			Organization returned = ourOrganizationDao.read(orgId);
-			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
 		// Read back through the HTTP API
 		{
 			Organization returned = ourClient.read(Organization.class, orgId);
-			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
@@ -492,9 +492,7 @@ public class ResourceProviderDstu1Test {
 	public static void beforeClass() throws Exception {
 		int port = RandomServerPortProvider.findFreePort();
 
-		RestfulServer restServer = new RestfulServer();
-		ourFhirCtx = FhirContext.forDstu1();
-		restServer.setFhirContext(ourFhirCtx);
+		RestfulServer restServer = new RestfulServer(ourCtx);
 		
 		String serverBase = "http://localhost:" + port + "/fhir/context";
 
@@ -526,7 +524,7 @@ public class ResourceProviderDstu1Test {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		ourClient = ourFhirCtx.newRestfulGenericClient(serverBase);
+		ourClient = ourCtx.newRestfulGenericClient(serverBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 	}

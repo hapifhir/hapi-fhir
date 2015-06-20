@@ -19,13 +19,18 @@ public class ExampleRestfulServlet extends RestfulServer {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Constructor
+	 */
+	public ExampleRestfulServlet() {
+		super(FhirContext.forDstu2()); // Support DSTU2
+	}
+	
+	/**
 	 * This method is called automatically when the
 	 * servlet is initializing.
 	 */
 	@Override
 	public void initialize() {
-		setFhirContext(FhirContext.forDstu2());// Support DSTU2
-		
 		/*
 		 * Two resource providers are defined. Each one handles a specific
 		 * type of resource.

@@ -36,7 +36,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class MethodPriorityTest {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
@@ -72,8 +72,7 @@ public class MethodPriorityTest {
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer();
-		ourServlet.setFhirContext(ourCtx);
+		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		ServletHolder servletHolder = new ServletHolder(ourServlet);

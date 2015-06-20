@@ -232,7 +232,7 @@ public class JsonParserDstu2Test {
 		report.getContained().getContainedResources().add(obsv);
 		report.addResult().setResource(obsv);
 
-		IParser parser = new FhirContext().newXmlParser().setPrettyPrint(true);
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
@@ -247,12 +247,12 @@ public class JsonParserDstu2Test {
 		e.setResource(new Patient());
 		b.addCategory("scheme", "term", "label");
 
-		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
+		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
 		ourLog.info(val);
 
 		assertThat(val, not(containsString("text")));
 
-		b = new FhirContext().newJsonParser().parseBundle(val);
+		b = ourCtx.newJsonParser().parseBundle(val);
 		assertEquals(1, b.getEntries().size());
 
 	}
@@ -268,11 +268,11 @@ public class JsonParserDstu2Test {
 		Entry e = b.addEntry();
 		e.setResource(new Patient());
 
-		String val = new FhirContext().newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
 		assertThat(val, not(containsString("text")));
 
-		val = new FhirContext().newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
+		val = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
 		ourLog.info(val);
 		assertThat(val, not(containsString("text")));
 
@@ -297,7 +297,7 @@ public class JsonParserDstu2Test {
 		obsv.setId("#123");
 		report.addResult().setReference("#123");
 
-		IParser parser = new FhirContext().newXmlParser().setPrettyPrint(true);
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		String message = parser.encodeResourceToString(report);
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));

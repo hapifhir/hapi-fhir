@@ -16,7 +16,7 @@ import ca.uhn.fhir.parser.MyPatient;
 public class ExtensionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExtensionTest.class);
 
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
 	public void testExtensionType() {
@@ -66,19 +66,19 @@ public class ExtensionTest {
 
 		patient.addName().addFamily("Smith").addGiven("John").addGiven("Quincy").addSuffix("Jr");
 
-		IParser p = new FhirContext().newXmlParser().setPrettyPrint(true);
+		IParser p = FhirContext.forDstu1().newXmlParser().setPrettyPrint(true);
 		String messageString = p.encodeResourceToString(patient);
 
 		System.out.println(messageString);
 		// END SNIPPET: patientUse
 
 		// START SNIPPET: patientParse
-		IParser parser = new FhirContext().newXmlParser();
+		IParser parser = FhirContext.forDstu1().newXmlParser();
 		MyPatient newPatient = parser.parseResource(MyPatient.class, messageString);
 		// END SNIPPET: patientParse
 
 		{
-			FhirContext ctx2 = new FhirContext();
+			FhirContext ctx2 = FhirContext.forDstu1();
 			RuntimeResourceDefinition def = ctx2.getResourceDefinition(patient);
 			System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile("http://foo.org/fhir")));
 		}

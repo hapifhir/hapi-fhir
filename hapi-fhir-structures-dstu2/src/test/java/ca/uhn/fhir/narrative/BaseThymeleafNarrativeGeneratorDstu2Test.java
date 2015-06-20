@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class BaseThymeleafNarrativeGeneratorTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGeneratorTest.class);
+public class BaseThymeleafNarrativeGeneratorDstu2Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGeneratorDstu2Test.class);
 
 	@Test
 	public void testTrimWhitespace() {

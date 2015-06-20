@@ -36,10 +36,10 @@ import ca.uhn.fhir.util.PortUtil;
 public class SortTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SortTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Test
 	public void testNoSort() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?name=Hello");
@@ -47,7 +47,7 @@ public class SortTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(1, bundle.size());
 
 		Patient p = bundle.getResources(Patient.class).get(0);
@@ -63,7 +63,7 @@ public class SortTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
 
 			Patient p = bundle.getResources(Patient.class).get(0);
@@ -77,7 +77,7 @@ public class SortTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
 
 			Patient p = bundle.getResources(Patient.class).get(0);
@@ -91,7 +91,7 @@ public class SortTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
 
 			Patient p = bundle.getResources(Patient.class).get(0);
@@ -110,7 +110,7 @@ public class SortTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+			Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 			assertEquals(1, bundle.size());
 
 			Patient p = bundle.getResources(Patient.class).get(0);
@@ -136,7 +136,7 @@ public class SortTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

@@ -40,7 +40,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class TransactionTest {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static boolean ourDropFirstResource;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionTest.class);
 	private static int ourPort;
@@ -88,7 +88,7 @@ public class TransactionTest {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(3, bundle.size());
 
 		BundleEntry entry0 = bundle.getEntries().get(0);
@@ -144,7 +144,7 @@ public class TransactionTest {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(2, bundle.size());
 
 		BundleEntry entry1 = bundle.getEntries().get(0);
@@ -195,7 +195,7 @@ public class TransactionTest {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(4, bundle.size());
 
 		assertEquals(OperationOutcome.class, bundle.getEntries().get(0).getResource().getClass());
@@ -228,7 +228,7 @@ public class TransactionTest {
 		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
-		RestfulServer server = new RestfulServer();
+		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
 		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();

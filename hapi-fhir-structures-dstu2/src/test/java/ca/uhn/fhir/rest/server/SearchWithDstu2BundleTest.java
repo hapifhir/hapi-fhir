@@ -30,7 +30,7 @@ public class SearchWithDstu2BundleTest {
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchWithDstu2BundleTest.class);
 
 	@Test
@@ -69,14 +69,13 @@ public class SearchWithDstu2BundleTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 
-		ourCtx = new FhirContext();
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);

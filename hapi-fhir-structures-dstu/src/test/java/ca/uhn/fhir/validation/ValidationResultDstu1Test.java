@@ -1,20 +1,19 @@
 package ca.uhn.fhir.validation;
 
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import org.junit.Test;
+
+import java.util.List;
+import java.util.UUID;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Test;
-
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-
-public class ValidationResultTest {
+public class ValidationResultDstu1Test {
 
     @Test
     public void isSuccessful_IsTrueForNullOperationOutcome() {

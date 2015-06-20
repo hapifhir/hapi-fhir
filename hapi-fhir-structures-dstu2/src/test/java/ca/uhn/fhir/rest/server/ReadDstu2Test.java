@@ -30,13 +30,13 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ReadTest {
+public class ReadDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
-
+	private static FhirContext ourCtx = FhirContext.forDstu2();
+	
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
@@ -75,14 +75,13 @@ public class ReadTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 
-		ourCtx = new FhirContext();
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);

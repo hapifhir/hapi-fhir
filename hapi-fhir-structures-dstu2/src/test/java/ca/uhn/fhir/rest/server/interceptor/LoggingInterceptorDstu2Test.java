@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -50,14 +51,15 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class LoggingInterceptorTest {
+public class LoggingInterceptorDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
-
+	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	
 	@Test
 	public void testRead() throws Exception {
 
@@ -187,7 +189,7 @@ public class LoggingInterceptorTest {
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer();
+		servlet = new RestfulServer(ourCtx);
 		
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
 		servlet.setPlainProviders(new PlainProvider());

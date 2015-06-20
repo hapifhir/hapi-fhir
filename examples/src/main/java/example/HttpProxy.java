@@ -39,7 +39,7 @@ public class HttpProxy {
          .disableCookieManagement(); 
       CloseableHttpClient httpClient = clientBuilder.build();
       
-      FhirContext ctx = new FhirContext(); 
+      FhirContext ctx = FhirContext.forDstu2(); 
       String serverBase = "http://spark.furore.com/fhir/"; 
       ctx.getRestfulClientFactory().setHttpClient(httpClient); 
       IGenericClient client = ctx.newRestfulGenericClient(serverBase); 

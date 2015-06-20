@@ -13,7 +13,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 
 public class TagListTest {
 
-	private FhirContext myCtx = new FhirContext();
+	private FhirContext myCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testEquals() {

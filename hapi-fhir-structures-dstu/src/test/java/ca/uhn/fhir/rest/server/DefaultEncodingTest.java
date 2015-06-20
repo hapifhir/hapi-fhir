@@ -44,9 +44,8 @@ public class DefaultEncodingTest {
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static RestfulServer ourRestfulServer;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultEncodingTest.class);
 
 	@Test
 	public void testReadWithDefaultJsonPretty() throws Exception {
@@ -135,8 +134,7 @@ public class DefaultEncodingTest {
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		ourRestfulServer = new RestfulServer();
-		ourCtx = ourRestfulServer.getFhirContext();
+		ourRestfulServer = new RestfulServer(ourCtx);
 		ourRestfulServer.setResourceProviders(new PatientProvider());
 		ServletHolder servletHolder = new ServletHolder(ourRestfulServer);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

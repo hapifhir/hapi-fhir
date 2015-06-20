@@ -139,8 +139,7 @@ public class ResourceProviderMultiVersionTest {
 		 * DEV resources
 		 */
 
-		RestfulServer restServerDstu2 = new RestfulServer();
-		restServerDstu2.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
+		RestfulServer restServerDstu2 = new RestfulServer(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
 		List<IResourceProvider> rpsDstu2 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
 		restServerDstu2.setResourceProviders(rpsDstu2);
 
@@ -155,8 +154,7 @@ public class ResourceProviderMultiVersionTest {
 		 * DSTU resources
 		 */
 
-		RestfulServer restServerDstu1 = new RestfulServer();
-		restServerDstu1.setFhirContext(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
+		RestfulServer restServerDstu1 = new RestfulServer(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
 		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServerDstu1.setResourceProviders(rpsDstu1);
 

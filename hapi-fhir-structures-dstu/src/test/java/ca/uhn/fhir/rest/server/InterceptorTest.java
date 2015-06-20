@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InOrder;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -53,6 +54,7 @@ public class InterceptorTest {
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor1;
 	private IServerInterceptor myInterceptor2;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testInterceptorFires() throws Exception {
@@ -101,7 +103,7 @@ public class InterceptorTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer();
+		servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

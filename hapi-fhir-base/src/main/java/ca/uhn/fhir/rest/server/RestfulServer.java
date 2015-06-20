@@ -103,12 +103,18 @@ public class RestfulServer extends HttpServlet {
 	private boolean myUseBrowserFriendlyContentTypes;
 
 	/**
-	 * Constructor
+	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
+	 * through {@link #setFhirContext(FhirContext)}) the server will determine which version of FHIR to support
+	 * through classpath scanning. This is brittle, and it is highly recommended to explicitly specify
+	 * a FHIR version.
 	 */
 	public RestfulServer() {
-		this(new FhirContext());
+		this(null);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public RestfulServer(FhirContext theCtx) {
 		myFhirContext = theCtx;
 	}
@@ -200,7 +206,7 @@ public class RestfulServer extends HttpServlet {
 		int count = 0;
 
 		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
-			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theProvider);
+			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
 			if (foundMethodBinding == null) {
 				continue;
 			}
@@ -220,7 +226,7 @@ public class RestfulServer extends HttpServlet {
 					if (resourceName == null) {
 						resourceBinding = myServerBinding;
 					} else {
-						RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(resourceName);
+						RuntimeResourceDefinition definition = getFhirContext().getResourceDefinition(resourceName);
 						if (myResourceNameToProvider.containsKey(definition.getName())) {
 							resourceBinding = myResourceNameToProvider.get(definition.getName());
 						} else {
@@ -270,7 +276,7 @@ public class RestfulServer extends HttpServlet {
 			if (Modifier.isPublic(m.getModifiers())) {
 				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
 
-				BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, myFhirContext, theSystemProvider);
+				BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theSystemProvider);
 				if (foundMethodBinding != null) {
 					if (foundMethodBinding instanceof ConformanceMethodBinding) {
 						myServerConformanceMethod = foundMethodBinding;
@@ -318,6 +324,9 @@ public class RestfulServer extends HttpServlet {
 	 * creating their own.
 	 */
 	public FhirContext getFhirContext() {
+		if (myFhirContext == null) {
+			myFhirContext = new FhirContext();
+		}
 		return myFhirContext;
 	}
 
@@ -419,7 +428,7 @@ public class RestfulServer extends HttpServlet {
 	}
 
 	public IResourceProvider getServerProfilesProvider() {
-		return myFhirContext.getVersion().createServerProfilesProvider(this);
+		return getFhirContext().getVersion().createServerProfilesProvider(this);
 	}
 
 	/**
@@ -462,7 +471,7 @@ public class RestfulServer extends HttpServlet {
 		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		IVersionSpecificBundleFactory bundleFactory = myFhirContext.newBundleFactory();
+		IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
 
 		Set<Include> includes = new HashSet<Include>();
 		String[] reqIncludes = theRequest.getServletRequest().getParameterValues(Constants.PARAM_INCLUDE);
@@ -765,7 +774,7 @@ public class RestfulServer extends HttpServlet {
 						throw new NullPointerException("getResourceType() on class '" + nextProvider.getClass().getCanonicalName() + "' returned null");
 					}
 
-					String resourceName = myFhirContext.getResourceDefinition(resourceType).getName();
+					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					if (typeToProvider.containsKey(resourceName)) {
 						throw new ServletException("Multiple resource providers return resource type[" + resourceName + "]: First[" + typeToProvider.get(resourceName).getClass().getCanonicalName()
 								+ "] and Second[" + nextProvider.getClass().getCanonicalName() + "]");
@@ -792,7 +801,7 @@ public class RestfulServer extends HttpServlet {
 
 			Object confProvider = getServerConformanceProvider();
 			if (confProvider == null) {
-				confProvider = myFhirContext.getVersion().createServerConformanceProvider(this);
+				confProvider = getFhirContext().getVersion().createServerConformanceProvider(this);
 			}
 			findSystemMethods(confProvider);
 

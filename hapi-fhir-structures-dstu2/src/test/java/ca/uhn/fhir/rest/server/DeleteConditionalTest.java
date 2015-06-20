@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -34,7 +35,7 @@ public class DeleteConditionalTest {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
 	private static int ourPort;
-
+	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static Server ourServer;
 	private static IdDt ourLastIdParam;
 	
@@ -91,7 +92,7 @@ public class DeleteConditionalTest {
 		PatientProvider patientProvider = new PatientProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

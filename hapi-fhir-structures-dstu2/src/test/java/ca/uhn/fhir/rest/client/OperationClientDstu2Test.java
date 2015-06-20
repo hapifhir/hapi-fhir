@@ -38,9 +38,9 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class OperationClientTest {
+public class OperationClientDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationClientTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationClientDstu2Test.class);
 	private FhirContext ourCtx;
 	private HttpClient ourHttpClient;
 

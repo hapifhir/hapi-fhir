@@ -6,13 +6,13 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 
-public class ValidatorInstantiatorTest {
+public class ValidatorInstantiatorDstu2Test {
 
+	private static FhirContext ourCtx = FhirContext.forDstu2();
    @Test
    public void testValidator() {
       
-      FhirContext ctx = new FhirContext();
-      FhirValidator val = ctx.newValidator();
+      FhirValidator val = ourCtx.newValidator();
       
       // We have a full classpath, so take advantage
       assertTrue(val.isValidateAgainstStandardSchema());

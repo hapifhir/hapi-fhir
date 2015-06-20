@@ -1,12 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.InputStream;
 import java.io.StringReader;
@@ -47,7 +43,6 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.dstu.composite.CodingDt;
-import ca.uhn.fhir.model.dstu.resource.Conformance;
 import ca.uhn.fhir.model.dstu.resource.Observation;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -77,19 +72,19 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 
-public class ClientTest {
+public class ClientDstu1Test {
 
-	private FhirContext ctx;
+	private FhirContext ourCtx;
 	private HttpClient httpClient;
 	private HttpResponse httpResponse;
 
 	@Before
 	public void before() {
-		ctx = new FhirContext(Patient.class, Conformance.class);
+		ourCtx = FhirContext.forDstu1();
 
 		httpClient = mock(HttpClient.class, new ReturnsDeepStubs());
-		ctx.getRestfulClientFactory().setHttpClient(httpClient);
-		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setHttpClient(httpClient);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		httpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
@@ -136,7 +131,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		CapturingInterceptor interceptor = new CapturingInterceptor();
 		client.registerInterceptor(interceptor);
 
@@ -165,7 +160,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("foobar"), Charset.forName("UTF-8")));
 
 		try {
-			ctx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
+			ourCtx.newRestfulClient(ITestClient.class, "http://foo").createPatient(patient);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), StringContains.containsString("foobar"));
@@ -185,10 +180,10 @@ public class ClientTest {
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
-		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ctx.newXmlParser().encodeResourceToString(patient)), Charset.forName("UTF-8")));
+		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(ourCtx.newXmlParser().encodeResourceToString(patient)), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome response = client.createPatient(patient);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
@@ -211,7 +206,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		TagList tagList = new TagList();
 		tagList.add(new Tag((String) null, "Dog", "DogLabel"));
 		tagList.add(new Tag("http://cats", "Cat", "CatLabel"));
@@ -237,7 +232,7 @@ public class ClientTest {
 
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDetails("Hello");
-		String resp = new FhirContext().newXmlParser().encodeResourceToString(oo);
+		String resp = ourCtx.newXmlParser().encodeResourceToString(oo);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
@@ -245,7 +240,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(resp), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome response = client.deletePatient(new IdDt("1234"));
 
 		assertEquals(HttpDelete.class, capt.getValue().getClass());
@@ -262,7 +257,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.deleteDiagnosticReport(new IdDt("1234"));
 
 		assertEquals(HttpDelete.class, capt.getValue().getClass());
@@ -272,7 +267,7 @@ public class ClientTest {
 	@Test
 	public void testGetConformance() throws Exception {
 
-		String msg = IOUtils.toString(ClientTest.class.getResourceAsStream("/example-metadata.xml"));
+		String msg = IOUtils.toString(ClientDstu1Test.class.getResourceAsStream("/example-metadata.xml"));
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
@@ -280,7 +275,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		BaseConformance response = client.getServerConformanceStatement();
 
 		assertEquals("http://foo/metadata", capt.getValue().getURI().toString());
@@ -319,7 +314,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.getHistoryPatientInstance(new IdDt("111"));
 
 		assertEquals("http://foo/Patient/111/_history", capt.getValue().getURI().toString());
@@ -391,7 +386,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.getHistoryPatientType();
 
 		assertEquals("http://foo/Patient/_history", capt.getValue().getURI().toString());
@@ -462,7 +457,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_ATOM_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.getHistoryServer();
 
 		assertEquals("http://foo/_history", capt.getValue().getURI().toString());
@@ -521,7 +516,7 @@ public class ClientTest {
 			}
 		});
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 
 		// ensures the local timezone
 		String expectedDateString = new InstantDt(new InstantDt("2012-01-02T12:01:02").getValue()).getValueAsString();
@@ -556,7 +551,7 @@ public class ClientTest {
 
 		// TODO: remove the read annotation and make sure we get a sensible
 		// error message to tell the user why the method isn't working
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = ourCtx;
 		ctx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
 
 		ClientWithoutAnnotation client = ctx.newRestfulClient(ClientWithoutAnnotation.class, "http://wildfhir.aegis.net/fhir");
@@ -596,7 +591,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientById(new IdDt("111"));
@@ -640,7 +635,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "application/fhir+xml; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientById(new IdDt("111"));
@@ -662,7 +657,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("Internal Failure"), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
 			client.getPatientById(new IdDt("111"));
 			fail();
@@ -689,7 +684,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		try {
 			client.getPatientById(new IdDt("111"));
 			fail();
@@ -723,7 +718,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientById(new IdDt("111"));
@@ -748,7 +743,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		DateRangeParam param = new DateRangeParam();
 		param.setLowerBound(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-01"));
 		param.setUpperBound(new DateParam(QuantityCompararatorEnum.LESSTHAN_OR_EQUALS, "2021-01-01"));
@@ -772,7 +767,7 @@ public class ClientTest {
 		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		List<Patient> response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
@@ -793,7 +788,7 @@ public class ClientTest {
 
 		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		List<Patient> response = client.getPatientByCompartmentAndDob(new IdDt("123"), new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient/123/compartmentName?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
@@ -819,7 +814,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Patient response = client.findPatientQuantity(new QuantityParam(QuantityCompararatorEnum.GREATERTHAN, 123L, "foo", "bar"));
 
 		assertEquals("http://foo/Patient?quantityParam=%3E123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
@@ -838,7 +833,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Patient response = client.findPatientByMrn(new TokenParam("urn:foo", "123"));
 
 		assertEquals("http://foo/Patient?identifier=urn%3Afoo%7C123", capt.getValue().getURI().toString());
@@ -857,7 +852,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		TokenOrListParam identifiers = new TokenOrListParam();
 		identifiers.add(new CodingDt("foo", "bar"));
 		identifiers.add(new CodingDt("baz", "boz"));
@@ -878,7 +873,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientNoParams();
 
 		assertEquals("http://foo/Patient?_query=someQueryNoParams", capt.getValue().getURI().toString());
@@ -896,7 +891,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientOneParam(new StringParam("BB"));
 
 		assertEquals("http://foo/Patient?_query=someQueryOneParam&param1=BB", capt.getValue().getURI().toString());
@@ -914,7 +909,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClientWithCustomType client = ctx.newRestfulClient(ITestClientWithCustomType.class, "http://foo");
+		ITestClientWithCustomType client = ourCtx.newRestfulClient(ITestClientWithCustomType.class, "http://foo");
 		CustomPatient response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
@@ -933,7 +928,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClientWithCustomTypeList client = ctx.newRestfulClient(ITestClientWithCustomTypeList.class, "http://foo");
+		ITestClientWithCustomTypeList client = ourCtx.newRestfulClient(ITestClientWithCustomTypeList.class, "http://foo");
 		List<CustomPatient> response = client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getValue().getURI().toString());
@@ -954,7 +949,7 @@ public class ClientTest {
 
 		// TODO: document this
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientByDob(new DateParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 		assertEquals("http://foo/Patient?birthdate=%3E%3D2011-01-02", capt.getAllValues().get(0).getURI().toString());
 
@@ -982,7 +977,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include[] { new Include("inc1"), new Include("inc2") }));
 
 		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include=inc2", capt.getValue().getURI().toString());
@@ -1000,7 +995,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		Bundle response = client.findPatientByName(new StringParam("AAA"), null);
 
 		assertEquals("http://foo/Patient?family=AAA", capt.getValue().getURI().toString());
@@ -1012,7 +1007,7 @@ public class ClientTest {
 		 */
 
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
-		client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		response = client.findPatientByName(new StringParam("AAA"), new StringParam("BBB"));
 
 		assertEquals("http://foo/Patient?family=AAA&given=BBB", capt.getValue().getURI().toString());
@@ -1032,7 +1027,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		StringParam str = new StringParam("FOO$BAR");
 		DateParam date = new DateParam("2001-01-01");
 		client.getObservationByNameValueDate(new CompositeParam<StringParam, DateParam>(str, date));
@@ -1052,7 +1047,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClientWithStringIncludes client = ctx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
+		ITestClientWithStringIncludes client = ourCtx.newRestfulClient(ITestClientWithStringIncludes.class, "http://foo");
 		client.getPatientWithIncludes(new StringParam("aaa"), "inc1");
 
 		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1", capt.getValue().getURI().toString());
@@ -1072,7 +1067,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome response = client.updatePatient(new IdDt("100"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
@@ -1100,7 +1095,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Content-Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
@@ -1124,7 +1119,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), Constants.STATUS_HTTP_409_CONFLICT, "Conflict"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
 	}
 
@@ -1141,7 +1136,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome response = client.updatePatient(new IdDt("Patient/100/_history/200"), patient);
 
 		assertEquals(HttpPut.class, capt.getValue().getClass());
@@ -1166,7 +1161,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), Charset.forName("UTF-8")));
 		when(httpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome response = client.validatePatient(patient);
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
@@ -1199,7 +1194,7 @@ public class ClientTest {
 		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
 		when(httpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
+		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		// Patient response = client.findPatientByMrn(new
 		// IdentifierDt("urn:foo", "123"));
 		Patient response = client.getPatientById(new IdDt("Patient/111/_history/999"));
@@ -1224,7 +1219,7 @@ public class ClientTest {
 			}
 		});
 
-		ITestClientWithNarrativeParam client = ctx.newRestfulClient(ITestClientWithNarrativeParam.class, "http://foo");
+		ITestClientWithNarrativeParam client = ourCtx.newRestfulClient(ITestClientWithNarrativeParam.class, "http://foo");
 
 		int idx = 0;
 

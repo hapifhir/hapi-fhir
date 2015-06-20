@@ -451,7 +451,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -470,7 +470,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -586,7 +586,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -698,7 +698,7 @@ public class JsonParserHl7OrgTest {
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new Reference());
 
-		IParser p = new FhirContext().newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
@@ -716,7 +716,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeUndeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -764,15 +764,15 @@ public class JsonParserHl7OrgTest {
 		HumanName given = name.addGiven("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue( new StringType("Hello"));
 		given.getExtension().add(ext2);
-		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		assertEquals("{\"resourceType\":\"Patient\",\"name\":[{\"extension\":[{\"url\":\"http://examples.com#givenext\",\"valueString\":\"Hello\"}],\"family\":[\"Shmoe\"],\"given\":[\"Joe\"]}]}", enc);
 
-		IParser newJsonParser = new FhirContext().newJsonParser();
+		IParser newJsonParser = ourCtx.newJsonParser();
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
@@ -790,7 +790,7 @@ public class JsonParserHl7OrgTest {
 		family.setValue("Shmoe");
 
 		family.addExtension().setUrl("http://examples.com#givenext").setValue( new StringType("Hello"));
-		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
 		assertThat(enc, containsString(("{\n" + 
@@ -815,7 +815,7 @@ public class JsonParserHl7OrgTest {
 				"}").replace("\n", "").replaceAll(" +", "")));
 		//@formatter:on
 
-		Patient parsed = new FhirContext().newJsonParser().parseResource(Patient.class, new StringReader(enc));
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
 		assertEquals("Hello", ((IPrimitiveType<?>)ext.getValue()).getValue());
@@ -962,7 +962,7 @@ public class JsonParserHl7OrgTest {
 				// nothing
 			}};
 			
-		FhirContext context = new FhirContext();
+		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newJsonParser();
 		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
@@ -1189,7 +1189,7 @@ public class JsonParserHl7OrgTest {
 				"}";
 		//@formatter:on
 
-		TagList tagList = new FhirContext().newJsonParser().parseTagList(tagListStr);
+		TagList tagList = ourCtx.newJsonParser().parseTagList(tagListStr);
 		assertEquals(3, tagList.size());
 		assertEquals("term0", tagList.get(0).getTerm());
 		assertEquals("label0", tagList.get(0).getLabel());
@@ -1226,7 +1226,7 @@ public class JsonParserHl7OrgTest {
 				"}";
 		//@formatter:on
 
-		String encoded = new FhirContext().newJsonParser().encodeTagListToString(tagList);
+		String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
 		assertEquals(expected, encoded);
 
 	}

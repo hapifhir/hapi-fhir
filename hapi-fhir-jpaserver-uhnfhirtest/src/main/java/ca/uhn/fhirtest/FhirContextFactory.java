@@ -7,9 +7,10 @@ import ca.uhn.fhir.context.FhirContext;
 
 public class FhirContextFactory implements FactoryBean<FhirContext>, InitializingBean {
 
-	private  int myConnectionRequestTimeout = 5000;
-	private  int mySocketTimeout = 10000;
+	private int myConnectionRequestTimeout = 5000;
+	private int mySocketTimeout = 10000;
 	private int myConnectTimeout = 4000;
+
 	public int getConnectionRequestTimeout() {
 		return myConnectionRequestTimeout;
 	}
@@ -36,9 +37,9 @@ public class FhirContextFactory implements FactoryBean<FhirContext>, Initializin
 
 	private FhirContext myCtx;
 
-	 public FhirContextFactory() {
+	public FhirContextFactory() {
 	}
-	
+
 	@Override
 	public FhirContext getObject() throws Exception {
 		return myCtx;
@@ -56,7 +57,7 @@ public class FhirContextFactory implements FactoryBean<FhirContext>, Initializin
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		myCtx=new FhirContext();
+		myCtx = new FhirContext();
 		myCtx.getRestfulClientFactory().setConnectTimeout(myConnectTimeout);
 		myCtx.getRestfulClientFactory().setSocketTimeout(mySocketTimeout);
 		myCtx.getRestfulClientFactory().setConnectionRequestTimeout(myConnectionRequestTimeout);

@@ -14,7 +14,7 @@ import org.hl7.fhir.instance.model.annotations.ResourceDef;
 
 
 @ResourceDef()
-public class MyPatient extends Patient {
+public class MyPatientHl7Org extends Patient {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -29,7 +29,7 @@ public class MyPatient extends Patient {
 	private List<DateTimeType> myImportantDates;
 	
 	@Child(name="managingOrganization", order=Child.REPLACE_PARENT, min=0, max=1, type={
-			MyOrganization.class	})
+			MyOrganizationDstu2.class	})
 		@Description(
 			shortDefinition="Organization that is the custodian of the patient record",
 			formalDefinition="Organization that is the custodian of the patient record"

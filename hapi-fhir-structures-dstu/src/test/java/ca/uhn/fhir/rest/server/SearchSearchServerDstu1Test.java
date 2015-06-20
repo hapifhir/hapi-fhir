@@ -66,11 +66,11 @@ import com.google.common.net.UrlEscapers;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class SearchTest {
+public class SearchSearchServerDstu1Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchSearchServerDstu1Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;

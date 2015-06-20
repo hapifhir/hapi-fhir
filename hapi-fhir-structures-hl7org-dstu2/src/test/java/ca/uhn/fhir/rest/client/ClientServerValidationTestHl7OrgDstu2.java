@@ -37,9 +37,9 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class ClientServerValidationTestDstu2 {
+public class ClientServerValidationTestHl7OrgDstu2 {
 	
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientServerValidationTestDstu2.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientServerValidationTestHl7OrgDstu2.class);
 	private FhirContext myCtx;
 	private HttpClient myHttpClient;
 	private HttpResponse myHttpResponse;

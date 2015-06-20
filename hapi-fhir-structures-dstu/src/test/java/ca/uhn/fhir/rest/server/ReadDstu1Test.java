@@ -1,10 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
@@ -22,8 +20,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.common.net.UrlEscapers;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
@@ -39,13 +35,13 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ReadTest {
+public class ReadDstu1Test {
 
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadTest.class);
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu1Test.class);
 
 	@Test
 	public void testReadXml() throws Exception {
@@ -68,7 +64,7 @@ public class ReadTest {
 		assertThat(responseContent, stringContainsInOrder("1", "\""));
 		assertThat(responseContent, not(stringContainsInOrder("1", "\"", "1")));
 	}
-	
+
 	@Test
 	public void testEncodeConvertsReferencesToRelative() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=xml");
@@ -205,8 +201,8 @@ public class ReadTest {
 		PatientProvider patientProvider = new PatientProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		ourCtx = servlet.getFhirContext();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+
 		servlet.setResourceProviders(patientProvider, new BinaryProvider(), new OrganizationProviderWithAbstractReturnType());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

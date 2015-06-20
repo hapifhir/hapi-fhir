@@ -40,7 +40,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class TransactionWithBundleParamTest {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionWithBundleParamTest.class);
 	private static int ourPort;
 	private static boolean ourReturnOperationOutcome;
@@ -144,7 +144,7 @@ public class TransactionWithBundleParamTest {
 		
 		ourLog.info(responseContent);
 		
-		Bundle bundle = new FhirContext().newXmlParser().parseBundle(responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
 		assertEquals(4, bundle.size());
 
 		assertEquals(OperationOutcome.class, bundle.getEntries().get(0).getResource().getClass());
@@ -177,7 +177,7 @@ public class TransactionWithBundleParamTest {
 		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
-		RestfulServer server = new RestfulServer();
+		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 		
 		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();

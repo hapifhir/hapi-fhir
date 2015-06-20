@@ -11,7 +11,7 @@ import ca.uhn.fhir.parser.MyPatient;
 
 public class ModelExtensionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelExtensionTest.class);
-	private FhirContext ourCtx = new FhirContext();
+	private FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testModelExtension() throws DataFormatException {

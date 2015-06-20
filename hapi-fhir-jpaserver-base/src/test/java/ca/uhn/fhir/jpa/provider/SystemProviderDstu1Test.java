@@ -89,7 +89,7 @@ public class SystemProviderDstu1Test {
 		OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 		organizationRp.setDao(organizationDao);
 
-		RestfulServer restServer = new RestfulServer();
+		RestfulServer restServer = new RestfulServer(ourCtx);
 		restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
 
 		JpaSystemProviderDstu1 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu1.class, "mySystemProviderDstu1");

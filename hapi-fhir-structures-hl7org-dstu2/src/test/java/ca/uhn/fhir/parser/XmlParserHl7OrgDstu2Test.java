@@ -1051,7 +1051,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testExtensions() throws DataFormatException {
 
-		MyPatient patient = new MyPatient();
+		MyPatientHl7Org patient = new MyPatientHl7Org();
 		patient.setPetName(new StringType("Fido"));
 		patient.getImportantDates().add(new DateTimeType("2010-01-02"));
 		patient.getImportantDates().add(new DateTimeType("2014-01-26T11:11:11"));
@@ -1358,7 +1358,7 @@ public class XmlParserHl7OrgDstu2Test {
 			}
 		};
 
-		FhirContext context = new FhirContext();
+		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newXmlParser();
 		String str = p.encodeResourceToString(patient);
@@ -1540,7 +1540,7 @@ public class XmlParserHl7OrgDstu2Test {
 		XMLUnit.setIgnoreAttributeOrder(true);
 		XMLUnit.setIgnoreComments(true);
 		XMLUnit.setIgnoreWhitespace(true);
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu2Hl7Org();
 	}
 
 }

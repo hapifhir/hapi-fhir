@@ -46,7 +46,7 @@ public class DefaultThymeleafNarrativeGeneratorTest {
 		gen.setIgnoreFailures(false);
 		gen.setIgnoreMissingTemplates(false);
 
-		myCtx = new FhirContext();
+		myCtx = FhirContext.forDstu1();
 		myCtx.setNarrativeGenerator(gen);
 	}
 

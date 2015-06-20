@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNull;
 public class ProvidedResourceScannerTest extends TestCase {
 	@Test
 	public void testScannerShouldAddProvidedResources() {
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 		assertEquals(CustomPatient.class, ctx.getElementDefinition(CustomPatient.class).getImplementingClass());
 		assertEquals(Patient.class, ctx.getResourceDefinition("Patient").getImplementingClass());
 

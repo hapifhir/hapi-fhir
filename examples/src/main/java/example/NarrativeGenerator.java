@@ -16,7 +16,7 @@ public class NarrativeGenerator {
 String propFile = "classpath:/com/foo/customnarrative.properties";
 CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(propFile);
 
-FhirContext ctx = new FhirContext();
+FhirContext ctx = FhirContext.forDstu2();
 ctx.setNarrativeGenerator(gen);
 //END SNIPPET: gen
 

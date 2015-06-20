@@ -39,8 +39,7 @@ public class LoggingInterceptorTest {
 
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
-
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private Appender<ILoggingEvent> myMockAppender;
 	private Logger myLoggerRoot;
 
@@ -89,15 +88,14 @@ public class LoggingInterceptorTest {
 		DummyProvider patientProvider = new DummyProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		ourCtx = servlet.getFhirContext();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 		
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 	}
 
 	/**

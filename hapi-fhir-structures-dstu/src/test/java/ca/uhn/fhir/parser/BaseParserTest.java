@@ -13,7 +13,7 @@ import ca.uhn.fhir.model.dstu.resource.Composition;
 
 public class BaseParserTest {
 
-	private static final FhirContext ourCtx = new FhirContext();
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParserTest.class);
 

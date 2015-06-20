@@ -23,7 +23,7 @@ public class DuplicateExtensionTest extends TestCase {
 	
 	@Test
 	public void testScannerShouldAddProvidedResources() {
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 		RuntimeResourceDefinition patientDef = ctx.getResourceDefinition(CustomPatient.class);
 		Profile profile = (Profile) patientDef.toProfile("http://foo.org/fhir");
 

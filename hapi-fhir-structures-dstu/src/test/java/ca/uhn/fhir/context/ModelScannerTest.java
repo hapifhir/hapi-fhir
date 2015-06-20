@@ -19,7 +19,7 @@ public class ModelScannerTest {
 	
 	@Test
 	public void testExtendedClass() {
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 		ctx.getResourceDefinition(MyPatient.class);
 		
 		RuntimeResourceDefinition patient = ctx.getResourceDefinition("Patient");

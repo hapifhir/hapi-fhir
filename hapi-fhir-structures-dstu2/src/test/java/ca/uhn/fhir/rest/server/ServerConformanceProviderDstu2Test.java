@@ -46,12 +46,12 @@ import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 public class ServerConformanceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderDstu2Test.class);
-	private FhirContext myCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	
 	@Test
 	public void testSearchParameterDocumentation() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -73,7 +73,7 @@ public class ServerConformanceProviderDstu2Test {
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
@@ -84,7 +84,7 @@ public class ServerConformanceProviderDstu2Test {
 	@Test
 	public void testOperationDocumentation() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -106,7 +106,7 @@ public class ServerConformanceProviderDstu2Test {
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
@@ -117,7 +117,7 @@ public class ServerConformanceProviderDstu2Test {
 	@Test
 	public void testExtendedOperationReturningBundle() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -127,7 +127,7 @@ public class ServerConformanceProviderDstu2Test {
 		
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 		
 	}
@@ -135,7 +135,7 @@ public class ServerConformanceProviderDstu2Test {
 	@Test
 	public void testValidateGeneratedStatement() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -145,7 +145,7 @@ public class ServerConformanceProviderDstu2Test {
 		
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		assertTrue(myCtx.newValidator().validateWithResult(conformance).isSuccessful());
+		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
 	}
 
 	
@@ -153,7 +153,7 @@ public class ServerConformanceProviderDstu2Test {
 	@Test
 	public void testMultiOptionalDocumentation() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -175,7 +175,7 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
@@ -186,7 +186,7 @@ public class ServerConformanceProviderDstu2Test {
 	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithRequiredAndOptional());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -195,7 +195,7 @@ public class ServerConformanceProviderDstu2Test {
 		rs.init(createServletConfig());
 		
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		Rest rest = conformance.getRestFirstRep();

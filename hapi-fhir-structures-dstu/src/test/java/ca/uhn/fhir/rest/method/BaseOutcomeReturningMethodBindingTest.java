@@ -184,7 +184,7 @@ public class BaseOutcomeReturningMethodBindingTest {
 				"}";
 		//@formatter:on
 		
-		TagList parsedFromResource = new FhirContext().newJsonParser().parseTagList(resourceString);
+		TagList parsedFromResource = FhirContext.forDstu1().newJsonParser().parseTagList(resourceString);
 		
 		assertEquals(parsedFromHeader.size(), parsedFromResource.size());
 	

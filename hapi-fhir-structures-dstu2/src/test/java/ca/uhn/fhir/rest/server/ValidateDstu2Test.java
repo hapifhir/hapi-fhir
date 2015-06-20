@@ -44,13 +44,13 @@ public class ValidateDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static BaseOperationOutcome ourOutcomeToReturn;
 	private static ValidationModeEnum ourLastMode;
 	private static String ourLastProfile;
-
+	private static FhirContext ourCtx = FhirContext.forDstu2();
+	
 	@Before()
 	public void before() {
 		ourLastResourceBody = null;
@@ -73,7 +73,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("mode").setValue(new StringDt(ValidationModeEnum.CREATE.name()));
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -97,7 +97,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -122,7 +122,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		String resp = IOUtils.toString(status.getEntity().getContent());
@@ -144,7 +144,7 @@ public class ValidateDstu2Test {
 		params.addParameter().setName("resource").setResource(org);
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/$validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -167,7 +167,7 @@ public class ValidateDstu2Test {
 		PatientProvider patientProvider = new PatientProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider, new OrganizationProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

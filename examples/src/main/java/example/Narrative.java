@@ -18,7 +18,7 @@ patient.addIdentifier().setSystem("urn:foo").setValue("7000135");
 patient.addName().addFamily("Smith").addGiven("John").addGiven("Edward");
 patient.addAddress().addLine("742 Evergreen Terrace").setCity("Springfield").setState("ZZ");
 
-FhirContext ctx = new FhirContext();
+FhirContext ctx = FhirContext.forDstu2();
 
 // Use the narrative generator
 ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());

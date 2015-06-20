@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -43,7 +44,8 @@ public class ExceptionInterceptorMethodTest {
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionInterceptorMethodTest.class);
-
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Test
 	public void testThrowUnprocessableEntityException() throws Exception {
 
@@ -112,7 +114,7 @@ public class ExceptionInterceptorMethodTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer();
+		servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

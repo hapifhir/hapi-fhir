@@ -165,7 +165,7 @@ public class CustomTypeTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer();
+		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		ourServlet.setResourceProviders(patientProvider);

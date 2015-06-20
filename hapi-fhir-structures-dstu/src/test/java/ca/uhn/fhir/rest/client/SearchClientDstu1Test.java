@@ -42,9 +42,9 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
-public class SearchTest {
+public class SearchClientDstu1Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchClientDstu1Test.class);
 
 	private FhirContext ourCtx;
 	private HttpClient ourHttpClient;

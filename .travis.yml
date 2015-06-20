@@ -1,2 +1,7 @@
 language: java
+jdk:
+  - oraclejdk6
+
+install: mvn clean install -Dcobertura.skip=true
+script: mvn -P COBERTURA clean cobertura:cobertura
 

@@ -292,6 +292,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				loadProperties(next);
 			}
 		} catch (IOException e) {
+			ourLog.info("Failed to load property file " + propFileName, e);
 			throw new ConfigurationException("Can not load property file " + propFileName, e);
 		}
 

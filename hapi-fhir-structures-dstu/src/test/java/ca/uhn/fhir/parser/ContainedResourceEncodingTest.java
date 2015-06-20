@@ -58,7 +58,7 @@ public class ContainedResourceEncodingTest {
 		initPatient();
 		initAuthor();
 		initComposition();
-		this.ctx = new FhirContext();
+		this.ctx = FhirContext.forDstu1();
 
 	}
 

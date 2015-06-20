@@ -65,19 +65,19 @@ patient.getImportantDates().add(new DateTimeDt("2014-01-26T11:11:11"));
 
 patient.addName().addFamily("Smith").addGiven("John").addGiven("Quincy").addSuffix("Jr");
 
-IParser p = new FhirContext().newXmlParser().setPrettyPrint(true);
+IParser p = FhirContext.forDstu2().newXmlParser().setPrettyPrint(true);
 String messageString = p.encodeResourceToString(patient);
 
 System.out.println(messageString);
 //END SNIPPET: patientUse
 	
 //START SNIPPET: patientParse
-IParser parser = new FhirContext().newXmlParser();
+IParser parser = FhirContext.forDstu2().newXmlParser();
 MyPatient newPatient = parser.parseResource(MyPatient.class, messageString);
 //END SNIPPET: patientParse
 
 {
-	FhirContext ctx2 = new FhirContext();
+	FhirContext ctx2 = FhirContext.forDstu2();
 	RuntimeResourceDefinition def = ctx2.getResourceDefinition(patient);
 	System.out.println(ctx2.newXmlParser().setPrettyPrint(true).encodeResourceToString(def.toProfile()));
 }

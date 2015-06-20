@@ -39,8 +39,8 @@ public class ValidateDstu1Test {
 	private static CloseableHttpClient ourClient;
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu1Test.class);
 	private static int ourPort;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static Server ourServer;
 
 	@Before()
@@ -57,7 +57,7 @@ public class ValidateDstu1Test {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/_validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -76,7 +76,7 @@ public class ValidateDstu1Test {
 		org.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization/_validate");
-		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(org), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(org), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 		assertEquals(204, status.getStatusLine().getStatusCode());
@@ -99,7 +99,7 @@ public class ValidateDstu1Test {
 		PatientProvider patientProvider = new PatientProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider, new OrganizationProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
