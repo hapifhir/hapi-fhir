@@ -396,7 +396,7 @@ public abstract class BaseStructureParser {
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileWriter w = new FileWriter(theFile, false);
 
-		ourLog.info("Writing file: {}", theFile.getAbsolutePath());
+		ourLog.debug("Writing file: {}", theFile.getAbsolutePath());
 
 		ArrayList<String> imports = new ArrayList<String>();
 		for (String next : myImports) {
@@ -486,7 +486,7 @@ public abstract class BaseStructureParser {
 		}
 
 		for (BaseRootType next : myResources) {
-			ourLog.info("Writing Resource {}", next.getName());
+			ourLog.debug("Writing Resource {}", next.getName());
 
 			scanForCorrections(next);
 			scanForTypeNameConflicts(next);

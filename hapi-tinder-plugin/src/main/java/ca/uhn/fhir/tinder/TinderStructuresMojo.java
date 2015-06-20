@@ -121,8 +121,9 @@ public class TinderStructuresMojo extends AbstractMojo {
 			rp.getLocalImports().putAll(datatypeLocalImports);
 			datatypeLocalImports.putAll(rp.getLocalImports());
 
-			ourLog.info("Writing Resources...");
 			File resSubDirectoryBase = new File(directoryBase, "resource");
+			ourLog.info("Writing Resources to directory: {}", resSubDirectoryBase.getAbsolutePath());
+			
 			rp.combineContentMaps(dtp);
 			rp.writeAll(resSubDirectoryBase, resDirectoryBase, packageName);
 		}

@@ -274,7 +274,7 @@ public class ValueSetGenerator {
 		File f = new File(theOutputDirectory, theValueSetTm.getClassName() + ".java");
 		FileWriter w = new FileWriter(f, false);
 
-		ourLog.info("Writing file: {}", f.getAbsolutePath());
+		ourLog.debug("Writing file: {}", f.getAbsolutePath());
 
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("valueSet", theValueSetTm);

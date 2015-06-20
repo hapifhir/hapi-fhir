@@ -1,7 +1,14 @@
+# Use docker-based build environment (instead of openvz)
+sudo: false
+
 language: java
 jdk:
   - oraclejdk7
 
-install: mvn clean install -Dcobertura.skip=true
-script: mvn -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:check
-
+cache:
+  directories:
+      - '$HOME/.m2/repository'
+		
+install: /bin/true
+script:
+  - mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:check && mvn -B clean install -Dcobertura.skip=true
