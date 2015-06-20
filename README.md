@@ -3,6 +3,8 @@ hapi-fhir
 
 HAPI FHIR - Java API for HL7 FHIR Clients and Servers
 
+![Travis](https://travis-ci.org/jamesagnew/hapi-fhir.svg?branch=master)
+
 Complete project documentation is available here:
 http://jamesagnew.github.io/hapi-fhir/
 
