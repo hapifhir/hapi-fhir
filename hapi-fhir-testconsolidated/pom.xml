@@ -217,7 +217,7 @@
 					<configuration>
 						<skip>false</skip>
 						<format>xml</format>
-						<maxmem>512mm</maxmem>
+						<maxmem>256m</maxmem>
 						<instrumentation>
 							<ignores>
 								<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
