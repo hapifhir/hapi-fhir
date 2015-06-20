@@ -229,7 +229,7 @@
 					<artifactId>cobertura-maven-plugin</artifactId>
 					<version>${maven_cobertura_plugin_version}</version>
 					<configuration>
-						<!--<skip>true</skip>-->
+						<skip>true</skip>
 					</configuration>
 				</plugin>
 				<plugin>
