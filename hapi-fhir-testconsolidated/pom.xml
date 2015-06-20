@@ -282,9 +282,9 @@
 						<configuration>
 							<sources>
 								<source>../hapi-fhir-structures-dstu/src/test/java</source>
-								<source>../hapi-fhir-structures-dstu2/src/test/java</source>
+								<!-- <source>../hapi-fhir-structures-dstu2/src/test/java</source>
 								<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source>
-								<source>../hapi-fhir-jpaserver-base/src/test/java</source>
+								<source>../hapi-fhir-jpaserver-base/src/test/java</source>-->
 							</sources>
 						</configuration>
 					</execution>

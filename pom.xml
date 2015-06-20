@@ -274,7 +274,7 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${maven_surefire_plugin_version}</version>
 					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<!-- <redirectTestOutputToFile>true</redirectTestOutputToFile>  -->
 						<runOrder>random</runOrder>
 						<argLine>-Dfile.encoding=UTF-8</argLine>
 					</configuration>
