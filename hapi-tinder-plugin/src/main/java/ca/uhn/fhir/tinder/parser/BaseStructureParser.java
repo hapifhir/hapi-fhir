@@ -89,7 +89,7 @@ public abstract class BaseStructureParser {
 				myLocallyDefinedClassNames.put(bindingClass, "valueset");
 			} else {
 				ourLog.info("No binding found for: {}", theResource.getBinding());
-				ourLog.info(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
+				ourLog.debug(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
 			}
 		}
 		for (BaseElement next : theResource.getChildren()) {
