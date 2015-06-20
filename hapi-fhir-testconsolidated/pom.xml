@@ -217,7 +217,7 @@
 					<configuration>
 						<skip>false</skip>
 						<format>xml</format>
-						<maxmem>256m</maxmem>
+						<maxmem>512mm</maxmem>
 						<instrumentation>
 							<ignores>
 								<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
@@ -253,6 +253,12 @@
 					<sourceEncoding>UTF-8</sourceEncoding>
 					<serviceName>travis-ci</serviceName>
 					<serviceJobId>${env.TRAVIS_JOB_ID} </serviceJobId>
+					<sourceDirectories>
+						<sourceDirectory>../hapi-fhir-structures-dstu/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-structures-dstu2/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-structures-hl7org-dstu2/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-jpaserver-base/src/test/java</sourceDirectory>
+					</sourceDirectories>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -282,9 +288,8 @@
 						<configuration>
 							<sources>
 								<source>../hapi-fhir-structures-dstu/src/test/java</source>
-								<!-- <source>../hapi-fhir-structures-dstu2/src/test/java</source>
-								<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source>
-								<source>../hapi-fhir-jpaserver-base/src/test/java</source>-->
+								<!-- <source>../hapi-fhir-structures-dstu2/src/test/java</source> 
+									<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source> <source>../hapi-fhir-jpaserver-base/src/test/java</source> -->
 							</sources>
 						</configuration>
 					</execution>
@@ -327,30 +332,15 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>${maven_cobertura_plugin_version}</version>
-				<configuration>
-					<check>
-						<branchRate>85</branchRate> <lineRate>85</lineRate> <haltOnFailure>true</haltOnFailure> 
-							<totalBranchRate>85</totalBranchRate> <totalLineRate>85</totalLineRate> <packageLineRate>85</packageLineRate> 
-							<packageBranchRate>85</packageBranchRate> <regexes> <regex> <pattern>com.example.reallyimportant.*</pattern> 
-							<branchRate>90</branchRate> <lineRate>80</lineRate> </regex> <regex> <pattern>com.example.boringcode.*</pattern> 
-							<branchRate>40</branchRate> <lineRate>30</lineRate> </regex> </regexes>
-					</check>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>clean</goal>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			-->
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> 
+				<version>${maven_cobertura_plugin_version}</version> <configuration> <check> 
+				<branchRate>85</branchRate> <lineRate>85</lineRate> <haltOnFailure>true</haltOnFailure> 
+				<totalBranchRate>85</totalBranchRate> <totalLineRate>85</totalLineRate> <packageLineRate>85</packageLineRate> 
+				<packageBranchRate>85</packageBranchRate> <regexes> <regex> <pattern>com.example.reallyimportant.*</pattern> 
+				<branchRate>90</branchRate> <lineRate>80</lineRate> </regex> <regex> <pattern>com.example.boringcode.*</pattern> 
+				<branchRate>40</branchRate> <lineRate>30</lineRate> </regex> </regexes> </check> 
+				</configuration> <executions> <execution> <goals> <goal>clean</goal> <goal>check</goal> 
+				</goals> </execution> </executions> </plugin> -->
 		</plugins>
 		<resources>
 		</resources>
