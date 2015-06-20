@@ -8,7 +8,7 @@ jdk:
 cache:
   directories:
       - '$HOME/.m2/repository'
-		
+
 install: /bin/true
 script:
   - mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:check && mvn -B clean install -Dcobertura.skip=true
