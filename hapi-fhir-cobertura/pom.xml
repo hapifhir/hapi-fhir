@@ -301,6 +301,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
+					<reuseForks>false</reuseForks>
 				</configuration>
 			</plugin>
 			<plugin>
