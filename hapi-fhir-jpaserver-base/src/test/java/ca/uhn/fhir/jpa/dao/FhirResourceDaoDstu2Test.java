@@ -93,7 +93,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 @SuppressWarnings("unchecked")
-public class FhirResourceDaoDstu2Test {
+public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;
 	private static IFhirResourceDao<Device> ourDeviceDao;

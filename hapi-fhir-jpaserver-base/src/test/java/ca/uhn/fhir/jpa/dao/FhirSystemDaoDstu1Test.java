@@ -45,7 +45,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-public class FhirSystemDaoDstu1Test {
+public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 	private static ClassPathXmlApplicationContext ourCtx;
 	private static FhirContext ourFhirContext;

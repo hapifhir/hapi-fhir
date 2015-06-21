@@ -7,7 +7,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 
-public class BaseFhirDaoTest {
+public class BaseFhirDaoTest  extends BaseJpaTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	

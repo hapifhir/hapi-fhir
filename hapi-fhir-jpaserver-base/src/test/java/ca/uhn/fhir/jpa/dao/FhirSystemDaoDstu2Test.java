@@ -8,6 +8,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 import java.io.InputStream;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class FhirSystemDaoDstu2Test {
+public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;
 	private static FhirContext ourFhirContext;
@@ -953,7 +955,7 @@ public class FhirSystemDaoDstu2Test {
 	}
 
 	@AfterClass
-	public static void afterClass() {
+	public static void afterClass() throws SQLException {
 		ourCtx.close();
 	}
 
