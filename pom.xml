@@ -518,6 +518,9 @@
 								<copy todir="target/site/xref-base">
 									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
+								<copy todir="target/site/cobertura">
+									<fileset dir="hapi-fhir-cobertura/target/site/cobertura"/>
+								</copy>
 							</target>
 						</configuration>
 					</execution>
@@ -893,6 +896,7 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-cobertura</module>
 				<module>examples</module>
 			</modules>
 			<reporting>

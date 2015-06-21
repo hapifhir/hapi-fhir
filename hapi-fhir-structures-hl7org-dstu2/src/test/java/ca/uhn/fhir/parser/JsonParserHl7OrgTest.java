@@ -1078,7 +1078,7 @@ public class JsonParserHl7OrgTest {
 	 */
 	@Test
 	public void testParseWithIncorrectReference() throws IOException {
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
 		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
 		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
@@ -1087,7 +1087,7 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleParse() throws DataFormatException, IOException {
 
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
 		IParser p = ourCtx.newJsonParser();
 		// ourLog.info("Reading in message: {}", msg);
 		Patient res = p.parseResource(Patient.class, msg);
@@ -1104,7 +1104,7 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleResourceEncode() throws IOException {
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
 		Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
 		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
@@ -1117,7 +1117,7 @@ public class JsonParserHl7OrgTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
