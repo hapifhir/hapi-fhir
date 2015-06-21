@@ -252,7 +252,7 @@
 					</coberturaReports>
 					<sourceEncoding>UTF-8</sourceEncoding>
 					<serviceName>travis-ci</serviceName>
-					<serviceJobId>${env.TRAVIS_JOB_ID} </serviceJobId>
+					<serviceJobId>${env.TRAVIS_JOB_ID}</serviceJobId>
 					<sourceDirectories>
 						<sourceDirectory>../hapi-fhir-structures-dstu/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu2/src/test/java</sourceDirectory>
@@ -290,8 +290,8 @@
 						<configuration>
 							<sources>
 								<source>../hapi-fhir-structures-dstu/src/test/java</source>
-								<!-- <source>../hapi-fhir-structures-dstu2/src/test/java</source> 
-									<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source> <source>../hapi-fhir-jpaserver-base/src/test/java</source> -->
+								 <source>../hapi-fhir-structures-dstu2/src/test/java</source> 
+									<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source> <source>../hapi-fhir-jpaserver-base/src/test/java</source> 
 							</sources>
 						</configuration>
 					</execution>
