@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * be specified in an HTTP header, and none was.
  */
 @SuppressWarnings("deprecation")
+@CoverageIgnore
 public class PreconditionFailedException extends ResourceVersionNotSpecifiedException {
 	@SuppressWarnings("hiding")
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;

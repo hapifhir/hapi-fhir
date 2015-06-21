@@ -58,6 +58,7 @@ import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -71,6 +72,10 @@ public class JsonParserHl7OrgTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgTest.class);
 
+	@After
+	public void after() {
+		ourCtx.setNarrativeGenerator(null);
+	}
 
 	
 	@Test
@@ -1133,7 +1138,7 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
 		assertEquals(0, obs.getExtension().size());
@@ -1149,7 +1154,7 @@ public class JsonParserHl7OrgTest {
 		String encoded = xmlParser.encodeResourceToString(obs);
 		encoded = encoded.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
 		xmlString = xmlString.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
 		ourLog.info("Expected: " + xmlString);

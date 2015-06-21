@@ -111,15 +111,18 @@ public @interface Child {
 	@CoverageIgnore
 	public static class NoEnumFactory implements IBaseEnumFactory<Enum<?>> {
 
+		@CoverageIgnore
 		private NoEnumFactory() {
 			// non instantiable
 		}
 
+		@CoverageIgnore
 		@Override
 		public Enum<?> fromCode(String theCodeString) throws IllegalArgumentException {
 			return null;
 		}
 
+		@CoverageIgnore
 		@Override
 		public String toCode(Enum<?> theCode) {
 			return null;

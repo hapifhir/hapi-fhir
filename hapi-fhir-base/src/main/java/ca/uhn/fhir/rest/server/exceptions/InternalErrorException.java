@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -39,6 +40,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * 
  * @see UnprocessableEntityException Which should be used for business level validation failures
  */
+@CoverageIgnore
 public class InternalErrorException extends BaseServerResponseException {
 
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_500_INTERNAL_ERROR;

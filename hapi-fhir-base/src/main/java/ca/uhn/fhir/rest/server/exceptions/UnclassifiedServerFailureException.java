@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 /*
@@ -26,6 +27,7 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
  * Exception for use when a response is received or being sent that does not correspond to any other exception type. An HTTP status code must be provided, and will be provided to the caller in the
  * case of a server implementation.
  */
+@CoverageIgnore
 public class UnclassifiedServerFailureException extends BaseServerResponseException {
 
 	/**

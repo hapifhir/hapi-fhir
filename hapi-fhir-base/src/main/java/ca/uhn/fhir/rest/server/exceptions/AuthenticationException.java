@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -25,6 +26,7 @@ import ca.uhn.fhir.rest.server.Constants;
 /**
  * Represents an <b>HTTP 401 Client Unauthorized</b> response, which means that the client needs to provide credentials, or has provided invalid credentials.
  */
+@CoverageIgnore
 public class AuthenticationException extends BaseServerResponseException {
 
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_401_CLIENT_UNAUTHORIZED;

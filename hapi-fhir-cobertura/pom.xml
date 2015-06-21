@@ -62,11 +62,13 @@
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>${slf4j_version}</version>
 		</dependency>
-<dependency>
-	<groupId>org.slf4j</groupId>
-	<artifactId>slf4j-nop</artifactId>
-	<version>${slf4j_version}</version>
-</dependency>
+		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-nop</artifactId> 
+			<version>${slf4j_version}</version> </dependency> -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback_version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.hamcrest</groupId>
@@ -215,7 +217,10 @@
 					<version>${maven_cobertura_plugin_version}</version>
 					<configuration>
 						<skip>false</skip>
-						<format>xml</format>
+						<formats>
+							<format>html</format>
+							<format>xml</format>
+						</formats>
 						<maxmem>256m</maxmem>
 						<instrumentation>
 							<ignores>
@@ -225,6 +230,11 @@
 								<ignore>**/valueset/*.class</ignore>
 								<ignore>**/exceptions/*.class</ignore>
 							</excludes>
+							<!--
+							<ignoreMethodAnnotations>
+								<ignoreMethodAnnotation>net.sourceforge.cobertura.CoverageIgnore</ignoreMethodAnnotation>
+							</ignoreMethodAnnotations>
+							-->
 						</instrumentation>
 					</configuration>
 					<executions>
@@ -289,8 +299,9 @@
 						<configuration>
 							<sources>
 								<source>../hapi-fhir-structures-dstu/src/test/java</source>
-								 <source>../hapi-fhir-structures-dstu2/src/test/java</source> 
-									<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source> <source>../hapi-fhir-jpaserver-base/src/test/java</source> 
+								<source>../hapi-fhir-structures-dstu2/src/test/java</source>
+								<source>../hapi-fhir-structures-hl7org-dstu2/src/test/java</source>
+								<source>../hapi-fhir-jpaserver-base/src/test/java</source>
 							</sources>
 						</configuration>
 					</execution>

@@ -20,8 +20,10 @@ package ca.uhn.fhir.rest.client.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
+@CoverageIgnore
 public class InvalidResponseException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;
