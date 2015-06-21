@@ -62,13 +62,12 @@
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>${slf4j_version}</version>
 		</dependency>
+<dependency>
+	<groupId>org.slf4j</groupId>
+	<artifactId>slf4j-nop</artifactId>
+	<version>${slf4j_version}</version>
+</dependency>
 
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback_version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>java-hamcrest</artifactId>

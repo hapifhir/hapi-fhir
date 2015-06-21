@@ -10,19 +10,19 @@
 	<logger name="org.eclipse" additivity="false">
 	</logger>
 
-	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="info">
+	<logger name="ca.uhn.fhir.rest.client" additivity="false" level="fatal">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="info">
+	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="fatal">
 		<appender-ref ref="STDOUT" />
 	</logger>
 	
-	<logger name="org.hibernate.SQL" additivity="false" level="info">
+	<logger name="org.hibernate.SQL" additivity="false" level="fatal">
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<root level="info">
+	<root level="fatal">
 		<appender-ref ref="STDOUT" />
 	</root>
 
