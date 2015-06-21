@@ -4,6 +4,9 @@ sudo: false
 language: java
 jdk:
   - oraclejdk7
+env:
+  global:
+    - MAVEN_OPTS="-XX:MaxPermSize=512m -Xmx4g"
 
 cache:
   directories:
