@@ -20,11 +20,13 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.parser.DataFormatException;
 
 @DatatypeDef(name = "unsignedInt")
+@CoverageIgnore
 public class UnsignedIntDt extends IntegerDt {
 
 	/**

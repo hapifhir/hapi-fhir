@@ -18,7 +18,7 @@ public class CustomThymeleafNarrativeGeneratorTest {
 	@Test
 	public void testGenerator() {
 
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("file:src/test/resources/narrative/customnarrative.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customnarrative.properties");
 		gen.setFhirContext(ourCtx);
 
 		Practitioner p = new Practitioner();

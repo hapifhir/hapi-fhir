@@ -24,8 +24,10 @@ package ca.uhn.fhir.model.dstu.valueset;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
+@CoverageIgnore
 public enum RestfulOperationTypeEnum {
 
 	/**

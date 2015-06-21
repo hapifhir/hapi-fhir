@@ -1107,7 +1107,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
-		IParser p = new FhirContext(ResourceWithExtensionsA.class).newXmlParser();
+		IParser p = ourCtx.newXmlParser();
 
 		//@formatter:off
 		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -1142,7 +1142,7 @@ public class XmlParserHl7OrgDstu2Test {
 				"</ResourceWithExtensionsA>";
 		//@formatter:on
 
-		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(msg);
+		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(ResourceWithExtensionsA.class, msg);
 		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", resource.getFoo1().get(0).getValue());
 		assertEquals("Foo1Value2", resource.getFoo1().get(1).getValue());
@@ -1503,9 +1503,8 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
 		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
+		MyObservationWithExtensions obs = ourCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getExtension().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
@@ -1516,7 +1515,7 @@ public class XmlParserHl7OrgDstu2Test {
 		Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-		IParser jsonParser = fhirCtx.newJsonParser().setPrettyPrint(true);
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 

@@ -24,6 +24,7 @@ package ca.uhn.fhir.model.valueset;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 /**
@@ -31,6 +32,7 @@ import ca.uhn.fhir.model.api.IValueSetEnumBinder;
  * on a DSTU2 server. It is preferably to use the new DSTU2 Bundle (<code>ca.uhn.fhir.model.dstu2.resource.Bundle</code>)
  * for this purpose.
  */
+@CoverageIgnore
 public enum BundleEntryTransactionMethodEnum {
 
 	GET("GET", "http://hl7.org/fhir/http-verb"),

@@ -26,6 +26,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Enumeration;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 
 import ca.uhn.fhir.model.api.IElement;
@@ -106,6 +108,7 @@ public @interface Child {
 	 */
 	Class<? extends IBaseEnumFactory<?>> enumFactory() default NoEnumFactory.class;
 
+	@CoverageIgnore
 	public static class NoEnumFactory implements IBaseEnumFactory<Enum<?>> {
 
 		private NoEnumFactory() {

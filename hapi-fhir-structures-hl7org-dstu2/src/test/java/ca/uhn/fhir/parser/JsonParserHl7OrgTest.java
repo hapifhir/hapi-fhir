@@ -68,7 +68,7 @@ import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class JsonParserHl7OrgTest {
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgTest.class);
 
 
@@ -410,7 +410,7 @@ public class JsonParserHl7OrgTest {
 		rpt.getText().setDivAsString("AAA");
 		rpt.addSpecimen().setResource(spm);
 
-		IParser p = new FhirContext(DiagnosticReport.class).newJsonParser().setPrettyPrint(true);
+		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
@@ -632,7 +632,7 @@ public class JsonParserHl7OrgTest {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalType(112.22));
 
-		IParser p = new FhirContext(Observation.class).newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 
 		try {
 			p.encodeResourceToString(obs);
@@ -1133,9 +1133,8 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
 		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
+		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
 		assertEquals(0, obs.getExtension().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
@@ -1146,7 +1145,7 @@ public class JsonParserHl7OrgTest {
 		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-		IParser xmlParser = fhirCtx.newXmlParser();
+		IParser xmlParser = ourCtx.newXmlParser();
 		String encoded = xmlParser.encodeResourceToString(obs);
 		encoded = encoded.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
@@ -1229,11 +1228,6 @@ public class JsonParserHl7OrgTest {
 		String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
 		assertEquals(expected, encoded);
 
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu2Hl7Org();
 	}
 
 
