@@ -938,7 +938,7 @@
 		<profile>
 			<id>COBERTURA</id>
 			<modules>
-				<module>hapi-fhir-testconsolidated</module>
+				<module>hapi-fhir-cobertura</module>
 			</modules>
 		</profile>
 	</profiles>

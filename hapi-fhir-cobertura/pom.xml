@@ -9,7 +9,7 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-testconsolidated</artifactId>
+	<artifactId>hapi-fhir-cobertura</artifactId>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Consolidated Test Project</name>
@@ -258,6 +258,8 @@
 						<sourceDirectory>../hapi-fhir-structures-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-hl7org-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-jpaserver-base/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-base/src/main/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-jpaserver-base/src/main/java</sourceDirectory>
 					</sourceDirectories>
 				</configuration>
 			</plugin>
