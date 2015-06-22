@@ -1002,7 +1002,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return singleCode;
 	}
 
-	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
+	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
@@ -1017,7 +1017,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				theOrders.add(theBuilder.desc(theFrom.get("myId")));
 			}
 
-			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, null);
+			createSort(theBuilder, theFrom, theSort.getChain(), theOrders);
 			return;
 		}
 
@@ -1039,6 +1039,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			joinAttrName = "myParamsDate";
 			sortAttrName = "myValueLow";
 			break;
+		case REFERENCE:
+			joinAttrName = "myResourceLinks";
+			sortAttrName = "myTargetResourcePid";
+			break;
 		default:
 			throw new NotImplementedException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
 		}
@@ -1054,7 +1058,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			theOrders.add(theBuilder.desc(stringJoin.get(sortAttrName)));
 		}
 
-		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, null);
+		createSort(theBuilder, theFrom, theSort.getChain(), theOrders);
 	}
 
 	@Override
@@ -1142,6 +1146,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return outcome;
 	}
 
+	/**
+	 * May 
+	 * @param theResource The resource that is about to be stored
+	 */
 	protected void preProcessResourceForStorage(T theResource) {
 		// nothing by default
 	}
@@ -1655,7 +1663,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			predicates.add(from.get("myId").in(loadPids));
-			createSort(builder, from, theParams.getSort(), orders, predicates);
+			createSort(builder, from, theParams.getSort(), orders);
 			if (orders.size() > 0) {
 				Set<Long> originalPids = loadPids;
 				loadPids = new LinkedHashSet<Long>();

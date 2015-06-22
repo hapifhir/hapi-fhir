@@ -309,7 +309,8 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<reuseForks>false</reuseForks>
+					<reuseForks>true</reuseForks>
+					<argLine>-Xms512m -Xmx1024m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>

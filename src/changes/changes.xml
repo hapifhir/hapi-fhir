@@ -119,6 +119,10 @@
 				Generic/fluent client and JPA server now both support _lastUpdated search parameter
 				which was added in DSTU2
 			</action>
+			<action name="fix">
+				JPA server now supports sorting on reference parameters. Thanks to
+				Vishal Kachroo for reporting that this wasn't working!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">
