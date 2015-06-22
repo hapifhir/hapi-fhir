@@ -7,11 +7,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -78,6 +74,7 @@ import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -791,6 +788,31 @@ public class ResourceProviderDstu2Test {
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 	}
 
+	@Test
+	public void testSearchReturnsSearchDate() throws Exception {
+		Date before = new Date();
+		Thread.sleep(1);
+		
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.prettyPrint()
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		
+		Thread.sleep(1);
+		Date after = new Date();
+
+		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(found);
+		assertNotNull(updated);
+		assertNotNull(updated.getValue());
+		assertTrue(updated.getValue().after(before));
+		assertTrue(updated.getValue().before(after));
+	}
+
+	
 	@Test
 	public void testSearchWithMissing() throws Exception {
 		ourLog.info("Starting testSearchWithMissing");
