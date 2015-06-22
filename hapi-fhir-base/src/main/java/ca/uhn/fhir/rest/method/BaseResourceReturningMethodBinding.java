@@ -44,8 +44,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -307,11 +309,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 				IBaseResource resource;
+				InstantDt lastUpdated;
 				if (resultObj instanceof IBundleProvider) {
 					IBundleProvider result = (IBundleProvider) resultObj;
 					resource = result.getResources(0, 1).get(0);
+					lastUpdated = result.getPublished();
 				} else {
 					resource = (IResource) resultObj;
+					lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) resource);
 				}
 
 				/*
@@ -319,7 +324,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				 */
 				IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 				bundleFactory.initializeWithBundleResource(resource);
-				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, count, getResponseBundleType());
+				bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, count, getResponseBundleType(), lastUpdated);
 
 				for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 					IServerInterceptor next = theServer.getInterceptors().get(i);

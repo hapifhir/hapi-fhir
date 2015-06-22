@@ -157,14 +157,17 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType) {
+	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, InstantDt theLastUpdated) {
 
 		if (myBundle.getId().isEmpty()) {
 			myBundle.setId(UUID.randomUUID().toString());
 		}
 
-		InstantDt published = new InstantDt();
-		published.setToCurrentTimeInLocalTimeZone();
+		if (myBundle.getMeta().getLastUpdated() == null) {
+			InstantType instantType = new InstantType();
+			instantType.setValueAsString(theLastUpdated.getValueAsString());
+			myBundle.getMeta().setLastUpdatedElement(instantType);
+		}
 
 		if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theCompleteUrl)) {
 			myBundle.addLink().setRelation("self").setUrl(theCompleteUrl);
@@ -243,7 +246,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		addResourcesToBundle(resourceList, theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
+		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
 
 		if (theServer.getPagingProvider() != null) {
 			int limit;

@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLNonTransientConnectionException;
 
 import org.junit.AfterClass;
 

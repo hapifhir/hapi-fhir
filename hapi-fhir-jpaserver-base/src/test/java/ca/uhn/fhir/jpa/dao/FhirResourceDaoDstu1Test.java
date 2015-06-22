@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
+@SuppressWarnings("unused")
 public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;

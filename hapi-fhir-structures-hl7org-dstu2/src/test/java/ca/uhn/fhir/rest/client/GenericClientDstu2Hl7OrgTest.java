@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -59,10 +60,61 @@ public class GenericClientDstu2Hl7OrgTest {
 	public void before() {
 		myHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(myHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}
 
+	
+	
+	@Test
+	public void testReadUpdatedHeaderDoesntOverwriteResourceValue() throws Exception {
+
+		//@formatter:off
+		final String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" + 
+				"   <meta>\n" + 
+				"      <lastUpdated value=\"2015-06-22T15:48:57.554-04:00\"/>\n" + 
+				"   </meta>\n" + 
+				"   <type value=\"searchset\"/>\n" + 
+				"   <base value=\"http://localhost:58109/fhir/context\"/>\n" + 
+				"   <total value=\"0\"/>\n" + 
+				"   <link>\n" + 
+				"      <relation value=\"self\"/>\n" + 
+				"      <url value=\"http://localhost:58109/fhir/context/Patient?_pretty=true\"/>\n" + 
+				"   </link>\n" + 
+				"</Bundle>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] {
+				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT")
+		});
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(input), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		org.hl7.fhir.instance.model.Bundle response;
+
+		//@formatter:off
+		response = client
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(org.hl7.fhir.instance.model.Bundle.class)
+				.execute();
+		//@formatter:on
+		
+		assertEquals("2015-06-22T15:48:57.554-04:00", response.getMeta().getLastUpdatedElement().getValueAsString());
+	}
+
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithReverseInclude() throws Exception {

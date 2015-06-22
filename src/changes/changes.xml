@@ -123,6 +123,13 @@
 				JPA server now supports sorting on reference parameters. Thanks to
 				Vishal Kachroo for reporting that this wasn't working!
 			</action>
+			<action type="fix">
+				Prevent Last-Updated header in responses coming back to the client from
+				overwriting the 'lastUpdated' value in the meta element in DSTU2
+				resources. This is important because 'lastUpdated' can have more
+				precision than the equivalent header, but the client previously
+				gave the header priority.
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

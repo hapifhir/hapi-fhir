@@ -83,6 +83,7 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -808,9 +809,12 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(found);
 		assertNotNull(updated);
-		assertNotNull(updated.getValue());
-		assertTrue(updated.getValue().after(before));
-		assertTrue(updated.getValue().before(after));
+		Date value = updated.getValue();
+		assertNotNull(value);
+		ourLog.info(value.getTime()+"");
+		ourLog.info(before.getTime()+"");
+		assertTrue(value.after(before));
+		assertTrue(value.before(after));
 	}
 
 	
@@ -1120,7 +1124,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
-		// ourClient.registerInterceptor(new LoggingInterceptor(true));
+		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

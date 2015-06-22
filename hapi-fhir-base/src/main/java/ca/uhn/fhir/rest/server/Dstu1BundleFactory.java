@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +44,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -201,7 +204,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 		}
 	
 		addResourcesToBundle(new ArrayList<IBaseResource>(resourceList), theBundleType, theServerBase, theServer.getBundleInclusionRule(), theIncludes);
-		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType);
+		addRootPropertiesToBundle(null, theServerBase, theCompleteUrl, theResult.size(), theBundleType, theResult.getPublished());
 
 		if (theServer.getPagingProvider() != null) {
 			int limit;
@@ -221,9 +224,13 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 	
 	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType) {
+	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, InstantDt theLastUpdated) {
 		if (myBundle.getAuthorName().isEmpty()) {
 			myBundle.getAuthorName().setValue(theAuthor);
+		}
+
+		if (myBundle.getUpdated().isEmpty() && isNotBlank(theLastUpdated.getValueAsString())) {
+			myBundle.getUpdated().setValueAsString(theLastUpdated.getValueAsString());
 		}
 		
 		if (myBundle.getBundleId().isEmpty()) {
@@ -301,7 +308,7 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				List<IBaseResource> addedResourcesThisPass = new ArrayList<IBaseResource>();
 	
 				for (BaseResourceReferenceDt nextRef : references) {
-					IBaseResource nextRefRes = (IBaseResource) nextRef.getResource();
+					IBaseResource nextRefRes = nextRef.getResource();
 					if (nextRefRes != null) {
 						if (nextRefRes.getIdElement().hasIdPart()) {
 							if (containedIds.contains(nextRefRes.getIdElement().getValue())) {

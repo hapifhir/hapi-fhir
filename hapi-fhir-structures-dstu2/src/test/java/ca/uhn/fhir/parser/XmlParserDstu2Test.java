@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -57,7 +66,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
 public class XmlParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
@@ -95,6 +103,30 @@ public class XmlParserDstu2Test {
 		
 	}
 
+	@Test
+	public void testParseMetaUpdatedDate() {
+		//@formatter:off
+		String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" + 
+				"   <meta>\n" + 
+				"      <lastUpdated value=\"2015-06-22T15:48:57.554-04:00\"/>\n" + 
+				"   </meta>\n" + 
+				"   <type value=\"searchset\"/>\n" + 
+				"   <base value=\"http://localhost:58109/fhir/context\"/>\n" + 
+				"   <total value=\"0\"/>\n" + 
+				"   <link>\n" + 
+				"      <relation value=\"self\"/>\n" + 
+				"      <url value=\"http://localhost:58109/fhir/context/Patient?_pretty=true\"/>\n" + 
+				"   </link>\n" + 
+				"</Bundle>";
+		//@formatter:on
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
+		
+		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(b);
+		assertEquals("2015-06-22T15:48:57.554-04:00", updated.getValueAsString());
+		
+	}
+	
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
 		Patient p = new Patient();

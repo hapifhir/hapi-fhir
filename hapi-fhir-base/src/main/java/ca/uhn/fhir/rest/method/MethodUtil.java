@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -500,10 +501,17 @@ public class MethodUtil {
 			try {
 				headerDateValue = DateUtils.parseDate(headerValue);
 				if (resource instanceof IResource) {
-					InstantDt lmValue = new InstantDt(headerDateValue);
-					((IResource) resource).getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+					IResource iResource = (IResource) resource;
+					InstantDt existing = ResourceMetadataKeyEnum.UPDATED.get(iResource);
+					if (existing == null || existing.isEmpty()) {
+						InstantDt lmValue = new InstantDt(headerDateValue);
+						iResource.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, lmValue);
+					}
 				} else if (resource instanceof IAnyResource) {
-					((IAnyResource) resource).getMeta().setLastUpdated(headerDateValue);
+					IAnyResource anyResource = (IAnyResource) resource;
+					if (anyResource.getMeta().getLastUpdated() == null) {
+						anyResource.getMeta().setLastUpdated(headerDateValue);
+					}
 				}
 			} catch (Exception e) {
 				ourLog.warn("Unable to parse date string '{}'. Error is: {}", headerValue, e.toString());

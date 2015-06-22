@@ -1,8 +1,12 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +17,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.Header;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolVersion;
@@ -34,6 +39,7 @@ import org.mockito.stubbing.Answer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -258,6 +264,56 @@ public class GenericClientDstu2Test {
 		idx++;
 	}
 
+
+	@Test
+	public void testReadUpdatedHeaderDoesntOverwriteResourceValue() throws Exception {
+
+		//@formatter:off
+		final String input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <id value=\"e2ee823b-ee4d-472d-b79d-495c23f16b99\"/>\n" + 
+				"   <meta>\n" + 
+				"      <lastUpdated value=\"2015-06-22T15:48:57.554-04:00\"/>\n" + 
+				"   </meta>\n" + 
+				"   <type value=\"searchset\"/>\n" + 
+				"   <base value=\"http://localhost:58109/fhir/context\"/>\n" + 
+				"   <total value=\"0\"/>\n" + 
+				"   <link>\n" + 
+				"      <relation value=\"self\"/>\n" + 
+				"      <url value=\"http://localhost:58109/fhir/context/Patient?_pretty=true\"/>\n" + 
+				"   </link>\n" + 
+				"</Bundle>";
+		//@formatter:on
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[] {
+				new BasicHeader(Constants.HEADER_LAST_MODIFIED, "Sat, 20 Jun 2015 19:32:17 GMT")
+		});
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(input), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle response;
+
+		//@formatter:off
+		response = client
+				.search()
+				.forResource(Patient.class)
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+		
+		assertEquals("2015-06-22T15:48:57.554-04:00", ResourceMetadataKeyEnum.UPDATED.get(response).getValueAsString());
+	}
+
+	
 	@Test
 	public void testOperationAsGetWithInParameters() throws Exception {
 		IParser p = ourCtx.newXmlParser();
