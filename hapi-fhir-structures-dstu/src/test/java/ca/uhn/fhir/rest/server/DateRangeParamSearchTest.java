@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -37,7 +38,8 @@ public class DateRangeParamSearchTest {
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
-
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Test
 	public void testSearchForOneUnqualifiedDate() throws Exception {
 		String baseUrl = "http://localhost:" + ourPort + "/Patient?" + Patient.SP_BIRTHDATE + "=";
@@ -85,7 +87,7 @@ public class DateRangeParamSearchTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		servlet.setResourceProviders(patientProvider);

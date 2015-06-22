@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -32,6 +33,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * 
  * @see InvalidRequestException Which corresponds to an <b>HTTP 400 Bad Request</b> failure
  */
+@CoverageIgnore
 public class UnprocessableEntityException extends BaseServerResponseException {
 
 	private static final String DEFAULT_MESSAGE = "Unprocessable Entity";

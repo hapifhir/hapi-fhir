@@ -2,9 +2,7 @@ package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -39,8 +37,7 @@ public class LoggingInterceptorTest {
 
 	private static int ourPort;
 	private static Server ourServer;
-	private static FhirContext ourCtx;
-
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private Appender<ILoggingEvent> myMockAppender;
 	private Logger myLoggerRoot;
 
@@ -63,15 +60,18 @@ public class LoggingInterceptorTest {
 
 	@Test
 	public void testLogger() throws Exception {
+		System.out.println("Starting testLogger");
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 		client.registerInterceptor(new LoggingInterceptor(true));
 		Patient patient = client.read(Patient.class, "1");
 		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
-		verify(myMockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
+		verify(myMockAppender, atLeastOnce()).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
 			public boolean matches(final Object argument) {
-				return ((LoggingEvent) argument).getFormattedMessage().contains("Content-Type: application/xml+fhir; charset=UTF-8");
+				String formattedMessage = ((LoggingEvent) argument).getFormattedMessage();
+				System.out.println("Verifying: " + formattedMessage);
+				return formattedMessage.contains("Content-Type: application/xml+fhir; charset=UTF-8");
 			}
 		}));
 	}
@@ -89,15 +89,14 @@ public class LoggingInterceptorTest {
 		DummyProvider patientProvider = new DummyProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		ourCtx = servlet.getFhirContext();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
-		
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 	}
 
 	/**

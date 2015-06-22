@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * thrown in methods which accept a version (e.g. {@link Update}, {@link Delete}) 
  * when the operation fails because of a version conflict as specified in the FHIR specification. 
  */
+@CoverageIgnore
 public class ResourceVersionConflictException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_409_CONFLICT;
 	private static final long serialVersionUID = 1L;

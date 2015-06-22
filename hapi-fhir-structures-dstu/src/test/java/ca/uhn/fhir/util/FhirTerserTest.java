@@ -17,7 +17,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 
 public class FhirTerserTest {
 
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfType() {
@@ -29,7 +29,7 @@ public class FhirTerserTest {
 		p.addAddress().addLine("Line2");
 		p.addName().addFamily("Line3");
 
-		FhirTerser t = new FhirContext().newTerser();
+		FhirTerser t = ourCtx.newTerser();
 		List<StringDt> strings = t.getAllPopulatedChildElementsOfType(p, StringDt.class);
 
 		assertEquals(3, strings.size());
@@ -43,7 +43,7 @@ public class FhirTerserTest {
 		Observation obs = new Observation();
 		obs.setValue(new QuantityDt(123L));
 
-		FhirTerser t = new FhirContext().newTerser();
+		FhirTerser t = ourCtx.newTerser();
 
 		// As string
 		{

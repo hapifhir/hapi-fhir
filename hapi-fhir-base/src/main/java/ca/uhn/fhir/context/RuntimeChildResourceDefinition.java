@@ -26,17 +26,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 
 public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefinition {
 

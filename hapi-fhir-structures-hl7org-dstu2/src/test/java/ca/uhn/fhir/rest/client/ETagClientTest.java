@@ -274,7 +274,7 @@ public class ETagClientTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu2Hl7Org();
 	}
 
 }

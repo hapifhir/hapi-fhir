@@ -13,6 +13,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -26,7 +27,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 
-public class ResourceProviderMultiVersionTest {
+public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClientDstu2;
@@ -139,8 +140,7 @@ public class ResourceProviderMultiVersionTest {
 		 * DEV resources
 		 */
 
-		RestfulServer restServerDstu2 = new RestfulServer();
-		restServerDstu2.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
+		RestfulServer restServerDstu2 = new RestfulServer(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
 		List<IResourceProvider> rpsDstu2 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
 		restServerDstu2.setResourceProviders(rpsDstu2);
 
@@ -155,8 +155,7 @@ public class ResourceProviderMultiVersionTest {
 		 * DSTU resources
 		 */
 
-		RestfulServer restServerDstu1 = new RestfulServer();
-		restServerDstu1.setFhirContext(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
+		RestfulServer restServerDstu1 = new RestfulServer(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
 		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 		restServerDstu1.setResourceProviders(rpsDstu1);
 

@@ -48,7 +48,7 @@ public class TransactionWithBundleResourceParamTest {
 	}
 	
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TransactionWithBundleResourceParamTest.class);
 	private static int ourPort;
 	private static boolean ourReturnOperationOutcome;
@@ -208,7 +208,7 @@ public class TransactionWithBundleResourceParamTest {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = new FhirContext().newXmlParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertEquals(4, bundle.getEntry().size());
 
 		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
@@ -234,7 +234,7 @@ public class TransactionWithBundleResourceParamTest {
 		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
-		RestfulServer server = new RestfulServer();
+		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
 		org.eclipse.jetty.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.servlet.ServletContextHandler();

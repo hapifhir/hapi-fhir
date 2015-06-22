@@ -32,7 +32,7 @@ public class ResourceMethodTest {
 	
 	@Before
 	public void before() throws NoSuchMethodException, SecurityException {
-		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("foo"), new FhirContext(), null);
+		rm = new SearchMethodBinding(Patient.class, ResourceMethodTest.class.getMethod("foo"), FhirContext.forDstu1(), null);
 	}
 	
 	@Test

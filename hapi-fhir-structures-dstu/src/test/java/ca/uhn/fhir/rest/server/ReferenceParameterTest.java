@@ -53,7 +53,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class ReferenceParameterTest {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReferenceParameterTest.class);
 	private static int ourPort;
 	private static Server ourServer;
@@ -298,9 +298,8 @@ public class ReferenceParameterTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
         servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-		ourCtx = servlet.getFhirContext();
 		servlet.setResourceProviders(patientProvider, new DummyOrganizationResourceProvider(), new DummyLocationResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -311,8 +310,6 @@ public class ReferenceParameterTest {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
-		ourCtx = servlet.getFhirContext();
 	}
 
 	public static class DummyLocationResourceProvider implements IResourceProvider {

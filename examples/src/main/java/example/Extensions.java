@@ -49,7 +49,8 @@ ExtensionDt givenExt = new ExtensionDt(false, "http://examples.com#moreext", new
 given.addUndeclaredExtension(givenExt);
 //END SNIPPET: resourceStringExtension
 
-String output = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
+FhirContext ctx = FhirContext.forDstu2();
+String output = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 System.out.println(output);
 
 

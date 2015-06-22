@@ -1700,8 +1700,7 @@ public class XmlParserTest {
 	@Test
 	public void testParseFeedWithListResource() throws ConfigurationException, DataFormatException, IOException {
 
-		// Use new context here to ensure List isn't already loaded
-		IParser p = new FhirContext().newXmlParser();
+		IParser p = FhirContext.forDstu1().newXmlParser(); // Use new context here
 
 		String string = IOUtils.toString(XmlParserTest.class.getResourceAsStream("/feed-with-list.xml"), Charset.forName("UTF-8"));
 		Bundle bundle = p.parseBundle(string);
@@ -1920,7 +1919,7 @@ public class XmlParserTest {
 		XMLUnit.setIgnoreAttributeOrder(true);
 		XMLUnit.setIgnoreComments(true);
 		XMLUnit.setIgnoreWhitespace(true);
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu1();
 	}
 	
 	@BeforeClass

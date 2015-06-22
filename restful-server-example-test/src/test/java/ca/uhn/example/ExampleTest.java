@@ -88,7 +88,7 @@ public class ExampleTest {
 
 		ourServer.start();
 
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu2();
 		ourClient = ourCtx.newRestfulGenericClient(base);
 
 	}

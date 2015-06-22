@@ -51,11 +51,11 @@ import ca.uhn.fhir.util.PortUtil;
  */
 public class CreateTest {
 	private static CloseableHttpClient ourClient;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static EncodingEnum ourLastEncoding;
 	private static String ourLastResourceBody;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateTest.class);
 	private static int ourPort;
-
 	private static DiagnosticReportProvider ourReportProvider;
 
 	private static Server ourServer;
@@ -65,7 +65,7 @@ public class CreateTest {
 		ourLastResourceBody=null;
 		ourLastEncoding=null;
 	}
-
+	
 	@Test
 	public void testCreate() throws Exception {
 
@@ -74,7 +74,7 @@ public class CreateTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -92,31 +92,6 @@ public class CreateTest {
 	}
 
 	@Test
-	public void testCreateWithNoParsed() throws Exception {
-
-		Organization org = new Organization();
-		org.addIdentifier().setValue("001");
-		org.addIdentifier().setValue("002");
-
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization");
-		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(org), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals("http://localhost:" + ourPort + "/Organization/001", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
-
-		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"","\"value\":\"001"));
-		assertEquals(EncodingEnum.JSON, ourLastEncoding);
-		
-	}
-
-	@Test
 	public void testCreateById() throws Exception {
 
 		Patient patient = new Patient();
@@ -124,7 +99,7 @@ public class CreateTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/1234");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -144,7 +119,7 @@ public class CreateTest {
 		obs.getIdentifier().setValue("001");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Observation");
-		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(obs), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(obs), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -166,7 +141,7 @@ public class CreateTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
-		httpPost.setEntity(new StringEntity(new FhirContext().newJsonParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -181,13 +156,38 @@ public class CreateTest {
 	}
 
 	@Test
+	public void testCreateWithNoParsed() throws Exception {
+
+		Organization org = new Organization();
+		org.addIdentifier().setValue("001");
+		org.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Organization");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(org), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals("http://localhost:" + ourPort + "/Organization/001", status.getFirstHeader("location").getValue());
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
+
+		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"","\"value\":\"001"));
+		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+		
+	}
+
+	@Test
 	public void testCreateWithUnprocessableEntity() throws Exception {
 
 		DiagnosticReport report = new DiagnosticReport();
 		report.getIdentifier().setValue("001");
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/DiagnosticReport");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(report), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(report), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -198,7 +198,7 @@ public class CreateTest {
 
 		assertEquals(422, status.getStatusLine().getStatusCode());
 
-		OperationOutcome outcome = new FhirContext().newXmlParser().parseResource(OperationOutcome.class, new StringReader(responseContent));
+		OperationOutcome outcome = ourCtx.newXmlParser().parseResource(OperationOutcome.class, new StringReader(responseContent));
 		assertEquals("FOOBAR", outcome.getIssueFirstRep().getDetails().getValue());
 
 	}
@@ -218,7 +218,7 @@ public class CreateTest {
 		ourReportProvider = new DiagnosticReportProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(
 				patientProvider, ourReportProvider, new DummyAdverseReactionResourceProvider(), new CustomObservationProvider(), 
 				new OrganizationProvider());
@@ -329,6 +329,23 @@ public class CreateTest {
 
 	}
 
+	public static class OrganizationProvider implements IResourceProvider {
+
+		@Create()
+		public MethodOutcome create(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
+			ourLastResourceBody=theResourceBody;
+			ourLastEncoding=theEncoding;
+			
+			return new MethodOutcome(new IdDt("001"));
+		}
+
+		@Override
+		public Class<? extends IResource> getResourceType() {
+			return Organization.class;
+		}
+
+	}
+
 	public static class PatientProvider implements IResourceProvider {
 
 		@Create()
@@ -347,23 +364,6 @@ public class CreateTest {
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;
-		}
-
-	}
-
-	public static class OrganizationProvider implements IResourceProvider {
-
-		@Create()
-		public MethodOutcome create(@ResourceParam String theResourceBody, @ResourceParam EncodingEnum theEncoding) {
-			ourLastResourceBody=theResourceBody;
-			ourLastEncoding=theEncoding;
-			
-			return new MethodOutcome(new IdDt("001"));
-		}
-
-		@Override
-		public Class<? extends IResource> getResourceType() {
-			return Organization.class;
 		}
 
 	}

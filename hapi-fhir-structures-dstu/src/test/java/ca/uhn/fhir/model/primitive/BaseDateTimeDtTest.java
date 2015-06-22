@@ -27,7 +27,7 @@ public class BaseDateTimeDtTest {
 	private FastDateFormat myDateInstantZoneParser;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtTest.class);
 
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Before
 	public void before() {

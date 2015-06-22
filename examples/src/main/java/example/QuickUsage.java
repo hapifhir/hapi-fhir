@@ -30,7 +30,7 @@ patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("J
 patient.setGender(AdministrativeGenderEnum.MALE);
 
 
-FhirContext ctx = new FhirContext();
+FhirContext ctx = FhirContext.forDstu2();
 String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
 String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
 

@@ -10,6 +10,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -20,7 +21,8 @@ import ca.uhn.fhir.util.PortUtil;
 public class ResourceProviderWithNoMethodsTest {
 
 	private Server ourServer;
-
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@After
 	public void after() throws Exception {
 		ourServer.stop();
@@ -34,7 +36,7 @@ public class ResourceProviderWithNoMethodsTest {
 		ResourceProvider patientProvider = new ResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -56,7 +58,7 @@ public class ResourceProviderWithNoMethodsTest {
 		NonPublicMethodProvider patientProvider = new NonPublicMethodProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

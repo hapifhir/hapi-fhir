@@ -20,9 +20,7 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -50,11 +48,8 @@ import javax.json.stream.JsonGeneratorFactory;
 import javax.json.stream.JsonParsingException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -63,8 +58,10 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
@@ -82,7 +79,6 @@ import ca.uhn.fhir.model.api.BaseBundle;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
@@ -94,18 +90,13 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.util.ElementUtil;
-import ca.uhn.fhir.util.UrlUtil;
 
 /**
  * This class is the FHIR JSON parser/encoder. Users should not interact with this class directly, but should use {@link FhirContext#newJsonParser()} to get an instance.

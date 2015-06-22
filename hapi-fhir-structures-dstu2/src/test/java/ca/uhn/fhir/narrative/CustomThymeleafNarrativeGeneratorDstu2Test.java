@@ -9,16 +9,17 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 
-public class CustomThymeleafNarrativeGeneratorTest {
+public class CustomThymeleafNarrativeGeneratorDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomThymeleafNarrativeGeneratorDstu2Test.class);
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	
 	@Test
 	public void testGenerator() {
 
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("file:src/test/resources/narrative/customnarrative.properties");
+//		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("file:src/test/resources/narrative/customnarrative.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customnarrative_dstu2.properties");
 		ourCtx.setNarrativeGenerator(gen);
 
 		Practitioner p = new Practitioner();

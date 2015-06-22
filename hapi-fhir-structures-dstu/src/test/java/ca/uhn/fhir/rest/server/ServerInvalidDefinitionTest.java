@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -27,20 +28,21 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.StringParam;
 
 public class ServerInvalidDefinitionTest {
-
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
+	
 	/**
 	 * Normal, should initialize properly
 	 */
 	@Test()
 	public void testBaseline() throws ServletException {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new InstantiableTypeForResourceProvider());
 		srv.init();
 	}
 
 	@Test
 	public void testInvalidSpecialNameResourceProvider() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new InvalidSpecialParameterNameResourceProvider());
 
 		try {
@@ -54,7 +56,7 @@ public class ServerInvalidDefinitionTest {
 
 	@Test
 	public void testMultipleResourceProviderForSameType() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new PatientResourceProvider1(), new PatientResourceProvider2());
 
 		try {
@@ -69,7 +71,7 @@ public class ServerInvalidDefinitionTest {
 
 	@Test
 	public void testPrivateResourceProvider() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new PrivateResourceProvider());
 
 		try {
@@ -83,7 +85,7 @@ public class ServerInvalidDefinitionTest {
 
 	@Test
 	public void testProviderWithNonResourceType() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new ProviderWithNonResourceType());
 
 		try {
@@ -97,7 +99,7 @@ public class ServerInvalidDefinitionTest {
 
 	@Test
 	public void testReadMethodWithoutIdParamProvider() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new ReadMethodWithoutIdParamProvider());
 
 		try {
@@ -110,7 +112,7 @@ public class ServerInvalidDefinitionTest {
 
 	@Test
 	public void testReadMethodWithSearchParameters() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new ReadMethodWithSearchParamProvider());
 
 		try {
@@ -123,7 +125,7 @@ public class ServerInvalidDefinitionTest {
 
 	@Test
 	public void testSearchWithId() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setResourceProviders(new SearchWithIdParamProvider());
 
 		try {

@@ -34,7 +34,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class BundleTypeInResponseTest {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleTypeInResponseTest.class);
 	private static int ourPort;
 
@@ -69,7 +69,7 @@ public class BundleTypeInResponseTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		servlet.setResourceProviders(patientProvider);

@@ -1051,7 +1051,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testExtensions() throws DataFormatException {
 
-		MyPatient patient = new MyPatient();
+		MyPatientHl7Org patient = new MyPatientHl7Org();
 		patient.setPetName(new StringType("Fido"));
 		patient.getImportantDates().add(new DateTimeType("2010-01-02"));
 		patient.getImportantDates().add(new DateTimeType("2014-01-26T11:11:11"));
@@ -1107,7 +1107,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testLoadAndEncodeDeclaredExtensions() throws ConfigurationException, DataFormatException, SAXException, IOException {
-		IParser p = new FhirContext(ResourceWithExtensionsA.class).newXmlParser();
+		IParser p = ourCtx.newXmlParser();
 
 		//@formatter:off
 		String msg = "<ResourceWithExtensionsA xmlns=\"http://hl7.org/fhir\">\n" + 
@@ -1142,7 +1142,7 @@ public class XmlParserHl7OrgDstu2Test {
 				"</ResourceWithExtensionsA>";
 		//@formatter:on
 
-		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(msg);
+		ResourceWithExtensionsA resource = (ResourceWithExtensionsA) p.parseResource(ResourceWithExtensionsA.class, msg);
 		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", resource.getFoo1().get(0).getValue());
 		assertEquals("Foo1Value2", resource.getFoo1().get(1).getValue());
@@ -1358,7 +1358,7 @@ public class XmlParserHl7OrgDstu2Test {
 			}
 		};
 
-		FhirContext context = new FhirContext();
+		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newXmlParser();
 		String str = p.encodeResourceToString(patient);
@@ -1477,7 +1477,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testSimpleResourceEncode() throws IOException, SAXException {
 
-		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 		Patient obs = ourCtx.newJsonParser().parseResource(Patient.class, xmlString);
 
 		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
@@ -1490,7 +1490,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
 
 		String expected = (jsonString);
 		String actual = (encoded.trim());
@@ -1503,9 +1503,8 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException {
 
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
-		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
+		String xmlString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = ourCtx.newXmlParser().parseResource(MyObservationWithExtensions.class, xmlString);
 
 		assertEquals(0, obs.getExtension().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
@@ -1516,11 +1515,11 @@ public class XmlParserHl7OrgDstu2Test {
 		Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-		IParser jsonParser = fhirCtx.newJsonParser().setPrettyPrint(true);
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -1540,7 +1539,7 @@ public class XmlParserHl7OrgDstu2Test {
 		XMLUnit.setIgnoreAttributeOrder(true);
 		XMLUnit.setIgnoreComments(true);
 		XMLUnit.setIgnoreWhitespace(true);
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu2Hl7Org();
 	}
 
 }

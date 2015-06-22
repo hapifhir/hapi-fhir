@@ -11,7 +11,7 @@ public class ExampleRestfulClient {
 	
 //START SNIPPET: client
 public static void main(String[] args) {
-   FhirContext ctx = new FhirContext();
+   FhirContext ctx = FhirContext.forDstu2();
    String serverBase = "http://foo.com/fhirServerBase";
    
    // Create the client

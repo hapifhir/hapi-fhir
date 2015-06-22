@@ -34,14 +34,17 @@ public class ServerExtraParametersTest {
 	private int myPort;
 	private Server myServer;
 	private RestfulServer myServlet;
-
+	private static FhirContext ourCtx = FhirContext.forDstu1();
+	
 	@Before
 	public void before() {
 		myPort = PortUtil.findFreePort();
 		myServer = new Server(myPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		myServlet = new RestfulServer();
+		myServlet = new RestfulServer(ourCtx);
+		myServlet.setFhirContext(ourCtx);
+		
 		ServletHolder servletHolder = new ServletHolder(myServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		myServer.setHandler(proxyHandler);
@@ -55,7 +58,7 @@ public class ServerExtraParametersTest {
 
 		myServer.start();
 
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = ourCtx;
 		PatientClient client = ctx.newRestfulClient(PatientClient.class, "http://localhost:" + myPort + "/");
 
 		List<Patient> actualPatients = client.searchForPatients(new StringDt("AAAABBBB"));
@@ -72,7 +75,7 @@ public class ServerExtraParametersTest {
 
 		myServer.start();
 
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = ourCtx;
 		IGenericClient client = ctx.newRestfulGenericClient("http://localhost:" + myPort + "/");
 		client.registerInterceptor(new LoggingInterceptor(true));
 

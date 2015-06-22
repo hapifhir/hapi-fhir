@@ -38,6 +38,7 @@ public class AcceptHeaderTest {
 	private static CloseableHttpClient ourClient;
 	private static int ourPort;
 	private static Server ourServer;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testReadNoHeader() throws Exception {
@@ -97,7 +98,7 @@ public class AcceptHeaderTest {
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(new PatientProvider());
 		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ServletHolder servletHolder = new ServletHolder(servlet);

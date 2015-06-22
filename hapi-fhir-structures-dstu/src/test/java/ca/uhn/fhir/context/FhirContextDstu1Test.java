@@ -9,11 +9,11 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 
-public class FhirContextTest {
+public class FhirContextDstu1Test {
 
 	@Test
 	public void testIncrementalScan() {
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 		RuntimeResourceDefinition vsDef = ctx.getResourceDefinition(ValueSet.class);
 		RuntimeResourceDefinition ptDef = ctx.getResourceDefinition(Patient.class);
 		assertNotNull(ptDef);
@@ -24,13 +24,13 @@ public class FhirContextTest {
 
 	@Test
 	public void testFindBinary() {
-		RuntimeResourceDefinition def = new FhirContext().getResourceDefinition("Binary");
+		RuntimeResourceDefinition def = FhirContext.forDstu1().getResourceDefinition("Binary");
 		assertEquals("Binary", def.getName());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testGetResourceDefinitionFails() {
-		new FhirContext().getResourceDefinition(IResource.class);
+		FhirContext.forDstu1().getResourceDefinition(IResource.class);
 	}
 
 	@Test

@@ -1,9 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.StringReader;
 import java.nio.charset.Charset;
@@ -27,14 +25,13 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 
-public class BundleTypeTest {
+public class BundleTypeDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleTypeTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleTypeDstu2Test.class);
 	private FhirContext ourCtx;
 	private HttpClient ourHttpClient;
 
@@ -46,7 +43,7 @@ public class BundleTypeTest {
 
 		ourHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(ourHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ourHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}

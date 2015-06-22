@@ -6,7 +6,7 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 
 public class ResourceRefs {
 
-   private static FhirContext ourCtx = new FhirContext();
+   private static FhirContext ourCtx = FhirContext.forDstu2();
 
    public static void main(String[] args) {
       manualContained();

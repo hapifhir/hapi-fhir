@@ -29,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.resource.BaseSecurityEvent;
@@ -64,6 +65,7 @@ public class AuditingInterceptorTest {
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private IServerInterceptor myInterceptor;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	
 	private class MockDataStore implements IAuditDataStore {
 
@@ -190,7 +192,7 @@ public class AuditingInterceptorTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer();
+		servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

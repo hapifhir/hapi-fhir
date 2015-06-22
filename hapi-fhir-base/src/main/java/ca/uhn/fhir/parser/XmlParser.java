@@ -91,7 +91,8 @@ import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
 import ca.uhn.fhir.util.XmlUtil;
 
 /**
- * This class is the FHIR XML parser/encoder. Users should not interact with this class directly, but should use {@link FhirContext#newXmlParser()} to get an instance.
+ * This class is the FHIR XML parser/encoder. Users should not interact with this class directly, but should use
+ * {@link FhirContext#newXmlParser()} to get an instance.
  */
 public class XmlParser extends BaseParser implements IParser {
 
@@ -110,7 +111,8 @@ public class XmlParser extends BaseParser implements IParser {
 	private boolean myPrettyPrint;
 
 	/**
-	 * Do not use this constructor, the recommended way to obtain a new instance of the XML parser is to invoke {@link FhirContext#newXmlParser()}.
+	 * Do not use this constructor, the recommended way to obtain a new instance of the XML parser is to invoke
+	 * {@link FhirContext#newXmlParser()}.
 	 * 
 	 * @param theParserErrorHandler
 	 */
@@ -187,13 +189,11 @@ public class XmlParser extends BaseParser implements IParser {
 
 						}
 
-						for (@SuppressWarnings("unchecked")
-						Iterator<Attribute> iter = elem.getAttributes(); iter.hasNext();) {
+						@SuppressWarnings("unchecked")
+						Iterator<Attribute> attributes = elem.getAttributes();
+						for (Iterator<Attribute> iter = attributes; iter.hasNext();) {
 							Attribute next = iter.next();
-							// if
-							// (next.getName().getLocalPart().equals("value")) {
 							parserState.attributeValue(next.getName().getLocalPart(), next.getValue());
-							// }
 						}
 
 					} else if (nextEvent.isAttribute()) {
@@ -446,8 +446,7 @@ public class XmlParser extends BaseParser implements IParser {
 		theEventWriter.close();
 	}
 
-	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, IBase nextValue, String childName, BaseRuntimeElementDefinition<?> childDef,
-			String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, IBase nextValue, String childName, BaseRuntimeElementDefinition<?> childDef, String theExtensionUrl, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		if (nextValue == null || nextValue.isEmpty()) {
 			if (isChildContained(childDef, theIncludedResource)) {
 				// We still want to go in..
@@ -502,9 +501,10 @@ public class XmlParser extends BaseParser implements IParser {
 		case CONTAINED_RESOURCE_LIST:
 		case CONTAINED_RESOURCES: {
 			/*
-			 * Disable per #103 for (IResource next : value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
-			 * theEventWriter.writeStartElement("contained"); encodeResourceToXmlStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
-			 * theEventWriter.writeEndElement(); }
+			 * Disable per #103 for (IResource next : value.getContainedResources()) { if
+			 * (getContainedResources().getResourceId(next) != null) { continue; }
+			 * theEventWriter.writeStartElement("contained"); encodeResourceToXmlStreamWriter(next, theEventWriter, true,
+			 * fixContainedResourceId(next.getId().getValue())); theEventWriter.writeEndElement(); }
 			 */
 			for (IBaseResource next : getContainedResources().getContainedResources()) {
 				IIdType resourceId = getContainedResources().getResourceId(next);
@@ -548,8 +548,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 	}
 
-	private void encodeCompositeElementChildrenToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children,
-			boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementChildrenToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, List<? extends BaseRuntimeChildDefinition> children, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (BaseRuntimeChildDefinition nextChild : children) {
 			if (nextChild.getElementName().equals("extension") || nextChild.getElementName().equals("modifierExtension")) {
 				continue;
@@ -586,7 +585,8 @@ public class XmlParser extends BaseParser implements IParser {
 					// RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					// String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					// BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-					// encodeChildElementToStreamWriter(theResource, theEventWriter, narr2, childName, type, null, theIncludedResource);
+					// encodeChildElementToStreamWriter(theResource, theEventWriter, narr2, childName, type, null,
+					// theIncludedResource);
 					// continue;
 					// }
 				}
@@ -594,8 +594,7 @@ public class XmlParser extends BaseParser implements IParser {
 
 			if (nextChild instanceof RuntimeChildContainedResources) {
 				if (!theIncludedResource) {
-					encodeChildElementToStreamWriter(theResource, theEventWriter, null, nextChild.getChildNameByDatatype(null), nextChild.getChildElementDefinitionByDatatype(null), null,
-							theIncludedResource);
+					encodeChildElementToStreamWriter(theResource, theEventWriter, null, nextChild.getChildNameByDatatype(null), nextChild.getChildElementDefinitionByDatatype(null), null, theIncludedResource);
 				}
 			} else {
 
@@ -641,8 +640,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> theElementDefinition,
-			boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> theElementDefinition, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getExtensions(), theIncludedResource);
 		encodeCompositeElementChildrenToStreamWriter(theResource, theElement, theEventWriter, theElementDefinition.getChildren(), theIncludedResource);
@@ -665,8 +663,9 @@ public class XmlParser extends BaseParser implements IParser {
 	}
 
 	/**
-	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be
-	 * rejected by the compiler some of the time.
+	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to
+	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be rejected by the
+	 * compiler some of the time.
 	 */
 	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
 		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
@@ -691,11 +690,10 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeResourceToStreamWriterInDstu2Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter,
-			BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToStreamWriterInDstu2Format(RuntimeResourceDefinition theResDef, IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, BaseRuntimeElementCompositeDefinition<?> resDef, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		/*
-		 * DSTU2 requires extensions to come in a specific spot within the encoded content - This is a bit of a messy way to make that happen, but hopefully this won't matter as much once we use the
-		 * HL7 structures
+		 * DSTU2 requires extensions to come in a specific spot within the encoded content - This is a bit of a messy way
+		 * to make that happen, but hopefully this won't matter as much once we use the HL7 structures
 		 */
 
 		List<BaseRuntimeChildDefinition> preExtensionChildren = new ArrayList<BaseRuntimeChildDefinition>();
@@ -885,8 +883,7 @@ public class XmlParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource)
-			throws XMLStreamException, DataFormatException {
+	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource) throws XMLStreamException, DataFormatException {
 		for (IBaseExtension<?, ?> next : theExtensions) {
 			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
 				continue;

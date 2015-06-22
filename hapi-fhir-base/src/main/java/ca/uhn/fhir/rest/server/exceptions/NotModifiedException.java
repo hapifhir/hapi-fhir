@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * Summary</a>.
  * </p>
  */
+@CoverageIgnore
 public class NotModifiedException extends BaseServerResponseException {
 
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_304_NOT_MODIFIED;

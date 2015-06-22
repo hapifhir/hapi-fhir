@@ -58,6 +58,7 @@ import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -68,9 +69,13 @@ import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 
 public class JsonParserHl7OrgTest {
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserHl7OrgTest.class);
 
+	@After
+	public void after() {
+		ourCtx.setNarrativeGenerator(null);
+	}
 
 	
 	@Test
@@ -410,7 +415,7 @@ public class JsonParserHl7OrgTest {
 		rpt.getText().setDivAsString("AAA");
 		rpt.addSpecimen().setResource(spm);
 
-		IParser p = new FhirContext(DiagnosticReport.class).newJsonParser().setPrettyPrint(true);
+		IParser p = ourCtx.newJsonParser().setPrettyPrint(true);
 		String str = p.encodeResourceToString(rpt);
 
 		ourLog.info(str);
@@ -451,7 +456,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -470,7 +475,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeDeclaredExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -586,7 +591,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeExtensionWithResourceContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -632,7 +637,7 @@ public class JsonParserHl7OrgTest {
 		Observation obs = new Observation();
 		obs.setValue(new DecimalType(112.22));
 
-		IParser p = new FhirContext(Observation.class).newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 
 		try {
 			p.encodeResourceToString(obs);
@@ -698,7 +703,7 @@ public class JsonParserHl7OrgTest {
 		Patient patient = new Patient();
 		patient.setManagingOrganization(new Reference());
 
-		IParser p = new FhirContext().newJsonParser();
+		IParser p = ourCtx.newJsonParser();
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
@@ -716,7 +721,7 @@ public class JsonParserHl7OrgTest {
 
 	@Test
 	public void testEncodeUndeclaredExtensionWithAddressContent() {
-		IParser parser = new FhirContext().newJsonParser();
+		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
 		patient.addAddress().setUse(AddressUse.HOME);
@@ -764,15 +769,15 @@ public class JsonParserHl7OrgTest {
 		HumanName given = name.addGiven("Joe");
 		Extension ext2 = new Extension().setUrl("http://examples.com#givenext").setValue( new StringType("Hello"));
 		given.getExtension().add(ext2);
-		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		assertEquals("{\"resourceType\":\"Patient\",\"name\":[{\"extension\":[{\"url\":\"http://examples.com#givenext\",\"valueString\":\"Hello\"}],\"family\":[\"Shmoe\"],\"given\":[\"Joe\"]}]}", enc);
 
-		IParser newJsonParser = new FhirContext().newJsonParser();
+		IParser newJsonParser = ourCtx.newJsonParser();
 		StringReader reader = new StringReader(enc);
 		Patient parsed = newJsonParser.parseResource(Patient.class, reader);
 
-		ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed));
 
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
@@ -790,7 +795,7 @@ public class JsonParserHl7OrgTest {
 		family.setValue("Shmoe");
 
 		family.addExtension().setUrl("http://examples.com#givenext").setValue( new StringType("Hello"));
-		String enc = new FhirContext().newJsonParser().encodeResourceToString(patient);
+		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
 		assertThat(enc, containsString(("{\n" + 
@@ -815,7 +820,7 @@ public class JsonParserHl7OrgTest {
 				"}").replace("\n", "").replaceAll(" +", "")));
 		//@formatter:on
 
-		Patient parsed = new FhirContext().newJsonParser().parseResource(Patient.class, new StringReader(enc));
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
 		Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
 		assertEquals("Hello", ((IPrimitiveType<?>)ext.getValue()).getValue());
@@ -962,7 +967,7 @@ public class JsonParserHl7OrgTest {
 				// nothing
 			}};
 			
-		FhirContext context = new FhirContext();
+		FhirContext context = ourCtx;
 		context.setNarrativeGenerator(gen);
 		IParser p = context.newJsonParser();
 		p.encodeResourceToWriter(patient, new OutputStreamWriter(System.out));
@@ -1073,7 +1078,7 @@ public class JsonParserHl7OrgTest {
 	 */
 	@Test
 	public void testParseWithIncorrectReference() throws IOException {
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
 		jsonString = jsonString.replace("\"reference\"", "\"resource\"");
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
 		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
@@ -1082,7 +1087,7 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleParse() throws DataFormatException, IOException {
 
-		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general.json"));
+		String msg = IOUtils.toString(XmlParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
 		IParser p = ourCtx.newJsonParser();
 		// ourLog.info("Reading in message: {}", msg);
 		Patient res = p.parseResource(Patient.class, msg);
@@ -1099,7 +1104,7 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleResourceEncode() throws IOException {
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
 		Patient obs = ourCtx.newXmlParser().parseResource(Patient.class, xmlString);
 
 		List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
@@ -1112,7 +1117,7 @@ public class JsonParserHl7OrgTest {
 		String encoded = jsonParser.encodeResourceToString(obs);
 		ourLog.info(encoded);
 
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
 
 		JSON expected = JSONSerializer.toJSON(jsonString);
 		JSON actual = JSONSerializer.toJSON(encoded.trim());
@@ -1133,9 +1138,8 @@ public class JsonParserHl7OrgTest {
 	@Test
 	public void testSimpleResourceEncodeWithCustomType() throws IOException, SAXException {
 
-		FhirContext fhirCtx = new FhirContext(MyObservationWithExtensions.class);
-		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.json"), Charset.forName("UTF-8"));
-		MyObservationWithExtensions obs = fhirCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
+		String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"), Charset.forName("UTF-8"));
+		MyObservationWithExtensions obs = ourCtx.newJsonParser().parseResource(MyObservationWithExtensions.class, jsonString);
 
 		assertEquals(0, obs.getExtension().size());
 		assertEquals("aaaa", obs.getExtAtt().getContentType());
@@ -1146,11 +1150,11 @@ public class JsonParserHl7OrgTest {
 		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
-		IParser xmlParser = fhirCtx.newXmlParser();
+		IParser xmlParser = ourCtx.newXmlParser();
 		String encoded = xmlParser.encodeResourceToString(obs);
 		encoded = encoded.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
-		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general.xml"), Charset.forName("UTF-8"));
+		String xmlString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.xml"), Charset.forName("UTF-8"));
 		xmlString = xmlString.replaceAll("<!--.*-->", "").replace("\n", "").replace("\r", "").replaceAll(">\\s+<", "><");
 
 		ourLog.info("Expected: " + xmlString);
@@ -1189,7 +1193,7 @@ public class JsonParserHl7OrgTest {
 				"}";
 		//@formatter:on
 
-		TagList tagList = new FhirContext().newJsonParser().parseTagList(tagListStr);
+		TagList tagList = ourCtx.newJsonParser().parseTagList(tagListStr);
 		assertEquals(3, tagList.size());
 		assertEquals("term0", tagList.get(0).getTerm());
 		assertEquals("label0", tagList.get(0).getLabel());
@@ -1226,14 +1230,9 @@ public class JsonParserHl7OrgTest {
 				"}";
 		//@formatter:on
 
-		String encoded = new FhirContext().newJsonParser().encodeTagListToString(tagList);
+		String encoded = ourCtx.newJsonParser().encodeTagListToString(tagList);
 		assertEquals(expected, encoded);
 
-	}
-
-	@BeforeClass
-	public static void beforeClass() {
-		ourCtx = FhirContext.forDstu2Hl7Org();
 	}
 
 

@@ -35,7 +35,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class SearchDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDstu2Test.class);
 	private static int ourPort;
 
@@ -100,7 +100,7 @@ public class SearchDstu2Test {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);

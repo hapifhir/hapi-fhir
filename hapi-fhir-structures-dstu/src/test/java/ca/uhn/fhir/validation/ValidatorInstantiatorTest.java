@@ -8,12 +8,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 
 public class ValidatorInstantiatorTest {
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
    @Test
    public void testValidator() {
       
-      FhirContext ctx = new FhirContext();
-      FhirValidator val = ctx.newValidator();
+      FhirValidator val = ourCtx.newValidator();
       
       // We have a full classpath, so take advantage
       assertTrue(val.isValidateAgainstStandardSchema());

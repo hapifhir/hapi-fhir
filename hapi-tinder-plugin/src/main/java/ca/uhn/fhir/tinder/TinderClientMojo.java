@@ -156,7 +156,7 @@ public class TinderClientMojo extends AbstractMojo {
 		File file = new File(myDirectoryBase, myClientClassSimpleName + ".java");
 		FileWriter w = new FileWriter(file, false);
 
-		ourLog.info("Writing file: {}", file.getAbsolutePath());
+		ourLog.debug("Writing file: {}", file.getAbsolutePath());
 
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("packageBase", myPackageBase);

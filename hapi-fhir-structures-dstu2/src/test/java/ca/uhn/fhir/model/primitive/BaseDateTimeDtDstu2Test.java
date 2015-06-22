@@ -15,9 +15,9 @@ import org.junit.Test;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
-public class BaseDateTimeDtTest {
+public class BaseDateTimeDtDstu2Test {
 	private static Locale ourDefaultLocale;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDtDstu2Test.class);
 	private SimpleDateFormat myDateInstantParser;
 
 	@Before

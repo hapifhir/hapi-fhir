@@ -44,6 +44,7 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
@@ -93,12 +94,12 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class ResourceProviderDstu2Test {
+public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
 	private static DaoConfig ourDaoConfig;
-	private static FhirContext ourFhirCtx;
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static CloseableHttpClient ourHttpClient;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
@@ -145,7 +146,7 @@ public class ResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = client.read().resource(ca.uhn.fhir.model.dstu2.resource.Bundle.class).withId(id).execute();
 
-		ourLog.info(ourFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 	}
 
 	@Test
@@ -191,7 +192,7 @@ public class ResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
@@ -281,7 +282,7 @@ public class ResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -325,7 +326,7 @@ public class ResourceProviderDstu2Test {
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		pt.addIdentifier().setSystem("http://ghh.org/patient").setValue(methodName);
-		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -406,8 +407,8 @@ public class ResourceProviderDstu2Test {
 	 */
 	@Test
 	public void testDocumentManifestResources() throws Exception {
-		ourFhirCtx.getResourceDefinition(Practitioner.class);
-		ourFhirCtx.getResourceDefinition(ca.uhn.fhir.model.dstu.resource.DocumentManifest.class);
+		ourCtx.getResourceDefinition(Practitioner.class);
+		ourCtx.getResourceDefinition(ca.uhn.fhir.model.dstu.resource.DocumentManifest.class);
 
 		IGenericClient client = ourClient;
 
@@ -446,7 +447,7 @@ public class ResourceProviderDstu2Test {
 	@Test
 	public void testEverythingDoesntRepeatPatient() throws Exception {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b;
-		b = ourFhirCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
+		b = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/bug147-bundle.json")));
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdDt> ids = new ArrayList<IdDt>();
@@ -515,7 +516,7 @@ public class ResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 
-		ourLog.info(ourFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdDt patientId = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
@@ -896,14 +897,14 @@ public class ResourceProviderDstu2Test {
 		// Read back directly from the DAO
 		{
 			Organization returned = ourOrganizationDao.read(orgId);
-			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
 		// Read back through the HTTP API
 		{
 			Organization returned = ourClient.read(Organization.class, orgId);
-			String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
+			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
 		}
@@ -960,7 +961,7 @@ public class ResourceProviderDstu2Test {
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
-		String resource = ourFhirCtx.newXmlParser().encodeResourceToString(pt);
+		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient?name=" + methodName);
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1018,7 +1019,7 @@ public class ResourceProviderDstu2Test {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = ourFhirCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -1046,7 +1047,7 @@ public class ResourceProviderDstu2Test {
 		Parameters input = new Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
-		String inputStr = ourFhirCtx.newXmlParser().encodeResourceToString(input);
+		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
@@ -1083,9 +1084,8 @@ public class ResourceProviderDstu2Test {
 	public static void beforeClass() throws Exception {
 		ourPort = RandomServerPortProvider.findFreePort();
 
-		RestfulServer restServer = new RestfulServer();
-		ourFhirCtx = FhirContext.forDstu2();
-		restServer.setFhirContext(ourFhirCtx);
+		RestfulServer restServer = new RestfulServer(ourCtx);
+		restServer.setFhirContext(ourCtx);
 
 		ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
@@ -1117,9 +1117,9 @@ public class ResourceProviderDstu2Test {
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
 
-		ourFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		ourFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		ourClient = ourFhirCtx.newRestfulGenericClient(ourServerBase);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
+		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		// ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

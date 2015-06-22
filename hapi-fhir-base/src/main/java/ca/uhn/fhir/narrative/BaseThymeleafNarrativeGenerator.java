@@ -20,7 +20,7 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -292,6 +292,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				loadProperties(next);
 			}
 		} catch (IOException e) {
+			ourLog.info("Failed to load property file " + propFileName, e);
 			throw new ConfigurationException("Can not load property file " + propFileName, e);
 		}
 

@@ -37,7 +37,7 @@ import ca.uhn.fhir.util.PortUtil;
  */
 public class CorsTest {
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CorsTest.class);
 
 	@Test
@@ -45,8 +45,7 @@ public class CorsTest {
 		int port = PortUtil.findFreePort();
 		Server server = new Server(port);
 
-		RestfulServer restServer = new RestfulServer();
-		restServer.setFhirContext(ourCtx);
+		RestfulServer restServer = new RestfulServer(ourCtx);
 		restServer.setResourceProviders(new DummyPatientResourceProvider());
 
 		// ServletHandler proxyHandler = new ServletHandler();
@@ -125,8 +124,6 @@ public class CorsTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourCtx = new FhirContext();
-
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);

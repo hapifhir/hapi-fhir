@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * Represents an <b>HTTP 410 Resource Gone</b> response, which geenerally
  * indicates that the resource has been deleted
  */
+@CoverageIgnore
 public class ResourceGoneException extends BaseServerResponseException {
 
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_410_GONE;

@@ -34,69 +34,30 @@ import ca.uhn.fhir.util.PortUtil;
 public class StringParameterTest {
 
 	private static CloseableHttpClient ourClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StringParameterTest.class);
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
+
 	private static Server ourServer;
-
-	@Test
-	public void testSearchWithFormatAndPretty() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa&_format=xml&_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
-		}
-	}
-	
-	@Test
-	public void testSearchNormalMatch() throws Exception {
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
-		}
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=AAA");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
-		}
-		{
-			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=BBB");
-			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
-		}
-	}
 
 	@Test
 	public void testRawString() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			assertEquals(1, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?plain=BBB");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			assertEquals(0, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 	}
 
@@ -105,26 +66,29 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str:exact=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			assertEquals(1, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str:exact=AAA");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			assertEquals(0, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str:exact=BBB");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(0, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			assertEquals(0, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 	}
 
@@ -133,14 +97,60 @@ public class StringParameterTest {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?ccc:exact=aaa");
 			HttpResponse status = ourClient.execute(httpGet);
-			String responseContent = IOUtils.toString(status.getEntity().getContent());		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
 
 			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(1, new FhirContext().newXmlParser().parseBundle(responseContent).getEntries().size());
+			assertEquals(1, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
 		}
 	}
 
-	
+	@Test
+	public void testSearchNormalMatch() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(1, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=AAA");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(1, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=BBB");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(0, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+	}
+
+	@Test
+	public void testSearchWithFormatAndPretty() throws Exception {
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?str=aaa&_format=xml&_pretty=true");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(1, ourCtx.newXmlParser().parseBundle(responseContent).getEntries().size());
+		}
+	}
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -154,7 +164,8 @@ public class StringParameterTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -174,6 +185,19 @@ public class StringParameterTest {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Search
+		public List<Patient> findPatientByString(@RequiredParam(name = "plain") String theParam) {
+			ArrayList<Patient> retVal = new ArrayList<Patient>();
+
+			if (theParam.toLowerCase().equals("aaa")) {
+				Patient patient = new Patient();
+				patient.setId("1");
+				retVal.add(patient);
+			}
+
+			return retVal;
+		}
+
+		@Search
 		public List<Patient> findPatientByStringParam(@RequiredParam(name = "str") StringParam theParam) {
 			ArrayList<Patient> retVal = new ArrayList<Patient>();
 
@@ -185,19 +209,6 @@ public class StringParameterTest {
 			if (!theParam.isExact() && theParam.getValue().toLowerCase().equals("aaa")) {
 				Patient patient = new Patient();
 				patient.setId("2");
-				retVal.add(patient);
-			}
-
-			return retVal;
-		}
-
-		@Search
-		public List<Patient> findPatientByString(@RequiredParam(name = "plain") String theParam) {
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
-
-			if (theParam.toLowerCase().equals("aaa")) {
-				Patient patient = new Patient();
-				patient.setId("1");
 				retVal.add(patient);
 			}
 
@@ -222,7 +233,6 @@ public class StringParameterTest {
 			return retVal;
 		}
 
-		
 		@Override
 		public Class<? extends IResource> getResourceType() {
 			return Patient.class;

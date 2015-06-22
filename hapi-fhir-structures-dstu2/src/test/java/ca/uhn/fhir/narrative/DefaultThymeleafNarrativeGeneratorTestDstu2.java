@@ -33,7 +33,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 
 public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
-	private FhirContext myCtx;
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorTestDstu2.class);
 	private DefaultThymeleafNarrativeGenerator myGen;
 
@@ -44,8 +44,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		myGen.setIgnoreFailures(false);
 		myGen.setIgnoreMissingTemplates(false);
 
-		myCtx = new FhirContext();
-		myCtx.setNarrativeGenerator(myGen);
+		ourCtx.setNarrativeGenerator(myGen);
 	}
 
 	@Test
@@ -125,7 +124,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 				"</OperationOutcome>";
 		//@formatter:on
 
-		OperationOutcome oo = myCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
+		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
 //		String output = gen.generateTitle(oo);
 //		ourLog.info(output);
@@ -188,7 +187,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 
 		// Now try it with the parser
 
-		output = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
+		output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 

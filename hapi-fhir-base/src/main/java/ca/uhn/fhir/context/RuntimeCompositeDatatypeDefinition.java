@@ -20,7 +20,7 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import org.hl7.fhir.instance.model.api.ICompositeType;
 

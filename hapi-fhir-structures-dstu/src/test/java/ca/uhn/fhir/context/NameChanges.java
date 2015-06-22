@@ -19,7 +19,7 @@ public class NameChanges {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testNameChanges() throws IOException, ClassNotFoundException {
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 		ImmutableSet<ClassInfo> names = ClassPath.from(getClass().getClassLoader()).getTopLevelClasses(Patient.class.getPackage().getName());
 		List<String> changes = new ArrayList<String>();
 		

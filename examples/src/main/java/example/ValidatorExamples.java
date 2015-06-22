@@ -37,7 +37,7 @@ public class ValidatorExamples {
    public void validateResource() {
       // START SNIPPET: basicValidation
       // As always, you need a context
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
 
       // Create and populate a new patient object
       Patient p = new Patient();
@@ -73,7 +73,7 @@ public class ValidatorExamples {
 
    private static void validateFiles() throws Exception {
       // START SNIPPET: validateFiles
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
 
       // Create a validator and configure it
       FhirValidator validator = ctx.newValidator();

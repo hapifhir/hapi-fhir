@@ -40,7 +40,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class CompositeParameterTest {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	private static int ourPort;
 	private static Server ourServer;
 
@@ -106,8 +106,7 @@ public class CompositeParameterTest {
 		DummyObservationResourceProvider patientProvider = new DummyObservationResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		ourCtx = servlet.getFhirContext();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -118,8 +117,6 @@ public class CompositeParameterTest {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
-
-		ourCtx = servlet.getFhirContext();
 	}
 
 	/**

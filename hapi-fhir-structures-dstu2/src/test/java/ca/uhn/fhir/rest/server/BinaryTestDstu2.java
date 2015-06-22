@@ -46,7 +46,7 @@ import ca.uhn.fhir.util.PortUtil;
 public class BinaryTestDstu2 {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static Binary ourLast;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryTestDstu2.class);
@@ -186,7 +186,7 @@ public class BinaryTestDstu2 {
 		ResourceProvider patientProvider = new ResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

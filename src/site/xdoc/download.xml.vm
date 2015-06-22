@@ -21,6 +21,21 @@
 				<a href="https://github.com/jamesagnew/hapi-fhir/releases">GitHub Release Section</a>.
 			</p>
 
+			<subsection name="Note on &quot;snapshot&quot; (pre-release) builds">
+				<p>
+					FHIR is a fast moving specification, and there is a lot of ongoing work
+					in HAPI as well. While we regularly put out new releases, there may be
+					times when you want to try out the latest unreleased version. You can ususally
+					look at the source of the 
+					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/src/changes/changes.xml">changes report</a>
+					to get a sense of what has changed in the next unreleased version.
+				</p>
+				<p>
+					See <a href="#Using_Snapshot_Builds">using snapshot builds</a> below to find out
+					how to get these builds.S
+				</p>
+			</subsection>
+
 		</section>
 		
 		<section name="Maven Users">
@@ -30,18 +45,20 @@
 				The structures JAR contains classes with the resource and datatype definitions for a given
 				version of FHIR.
 			</p>
-			<p>
-				At this time, the only official release of FHIR is the "DSTU1" release,
-				which is available by including the <code>hapi-fhir-structures-dstu-[version].jar</code>.
-				Note that the ballot process for the next release (DSTU2) has not yet been
-				completed, but many users are already targeting it for new development as it
-				is likely to be approved without significant changes.
-			</p>
-			<p>
-				If you use Maven, you can include these JARs with the following dependency tags
-				to enable DSTU1 support:
-			</p>
-			<source><![CDATA[<dependency>
+
+			<subsection name="DSTU1 Resources - HAPI Structures">
+				<p>
+					At this time, the only official release of FHIR is the "DSTU1" release,
+					which is available by including the <code>hapi-fhir-structures-dstu-[version].jar</code>.
+					Note that the ballot process for the next release (DSTU2) has not yet been
+					completed, but many users are already targeting it for new development as it
+					is likely to be approved without significant changes.
+				</p>
+				<p>
+					If you use Maven, you can include these JARs with the following dependency tags
+					to enable DSTU1 support:
+				</p>
+				<source><![CDATA[<dependency>
    <groupId>ca.uhn.hapi.fhir</groupId>
    <artifactId>hapi-fhir-base</artifactId>
    <version>${hapi_stable_version}</version>
@@ -51,8 +68,9 @@
    <artifactId>hapi-fhir-structures-dstu</artifactId>
    <version>${hapi_stable_version}</version>
 </dependency>]]></source>
-			
-			<subsection name="Supporting DSTU2 Resources - HAPI Structures">
+			</subsection>
+
+			<subsection name="DSTU2 Resources - HAPI Structures">
 			
 				<p>
 					HAPI also has a <code>hapi-fhir-structures-dstu2-[version].jar</code>, which 
@@ -76,11 +94,11 @@
 				
 			</subsection>
 
-			<subsection name="Using Reference Implementation Structures">
+			<subsection name="DSTU2 Resources - HL7.org Structures">
 			
 				<p>
 					To use the HL7.org reference implementation structures
-					(see the <a href="./doc_upgrading.html">upgrading page</a> for more information),
+					(see the <a href="./doc_dstu2.html">DSTU2 page</a> for more information),
 					use the following dependency.
 				</p>
 			<source><![CDATA[<dependency>
@@ -143,12 +161,6 @@ compile 'ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:${hapi_stable_version}']]><
    }
 }]]></source>
 
-			<p>
-				<b>Non Maven users</b> can often also find snapshot builds in the Maven repository
-				manually by searching
-				<a href="https://oss.sonatype.org/content/repositories/snapshots/ca/uhn/hapi/fhir/">here</a>.
-			</p>
-			
 		</section>
 
 		<section name="Dependencies">

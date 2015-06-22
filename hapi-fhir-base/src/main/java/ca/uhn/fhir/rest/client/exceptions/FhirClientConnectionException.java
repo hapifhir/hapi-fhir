@@ -20,12 +20,14 @@ package ca.uhn.fhir.rest.client.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 /**
  * Represents a failure by the HAPI FHIR Client to successfully communicate
  * with a FHIR server, because of IO failures, incomprehensible response, etc.
  */
+@CoverageIgnore
 public class FhirClientConnectionException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;

@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.util.Map;

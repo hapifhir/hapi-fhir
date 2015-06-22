@@ -37,7 +37,7 @@ public class CompleteExampleClient {
    public static void main(String[] args) throws IOException {
 
       // Create a client factory
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
 
       // Create the client
       String serverBase = "http://fhir.healthintersections.com.au/open";

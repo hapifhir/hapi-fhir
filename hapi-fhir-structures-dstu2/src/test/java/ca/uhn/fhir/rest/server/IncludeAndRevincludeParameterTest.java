@@ -85,13 +85,12 @@ public class IncludeAndRevincludeParameterTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu2();
 		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
-		servlet.setFhirContext(ourCtx);
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(new DummyPatientResourceProvider());
         servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(servlet);

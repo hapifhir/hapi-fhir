@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class ETagClientTest {
+public class ETagClientDstu2Test {
 
 	private static FhirContext ourCtx;
 	private HttpClient myHttpClient;
@@ -283,7 +283,7 @@ public class ETagClientTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu2();
 	}
 
 }

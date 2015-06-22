@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.api.IResource;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.rest.server.Constants;
 /**
  * Represents an <b>HTTP 404 Resource Not Found</b> response, which means that the request is pointing to a resource that does not exist.
  */
+@CoverageIgnore
 public class ResourceNotFoundException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;

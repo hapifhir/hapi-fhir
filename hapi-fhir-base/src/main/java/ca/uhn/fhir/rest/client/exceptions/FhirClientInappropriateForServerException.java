@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 /**
@@ -27,6 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * communicate with a server which is a valid FHIR server but is incompatible
  * with this client for some reason.
  */
+@CoverageIgnore
 public class FhirClientInappropriateForServerException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;

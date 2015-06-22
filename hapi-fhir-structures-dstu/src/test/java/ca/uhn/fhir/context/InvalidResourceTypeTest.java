@@ -10,7 +10,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 
 public class InvalidResourceTypeTest {
 
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
 	public void testNonInstantiableType() {

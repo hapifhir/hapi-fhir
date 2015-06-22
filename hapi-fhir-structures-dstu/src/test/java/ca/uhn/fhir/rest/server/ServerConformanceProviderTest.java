@@ -41,12 +41,12 @@ import javax.servlet.http.HttpServletRequest;
 public class ServerConformanceProviderTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderTest.class);
-	private FhirContext myCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Test
 	public void testSearchParameterDocumentation() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new SearchProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -68,7 +68,7 @@ public class ServerConformanceProviderTest {
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
@@ -80,7 +80,7 @@ public class ServerConformanceProviderTest {
 	@Test
 	public void testValidateGeneratedStatement() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -90,7 +90,7 @@ public class ServerConformanceProviderTest {
 		
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		myCtx.newValidator().validate(conformance);
+		ourCtx.newValidator().validate(conformance);
 	}
 
 	
@@ -98,7 +98,7 @@ public class ServerConformanceProviderTest {
 	@Test
 	public void testMultiOptionalDocumentation() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new MultiOptionalProvider());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -119,7 +119,7 @@ public class ServerConformanceProviderTest {
 		}
 		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier\"/>"));
@@ -130,7 +130,7 @@ public class ServerConformanceProviderTest {
 	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
-		RestfulServer rs = new RestfulServer();
+		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithRequiredAndOptional());
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
@@ -139,7 +139,7 @@ public class ServerConformanceProviderTest {
 		rs.init(createServletConfig());
 		
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-		String conf = new FhirContext().newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		Rest rest = conformance.getRestFirstRep();

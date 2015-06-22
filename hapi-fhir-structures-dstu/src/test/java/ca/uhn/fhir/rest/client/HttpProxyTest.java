@@ -49,7 +49,7 @@ public class HttpProxyTest {
 		myFirstRequest = true;
 		myAuthHeader = null;
 		
-		RestfulServer restServer = new RestfulServer() {
+		RestfulServer restServer = new RestfulServer(ourCtx) {
 
 			@Override
 			protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
@@ -69,7 +69,6 @@ public class HttpProxyTest {
 			}
 
 		};
-		restServer.setFhirContext(ourCtx);
 		restServer.setResourceProviders(new PatientResourceProvider());
 
 		// ServletHandler proxyHandler = new ServletHandler();
@@ -123,7 +122,7 @@ public class HttpProxyTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu1();
 	}
 
 	public static class PatientResourceProvider implements IResourceProvider {

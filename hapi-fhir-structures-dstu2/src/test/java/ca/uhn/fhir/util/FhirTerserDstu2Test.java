@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 
 public class FhirTerserDstu2Test {
 
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDoesntDescendIntoEmbedded() {

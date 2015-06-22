@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.method;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.lang.reflect.Method;
 import java.util.Collection;

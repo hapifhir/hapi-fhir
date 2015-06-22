@@ -20,7 +20,7 @@ public class ServerInvalidDefinitionDstu2Test {
 	
 	@Test
 	public void testOperationReturningOldBundleProvider() {
-		RestfulServer srv = new RestfulServer();
+		RestfulServer srv = new RestfulServer(ourCtx);
 		srv.setFhirContext(ourCtx);
 		srv.setResourceProviders(new OperationReturningOldBundleProvider());
 

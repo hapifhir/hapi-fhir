@@ -93,7 +93,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 @SuppressWarnings("unchecked")
-public class FhirResourceDaoDstu2Test {
+public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;
 	private static IFhirResourceDao<Device> ourDeviceDao;
@@ -2208,6 +2208,67 @@ public class FhirResourceDaoDstu2Test {
 		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id3, id2, id1, id4));
+	}
+
+	@Test
+	public void testSortByReference() {
+		String methodName = "testSortByReference";
+		
+		Organization o1 = new Organization();
+		IdDt oid1 = ourOrganizationDao.create(o1).getId().toUnqualifiedVersionless();
+		
+		Organization o2 = new Organization();
+		IdDt oid2 = ourOrganizationDao.create(o2).getId().toUnqualifiedVersionless();
+		
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("testSortF1").addGiven("testSortG1");
+		p.getManagingOrganization().setReference(oid1);
+		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("testSortF2").addGiven("testSortG2");
+		p.getManagingOrganization().setReference(oid2);
+		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("testSortF3").addGiven("testSortG3");
+		p.getManagingOrganization().setReference(oid1);
+		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(oid2);
+		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm;
+		List<IdDt> actual;
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
+		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual.subList(0, 2), containsInAnyOrder(id1, id3));
+		assertThat(actual.subList(2, 4), containsInAnyOrder(id2, id4));
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
+		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.ASC));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual.subList(0, 2), containsInAnyOrder(id1, id3));
+		assertThat(actual.subList(2, 4), containsInAnyOrder(id2, id4));
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
+		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual.subList(0, 2), containsInAnyOrder(id2, id4));
+		assertThat(actual.subList(2, 4), containsInAnyOrder(id1, id3));
 	}
 
 	@Test

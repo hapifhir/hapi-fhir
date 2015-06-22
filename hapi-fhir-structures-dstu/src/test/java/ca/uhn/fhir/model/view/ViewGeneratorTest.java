@@ -14,7 +14,7 @@ import ca.uhn.fhir.parser.IParser;
 
 public class ViewGeneratorTest {
 
-	private static FhirContext ourCtx  = new FhirContext();
+	private static FhirContext ourCtx  = FhirContext.forDstu1();
 	
 	@Test
 	public void testView() {

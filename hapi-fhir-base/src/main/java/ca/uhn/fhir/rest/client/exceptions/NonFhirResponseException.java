@@ -25,10 +25,13 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.IOException;
 import java.io.Reader;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 import org.apache.commons.io.IOUtils;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
+@CoverageIgnore
 public class NonFhirResponseException extends BaseServerResponseException {
 
 	private static final long serialVersionUID = 1L;

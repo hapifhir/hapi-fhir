@@ -20,7 +20,8 @@ package ca.uhn.fhir.context;
  * #L%
  */
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.model.api.annotation.ProvidesResources;
 
 /**
@@ -30,42 +31,48 @@ import ca.uhn.fhir.model.api.annotation.ProvidesResources;
  * @see ca.uhn.fhir.model.api.annotation.ProvidesResources
  */
 public class ProvidedResourceScanner {
-    private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ModelScanner.class);
-    private FhirContext myContext;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ProvidedResourceScanner.class);
+	private FhirContext myContext;
 
-    /**
-     * Constructor
-     * @param theContext - context whose resource definition list is to be updated by the scanner
-     */
-    public ProvidedResourceScanner(FhirContext theContext) {
-        myContext = theContext;
-    }
+	/**
+	 * Constructor
+	 * 
+	 * @param theContext
+	 *           - context whose resource definition list is to be updated by the scanner
+	 */
+	public ProvidedResourceScanner(FhirContext theContext) {
+		myContext = theContext;
+	}
 
-    /**
-     * If {@code theProvider} is tagged with the {@code ProvidesResources} annotation, this method will add every resource listed
-     * by the {@code resources} method.
-     * <p>
-     * Notes:
-     * </p>
-     * <ul>
-     * <li>if {@code theProvider} isn't annotated with {@code resources} nothing is done; it's expected that most RestfulServers and
-     * ResourceProviders won't be annotated.</li>
-     * <li>any object listed in {@code resources} that doesn't implement {@code IResource} will generate a warning in the log.</li>
-     * </ul>
-     *
-     * @param theProvider - Normally, either a {@link ca.uhn.fhir.rest.server.RestfulServer} or a {@link ca.uhn.fhir.rest.server.IResourceProvider}
-     *                    that might be annotated with {@link ca.uhn.fhir.model.api.annotation.ProvidesResources}
-     */
-    public void scanForProvidedResources(Object theProvider) {
-        ProvidesResources annotation = theProvider.getClass().getAnnotation(ProvidesResources.class);
-        if (annotation == null)
-            return;
-        for (Class clazz : annotation.resources()) {
-            if (IResource.class.isAssignableFrom(clazz)) {
-                myContext.getResourceDefinition(clazz);
-            } else {
-                ourLog.warn(clazz.getSimpleName() + "is not assignable from IResource");
-            }
-        }
-    }
+	/**
+	 * If {@code theProvider} is tagged with the {@code ProvidesResources} annotation, this method will add every
+	 * resource listed by the {@code resources} method.
+	 * <p>
+	 * Notes:
+	 * </p>
+	 * <ul>
+	 * <li>if {@code theProvider} isn't annotated with {@code resources} nothing is done; it's expected that most
+	 * RestfulServers and ResourceProviders won't be annotated.</li>
+	 * <li>any object listed in {@code resources} that doesn't implement {@code IResource} will generate a warning in the
+	 * log.</li>
+	 * </ul>
+	 *
+	 * @param theProvider
+	 *           - Normally, either a {@link ca.uhn.fhir.rest.server.RestfulServer} or a
+	 *           {@link ca.uhn.fhir.rest.server.IResourceProvider} that might be annotated with
+	 *           {@link ca.uhn.fhir.model.api.annotation.ProvidesResources}
+	 */
+	@SuppressWarnings("unchecked")
+	public void scanForProvidedResources(Object theProvider) {
+		ProvidesResources annotation = theProvider.getClass().getAnnotation(ProvidesResources.class);
+		if (annotation == null)
+			return;
+		for (Class<?> clazz : annotation.resources()) {
+			if (IBaseResource.class.isAssignableFrom(clazz)) {
+				myContext.getResourceDefinition((Class<? extends IBaseResource>) clazz);
+			} else {
+				ourLog.warn(clazz.getSimpleName() + "is not assignable from IResource");
+			}
+		}
+	}
 }

@@ -83,13 +83,13 @@ public abstract class BaseStructureParser {
 		if (isNotBlank(theResource.getBinding())) {
 			String bindingClass = theVsp.getClassForValueSetIdAndMarkAsNeeded(theResource.getBinding());
 			if (bindingClass != null) {
-				ourLog.info("Adding binding ValueSet class: {}", bindingClass);
+				ourLog.debug("Adding binding ValueSet class: {}", bindingClass);
 				theResource.setBindingClass(bindingClass);
 				addImport(bindingClass);
 				myLocallyDefinedClassNames.put(bindingClass, "valueset");
 			} else {
-				ourLog.info("No binding found for: {}", theResource.getBinding());
-				ourLog.info(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
+				ourLog.debug("No binding found for: {}", theResource.getBinding());
+				ourLog.debug(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
 			}
 		}
 		for (BaseElement next : theResource.getChildren()) {
@@ -396,7 +396,7 @@ public abstract class BaseStructureParser {
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
 		FileWriter w = new FileWriter(theFile, false);
 
-		ourLog.info("Writing file: {}", theFile.getAbsolutePath());
+		ourLog.debug("Writing file: {}", theFile.getAbsolutePath());
 
 		ArrayList<String> imports = new ArrayList<String>();
 		for (String next : myImports) {
@@ -486,7 +486,7 @@ public abstract class BaseStructureParser {
 		}
 
 		for (BaseRootType next : myResources) {
-			ourLog.info("Writing Resource {}", next.getName());
+			ourLog.debug("Writing Resource {}", next.getName());
 
 			scanForCorrections(next);
 			scanForTypeNameConflicts(next);
@@ -520,7 +520,7 @@ public abstract class BaseStructureParser {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
 				FileWriter w = new FileWriter(versionFile, false);
 
-				ourLog.info("Writing file: {}", versionFile.getAbsolutePath());
+				ourLog.debug("Writing file: {}", versionFile.getAbsolutePath());
 
 				VelocityContext ctx = new VelocityContext();
 				ctx.put("nameToResourceClass", myNameToResourceClass);

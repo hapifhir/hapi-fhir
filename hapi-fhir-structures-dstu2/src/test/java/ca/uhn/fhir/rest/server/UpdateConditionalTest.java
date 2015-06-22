@@ -52,7 +52,7 @@ public class UpdateConditionalTest {
 	private static String ourLastConditionalUrl;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
 	private static int ourPort;
-
+	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static Server ourServer;
 	private static IdDt ourLastId;
 	private static IdDt ourLastIdParam;
@@ -75,7 +75,7 @@ public class UpdateConditionalTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -101,7 +101,7 @@ public class UpdateConditionalTest {
 		patient.addIdentifier().setValue("002");
 
 		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/2");
-		httpPost.setEntity(new StringEntity(new FhirContext().newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
 
@@ -157,7 +157,7 @@ public class UpdateConditionalTest {
 		PatientProvider patientProvider = new PatientProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

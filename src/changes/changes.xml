@@ -119,6 +119,10 @@
 				Generic/fluent client and JPA server now both support _lastUpdated search parameter
 				which was added in DSTU2
 			</action>
+			<action name="fix">
+				JPA server now supports sorting on reference parameters. Thanks to
+				Vishal Kachroo for reporting that this wasn't working!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">
@@ -495,8 +499,8 @@
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their
 				own JAR, in order to allow support for DEV resources, and DSTU2 resources when thast
-				version is finalized. See
-				<![CDATA[<a href="./doc_upgrading.html">upgrading</a>]]> 
+				version is finalized. See the
+				<![CDATA[<a href="./doc_dstu2.html">DSTU2 page</a>]]> 
 				for more information.  
 			</action>
 			<action type="fix">

@@ -19,7 +19,7 @@ public class ClientExamples {
    @SuppressWarnings("unused")
    public void createProxy() {
       // START SNIPPET: proxy
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
 
       // Set connections to access the network via the HTTP proxy at
       // example.com : 8888
@@ -36,7 +36,7 @@ public class ClientExamples {
    @SuppressWarnings("unused")
    public void createTimeouts() {
       // START SNIPPET: timeouts
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
 
       // Set how long to try and establish the initial TCP connection (in ms)
       ctx.getRestfulClientFactory().setConnectTimeout(20 * 1000);
@@ -53,7 +53,7 @@ public class ClientExamples {
    public void createSecurity() {
       // START SNIPPET: security
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // Create an HTTP basic auth interceptor
@@ -74,7 +74,7 @@ public class ClientExamples {
    public void createCookie() {
       // START SNIPPET: cookie
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // Create a cookie interceptor. This cookie will have the name "mycookie" and
@@ -95,7 +95,7 @@ public class ClientExamples {
    public void createSecurityBearer() {
       // START SNIPPET: securityBearer
       // Create a context and get the client factory so it can be configured
-      FhirContext ctx = new FhirContext();
+      FhirContext ctx = FhirContext.forDstu2();
       IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
       // In reality the token would have come from an authorization server 
@@ -117,7 +117,7 @@ public class ClientExamples {
       {
          // START SNIPPET: logging
          // Create a context and get the client factory so it can be configured
-         FhirContext ctx = new FhirContext();
+         FhirContext ctx = FhirContext.forDstu2();
          IRestfulClientFactory clientFactory = ctx.getRestfulClientFactory();
 
          // Create a logging interceptor
@@ -141,7 +141,7 @@ public class ClientExamples {
       {
          // START SNIPPET: clientConfig
          // Create a client
-         FhirContext ctx = new FhirContext();
+         FhirContext ctx = FhirContext.forDstu2();
          IPatientClient client = ctx.newRestfulClient(IPatientClient.class, "http://localhost:9999/");
 
          // Request JSON encoding from the server (_format=json)

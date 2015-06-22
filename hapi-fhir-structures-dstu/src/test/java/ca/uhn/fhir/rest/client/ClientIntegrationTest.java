@@ -34,6 +34,7 @@ public class ClientIntegrationTest {
 	private int myPort;
 	private Server myServer;
 	private MyPatientResourceProvider myPatientProvider;
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Before
 	public void before() {
@@ -43,7 +44,7 @@ public class ClientIntegrationTest {
 		myPatientProvider = new MyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer();
+		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(myPatientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -57,7 +58,7 @@ public class ClientIntegrationTest {
 
 		myServer.start();
 
-		FhirContext ctx = new FhirContext();
+		FhirContext ctx = FhirContext.forDstu1();
 
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		// PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);

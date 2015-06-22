@@ -20,7 +20,7 @@ public class TagsExamples {
    @SuppressWarnings("unused")
    public void getResourceTags() {
       // START SNIPPET: getResourceTags
-      IGenericClient client = new FhirContext().newRestfulGenericClient("http://fhir.healthintersections.com.au/open");
+      IGenericClient client = FhirContext.forDstu2().newRestfulGenericClient("http://fhir.healthintersections.com.au/open");
       Patient p = client.read(Patient.class, "1");
 
       // Retrieve the list of tags from the resource metadata

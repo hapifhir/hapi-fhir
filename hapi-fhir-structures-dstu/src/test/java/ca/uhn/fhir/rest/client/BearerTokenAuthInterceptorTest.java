@@ -82,7 +82,7 @@ public class BearerTokenAuthInterceptorTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourCtx = new FhirContext();
+		ourCtx = FhirContext.forDstu1();
 	}
 
 }

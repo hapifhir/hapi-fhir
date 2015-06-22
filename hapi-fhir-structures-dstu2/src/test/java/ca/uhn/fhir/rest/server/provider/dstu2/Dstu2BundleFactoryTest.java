@@ -32,7 +32,7 @@ public class Dstu2BundleFactoryTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        ourCtx = new FhirContext(Patient.class);
+        ourCtx = FhirContext.forDstu2();
     }
 
     @Before
@@ -159,7 +159,8 @@ public class Dstu2BundleFactoryTest {
         return count;
     }
 
-    private <T extends IResource> List<T> getResourcesOfType(Bundle theBundle, Class<T> theResourceClass) {
+    @SuppressWarnings("unchecked")
+	private <T extends IResource> List<T> getResourcesOfType(Bundle theBundle, Class<T> theResourceClass) {
         List<T> resources = new ArrayList<T>();
         for (Bundle.Entry entry : theBundle.getEntry()) {
             if (theResourceClass.isAssignableFrom(entry.getResource().getClass())) {

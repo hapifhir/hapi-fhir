@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
@@ -52,6 +53,7 @@ public class ExceptionHandlingInterceptorTest {
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private static ExceptionHandlingInterceptor myInterceptor;
+	private static final FhirContext ourCtx = FhirContext.forDstu1();
 	
 	@Before
 	public void before() {
@@ -109,7 +111,7 @@ public class ExceptionHandlingInterceptorTest {
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer();
+		servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.exceptions;
  * #L%
  */
 
+import net.sourceforge.cobertura.CoverageIgnore;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -28,6 +29,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * strangely named and will be removed at some point.
  */
 @Deprecated
+@CoverageIgnore
 public class ResourceVersionNotSpecifiedException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_412_PRECONDITION_FAILED;
 	private static final long serialVersionUID = 1L;

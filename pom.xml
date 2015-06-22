@@ -45,13 +45,17 @@
 	</description>
 
 	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.cobertura</groupId>
+			<artifactId>cobertura</artifactId>
+			<version>2.1.1</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<prerequisites>
-		<!--
-		   TODO: the version number here should probably be
-		   either 3.2 or 3.3. Check and fix
-		-->
+		<!-- TODO: the version number here should probably be either 3.2 or 3.3. 
+			Check and fix -->
 		<maven>3.0.1</maven>
 	</prerequisites>
 
@@ -156,15 +160,13 @@
 	</licenses>
 
 	<properties>
-		<!-- 
-		This property is used in some of the site documentation where the version
-		is shown, so that we can deploy the site even if the project is on a
-		snapshot version.
-		-->
+		<!-- This property is used in some of the site documentation where the 
+			version is shown, so that we can deploy the site even if the project is on 
+			a snapshot version. -->
 		<hapi_stable_version>1.0</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
+
 		<!-- For site-deploy -->
 		<siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
@@ -178,14 +180,11 @@
 		<derby_version>10.11.1.1</derby_version>
 		<guava_version>18.0</guava_version>
 		<hamcrest_version>2.0.0.0</hamcrest_version>
-		<!--
-		Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for
-		a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this 
-		version with caution! Also note that if you change this, you may get a failure 
-		in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's
-		configuration for that plugin...
-		<hibernate_version>4.3.7.Final</hibernate_version>
-		-->
+		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is 
+			too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. 
+			Upgrade this version with caution! Also note that if you change this, you 
+			may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's 
+			configuration for that plugin... <hibernate_version>4.3.7.Final</hibernate_version> -->
 		<hibernate_version>4.2.17.Final</hibernate_version>
 		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
 		<jetty_version>9.2.6.v20141205</jetty_version>
@@ -195,6 +194,7 @@
 		<maven_antrun_plugin_version>1.8</maven_antrun_plugin_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
+		<maven_cobertura_plugin_version>2.7</maven_cobertura_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_gpg_plugin_version>1.6</maven_gpg_plugin_version>
 		<maven_javadoc_plugin_version>2.10.1</maven_javadoc_plugin_version>
@@ -216,13 +216,30 @@
 		<thymeleaf-version>2.1.4.RELEASE</thymeleaf-version>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<woodstox_version>4.4.1</woodstox_version>
-
+		<xmlunit_version>1.6</xmlunit_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<build>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<version>${maven_cobertura_plugin_version}</version>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eluder.coveralls</groupId>
+					<artifactId>coveralls-maven-plugin</artifactId>
+					<version>3.1.0</version>
+					<configuration>
+						<coberturaReports>
+						</coberturaReports>
+					</configuration>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -320,12 +337,11 @@
 							<artifactId>doxia-module-markdown</artifactId>
 							<version>1.6</version>
 						</dependency>
-						<!-- 
-						-->
+						<!-- -->
 						<dependency>
 							<groupId>lt.velykis.maven.skins</groupId>
 							<artifactId>reflow-velocity-tools</artifactId>
-						<version>1.1.1</version>
+							<version>1.1.1</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.velocity</groupId>
@@ -334,7 +350,8 @@
 						</dependency>
 					</dependencies>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -425,21 +442,21 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-checkstyle-plugin</artifactId>
-						<version>2.15</version>
-						<dependencies>
-							<dependency>
-								<groupId>com.puppycrawl.tools</groupId>
-								<artifactId>checkstyle</artifactId>
-								<version>6.7</version>
-							</dependency>
-						</dependencies>
-						<configuration>
-							<configLocation>src/checkstyle/checkstyle.xml</configLocation>
-						</configuration>
-					</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>2.15</version>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>6.7</version>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<configLocation>src/checkstyle/checkstyle.xml</configLocation>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -474,26 +491,61 @@
 						<configuration>
 							<target>
 								<copy todir="target/site/apidocs">
-									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
+									<fileset dir="hapi-fhir-base/target/site/apidocs" />
 								</copy>
 								<copy todir="target/site/apidocs-dstu">
-									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
+									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs" />
 								</copy>
 								<copy todir="target/site/apidocs-hl7org-dstu2">
-									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs"/>
+									<fileset
+										dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs" />
 								</copy>
 								<copy todir="target/site/apidocs-dstu2">
-									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
+									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs" />
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs" />
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref" />
 								</copy>
 								<copy todir="target/site/xref-base">
-									<fileset dir="hapi-fhir-base/target/site/xref"/>
+									<fileset dir="hapi-fhir-base/target/site/xref" />
 								</copy>
+								<copy todir="target/site/cobertura">
+									<fileset dir="hapi-fhir-cobertura/target/site/cobertura" />
+								</copy>
+								<copy todir="target/site">
+									<fileset dir="hapi-fhir-cobertura/target/site" includes="checkstyle.*"/>
+								</copy>
+								<echo>Fixing Checkstyle Report</echo>
+								<replace dir="target/site" summary="true">
+									<include name="checkstyle.html" />
+									<replacetoken>"../../</replacetoken>
+									<replacevalue>"./</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="*.html" />
+									<replacetoken>http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css</replacetoken>
+									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
+								</replace>
+								<replace dir="target/site" summary="true">
+									<include name="index.html" />
+									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
+									<replacevalue><![CDATA[<div class="jumbotron subhead">
+		<div class="row" id="banner">
+			<div class="span12">
+				<div class="pull-left">
+					<a href="./" id="bannerLeft"><img src="images/hapi_fhir_banner.png" alt='"'HAPI'"' /></a>
+				</div>
+				<div class="pull-right">
+					<a href="./" id="bannerRight"><img src="images/hapi_fhir_banner_right.png" alt='"'FHIR'"' /></a>
+				</div>
+			</div>
+		</div>
+	</div>]]></replacevalue>
+								</replace>
+								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/>-->
 							</target>
 						</configuration>
 					</execution>
@@ -533,7 +585,7 @@
 								</replace>
 								<echo>Changing Breadcrumbs</echo>
 								<replace dir="target/site" summary="true">
-									<include name="doc_*.html"/>
+									<include name="doc_*.html" />
 									<replacetoken><![CDATA[<li class="divider">/</li>]]></replacetoken>
 									<replacevalue><![CDATA[<li  class="divider">/</li>
 			<li><a href="docindex.html" title="Documentation">Documentation</a></li>
@@ -623,46 +675,6 @@
                 </BODY >
                 ]]></replacevalue>
 								</replace>
-								<echo>Adding social plugins for HAPI</echo>
-								<replace dir="target/site/" summary="true">
-									<include name="**/*.html"></include>
-									<replacetoken><![CDATA[SOCIALPLUGINSHEREFHIR]]></replacetoken>
-									<replacevalue><![CDATA[
-            	<table cellpadding="0" cellspacing="0" border="0"><tr>
-					<td>
-					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=watch&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
-					</td>
-					<td>
-					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
-					</td>
-					<td>
-					<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&repo=hapi-fhir&type=fork&count=true&v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
-					</td>
-            	<td><div class="g-plusone" data-annotation="inline" data-width="300" data-href="http://hl7api.sourceforge.net/"></div></td>
-            	<td><div class="fb-like" data-href="http://hl7api.sourceforge.net/" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"></div></td>
-            	</tr></table>
-
-            	</p><p>
-            	<!-- Place this tag after the last +1 button tag. -->
-            	<script type="text/javascript">
-            	  (function() {
-            	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-            	    po.src = 'https://apis.google.com/js/plusone.js';
-            	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-            	  })();
-            	</script>
-            	<div id="fb-root"></div>
-            	<script>(function(d, s, id) {
-            	  var js, fjs = d.getElementsByTagName(s)[0];
-            	  if (d.getElementById(id)) return;
-            	  js = d.createElement(s); js.id = id;
-            	  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
-            	  fjs.parentNode.insertBefore(js, fjs);
-            	}(document, 'script', 'facebook-jssdk'));</script>
-				]]></replacevalue>
-								</replace>
-
-
 							</target>
 						</configuration>
 						<goals>
@@ -727,23 +739,11 @@
 
 	<reporting>
 		<plugins>
-			<!--
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<reportSets>
-					<reportSet>
-						<reports><report>checkstyle-aggregate</report></reports>
-					</reportSet>
-				</reportSets>
-				<configuration>
-					<configLocation>config/sun_checks.xml</configLocation>
-					<includes>
-						hapi-fhir-base/src/main/java/**/*.java
-					</includes>
-				</configuration>
-			</plugin>
-			-->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
+				<reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> 
+				</reportSet> </reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> 
+				<includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> 
+				</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
@@ -776,12 +776,12 @@
 					</reportSet>
 				</reportSets>
 				<configuration>
-							<reportsDirectories>
-								<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
-								<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/</reportDirectory>
-								<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/</reportDirectory>
-								<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/</reportDirectory>
-							</reportsDirectories>
+					<reportsDirectories>
+						<reportDirectory>${project.basedir}/hapi-fhir-base/target/surefire-reports/</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu/target/surefire-reports/</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-structures-dstu2/target/surefire-reports/</reportDirectory>
+						<reportDirectory>${project.basedir}/hapi-fhir-jpaserver-base/target/surefire-reports/</reportDirectory>
+					</reportsDirectories>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -808,32 +808,21 @@
 	<profiles>
 		<profile>
 			<id>ROOT</id>
+			<reporting>
+				<plugins>
+				</plugins>
+			</reporting>
 			<modules>
 			</modules>
 			<build>
 				<plugins>
-					<!-- 
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<version>${maven_assembly_plugin_version}</version>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-								<configuration>
-									<attach>false</attach>
-									<descriptors>
-										<descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor>
-									</descriptors>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-					 -->
+					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> 
+						<executions> <execution> <phase>package</phase> <goals> <goal>single</goal> 
+						</goals> <configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> 
+						</descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
+
 		</profile>
 		<profile>
 			<id>SIGN_ARTIFACTS</id>
@@ -869,6 +858,7 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-hl7org-dstu2</module>
 				<module>hapi-fhir-jpaserver-base</module>
+				<module>hapi-fhir-cobertura</module>
 				<module>examples</module>
 			</modules>
 			<reporting>
@@ -899,7 +889,7 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
-				<!--<module>hapi-fhir-oauth2</module>-->
+				<!--<module>hapi-fhir-oauth2</module> -->
 				<module>hapi-fhir-base-test-mindeps-client</module>
 				<module>hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-tinder-plugin</module>
@@ -915,6 +905,12 @@
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-dist</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>COBERTURA</id>
+			<modules>
+				<module>hapi-fhir-cobertura</module>
 			</modules>
 		</profile>
 	</profiles>

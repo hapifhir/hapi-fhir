@@ -35,7 +35,7 @@ public class ServerBaseTest {
 	private static CloseableHttpClient ourClient;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerBaseTest.class);
 	private Server myServer;
-	private static FhirContext ourCtx = new FhirContext();
+	private static FhirContext ourCtx = FhirContext.forDstu1();
 
 	@Test
 	public void testTransaction() throws Exception {
