@@ -20,18 +20,16 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
  * This interface is the parent interface for all FHIR Resource definition

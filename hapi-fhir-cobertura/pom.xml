@@ -230,11 +230,8 @@
 								<ignore>**/valueset/*.class</ignore>
 								<ignore>**/exceptions/*.class</ignore>
 							</excludes>
-							<!--
-							<ignoreMethodAnnotations>
-								<ignoreMethodAnnotation>net.sourceforge.cobertura.CoverageIgnore</ignoreMethodAnnotation>
-							</ignoreMethodAnnotations>
-							-->
+							<!-- <ignoreMethodAnnotations> <ignoreMethodAnnotation>net.sourceforge.cobertura.CoverageIgnore</ignoreMethodAnnotation> 
+								</ignoreMethodAnnotations> -->
 						</instrumentation>
 					</configuration>
 					<executions>
@@ -386,6 +383,28 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>${maven_project_info_plugin_version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-checkstyle-plugin</artifactId>
+			<reportSets>
+				<reportSet>
+					<reports>
+						<report>checkstyle</report>
+					</reports>
+				</reportSet>
+			</reportSets>
+			<configuration>
+				<linkXRef>false</linkXRef>
+			</configuration>
+		</plugin>
 	</reporting>
 </project>

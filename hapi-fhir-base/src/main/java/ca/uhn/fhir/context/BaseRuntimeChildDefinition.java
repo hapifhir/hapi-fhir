@@ -32,7 +32,7 @@ public abstract class BaseRuntimeChildDefinition {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"[" + getElementName() + "]";
+		return getClass().getSimpleName() + "[" + getElementName() + "]";
 	}
 
 	public abstract BaseRuntimeElementDefinition<?> getChildByName(String theName);
@@ -52,11 +52,11 @@ public abstract class BaseRuntimeChildDefinition {
 	}
 
 	public abstract String getElementName();
-	
+
 	public abstract int getMax();
-	
+
 	public abstract int getMin();
-	
+
 	public interface IMutator {
 		void setValue(Object theTarget, IBase theValue);
 
@@ -71,7 +71,7 @@ public abstract class BaseRuntimeChildDefinition {
 		return null;
 	}
 
-//	public String getExtensionUrl() {
-//		return null;
-//	}
+	// public String getExtensionUrl() {
+	// return null;
+	// }
 }

@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;

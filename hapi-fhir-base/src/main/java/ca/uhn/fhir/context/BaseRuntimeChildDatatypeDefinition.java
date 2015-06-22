@@ -41,14 +41,15 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 
 	public BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class<? extends IBase> theDatatype) {
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
-		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here"; // should use RuntimeChildAny
+		// should use RuntimeChildAny
+		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
 		myDatatype = theDatatype;
 	}
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
 		Class<?> nextType = theDatatype;
-		while(nextType.equals(Object.class)==false) {
+		while (nextType.equals(Object.class) == false) {
 			if (myDatatype.equals(nextType)) {
 				return getElementName();
 			}
@@ -60,7 +61,7 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 	@Override
 	public BaseRuntimeElementDefinition<?> getChildElementDefinitionByDatatype(Class<? extends IBase> theDatatype) {
 		Class<?> nextType = theDatatype;
-		while(nextType.equals(Object.class)==false) {
+		while (nextType.equals(Object.class) == false) {
 			if (myDatatype.equals(nextType)) {
 				return myElementDefinition;
 			}
@@ -102,11 +103,10 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		}
 		myCodeType = theType;
 	}
-	
+
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + getElementName() + "]";
 	}
 
-	
 }

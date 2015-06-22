@@ -10,9 +10,20 @@
 
 		<!-- The body of the document contains a number of sections -->
 		<section name="Welcome">
-			<p>
-			    SOCIALPLUGINSHEREFHIR
+			<p style="float:right; text-align: center;">
+				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=watch&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<br/>
+				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=star&amp;count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<br/>
+				<iframe src="http://ghbtns.com/github-btn.html?user=jamesagnew&amp;repo=hapi-fhir&amp;type=fork&amp;count=true&amp;v=2" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+				<br/>
+				<a href="https://travis-ci.org/jamesagnew/hapi-fhir"><img src="https://travis-ci.org/jamesagnew/hapi-fhir.svg?branch=master" alt="Build Status"/></a>
+				<br/>
+				<a href="https://coveralls.io/r/jamesagnew/hapi-fhir?branch=master"><img src="https://coveralls.io/repos/jamesagnew/hapi-fhir/badge.svg?branch=master" alt="Coverage Status"/></a>
+				<br/>
+				<a href="https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg"><img src="https://maven-badges.herokuapp.com/maven-central/ca.uhn.hapi.fhir/hapi-fhir-base/badge.svg" alt="Maven Central"/></a>
 			</p>
+			
 			<p>
 				This is the homepage for the HAPI-FHIR library. We are developing 
 				an open-source implementation of the FHIR specification in Java.

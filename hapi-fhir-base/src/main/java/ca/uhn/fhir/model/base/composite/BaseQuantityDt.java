@@ -34,7 +34,6 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.rest.param.StringParam;
 
 public abstract class BaseQuantityDt extends BaseIdentifiableElement implements ICompositeDatatype, IQueryParameterType {
 

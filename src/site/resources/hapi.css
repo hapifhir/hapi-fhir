@@ -86,8 +86,13 @@ A.pagenavlinks {
 }
 */
 
-body {
+@media (min-width: 980px) {   /* 768 980 */
+  body {
     padding-top: 40px;
+  }
+}
+
+body {
     padding-bottom: 10px;
 }
 
@@ -101,6 +106,7 @@ pre {
 .page-header {
 	padding-bottom: 2px;
 	margin: 0px 0 0px;
+	border-bottom: none;
 }
 h1[id]:before,
 h2[id]:before,

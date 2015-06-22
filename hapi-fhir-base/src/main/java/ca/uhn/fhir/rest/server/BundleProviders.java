@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
 /**

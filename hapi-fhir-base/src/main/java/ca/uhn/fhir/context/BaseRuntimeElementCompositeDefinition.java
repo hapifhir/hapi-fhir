@@ -41,7 +41,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		super(theName, theImplementingClass, theStandardType);
 	}
 
-	public void addChild(BaseRuntimeChildDefinition theNext) {
+	void addChild(BaseRuntimeChildDefinition theNext) {
 		if (theNext == null) {
 			throw new NullPointerException();
 		}

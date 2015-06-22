@@ -180,7 +180,7 @@
 			<id>SITE</id>
 			<reporting>
 				<plugins>
-
+<!--
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-checkstyle-plugin</artifactId>
@@ -192,9 +192,13 @@
 							</reportSet>
 						</reportSets>
 						<configuration>
+							<linkXRef>false</linkXRef>
+							<sourceDirectories>
+								<sourceDirectory>hapi-fhir-base/src/main/java</sourceDirectory>
+							</sourceDirectories>
 						</configuration>
 					</plugin>
-
+-->
 					<!--<plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
 						<version>3.0.0</version> <configuration> </configuration> </plugin> -->
 					<plugin>
