@@ -391,7 +391,6 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-		</plugins>
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-checkstyle-plugin</artifactId>
@@ -406,5 +405,6 @@
 				<linkXRef>false</linkXRef>
 			</configuration>
 		</plugin>
+		</plugins>
 	</reporting>
 </project>
