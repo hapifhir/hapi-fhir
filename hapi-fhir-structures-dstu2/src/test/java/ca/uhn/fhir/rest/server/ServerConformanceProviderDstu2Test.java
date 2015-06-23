@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -27,12 +27,14 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
@@ -184,6 +186,45 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
+	public void testReadAndVReadSupported() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new VreadProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
+		assertThat(conf, containsString("<interaction><code value=\"vread\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+	}
+
+	@Test
+	public void testReadSupported() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new ReadProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+		
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
+		assertThat(conf, not(containsString("<interaction><code value=\"vread\"/></interaction>")));
+		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
+	}
+ 	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -219,6 +260,7 @@ public class ServerConformanceProviderDstu2Test {
 	 */
 	public static class SearchProvider {
 
+
 		@Search(type = Patient.class)
 		public Patient findPatient(
 				@Description(shortDefinition = "The patient's identifier (MRN or other card number)") 
@@ -228,7 +270,46 @@ public class ServerConformanceProviderDstu2Test {
 
 	}
 	
-	
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class VreadProvider {
+
+		@Read(version=true)
+		public Patient readPatient(
+				@IdParam IdDt theId) {
+			return null;
+		}
+
+		@Search(type = Patient.class)
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)") 
+				@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+			return null;
+		}
+
+	}
+
+	/**
+	 * Created by dsotnikov on 2/25/2014.
+	 */
+	public static class ReadProvider {
+
+		@Read(version=false)
+		public Patient readPatient(
+				@IdParam IdDt theId) {
+			return null;
+		}
+
+		@Search(type = Patient.class)
+		public Patient findPatient(
+				@Description(shortDefinition = "The patient's identifier (MRN or other card number)") 
+				@RequiredParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier) {
+			return null;
+		}
+
+	}
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */

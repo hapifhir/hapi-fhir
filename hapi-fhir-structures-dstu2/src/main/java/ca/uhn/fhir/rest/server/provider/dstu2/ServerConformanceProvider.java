@@ -164,6 +164,14 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 								resourceOps.add(resOp);
 								resource.addInteraction().setCode(resOp);
 							}
+							if ("vread".equals(resOpCode)) {
+								// vread implies read
+								resOp = TypeRestfulInteractionEnum.READ;
+								if (resourceOps.contains(resOp) == false) {
+									resourceOps.add(resOp);
+									resource.addInteraction().setCode(resOp);
+								}
+							}
 						}
 					}
 

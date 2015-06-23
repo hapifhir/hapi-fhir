@@ -267,7 +267,7 @@ patient.addIdentifier().setUse(SECONDARY).setSystem("urn:fake:otherids").setValu
 
 patient.addName().addFamily("Smith").addGiven("John").addGiven("Q").addSuffix("Junior");
 
-patient.setGender(AdministrativeGenderCodesEnum.M);]]></source>
+patient.setGender(AdministrativeGenderEnum.MALE);]]></source>
 
 			</subsection>
 			<subsection name="Encoding Support">
@@ -280,7 +280,7 @@ patient.setGender(AdministrativeGenderCodesEnum.M);]]></source>
 					<a href="https://jcp.org/en/jsr/detail?id=353">javax.json/JSR-353</a> API. 
 				</p>
 	
-				<source><![CDATA[FhirContext ctx = new FhirContext();
+				<source><![CDATA[FhirContext ctx = FhirContext.forDstu2();
 String xmlEncoded = ctx.newXmlParser().encodeResourceToString(patient);
 String jsonEncoded = ctx.newJsonParser().encodeResourceToString(patient);
 ]]></source>

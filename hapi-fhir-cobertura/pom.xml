@@ -309,7 +309,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<reuseForks>false</reuseForks>
 					<argLine>-Xms512m -Xmx1024m</argLine>
 				</configuration>
 			</plugin>
@@ -392,20 +391,38 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-checkstyle-plugin</artifactId>
-			<reportSets>
-				<reportSet>
-					<reports>
-						<report>checkstyle</report>
-					</reports>
-				</reportSet>
-			</reportSets>
-			<configuration>
-				<linkXRef>false</linkXRef>
-			</configuration>
-		</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>checkstyle</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+				<configuration>
+					<linkXRef>false</linkXRef>
+				</configuration>
+			</plugin>
 		</plugins>
 	</reporting>
+
+	<profiles>
+		<profile>
+			<id>TRAVIS</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<!-- Travis build seems to run out of memory unless we don't reuse JVMs -->
+							<reuseForks>false</reuseForks>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
