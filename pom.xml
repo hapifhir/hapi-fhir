@@ -905,6 +905,7 @@
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 				<module>hapi-fhir-android</module>
 				<module>hapi-fhir-dist</module>
+				<module>examples</module>
 			</modules>
 		</profile>
 		<profile>
