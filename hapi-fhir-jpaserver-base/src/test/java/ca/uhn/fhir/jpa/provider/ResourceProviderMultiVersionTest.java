@@ -16,11 +16,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
-import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
-import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu2.resource.PaymentNotice;
@@ -105,6 +100,7 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void testUnknownResourceType() {
 		ca.uhn.fhir.model.dstu2.resource.Patient p = new ca.uhn.fhir.model.dstu2.resource.Patient();
@@ -113,7 +109,7 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 
 		PaymentNotice s = new PaymentNotice();
 		s.addIdentifier().setSystem("urn:MultiFhirVersionTest").setValue("testUnknownResourceType02");
-		id = ourClientDstu2.create().resource(s).execute().getId();
+		ourClientDstu2.create().resource(s).execute().getId();
 
 		Bundle history = ourClientDstu2.history(null, id, null, null);
 		assertEquals(PaymentNotice.class, history.getEntries().get(0).getResource().getClass());
@@ -121,23 +117,19 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 
 		history = ourClientDstu1.history(null, id, null, null);
 		assertEquals(ca.uhn.fhir.model.dstu.resource.Patient.class, history.getEntries().get(0).getResource().getClass());
+		
+		history = ourClientDstu2.history().onServer().andReturnDstu1Bundle().execute();
+		assertEquals(PaymentNotice.class, history.getEntries().get(0).getResource().getClass());
+		assertEquals(ca.uhn.fhir.model.dstu2.resource.Patient.class, history.getEntries().get(1).getResource().getClass());
+
+		history = ourClientDstu1.history().onServer().andReturnDstu1Bundle().execute();
+		assertEquals(ca.uhn.fhir.model.dstu.resource.Patient.class, history.getEntries().get(0).getResource().getClass());
+
+		history = ourClientDstu1.history().onInstance(id).andReturnDstu1Bundle().execute();
+		assertEquals(ca.uhn.fhir.model.dstu.resource.Patient.class, history.getEntries().get(0).getResource().getClass());
+
 	}
 
-	@Test
-	public void testUnknownResourceType2() {
-		AdverseReaction ar = new AdverseReaction();
-		ar.addIdentifier("FOO", "BAR");
-
-		AllergyIntolerance ai = new AllergyIntolerance();
-		ai.addReaction().setResource(ar);
-		IdDt id = ourClientDstu2.create().resource(ai).execute().getId().toUnqualifiedVersionless();
-
-		ourClientDstu2.search().forResource(AllergyIntolerance.class.getSimpleName())
-		.where(BaseResource.RES_ID.matches().value(id.getIdPart()))
-		.include(new Include("*")).execute();
-	}
-
-	
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() throws Exception {
