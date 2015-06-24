@@ -222,6 +222,30 @@
 					<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
 						<version>1.1</version> <configuration> <forceSite>false</forceSite> </configuration> 
 						</plugin> -->
+
+
+<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-checkstyle-plugin</artifactId>
+            <reportSets>
+               <reportSet>
+                  <reports>
+                     <report>checkstyle</report>
+                  </reports>
+               </reportSet>
+            </reportSets>
+            <configuration>
+               <linkXRef>false</linkXRef>
+               <configLocation>file://${project.basedir}/../src/checkstyle/checkstyle.xml</configLocation>
+               <!--<sourceDirectories>
+               <sourceDirectory>
+                  ${project.basedir}/../hapi-fhir-base/src/main/java
+               </sourceDirectory>
+               </sourceDirectories>-->
+            </configuration>
+         </plugin>
+
+
 				</plugins>
 			</reporting>
 		</profile>

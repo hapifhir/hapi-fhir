@@ -454,7 +454,7 @@
 						</dependency>
 					</dependencies>
 					<configuration>
-						<configLocation>src/checkstyle/checkstyle.xml</configLocation>
+						<configLocation>file://${project.basedir}/src/checkstyle/checkstyle.xml</configLocation>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -516,7 +516,7 @@
 									<fileset dir="hapi-fhir-cobertura/target/site/cobertura" />
 								</copy>
 								<copy todir="target/site">
-									<fileset dir="hapi-fhir-cobertura/target/site" includes="checkstyle.*"/>
+									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
 								</copy>
 								<echo>Fixing Checkstyle Report</echo>
 								<replace dir="target/site" summary="true">

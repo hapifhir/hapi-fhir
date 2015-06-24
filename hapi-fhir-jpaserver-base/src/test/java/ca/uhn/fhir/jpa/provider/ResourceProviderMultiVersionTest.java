@@ -16,6 +16,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.dstu.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.AdverseReaction;
+import ca.uhn.fhir.model.dstu.resource.AllergyIntolerance;
+import ca.uhn.fhir.model.dstu.resource.BaseResource;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.valueset.AdministrativeGenderCodesEnum;
 import ca.uhn.fhir.model.dstu2.resource.PaymentNotice;
@@ -116,6 +121,20 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 
 		history = ourClientDstu1.history(null, id, null, null);
 		assertEquals(ca.uhn.fhir.model.dstu.resource.Patient.class, history.getEntries().get(0).getResource().getClass());
+	}
+
+	@Test
+	public void testUnknownResourceType2() {
+		AdverseReaction ar = new AdverseReaction();
+		ar.addIdentifier("FOO", "BAR");
+
+		AllergyIntolerance ai = new AllergyIntolerance();
+		ai.addReaction().setResource(ar);
+		IdDt id = ourClientDstu2.create().resource(ai).execute().getId().toUnqualifiedVersionless();
+
+		ourClientDstu2.search().forResource(AllergyIntolerance.class.getSimpleName())
+		.where(BaseResource.RES_ID.matches().value(id.getIdPart()))
+		.include(new Include("*")).execute();
 	}
 
 	

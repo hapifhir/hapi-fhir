@@ -38,7 +38,6 @@ import ca.uhn.fhir.util.BeanUtils;
 
 public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChildDefinition {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseRuntimeDeclaredChildDefinition.class);
-	private Boolean ourUseMethodAccessors;
 	private final IAccessor myAccessor;
 	private final String myElementName;
 	private final Field myField;
@@ -47,6 +46,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private final int myMin;
 	private final IMutator myMutator;
 	private final String myShortDefinition;
+	private Boolean ourUseMethodAccessors;
 
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
 		super();
@@ -197,11 +197,43 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 	}
 
-	protected final class FieldPlainMutator implements IMutator {
+	private final class FieldListAccessor implements IAccessor {
+		@SuppressWarnings("unchecked")
+		@Override
+		public List<IBase> getValues(Object theTarget) {
+			List<IBase> retVal;
+			try {
+				retVal = (List<IBase>) myField.get(theTarget);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to get value", e);
+			}
+			if (retVal == null) {
+				retVal = Collections.emptyList();
+			}
+			return retVal;
+		}
+	}
+
+	protected final class FieldListMutator implements IMutator {
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, theValue, false);
+		}
+
+		private void addValue(Object theTarget, IBase theValue, boolean theClear) {
 			try {
-				myField.set(theTarget, theValue);
+				@SuppressWarnings("unchecked")
+				List<IBase> existingList = (List<IBase>) myField.get(theTarget);
+				if (existingList == null) {
+					existingList = new ArrayList<IBase>(2);
+					myField.set(theTarget, existingList);
+				}
+				if (theClear) {
+					existingList.clear();
+				}
+				existingList.add(theValue);
 			} catch (IllegalArgumentException e) {
 				throw new ConfigurationException("Failed to set value", e);
 			} catch (IllegalAccessException e) {
@@ -211,7 +243,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 
 		@Override
 		public void setValue(Object theTarget, IBase theValue) {
-			addValue(theTarget, theValue);
+			addValue(theTarget, theValue, true);
 		}
 	}
 
@@ -233,53 +265,21 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 	}
 
-	protected final class FieldListMutator implements IMutator {
+	protected final class FieldPlainMutator implements IMutator {
 		@Override
 		public void addValue(Object theTarget, IBase theValue) {
-			addValue(theTarget, theValue, false);
+			try {
+				myField.set(theTarget, theValue);
+			} catch (IllegalArgumentException e) {
+				throw new ConfigurationException("Failed to set value", e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to set value", e);
+			}
 		}
 
 		@Override
 		public void setValue(Object theTarget, IBase theValue) {
-			addValue(theTarget, theValue, true);
-		}
-
-		private void addValue(Object theTarget, IBase theValue, boolean theClear) {
-			try {
-				@SuppressWarnings("unchecked")
-				List<IBase> existingList = (List<IBase>) myField.get(theTarget);
-				if (existingList == null) {
-					existingList = new ArrayList<IBase>(2);
-					myField.set(theTarget, existingList);
-				}
-				if (theClear) {
-					existingList.clear();
-				}
-				existingList.add(theValue);
-			} catch (IllegalArgumentException e) {
-				throw new ConfigurationException("Failed to set value", e);
-			} catch (IllegalAccessException e) {
-				throw new ConfigurationException("Failed to set value", e);
-			}
-		}
-	}
-
-	private final class FieldListAccessor implements IAccessor {
-		@SuppressWarnings("unchecked")
-		@Override
-		public List<IBase> getValues(Object theTarget) {
-			List<IBase> retVal;
-			try {
-				retVal = (List<IBase>) myField.get(theTarget);
-			} catch (IllegalArgumentException e) {
-				throw new ConfigurationException("Failed to get value", e);
-			} catch (IllegalAccessException e) {
-				throw new ConfigurationException("Failed to get value", e);
-			}
-			if (retVal == null) {
-				retVal = Collections.emptyList();
-			}
-			return retVal;
+			addValue(theTarget, theValue);
 		}
 	}
 
@@ -312,11 +312,6 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			myMutatorMethod = theMutator;
 		}
 
-		@Override
-		public void addValue(Object theTarget, IBase theValue) {
-			addValue(theTarget, false, theValue);
-		}
-
 		private void addValue(Object theTarget, boolean theClear, IBase theValue) {
 			List<IBase> existingList = myAccessor.getValues(theTarget);
 			if (existingList == null) {
@@ -335,6 +330,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 				existingList.clear();
 			}
 			existingList.add(theValue);
+		}
+
+		@Override
+		public void addValue(Object theTarget, IBase theValue) {
+			addValue(theTarget, false, theValue);
 		}
 
 		@Override
