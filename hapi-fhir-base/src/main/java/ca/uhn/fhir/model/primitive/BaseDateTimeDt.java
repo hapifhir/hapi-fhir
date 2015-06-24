@@ -62,8 +62,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private static final FastDateFormat ourYearMonthFormat = FastDateFormat.getInstance("yyyy-MM");
 	private static final FastDateFormat ourYearMonthNoDashesFormat = FastDateFormat.getInstance("yyyyMM");
 	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
-    private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
-    private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
+	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
+	private static final Pattern ourYearMonthPattern = Pattern.compile("[0-9]{4}[0-9]{2}");
 	private static final Pattern ourYearPattern = Pattern.compile("[0-9]{4}");
 
 	static {
@@ -88,55 +88,50 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	private boolean myTimeZoneZulu = false;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseDateTimeDt.class);
 
-    /**
-     * Returns a human readable version of this date/time using the system local format.
-     * <p>
-     * <b>Note on time zones:</b> This method renders the value using the time zone
-     * that is contained within the value. For example, if this date object contains the
-     * value "2012-01-05T12:00:00-08:00", the human display will be rendered as "12:00:00"
-     * even if the application is being executed on a system in a different time zone. If
-     * this behaviour is not what you want, use {@link #toHumanDisplayLocalTimezone()}
-     * instead.
-     * </p>
-     */
-    public String toHumanDisplay() {
-            TimeZone tz = getTimeZone();
-			Calendar value = tz != null ? Calendar.getInstance(tz) : Calendar.getInstance();
-            value.setTime(getValue());
-            
-			switch (getPrecision()) {
-            case YEAR:
-            case MONTH:
-            case DAY:
-                    return ourHumanDateFormat.format(value);
-            case MILLI:
-            case SECOND:
-            default:
-                    return ourHumanDateTimeFormat.format(value);
-            }
-    }
-	
-    /**
-     * Returns a human readable version of this date/time using the system local format,
-     * converted to the local timezone if neccesary.
-     * 
-     * @see #toHumanDisplay() for a method which does not convert the time to the local
-     * timezone before rendering it.
-     */
-    public String toHumanDisplayLocalTimezone() {
-		switch (getPrecision()) {
-        case YEAR:
-        case MONTH:
-        case DAY:
-                return ourHumanDateFormat.format(getValue());
-        case MILLI:
-        case SECOND:
-        default:
-                return ourHumanDateTimeFormat.format(getValue());
-        }
-    }
+	/**
+	 * Returns a human readable version of this date/time using the system local format.
+	 * <p>
+	 * <b>Note on time zones:</b> This method renders the value using the time zone that is contained within the value. For example, if this date object contains the value "2012-01-05T12:00:00-08:00",
+	 * the human display will be rendered as "12:00:00" even if the application is being executed on a system in a different time zone. If this behaviour is not what you want, use
+	 * {@link #toHumanDisplayLocalTimezone()} instead.
+	 * </p>
+	 */
+	public String toHumanDisplay() {
+		TimeZone tz = getTimeZone();
+		Calendar value = tz != null ? Calendar.getInstance(tz) : Calendar.getInstance();
+		value.setTime(getValue());
 
-    /**
+		switch (getPrecision()) {
+		case YEAR:
+		case MONTH:
+		case DAY:
+			return ourHumanDateFormat.format(value);
+		case MILLI:
+		case SECOND:
+		default:
+			return ourHumanDateTimeFormat.format(value);
+		}
+	}
+
+	/**
+	 * Returns a human readable version of this date/time using the system local format, converted to the local timezone if neccesary.
+	 * 
+	 * @see #toHumanDisplay() for a method which does not convert the time to the local timezone before rendering it.
+	 */
+	public String toHumanDisplayLocalTimezone() {
+		switch (getPrecision()) {
+		case YEAR:
+		case MONTH:
+		case DAY:
+			return ourHumanDateFormat.format(getValue());
+		case MILLI:
+		case SECOND:
+		default:
+			return ourHumanDateTimeFormat.format(getValue());
+		}
+	}
+
+	/**
 	 * Constructor
 	 */
 	public BaseDateTimeDt() {
@@ -147,7 +142,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * Constructor
 	 * 
 	 * @throws DataFormatException
-	 *             If the specified precision is not allowed for this type
+	 *            If the specified precision is not allowed for this type
 	 */
 	public BaseDateTimeDt(Date theDate, TemporalPrecisionEnum thePrecision) {
 		setValue(theDate, thePrecision);
@@ -160,7 +155,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * Constructor
 	 * 
 	 * @throws DataFormatException
-	 *             If the specified precision is not allowed for this type
+	 *            If the specified precision is not allowed for this type
 	 */
 	public BaseDateTimeDt(String theString) {
 		setValueAsString(theString);
@@ -241,8 +236,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Returns the TimeZone associated with this dateTime's value. May return <code>null</code> if no timezone was
-	 * supplied.
+	 * Returns the TimeZone associated with this dateTime's value. May return <code>null</code> if no timezone was supplied.
 	 */
 	public TimeZone getTimeZone() {
 		return myTimeZone;
@@ -279,7 +273,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 * Returns <code>true</code> if this object represents a date that is today's date
 	 * 
 	 * @throws NullPointerException
-	 *             if {@link #getValue()} returns <code>null</code>
+	 *            if {@link #getValue()} returns <code>null</code>
 	 */
 	public boolean isToday() {
 		Validate.notNull(getValue(), getClass().getSimpleName() + " contains null value");
@@ -417,10 +411,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Sets the value for this type using the given Java Date object as the time, and using the
-	 * default precision for this datatype, as well as the local timezone as determined by the
-	 * local operating system. Both of these properties may be modified in subsequent calls 
-	 * if neccesary.
+	 * Sets the value for this type using the given Java Date object as the time, and using the default precision for this datatype, as well as the local timezone as determined by the local operating
+	 * system. Both of these properties may be modified in subsequent calls if neccesary.
 	 */
 	@Override
 	public BaseDateTimeDt setValue(Date theValue) {
@@ -429,15 +421,13 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	/**
-	 * Sets the value for this type using the given Java Date object as the time, and using the
-	 * specified precision, as well as the local timezone as determined by the
-	 * local operating system. Both of these properties may be modified in subsequent calls 
-	 * if neccesary.
+	 * Sets the value for this type using the given Java Date object as the time, and using the specified precision, as well as the local timezone as determined by the local operating system. Both of
+	 * these properties may be modified in subsequent calls if neccesary.
 	 * 
 	 * @param theValue
-	 *            The date value
+	 *           The date value
 	 * @param thePrecision
-	 *            The precision
+	 *           The precision
 	 * @throws DataFormatException
 	 */
 	public void setValue(Date theValue, TemporalPrecisionEnum thePrecision) throws DataFormatException {

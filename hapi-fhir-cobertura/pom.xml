@@ -2,17 +2,22 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<!--
+	The parent of this project is the deployable POM. This project isn't deployable,
+	but this keeps it before the root pom in the reactor order when building the site.
+	I don't know why this works... Need to investigate this.
+	-->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-fhir</artifactId>
-		<version>1.1-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+                <artifactId>hapi-deployable-pom</artifactId>
+                <version>1.1-SNAPSHOT</version>
+                <relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-cobertura</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Consolidated Test Project</name>
+	<name>HAPI FHIR - Cobertura Test Coverage</name>
 
 	<dependencies>
 		<dependency>
@@ -70,13 +75,6 @@
 			<version>${logback_version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>java-hamcrest</artifactId>
-			<version>${hamcrest_version}</version>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- Test Database -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -119,12 +117,6 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jetty_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-servlet</artifactId>
 			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
@@ -371,7 +363,7 @@
 	</build>
 	<reporting>
 		<plugins>
-			<!--<plugin>
+			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>${maven_cobertura_plugin_version}</version>
@@ -382,7 +374,7 @@
 						</reports>
 					</reportSet>
 				</reportSets>
-			</plugin>-->
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>

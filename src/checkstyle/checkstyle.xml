@@ -76,7 +76,9 @@
         <module name="OneStatementPerLine"/>
         <module name="MultipleVariableDeclarations"/>
         <module name="ArrayTypeStyle"/>
+        <!--
         <module name="MissingSwitchDefault"/>
+        -->
         <module name="FallThrough"/>
         <module name="UpperEll"/>
         <module name="ModifierOrder"/>
@@ -141,7 +143,7 @@
         <module name="Indentation">
             <property name="basicOffset" value="3"/>
             <property name="braceAdjustment" value="0"/>
-            <property name="caseIndent" value="3"/>
+            <property name="caseIndent" value="0"/>
             <property name="throwsIndent" value="6"/>
             <property name="lineWrappingIndentation" value="6"/>
             <property name="arrayInitIndent" value="3"/>
