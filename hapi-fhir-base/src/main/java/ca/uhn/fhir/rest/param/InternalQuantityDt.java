@@ -1,19 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package ca.uhn.fhir.rest.param;
 
 /*
@@ -51,9 +35,10 @@ import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 
-class InternalQuantityDt
-        extends  BaseQuantityDt         implements ICompositeDatatype
-{
+/**
+ * Base class for QuantityDt of any version
+ */
+class InternalQuantityDt extends BaseQuantityDt implements ICompositeDatatype {
 
 	/**
 	 * Constructor
@@ -66,7 +51,7 @@ class InternalQuantityDt
 	 * Constructor
 	 */
 	@SimpleSetter
-	public InternalQuantityDt(@SimpleSetter.Parameter(name="theValue") double theValue) {
+	public InternalQuantityDt(@SimpleSetter.Parameter(name = "theValue") double theValue) {
 		setValue(theValue);
 	}
 
@@ -74,10 +59,10 @@ class InternalQuantityDt
 	 * Constructor
 	 */
 	@SimpleSetter
-	public InternalQuantityDt(@SimpleSetter.Parameter(name="theValue") long theValue) {
+	public InternalQuantityDt(@SimpleSetter.Parameter(name = "theValue") long theValue) {
 		setValue(theValue);
 	}
-	
+
 	/**
 	 * Constructor
 	 */
@@ -104,7 +89,8 @@ class InternalQuantityDt
 	 * Constructor
 	 */
 	@SimpleSetter
-	public InternalQuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") double theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+	public InternalQuantityDt(@SimpleSetter.Parameter(name = "theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name = "theValue") double theValue,
+			@SimpleSetter.Parameter(name = "theSystem") String theSystem, @SimpleSetter.Parameter(name = "theUnits") String theUnits) {
 		setValue(theValue);
 		setComparator(theComparator);
 		setSystem(theSystem);
@@ -115,71 +101,52 @@ class InternalQuantityDt
 	 * Constructor
 	 */
 	@SimpleSetter
-	public InternalQuantityDt(@SimpleSetter.Parameter(name="theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name="theValue") long theValue, @SimpleSetter.Parameter(name="theSystem") String theSystem, @SimpleSetter.Parameter(name="theUnits") String theUnits) {
+	public InternalQuantityDt(@SimpleSetter.Parameter(name = "theComparator") QuantityCompararatorEnum theComparator, @SimpleSetter.Parameter(name = "theValue") long theValue,
+			@SimpleSetter.Parameter(name = "theSystem") String theSystem, @SimpleSetter.Parameter(name = "theUnits") String theUnits) {
 		setValue(theValue);
 		setComparator(theComparator);
 		setSystem(theSystem);
 		setUnits(theUnits);
 	}
 
-
-	@Child(name="value", type=DecimalDt.class, order=0, min=0, max=1)	
-	@Description(
-		shortDefinition="Numerical value (with implicit precision)",
-		formalDefinition="The value of the measured amount. The value includes an implicit precision in the presentation of the value"
-	)
+	@Child(name = "value", type = DecimalDt.class, order = 0, min = 0, max = 1)
+	@Description(shortDefinition = "Numerical value (with implicit precision)", formalDefinition = "The value of the measured amount. The value includes an implicit precision in the presentation of the value")
 	private DecimalDt myValue;
-	
-	@Child(name="comparator", type=CodeDt.class, order=1, min=0, max=1)	
-	@Description(
-		shortDefinition="< | <= | >= | > - how to understand the value",
-		formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value"
-	)
+
+	@Child(name = "comparator", type = CodeDt.class, order = 1, min = 0, max = 1)
+	@Description(shortDefinition = "< | <= | >= | > - how to understand the value", formalDefinition = "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value")
 	private BoundCodeDt<QuantityCompararatorEnum> myComparator;
-	
-	@Child(name="units", type=StringDt.class, order=2, min=0, max=1)	
-	@Description(
-		shortDefinition="Unit representation",
-		formalDefinition="A human-readable form of the units"
-	)
+
+	@Child(name = "units", type = StringDt.class, order = 2, min = 0, max = 1)
+	@Description(shortDefinition = "Unit representation", formalDefinition = "A human-readable form of the units")
 	private StringDt myUnits;
-	
-	@Child(name="system", type=UriDt.class, order=3, min=0, max=1)	
-	@Description(
-		shortDefinition="System that defines coded unit form",
-		formalDefinition="The identification of the system that provides the coded form of the unit"
-	)
+
+	@Child(name = "system", type = UriDt.class, order = 3, min = 0, max = 1)
+	@Description(shortDefinition = "System that defines coded unit form", formalDefinition = "The identification of the system that provides the coded form of the unit")
 	private UriDt mySystem;
-	
-	@Child(name="code", type=CodeDt.class, order=4, min=0, max=1)	
-	@Description(
-		shortDefinition="Coded form of the unit",
-		formalDefinition="A computer processable form of the units in some unit representation system"
-	)
+
+	@Child(name = "code", type = CodeDt.class, order = 4, min = 0, max = 1)
+	@Description(shortDefinition = "Coded form of the unit", formalDefinition = "A computer processable form of the units in some unit representation system")
 	private CodeDt myCode;
-	
 
 	@Override
 	public boolean isEmpty() {
-		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(  myValue,  myComparator,  myUnits,  mySystem,  myCode);
+		return super.isBaseEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(myValue, myComparator, myUnits, mySystem, myCode);
 	}
-	
+
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
 		return ca.uhn.fhir.util.ElementUtil.allPopulatedChildElements(theType, myValue, myComparator, myUnits, mySystem, myCode);
 	}
 
 	/**
-	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>value</b> (Numerical value (with implicit precision)). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The value of the measured amount. The value includes an implicit precision in the presentation of the value
+	 * </p>
 	 */
-	public DecimalDt getValueElement() {  
+	public DecimalDt getValueElement() {
 		if (myValue == null) {
 			myValue = new DecimalDt();
 		}
@@ -189,67 +156,60 @@ class InternalQuantityDt
 	/**
 	 * Sets the value(s) for <b>value</b> (Numerical value (with implicit precision))
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The value of the measured amount. The value includes an implicit precision in the presentation of the value
+	 * </p>
 	 */
 	public InternalQuantityDt setValue(DecimalDt theValue) {
 		myValue = theValue;
 		return this;
 	}
 
- 	/**
+	/**
 	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The value of the measured amount. The value includes an implicit precision in the presentation of the value
+	 * </p>
 	 */
-	public InternalQuantityDt setValue( long theValue) {
-		myValue = new DecimalDt(theValue); 
-		return this; 
+	public InternalQuantityDt setValue(long theValue) {
+		myValue = new DecimalDt(theValue);
+		return this;
 	}
 
 	/**
 	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The value of the measured amount. The value includes an implicit precision in the presentation of the value
+	 * </p>
 	 */
-	public InternalQuantityDt setValue( double theValue) {
-		myValue = new DecimalDt(theValue); 
-		return this; 
+	public InternalQuantityDt setValue(double theValue) {
+		myValue = new DecimalDt(theValue);
+		return this;
 	}
 
 	/**
 	 * Sets the value for <b>value</b> (Numerical value (with implicit precision))
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The value of the measured amount. The value includes an implicit precision in the presentation of the value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The value of the measured amount. The value includes an implicit precision in the presentation of the value
+	 * </p>
 	 */
-	public InternalQuantityDt setValue( java.math.BigDecimal theValue) {
-		myValue = new DecimalDt(theValue); 
-		return this; 
+	public InternalQuantityDt setValue(java.math.BigDecimal theValue) {
+		myValue = new DecimalDt(theValue);
+		return this;
 	}
 
- 
 	/**
-	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is
+	 * \"<\" , then the real value is < stated value
+	 * </p>
 	 */
-	public BoundCodeDt<QuantityCompararatorEnum> getComparatorElement() {  
+	public BoundCodeDt<QuantityCompararatorEnum> getComparatorElement() {
 		if (myComparator == null) {
 			myComparator = new BoundCodeDt<QuantityCompararatorEnum>(QuantityCompararatorEnum.VALUESET_BINDER);
 		}
@@ -259,10 +219,10 @@ class InternalQuantityDt
 	/**
 	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is
+	 * \"<\" , then the real value is < stated value
+	 * </p>
 	 */
 	public InternalQuantityDt setComparator(BoundCodeDt<QuantityCompararatorEnum> theValue) {
 		myComparator = theValue;
@@ -272,28 +232,24 @@ class InternalQuantityDt
 	/**
 	 * Sets the value(s) for <b>comparator</b> (< | <= | >= | > - how to understand the value)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is
+	 * \"<\" , then the real value is < stated value
+	 * </p>
 	 */
 	public InternalQuantityDt setComparator(QuantityCompararatorEnum theValue) {
 		getComparatorElement().setValueAsEnum(theValue);
 		return this;
 	}
 
-  
 	/**
-	 * Gets the value(s) for <b>units</b> (Unit representation).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>units</b> (Unit representation). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A human-readable form of the units
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A human-readable form of the units
+	 * </p>
 	 */
-	public StringDt getUnitsElement() {  
+	public StringDt getUnitsElement() {
 		if (myUnits == null) {
 			myUnits = new StringDt();
 		}
@@ -303,41 +259,35 @@ class InternalQuantityDt
 	/**
 	 * Sets the value(s) for <b>units</b> (Unit representation)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A human-readable form of the units
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A human-readable form of the units
+	 * </p>
 	 */
 	public InternalQuantityDt setUnits(StringDt theValue) {
 		myUnits = theValue;
 		return this;
 	}
 
- 	/**
+	/**
 	 * Sets the value for <b>units</b> (Unit representation)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A human-readable form of the units
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A human-readable form of the units
+	 * </p>
 	 */
-	public InternalQuantityDt setUnits( String theString) {
-		myUnits = new StringDt(theString); 
-		return this; 
+	public InternalQuantityDt setUnits(String theString) {
+		myUnits = new StringDt(theString);
+		return this;
 	}
 
- 
 	/**
-	 * Gets the value(s) for <b>system</b> (System that defines coded unit form).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>system</b> (System that defines coded unit form). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The identification of the system that provides the coded form of the unit
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The identification of the system that provides the coded form of the unit
+	 * </p>
 	 */
-	public UriDt getSystemElement() {  
+	public UriDt getSystemElement() {
 		if (mySystem == null) {
 			mySystem = new UriDt();
 		}
@@ -347,41 +297,35 @@ class InternalQuantityDt
 	/**
 	 * Sets the value(s) for <b>system</b> (System that defines coded unit form)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The identification of the system that provides the coded form of the unit
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The identification of the system that provides the coded form of the unit
+	 * </p>
 	 */
 	public InternalQuantityDt setSystem(UriDt theValue) {
 		mySystem = theValue;
 		return this;
 	}
 
- 	/**
+	/**
 	 * Sets the value for <b>system</b> (System that defines coded unit form)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * The identification of the system that provides the coded form of the unit
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> The identification of the system that provides the coded form of the unit
+	 * </p>
 	 */
-	public InternalQuantityDt setSystem( String theUri) {
-		mySystem = new UriDt(theUri); 
-		return this; 
+	public InternalQuantityDt setSystem(String theUri) {
+		mySystem = new UriDt(theUri);
+		return this;
 	}
 
- 
 	/**
-	 * Gets the value(s) for <b>code</b> (Coded form of the unit).
-	 * creating it if it does
-	 * not exist. Will not return <code>null</code>.
+	 * Gets the value(s) for <b>code</b> (Coded form of the unit). creating it if it does not exist. Will not return <code>null</code>.
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A computer processable form of the units in some unit representation system
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A computer processable form of the units in some unit representation system
+	 * </p>
 	 */
-	public CodeDt getCodeElement() {  
+	public CodeDt getCodeElement() {
 		if (myCode == null) {
 			myCode = new CodeDt();
 		}
@@ -391,27 +335,25 @@ class InternalQuantityDt
 	/**
 	 * Sets the value(s) for <b>code</b> (Coded form of the unit)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A computer processable form of the units in some unit representation system
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A computer processable form of the units in some unit representation system
+	 * </p>
 	 */
 	public InternalQuantityDt setCode(CodeDt theValue) {
 		myCode = theValue;
 		return this;
 	}
 
- 	/**
+	/**
 	 * Sets the value for <b>code</b> (Coded form of the unit)
 	 *
-     * <p>
-     * <b>Definition:</b>
-     * A computer processable form of the units in some unit representation system
-     * </p> 
+	 * <p>
+	 * <b>Definition:</b> A computer processable form of the units in some unit representation system
+	 * </p>
 	 */
-	public InternalQuantityDt setCode( String theCode) {
-		myCode = new CodeDt(theCode); 
-		return this; 
+	public InternalQuantityDt setCode(String theCode) {
+		myCode = new CodeDt(theCode);
+		return this;
 	}
 
 	@Override
@@ -423,8 +365,5 @@ class InternalQuantityDt
 	public void setMissing(Boolean theMissing) {
 		throw new UnsupportedOperationException();
 	}
-
- 
-
 
 }

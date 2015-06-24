@@ -212,7 +212,7 @@ class ParserState<T> {
 		myState.xmlEvent(theNextEvent);
 	}
 
-	public static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler)
+	static ParserState<Bundle> getPreAtomInstance(FhirContext theContext, Class<? extends IBaseResource> theResourceType, boolean theJsonMode, IParserErrorHandler theErrorHandler)
 			throws DataFormatException {
 		ParserState<Bundle> retVal = new ParserState<Bundle>(theContext, theJsonMode, theErrorHandler);
 		if (theContext.getVersion().getVersion() == FhirVersionEnum.DSTU1) {
@@ -227,7 +227,7 @@ class ParserState<T> {
 	 * @param theResourceType
 	 *            May be null
 	 */
-	public static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler)
+	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler)
 			throws DataFormatException {
 		ParserState<T> retVal = new ParserState<T>(theContext, theJsonMode, theErrorHandler);
 		if (theResourceType == null) {
@@ -246,13 +246,13 @@ class ParserState<T> {
 		return retVal;
 	}
 
-	public static ParserState<TagList> getPreTagListInstance(FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
+	static ParserState<TagList> getPreTagListInstance(FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler) {
 		ParserState<TagList> retVal = new ParserState<TagList>(theContext, theJsonMode, theErrorHandler);
 		retVal.push(retVal.new PreTagListState());
 		return retVal;
 	}
 
-	public class AtomAuthorState extends BaseState {
+	private class AtomAuthorState extends BaseState {
 
 		private BaseBundle myInstance;
 
@@ -355,7 +355,7 @@ class ParserState<T> {
 
 	}
 
-	public class AtomDeletedEntryByState extends BaseState {
+	private class AtomDeletedEntryByState extends BaseState {
 
 		private BundleEntry myEntry;
 
@@ -382,7 +382,7 @@ class ParserState<T> {
 
 	}
 
-	public class AtomDeletedEntryState extends AtomEntryState {
+	private class AtomDeletedEntryState extends AtomEntryState {
 
 		public AtomDeletedEntryState(Bundle theInstance, Class<? extends IBaseResource> theResourceType) {
 			super(theInstance, theResourceType);
@@ -450,7 +450,7 @@ class ParserState<T> {
 
 	}
 
-	public class AtomEntryState extends BaseState {
+	private class AtomEntryState extends BaseState {
 
 		private boolean myDeleted;
 		private BundleEntry myEntry;
@@ -995,7 +995,7 @@ class ParserState<T> {
 
 	}
 
-	public class BundleEntrySearchState extends BaseState {
+	private class BundleEntrySearchState extends BaseState {
 
 		private BundleEntry myEntry;
 
@@ -1022,7 +1022,7 @@ class ParserState<T> {
 
 	}
 
-	public class BundleEntryState extends BaseState {
+	private class BundleEntryState extends BaseState {
 
 		private BundleEntry myEntry;
 		private Class<? extends IBaseResource> myResourceType;
@@ -1120,7 +1120,7 @@ class ParserState<T> {
 
 	}
 
-	public class BundleEntryTransactionState extends BaseState {
+	private class BundleEntryTransactionState extends BaseState {
 
 		private BundleEntry myEntry;
 

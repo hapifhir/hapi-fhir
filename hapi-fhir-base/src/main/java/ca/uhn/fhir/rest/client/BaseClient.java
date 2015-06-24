@@ -71,7 +71,7 @@ public abstract class BaseClient implements IRestfulClient {
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
 	private final String myUrlBase;
-	
+
 	BaseClient(HttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
 		myClient = theClient;
@@ -95,6 +95,10 @@ public abstract class BaseClient implements IRestfulClient {
 		return retVal;
 	}
 
+	void forceConformanceCheck() {
+		myFactory.validateServerBase(myUrlBase, myClient, this);
+	}
+
 	/**
 	 * Returns the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is standard behaviour according to the
 	 * FHIR specification)
@@ -109,6 +113,10 @@ public abstract class BaseClient implements IRestfulClient {
 	@Override
 	public HttpClient getHttpClient() {
 		return myClient;
+	}
+
+	public List<IClientInterceptor> getInterceptors() {
+		return Collections.unmodifiableList(myInterceptors);
 	}
 
 	/**
@@ -144,7 +152,7 @@ public abstract class BaseClient implements IRestfulClient {
 	public String getUrlBase() {
 		return myUrlBase;
 	}
-	
+
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
 		return invokeClient(theContext, binding, clientInvocation, false);
 	}
@@ -153,39 +161,35 @@ public abstract class BaseClient implements IRestfulClient {
 		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse);
 	}
 
-	void forceConformanceCheck() {
-		myFactory.validateServerBase(myUrlBase, myClient, this);
-	}
-	
-	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint, boolean theLogRequestAndResponse) {
+	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
+			boolean theLogRequestAndResponse) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
 		}
-		
+
 		// TODO: handle non 2xx status codes by throwing the correct exception,
 		// and ensure it's passed upwards
 		HttpRequestBase httpRequest;
 		HttpResponse response;
 		try {
 			Map<String, List<String>> params = createExtraParams();
-			
+
 			if (theEncoding == EncodingEnum.XML) {
 				params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
 			} else if (theEncoding == EncodingEnum.JSON) {
 				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
 			}
-			
+
 			if (thePrettyPrint == Boolean.TRUE) {
 				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
 			}
 
-			
 			EncodingEnum encoding = getEncoding();
 			if (theEncoding != null) {
-				encoding=theEncoding;
+				encoding = theEncoding;
 			}
-			
+
 			httpRequest = clientInvocation.asHttpRequest(myUrlBase, params, encoding, thePrettyPrint);
 
 			if (theLogRequestAndResponse) {
@@ -223,7 +227,7 @@ public abstract class BaseClient implements IRestfulClient {
 				ContentType ct = ContentType.get(response.getEntity());
 				mimeType = ct != null ? ct.getMimeType() : null;
 			}
-			
+
 			Map<String, List<String>> headers = new HashMap<String, List<String>>();
 			if (response.getAllHeaders() != null) {
 				for (Header next : response.getAllHeaders()) {
@@ -250,7 +254,7 @@ public abstract class BaseClient implements IRestfulClient {
 				}
 
 				String message = "HTTP " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase();
-				BaseOperationOutcome oo=null;
+				BaseOperationOutcome oo = null;
 				if (Constants.CT_TEXT.equals(mimeType)) {
 					message = message + ": " + body;
 				} else {
@@ -259,8 +263,8 @@ public abstract class BaseClient implements IRestfulClient {
 						IParser p = enc.newParser(theContext);
 						try {
 							// TODO: handle if something other than OO comes back
-							oo = (BaseOperationOutcome) p.parseResource( body);
-							if (oo.getIssueFirstRep().getDetailsElement().isEmpty()==false) {
+							oo = (BaseOperationOutcome) p.parseResource(body);
+							if (oo.getIssueFirstRep().getDetailsElement().isEmpty() == false) {
 								message = message + ": " + oo.getIssueFirstRep().getDetailsElement().getValue();
 							}
 						} catch (Exception e) {
@@ -273,7 +277,7 @@ public abstract class BaseClient implements IRestfulClient {
 
 				BaseServerResponseException exception = BaseServerResponseException.newInstance(response.getStatusLine().getStatusCode(), message);
 				exception.setOperationOutcome(oo);
-				
+
 				if (body != null) {
 					exception.setResponseBody(body);
 				}
@@ -368,27 +372,27 @@ public abstract class BaseClient implements IRestfulClient {
 			ourLog.trace("FHIR response:\n{}\n{}", response, responseString);
 		}
 	}
-	
+
 	public void registerInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.add(theInterceptor);
 	}
 
 	/**
-	 * This method is an internal part of the HAPI API and may change, use with caution. If you 
-	 * want to disable the loading of conformance statements, use {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
+	 * This method is an internal part of the HAPI API and may change, use with caution. If you want to disable the loading of conformance statements, use
+	 * {@link IRestfulClientFactory#setServerValidationModeEnum(ServerValidationModeEnum)}
 	 */
 	public void setDontValidateConformance(boolean theDontValidateConformance) {
 		myDontValidateConformance = theDontValidateConformance;
 	}
 
 	/**
-	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR
-	 * specification. In this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
+	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is perfectly acceptable behaviour according
+	 * to the FHIR specification. In this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
 	 */
 	public void setEncoding(EncodingEnum theEncoding) {
 		myEncoding = theEncoding;
-//		return this;
+		// return this;
 	}
 
 	/**
@@ -418,7 +422,7 @@ public abstract class BaseClient implements IRestfulClient {
 	 */
 	public void setPrettyPrint(Boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
-//		return this;
+		// return this;
 	}
 
 	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
@@ -445,10 +449,6 @@ public abstract class BaseClient implements IRestfulClient {
 
 		Reader reader = new InputStreamReader(theResponse.getEntity().getContent(), charset);
 		return reader;
-	}
-
-	public List<IClientInterceptor> getInterceptors() {
-		return Collections.unmodifiableList(myInterceptors);
 	}
 
 }

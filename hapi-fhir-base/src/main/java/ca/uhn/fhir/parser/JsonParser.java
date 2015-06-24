@@ -126,9 +126,9 @@ public class JsonParser extends BaseParser implements IParser {
 	private boolean myPrettyPrint;
 
 	/**
-	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
-	 * {@link FhirContext#newJsonParser()}.
-	 * @param theParserErrorHandler 
+	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke {@link FhirContext#newJsonParser()}.
+	 * 
+	 * @param theParserErrorHandler
 	 */
 	public JsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
@@ -433,10 +433,8 @@ public class JsonParser extends BaseParser implements IParser {
 		case CONTAINED_RESOURCE_LIST:
 		case CONTAINED_RESOURCES: {
 			/*
-			 * Disabled per #103 ContainedDt value = (ContainedDt) theNextValue; for (IResource next :
-			 * value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
-			 * encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true,
-			 * fixContainedResourceId(next.getId().getValue())); }
+			 * Disabled per #103 ContainedDt value = (ContainedDt) theNextValue; for (IResource next : value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) {
+			 * continue; } encodeResourceToJsonStreamWriter(theResDef, next, theWriter, null, true, fixContainedResourceId(next.getId().getValue())); }
 			 */
 			List<IBaseResource> containedResources = getContainedResources().getContainedResources();
 			if (containedResources.size() > 0) {
@@ -513,7 +511,7 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 				continue;
 			}
-			
+
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theNextValue);
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -545,7 +543,7 @@ public class JsonParser extends BaseParser implements IParser {
 				}
 				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
 
-				if ((childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES||childDef.getChildType()==ChildTypeEnum.CONTAINED_RESOURCE_LIST) && theContainedResource) {
+				if ((childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCES || childDef.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) && theContainedResource) {
 					continue;
 				}
 
@@ -670,7 +668,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 		} else if (theResource instanceof IAnyResource) {
 			IAnyResource res = (IAnyResource) theResource;
-			if (/*theContainedResource && */ StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
+			if (/* theContainedResource && */StringUtils.isNotBlank(res.getIdElement().getIdPart())) {
 				resourceId = res.getIdElement().getIdPart();
 			}
 		}
@@ -678,11 +676,12 @@ public class JsonParser extends BaseParser implements IParser {
 		if (isOmitResourceId() && !theContainedResource) {
 			resourceId = null;
 		}
-		
+
 		encodeResourceToJsonStreamWriter(theResDef, theResource, theEventWriter, theObjectNameOrNull, theContainedResource, resourceId);
 	}
 
-	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull, boolean theContainedResource, String theResourceId) throws IOException {
+	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonGenerator theEventWriter, String theObjectNameOrNull,
+			boolean theContainedResource, String theResourceId) throws IOException {
 		if (!theContainedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -807,10 +806,10 @@ public class JsonParser extends BaseParser implements IParser {
 	}
 
 	/**
-	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object
-	 * called _name): resource extensions, and extension extensions
+	 * This is useful only for the two cases where extensions are encoded as direct children (e.g. not in some object called _name): resource extensions, and extension extensions
 	 */
-	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef, IBaseResource theResource, String theParentExtensionUrl) throws IOException {
+	private void extractAndWriteExtensionsAsDirectChild(IBase theElement, JsonGenerator theEventWriter, BaseRuntimeElementDefinition<?> theElementDef, RuntimeResourceDefinition theResDef,
+			IBaseResource theResource, String theParentExtensionUrl) throws IOException {
 		List<HeldExtension> extensions = new ArrayList<HeldExtension>(0);
 		List<HeldExtension> modifierExtensions = new ArrayList<HeldExtension>(0);
 
@@ -944,7 +943,8 @@ public class JsonParser extends BaseParser implements IParser {
 			object = reader.readObject();
 		} catch (JsonParsingException e) {
 			if (e.getMessage().startsWith("Unexpected char 39")) {
-				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage() + " - This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
+				throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage()
+						+ " - This may indicate that single quotes are being used as JSON escapes where double quotes are required", e);
 			}
 			throw new DataFormatException("Failed to parse JSON encoded FHIR content: " + e.getMessage(), e);
 		}
@@ -1205,21 +1205,21 @@ public class JsonParser extends BaseParser implements IParser {
 		try {
 			JsonReader reader = Json.createReader(theReader);
 			JsonObject object = reader.readObject();
-	
+
 			JsonValue resourceTypeObj = object.get("resourceType");
 			assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
 			String resourceType = ((JsonString) resourceTypeObj).getString();
-	
+
 			ParserState<? extends IBaseResource> state = ParserState.getPreResourceInstance(theResourceType, myContext, true, getErrorHandler());
 			state.enteringNewElement(null, resourceType);
-	
+
 			parseChildren(object, state);
-	
+
 			state.endingElement();
-	
+
 			@SuppressWarnings("unchecked")
 			T retVal = (T) state.getObject();
-	
+
 			return retVal;
 		} catch (JsonParsingException e) {
 			throw new DataFormatException("Failed to parse JSON: " + e.getMessage(), e);
@@ -1308,7 +1308,8 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions, List<HeldExtension> modifierExtensions, String theParentExtensionUrl) throws IOException {
+	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonGenerator theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
+			List<HeldExtension> modifierExtensions, String theParentExtensionUrl) throws IOException {
 		if (extensions.isEmpty() == false) {
 			theEventWriter.writeStartArray("extension");
 			for (HeldExtension next : extensions) {

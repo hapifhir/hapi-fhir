@@ -36,7 +36,7 @@ public @interface OperationParam {
 	/**
 	 * Value for {@link OperationParam#max()} indicating no maximum
 	 */
-	int MAX_UNLIMITED = -1;
+	final int MAX_UNLIMITED = -1;
 
 	/**
 	 * The name of the parameter
