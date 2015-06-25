@@ -1,16 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -46,6 +37,8 @@ import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.dstu2.resource.DataElement;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
@@ -1330,6 +1323,25 @@ public class XmlParserDstu2Test {
 		ourLog.info("Actual  : {}", output);
 		assertEquals(input, output);
 	}
+
+	/**
+	 * See #191
+	 */
+	@Test
+	public void testParseBundleWithLinksOfUnknownRelation() throws Exception {
+		String input =IOUtils.toString(XmlParserDstu2Test.class.getResourceAsStream("/bundle_orion.xml")); 
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
+
+		Link link = parsed.getLink().get(0);
+		assertEquals("just trying add link", link.getRelation());
+		assertEquals("blarion", link.getUrl());
+
+		Entry entry = parsed.getEntry().get(0);
+		link = entry.getLink().get(0);
+		assertEquals("orionhealth.edit", link.getRelation());
+		assertEquals("Observation", link.getUrl());
+	}
+	
 	
 	@Test
 	public void testParseBundleNewWithPlaceholderIds() {
