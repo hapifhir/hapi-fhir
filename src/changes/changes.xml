@@ -130,6 +130,9 @@
 				precision than the equivalent header, but the client previously
 				gave the header priority.
 			</action>
+			<action type="fix">
+				JPA server supports _count parameter in transaction containing search URL (nested search)
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

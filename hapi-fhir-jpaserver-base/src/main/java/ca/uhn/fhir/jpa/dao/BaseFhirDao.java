@@ -125,7 +125,7 @@ public abstract class BaseFhirDao implements IDao {
 
 	private FhirContext myContext;
 
-//	@PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
+	// @PersistenceContext(name = "FHIR_UT", type = PersistenceContextType.TRANSACTION, unitName = "FHIR_UT")
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
@@ -195,8 +195,7 @@ public abstract class BaseFhirDao implements IDao {
 
 					String typeString = nextValue.getReference().getResourceType();
 					if (isBlank(typeString)) {
-						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - "
-								+ nextValue.getReference().getValue());
+						throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource type - " + nextValue.getReference().getValue());
 					}
 					Class<? extends IBaseResource> type = getContext().getResourceDefinition(typeString).getImplementingClass();
 					String id = nextValue.getReference().getIdPart();
@@ -347,7 +346,7 @@ public abstract class BaseFhirDao implements IDao {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 		Root<TagDefinition> from = cq.from(TagDefinition.class);
-		
+
 		//@formatter:off
 		if (isNotBlank(theScheme)) {
 			cq.where(
@@ -365,7 +364,7 @@ public abstract class BaseFhirDao implements IDao {
 				);
 		}
 		//@formatter:on
-		
+
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 		try {
 			return q.getSingleResult();
@@ -530,7 +529,7 @@ public abstract class BaseFhirDao implements IDao {
 		if (pids.isEmpty()) {
 			return new ArrayList<IBaseResource>();
 		}
-		
+
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceTable> cq = builder.createQuery(ResourceTable.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
@@ -684,6 +683,18 @@ public abstract class BaseFhirDao implements IDao {
 						DateRangeParam p1 = new DateRangeParam();
 						p1.setValuesAsQueryTokens(paramList);
 						paramMap.setLastUpdated(p1);
+					}
+				}
+				continue;
+			}
+
+			if (Constants.PARAM_COUNT.equals(nextParamName)) {
+				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
+					String intString = paramList.get(0).get(0);
+					try {
+						paramMap.setCount(Integer.parseInt(intString));
+					} catch (NumberFormatException e) {
+						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + intString);
 					}
 				}
 				continue;
@@ -886,7 +897,7 @@ public abstract class BaseFhirDao implements IDao {
 		RuntimeResourceDefinition type = myContext.getResourceDefinition(theEntity.getResourceType());
 		return toResource(type.getImplementingClass(), theEntity);
 	}
-	
+
 	protected <T extends IBaseResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
@@ -1067,9 +1078,9 @@ public abstract class BaseFhirDao implements IDao {
 				quantityParams = extractSearchParamQuantity(entity, theResource);
 				dateParams = extractSearchParamDates(entity, theResource);
 
-//				ourLog.info("Indexing resource: {}", entity.getId());
+				// ourLog.info("Indexing resource: {}", entity.getId());
 				ourLog.trace("Storing string indexes: {}", stringParams);
-				
+
 				tokenParams = new ArrayList<ResourceIndexedSearchParamToken>();
 				for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(entity, theResource)) {
 					if (next instanceof ResourceIndexedSearchParamToken) {

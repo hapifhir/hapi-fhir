@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -24,6 +25,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jmx.access.InvalidInvocationException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -560,9 +562,54 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		nextEntry = resp.getEntry().get(3);
 		assertEquals(Bundle.class, nextEntry.getResource().getClass());
-
 		Bundle respBundle = (Bundle) nextEntry.getResource();
 		assertEquals(1, respBundle.getTotal().intValue());
+	}
+
+	@Test
+	public void testTransactionSearchWithCount() {
+		String methodName = "testTransactionSearchWithCount";
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IdDt idv1 = ourPatientDao.update(p).getId();
+		ourLog.info("Created patient, got id: {}", idv1);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("Family Name");
+		p.setId("Patient/" + methodName);
+		IdDt idv2 = ourPatientDao.update(p).getId();
+		ourLog.info("Updated patient, got id: {}", idv2);
+
+		Bundle request = new Bundle();
+		request.addEntry().getTransaction().setMethod(HTTPVerbEnum.GET).setUrl("Patient?" + Constants.PARAM_COUNT + "=1");
+		Bundle resp = ourSystemDao.transaction(request);
+
+		assertEquals(2, resp.getEntry().size());
+
+		Entry nextEntry = resp.getEntry().get(1);
+		assertEquals(Bundle.class, nextEntry.getResource().getClass());
+		Bundle respBundle = (Bundle) nextEntry.getResource();
+		assertEquals(1, respBundle.getTotal().intValue());
+
+		// Invalid _count
+		
+		request = new Bundle();
+		request.addEntry().getTransaction().setMethod(HTTPVerbEnum.GET).setUrl("Patient?" + Constants.PARAM_COUNT + "=GKJGKJG");
+		try {
+		ourSystemDao.transaction(request);
+		} catch (InvalidRequestException e) {
+			assertEquals(e.getMessage(), ("Invalid _count value: GKJGKJG"));
+		}
+
+		// Empty _count
+		
+		request = new Bundle();
+		request.addEntry().getTransaction().setMethod(HTTPVerbEnum.GET).setUrl("Patient?" + Constants.PARAM_COUNT + "=");
+		respBundle = ourSystemDao.transaction(request);
+		assertThat(respBundle.getEntry().size(), greaterThan(0));
 	}
 
 	@Test
