@@ -592,7 +592,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Entry nextEntry = resp.getEntry().get(1);
 		assertEquals(Bundle.class, nextEntry.getResource().getClass());
 		Bundle respBundle = (Bundle) nextEntry.getResource();
-		assertEquals(1, respBundle.getTotal().intValue());
+		assertThat(respBundle.getTotal().intValue(), greaterThan(0));
 
 		// Invalid _count
 		
