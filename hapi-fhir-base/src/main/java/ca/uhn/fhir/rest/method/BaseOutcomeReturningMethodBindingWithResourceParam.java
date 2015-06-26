@@ -35,10 +35,10 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
-	private int myResourceParameterIndex;
-	private String myResourceName;
-	private Class<? extends IBaseResource> myResourceType;
 	private Integer myIdParamIndex;
+	private String myResourceName;
+	private int myResourceParameterIndex;
+	private Class<? extends IBaseResource> myResourceType;
 
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
@@ -55,7 +55,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 				if (myResourceType != null) {
 					throw new ConfigurationException("Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
 				}
-				
+
 				myResourceType = resourceParameter.getResourceType();
 
 				myResourceParameterIndex = index;

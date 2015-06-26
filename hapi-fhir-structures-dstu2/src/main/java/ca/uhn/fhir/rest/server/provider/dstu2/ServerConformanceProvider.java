@@ -71,8 +71,10 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
- * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
+ * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
+ * you are adding anything to the returned conformance instance on each call you should call
+ * <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
@@ -87,8 +89,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
+	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
+	 * "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public String getPublisher() {
 		return myPublisher;
@@ -107,7 +110,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setDate(DateTimeDt.withCurrentTime());
 		retVal.setFhirVersion("0.5.0"); // TODO: pull from model
 		retVal.setAcceptUnknown(false); // TODO: make this configurable - this is a fairly big effort since the parser
-										// needs to be modified to actually allow it
+		// needs to be modified to actually allow it
 
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
@@ -170,6 +173,22 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 								if (resourceOps.contains(resOp) == false) {
 									resourceOps.add(resOp);
 									resource.addInteraction().setCode(resOp);
+								}
+							}
+
+							if (nextMethodBinding.isSupportsConditional()) {
+								switch (resOp) {
+								case CREATE:
+									resource.setConditionalCreate(true);
+									break;
+								case DELETE:
+									resource.setConditionalDelete(true);
+									break;
+								case UPDATE:
+									resource.setConditionalUpdate(true);
+									break;
+								default:
+									break;
 								}
 							}
 						}
@@ -386,8 +405,9 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
-	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
+	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
+	 * "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public void setPublisher(String thePublisher) {
 		myPublisher = thePublisher;

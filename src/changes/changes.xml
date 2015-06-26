@@ -92,7 +92,7 @@
 				and Bundle.entry.base is empty, it will now be
 				automatically set by the parser.
 			</action>
-			<action type="add">
+			<action type="add" issue="179">
 				Add fluent client method for validate operation, and support the
 				new DSTU2 style extended operation for $validate if the client is
 				in DSTU2 mode. Thanks to Eric from the FHIR Skype Implementers chat for
@@ -105,7 +105,7 @@
 			<action type="add">
 				Server in DSTU2 mode now indicates that whether it has support for Transaction operation or not. Thanks to Kevin Paschke for pointing out that this wasn't working!
 			</action>
-			<action type="add">
+			<action type="add" issue="166">
 				Questionnaire.title now gets correctly indexed in JPA server (it has no path, so it is a special case)
 			</action>
 			<action type="add">
@@ -132,6 +132,10 @@
 			</action>
 			<action type="fix">
 				JPA server supports _count parameter in transaction containing search URL (nested search)
+			</action>
+			<action type="fix">
+				DSTU2 servers now indicate support for conditional create/update/delete in their
+				conformance statement.
 			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">

@@ -99,7 +99,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			myMethodReturnType = MethodReturnTypeEnum.LIST_OF_RESOURCES;
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
-				if (!Object.class.equals(collectionType) && !IResource.class.isAssignableFrom(collectionType)) {
+				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
 					throw new ConfigurationException("Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: "
 							+ collectionType);
 				}
