@@ -46,7 +46,7 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 		p.addIdentifier("urn:MultiFhirVersionTest", "testSubmitPatient01");
 		p.addUndeclaredExtension(false, "http://foo#ext1", new StringDt("The value"));
 		p.getGender().setValueAsEnum(AdministrativeGenderCodesEnum.M);
-		IdDt id = ourClientDstu1.create().resource(p).execute().getId();
+		IdDt id = (IdDt) ourClientDstu1.create().resource(p).execute().getId();
 
 		// Read back as DSTU1
 		Patient patDstu1 = ourClientDstu1.read(Patient.class, id);
@@ -76,7 +76,7 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 		p.addIdentifier().setSystem("urn:MultiFhirVersionTest").setValue("testSubmitPatientDstu201");
 		p.addUndeclaredExtension(false, "http://foo#ext1", new StringDt("The value"));
 		p.setGender(AdministrativeGenderEnum.MALE);
-		IdDt id = ourClientDstu2.create().resource(p).execute().getId();
+		IdDt id = (IdDt) ourClientDstu2.create().resource(p).execute().getId();
 
 		// Read back as DSTU1
 		Patient patDstu1 = ourClientDstu1.read(Patient.class, id);
@@ -105,7 +105,7 @@ public class ResourceProviderMultiVersionTest  extends BaseJpaTest {
 	public void testUnknownResourceType() {
 		ca.uhn.fhir.model.dstu2.resource.Patient p = new ca.uhn.fhir.model.dstu2.resource.Patient();
 		p.addIdentifier().setSystem("urn:MultiFhirVersionTest").setValue("testUnknownResourceType01");
-		IdDt id = ourClientDstu2.create().resource(p).execute().getId();
+		IdDt id = (IdDt) ourClientDstu2.create().resource(p).execute().getId();
 
 		PaymentNotice s = new PaymentNotice();
 		s.addIdentifier().setSystem("urn:MultiFhirVersionTest").setValue("testUnknownResourceType02");

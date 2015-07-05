@@ -22,13 +22,15 @@ package ca.uhn.fhir.model.base.resource;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.model.api.BaseIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.IResourceBlock;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
-public interface BaseOperationOutcome extends IResource {
+public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
 	public abstract BaseIssue addIssue();
 

@@ -45,7 +45,7 @@ import org.hl7.fhir.instance.model.api.*;
  * A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.
  */
 @ResourceDef(name="Conformance", profile="http://hl7.org/fhir/Profile/Conformance")
-public class Conformance extends DomainResource {
+public class Conformance extends DomainResource implements IBaseConformance {
 
     public enum RestfulConformanceMode {
         /**

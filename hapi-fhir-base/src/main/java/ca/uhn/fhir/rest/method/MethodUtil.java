@@ -127,6 +127,22 @@ public class MethodUtil {
 		}
 	}
 
+	
+	public static IIdType convertIdToType(IIdType value, Class<? extends IIdType> idParamType) {
+		if (value != null && !idParamType.isAssignableFrom(value.getClass())) {
+			try {
+				IIdType newValue = idParamType.newInstance();
+				newValue.setValue(value.getValue());
+				value = newValue;
+			} catch (InstantiationException e) {
+				throw new ConfigurationException("Failed to instantiate " + idParamType, e);
+			} catch (IllegalAccessException e) {
+				throw new ConfigurationException("Failed to instantiate " + idParamType, e);
+			}
+		}
+		return value;
+	}
+
 	public static HttpGetClientInvocation createConformanceInvocation() {
 		return new HttpGetClientInvocation("metadata");
 	}
@@ -181,42 +197,6 @@ public class MethodUtil {
 		return retVal;
 	}
 
-	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
-		String resourceName = theContext.getResourceDefinition(theResource).getName();
-		StringBuilder urlBuilder = new StringBuilder();
-		urlBuilder.append(resourceName);
-		urlBuilder.append('/');
-		urlBuilder.append(theId.getIdPart());
-		String urlExtension = urlBuilder.toString();
-
-		HttpPutClientInvocation retVal;
-		if (StringUtils.isBlank(theResourceBody)) {
-			retVal = new HttpPutClientInvocation(theContext, theResource, urlExtension);
-		} else {
-			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, urlExtension);
-		}
-
-		if (theId.hasVersionIdPart()) {
-			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
-				retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
-			} else {
-				String versionId = theId.getVersionIdPart();
-				if (StringUtils.isNotBlank(versionId)) {
-					urlBuilder.append('/');
-					urlBuilder.append(Constants.PARAM_HISTORY);
-					urlBuilder.append('/');
-					urlBuilder.append(versionId);
-					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
-				}
-			}
-		}
-
-		addTagsToPostOrPut(theContext, theResource, retVal);
-		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
-
-		return retVal;
-	}
-
 	public static HttpPutClientInvocation createUpdateInvocation(FhirContext theContext, IBaseResource theResource, String theResourceBody, Map<String, List<String>> theMatchParams) {
 		StringBuilder b = new StringBuilder();
 
@@ -263,6 +243,42 @@ public class MethodUtil {
 		return retVal;
 	}
 
+	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody, IIdType theId, FhirContext theContext) {
+		String resourceName = theContext.getResourceDefinition(theResource).getName();
+		StringBuilder urlBuilder = new StringBuilder();
+		urlBuilder.append(resourceName);
+		urlBuilder.append('/');
+		urlBuilder.append(theId.getIdPart());
+		String urlExtension = urlBuilder.toString();
+
+		HttpPutClientInvocation retVal;
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPutClientInvocation(theContext, theResource, urlExtension);
+		} else {
+			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, urlExtension);
+		}
+
+		if (theId.hasVersionIdPart()) {
+			if (theContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+				retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+			} else {
+				String versionId = theId.getVersionIdPart();
+				if (StringUtils.isNotBlank(versionId)) {
+					urlBuilder.append('/');
+					urlBuilder.append(Constants.PARAM_HISTORY);
+					urlBuilder.append('/');
+					urlBuilder.append(versionId);
+					retVal.addHeader(Constants.HEADER_CONTENT_LOCATION, urlBuilder.toString());
+				}
+			}
+		}
+
+		addTagsToPostOrPut(theContext, theResource, retVal);
+		// addContentTypeHeaderBasedOnDetectedType(retVal, theResourceBody);
+
+		return retVal;
+	}
+
 	public static EncodingEnum detectEncoding(String theBody) {
 		EncodingEnum retVal = detectEncodingNoDefault(theBody);
 		if (retVal == null) {
@@ -299,6 +315,10 @@ public class MethodUtil {
 		}
 	}
 
+	public static Integer findConditionalOperationParameterIndex(Method theMethod) {
+		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalUrlParam.class);
+	}
+
 	public static Integer findIdParameterIndex(Method theMethod) {
 		return MethodUtil.findParamAnnotationIndex(theMethod, IdParam.class);
 	}
@@ -320,10 +340,6 @@ public class MethodUtil {
 
 	public static Integer findTagListParameterIndex(Method theMethod) {
 		return MethodUtil.findParamAnnotationIndex(theMethod, TagListParam.class);
-	}
-
-	public static Integer findConditionalOperationParameterIndex(Method theMethod) {
-		return MethodUtil.findParamAnnotationIndex(theMethod, ConditionalUrlParam.class);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -447,13 +463,13 @@ public class MethodUtil {
 						}
 						param = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IConverter() {
 							@Override
-							public Object outgoingClient(Object theObject) {
-								return new StringDt(((ValidationModeEnum)theObject).name().toLowerCase());
+							public Object incomingServer(Object theObject) {
+								return ValidationModeEnum.valueOf(theObject.toString().toUpperCase());
 							}
 							
 							@Override
-							public Object incomingServer(Object theObject) {
-								return ValidationModeEnum.valueOf(theObject.toString().toUpperCase());
+							public Object outgoingClient(Object theObject) {
+								return new StringDt(((ValidationModeEnum)theObject).name().toLowerCase());
 							}
 						});
 					} else if (nextAnnotation instanceof Validate.Profile) {
@@ -462,13 +478,13 @@ public class MethodUtil {
 						}
 						param = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IConverter() {
 							@Override
-							public Object outgoingClient(Object theObject) {
-								return new StringDt(theObject.toString());
+							public Object incomingServer(Object theObject) {
+								return theObject.toString();
 							}
 							
 							@Override
-							public Object incomingServer(Object theObject) {
-								return theObject.toString();
+							public Object outgoingClient(Object theObject) {
+								return new StringDt(theObject.toString());
 							}
 						});
 					} else {
@@ -492,7 +508,7 @@ public class MethodUtil {
 		return parameters;
 	}
 
-	public static void parseClientRequestResourceHeaders(IdDt theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
+	public static void parseClientRequestResourceHeaders(IIdType theRequestedId, Map<String, List<String>> theHeaders, IBaseResource resource) {
 		List<String> lmHeaders = theHeaders.get(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
 		if (lmHeaders != null && lmHeaders.size() > 0 && StringUtils.isNotBlank(lmHeaders.get(0))) {
 			String headerValue = lmHeaders.get(0);

@@ -216,9 +216,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IdDt theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches) {
 		String resName = toResourceName(theType);
-		IdDt id = theId;
+		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
 			id = new IdDt(resName, id.getIdPart(), id.getVersionIdPart());
 		}
@@ -1289,7 +1289,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private class ReadInternal extends BaseClientExecutable implements IRead, IReadTyped, IReadExecutable {
-		private IdDt myId;
+		private IIdType myId;
 		private String myIfVersionMatches;
 		private ICallable myNotModifiedHandler;
 		private RuntimeResourceDefinition myType;
@@ -1370,7 +1370,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IReadExecutable withId(IdDt theId) {
+		public IReadExecutable withId(IIdType theId) {
 			Validate.notNull(theId, "The ID can not be null");
 			Validate.notBlank(theId.getIdPart(), "The ID can not be blank");
 			myId = theId.toUnqualified();
@@ -1392,7 +1392,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IReadExecutable withUrl(IdDt theUrl) {
+		public IReadExecutable withUrl(IIdType theUrl) {
 			Validate.notNull(theUrl, "theUrl can not be null");
 			myId = theUrl;
 			processUrl();
@@ -1434,10 +1434,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
 
-		private IdDt myId;
+		private IIdType myId;
 		private Class<T> myType;
 
-		public ResourceResponseHandler(Class<T> theType, IdDt theId) {
+		public ResourceResponseHandler(Class<T> theType, IIdType theId) {
 			myType = theType;
 			myId = theId;
 		}

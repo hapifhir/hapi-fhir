@@ -54,6 +54,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Bundle;
@@ -353,6 +354,9 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public Bundle parseBundle(Reader theReader) {
+		if (myContext.getVersion().getVersion() == FhirVersionEnum.DSTU2_HL7ORG) {
+			throw new IllegalStateException("Can't parse DSTU1 (Atom) bundle in HL7.org DSTU2 mode. Use parseResource(Bundle.class, foo) instead.");
+		}
 		return parseBundle(null, theReader);
 	}
 

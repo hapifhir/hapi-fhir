@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -111,7 +112,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testCreateWithId01");
-		IdDt p1Id = ourClient.create().resource(p1).withId("testCreateWithId").execute().getId();
+		IIdType p1Id = ourClient.create().resource(p1).withId("testCreateWithId").execute().getId();
 
 		assertThat(p1Id.getValue(), containsString("Patient/testCreateWithId/_history"));
 
@@ -143,12 +144,12 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		Location l1 = new Location();
 		l1.getNameElement().setValue("testDeepChainingL1");
-		IdDt l1id = ourClient.create().resource(l1).execute().getId();
+		IIdType l1id = ourClient.create().resource(l1).execute().getId();
 
 		Location l2 = new Location();
 		l2.getNameElement().setValue("testDeepChainingL2");
 		l2.getPartOf().setReference(l1id.toVersionless().toUnqualified());
-		IdDt l2id = ourClient.create().resource(l2).execute().getId();
+		IIdType l2id = ourClient.create().resource(l2).execute().getId();
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("urn:foo").setValue("testDeepChainingE1");
@@ -157,7 +158,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		ca.uhn.fhir.model.dstu.resource.Encounter.Location location = e1.addLocation();
 		location.getLocation().setReference(l2id.toUnqualifiedVersionless());
 		location.setPeriod(new PeriodDt().setStartWithSecondsPrecision(new Date()).setEndWithSecondsPrecision(new Date()));
-		IdDt e1id = ourClient.create().resource(e1).execute().getId();
+		IIdType e1id = ourClient.create().resource(e1).execute().getId();
 
 		//@formatter:off
 		Bundle res = ourClient.search()
@@ -257,9 +258,9 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, newId);
+		Patient actual = ourClient.read(Patient.class, (IdDt)newId);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
@@ -273,9 +274,9 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		p1.getManagingOrganization().setResource(o1);
 
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, newId);
+		Patient actual = ourClient.read(Patient.class, (IdDt)newId);
 		assertEquals(1, actual.getContained().getContainedResources().size());
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
 
@@ -289,9 +290,9 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, newId);
+		Patient actual = ourClient.read(Patient.class, (IdDt)newId);
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
 	}
 
@@ -303,7 +304,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
 		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
-		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
+		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
@@ -321,7 +322,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
-		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
+		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
@@ -336,13 +337,13 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IdDt o1id = ourClient.create().resource(o1).execute().getId();
+		IIdType o1id = ourClient.create().resource(o1).execute().getId();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 		p1.setManagingOrganization(new ResourceReferenceDt(o1id));
-		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
+		IIdType p1Id = ourClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
 		Bundle actual = ourClient.search()
@@ -368,7 +369,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system").setValue( "testSearchWithInclude01");
-		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IIdType orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue("testSearchWithInclude02");
@@ -401,7 +402,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
-		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IIdType orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		// Read back directly from the DAO
 		{
@@ -412,7 +413,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		}
 		// Read back through the HTTP API
 		{
-			Organization returned = ourClient.read(Organization.class, orgId);
+			Organization returned = ourClient.read(Organization.class, (IdDt)orgId);
 			String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
 			ourLog.info(val);
 			assertThat(val, containsString("<name value=\"測試醫院\"/>"));
@@ -444,7 +445,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = ourClient.create().resource(p1).execute().getId();
+		IIdType p1id = ourClient.create().resource(p1).execute().getId();
 
 		Organization p2 = new Organization();
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
@@ -472,7 +473,7 @@ public class ResourceProviderDstu1Test  extends BaseJpaTest {
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExist");
 		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExist").execute();
 		assertEquals(true, outcome.getCreated().booleanValue());
-		IdDt p1Id = outcome.getId();
+		IIdType p1Id = outcome.getId();
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExist/_history"));
 

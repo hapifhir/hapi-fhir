@@ -25,7 +25,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import ca.uhn.fhir.model.api.IResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
@@ -77,7 +78,7 @@ public @interface Search {
 	 * </p>
 	 */
 	// NB: Read, Search (maybe others) share this annotation method, so update the javadocs everywhere
-	Class<? extends IResource> type() default IResource.class;
+	Class<? extends IBaseResource> type() default IBaseResource.class;
 
 	/**
 	 * This is an experimental option - Use with caution

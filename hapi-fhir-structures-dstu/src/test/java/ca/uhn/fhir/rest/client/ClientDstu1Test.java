@@ -245,7 +245,7 @@ public class ClientDstu1Test {
 
 		assertEquals(HttpDelete.class, capt.getValue().getClass());
 		assertEquals("http://foo/Patient/1234", capt.getValue().getURI().toString());
-		assertEquals("Hello", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("Hello", ((OperationOutcome)response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 	}
 
 	@Test

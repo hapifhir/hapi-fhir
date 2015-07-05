@@ -75,7 +75,7 @@ public class GenericClientExample {
          // resource, the OperationOutcome response, etc. (assuming that
          // any of these things were provided by the server! They may not
          // always be)
-         IdDt id = outcome.getId();
+         IdDt id = (IdDt) outcome.getId();
          System.out.println("Got ID: " + id.getValue());
          // END SNIPPET: create
       }
@@ -100,7 +100,7 @@ public class GenericClientExample {
           Boolean created = outcome.getCreated();
 
           // The ID of the created, or the pre-existing resource
-          IdDt id = outcome.getId();
+          IdDt id = (IdDt) outcome.getId();
           // END SNIPPET: createConditional
       }
       {
@@ -149,7 +149,7 @@ public class GenericClientExample {
          // resource, the OperationOutcome response, etc. (assuming that
          // any of these things were provided by the server! They may not
          // always be)
-         IdDt id = outcome.getId();
+         IdDt id = (IdDt) outcome.getId();
          System.out.println("Got ID: " + id.getValue());
          // END SNIPPET: update
       }

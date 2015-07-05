@@ -29,6 +29,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -124,17 +126,12 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		}
 
 		if (theReturnResourceType != null) {
-			if (IResource.class.isAssignableFrom(theReturnResourceType)) {
-				ResourceDef resourceDefAnnotation = theReturnResourceType.getAnnotation(ResourceDef.class);
-				if (resourceDefAnnotation == null) {
-					if (Modifier.isAbstract(theReturnResourceType.getModifiers())) {
-						// If we're returning an abstract type, that's ok
-					} else {
-						throw new ConfigurationException(theReturnResourceType.getCanonicalName() + " has no @" + ResourceDef.class.getSimpleName() + " annotation");
-					}
+			if (IBaseResource.class.isAssignableFrom(theReturnResourceType)) {
+				if (Modifier.isAbstract(theReturnResourceType.getModifiers()) || Modifier.isInterface(theReturnResourceType.getModifiers())) {
+					// If we're returning an abstract type, that's ok
 				} else {
 					myResourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = resourceDefAnnotation.name();
+					myResourceName = theContext.getResourceDefinition(myResourceType).getName();
 				}
 			}
 		}
@@ -309,14 +306,14 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 
 			if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 				IBaseResource resource;
-				InstantDt lastUpdated;
+				IPrimitiveType<Date> lastUpdated;
 				if (resultObj instanceof IBundleProvider) {
 					IBundleProvider result = (IBundleProvider) resultObj;
 					resource = result.getResources(0, 1).get(0);
 					lastUpdated = result.getPublished();
 				} else {
-					resource = (IResource) resultObj;
-					lastUpdated = ResourceMetadataKeyEnum.UPDATED.get((IResource) resource);
+					resource = (IBaseResource) resultObj;
+					lastUpdated = theServer.getFhirContext().getVersion().getLastUpdated(resource);
 				}
 
 				/*

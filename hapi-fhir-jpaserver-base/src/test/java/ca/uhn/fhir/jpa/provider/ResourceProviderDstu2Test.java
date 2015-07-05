@@ -1,12 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
@@ -38,6 +32,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -77,6 +72,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UnsignedIntDt;
+import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -141,7 +137,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		IGenericClient client = ourClient;
 
 		String resBody = IOUtils.toString(ResourceProviderDstu2Test.class.getResource("/document-father.json"));
-		IdDt id = client.create().resource(resBody).execute().getId();
+		IIdType id = client.create().resource(resBody).execute().getId();
 
 		ourLog.info("Created: {}", id);
 
@@ -246,12 +242,12 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		Location l1 = new Location();
 		l1.getNameElement().setValue("testDeepChainingL1");
-		IdDt l1id = ourClient.create().resource(l1).execute().getId();
+		IIdType l1id = ourClient.create().resource(l1).execute().getId();
 
 		Location l2 = new Location();
 		l2.getNameElement().setValue("testDeepChainingL2");
 		l2.getPartOf().setReference(l1id.toVersionless().toUnqualified());
-		IdDt l2id = ourClient.create().resource(l2).execute().getId();
+		IIdType l2id = ourClient.create().resource(l2).execute().getId();
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("urn:foo").setValue("testDeepChainingE1");
@@ -260,7 +256,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		ca.uhn.fhir.model.dstu2.resource.Encounter.Location location = e1.addLocation();
 		location.getLocation().setReference(l2id.toUnqualifiedVersionless());
 		location.setPeriod(new PeriodDt().setStartWithSecondsPrecision(new Date()).setEndWithSecondsPrecision(new Date()));
-		IdDt e1id = ourClient.create().resource(e1).execute().getId();
+		IIdType e1id = ourClient.create().resource(e1).execute().getId();
 
 		//@formatter:off
 		Bundle res = ourClient.search()
@@ -542,30 +538,30 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
-		IdDt orgId1 = ourClient.create().resource(org1).execute().getId();
+		IIdType orgId1 = ourClient.create().resource(org1).execute().getId();
 
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
 		p.getManagingOrganization().setReference(orgId1);
-		IdDt patientId = ourClient.create().resource(p).execute().getId();
+		IIdType patientId = ourClient.create().resource(p).execute().getId();
 
 		Organization org2 = new Organization();
 		org2.setName(methodName + "1");
-		IdDt orgId2 = ourClient.create().resource(org2).execute().getId();
+		IIdType orgId2 = ourClient.create().resource(org2).execute().getId();
 
 		Device dev = new Device();
 		dev.setModel(methodName);
 		dev.getOwner().setReference(orgId2);
-		IdDt devId = ourClient.create().resource(dev).execute().getId();
+		IIdType devId = ourClient.create().resource(dev).execute().getId();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId);
 		obs.getDevice().setReference(devId);
-		IdDt obsId = ourClient.create().resource(obs).execute().getId();
+		IIdType obsId = ourClient.create().resource(obs).execute().getId();
 
 		Encounter enc = new Encounter();
 		enc.getPatient().setReference(patientId);
-		IdDt encId = ourClient.create().resource(enc).execute().getId();
+		IIdType encId = ourClient.create().resource(enc).execute().getId();
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
@@ -636,9 +632,9 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		p1.getText().getDiv().setValueAsString("<div>HELLO WORLD</div>");
 		p1.addIdentifier().setSystem("urn:system").setValue("testSaveAndRetrieveExistingNarrative01");
 
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, newId);
+		Patient actual = ourClient.read(Patient.class, (UriDt)newId);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
@@ -652,9 +648,9 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		p1.getManagingOrganization().setResource(o1);
 
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
+		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, newId);
+		Patient actual = ourClient.read(Patient.class, (UriDt)newId);
 		assertEquals(1, actual.getContained().getContainedResources().size());
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
 
@@ -668,7 +664,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 
-		IdDt newId = ourClient.create().resource(p1).execute().getId();
+		IdDt newId = (IdDt) ourClient.create().resource(p1).execute().getId();
 
 		Patient actual = ourClient.read(Patient.class, newId);
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
@@ -696,7 +692,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
 		p1.addName().addFamily("testSearchByIdentifierFamily01").addGiven("testSearchByIdentifierGiven01");
-		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
+		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier02");
@@ -715,7 +711,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
-		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
+		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
 		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
 				.execute();
@@ -731,13 +727,13 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		Organization o1 = new Organization();
 		o1.setName("testSearchByResourceChainName01");
-		IdDt o1id = ourClient.create().resource(o1).execute().getId();
+		IdDt o1id = (IdDt) ourClient.create().resource(o1).execute().getId();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByResourceChain01");
 		p1.addName().addFamily("testSearchByResourceChainFamily01").addGiven("testSearchByResourceChainGiven01");
 		p1.setManagingOrganization(new ResourceReferenceDt(o1id));
-		IdDt p1Id = ourClient.create().resource(p1).execute().getId();
+		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
 		//@formatter:off
 		Bundle actual = ourClient.search()
@@ -763,7 +759,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
-		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IdDt orgId = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude02");
@@ -827,12 +823,12 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
-		IdDt deletedIdMissingTrue = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		IdDt deletedIdMissingTrue = (IdDt) ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingTrue).execute();
 
 		org = new Organization();
 		org.setName("Help I'm a Bug");
-		IdDt deletedIdMissingFalse = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
+		IdDt deletedIdMissingFalse = (IdDt) ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
 		ourClient.delete().resourceById(deletedIdMissingFalse).execute();
 
 		List<IResource> resources = new ArrayList<IResource>();
@@ -846,11 +842,11 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
 		org.setName(methodName + "name");
-		IdDt orgNotMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+		IdDt orgNotMissing = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
-		IdDt orgMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+		IdDt orgMissing = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		{
 			//@formatter:off
@@ -896,7 +892,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
-		IdDt orgId = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
+		IdDt orgId = (IdDt) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		// Read back directly from the DAO
 		{
@@ -939,7 +935,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = ourClient.create().resource(p1).execute().getId();
+		IdDt p1id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
 		Organization p2 = new Organization();
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
@@ -1002,7 +998,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
 		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
 		assertEquals(true, outcome.getCreated().booleanValue());
-		IdDt p1Id = outcome.getId();
+		IdDt p1Id = (IdDt) outcome.getId();
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
@@ -1027,6 +1023,33 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
+	@Test
+	public void testValidateResourceWithId() throws IOException {
+
+		Patient patient = new Patient();
+		patient.addName().addGiven("James");
+		patient.setBirthDate(new DateDt("2011-02-02"));
+
+		Parameters input = new Parameters();
+		input.addParameter().setName("resource").setResource(patient);
+
+		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
+		ourLog.info(inputStr);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -1148,14 +1171,14 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().addFamily(methodName).addGiven("Joe");
-			id1a = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id1a = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 		IdDt id1b;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().addFamily(methodName + "XXXX").addGiven("Joe");
-			id1b = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id1b = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 
 		Thread.sleep(1100);
@@ -1167,7 +1190,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().addFamily(methodName).addGiven("John");
-			id2 = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+			id2 = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
 		
 		{

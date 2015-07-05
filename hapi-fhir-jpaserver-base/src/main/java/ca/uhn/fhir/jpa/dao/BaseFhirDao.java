@@ -140,7 +140,7 @@ public abstract class BaseFhirDao implements IDao {
 
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	protected void createForcedIdIfNeeded(ResourceTable entity, IdDt id) {
+	protected void createForcedIdIfNeeded(ResourceTable entity, IIdType id) {
 		if (id.isEmpty() == false && id.hasIdPart()) {
 			if (isValidPid(id)) {
 				return;
@@ -276,13 +276,13 @@ public abstract class BaseFhirDao implements IDao {
 				values.addAll(t.getValues(theResource, nextPathTrimmed));
 			} catch (Exception e) {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", nextPathTrimmed, def.getName(), e.toString());
+				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() } );
 			}
 		}
 		return values;
 	}
 
-	private void findMatchingTagIds(String theResourceName, IdDt theResourceId, Set<Long> tagIds, Class<? extends BaseTag> entityClass) {
+	private void findMatchingTagIds(String theResourceName, IIdType theResourceId, Set<Long> tagIds, Class<? extends BaseTag> entityClass) {
 		{
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
@@ -375,7 +375,7 @@ public abstract class BaseFhirDao implements IDao {
 		}
 	}
 
-	protected TagList getTags(Class<? extends IResource> theResourceType, IdDt theResourceId) {
+	protected TagList getTags(Class<? extends IResource> theResourceType, IIdType theResourceId) {
 		String resourceName = null;
 		if (theResourceType != null) {
 			resourceName = toResourceName(theResourceType);
@@ -610,7 +610,7 @@ public abstract class BaseFhirDao implements IDao {
 
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
-			for (IdDt next : profiles) {
+			for (IIdType next : profiles) {
 				TagDefinition tag = getTag(TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				theEntity.addTag(tag);
 				theEntity.setHasTags(true);

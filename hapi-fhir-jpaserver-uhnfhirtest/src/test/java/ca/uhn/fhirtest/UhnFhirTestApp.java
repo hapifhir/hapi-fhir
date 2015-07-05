@@ -55,7 +55,7 @@ public class UhnFhirTestApp {
 			Organization o1 = new Organization();
 			o1.getName().setValue("Some Org");
 			MethodOutcome create = client.create(o1);
-			IdDt orgId = create.getId();
+			IdDt orgId = (IdDt) create.getId();
 
 			Patient p1 = new Patient();
 			p1.addIdentifier("foo:bar", "12345");

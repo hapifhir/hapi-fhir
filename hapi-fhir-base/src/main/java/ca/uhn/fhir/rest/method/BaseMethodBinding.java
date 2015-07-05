@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -362,8 +363,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			return BundleProviders.newEmptyList();
 		} else if (response instanceof IBundleProvider) {
 			return (IBundleProvider) response;
-		} else if (response instanceof IResource) {
-			return BundleProviders.newList((IResource) response);
+		} else if (response instanceof IBaseResource) {
+			return BundleProviders.newList((IBaseResource) response);
 		} else if (response instanceof Collection) {
 			List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 			for (Object next : ((Collection<?>) response)) {
@@ -427,18 +428,18 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			// returns a bundle
 		} else if (Collection.class.isAssignableFrom(returnTypeFromMethod)) {
 			returnTypeFromMethod = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
-			if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !IResource.class.equals(returnTypeFromMethod)) {
+			if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns a collection with generic type " + toLogString(returnTypeFromMethod)
-						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IResource> )");
+						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
 			}
 		} else {
-			if (!IResource.class.equals(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
+			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, "
 						+ Bundle.class.getSimpleName() + ", " + IBundleProvider.class.getSimpleName() + ", etc., see the documentation for more details)");
 			}
 		}
 
-		Class<? extends IResource> returnTypeFromAnnotation = IResource.class;
+		Class<? extends IBaseResource> returnTypeFromAnnotation = IBaseResource.class;
 		if (read != null) {
 			returnTypeFromAnnotation = read.type();
 		} else if (search != null) {
@@ -462,7 +463,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		}
 
 		if (returnTypeFromRp != null) {
-			if (returnTypeFromAnnotation != null && returnTypeFromAnnotation != IResource.class) {
+			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type " + returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName()
 							+ " (or a subclass of it) per IResourceProvider contract");
@@ -476,7 +477,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				returnType = returnTypeFromRp;
 			}
 		} else {
-			if (returnTypeFromAnnotation != IResource.class) {
+			if (!isResourceInterface(returnTypeFromAnnotation)) {
 				if (!verifyIsValidResourceReturnType(returnTypeFromAnnotation)) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromAnnotation)
 							+ " according to annotation - Must return a resource type");
@@ -486,7 +487,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 				// if (IRestfulClient.class.isAssignableFrom(theMethod.getDeclaringClass())) {
 				// Clients don't define their methods in resource specific types, so they can
 				// infer their resource type from the method return type.
-				returnType = (Class<? extends IResource>) returnTypeFromMethod;
+				returnType = (Class<? extends IBaseResource>) returnTypeFromMethod;
 				// } else {
 				// This is a plain provider method returning a resource, so it should be
 				// an operation or global search presumably
@@ -553,6 +554,10 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		// }
 		//
 		// return sm;
+	}
+
+	private static boolean isResourceInterface(Class<?> theReturnTypeFromMethod) {
+		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
 	}
 
 	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {

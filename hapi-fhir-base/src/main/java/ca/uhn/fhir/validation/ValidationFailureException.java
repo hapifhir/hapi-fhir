@@ -20,20 +20,23 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public class ValidationFailureException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
-	private BaseOperationOutcome myOperationOutcome;
+	private IBaseOperationOutcome myOperationOutcome;
 
 //	public ValidationFailureException(String theProblem) {
 //		this(theProblem, IssueSeverityEnum.FATAL, null);
 //	}
 
-	private static String toDescription(BaseOperationOutcome theOo) {
+	private static String toDescription(FhirContext theCtx, IBaseOperationOutcome theOo) {
 		StringBuilder b = new StringBuilder();
-		b.append(theOo.getIssueFirstRep().getDetailsElement().getValue());
+		b.append(OperationOutcomeUtil.getFirstIssueDetails(theCtx, theOo));
 //		b.append(" - ");
 //		b.append(theOo.getIssueFirstRep().getLocationFirstRep().getValue());
 		return b.toString();
@@ -49,12 +52,12 @@ public class ValidationFailureException extends RuntimeException {
 //		myOperationOutcome.addIssue().setSeverity(theSeverity).setDetails(theProblem);
 //	}
 
-	public ValidationFailureException(BaseOperationOutcome theOperationOutcome) {
-		super(toDescription(theOperationOutcome));
+	public ValidationFailureException(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome) {
+		super(toDescription(theCtx, theOperationOutcome));
 		myOperationOutcome = theOperationOutcome;
 	}
 
-	public BaseOperationOutcome getOperationOutcome() {
+	public IBaseOperationOutcome getOperationOutcome() {
 		return myOperationOutcome;
 	}
 

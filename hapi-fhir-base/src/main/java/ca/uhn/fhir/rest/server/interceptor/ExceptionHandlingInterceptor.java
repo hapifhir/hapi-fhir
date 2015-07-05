@@ -31,10 +31,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -42,28 +42,16 @@ import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionHandlingInterceptor.class);
 	private Class<?>[] myReturnStackTracesForExceptionTypes;
 
-	/**
-	 * If any server methods throw an exception which extends any of the given exception types, the exception 
-	 * stack trace will be returned to the user. This can be useful for helping to diagnose issues, but may
-	 * not be desirable for production situations.
-	 * 
-	 * @param theExceptionTypes The exception types for which to return the stack trace to the user.
-	 * @return Returns an instance of this interceptor, to allow for easy method chaining.
-	 */
-	public ExceptionHandlingInterceptor setReturnStackTracesForExceptionTypes(Class<?>... theExceptionTypes) {
-		myReturnStackTracesForExceptionTypes = theExceptionTypes;
-		return this;
-	}
-
 	@Override
 	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		BaseOperationOutcome oo = null;
+		IBaseOperationOutcome oo = null;
 		int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
@@ -78,33 +66,30 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		 */
 		if (oo == null) {
 			try {
-				oo = (BaseOperationOutcome) ctx.getResourceDefinition("OperationOutcome").getImplementingClass().newInstance();
+				RuntimeResourceDefinition ooDef = ctx.getResourceDefinition("OperationOutcome");
+				oo = (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
+
+				if (theException instanceof InternalErrorException) {
+					ourLog.error("Failure during REST processing", theException);
+					populateDetails(ctx, theException, oo);
+				} else if (theException instanceof BaseServerResponseException) {
+					ourLog.warn("Failure during REST processing: {}", theException);
+					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;
+					statusCode = baseServerResponseException.getStatusCode();
+					populateDetails(ctx, theException, oo);
+					if (baseServerResponseException.getAdditionalMessages() != null) {
+						for (String next : baseServerResponseException.getAdditionalMessages()) {
+							OperationOutcomeUtil.addIssue(ctx, oo, "error", next);
+						}
+					}
+				} else {
+					ourLog.error("Failure during REST processing: " + theException.toString(), theException);
+					populateDetails(ctx, theException, oo);
+					statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+				}
 			} catch (Exception e1) {
 				ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
 				throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
-			}
-
-			BaseIssue issue = oo.addIssue();
-			issue.getSeverityElement().setValue("error");
-			if (theException instanceof InternalErrorException) {
-				ourLog.error("Failure during REST processing", theException);
-				populateDetails(theException, issue);
-			} else if (theException instanceof BaseServerResponseException) {
-				ourLog.warn("Failure during REST processing: {}", theException);
-				BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;
-				statusCode = baseServerResponseException.getStatusCode();
-				populateDetails(theException, issue);
-				if (baseServerResponseException.getAdditionalMessages() != null) {
-					for (String next : baseServerResponseException.getAdditionalMessages()) {
-						BaseIssue issue2 = oo.addIssue();
-						issue2.getSeverityElement().setValue("error");
-						issue2.setDetails(next);
-					}
-				}
-			} else {
-				ourLog.error("Failure during REST processing: " + theException.toString(), theException);
-				populateDetails(theException, issue);
-				statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
 			}
 		} else {
 			ourLog.error("Unknown error during processing", theException);
@@ -127,30 +112,44 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
 		String fhirServerBase = theRequestDetails.getFhirServerBase();
-		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser,
-				NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase, false);
+		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase, false);
 
-//		theResponse.setStatus(statusCode);
-//		theRequestDetails.getServer().addHeadersToResponse(theResponse);
-//		theResponse.setContentType("text/plain");
-//		theResponse.setCharacterEncoding("UTF-8");
-//		theResponse.getWriter().append(theException.getMessage());
-//		theResponse.getWriter().close();
+		// theResponse.setStatus(statusCode);
+		// theRequestDetails.getServer().addHeadersToResponse(theResponse);
+		// theResponse.setContentType("text/plain");
+		// theResponse.setCharacterEncoding("UTF-8");
+		// theResponse.getWriter().append(theException.getMessage());
+		// theResponse.getWriter().close();
 
 		return false;
 	}
 
-	private void populateDetails(Throwable theException, BaseIssue issue) {
+	private void populateDetails(FhirContext theCtx, Throwable theException, IBaseOperationOutcome theOo) {
 		if (myReturnStackTracesForExceptionTypes != null) {
 			for (Class<?> next : myReturnStackTracesForExceptionTypes) {
 				if (next.isAssignableFrom(theException.getClass())) {
-					issue.getDetailsElement().setValue(theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException));
+					String detailsValue = theException.getMessage() + "\n\n" + ExceptionUtils.getStackTrace(theException);
+					OperationOutcomeUtil.addIssue(theCtx, theOo, "error", detailsValue);
 					return;
 				}
 			}
 		}
 
-		issue.getDetailsElement().setValue(theException.getMessage());
+		OperationOutcomeUtil.addIssue(theCtx, theOo, "error", theException.getMessage());
 	}
 
+	/**
+	 * If any server methods throw an exception which extends any of the given exception types, the exception stack trace
+	 * will be returned to the user. This can be useful for helping to diagnose issues, but may not be desirable for
+	 * production situations.
+	 * 
+	 * @param theExceptionTypes
+	 *           The exception types for which to return the stack trace to the user.
+	 * @return Returns an instance of this interceptor, to allow for easy method chaining.
+	 */
+	public ExceptionHandlingInterceptor setReturnStackTracesForExceptionTypes(Class<?>... theExceptionTypes) {
+		myReturnStackTracesForExceptionTypes = theExceptionTypes;
+		return this;
+	}
+	
 }

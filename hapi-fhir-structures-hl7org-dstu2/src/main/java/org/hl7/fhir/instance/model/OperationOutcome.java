@@ -31,20 +31,21 @@ package org.hl7.fhir.instance.model;
 
 // Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
+import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.utilities.Utilities;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
 @ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/Profile/OperationOutcome")
-public class OperationOutcome extends DomainResource {
+public class OperationOutcome extends DomainResource implements IBaseOperationOutcome {
 
     public enum IssueSeverity {
         /**

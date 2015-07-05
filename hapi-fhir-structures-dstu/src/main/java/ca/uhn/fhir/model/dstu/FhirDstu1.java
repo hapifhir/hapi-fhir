@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -60,6 +62,7 @@ import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
@@ -85,12 +88,18 @@ import ca.uhn.fhir.rest.server.provider.ServerProfileProvider;
 public class FhirDstu1 implements IFhirVersion {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirDstu1.class);
-//	private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
+	// private Map<RuntimeChildDeclaredExtensionDefinition, String> myExtensionDefToCode = new
+	// HashMap<RuntimeChildDeclaredExtensionDefinition, String>();
 	private String myId;
 
 	@Override
 	public ServerConformanceProvider createServerConformanceProvider(RestfulServer theServer) {
 		return new ServerConformanceProvider(theServer);
+	}
+
+	@Override
+	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
+		return new ServerProfileProvider(theRestfulServer);
 	}
 
 	private void fillBasics(StructureElement theElement, BaseRuntimeElementDefinition<?> def, LinkedList<String> path, BaseRuntimeDeclaredChildDefinition theChild) {
@@ -234,8 +243,7 @@ public class FhirDstu1 implements IFhirVersion {
 					// ignore
 				} else if (child instanceof RuntimeChildDeclaredExtensionDefinition) {
 					throw new IllegalStateException("Unexpected child type: " + child.getClass().getCanonicalName());
-				} else if (child instanceof RuntimeChildCompositeDatatypeDefinition || child instanceof RuntimeChildPrimitiveDatatypeDefinition || child instanceof RuntimeChildChoiceDefinition
-						|| child instanceof RuntimeChildResourceDefinition) {
+				} else if (child instanceof RuntimeChildCompositeDatatypeDefinition || child instanceof RuntimeChildPrimitiveDatatypeDefinition || child instanceof RuntimeChildChoiceDefinition || child instanceof RuntimeChildResourceDefinition) {
 					Iterator<String> childNamesIter = child.getValidChildNames().iterator();
 					String nextName = childNamesIter.next();
 					BaseRuntimeElementDefinition<?> nextDef = child.getChildByName(nextName);
@@ -295,6 +303,53 @@ public class FhirDstu1 implements IFhirVersion {
 		return retVal;
 	}
 
+	@Override
+	public Class<? extends BaseContainedDt> getContainedType() {
+		return ContainedDt.class;
+	}
+
+	@Override
+	public InputStream getFhirVersionPropertiesFile() {
+		InputStream str = FhirDstu1.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
+		if (str == null) {
+			str = FhirDstu1.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
+		}
+		if (str == null) {
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
+		}
+		return str;
+	}
+
+	@Override
+	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
+		return ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
+	}
+
+	@Override
+	public String getPathToSchemaDefinitions() {
+		return "/ca/uhn/fhir/model/dstu/schema";
+	}
+
+	@Override
+	public Class<? extends BaseResourceReferenceDt> getResourceReferenceType() {
+		return ResourceReferenceDt.class;
+	}
+
+	@Override
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DSTU1;
+	}
+
+	@Override
+	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
+		return new Dstu1BundleFactory(theContext);
+	}
+
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new CodingDt();
+	}
+
 	private Map<RuntimeChildDeclaredExtensionDefinition, String> scanForExtensions(Profile theProfile, BaseRuntimeElementDefinition<?> def, Map<RuntimeChildDeclaredExtensionDefinition, String> theExtensionDefToCode) {
 		BaseRuntimeElementCompositeDefinition<?> cdef = ((BaseRuntimeElementCompositeDefinition<?>) def);
 
@@ -339,57 +394,8 @@ public class FhirDstu1 implements IFhirVersion {
 
 			}
 		}
-		
+
 		return theExtensionDefToCode;
 	}
-
-	@Override
-	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
-	}
-	
-	@Override
-	public FhirVersionEnum getVersion() {
-		return FhirVersionEnum.DSTU1;
-	}
-
-	@Override
-	public InputStream getFhirVersionPropertiesFile() {
-		InputStream str = FhirDstu1.class.getResourceAsStream("/ca/uhn/fhir/model/dstu/fhirversion.properties");
-		if (str == null) {
-			str = FhirDstu1.class.getResourceAsStream("ca/uhn/fhir/model/dstu/fhirversion.properties");
-		}
-		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu/model.properties");
-		}
-		return str;
-	}
-	
-
-	@Override
-	public String getPathToSchemaDefinitions() {
-		return "ca/uhn/fhir/model/dstu/schema";
-	}
-
-	@Override
-	public Class<? extends BaseResourceReferenceDt> getResourceReferenceType() {
-		return ResourceReferenceDt.class;
-	}
-
-	@Override
-	public Class<? extends BaseContainedDt> getContainedType() {
-		return ContainedDt.class;
-	}
-
-	@Override
-	public BaseCodingDt newCodingDt() {
-		return new CodingDt();
-	}
-
-	@Override
-	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
-		return new Dstu1BundleFactory(theContext);
-	}
-
 
 }

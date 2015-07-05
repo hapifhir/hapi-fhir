@@ -22,12 +22,16 @@ package org.hl7.fhir.instance;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.conf.ServerConformanceProvider;
 import org.hl7.fhir.instance.conf.ServerProfileProvider;
 import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -89,7 +93,7 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 
 	@Override
 	public String getPathToSchemaDefinitions() {
-		return "ca/uhn/fhir/model/dstu2/schema";
+		return "/org/hl7/fhir/instance/model/schema";
 	}
 
 	@Override
@@ -111,6 +115,11 @@ public class FhirDstu2Hl7Org implements IFhirVersion {
 	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
 		return new Dstu2Hl7OrgBundleFactory(theContext);
+	}
+
+	@Override
+	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
+		return ((Resource)theResource).getMeta().getLastUpdatedElement();
 	}
 
 }

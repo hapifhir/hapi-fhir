@@ -21,8 +21,11 @@ package ca.uhn.fhir.model.dstu2;
  */
 
 import java.io.InputStream;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -30,6 +33,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -55,6 +59,11 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	@Override
+	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
+		return new ServerProfileProvider(theRestfulServer);
+	}
+
+	@Override
 	public IResource generateProfile(RuntimeResourceDefinition theRuntimeResourceDefinition, String theServerBase) {
 		StructureDefinition retVal = new StructureDefinition();
 
@@ -70,13 +79,8 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	@Override
-	public IResourceProvider createServerProfilesProvider(RestfulServer theRestfulServer) {
-		return new ServerProfileProvider(theRestfulServer);
-	}
-
-	@Override
-	public FhirVersionEnum getVersion() {
-		return FhirVersionEnum.DSTU2;
+	public Class<? extends BaseContainedDt> getContainedType() {
+		return ContainedDt.class;
 	}
 
 	@Override
@@ -92,8 +96,13 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	@Override
+	public IPrimitiveType<Date> getLastUpdated(IBaseResource theResource) {
+		return ResourceMetadataKeyEnum.UPDATED.get((IResource) theResource);
+	}
+
+	@Override
 	public String getPathToSchemaDefinitions() {
-		return "ca/uhn/fhir/model/dstu2/schema";
+		return "/ca/uhn/fhir/model/dstu2/schema";
 	}
 
 	@Override
@@ -102,13 +111,8 @@ public class FhirDstu2 implements IFhirVersion {
 	}
 
 	@Override
-	public Class<? extends BaseContainedDt> getContainedType() {
-		return ContainedDt.class;
-	}
-
-	@Override
-	public BaseCodingDt newCodingDt() {
-		return new CodingDt();
+	public FhirVersionEnum getVersion() {
+		return FhirVersionEnum.DSTU2;
 	}
 
 	@Override
@@ -116,5 +120,9 @@ public class FhirDstu2 implements IFhirVersion {
 		return new Dstu2BundleFactory(theContext);
 	}
 
+	@Override
+	public BaseCodingDt newCodingDt() {
+		return new CodingDt();
+	}
 
 }

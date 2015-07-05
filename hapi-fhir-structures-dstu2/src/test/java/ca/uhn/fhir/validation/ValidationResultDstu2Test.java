@@ -11,14 +11,17 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 
 public class ValidationResultDstu2Test {
 
+	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	
     @Test
     public void isSuccessful_IsTrueForNullOperationOutcome() {
-        ValidationResult result = ValidationResult.valueOf(null);
+        ValidationResult result = ValidationResult.valueOf(ourCtx, null);
         assertTrue(result.isSuccessful());
     }
 
@@ -27,7 +30,7 @@ public class ValidationResultDstu2Test {
         OperationOutcome operationOutcome = new OperationOutcome();
         // make sure a non-null ID doesn't cause the validation result to be a fail
         operationOutcome.setId(UUID.randomUUID().toString());
-        ValidationResult result = ValidationResult.valueOf(operationOutcome);
+        ValidationResult result = ValidationResult.valueOf(ourCtx, operationOutcome);
         assertTrue(result.isSuccessful());
     }
 
@@ -37,9 +40,9 @@ public class ValidationResultDstu2Test {
         OperationOutcome.Issue issue = operationOutcome.addIssue();
         String errorMessage = "There was a validation problem";
         issue.setDetails(errorMessage);
-        ValidationResult result = ValidationResult.valueOf(operationOutcome);
+        ValidationResult result = ValidationResult.valueOf(ourCtx, operationOutcome);
         assertFalse(result.isSuccessful());
-        List<? extends BaseIssue> issues = result.getOperationOutcome().getIssue();
+        List<? extends BaseIssue> issues = ((OperationOutcome)result.getOperationOutcome()).getIssue();
         assertEquals(1, issues.size());
         assertEquals(errorMessage, issues.get(0).getDetailsElement().getValue());
 
@@ -52,7 +55,7 @@ public class ValidationResultDstu2Test {
     @Test
     public void toString_ShouldNotCauseResultToBecomeFailure() {
         OperationOutcome operationOutcome = new OperationOutcome();
-        ValidationResult result = ValidationResult.valueOf(operationOutcome);
+        ValidationResult result = ValidationResult.valueOf(ourCtx, operationOutcome);
         assertEquals(true, result.isSuccessful());
         // need to call toString to make sure any unwanted side effects are generated
         @SuppressWarnings("UnusedDeclaration") String unused = result.toString();

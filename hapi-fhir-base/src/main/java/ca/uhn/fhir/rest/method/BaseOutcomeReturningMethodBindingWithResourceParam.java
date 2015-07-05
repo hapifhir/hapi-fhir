@@ -24,10 +24,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
@@ -39,7 +41,9 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	private String myResourceName;
 	private int myResourceParameterIndex;
 	private Class<? extends IBaseResource> myResourceType;
+	private Class<? extends IIdType> myIdParamType;
 
+	@SuppressWarnings("unchecked")
 	public BaseOutcomeReturningMethodBindingWithResourceParam(Method theMethod, FhirContext theContext, Class<?> theMethodAnnotation, Object theProvider) {
 		super(theMethod, theContext, theMethodAnnotation, theProvider);
 
@@ -72,7 +76,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 
 		myResourceName = theContext.getResourceDefinition(myResourceType).getName();
 		myIdParamIndex = MethodUtil.findIdParameterIndex(theMethod);
-
+		if (myIdParamIndex != null) {
+			myIdParamType = (Class<? extends IIdType>) theMethod.getParameterTypes()[myIdParamIndex];
+		}
+		
 		if (resourceParameter == null) {
 			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
@@ -82,9 +89,10 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
 		if (myIdParamIndex != null) {
-			theParams[myIdParamIndex] = theRequest.getId();
+			theParams[myIdParamIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParamType);
 		}
 	}
+
 
 	@Override
 	public String getResourceName() {

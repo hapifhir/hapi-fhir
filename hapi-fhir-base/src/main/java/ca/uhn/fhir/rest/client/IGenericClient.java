@@ -382,5 +382,6 @@ public interface IGenericClient extends IRestfulClient {
 	 */
 	<T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId);
 
+
 	
 }

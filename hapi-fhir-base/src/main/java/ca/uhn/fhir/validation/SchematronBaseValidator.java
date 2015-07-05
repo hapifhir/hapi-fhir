@@ -34,8 +34,8 @@ import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 import com.phloc.commons.error.IResourceError;
 import com.phloc.commons.error.IResourceErrorGroup;
@@ -70,23 +70,25 @@ public class SchematronBaseValidator implements IValidator {
 		}
 
 		for (IResourceError next : errors.getAllErrors().getAllResourceErrors()) {
-			BaseIssue issue = theCtx.getOperationOutcome().addIssue();
+			String severity;
 			switch (next.getErrorLevel()) {
 			case ERROR:
-				issue.getSeverityElement().setValue("error");
+				severity = ("error");
 				break;
 			case FATAL_ERROR:
-				issue.getSeverityElement().setValue("fatal");
+				severity = ("fatal");
 				break;
 			case WARN:
-				issue.getSeverityElement().setValue("warning");
+				severity = ("warning");
 				break;
 			case INFO:
 			case SUCCESS:
+			default:
 				continue;
 			}
 
-			issue.getDetailsElement().setValue(next.getAsString(Locale.getDefault()));
+			String details = next.getAsString(Locale.getDefault());
+			OperationOutcomeUtil.addIssue(myCtx, theCtx.getOperationOutcome(), severity, details);
 		}
 
 	}
@@ -107,7 +109,7 @@ public class SchematronBaseValidator implements IValidator {
 
 			String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getName().toLowerCase()
 					+ ".sch";
-			InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
+			InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 			if (baseIs == null) {
 				throw new InternalErrorException("No schematron found for resource type: "
 						+ theCtx.getFhirContext().getResourceDefinition(theCtx.getResource()).getBaseDefinition().getImplementingClass().getCanonicalName());

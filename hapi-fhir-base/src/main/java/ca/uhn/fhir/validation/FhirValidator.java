@@ -25,12 +25,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
  * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, etc.)
@@ -148,9 +149,9 @@ public class FhirValidator {
 			next.validateBundle(ctx);
 		}
 
-		BaseOperationOutcome oo = ctx.getOperationOutcome();
-		if (oo != null && oo.getIssue().size() > 0) {
-			throw new ValidationFailureException(oo);
+		IBaseOperationOutcome oo = ctx.getOperationOutcome();
+		if (oo != null && OperationOutcomeUtil.hasIssues(myContext, oo)) {
+			throw new ValidationFailureException(myContext, oo);
 		}
 
 	}
@@ -168,7 +169,7 @@ public class FhirValidator {
 	public void validate(IResource theResource) throws ValidationFailureException {
         ValidationResult validationResult = validateWithResult(theResource);
         if (!validationResult.isSuccessful()) {
-            throw new ValidationFailureException(validationResult.getOperationOutcome());
+            throw new ValidationFailureException(myContext, validationResult.getOperationOutcome());
         }
     }
 
@@ -189,8 +190,8 @@ public class FhirValidator {
 			next.validateBundle(ctx);
 		}
 
-        BaseOperationOutcome oo = ctx.getOperationOutcome();
-        return ValidationResult.valueOf(oo);
+        IBaseOperationOutcome oo = ctx.getOperationOutcome();
+        return ValidationResult.valueOf(myContext, oo);
     }
 
     /**
@@ -209,7 +210,7 @@ public class FhirValidator {
             next.validateResource(ctx);
         }
 
-        BaseOperationOutcome oo = ctx.getOperationOutcome();
-        return ValidationResult.valueOf(oo);
+        IBaseOperationOutcome oo = ctx.getOperationOutcome();
+        return ValidationResult.valueOf(myContext, oo);
     }
 }

@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.persistence.TypedQuery;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.jmx.access.InvalidInvocationException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -363,7 +364,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 	private static void handleTransactionCreateOrUpdateOutcome(Map<IdDt, IdDt> idSubstitutions, Map<IdDt, DaoMethodOutcome> idToPersistedOutcome, IdDt nextResourceId, DaoMethodOutcome outcome,
 			Entry newEntry, String theResourceType) {
-		IdDt newId = outcome.getId().toUnqualifiedVersionless();
+		IdDt newId = (IdDt) outcome.getId().toUnqualifiedVersionless();
 		IdDt resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);

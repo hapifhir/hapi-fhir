@@ -6,6 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -95,13 +96,13 @@ public class FhirResourceDaoDstu1Test  extends BaseJpaTest {
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId01");
 		p1.setId("ABABA");
-		IdDt p1id = ourPatientDao.create(p1).getId();
+		IIdType p1id = ourPatientDao.create(p1).getId();
 		assertEquals("ABABA", p1id.getIdPart());
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsIdWhichPointsToForcedId02");
 		p2.addName().addFamily("Tester").addGiven("testUpdateRejectsIdWhichPointsToForcedId02");
-		IdDt p2id = ourPatientDao.create(p2).getId();
+		IIdType p2id = ourPatientDao.create(p2).getId();
 		long p1longId = p2id.getIdPartAsLong() - 1;
 
 		try {

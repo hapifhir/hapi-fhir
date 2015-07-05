@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,11 +45,11 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.AddProfileTagEnum;
 import ca.uhn.fhir.rest.server.BundleInclusionRule;
@@ -85,14 +87,18 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 
-		for (IBaseResource nextBaseRes : theResult) {
-			if (!(nextBaseRes instanceof IDomainResource)) {
-				continue;
+		for (IBaseResource next : theResult) {
+
+			List<? extends IAnyResource> contained;
+			if (next instanceof IDomainResource) {
+				IDomainResource nextDomain = (IDomainResource) next;
+				contained = nextDomain.getContained();
+			} else {
+				contained = Collections.emptyList();
 			}
-			IDomainResource next = (IDomainResource) nextBaseRes;
 
 			Set<String> containedIds = new HashSet<String>();
-			for (IAnyResource nextContained : next.getContained()) {
+			for (IAnyResource nextContained : contained) {
 				if (nextContained.getId().isEmpty() == false) {
 					containedIds.add(nextContained.getIdElement().getValue());
 				}
@@ -157,9 +163,9 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, InstantDt theLastUpdated) {
+	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
 
-		if (myBundle.getId().isEmpty()) {
+		if (isBlank(myBundle.getId())) {
 			myBundle.setId(UUID.randomUUID().toString());
 		}
 
@@ -203,9 +209,12 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		List<IBaseResource> resourceList;
 		if (theServer.getPagingProvider() == null) {
 			numToReturn = theResult.size();
-			resourceList = theResult.getResources(0, numToReturn);
-			RestfulServerUtils.validateResourceListNotNull(resourceList);
-
+			if (numToReturn == 0) {
+				resourceList = Collections.emptyList();
+			} else {
+				resourceList = theResult.getResources(0, numToReturn);
+				RestfulServerUtils.validateResourceListNotNull(resourceList);
+			}
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
 			if (theLimit == null) {

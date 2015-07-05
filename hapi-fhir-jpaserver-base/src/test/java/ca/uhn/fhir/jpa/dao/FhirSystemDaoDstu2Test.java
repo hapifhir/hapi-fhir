@@ -1,18 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -21,11 +10,11 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.jmx.access.InvalidInvocationException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -76,7 +65,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		assertEquals(0, published.size());
 
 		String methodName = "testSystemMetaOperation";
-		IdDt id1;
+		IIdType id1;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -165,7 +154,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt id = ourPatientDao.update(p).getId();
+		IIdType id = ourPatientDao.update(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -205,7 +194,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -333,13 +322,13 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id1 = ourPatientDao.create(p1).getId();
+		IIdType id1 = ourPatientDao.create(p1).getId();
 		ourLog.info("Created patient, got it: {}", id1);
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p2.setId("Patient/" + methodName);
-		IdDt id2 = ourPatientDao.update(p2).getId();
+		IIdType id2 = ourPatientDao.update(p2).getId();
 		ourLog.info("Created patient, got it: {}", id2);
 
 		Bundle request = new Bundle();
@@ -379,7 +368,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		Bundle request = new Bundle();
@@ -420,7 +409,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -466,7 +455,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt id = ourPatientDao.update(p).getId();
+		IIdType id = ourPatientDao.update(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		Bundle request = new Bundle();
@@ -531,14 +520,14 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt idv1 = ourPatientDao.update(p).getId();
+		IIdType idv1 = ourPatientDao.update(p).getId();
 		ourLog.info("Created patient, got id: {}", idv1);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Family Name");
 		p.setId("Patient/" + methodName);
-		IdDt idv2 = ourPatientDao.update(p).getId();
+		IIdType idv2 = ourPatientDao.update(p).getId();
 		ourLog.info("Updated patient, got id: {}", idv2);
 
 		Bundle request = new Bundle();
@@ -573,14 +562,14 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt idv1 = ourPatientDao.update(p).getId();
+		IIdType idv1 = ourPatientDao.update(p).getId();
 		ourLog.info("Created patient, got id: {}", idv1);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Family Name");
 		p.setId("Patient/" + methodName);
-		IdDt idv2 = ourPatientDao.update(p).getId();
+		IIdType idv2 = ourPatientDao.update(p).getId();
 		ourLog.info("Updated patient, got id: {}", idv2);
 
 		Bundle request = new Bundle();
@@ -619,14 +608,14 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt idv1 = ourPatientDao.update(p).getId();
+		IIdType idv1 = ourPatientDao.update(p).getId();
 		ourLog.info("Created patient, got id: {}", idv1);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Family Name");
 		p.setId("Patient/" + methodName);
-		IdDt idv2 = ourPatientDao.update(p).getId();
+		IIdType idv2 = ourPatientDao.update(p).getId();
 		ourLog.info("Updated patient, got id: {}", idv2);
 
 		Bundle request = new Bundle();
@@ -664,7 +653,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -705,7 +694,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -739,7 +728,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addName().addFamily("Hello");
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -778,7 +767,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.setId("Patient/" + methodName);
-		IdDt id = ourPatientDao.update(p).getId();
+		IIdType id = ourPatientDao.update(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();

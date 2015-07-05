@@ -154,6 +154,12 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	}
 
 	@Validate
+	public MethodOutcome validate(@ResourceParam T theResource, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
+			@Validate.Profile String theProfile) {
+		return validate(theResource, null, theRawResource, theEncoding, theMode, theProfile);
+	}
+		
+	@Validate
 	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
 			@Validate.Profile String theProfile) {
 
@@ -177,7 +183,8 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		validator.setValidateAgainstStandardSchema(true);
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResource);
-		for (BaseIssue next : result.getOperationOutcome().getIssue()) {
+		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
+		for (BaseIssue next : operationOutcome.getIssue()) {
 			oo.getIssue().add((Issue) next);
 		}
 

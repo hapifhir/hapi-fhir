@@ -21,9 +21,11 @@ package ca.uhn.fhir.model.api;
  */
 
 import java.io.InputStream;
+import java.util.Date;
 
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -55,5 +57,7 @@ public interface IFhirVersion {
 	BaseCodingDt newCodingDt();
 
 	IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext);
+
+	IPrimitiveType<Date> getLastUpdated(IBaseResource theResource);
 
 }

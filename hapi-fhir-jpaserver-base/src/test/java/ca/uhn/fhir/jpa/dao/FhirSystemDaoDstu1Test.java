@@ -88,19 +88,19 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testHistory");
 		patient.addName().addFamily("Tester").addGiven("Joe");
-		IdDt pid = ourPatientDao.create(patient).getId().toVersionless();
+		IIdType pid = ourPatientDao.create(patient).getId().toVersionless();
 
 		Thread.sleep(10);
 		patient.setId(pid);
-		IdDt newpid = ourPatientDao.update(patient).getId();
+		IIdType newpid = ourPatientDao.update(patient).getId();
 
 		Thread.sleep(10);
 		patient.setId(pid);
-		IdDt newpid2 = ourPatientDao.update(patient).getId();
+		IIdType newpid2 = ourPatientDao.update(patient).getId();
 
 		Thread.sleep(10);
 		patient.setId(pid);
-		IdDt newpid3 = ourPatientDao.update(patient).getId();
+		IIdType newpid3 = ourPatientDao.update(patient).getId();
 
 		IBundleProvider values = ourSystemDao.history(start);
 		assertEquals(4, values.size());
@@ -113,7 +113,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 		Location loc = new Location();
 		loc.getAddress().addLine("AAA");
-		IdDt lid = ourLocationDao.create(loc).getId();
+		IIdType lid = ourLocationDao.create(loc).getId();
 
 		Location loc2 = new Location();
 		loc2.getAddress().addLine("AAA");
@@ -224,7 +224,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 		Observation o1 = new Observation();
 		o1.getName().setText("testGetAllTags02");
 		ResourceMetadataKeyEnum.TAG_LIST.put(o1, tl2);
-		IdDt o1id = ourObservationDao.create(o1).getId();
+		IIdType o1id = ourObservationDao.create(o1).getId();
 		assertTrue(o1id.getVersionIdPart() != null);
 
 		TagList postSystemTl = ourSystemDao.getAllTags();
@@ -241,7 +241,7 @@ public class FhirSystemDaoDstu1Test extends BaseJpaTest  {
 
 		o1.getResourceMetadata().remove(ResourceMetadataKeyEnum.TAG_LIST);
 		o1.setId(o1id);
-		IdDt o1id2 = ourObservationDao.update(o1).getId();
+		IIdType o1id2 = ourObservationDao.update(o1).getId();
 		assertTrue(o1id2.getVersionIdPart() != null);
 
 		tags2 = ourObservationDao.getTags(o1id);

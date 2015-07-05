@@ -693,7 +693,9 @@ class ModelScanner {
 			resourceDef = new RuntimePrimitiveDatatypeDefinition(theDatatypeDefinition, theClass, isStandardType(theClass));
 		}
 		myClassToElementDefinitions.put(theClass, resourceDef);
-		myNameToElementDefinitions.put(resourceName, resourceDef);
+		if (!theDatatypeDefinition.isSpecialization()) {
+			myNameToElementDefinitions.put(resourceName, resourceDef);
+		}
 
 		return resourceName;
 	}

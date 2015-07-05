@@ -1656,7 +1656,7 @@ public class XmlUtil {
 					version = attrs.getValue(BUNDLE_VERSION);
 				}
 				if (ourLog.isDebugEnabled()) {
-					ourLog.debug("FHIR XML procesing will use StAX implementation at {}\n  Title:         {}\n  Symbolic name: {}\n  Vendor:        {}\n  Version:       {}", rootUrl, title, symbolicName, vendor, version);
+					ourLog.debug("FHIR XML procesing will use StAX implementation at {}\n  Title:         {}\n  Symbolic name: {}\n  Vendor:        {}\n  Version:       {}", new Object[] { rootUrl, title, symbolicName, vendor, version } );
 				} else {
 					ourLog.info("FHIR XML procesing will use StAX implementation '{}' version '{}'", title, version);
 				}

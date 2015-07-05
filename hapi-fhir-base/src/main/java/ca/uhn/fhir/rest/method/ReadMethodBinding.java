@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,7 +61,9 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	private Integer myIdIndex;
 	private boolean mySupportsVersion;
 	private Integer myVersionIdIndex;
+	private Class<? extends IIdType> myIdParameterType;
 
+	@SuppressWarnings("unchecked")
 	public ReadMethodBinding(Class<? extends IBaseResource> theAnnotatedResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theAnnotatedResourceType, theMethod, theContext, theProvider);
 
@@ -69,17 +72,19 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		Integer idIndex = MethodUtil.findIdParameterIndex(theMethod);
 		Integer versionIdIndex = MethodUtil.findVersionIdParameterIndex(theMethod);
 
+		Class<?>[] parameterTypes = theMethod.getParameterTypes();
+
 		mySupportsVersion = theMethod.getAnnotation(Read.class).version();
 		myIdIndex = idIndex;
 		myVersionIdIndex = versionIdIndex;
 
-		if (myIdIndex== null) {
+		if (myIdIndex == null) {
 			throw new ConfigurationException("@" + Read.class.getSimpleName() + " method " + theMethod.getName() + " on type \"" + theMethod.getDeclaringClass().getName() + "\" does not have a parameter annotated with @" + IdParam.class.getSimpleName());
 		}
-		
-		Class<?>[] parameterTypes = theMethod.getParameterTypes();
-		if (!IdDt.class.equals(parameterTypes[myIdIndex])) {
-			throw new ConfigurationException("ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myIdIndex]);
+		myIdParameterType = (Class<? extends IIdType>) parameterTypes[myIdIndex];
+
+		if (!IIdType.class.isAssignableFrom(myIdParameterType)) {
+			throw new ConfigurationException("ID parameter must be of type IdDt or IdType - Found: " + myIdParameterType);
 		}
 		if (myVersionIdIndex != null && !IdDt.class.equals(parameterTypes[myVersionIdIndex])) {
 			throw new ConfigurationException("Version ID parameter must be of type: " + IdDt.class.getCanonicalName() + " - Found: " + parameterTypes[myVersionIdIndex]);
@@ -173,7 +178,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	@Override
 	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
-		
+
 		IBaseBinary resource = (IBaseBinary) getContext().getResourceDefinition("Binary").newInstance();
 		resource.setContentType(theResponseMimeType);
 		resource.setContent(contents);
@@ -194,7 +199,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 
 	@Override
 	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
-		theMethodParams[myIdIndex] = theRequest.getId();
+		theMethodParams[myIdIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParameterType);
 		if (myVersionIdIndex != null) {
 			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
 		}
@@ -207,7 +212,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 			if (retVal.size() == 1 && StringUtils.isNotBlank(ifNoneMatch)) {
 				List<IBaseResource> responseResources = retVal.getResources(0, 1);
 				IBaseResource responseResource = responseResources.get(0);
-				
+
 				ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
 				if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
 					if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
@@ -230,19 +235,19 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 		return mySupportsVersion || myVersionIdIndex != null;
 	}
 
-	public static HttpGetClientInvocation createAbsoluteReadInvocation(IdDt theId) {
+	public static HttpGetClientInvocation createAbsoluteReadInvocation(IIdType theId) {
 		return new HttpGetClientInvocation(theId.toVersionless().getValue());
 	}
 
-	public static HttpGetClientInvocation createAbsoluteVReadInvocation(IdDt theId) {
+	public static HttpGetClientInvocation createAbsoluteVReadInvocation(IIdType theId) {
 		return new HttpGetClientInvocation(theId.getValue());
 	}
 
-	public static HttpGetClientInvocation createReadInvocation(IdDt theId, String theResourceName) {
+	public static HttpGetClientInvocation createReadInvocation(IIdType theId, String theResourceName) {
 		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart()).getValue());
 	}
 
-	public static HttpGetClientInvocation createVReadInvocation(IdDt theId, String theResourceName) {
+	public static HttpGetClientInvocation createVReadInvocation(IIdType theId, String theResourceName) {
 		return new HttpGetClientInvocation(new IdDt(theResourceName, theId.getIdPart(), theId.getVersionIdPart()).getValue());
 	}
 

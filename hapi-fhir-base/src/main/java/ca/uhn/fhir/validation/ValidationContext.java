@@ -20,18 +20,18 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 class ValidationContext<T> {
 
 	private final IEncoder myEncoder;
 	private final FhirContext myFhirContext;
-	private BaseOperationOutcome myOperationOutcome;
+	private IBaseOperationOutcome myOperationOutcome;
 	private final T myResource;
 	private String myXmlEncodedResource;
 private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationContext.class);
@@ -45,10 +45,10 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		return myFhirContext;
 	}
 
-	public BaseOperationOutcome getOperationOutcome() {
+	public IBaseOperationOutcome getOperationOutcome() {
 		if (myOperationOutcome == null) {
 			try {
-				myOperationOutcome = (BaseOperationOutcome) myFhirContext.getResourceDefinition("OperationOutcome").getImplementingClass().newInstance();
+				myOperationOutcome = (IBaseOperationOutcome) myFhirContext.getResourceDefinition("OperationOutcome").getImplementingClass().newInstance();
 			} catch (Exception e1) {
 				ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
 				throw new InternalErrorException("Failed to instantiate OperationOutcome resource instance", e1);

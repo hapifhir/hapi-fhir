@@ -50,7 +50,7 @@ public class BaseSearchParamExtractor {
 				values.addAll(t.getValues(theResource, nextPathTrimmed));
 			} catch (Exception e) {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", nextPathTrimmed, def.getName(), e.toString());
+				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() } );
 			}
 		}
 		return values;

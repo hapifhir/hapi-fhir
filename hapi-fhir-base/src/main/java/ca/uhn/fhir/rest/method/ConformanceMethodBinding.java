@@ -22,10 +22,11 @@ package ca.uhn.fhir.rest.method;
 
 import java.lang.reflect.Method;
 
+import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.base.resource.BaseConformance;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
 import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -43,7 +44,9 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 //		if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
 //			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
 //		}
-		if (getMethodReturnType() != MethodReturnTypeEnum.RESOURCE || !BaseConformance.class.isAssignableFrom((Class<?>) theMethod.getGenericReturnType())) {
+		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
+		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
+		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
 			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
@@ -70,7 +73,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		IResource conf = (IResource) invokeServerMethod(theMethodParams);
+		IBaseResource conf = (IBaseResource) invokeServerMethod(theMethodParams);
 		return new SimpleBundleProvider(conf);
 	}
 

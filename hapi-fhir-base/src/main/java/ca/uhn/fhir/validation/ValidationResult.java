@@ -20,7 +20,10 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
  * Encapsulates the results of validation
@@ -29,50 +32,48 @@ import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
  * @since 0.7
  */
 public class ValidationResult {
-    private BaseOperationOutcome myOperationOutcome;
-    private boolean isSuccessful;
+	private IBaseOperationOutcome myOperationOutcome;
+	private boolean myIsSuccessful;
+	private FhirContext myCtx;
 
-    private ValidationResult(BaseOperationOutcome myOperationOutcome, boolean isSuccessful) {
-        this.myOperationOutcome = myOperationOutcome;
-        this.isSuccessful = isSuccessful;
-    }
+	private ValidationResult(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, boolean isSuccessful) {
+		this.myCtx = theCtx;
+		this.myOperationOutcome = theOperationOutcome;
+		this.myIsSuccessful = isSuccessful;
+	}
 
-    public static ValidationResult valueOf(BaseOperationOutcome myOperationOutcome) {
-        boolean noIssues = myOperationOutcome == null || myOperationOutcome.getIssue().isEmpty();
-        return new ValidationResult(myOperationOutcome, noIssues);
-    }
+	public static ValidationResult valueOf(FhirContext theCtx, IBaseOperationOutcome myOperationOutcome) {
+		boolean noIssues = !OperationOutcomeUtil.hasIssues(theCtx, myOperationOutcome);
+		return new ValidationResult(theCtx, myOperationOutcome, noIssues);
+	}
 
-    public BaseOperationOutcome getOperationOutcome() {
-        return myOperationOutcome;
-    }
+	public IBaseOperationOutcome getOperationOutcome() {
+		return myOperationOutcome;
+	}
 
-    @Override
-    public String toString() {
-        return "ValidationResult{" +
-                "myOperationOutcome=" + myOperationOutcome +
-                ", isSuccessful=" + isSuccessful +
-                ", description='" + toDescription() + '\'' +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "ValidationResult{" + "myOperationOutcome=" + myOperationOutcome + ", isSuccessful=" + myIsSuccessful + ", description='" + toDescription() + '\'' + '}';
+	}
 
-    private String toDescription() {
-        StringBuilder b = new StringBuilder(100);
-        if (myOperationOutcome != null && myOperationOutcome.getIssue().size() > 0) {
-            BaseOperationOutcome.BaseIssue issueFirstRep = myOperationOutcome.getIssueFirstRep();
-            b.append(issueFirstRep.getDetailsElement().getValue());
-            b.append(" - ");
-            b.append(issueFirstRep.getLocationFirstRep().getValue());
-        }else {
-        	b.append("No issues");
-        }
-        return b.toString();
-    }
+	private String toDescription() {
+		StringBuilder b = new StringBuilder(100);
+		if (myOperationOutcome != null && OperationOutcomeUtil.hasIssues(myCtx, myOperationOutcome)) {
+			b.append(OperationOutcomeUtil.getFirstIssueDetails(myCtx, myOperationOutcome));
+			b.append(" - ");
+			b.append(OperationOutcomeUtil.getFirstIssueLocation(myCtx, myOperationOutcome));
+		} else {
+			b.append("No issues");
+		}
+		return b.toString();
+	}
 
-    /**
-     * Was the validation successful
-     * @return true if the validation was successful
-     */
-    public boolean isSuccessful() {
-        return isSuccessful;
-    }
+	/**
+	 * Was the validation successful
+	 * 
+	 * @return true if the validation was successful
+	 */
+	public boolean isSuccessful() {
+		return myIsSuccessful;
+	}
 }

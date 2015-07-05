@@ -24,38 +24,24 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
-import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.Create;
-import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Since;
-import ca.uhn.fhir.rest.annotation.Update;
-import ca.uhn.fhir.rest.annotation.Validate;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJpaProvider implements IResourceProvider {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProvider.class);
-
 	private FhirContext myContext;
-
 	private IFhirResourceDao<T> myDao;
 
 	public BaseJpaResourceProvider() {
@@ -136,21 +122,6 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 	@Required
 	public void setDao(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
-	}
-
-	@Validate
-	public MethodOutcome validate(HttpServletRequest theRequest, @ResourceParam T theResource) {
-		startRequest(theRequest);
-		try {
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome(new OperationOutcome());
-			BaseIssue issue = retVal.getOperationOutcome().addIssue();
-			issue.getSeverityElement().setValue("information");
-			issue.setDetails("Resource validates successfully");
-			return retVal;
-		} finally {
-			endRequest(theRequest);
-		}
 	}
 
 }

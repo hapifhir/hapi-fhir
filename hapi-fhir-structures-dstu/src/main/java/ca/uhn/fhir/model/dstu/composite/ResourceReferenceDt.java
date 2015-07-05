@@ -38,6 +38,8 @@ package ca.uhn.fhir.model.dstu.composite;
 
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.model.api.ICompositeDatatype;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.api.IResource;
@@ -110,7 +112,7 @@ public class ResourceReferenceDt
 	 * @param theResourceId
 	 *            The reference itself
 	 */
-	public ResourceReferenceDt(IdDt theResourceId) {
+	public ResourceReferenceDt(IIdType theResourceId) {
 		setReference(theResourceId);
 	}
 

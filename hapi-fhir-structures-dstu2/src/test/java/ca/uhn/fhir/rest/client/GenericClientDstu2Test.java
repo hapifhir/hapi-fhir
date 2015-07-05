@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -1174,8 +1175,12 @@ public class GenericClientDstu2Test {
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
-		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		idx++;
+	}
+
+	private OperationOutcome toOo(IBaseOperationOutcome theOperationOutcome) {
+		return (OperationOutcome) theOperationOutcome;
 	}
 
 	@Test
@@ -1209,7 +1214,7 @@ public class GenericClientDstu2Test {
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
-		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		idx++;
 
 		response = client.validate().resource(ourCtx.newXmlParser().encodeResourceToString(p)).execute();
@@ -1217,7 +1222,7 @@ public class GenericClientDstu2Test {
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
-		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		idx++;
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).execute();
@@ -1225,7 +1230,7 @@ public class GenericClientDstu2Test {
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", extractBody(capt, idx));
 		assertNotNull(response.getOperationOutcome());
-		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		idx++;
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
@@ -1233,7 +1238,7 @@ public class GenericClientDstu2Test {
 		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
 		assertThat(extractBody(capt, idx), containsString("\"resourceType\":\"Parameters\",\n"));
 		assertNotNull(response.getOperationOutcome());
-		assertEquals("FOOBAR", response.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		idx++;
 	}
 

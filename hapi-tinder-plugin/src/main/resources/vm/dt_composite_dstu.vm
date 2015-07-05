@@ -213,7 +213,7 @@ public class ${className}
 	 * @param theId
 	 *            The reference itself
 	 */
-	public ResourceReferenceDt(IdDt theResourceId) {
+	public ResourceReferenceDt(org.hl7.fhir.instance.model.api.IIdType theResourceId) {
 		setReference(theResourceId);
 	}
 #end

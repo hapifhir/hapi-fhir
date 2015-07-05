@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -65,7 +66,7 @@ public class ResourceValidatorDstu2Test {
 		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, result.getOperationOutcome().getIssue().size());
+		assertEquals(2, ((OperationOutcome)result.getOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("2000-15-31"));
 	}
 
@@ -156,9 +157,10 @@ public class ResourceValidatorDstu2Test {
 			val.validate(p);
 			fail();
 		} catch (ValidationFailureException e) {
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-			assertEquals(1, e.getOperationOutcome().getIssue().size());
-			assertThat(e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
+			OperationOutcome operationOutcome = (OperationOutcome) e.getOperationOutcome();
+			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+			assertEquals(1, operationOutcome.getIssue().size());
+			assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
 		}
 	}
 

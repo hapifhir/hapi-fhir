@@ -577,7 +577,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 				if (isBlank(ref.getChain())) {
 					if (resourceId.contains("/")) {
-						IdDt dt = new IdDt(resourceId);
+						IIdType dt = new IdDt(resourceId);
 						resourceId = dt.getIdPart();
 					}
 					Long targetPid = translateForcedIdToPid(new IdDt(resourceId));
@@ -780,7 +780,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public void addTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {
@@ -1062,10 +1062,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public DaoMethodOutcome delete(IdDt theId) {
+	public DaoMethodOutcome delete(IIdType theId) {
 		StopWatch w = new StopWatch();
 		final ResourceTable entity = readEntityLatestVersion(theId);
-		if (theId.hasVersionIdPart() && theId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
+		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new InvalidRequestException("Trying to update " + theId + " but this is not the current version");
 		}
 
@@ -1169,7 +1169,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public TagList getTags(IdDt theResourceId) {
+	public TagList getTags(IIdType theResourceId) {
 		StopWatch w = new StopWatch();
 		TagList retVal = super.getTags(myResourceType, theResourceId);
 		ourLog.info("Processed getTags on {} in {}ms", theResourceId, w.getMillisAndRestart());
@@ -1185,7 +1185,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public IBundleProvider history(final IdDt theId, final Date theSince) {
+	public IBundleProvider history(final IIdType theId, final Date theSince) {
 		final InstantDt end = createHistoryToTimestamp();
 		final String resourceType = getContext().getResourceDefinition(myResourceType).getName();
 
@@ -1375,7 +1375,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public MetaDt metaAddOperation(IdDt theResourceId, MetaDt theMetaAdd) {
+	public MetaDt metaAddOperation(IIdType theResourceId, MetaDt theMetaAdd) {
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theResourceId);
 		if (entity == null) {
@@ -1415,7 +1415,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public MetaDt metaDeleteOperation(IdDt theResourceId, MetaDt theMetaDel) {
+	public MetaDt metaDeleteOperation(IIdType theResourceId, MetaDt theMetaDel) {
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theResourceId);
 		if (entity == null) {
@@ -1461,7 +1461,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public MetaDt metaGetOperation(IdDt theId) {
+	public MetaDt metaGetOperation(IIdType theId) {
 		Long pid = super.translateForcedIdToPid(theId);
 
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t WHERE t.myResourceType = :res_type AND t.myResourceId = :res_id)";
@@ -1494,7 +1494,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public T read(IdDt theId) {
+	public T read(IIdType theId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
 		StopWatch w = new StopWatch();
@@ -1513,7 +1513,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public BaseHasResource readEntity(IdDt theId) {
+	public BaseHasResource readEntity(IIdType theId) {
 		boolean checkForForcedId = true;
 
 		BaseHasResource entity = readEntity(theId, checkForForcedId);
@@ -1522,13 +1522,13 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId) {
+	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
 		Long pid = translateForcedIdToPid(theId);
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
 		if (theId.hasVersionIdPart()) {
-			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
+			if (entity.getVersion() != Long.parseLong(theId.getVersionIdPart())) {
 				entity = null;
 			}
 		}
@@ -1539,7 +1539,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						"SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
-				q.setParameter("RVER", theId.getVersionIdPartAsLong());
+				q.setParameter("RVER", Long.parseLong(theId.getVersionIdPart()));
 				entity = q.getSingleResult();
 			}
 			if (entity == null) {
@@ -1555,7 +1555,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return entity;
 	}
 
-	private ResourceTable readEntityLatestVersion(IdDt theId) {
+	private ResourceTable readEntityLatestVersion(IIdType theId) {
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, translateForcedIdToPid(theId));
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
@@ -1565,7 +1565,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	@Override
-	public void removeTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
+	public void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm) {
 		StopWatch w = new StopWatch();
 		BaseHasResource entity = readEntity(theId);
 		if (entity == null) {
@@ -1728,7 +1728,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 								previouslyLoadedPids.add(next.getIdElement().toUnqualifiedVersionless());
 							}
 
-							Set<IdDt> includePids = new HashSet<IdDt>();
+							Set<IIdType> includePids = new HashSet<IIdType>();
 							List<IBaseResource> resources = retVal;
 							do {
 								includePids.clear();
@@ -1754,7 +1754,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 												continue;
 											}
 
-											IdDt nextId = rr.getReference().toUnqualified();
+											IIdType nextId = rr.getReference().toUnqualified();
 											if (!previouslyLoadedPids.contains(nextId)) {
 												includePids.add(nextId);
 												previouslyLoadedPids.add(nextId);
@@ -1842,7 +1842,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 					} else {
 						for (IQueryParameterType next : nextValue) {
 							String value = next.getValueAsQueryToken();
-							IdDt valueId = new IdDt(value);
+							IIdType valueId = new IdDt(value);
 							try {
 								long valueLong = translateForcedIdToPid(valueId);
 								joinPids.add(valueLong);
@@ -2039,7 +2039,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 		final ResourceTable entity;
 
-		IdDt resourceId;
+		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
 			Set<Long> match = processMatchUrl(theMatchUrl, myResourceType);
 			if (match.size() > 1) {
@@ -2067,7 +2067,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			}
 		}
 
-		if (resourceId.hasVersionIdPart() && resourceId.getVersionIdPartAsLong().longValue() != entity.getVersion()) {
+		if (resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) != entity.getVersion()) {
 			throw new InvalidRequestException("Trying to update " + resourceId + " but this is not the current version");
 		}
 
@@ -2078,7 +2078,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return toMethodOutcome(savedEntity, theResource).setCreated(false);
 	}
 
-	private void validateGivenIdIsAppropriateToRetrieveResource(IdDt theId, BaseHasResource entity) {
+	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
 		if (entity.getForcedId() != null) {
 			if (theId.isIdPartValidLong()) {
 				// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
@@ -2097,7 +2097,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		}
 	}
 
-	private void validateResourceTypeAndThrowIllegalArgumentException(IdDt theId) {
+	private void validateResourceTypeAndThrowIllegalArgumentException(IIdType theId) {
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
 			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}

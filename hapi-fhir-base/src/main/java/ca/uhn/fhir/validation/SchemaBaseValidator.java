@@ -51,6 +51,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 class SchemaBaseValidator implements IValidator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
@@ -85,7 +86,8 @@ class SchemaBaseValidator implements IValidator {
 			validator.setErrorHandler(handler);
 			String encodedResource = theContext.getXmlEncodedResource();
 
-			// ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString((Bundle) theContext.getResource()));
+			// ourLog.info(new FhirContext().newXmlParser().setPrettyPrint(true).encodeBundleToString((Bundle)
+			// theContext.getResource()));
 
 			validator.validate(new StreamSource(new StringReader(encodedResource)));
 		} catch (SAXException e) {
@@ -123,25 +125,25 @@ class SchemaBaseValidator implements IValidator {
 	private Source loadXml(String theVersion, String theSystemId, String theSchemaName) {
 		String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSchemaName;
 		ourLog.debug("Going to load resource: {}", pathToBase);
-		InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
+		InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 		if (baseIs == null) {
 			throw new InternalErrorException("No FHIR-BASE schema found");
 		}
-		 baseIs = new BOMInputStream(baseIs, false);
-		 InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
-		 Source baseSource = new StreamSource(baseReader, theSystemId);
+		baseIs = new BOMInputStream(baseIs, false);
+		InputStreamReader baseReader = new InputStreamReader(baseIs, Charset.forName("UTF-8"));
+		Source baseSource = new StreamSource(baseReader, theSystemId);
 
-//		String schema;
-//		try {
-//			schema = IOUtils.toString(baseIs, Charset.forName("UTF-8"));
-//		} catch (IOException e) {
-//			throw new InternalErrorException(e);
-//		}
-//
-//		ourLog.info("Schema is:\n{}", schema);
-//		
-//		Source baseSource = new StreamSource(new StringReader(schema), theSystemId);
-//		Source baseSource = new StreamSource(baseIs, theSystemId);
+		// String schema;
+		// try {
+		// schema = IOUtils.toString(baseIs, Charset.forName("UTF-8"));
+		// } catch (IOException e) {
+		// throw new InternalErrorException(e);
+		// }
+		//
+		// ourLog.info("Schema is:\n{}", schema);
+		//
+		// Source baseSource = new StreamSource(new StringReader(schema), theSystemId);
+		// Source baseSource = new StreamSource(baseIs, theSystemId);
 		return baseSource;
 	}
 
@@ -167,11 +169,10 @@ class SchemaBaseValidator implements IValidator {
 			myContext = theContext;
 		}
 
-		private void addIssue(SAXParseException theException, String severity) {
-			BaseIssue issue = myContext.getOperationOutcome().addIssue();
-			issue.getSeverityElement().setValue(severity);
-			issue.getDetailsElement().setValue(theException.getLocalizedMessage());
-			issue.addLocation("Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]");
+		private void addIssue(SAXParseException theException, String theSeverity) {
+			String details = theException.getLocalizedMessage();
+			String location = "Line[" + theException.getLineNumber() + "] Col[" + theException.getColumnNumber() + "]";
+			OperationOutcomeUtil.addIssue(myContext.getFhirContext(), myContext.getOperationOutcome(), theSeverity, details, location);
 		}
 
 		@Override
@@ -205,12 +206,12 @@ class SchemaBaseValidator implements IValidator {
 				input.setPublicId(thePublicId);
 				input.setSystemId(theSystemId);
 				input.setBaseURI(theBaseURI);
-//				String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
+				// String pathToBase = "ca/uhn/fhir/model/" + myVersion + "/schema/" + theSystemId;
 				String pathToBase = myCtx.getVersion().getPathToSchemaDefinitions() + '/' + theSystemId;
 
 				ourLog.debug("Loading referenced schema file: " + pathToBase);
 
-				InputStream baseIs = FhirValidator.class.getClassLoader().getResourceAsStream(pathToBase);
+				InputStream baseIs = FhirValidator.class.getResourceAsStream(pathToBase);
 				if (baseIs == null) {
 					throw new InternalErrorException("Schema file not found: " + pathToBase);
 				}

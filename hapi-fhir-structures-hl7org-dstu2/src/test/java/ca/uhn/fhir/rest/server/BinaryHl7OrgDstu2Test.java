@@ -1,9 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,15 +20,14 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.Binary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -43,13 +40,13 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class BinaryTestDstu2 {
+public class BinaryHl7OrgDstu2Test {
 
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static Binary ourLast;
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryTestDstu2.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryHl7OrgDstu2Test.class);
 
 	private static int ourPort;
 
@@ -148,8 +145,8 @@ public class BinaryTestDstu2 {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newJsonParser().parseBundle(responseContent);
-		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+		org.hl7.fhir.instance.model.Bundle bundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
@@ -166,8 +163,8 @@ public class BinaryTestDstu2 {
 
 		ourLog.info(responseContent);
 
-		Bundle bundle = ourCtx.newXmlParser().parseBundle(responseContent);
-		Binary bin = (Binary) bundle.getEntries().get(0).getResource();
+		org.hl7.fhir.instance.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, responseContent);
+		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
@@ -212,7 +209,7 @@ public class BinaryTestDstu2 {
 		}
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<? extends IBaseResource> getResourceType() {
 			return Binary.class;
 		}
 

@@ -144,7 +144,7 @@ public abstract class BaseQueryParameter implements IParameter {
 
 		if (paramList.isEmpty()) {
 
-			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", getName(), qualified, getQualifierWhitelist());
+			ourLog.debug("No value for parameter '{}' - Qualified names {} and qualifier whitelist {}", new Object[] { getName(), qualified, getQualifierWhitelist() } );
 
 			if (handlesMissing()) {
 				return parse(theRequest.getServer().getFhirContext(), paramList);

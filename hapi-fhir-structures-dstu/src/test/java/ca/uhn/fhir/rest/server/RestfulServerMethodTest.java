@@ -1155,7 +1155,7 @@ public class RestfulServerMethodTest {
 		public MethodOutcome deletePatient(@IdParam IdDt theId) {
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setOperationOutcome(new OperationOutcome());
-			retVal.getOperationOutcome().addIssue().setDetails(theId.getValue());
+			((OperationOutcome)retVal.getOperationOutcome()).addIssue().setDetails(theId.getValue());
 			return retVal;
 		}
 

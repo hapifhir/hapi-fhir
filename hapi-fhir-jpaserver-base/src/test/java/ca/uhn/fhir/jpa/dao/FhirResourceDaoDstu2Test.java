@@ -1,22 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,6 +15,7 @@ import java.util.Set;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -113,10 +99,10 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	public void testQuestionnaireTitleGetsIndexed() {
 		Questionnaire q = new Questionnaire();
 		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_TITLE");
-		IdDt qid1 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless(); 
+		IIdType qid1 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless(); 
 		q = new Questionnaire();
 		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_NOTITLE");
-		IdDt qid2 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless();
+		IIdType qid2 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless();
 		
 		IBundleProvider results = ourQuestionnaireDao.search("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE"));
 		assertEquals(1, results.size());
@@ -131,7 +117,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testChoiceParam01");
 		o1.setValue(new CodeableConceptDt("testChoiceParam01CCS", "testChoiceParam01CCV"));
-		IdDt id1 = ourObservationDao.create(o1).getId();
+		IIdType id1 = ourObservationDao.create(o1).getId();
 
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV"));
@@ -145,7 +131,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParam02");
 		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01")).setEnd(new DateTimeDt("2001-01-03")));
-		IdDt id2 = ourObservationDao.create(o2).getId();
+		IIdType id2 = ourObservationDao.create(o2).getId();
 
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_DATE, new DateParam("2001-01-02"));
@@ -159,7 +145,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateAlt02");
 		o2.setApplies(new DateTimeDt("2015-03-08T11:11:11"));
-		IdDt id2 = ourObservationDao.create(o2).getId();
+		IIdType id2 = ourObservationDao.create(o2).getId();
 
 		{
 			Set<Long> found = ourObservationDao.searchForIds(Observation.SP_DATE, new DateParam(">2001-01-02"));
@@ -176,7 +162,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
 		o3.setValue(new QuantityDt(QuantityComparatorEnum.GREATERTHAN, 123.0, "foo", "bar").setCode("bar"));
-		IdDt id3 = ourObservationDao.create(o3).getId();
+		IIdType id3 = ourObservationDao.create(o3).getId();
 
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", "foo", "bar"));
@@ -205,7 +191,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o4 = new Observation();
 		o4.getCode().addCoding().setSystem("foo").setCode("testChoiceParam04");
 		o4.setValue(new StringDt("testChoiceParam04Str"));
-		IdDt id4 = ourObservationDao.create(o4).getId();
+		IIdType id4 = ourObservationDao.create(o4).getId();
 
 		{
 			IBundleProvider found = ourObservationDao.search(Observation.SP_VALUE_STRING, new StringParam("testChoiceParam04Str"));
@@ -249,7 +235,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -438,9 +424,9 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	public void testDeleteResource() {
 		int initialHistory = ourPatientDao.history(null).size();
 
-		IdDt id1;
-		IdDt id2;
-		IdDt id2b;
+		IIdType id1;
+		IIdType id2;
+		IIdType id2b;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -502,7 +488,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
-		IdDt id = ourPatientDao.create(patient).getId();
+		IIdType id = ourPatientDao.create(patient).getId();
 		assertThat(id.getValue(), endsWith("/_history/1"));
 
 		// should be ok
@@ -522,11 +508,11 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
 		patient.setId(id.toUnqualifiedVersionless());
-		IdDt id2 = ourPatientDao.update(patient).getId();
+		IIdType id2 = ourPatientDao.update(patient).getId();
 
 		assertThat(id2.getValue(), endsWith("/_history/3"));
 
-		IdDt gotId = ourPatientDao.read(id.toUnqualifiedVersionless()).getId();
+		IIdType gotId = ourPatientDao.read(id.toUnqualifiedVersionless()).getId();
 		assertEquals(id2, gotId);
 	}
 
@@ -536,7 +522,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		Bundle request = new Bundle();
@@ -569,8 +555,8 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testHistoryByForcedId() {
-		IdDt idv1;
-		IdDt idv2;
+		IIdType idv1;
+		IIdType idv2;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("testHistoryByForcedId");
@@ -706,26 +692,26 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	public void testPersistResourceLink() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testPersistResourceLink01");
-		IdDt patientId01 = ourPatientDao.create(patient).getId();
+		IIdType patientId01 = ourPatientDao.create(patient).getId();
 
 		Patient patient02 = new Patient();
 		patient02.addIdentifier().setSystem("urn:system").setValue("testPersistResourceLink02");
-		IdDt patientId02 = ourPatientDao.create(patient02).getId();
+		IIdType patientId02 = ourPatientDao.create(patient02).getId();
 
 		Observation obs01 = new Observation();
 		obs01.setApplies(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
 		obs02.setApplies(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(patientId02));
-		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
 		// Create another type, that shouldn't be returned
 		DiagnosticReport dr01 = new DiagnosticReport();
 		dr01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt drId01 = ourDiagnosticReportDao.create(dr01).getId();
+		IIdType drId01 = ourDiagnosticReportDao.create(dr01).getId();
 
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
 
@@ -871,12 +857,12 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testReadVorcedIdVersionHistory01");
 		p1.setId("testReadVorcedIdVersionHistory");
-		IdDt p1id = ourPatientDao.update(p1).getId();
+		IIdType p1id = ourPatientDao.update(p1).getId();
 		assertEquals("testReadVorcedIdVersionHistory", p1id.getIdPart());
 
 		p1.addIdentifier().setSystem("urn:system").setValue("testReadVorcedIdVersionHistory02");
 		p1.setId(p1id);
-		IdDt p1idv2 = ourPatientDao.update(p1).getId();
+		IIdType p1idv2 = ourPatientDao.update(p1).getId();
 		assertEquals("testReadVorcedIdVersionHistory", p1idv2.getIdPart());
 
 		assertNotEquals(p1id.getValue(), p1idv2.getValue());
@@ -894,7 +880,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		String methodName = "testReverseIncludes";
 		Organization org = new Organization();
 		org.setName("X" + methodName + "X");
-		IdDt orgId = ourOrganizationDao.create(org).getId();
+		IIdType orgId = ourOrganizationDao.create(org).getId();
 
 		Patient pat = new Patient();
 		pat.addName().addFamily("X" + methodName + "X");
@@ -917,7 +903,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		deleteEverything();
 
 		String methodName = "testResourceInstanceMetaOperation";
-		IdDt id1, id2;
+		IIdType id1, id2;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1035,7 +1021,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		deleteEverything();
 
 		String methodName = "testResourceMetaOperation";
-		IdDt id1, id2;
+		IIdType id1, id2;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1172,13 +1158,13 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchByIdParam() {
-		IdDt id1;
+		IIdType id1;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1 = ourPatientDao.create(patient).getId();
 		}
-		IdDt id2;
+		IIdType id2;
 		{
 			Organization patient = new Organization();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1202,12 +1188,12 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
 		o1.setValue(new StringDt("testSearchCompositeParamS01"));
-		IdDt id1 = ourObservationDao.create(o1).getId();
+		IIdType id1 = ourObservationDao.create(o1).getId();
 
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamN01");
 		o2.setValue(new StringDt("testSearchCompositeParamS02"));
-		IdDt id2 = ourObservationDao.create(o2).getId();
+		IIdType id2 = ourObservationDao.create(o2).getId();
 
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
@@ -1232,12 +1218,12 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
 		o1.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T11:11:11")));
-		IdDt id1 = ourObservationDao.create(o1).getId().toUnqualifiedVersionless();
+		IIdType id1 = ourObservationDao.create(o1).getId().toUnqualifiedVersionless();
 
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
 		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T12:12:12")));
-		IdDt id2 = ourObservationDao.create(o2).getId().toUnqualifiedVersionless();
+		IIdType id2 = ourObservationDao.create(o2).getId().toUnqualifiedVersionless();
 
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
@@ -1271,7 +1257,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchLanguageParam() {
-		IdDt id1;
+		IIdType id1;
 		{
 			Patient patient = new Patient();
 			patient.getLanguage().setValue("en_CA");
@@ -1279,7 +1265,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			patient.addName().addFamily("testSearchLanguageParam").addGiven("Joe");
 			id1 = ourPatientDao.create(patient).getId();
 		}
-		IdDt id2;
+		IIdType id2;
 		{
 			Patient patient = new Patient();
 			patient.getLanguage().setValue("en_US");
@@ -1318,14 +1304,14 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Thread.sleep(sleep);
 
 		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
-		IdDt id1a;
+		IIdType id1a;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().addFamily(methodName).addGiven("Joe");
 			id1a = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
-		IdDt id1b;
+		IIdType id1b;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
@@ -1337,7 +1323,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
 		Thread.sleep(1100);
 		
-		IdDt id2;
+		IIdType id2;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
@@ -1347,33 +1333,33 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		
 		{
 			SearchParameterMap params = new SearchParameterMap();
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, hasItems(id1a, id1b, id2));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(beforeAny, null));
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, hasItems(id1a, id1b, id2));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(beforeR2, null));
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, hasItems(id2));
 			assertThat(patients, not(hasItems(id1a, id1b)));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(beforeAny, beforeR2));
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients.toString(), patients, not(hasItems(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(null, beforeR2));
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, (hasItems(id1a, id1b)));
 			assertThat(patients, not(hasItems(id2)));
 		}
@@ -1381,7 +1367,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchNameParam() {
-		IdDt id1;
+		IIdType id1;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1433,12 +1419,12 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue("testSearchNumberParam01");
 		e1.getLength().setSystem(BaseFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
-		IdDt id1 = ourEncounterDao.create(e1).getId();
+		IIdType id1 = ourEncounterDao.create(e1).getId();
 
 		Encounter e2 = new Encounter();
 		e2.addIdentifier().setSystem("foo").setValue("testSearchNumberParam02");
 		e2.getLength().setSystem(BaseFhirDao.UCUM_NS).setCode("year").setValue(2.0);
-		IdDt id2 = ourEncounterDao.create(e2).getId();
+		IIdType id2 = ourEncounterDao.create(e2).getId();
 		{
 			IBundleProvider found = ourEncounterDao.search(Encounter.SP_LENGTH, new NumberParam(">2"));
 			assertEquals(2, found.size());
@@ -1460,27 +1446,27 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChainXX");
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChain01");
-		IdDt patientId01 = ourPatientDao.create(patient).getId();
+		IIdType patientId01 = ourPatientDao.create(patient).getId();
 
 		Patient patient02 = new Patient();
 		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChainXX");
 		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChain02");
-		IdDt patientId02 = ourPatientDao.create(patient02).getId();
+		IIdType patientId02 = ourPatientDao.create(patient02).getId();
 
 		Observation obs01 = new Observation();
 		obs01.setApplies(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
 		obs02.setApplies(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(patientId02));
-		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
 		// Create another type, that shouldn't be returned
 		DiagnosticReport dr01 = new DiagnosticReport();
 		dr01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt drId01 = ourDiagnosticReportDao.create(dr01).getId();
+		IIdType drId01 = ourDiagnosticReportDao.create(dr01).getId();
 
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
 
@@ -1513,21 +1499,21 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
 		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypesXX");
-		IdDt patientId01 = ourPatientDao.create(patient).getId();
+		IIdType patientId01 = ourPatientDao.create(patient).getId();
 
 		Location loc01 = new Location();
 		loc01.getNameElement().setValue("testSearchResourceLinkWithChainWithMultipleTypes01");
-		IdDt locId01 = ourLocationDao.create(loc01).getId();
+		IIdType locId01 = ourLocationDao.create(loc01).getId();
 
 		Observation obs01 = new Observation();
 		obs01.setApplies(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
 		obs02.setApplies(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(locId01));
-		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
 		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", new Object[] { patientId01, locId01, obsId01, obsId02 });
 
@@ -1552,28 +1538,28 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		patient.setId("testSearchResourceLinkWithTextLogicalId01");
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithTextLogicalIdXX");
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithTextLogicalId01");
-		IdDt patientId01 = ourPatientDao.update(patient).getId();
+		IIdType patientId01 = ourPatientDao.update(patient).getId();
 
 		Patient patient02 = new Patient();
 		patient02.setId("testSearchResourceLinkWithTextLogicalId02");
 		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithTextLogicalIdXX");
 		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithTextLogicalId02");
-		IdDt patientId02 = ourPatientDao.update(patient02).getId();
+		IIdType patientId02 = ourPatientDao.update(patient02).getId();
 
 		Observation obs01 = new Observation();
 		obs01.setApplies(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt obsId01 = ourObservationDao.create(obs01).getId();
+		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
 		obs02.setApplies(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(patientId02));
-		IdDt obsId02 = ourObservationDao.create(obs02).getId();
+		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
 		// Create another type, that shouldn't be returned
 		DiagnosticReport dr01 = new DiagnosticReport();
 		dr01.setSubject(new ResourceReferenceDt(patientId01));
-		IdDt drId01 = ourDiagnosticReportDao.create(dr01).getId();
+		IIdType drId01 = ourDiagnosticReportDao.create(dr01).getId();
 
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[] { patientId01, patientId02, obsId01, obsId02, drId01 });
 
@@ -1625,9 +1611,9 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchWithMissingString() {
-		IdDt orgId = ourOrganizationDao.create(new Organization()).getId();
-		IdDt notMissing;
-		IdDt missing;
+		IIdType orgId = ourOrganizationDao.create(new Organization()).getId();
+		IIdType notMissing;
+		IIdType missing;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1647,7 +1633,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			StringParam param = new StringParam();
 			param.setMissing(false);
 			params.put(Patient.SP_FAMILY, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1656,7 +1642,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			StringParam param = new StringParam();
 			param.setMissing(true);
 			params.put(Patient.SP_FAMILY, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
@@ -1664,8 +1650,8 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchWithMissingQuantity() {
-		IdDt notMissing;
-		IdDt missing;
+		IIdType notMissing;
+		IIdType missing;
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1683,7 +1669,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			QuantityParam param = new QuantityParam();
 			param.setMissing(false);
 			params.put(Observation.SP_VALUE_QUANTITY, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1692,7 +1678,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			QuantityParam param = new QuantityParam();
 			param.setMissing(true);
 			params.put(Observation.SP_VALUE_QUANTITY, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
@@ -1700,8 +1686,8 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchWithToken() {
-		IdDt notMissing;
-		IdDt missing;
+		IIdType notMissing;
+		IIdType missing;
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1719,7 +1705,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			TokenParam param = new TokenParam();
 			param.setMissing(false);
 			params.put(Observation.SP_CODE, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1728,7 +1714,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			TokenParam param = new TokenParam();
 			param.setMissing(true);
 			params.put(Observation.SP_CODE, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
@@ -1736,9 +1722,9 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchWithMissingDate() {
-		IdDt orgId = ourOrganizationDao.create(new Organization()).getId();
-		IdDt notMissing;
-		IdDt missing;
+		IIdType orgId = ourOrganizationDao.create(new Organization()).getId();
+		IIdType notMissing;
+		IIdType missing;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1758,7 +1744,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			DateParam param = new DateParam();
 			param.setMissing(false);
 			params.put(Patient.SP_BIRTHDATE, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1767,7 +1753,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			DateParam param = new DateParam();
 			param.setMissing(true);
 			params.put(Patient.SP_BIRTHDATE, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
@@ -1775,9 +1761,9 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchWithMissingReference() {
-		IdDt orgId = ourOrganizationDao.create(new Organization()).getId().toUnqualifiedVersionless();
-		IdDt notMissing;
-		IdDt missing;
+		IIdType orgId = ourOrganizationDao.create(new Organization()).getId().toUnqualifiedVersionless();
+		IIdType notMissing;
+		IIdType missing;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -1797,7 +1783,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			ReferenceParam param = new ReferenceParam();
 			param.setMissing(false);
 			params.put(Patient.SP_ORGANIZATION, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, not(containsInRelativeOrder(missing)));
 			assertThat(patients, containsInRelativeOrder(notMissing));
 		}
@@ -1806,7 +1792,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			ReferenceParam param = new ReferenceParam();
 			param.setMissing(true);
 			params.put(Patient.SP_ORGANIZATION, param);
-			List<IdDt> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 			assertThat(patients, not(containsInRelativeOrder(orgId)));
@@ -1939,7 +1925,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testSearchWithIncludes() {
-		IdDt parentOrgId;
+		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
 			org.getNameElement().setValue("testSearchWithIncludes_O1Parent");
@@ -1949,7 +1935,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			Organization org = new Organization();
 			org.getNameElement().setValue("testSearchWithIncludes_O1");
 			org.setPartOf(new ResourceReferenceDt(parentOrgId));
-			IdDt orgId = ourOrganizationDao.create(org).getId();
+			IIdType orgId = ourOrganizationDao.create(org).getId();
 
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -2028,7 +2014,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			Organization org = new Organization();
 			org.setId("testSearchWithIncludesThatHaveTextId_id1");
 			org.getNameElement().setValue("testSearchWithIncludesThatHaveTextId_O1");
-			IdDt orgId = ourOrganizationDao.update(org).getId();
+			IIdType orgId = ourOrganizationDao.update(org).getId();
 			assertThat(orgId.getValue(), endsWith("Organization/testSearchWithIncludesThatHaveTextId_id1/_history/1"));
 
 			Patient patient = new Patient();
@@ -2066,26 +2052,26 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
 		p.addName().addFamily("testSortF1").addGiven("testSortG1");
 		p.setBirthDate(new DateDt("2001-01-01"));
-		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		// Create out of order
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
 		p.addName().addFamily("testSortF2").addGiven("testSortG2");
 		p.setBirthDate(new DateDt("2001-01-03"));
-		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
 		p.addName().addFamily("testSortF3").addGiven("testSortG3");
 		p.setBirthDate(new DateDt("2001-01-02"));
-		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
-		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
-		List<IdDt> actual;
+		List<IIdType> actual;
 		SearchParameterMap pm;
 
 		pm = new SearchParameterMap();
@@ -2117,28 +2103,28 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.setId(methodName);
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt idMethodName = ourPatientDao.update(p).getId().toUnqualifiedVersionless();
+		IIdType idMethodName = ourPatientDao.update(p).getId().toUnqualifiedVersionless();
 		assertEquals(methodName, idMethodName.getIdPart());
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
-		List<IdDt> actual;
+		List<IIdType> actual;
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
@@ -2167,25 +2153,25 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		p.addName().addFamily("testSortF1").addGiven("testSortG1");
-		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		// Create out of order
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		p.addName().addFamily("testSortF3").addGiven("testSortG3");
-		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
 		p.addName().addFamily("testSortF2").addGiven("testSortG2");
-		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
-		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
-		List<IdDt> actual;
+		List<IIdType> actual;
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testSortByString"));
@@ -2214,36 +2200,36 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		String methodName = "testSortByReference";
 		
 		Organization o1 = new Organization();
-		IdDt oid1 = ourOrganizationDao.create(o1).getId().toUnqualifiedVersionless();
+		IIdType oid1 = ourOrganizationDao.create(o1).getId().toUnqualifiedVersionless();
 		
 		Organization o2 = new Organization();
-		IdDt oid2 = ourOrganizationDao.create(o2).getId().toUnqualifiedVersionless();
+		IIdType oid2 = ourOrganizationDao.create(o2).getId().toUnqualifiedVersionless();
 		
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("testSortF1").addGiven("testSortG1");
 		p.getManagingOrganization().setReference(oid1);
-		IdDt id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("testSortF2").addGiven("testSortG2");
 		p.getManagingOrganization().setReference(oid2);
-		IdDt id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("testSortF3").addGiven("testSortG3");
 		p.getManagingOrganization().setReference(oid1);
-		IdDt id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 		
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.getManagingOrganization().setReference(oid2);
-		IdDt id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
-		List<IdDt> actual;
+		List<IIdType> actual;
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
@@ -2274,13 +2260,13 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	public void testStoreUnversionedResources() {
 		Organization o1 = new Organization();
 		o1.getNameElement().setValue("AAA");
-		IdDt o1id = ourOrganizationDao.create(o1).getId();
+		IIdType o1id = ourOrganizationDao.create(o1).getId();
 		assertTrue(o1id.hasVersionIdPart());
 
 		Patient p1 = new Patient();
 		p1.addName().addFamily("AAAA");
 		p1.getManagingOrganization().setReference(o1id);
-		IdDt p1id = ourPatientDao.create(p1).getId();
+		IIdType p1id = ourPatientDao.create(p1).getId();
 
 		p1 = ourPatientDao.read(p1id);
 
@@ -2296,7 +2282,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Organization org = new Organization();
 		org.setName("測試醫院");
 		org.addIdentifier().setSystem("urn:system").setValue("testStoreUtf8Characters_01");
-		IdDt orgId = ourOrganizationDao.create(org).getId();
+		IIdType orgId = ourOrganizationDao.create(org).getId();
 
 		Organization returned = ourOrganizationDao.read(orgId);
 		String val = ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(returned);
@@ -2357,7 +2343,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
 
 		MethodOutcome outcome = ourPatientDao.create(patient);
-		IdDt patientId = outcome.getId();
+		IIdType patientId = outcome.getId();
 		assertNotNull(patientId);
 		assertFalse(patientId.isEmpty());
 
@@ -2534,7 +2520,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IdDt id = ourPatientDao.create(p).getId();
+		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
 		p = new Patient();
@@ -2560,7 +2546,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
 
-		IdDt id = ourPatientDao.update(p).getId();
+		IIdType id = ourPatientDao.update(p).getId();
 		assertEquals("Patient/" + methodName, id.toUnqualifiedVersionless().getValue());
 
 		p = ourPatientDao.read(id);
@@ -2587,7 +2573,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2AAA");
 		p1.addName().addFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2AAA");
-		IdDt p1id = ourPatientDao.create(p1).getId();
+		IIdType p1id = ourPatientDao.create(p1).getId();
 
 		Patient p2 = new Patient();
 		p2.addIdentifier().setSystem("urn:system").setValue("testUpdateMaintainsSearchParamsDstu2BBB");
@@ -2601,7 +2587,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		// Update the name
 		p1.getNameFirstRep().getGivenFirstRep().setValue("testUpdateMaintainsSearchParamsDstu2BBB");
 		MethodOutcome update2 = ourPatientDao.update(p1);
-		IdDt p1id2 = update2.getId();
+		IIdType p1id2 = update2.getId();
 
 		ids = ourPatientDao.searchForIds(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA"));
 		assertEquals(0, ids.size());
@@ -2623,7 +2609,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
 		p1.addName().addFamily("Tester").addGiven("testUpdateRejectsInvalidTypes");
-		IdDt p1id = ourPatientDao.create(p1).getId();
+		IIdType p1id = ourPatientDao.create(p1).getId();
 
 		Organization p2 = new Organization();
 		p2.getNameElement().setValue("testUpdateRejectsInvalidTypes");
@@ -2664,10 +2650,10 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		return theSearch.getResources(0, theSearch.size());
 	}
 
-	private List<IdDt> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
-		List<IdDt> retVal = new ArrayList<IdDt>();
+	private List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theFound) {
+		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound.getResources(0, theFound.size())) {
-			retVal.add((IdDt) next.getIdElement().toUnqualifiedVersionless());
+			retVal.add((IIdType) next.getIdElement().toUnqualifiedVersionless());
 		}
 		return retVal;
 	}
@@ -2707,7 +2693,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		ourLog.info("Initial size: " + value.size());
 		for (IBaseResource next : value.getResources(0, value.size())) {
 			ourLog.info("Deleting: {}", next.getIdElement());
-			ourDeviceDao.delete((IdDt) next.getIdElement());
+			ourDeviceDao.delete((IIdType) next.getIdElement());
 		}
 
 		value = ourDeviceDao.search(new SearchParameterMap());

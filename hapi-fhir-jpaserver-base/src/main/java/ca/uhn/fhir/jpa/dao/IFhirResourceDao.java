@@ -24,19 +24,20 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 public interface IFhirResourceDao<T extends IResource> extends IDao {
 
-	void addTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
+	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
 	DaoMethodOutcome create(T theResource);
 
@@ -48,7 +49,7 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing);
 
-	DaoMethodOutcome delete(IdDt theResource);
+	DaoMethodOutcome delete(IIdType theResource);
 
 	DaoMethodOutcome deleteByUrl(String theString);
 
@@ -56,11 +57,11 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	Class<T> getResourceType();
 
-	TagList getTags(IdDt theResourceId);
+	TagList getTags(IIdType theResourceId);
 
 	IBundleProvider history(Date theSince);
 
-	IBundleProvider history(IdDt theId, Date theSince);
+	IBundleProvider history(IIdType theId, Date theSince);
 
 	IBundleProvider history(Long theId, Date theSince);
 
@@ -71,17 +72,17 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	 * @throws ResourceNotFoundException
 	 *             If the ID is not known to the server
 	 */
-	T read(IdDt theId);
+	T read(IIdType theId);
 
-	BaseHasResource readEntity(IdDt theId);
+	BaseHasResource readEntity(IIdType theId);
 
 	/**
 	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
 	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
-	BaseHasResource readEntity(IdDt theId, boolean theCheckForForcedId);
+	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId);
 
-	void removeTag(IdDt theId, TagTypeEnum theTagType, String theScheme, String theTerm);
+	void removeTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm);
 
 	IBundleProvider search(Map<String, IQueryParameterType> theParams);
 
@@ -114,15 +115,15 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaGetOperation(IdDt theId);
+	MetaDt metaGetOperation(IIdType theId);
 
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaDeleteOperation(IdDt theId1, MetaDt theMetaDel);
+	MetaDt metaDeleteOperation(IIdType theId1, MetaDt theMetaDel);
 
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaAddOperation(IdDt theId1, MetaDt theMetaAdd);
+	MetaDt metaAddOperation(IIdType theId1, MetaDt theMetaAdd);
 }

@@ -21,8 +21,7 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IReadTyped<T extends IBaseResource> {
 
@@ -34,11 +33,11 @@ public interface IReadTyped<T extends IBaseResource> {
 	 * Search using an ID. Note that even if theId contains a base URL it will be
 	 * ignored in favour of the base url for the given client. If you want to specify 
 	 * an absolute URL including a base and have that base used instead, use
-	 * {@link #withUrl(IdDt)}
+	 * {@link #withUrl(IIdType)}
 	 */
-	IReadExecutable<T> withId(IdDt theId);
+	IReadExecutable<T> withId(IIdType theId);
 
 	IReadExecutable<T> withUrl(String theUrl);
 
-	IReadExecutable<T> withUrl(IdDt theUrl);
+	IReadExecutable<T> withUrl(IIdType theUrl);
 }

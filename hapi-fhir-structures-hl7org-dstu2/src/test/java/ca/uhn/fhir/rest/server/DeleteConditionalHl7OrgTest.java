@@ -1,0 +1,124 @@
+package ca.uhn.fhir.rest.server;
+
+import static org.junit.Assert.*;
+
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.Patient;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.util.PortUtil;
+
+/**
+ * Created by dsotnikov on 2/25/2014.
+ */
+public class DeleteConditionalHl7OrgTest {
+	private static CloseableHttpClient ourClient;
+	private static String ourLastConditionalUrl;
+	private static int ourPort;
+	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static Server ourServer;
+	private static IdDt ourLastIdParam;
+	
+	
+	
+	@Before
+	public void before() {
+		ourLastConditionalUrl = null;
+		ourLastIdParam = null;
+	}
+
+	@Test
+	public void testUpdateWithConditionalUrl() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpDelete httpPost = new HttpDelete("http://localhost:" + ourPort + "/Patient?identifier=system%7C001");
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		
+		assertNull(ourLastIdParam);
+		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+	}
+
+	
+	@Test
+	public void testUpdateWithoutConditionalUrl() throws Exception {
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("002");
+
+		HttpDelete httpPost = new HttpDelete("http://localhost:" + ourPort + "/Patient/2");
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		assertEquals(204, status.getStatusLine().getStatusCode());
+		
+		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
+		assertNull(ourLastConditionalUrl);
+	}
+
+	@AfterClass
+	public static void afterClass() throws Exception {
+		ourServer.stop();
+	}
+		
+	
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		PatientProvider patientProvider = new PatientProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(patientProvider);
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+	}
+	
+	public static class PatientProvider implements IResourceProvider {
+
+		@Override
+		public Class<Patient> getResourceType() {
+			return Patient.class;
+		}
+
+		
+		@Delete()
+		public MethodOutcome updatePatient(@ConditionalUrlParam String theConditional, @IdParam IdDt theIdParam) {
+			ourLastConditionalUrl = theConditional;
+			ourLastIdParam = theIdParam;
+			return new MethodOutcome(new IdDt("Patient/001/_history/002"));
+		}
+
+	}
+
+}
