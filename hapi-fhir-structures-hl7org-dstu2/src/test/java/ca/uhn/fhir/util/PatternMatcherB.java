@@ -9,7 +9,7 @@ import org.hamcrest.TypeSafeMatcher;
 /**
  * Tests if the argument is a {@link CharSequence} that matches a regular expression.
  */
-public class PatternMatcher extends TypeSafeMatcher<CharSequence> {
+public class PatternMatcherB extends TypeSafeMatcher<CharSequence> {
 
 	/**
 	 * Creates a matcher that matches if the examined {@link CharSequence} matches the specified regular expression.
@@ -42,12 +42,12 @@ public class PatternMatcher extends TypeSafeMatcher<CharSequence> {
 	 */
 	@Factory
 	public static Matcher<CharSequence> pattern(Pattern pattern) {
-		return new PatternMatcher(pattern);
+		return new PatternMatcherB(pattern);
 	}
 
 	private final Pattern pattern;
 
-	public PatternMatcher(Pattern pattern) {
+	public PatternMatcherB(Pattern pattern) {
 		this.pattern = pattern;
 	}
 

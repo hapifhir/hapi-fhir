@@ -25,7 +25,7 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.util.PatternMatcher;
+import ca.uhn.fhir.util.PatternMatcherB;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -85,7 +85,7 @@ public class SearchHl7OrgDstu2Test {
 		ourLog.info(responseContent);
 		
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, PatternMatcher.pattern("id value..[0-9a-f-]+\\\""));
+		assertThat(responseContent, PatternMatcherB.pattern("id value..[0-9a-f-]+\\\""));
 	}
 
 	@Test

@@ -41,10 +41,10 @@ import ca.uhn.fhir.util.PortUtil;
 /**
  * Created by dsotnikov on 2/25/2014.
  */
-public class UpdateConditionalTest {
+public class UpdateConditionalHl7OrgDstu2Test {
 	private static CloseableHttpClient ourClient;
 	private static String ourLastConditionalUrl;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateConditionalHl7OrgDstu2Test.class);
 	private static int ourPort;
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static Server ourServer;
