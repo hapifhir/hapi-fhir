@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
@@ -252,11 +253,12 @@ public class FhirTerser {
 		theCallback.acceptElement(theElement, pathToElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
-		 if (theElement.isEmpty()) {
-		 return;
-		 }
-
-		switch (theDefinition.getChildType()) {
+		BaseRuntimeElementDefinition<?> def = theDefinition;
+		if (def.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) {
+			def = myContext.getElementDefinition(theElement.getClass());
+		}
+		
+		switch (def.getChildType()) {
 		case ID_DATATYPE:
 		case PRIMITIVE_XHTML_HL7ORG:
 		case PRIMITIVE_XHTML:
@@ -268,7 +270,7 @@ public class FhirTerser {
 			if (resRefDt.getReferenceElement().getValue() == null && resRefDt.getResource() != null) {
 				IBaseResource theResource = resRefDt.getResource();
 				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
-					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+					def = myContext.getResourceDefinition(theResource);
 					visit(theStack, theResource, pathToElement, null, def, theCallback);
 				}
 			}
@@ -276,7 +278,7 @@ public class FhirTerser {
 		case RESOURCE:
 		case RESOURCE_BLOCK:
 		case COMPOSITE_DATATYPE: {
-			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) theDefinition;
+			BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
 			for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
 				if (values != null) {
@@ -308,21 +310,16 @@ public class FhirTerser {
 		case CONTAINED_RESOURCES: {
 			BaseContainedDt value = (BaseContainedDt) theElement;
 			for (IResource next : value.getContainedResources()) {
-				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
+				def = myContext.getResourceDefinition(next);
 				visit(theStack, next, pathToElement, null, def, theCallback);
 			}
 			break;
 		}
+		case CONTAINED_RESOURCE_LIST:
 		case EXTENSION_DECLARED:
 		case UNDECL_EXT: {
-			throw new IllegalStateException("state should not happen: " + theDefinition.getChildType());
+			throw new IllegalStateException("state should not happen: " + def.getChildType());
 		}
-		case CONTAINED_RESOURCE_LIST:
-			if (theElement != null) {
-				BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
-				visit(theStack, theElement, pathToElement, null, def, theCallback);
-			}
-			break;
 		}
 		
 		theStack.remove(theElement);
