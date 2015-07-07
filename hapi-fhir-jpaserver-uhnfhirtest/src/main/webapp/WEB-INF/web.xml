@@ -9,10 +9,7 @@
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
-			/WEB-INF/hapi-fhir-server-database-config.xml
 			/WEB-INF/hapi-fhir-server-config.xml
-			classpath:hapi-fhir-server-resourceproviders-dstu1.xml
-			classpath:hapi-fhir-server-resourceproviders-dstu2.xml
 			/WEB-INF/hapi-fhir-tester-application-context.xml
 			/WEB-INF/hapi-fhir-tester-config.xml
 		</param-value>
@@ -33,6 +30,7 @@
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 
+	<!-- 
 	<servlet>
 		<servlet-name>fhirServletBase</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
@@ -46,6 +44,7 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
+	-->
 	
 	<servlet>
 		<servlet-name>fhirServletDstu1</servlet-name>
@@ -76,7 +75,7 @@
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>fhirServletBase</servlet-name>
+		<servlet-name>fhirServletDstu1</servlet-name>
 		<url-pattern>/base/*</url-pattern>
 	</servlet-mapping>
 

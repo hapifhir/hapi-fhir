@@ -28,6 +28,7 @@ public class UhnFhirTestApp {
 
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
+		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
 		System.setProperty("fhir.baseurl", base);
 		
 		Server server = new Server(myPort);
@@ -67,7 +68,7 @@ public class UhnFhirTestApp {
 			ResourceMetadataKeyEnum.TAG_LIST.put(p1, list);
 			client.create(p1);
 
-			List<IResource> resources = ctx.newJsonParser().parseBundle(IOUtils.toString(UhnFhirTestApp.class.getResourceAsStream("/test-server-seed-bundle.json"))).toListOfResources();
+			List<IResource> resources = ctx.newJsonParser().parseBundle(IOUtils.toString(UhnFhirTestApp.class.getResourceAsStream("/bundle.json"))).toListOfResources();
 			client.transaction().withResources(resources).execute();
 
 //			for (int i = 0; i < 1000; i++) {
