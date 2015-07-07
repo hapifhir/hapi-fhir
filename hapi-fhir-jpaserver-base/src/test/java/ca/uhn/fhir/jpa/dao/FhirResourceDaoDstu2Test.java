@@ -1157,7 +1157,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 		ourPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog");
 		ourPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
-		ourPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, "http://profile/1");
+		ourPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, "http://profile/1");
 
 		meta = ourPatientDao.metaGetOperation();
 		published = meta.getTag();
@@ -1481,12 +1481,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	public void testSearchNumberParam() {
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue("testSearchNumberParam01");
-		e1.getLength().setSystem(BaseFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
+		e1.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
 		IIdType id1 = ourEncounterDao.create(e1).getId();
 
 		Encounter e2 = new Encounter();
 		e2.addIdentifier().setSystem("foo").setValue("testSearchNumberParam02");
-		e2.getLength().setSystem(BaseFhirDao.UCUM_NS).setCode("year").setValue(2.0);
+		e2.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(2.0);
 		IIdType id2 = ourEncounterDao.create(e2).getId();
 		{
 			IBundleProvider found = ourEncounterDao.search(Encounter.SP_LENGTH, new NumberParam(">2"));

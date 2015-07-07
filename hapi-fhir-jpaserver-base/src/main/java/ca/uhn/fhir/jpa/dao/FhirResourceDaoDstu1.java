@@ -32,7 +32,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirResourceDaoDstu1<T extends IResource> extends BaseFhirResourceDao<T> {
+public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResourceDao<T> {
 
 	protected List<Object> getIncludeValues(FhirTerser t, Include next, IBaseResource nextResource, RuntimeResourceDefinition def) {
 		List<Object> values;

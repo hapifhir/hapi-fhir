@@ -44,8 +44,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public abstract class BaseFhirSystemDao<T> extends BaseFhirDao implements IFhirSystemDao<T> {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseFhirSystemDao.class);
+public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao implements IFhirSystemDao<T> {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
 
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override

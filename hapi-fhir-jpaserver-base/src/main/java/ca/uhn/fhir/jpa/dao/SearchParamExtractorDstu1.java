@@ -160,14 +160,14 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 						continue;
 					}
 
-					if (new UriDt(BaseFhirDao.UCUM_NS).equals(nextValue.getSystem())) {
+					if (new UriDt(BaseHapiFhirDao.UCUM_NS).equals(nextValue.getSystem())) {
 						if (isNotBlank(nextValue.getCode().getValue())) {
 
 							Unit<? extends Quantity> unit = Unit.valueOf(nextValue.getCode().getValue());
 							javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);
 							double dayValue = dayConverter.convert(nextValue.getValue().getValue().doubleValue());
 							DurationDt newValue = new DurationDt();
-							newValue.setSystem(BaseFhirDao.UCUM_NS);
+							newValue.setSystem(BaseHapiFhirDao.UCUM_NS);
 							newValue.setCode(NonSI.DAY.toString());
 							newValue.setValue(dayValue);
 							nextValue = newValue;
@@ -309,7 +309,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 						searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 					}
 
-					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(searchTerm), searchTerm);
+					ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
@@ -322,7 +322,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 							if (nextName.isEmpty()) {
 								continue;
 							}
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
@@ -338,14 +338,14 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 							if (nextName.isEmpty()) {
 								continue;
 							}
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
 					} else if (nextObject instanceof ContactDt) {
 						ContactDt nextContact = (ContactDt) nextObject;
 						if (nextContact.getValue().isEmpty() == false) {
-							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseFhirDao.normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
+							ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(resourceName, BaseHapiFhirDao.normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
 							nextEntity.setResource(theEntity);
 							retVal.add(nextEntity);
 						}
@@ -404,7 +404,7 @@ class SearchParamExtractorDstu1 extends BaseSearchParamExtractor implements ISea
 				} else if (nextObject instanceof CodeableConceptDt) {
 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
 					if (!nextCC.getText().isEmpty()) {
-						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseFhirDao.normalizeString(nextCC.getText().getValue()), nextCC.getText().getValue());
+						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(nextCC.getText().getValue()), nextCC.getText().getValue());
 						nextEntity.setResource(theEntity);
 						retVal.add(nextEntity);
 					}

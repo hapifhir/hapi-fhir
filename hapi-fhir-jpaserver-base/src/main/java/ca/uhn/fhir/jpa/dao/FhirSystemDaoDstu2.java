@@ -58,13 +58,13 @@ import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
+public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2.class);
 
 	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
 		String url = nextEntry.getTransaction().getUrl();
 		if (isBlank(url)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionMissingUrl", verb.name()));
+			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
 		}
 		return url;
 	}
@@ -111,7 +111,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
 						nextIsHistory = true;
 					} else {
-						String msg = getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
+						String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
 						throw new InvalidRequestException(msg);
 					}
 				}
@@ -129,7 +129,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		try {
 			resType = getContext().getResourceDefinition(retVal.getResourceType());
 		} catch (DataFormatException e) {
-			String msg = getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
 			throw new InvalidRequestException(msg);
 		}
 		IFhirResourceDao<? extends IResource> dao = null;
@@ -137,13 +137,13 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 			dao = getDao(resType.getImplementingClass());
 		}
 		if (dao == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
 			throw new InvalidRequestException(msg);
 		}
 		retVal.setDao(dao);
 
 		if (retVal.getResourceId() == null && retVal.getParams() == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
 			throw new InvalidRequestException(msg);
 		}
 
@@ -182,12 +182,12 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 				 */
 				if (isPlaceholder(nextResourceId)) {
 					if (!allIds.add(nextResourceId)) {
-						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
+						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
 					}
 				} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
 					IdDt nextId = nextResourceId.toUnqualifiedVersionless();
 					if (!allIds.add(nextId)) {
-						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
+						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
 					}
 				}
 
@@ -195,7 +195,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 
 			HTTPVerbEnum verb = nextEntry.getTransaction().getMethodElement().getValueAsEnum();
 			if (verb == null) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextEntry.getTransaction().getMethod()));
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextEntry.getTransaction().getMethod()));
 			}
 
 			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;

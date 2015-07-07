@@ -47,7 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.FhirTerser;
 
-public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
+public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu1.class);
 
 	@Override
@@ -123,14 +123,14 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 			} else if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.PUT || nextResouceOperationIn == BundleEntryTransactionMethodEnum.DELETE) {
 				if (candidateMatches == null || candidateMatches.size() == 0) {
 					if (nextId == null || StringUtils.isBlank(nextId.getIdPart())) {
-						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationFailedNoId", nextResouceOperationIn.name()));
+						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionOperationFailedNoId", nextResouceOperationIn.name()));
 					}
 					entity = tryToLoadEntity(nextId);
 					if (entity == null) {
 						if (nextResouceOperationIn == BundleEntryTransactionMethodEnum.PUT) {
 							ourLog.debug("Attempting to UPDATE resource with unknown ID '{}', will CREATE instead", nextId);
 						} else if (candidateMatches == null) {
-							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationFailedUnknownId", nextResouceOperationIn.name(), nextId));
+							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionOperationFailedUnknownId", nextResouceOperationIn.name(), nextId));
 						} else {
 							ourLog.debug("Resource with match URL [{}] already exists, will be NOOP", matchUrl);
 							persistedResources.add(null);
@@ -141,7 +141,7 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 				} else if (candidateMatches.size() == 1) {
 					entity = loadFirstEntityFromCandidateMatches(candidateMatches);
 				} else {
-					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", nextResouceOperationIn.name(), matchUrl, candidateMatches.size()));
+					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", nextResouceOperationIn.name(), matchUrl, candidateMatches.size()));
 				}
 			} else if (nextId.isEmpty() || isPlaceholder(nextId)) {
 				entity = null;
@@ -169,7 +169,7 @@ public class FhirSystemDaoDstu1 extends BaseFhirSystemDao<List<IResource>> {
 							continue;
 						}
 						if (candidateMatches.size() > 1) {
-							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", BundleEntryTransactionMethodEnum.POST.name(), matchUrl, candidateMatches.size()));
+							throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionOperationWithMultipleMatchFailure", BundleEntryTransactionMethodEnum.POST.name(), matchUrl, candidateMatches.size()));
 						}
 					}
 				} else {

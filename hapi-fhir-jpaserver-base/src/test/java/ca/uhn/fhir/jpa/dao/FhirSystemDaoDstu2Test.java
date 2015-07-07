@@ -127,7 +127,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
 		ourPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog");
 		ourPatientDao.removeTag(id1, TagTypeEnum.SECURITY_LABEL, "seclabel:sys:1", "seclabel:code:1");
-		ourPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseFhirDao.NS_JPA_PROFILE, "http://profile/1");
+		ourPatientDao.removeTag(id1, TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, "http://profile/1");
 
 		meta = ourSystemDao.metaGetOperation();
 		published = meta.getTag();

@@ -548,6 +548,9 @@ public class IdDt extends UriDt implements IPrimitiveDatatype<String>, IIdType {
 
 	@Override
 	public IdDt toUnqualifiedVersionless() {
+		if (isLocal()) {
+			return toVersionless();
+		}
 		return new IdDt(getResourceType(), getIdPart());
 	}
 

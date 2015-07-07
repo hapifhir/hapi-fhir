@@ -26,6 +26,9 @@ public interface IIdType {
 
 	boolean isEmpty();
 
+	/**
+	 * Returns true if this ID represents a local reference (i.e. a reference beginning with the character '#')
+	 */
 	boolean isLocal();
 
 	/**
@@ -46,8 +49,14 @@ public interface IIdType {
 
 	String getBaseUrl();
 
+	/**
+	 * Returns a copy of this ID without the base URL or the version 
+	 */
 	IIdType toUnqualifiedVersionless();
 
+	/**
+	 * Returns a copy of this ID without the version 
+	 */
 	IIdType toVersionless();
 
 	IIdType setValue(String theString);
