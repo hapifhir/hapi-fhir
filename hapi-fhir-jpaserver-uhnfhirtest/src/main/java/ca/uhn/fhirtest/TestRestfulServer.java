@@ -8,8 +8,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -33,7 +34,7 @@ public class TestRestfulServer extends RestfulServer {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestRestfulServer.class);
 
-	private ApplicationContext myAppCtx;
+	private ClassPathXmlApplicationContext myAppCtx;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -41,7 +42,7 @@ public class TestRestfulServer extends RestfulServer {
 		super.initialize();
 
 		// Get the spring context from the web container (it's declared in web.xml)
-		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
+		WebApplicationContext parentAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
 		// These two parmeters are also declared in web.xml
 		String implDesc = getInitParameter("ImplementationDescription");
@@ -56,23 +57,15 @@ public class TestRestfulServer extends RestfulServer {
 		List<IResourceProvider> beans;
 		JpaSystemProviderDstu1 systemProviderDstu1 = null;
 		JpaSystemProviderDstu2 systemProviderDstu2 = null;
+		@SuppressWarnings("rawtypes")
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
 		String baseUrlProperty;
 		switch (fhirVersionParam.trim().toUpperCase()) {
-		case "BASE": {
-			setFhirContext(FhirContext.forDstu1());
-			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
-			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
-			systemDao = myAppCtx.getBean("mySystemDaoDstu1", IFhirSystemDao.class);
-			etagSupport = ETagSupportEnum.DISABLED;
-			JpaConformanceProviderDstu1 confProvider = new JpaConformanceProviderDstu1(this, systemDao);
-			confProvider.setImplementationDescription(implDesc);
-			setServerConformanceProvider(confProvider);
-			baseUrlProperty = "fhir.baseurl";
-			break;
-		}
 		case "DSTU1": {
+			myAppCtx = new ClassPathXmlApplicationContext(new String[] { 
+					"hapi-fhir-server-database-config-dstu1.xml", 
+					"hapi-fhir-server-resourceproviders-dstu1.xml"}, parentAppCtx);
 			setFhirContext(FhirContext.forDstu1());
 			beans = myAppCtx.getBean("myResourceProvidersDstu1", List.class);
 			systemProviderDstu1 = myAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);
@@ -85,6 +78,10 @@ public class TestRestfulServer extends RestfulServer {
 			break;
 		}
 		case "DSTU2": {
+			myAppCtx = new ClassPathXmlApplicationContext(new String[] {
+					"hapi-fhir-server-database-config-dstu2.xml", 
+					"hapi-fhir-server-resourceproviders-dstu2.xml", 
+					}, parentAppCtx);
 			setFhirContext(FhirContext.forDstu2());
 			beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
 			systemProviderDstu2 = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
