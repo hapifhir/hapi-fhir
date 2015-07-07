@@ -21,8 +21,17 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 
 public interface IUpdateExecutable extends IClientExecutable<IUpdateExecutable, MethodOutcome>{
 
-	
+	/**
+	 * Add a <code>Prefer</code> header to the request, which requests that the server include 
+	 * or suppress the resource body as a part of the result. If a resource is returned by the server
+	 * it will be parsed an accessible to the client via {@link MethodOutcome#getResource()}
+	 * 
+	 * @since HAPI 1.1
+	 */
+	IUpdateExecutable prefer(PreferReturnEnum theReturn);
+
 }

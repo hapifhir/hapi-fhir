@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -747,6 +748,8 @@ public class MethodUtil {
 					IBaseResource outcome = parser.parseResource(reader);
 					if (outcome instanceof BaseOperationOutcome) {
 						retVal.setOperationOutcome((BaseOperationOutcome) outcome);
+					} else {
+						retVal.setResource(outcome);
 					}
 				}
 

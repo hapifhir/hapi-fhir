@@ -760,6 +760,29 @@ public MethodOutcome updatePatientConditional(
 }
 //END SNIPPET: updateConditional
 
+//START SNIPPET: updatePrefer
+@Update
+public MethodOutcome updatePatientPrefer(
+    @ResourceParam Patient thePatient, 
+    @IdParam IdDt theId) {
+
+   // Save the patient to the database
+   
+   // Update the version and last updated time on the resource
+   IdDt updatedId = theId.withVersion("123");
+   thePatient.setId(updatedId);
+   InstantDt lastUpdated = InstantDt.withCurrentTime();
+   ResourceMetadataKeyEnum.UPDATED.put(thePatient, lastUpdated);
+   
+   // Add the resource to the outcome, so that it can be returned by the server
+   // if the client requests it
+   MethodOutcome outcome = new MethodOutcome();
+   outcome.setId(updatedId);
+   outcome.setResource(thePatient);
+   return outcome;
+}
+//END SNIPPET: updatePrefer
+
 //START SNIPPET: updateRaw
 @Update
 public MethodOutcome updatePatientWithRawValue (

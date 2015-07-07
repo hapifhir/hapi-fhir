@@ -127,8 +127,8 @@
 		</menu>
 		
 		<menu name="Get Help" inherit="top">
-			<item name="Google Group" href="https://groups.google.com/d/forum/hapi-fhir" />
-			<item name="Issue Tracker" href="https://github.com/jamesagnew/hapi-fhir/issues" />
+			<item name="Google Group (Ask Questions)" href="https://groups.google.com/d/forum/hapi-fhir" />
+			<item name="Issue Tracker (Report Bugs/Request Features)" href="https://github.com/jamesagnew/hapi-fhir/issues" />
 		</menu>
 
 		<menu name="Test Server">

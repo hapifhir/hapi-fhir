@@ -6,6 +6,8 @@ import java.util.regex.Matcher;
 
 import org.junit.Test;
 
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+
 public class RestfulServerUtilsTest {
 
 	@Test
@@ -28,4 +30,31 @@ public class RestfulServerUtilsTest {
 		assertEquals("application/json+fhir", m.group(1));
 	}
 	
+	@Test
+	public void testParsePreferHeaderBad() {
+		assertEquals(null, RestfulServerUtils.parsePreferHeader(null));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader(""));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("foo"));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("foo,bar"));
+
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return"));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return="));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return= "));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return=  "));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return=   "));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return=    "));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return=     "));
+		assertEquals(null, RestfulServerUtils.parsePreferHeader("return   =\"minimal"));
+	}
+	
+	@Test
+	public void testParsePreferHeaderGood() {
+		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return=minimal"));
+		assertEquals(PreferReturnEnum.REPRESENTATION, RestfulServerUtils.parsePreferHeader("return=representation"));
+		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =  minimal    "));
+		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =  \"minimal\"    "));
+		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =\"minimal\""));
+		assertEquals(PreferReturnEnum.MINIMAL, RestfulServerUtils.parsePreferHeader("return   =\"minimal\""));
+	}
+
 }

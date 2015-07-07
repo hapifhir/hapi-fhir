@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -311,7 +312,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (addPredicateMissingFalseIfPresent(builder, theParamName, from, codePredicates, nextOr)) {
 				continue;
 			}
-			
+
 			if (params instanceof NumberParam) {
 				NumberParam param = (NumberParam) params;
 
@@ -374,7 +375,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		cq.select(from.get("myId").as(Long.class));
 
 		Subquery<Long> subQ = cq.subquery(Long.class);
-		Root<? extends BaseResourceIndexedSearchParam> subQfrom = subQ.from(theParamTable); 
+		Root<? extends BaseResourceIndexedSearchParam> subQfrom = subQ.from(theParamTable);
 		subQ.select(subQfrom.get("myResourcePid").as(Long.class));
 		Predicate subQname = builder.equal(subQfrom.get("myParamName"), theParamName);
 		Predicate subQtype = builder.equal(subQfrom.get("myResourceType"), resourceType);
@@ -383,16 +384,16 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		Predicate joinPredicate = builder.not(builder.in(from.get("myId")).value(subQ));
 		Predicate typePredicate = builder.equal(from.get("myResourceType"), resourceType);
 		Predicate notDeletedPredicate = builder.isNull(from.get("myDeleted"));
-		
+
 		if (thePids.size() > 0) {
 			Predicate inPids = (from.get("myId").in(thePids));
 			cq.where(builder.and(inPids, typePredicate, joinPredicate, notDeletedPredicate));
 		} else {
 			cq.where(builder.and(typePredicate, joinPredicate, notDeletedPredicate));
 		}
-		
+
 		ourLog.info("Adding :missing qualifier for parameter '{}'", theParamName);
-		
+
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		List<Long> resultList = q.getResultList();
 		HashSet<Long> retVal = new HashSet<Long>(resultList);
@@ -404,15 +405,15 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
 		cq.select(from.get("myId").as(Long.class));
-		
+
 		Subquery<Long> subQ = cq.subquery(Long.class);
-		Root<ResourceLink> subQfrom = subQ.from(ResourceLink.class); 
+		Root<ResourceLink> subQfrom = subQ.from(ResourceLink.class);
 		subQ.select(subQfrom.get("mySourceResourcePid").as(Long.class));
-		
-//		subQ.where(builder.equal(subQfrom.get("myParamName"), theParamName));
+
+		// subQ.where(builder.equal(subQfrom.get("myParamName"), theParamName));
 		Predicate path = createResourceLinkPathPredicate(theParamName, builder, subQfrom);
 		subQ.where(path);
-		
+
 		Predicate joinPredicate = builder.not(builder.in(from.get("myId")).value(subQ));
 		Predicate typePredicate = builder.equal(from.get("myResourceType"), myResourceName);
 
@@ -422,7 +423,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		} else {
 			cq.where(builder.and(typePredicate, joinPredicate));
 		}
-		
+
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		List<Long> resultList = q.getResultList();
 		HashSet<Long> retVal = new HashSet<Long>(resultList);
@@ -433,7 +434,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
 		}
-		
+
 		if (Boolean.TRUE.equals(theList.get(0).getMissing())) {
 			return addPredicateParamMissing(thePids, "myParamsQuantity", theParamName, ResourceIndexedSearchParamQuantity.class);
 		}
@@ -450,7 +451,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (addPredicateMissingFalseIfPresent(builder, theParamName, from, codePredicates, nextOr)) {
 				continue;
 			}
-			
+
 			String systemValue;
 			String unitsValue;
 			QuantityCompararatorEnum cmpValue;
@@ -569,7 +570,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (addPredicateMissingFalseIfPresentForResourceLink(builder, theParamName, from, codePredicates, nextOr)) {
 				continue;
 			}
-			
+
 			if (params instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) params;
 
@@ -587,10 +588,11 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 					codePredicates.add(eq);
 
 				} else {
-					String chain = getContext().getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
-					BaseRuntimeChildDefinition def = getContext().newTerser().getDefinition(myResourceType, chain);
+
+					String paramPath = getContext().getResourceDefinition(myResourceType).getSearchParam(theParamName).getPath();
+					BaseRuntimeChildDefinition def = getContext().newTerser().getDefinition(myResourceType, paramPath);
 					if (!(def instanceof RuntimeChildResourceDefinition)) {
-						throw new ConfigurationException("Property " + chain + " of type " + myResourceName + " is not a resource: " + def.getClass());
+						throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 					}
 					List<Class<? extends IBaseResource>> resourceTypes;
 					if (isBlank(ref.getResourceType())) {
@@ -601,9 +603,20 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						RuntimeResourceDefinition resDef = getContext().getResourceDefinition(ref.getResourceType());
 						resourceTypes.add(resDef.getImplementingClass());
 					}
+					
+					boolean foundChainMatch = false;
 					for (Class<? extends IBaseResource> nextType : resourceTypes) {
 						RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(nextType);
-						RuntimeSearchParam param = typeDef.getSearchParam(ref.getChain());
+						
+						String chain = ref.getChain();
+						String remainingChain = null;
+						int chainDotIndex = chain.indexOf('.');
+						if (chainDotIndex != -1) {
+							remainingChain = chain.substring(chainDotIndex + 1);
+							chain = chain.substring(0, chainDotIndex);
+						}
+
+						RuntimeSearchParam param = typeDef.getSearchParam(chain);
 						if (param == null) {
 							ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
 							continue;
@@ -613,9 +626,24 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 							ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName(), param);
 							continue;
 						}
-
-						IQueryParameterType chainValue = toParameterType(param, resourceId);
-						Set<Long> pids = dao.searchForIds(ref.getChain(), chainValue);
+						
+						IQueryParameterType chainValue;
+						if (remainingChain != null) {
+							if (param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", new Object[] { nextType.getSimpleName(), chain, remainingChain });
+								continue;
+							}
+							
+							chainValue = new ReferenceParam();
+							chainValue.setValueAsQueryToken(null, resourceId);
+							((ReferenceParam)chainValue).setChain(remainingChain);
+						} else {
+							chainValue = toParameterType(param, resourceId);
+						}
+						
+						foundChainMatch = true;
+						
+						Set<Long> pids = dao.searchForIds(chain, chainValue);
 						if (pids.isEmpty()) {
 							continue;
 						}
@@ -624,10 +652,14 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						codePredicates.add(eq);
 
 					}
+					
+					if (!foundChainMatch) {
+						throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + ref.getChain()));
+					}
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
+				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + params.getClass());
 			}
 
 		}
@@ -673,7 +705,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (addPredicateMissingFalseIfPresent(builder, theParamName, from, codePredicates, nextOr)) {
 				continue;
 			}
-			
+
 			Predicate singleCode = createPredicateString(theParameter, theParamName, builder, from);
 			codePredicates.add(singleCode);
 		}
@@ -693,7 +725,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -707,7 +740,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		return missingFalse;
 	}
 
-	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -740,7 +774,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			if (addPredicateMissingFalseIfPresent(builder, theParamName, from, codePredicates, nextOr)) {
 				continue;
 			}
-			
+
 			if (nextOr instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextOr;
 				if (id.isText()) {
@@ -1101,9 +1135,9 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 
 	private DaoMethodOutcome doCreate(T theResource, String theIfNoneExist, boolean thePerformIndexing) {
 		StopWatch w = new StopWatch();
-		
+
 		preProcessResourceForStorage(theResource);
-		
+
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
 
@@ -1147,8 +1181,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 	}
 
 	/**
-	 * May 
-	 * @param theResource The resource that is about to be stored
+	 * May
+	 * 
+	 * @param theResource
+	 *           The resource that is about to be stored
 	 */
 	protected void preProcessResourceForStorage(T theResource) {
 		// nothing by default
@@ -1242,9 +1278,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 					retVal.add(current);
 				}
 
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery(
-						"SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END "
-								+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END "
+						+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
 				q.setParameter("PID", translateForcedIdToPid(theId));
 				q.setParameter("RESTYPE", resourceType);
 				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
@@ -1486,8 +1521,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
 			if (sp.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName
-						+ "] is not a token type, only token is supported");
+				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
 			}
 		}
 
@@ -1636,10 +1670,10 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			CriteriaQuery<Long> cq = builder.createQuery(Long.class);
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			cq.select(from.get("myId").as(Long.class));
-			
+
 			Predicate predicateIds = (from.get("myId").in(loadPids));
-			Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date>get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
-			Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date>get("myUpdated"), lu.getUpperBoundAsInstant()) : null;
+			Predicate predicateLower = lu.getLowerBoundAsInstant() != null ? builder.greaterThanOrEqualTo(from.<Date> get("myUpdated"), lu.getLowerBoundAsInstant()) : null;
+			Predicate predicateUpper = lu.getUpperBoundAsInstant() != null ? builder.lessThanOrEqualTo(from.<Date> get("myUpdated"), lu.getUpperBoundAsInstant()) : null;
 			if (predicateLower != null && predicateUpper != null) {
 				cq.where(predicateIds, predicateLower, predicateUpper);
 			} else if (predicateLower != null) {
@@ -1719,8 +1753,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
 						/*
-						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as they are counted towards the total count and paged, so they are loaded
-						 * outside the bundle provider
+						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as they are counted towards the total count and paged, so they are loaded outside the
+						 * bundle provider
 						 */
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
 							Set<IIdType> previouslyLoadedPids = new HashSet<IIdType>();
@@ -1960,6 +1994,7 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 		outcome.setResource(theResource);
 		if (theResource != null) {
 			theResource.setId(theEntity.getIdDt());
+			ResourceMetadataKeyEnum.UPDATED.put(theResource, theEntity.getUpdated());
 		}
 		return outcome;
 	}
@@ -1992,6 +2027,8 @@ public abstract class BaseFhirResourceDao<T extends IResource> extends BaseFhirD
 			qp = new CompositeParam<IQueryParameterType, IQueryParameterType>(leftParam, rightParam);
 			break;
 		case REFERENCE:
+			qp = new ReferenceParam();
+			break;
 		default:
 			throw new InternalErrorException("Don't know how to convert param type: " + theParam.getParamType());
 		}

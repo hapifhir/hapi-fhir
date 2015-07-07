@@ -989,6 +989,53 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		}
 
 	}
+	
+	
+	@Test
+	public void testUpdateResourceWithPrefer() throws IOException, Exception {
+		String methodName = "testUpdateResourceWithPrefer";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		String resource = ourCtx.newXmlParser().encodeResourceToString(pt);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdDt id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+			id = new IdDt(newIdString);
+		} finally {
+			response.close();
+		}
+
+		Date before = new Date();
+		Thread.sleep(100);
+		
+		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
+		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		response = ourHttpClient.execute(put);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			
+			Patient respPt = ourCtx.newXmlParser().parseResource(Patient.class, responseString);
+			assertEquals("2", respPt.getId().getVersionIdPart());
+			
+			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
+			assertTrue(updateTime.getValue().after(before));
+			
+		} finally {
+			response.close();
+		}
+
+	}
+
 
 	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
@@ -1035,6 +1082,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 			response.close();
 		}
 	}
+
 
 	@Test
 	public void testValidateResourceWithId() throws IOException {

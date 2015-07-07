@@ -64,6 +64,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -563,6 +564,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		params.get(parameterName).add(parameterValue);
 	}
 
+	private static void addPreferHeader(PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
+		if (thePrefer != null) {
+			theInvocation.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
+		}
+	}
+
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
 		private EncodingEnum myParamEncoding;
 		private Boolean myPrettyPrint;
@@ -650,6 +657,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private CriterionList myCriterionList;
 		private String myId;
+		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
@@ -693,6 +701,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = MethodUtil.createCreateInvocation(myResource, myResourceBody, myId, myContext);
 			}
 
+			addPreferHeader(myPrefer, invocation);
+			
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
 
@@ -701,6 +711,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
 
+		}
+
+		@Override
+		public ICreateTyped prefer(PreferReturnEnum theReturn) {
+			myPrefer = theReturn;
+			return this;
 		}
 
 		@Override
@@ -1250,7 +1266,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
 
 		@Override
-		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -1278,7 +1294,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, myResourceName, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
 			if (theResponseStatusCode == Constants.STATUS_HTTP_201_CREATED) {
 				response.setCreated(true);
@@ -1418,7 +1434,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 				Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
 				ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType, null);
@@ -1443,7 +1459,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -1463,6 +1479,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private String myCompartmentName;
 		private CriterionList myCriterion = new CriterionList();
 		private List<Include> myInclude = new ArrayList<Include>();
+		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
 		private String myResourceId;
 		private String myResourceName;
@@ -1470,7 +1487,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class<? extends IBaseBundle> myReturnBundleType;
 		private List<Include> myRevInclude = new ArrayList<Include>();
 		private SearchStyleEnum mySearchStyle;
-		private DateRangeParam myLastUpdated;
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
 
 		public SearchInternal() {
@@ -1560,6 +1576,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
+		public IQuery lastUpdated(DateRangeParam theLastUpdated) {
+			myLastUpdated = theLastUpdated;
+			return this;
+		}
+
+		@Override
 		public IQuery limitTo(int theLimitTo) {
 			if (theLimitTo > 0) {
 				myParamLimit = theLimitTo;
@@ -1621,12 +1643,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
-		@Override
-		public IQuery lastUpdated(DateRangeParam theLastUpdated) {
-			myLastUpdated = theLastUpdated;
-			return this;
-		}
-
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -1682,7 +1698,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class TagListResponseHandler implements IClientResponseHandler<TagList> {
 
 		@Override
-		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+		public TagList invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
@@ -1786,6 +1802,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private CriterionList myCriterionList;
 		private IIdType myId;
+		private PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
@@ -1834,6 +1851,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
 			}
 
+			addPreferHeader(myPrefer, invocation);
+			
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
 
@@ -1842,6 +1861,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Map<String, List<String>> params = new HashMap<String, List<String>>();
 			return invoke(params, binding, invocation);
 
+		}
+
+		@Override
+		public IUpdateExecutable prefer(PreferReturnEnum theReturn) {
+			myPrefer = theReturn;
+			return this;
 		}
 
 		@Override

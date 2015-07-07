@@ -21,31 +21,23 @@ package ca.uhn.fhir.rest.api;
  */
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.primitive.IdDt;
 
 public class MethodOutcome {
 
+	private Boolean myCreated;
 	private IIdType myId;
 	private IBaseOperationOutcome myOperationOutcome;
+	private IBaseResource myResource;
 	private IdDt myVersionId;
-	private Boolean myCreated;
 
 	/**
 	 * Constructor
 	 */
 	public MethodOutcome() {
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param theId
-	 *            The ID of the created/updated resource
-	 */
-	public MethodOutcome(IIdType theId) {
-		myId = theId;
 	}
 
 	/**
@@ -115,6 +107,24 @@ public class MethodOutcome {
 		myOperationOutcome = theBaseOperationOutcome;
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param theId
+	 *            The ID of the created/updated resource
+	 */
+	public MethodOutcome(IIdType theId) {
+		myId = theId;
+	}
+
+	/**
+	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are
+	 * returned to client instances, if the server has responded with an HTTP 201 Created.
+	 */
+	public Boolean getCreated() {
+		return myCreated;
+	}
+
 	public IIdType getId() {
 		return myId;
 	}
@@ -129,19 +139,20 @@ public class MethodOutcome {
 	}
 
 	/**
+	 * <b>From a client response:</b> If the method returned an actual resource body (e.g. a create/update with
+	 * "Prefer: return=representation") this field will be populated with the
+	 * resource itself.
+	 */
+	public IBaseResource getResource() {
+		return myResource;
+	}
+
+	/**
 	 * @deprecated {@link MethodOutcome#getId()} should return the complete ID including version if it is available
 	 */
 	@Deprecated
 	public IdDt getVersionId() {
 		return myVersionId;
-	}
-
-	/**
-	 * This will be set to {@link Boolean#TRUE} for instance of MethodOutcome which are
-	 * returned to client instances, if the server has responded with an HTTP 201 Created.
-	 */
-	public Boolean getCreated() {
-		return myCreated;
 	}
 
 	/**
@@ -173,6 +184,19 @@ public class MethodOutcome {
 	 */
 	public void setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
 		myOperationOutcome = theBaseOperationOutcome;
+	}
+
+	/**
+	 * <b>In a server response</b>: This field may be populated in server code with the final resource for operations
+	 * where a resource body is being created/updated. E.g. for an update method, this field could be populated with
+	 * the resource after the update is applied, with the new version ID, lastUpdate time, etc. 
+	 * <p>
+	 * This field is optional, but if it is populated the server will return the resource body if requested to
+	 * do so via the HTTP Prefer header.
+	 * </p> 
+	 */
+	public void setResource(IBaseResource theResource) {
+		myResource = theResource;
 	}
 
 	/**

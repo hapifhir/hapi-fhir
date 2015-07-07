@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -57,6 +58,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -80,7 +82,7 @@ public class RestfulServerUtils {
 			}
 		}
 	}
-
+	
 	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, EncodingEnum theResponseEncoding, boolean thePrettyPrint) {
 		try {
 			StringBuilder b = new StringBuilder();
@@ -128,6 +130,8 @@ public class RestfulServerUtils {
 		}
 	}
 
+	
+	
 	public static RestfulServer.NarrativeModeEnum determineNarrativeMode(RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
 		String[] narrative = requestParams.get(Constants.PARAM_NARRATIVE);
@@ -279,6 +283,38 @@ public class RestfulServerUtils {
 			writer = theHttpResponse.getWriter();
 		}
 		return writer;
+	}
+
+	public static PreferReturnEnum parsePreferHeader(String theValue) {
+		if (isBlank(theValue)) {
+			return null;
+		}
+		
+		StringTokenizer tok = new StringTokenizer(theValue, ",");
+		while (tok.hasMoreTokens()) {
+			String next = tok.nextToken();
+			int eqIndex = next.indexOf('=');
+			if (eqIndex == -1 || eqIndex >= next.length() - 2) {
+				continue;
+			}
+			
+			String key = next.substring(0, eqIndex).trim();
+			if (key.equals(Constants.HEADER_PREFER_RETURN) == false) {
+				continue;
+			}
+			
+			String value = next.substring(eqIndex + 1).trim();
+			if (value.length() < 2) {
+				continue;
+			}
+			if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+				value = value.substring(1, value.length() - 1);
+			}
+			
+			return PreferReturnEnum.fromHeaderValue(value);
+		}
+		
+		return null;
 	}
 
 	public static boolean prettyPrintResponse(RestfulServer theServer, RequestDetails theRequest) {

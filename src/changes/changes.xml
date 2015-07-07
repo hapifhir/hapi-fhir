@@ -137,6 +137,15 @@
 				DSTU2 servers now indicate support for conditional create/update/delete in their
 				conformance statement.
 			</action>
+			<action type="fix">
+				Support for the Prefer header has been added to the server, client, and
+				JPA modules.
+			</action>
+			<action type="fix" issue="196">
+				JPA server failed to search for deep chained parameters across multiple references,
+				e.g. "Location.partof.partof.organization". Thanks to Ismael Sarmento Jr for
+				reporting!
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

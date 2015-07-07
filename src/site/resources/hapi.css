@@ -157,6 +157,10 @@ DIV.main-body DIV.row DIV.span8 DIV.body-content {
 	background-color: #F8F8F8 !important;
 }
 
+.syntaxhighlighter .code .container:before {
+	display: block;
+}
+
 .table th, .table td {
 	padding: 2px;
 }

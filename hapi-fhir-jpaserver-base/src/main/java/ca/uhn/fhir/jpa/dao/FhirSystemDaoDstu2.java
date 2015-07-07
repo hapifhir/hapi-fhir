@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -32,8 +33,6 @@ import java.util.Set;
 import javax.persistence.TypedQuery;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.jmx.access.InvalidInvocationException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -318,7 +317,7 @@ public class FhirSystemDaoDstu2 extends BaseFhirSystemDao<Bundle> {
 		FhirTerser terser = getContext().newTerser();
 
 		for (DaoMethodOutcome nextOutcome : idToPersistedOutcome.values()) {
-			IResource nextResource = nextOutcome.getResource();
+			IResource nextResource = (IResource) nextOutcome.getResource();
 			if (nextResource == null) {
 				continue;
 			}

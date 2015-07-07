@@ -31,7 +31,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -39,6 +39,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
@@ -170,7 +171,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		}
 
-		IBaseOperationOutcome outcome = response != null ? response.getOperationOutcome() : null;
+		IBaseResource outcome = response != null ? response.getOperationOutcome() : null;
+		IBaseResource resource = response != null ? response.getResource() : null;
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);
 			boolean continueProcessing = next.outgoingResponse(theRequest, outcome, theRequest.getServletRequest(), theRequest.getServletResponse());
@@ -179,6 +181,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			}
 		}
 
+		boolean allowPrefer = false;
 		switch (getResourceOperationType()) {
 		case CREATE:
 			if (response == null) {
@@ -191,6 +194,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				servletResponse.setStatus(Constants.STATUS_HTTP_200_OK);
 			}
 			addContentLocationHeaders(theRequest, servletResponse, response);
+			allowPrefer = true;
 			break;
 
 		case UPDATE:
@@ -200,6 +204,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 				servletResponse.setStatus(Constants.STATUS_HTTP_201_CREATED);
 			}
 			addContentLocationHeaders(theRequest, servletResponse, response);
+			allowPrefer = true;
 			break;
 
 		case VALIDATE:
@@ -222,6 +227,16 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		theServer.addHeadersToResponse(servletResponse);
 
+		if (resource != null && allowPrefer) {
+			String prefer = theRequest.getServletRequest().getHeader(Constants.HEADER_PREFER);
+			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
+			if (preferReturn != null) {
+				if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+					outcome = resource;
+				}
+			}
+		} 
+		
 		if (outcome != null) {
 			EncodingEnum encoding = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
 			servletResponse.setContentType(encoding.getResourceContentType());
@@ -229,7 +244,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			IParser parser = encoding.newParser(getContext());
 			parser.setPrettyPrint(RestfulServerUtils.prettyPrintResponse(theServer, theRequest));
 			try {
-				parser.encodeResourceToWriter(response.getOperationOutcome(), writer);
+				parser.encodeResourceToWriter(outcome, writer);
 			} finally {
 				writer.close();
 			}

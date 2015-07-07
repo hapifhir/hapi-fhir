@@ -1,7 +1,22 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,6 +35,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.jmx.access.InvalidInvocationException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -78,7 +94,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 @SuppressWarnings("unchecked")
-public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
+public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourCtx;
 	private static IFhirResourceDao<Device> ourDeviceDao;
@@ -90,28 +106,11 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
-	private static IFhirSystemDao<Bundle> ourSystemDao;
-	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	@SuppressWarnings("unused")
 	private static IFhirResourceDao<QuestionnaireAnswers> ourQuestionnaireAnswersDao;
+	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
+	private static IFhirSystemDao<Bundle> ourSystemDao;
 
-	@Test
-	public void testQuestionnaireTitleGetsIndexed() {
-		Questionnaire q = new Questionnaire();
-		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_TITLE");
-		IIdType qid1 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless(); 
-		q = new Questionnaire();
-		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_NOTITLE");
-		IIdType qid2 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless();
-		
-		IBundleProvider results = ourQuestionnaireDao.search("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE"));
-		assertEquals(1, results.size());
-		assertEquals(qid1, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
-		assertNotEquals(qid2, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
-		
-	}
-
-	
 	@Test
 	public void testChoiceParamConcept() {
 		Observation o1 = new Observation();
@@ -649,6 +648,51 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		}
 	}
 
+	/**
+	 * See #196
+	 */
+	@Test
+	public void testInvalidChainNames() {
+		ReferenceParam param = null;
+
+		// OK
+		param = new ReferenceParam("999999999999");
+		param.setChain("organization");
+		ourLocationDao.search("partof", param);
+
+		// OK
+		param = new ReferenceParam("999999999999");
+		param.setChain("organization.name");
+		ourLocationDao.search("partof", param);
+
+		try {
+			param = new ReferenceParam("999999999999");
+			param.setChain("foo");
+			ourLocationDao.search("partof", param);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Invalid parameter chain: partof." + param.getChain()));
+		}
+
+		try {
+			param = new ReferenceParam("999999999999");
+			param.setChain("organization.foo");
+			ourLocationDao.search("partof", param);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Invalid parameter chain: " + param.getChain()));
+		}
+
+		try {
+			param = new ReferenceParam("999999999999");
+			param.setChain("organization.name.foo");
+			ourLocationDao.search("partof", param);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Invalid parameter chain: " + param.getChain()));
+		}
+	}
+
 	@Test
 	public void testOrganizationName() {
 
@@ -689,6 +733,21 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testPersistContactPoint() {
+		List<IResource> found = toList(ourPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
+		int initialSize2000 = found.size();
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testPersistContactPoint");
+		patient.addTelecom().setValue("555-123-4567");
+		ourPatientDao.create(patient);
+
+		found = toList(ourPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
+		assertEquals(1 + initialSize2000, found.size());
+
+	}
+
+	@Test
 	public void testPersistResourceLink() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testPersistResourceLink01");
@@ -725,21 +784,6 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999")));
 		assertEquals(0, result.size());
-
-	}
-
-	@Test
-	public void testPersistContactPoint() {
-		List<IResource> found = toList(ourPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
-		int initialSize2000 = found.size();
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("testPersistContactPoint");
-		patient.addTelecom().setValue("555-123-4567");
-		ourPatientDao.create(patient);
-
-		found = toList(ourPatientDao.search(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567")));
-		assertEquals(1 + initialSize2000, found.size());
 
 	}
 
@@ -853,6 +897,22 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testQuestionnaireTitleGetsIndexed() {
+		Questionnaire q = new Questionnaire();
+		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_TITLE");
+		IIdType qid1 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless();
+		q = new Questionnaire();
+		q.getGroup().setTitle("testQuestionnaireTitleGetsIndexedQ_NOTITLE");
+		IIdType qid2 = ourQuestionnaireDao.create(q).getId().toUnqualifiedVersionless();
+
+		IBundleProvider results = ourQuestionnaireDao.search("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE"));
+		assertEquals(1, results.size());
+		assertEquals(qid1, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+		assertNotEquals(qid2, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+
+	}
+
+	@Test
 	public void testReadForcedIdVersionHistory() throws InterruptedException {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testReadVorcedIdVersionHistory01");
@@ -873,29 +933,6 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Patient v2 = ourPatientDao.read(p1idv2);
 		assertEquals(2, v2.getIdentifier().size());
 
-	}
-
-	@Test
-	public void testReverseIncludes() {
-		String methodName = "testReverseIncludes";
-		Organization org = new Organization();
-		org.setName("X" + methodName + "X");
-		IIdType orgId = ourOrganizationDao.create(org).getId();
-
-		Patient pat = new Patient();
-		pat.addName().addFamily("X" + methodName + "X");
-		pat.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless());
-		ourPatientDao.create(pat);
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add(Organization.SP_NAME, new StringParam("X" + methodName + "X"));
-		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
-		IBundleProvider resultsP = ourOrganizationDao.search(map);
-		assertEquals(2, resultsP.size());
-		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
-		assertEquals(2, results.size());
-		assertEquals(Organization.class, results.get(0).getClass());
-		assertEquals(Patient.class, results.get(1).getClass());
 	}
 
 	@Test
@@ -1137,6 +1174,29 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testReverseIncludes() {
+		String methodName = "testReverseIncludes";
+		Organization org = new Organization();
+		org.setName("X" + methodName + "X");
+		IIdType orgId = ourOrganizationDao.create(org).getId();
+
+		Patient pat = new Patient();
+		pat.addName().addFamily("X" + methodName + "X");
+		pat.getManagingOrganization().setReference(orgId.toUnqualifiedVersionless());
+		ourPatientDao.create(pat);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Organization.SP_NAME, new StringParam("X" + methodName + "X"));
+		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
+		IBundleProvider resultsP = ourOrganizationDao.search(map);
+		assertEquals(2, resultsP.size());
+		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
+		assertEquals(2, results.size());
+		assertEquals(Organization.class, results.get(0).getClass());
+		assertEquals(Patient.class, results.get(1).getClass());
+	}
+
+	@Test
 	public void testSearchAll() {
 		{
 			Patient patient = new Patient();
@@ -1299,7 +1359,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	@Test
 	public void testSearchLastUpdatedParam() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParam";
-		
+
 		int sleep = 100;
 		Thread.sleep(sleep);
 
@@ -1322,7 +1382,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		Thread.sleep(1100);
 		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
 		Thread.sleep(1100);
-		
+
 		IIdType id2;
 		{
 			Patient patient = new Patient();
@@ -1330,7 +1390,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 			patient.addName().addFamily(methodName).addGiven("John");
 			id2 = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
 		}
-		
+
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
@@ -1495,6 +1555,52 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testSearchResourceLinkWithChainDouble() {
+		String methodName = "testSearchResourceLinkWithChainDouble";
+
+		Organization org = new Organization();
+		org.setName(methodName);
+		IIdType orgId01 = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		Location locParent = new Location();
+		locParent.setManagingOrganization(new ResourceReferenceDt(orgId01));
+		IIdType locParentId = ourLocationDao.create(locParent).getId().toUnqualifiedVersionless();
+
+		Location locChild = new Location();
+		locChild.setPartOf(new ResourceReferenceDt(locParentId));
+		IIdType locChildId = ourLocationDao.create(locChild).getId().toUnqualifiedVersionless();
+
+		Location locGrandchild = new Location();
+		locGrandchild.setPartOf(new ResourceReferenceDt(locChildId));
+		IIdType locGrandchildId = ourLocationDao.create(locGrandchild).getId().toUnqualifiedVersionless();
+
+		IBundleProvider found;
+		ReferenceParam param;
+
+		found = ourLocationDao.search("organization", new ReferenceParam(orgId01.getIdPart()));
+		assertEquals(1, found.size());
+		assertEquals(locParentId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+
+		param = new ReferenceParam(orgId01.getIdPart());
+		param.setChain("organization");
+		found = ourLocationDao.search("partof", param);
+		assertEquals(1, found.size());
+		assertEquals(locChildId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+
+		param = new ReferenceParam(orgId01.getIdPart());
+		param.setChain("partof.organization");
+		found = ourLocationDao.search("partof", param);
+		assertEquals(1, found.size());
+		assertEquals(locGrandchildId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+
+		param = new ReferenceParam(methodName);
+		param.setChain("partof.organization.name");
+		found = ourLocationDao.search("partof", param);
+		assertEquals(1, found.size());
+		assertEquals(locGrandchildId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+	}
+
+	@Test
 	public void testSearchResourceLinkWithChainWithMultipleTypes() {
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSearchResourceLinkWithChainWithMultipleTypes01");
@@ -1607,196 +1713,6 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		patients = toList(ourPatientDao.search(params));
 		assertEquals(0, patients.size());
 
-	}
-
-	@Test
-	public void testSearchWithMissingString() {
-		IIdType orgId = ourOrganizationDao.create(new Organization()).getId();
-		IIdType notMissing;
-		IIdType missing;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			missing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
-			patient.setBirthDate(new DateDt("2011-01-01"));
-			patient.getManagingOrganization().setReference(orgId);
-			notMissing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		// String Param
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			StringParam param = new StringParam();
-			param.setMissing(false);
-			params.put(Patient.SP_FAMILY, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-		}
-		{
-			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			StringParam param = new StringParam();
-			param.setMissing(true);
-			params.put(Patient.SP_FAMILY, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-		}
-	}
-
-	@Test
-	public void testSearchWithMissingQuantity() {
-		IIdType notMissing;
-		IIdType missing;
-		{
-			Observation obs = new Observation();
-			obs.addIdentifier().setSystem("urn:system").setValue("001");
-			missing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
-		}
-		{
-			Observation obs = new Observation();
-			obs.addIdentifier().setSystem("urn:system").setValue("002");
-			obs.setValue(new QuantityDt(123));
-			notMissing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
-		}
-		// Quantity Param
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			QuantityParam param = new QuantityParam();
-			param.setMissing(false);
-			params.put(Observation.SP_VALUE_QUANTITY, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-		}
-		{
-			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			QuantityParam param = new QuantityParam();
-			param.setMissing(true);
-			params.put(Observation.SP_VALUE_QUANTITY, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-		}
-	}
-
-	@Test
-	public void testSearchWithToken() {
-		IIdType notMissing;
-		IIdType missing;
-		{
-			Observation obs = new Observation();
-			obs.addIdentifier().setSystem("urn:system").setValue("001");
-			missing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
-		}
-		{
-			Observation obs = new Observation();
-			obs.addIdentifier().setSystem("urn:system").setValue("002");
-			obs.getCode().addCoding().setSystem("urn:system").setCode("002");
-			notMissing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
-		}
-		// Token Param
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			TokenParam param = new TokenParam();
-			param.setMissing(false);
-			params.put(Observation.SP_CODE, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-		}
-		{
-			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			TokenParam param = new TokenParam();
-			param.setMissing(true);
-			params.put(Observation.SP_CODE, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-		}
-	}
-
-	@Test
-	public void testSearchWithMissingDate() {
-		IIdType orgId = ourOrganizationDao.create(new Organization()).getId();
-		IIdType notMissing;
-		IIdType missing;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			missing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
-			patient.setBirthDate(new DateDt("2011-01-01"));
-			patient.getManagingOrganization().setReference(orgId);
-			notMissing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		// Date Param
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			DateParam param = new DateParam();
-			param.setMissing(false);
-			params.put(Patient.SP_BIRTHDATE, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-		}
-		{
-			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			DateParam param = new DateParam();
-			param.setMissing(true);
-			params.put(Patient.SP_BIRTHDATE, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-		}
-	}
-
-	@Test
-	public void testSearchWithMissingReference() {
-		IIdType orgId = ourOrganizationDao.create(new Organization()).getId().toUnqualifiedVersionless();
-		IIdType notMissing;
-		IIdType missing;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			missing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
-			patient.setBirthDate(new DateDt("2011-01-01"));
-			patient.getManagingOrganization().setReference(orgId);
-			notMissing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		}
-		// Reference Param
-		{
-			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			ReferenceParam param = new ReferenceParam();
-			param.setMissing(false);
-			params.put(Patient.SP_ORGANIZATION, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-		}
-		{
-			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
-			ReferenceParam param = new ReferenceParam();
-			param.setMissing(true);
-			params.put(Patient.SP_ORGANIZATION, param);
-			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-			assertThat(patients, not(containsInRelativeOrder(orgId)));
-		}
 	}
 
 	@Test
@@ -2047,6 +1963,221 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testSearchWithMissingDate() {
+		IIdType orgId = ourOrganizationDao.create(new Organization()).getId();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
+			patient.setBirthDate(new DateDt("2011-01-01"));
+			patient.getManagingOrganization().setReference(orgId);
+			notMissing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		// Date Param
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			DateParam param = new DateParam();
+			param.setMissing(false);
+			params.put(Patient.SP_BIRTHDATE, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			DateParam param = new DateParam();
+			param.setMissing(true);
+			params.put(Patient.SP_BIRTHDATE, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+	}
+
+	@Test
+	public void testSearchWithMissingQuantity() {
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("002");
+			obs.setValue(new QuantityDt(123));
+			notMissing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		}
+		// Quantity Param
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			QuantityParam param = new QuantityParam();
+			param.setMissing(false);
+			params.put(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			QuantityParam param = new QuantityParam();
+			param.setMissing(true);
+			params.put(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+	}
+
+	@Test
+	public void testSearchWithMissingReference() {
+		IIdType orgId = ourOrganizationDao.create(new Organization()).getId().toUnqualifiedVersionless();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
+			patient.setBirthDate(new DateDt("2011-01-01"));
+			patient.getManagingOrganization().setReference(orgId);
+			notMissing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		// Reference Param
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			ReferenceParam param = new ReferenceParam();
+			param.setMissing(false);
+			params.put(Patient.SP_ORGANIZATION, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			ReferenceParam param = new ReferenceParam();
+			param.setMissing(true);
+			params.put(Patient.SP_ORGANIZATION, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients, not(containsInRelativeOrder(orgId)));
+		}
+	}
+
+	@Test
+	public void testSearchWithMissingString() {
+		IIdType orgId = ourOrganizationDao.create(new Organization()).getId();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily("Tester_testSearchStringParam").addGiven("John");
+			patient.setBirthDate(new DateDt("2011-01-01"));
+			patient.getManagingOrganization().setReference(orgId);
+			notMissing = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		// String Param
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			StringParam param = new StringParam();
+			param.setMissing(false);
+			params.put(Patient.SP_FAMILY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			StringParam param = new StringParam();
+			param.setMissing(true);
+			params.put(Patient.SP_FAMILY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+	}
+
+	@Test
+	public void testSearchWithNoResults() {
+		Device dev = new Device();
+		dev.addIdentifier().setSystem("Foo");
+		ourDeviceDao.create(dev);
+
+		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
+		ourLog.info("Initial size: " + value.size());
+		for (IBaseResource next : value.getResources(0, value.size())) {
+			ourLog.info("Deleting: {}", next.getIdElement());
+			ourDeviceDao.delete((IIdType) next.getIdElement());
+		}
+
+		value = ourDeviceDao.search(new SearchParameterMap());
+		if (value.size() > 0) {
+			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
+			fail(ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
+		}
+		assertEquals(0, value.size());
+
+		List<IBaseResource> res = value.getResources(0, 0);
+		assertTrue(res.isEmpty());
+
+	}
+
+	@Test
+	public void testSearchWithToken() {
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("002");
+			obs.getCode().addCoding().setSystem("urn:system").setCode("002");
+			notMissing = ourObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		}
+		// Token Param
+		{
+			HashMap<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			TokenParam param = new TokenParam();
+			param.setMissing(false);
+			params.put(Observation.SP_CODE, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+			TokenParam param = new TokenParam();
+			param.setMissing(true);
+			params.put(Observation.SP_CODE, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourObservationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+	}
+
+	@Test
 	public void testSortByDate() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testtestSortByDate");
@@ -2149,6 +2280,67 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testSortByReference() {
+		String methodName = "testSortByReference";
+
+		Organization o1 = new Organization();
+		IIdType oid1 = ourOrganizationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		Organization o2 = new Organization();
+		IIdType oid2 = ourOrganizationDao.create(o2).getId().toUnqualifiedVersionless();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("testSortF1").addGiven("testSortG1");
+		p.getManagingOrganization().setReference(oid1);
+		IIdType id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("testSortF2").addGiven("testSortG2");
+		p.getManagingOrganization().setReference(oid2);
+		IIdType id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addFamily("testSortF3").addGiven("testSortG3");
+		p.getManagingOrganization().setReference(oid1);
+		IIdType id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.getManagingOrganization().setReference(oid2);
+		IIdType id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm;
+		List<IIdType> actual;
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
+		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual.subList(0, 2), containsInAnyOrder(id1, id3));
+		assertThat(actual.subList(2, 4), containsInAnyOrder(id2, id4));
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
+		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.ASC));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual.subList(0, 2), containsInAnyOrder(id1, id3));
+		assertThat(actual.subList(2, 4), containsInAnyOrder(id2, id4));
+
+		pm = new SearchParameterMap();
+		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
+		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual.subList(0, 2), containsInAnyOrder(id2, id4));
+		assertThat(actual.subList(2, 4), containsInAnyOrder(id1, id3));
+	}
+
+	@Test
 	public void testSortByString() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testSortByString");
@@ -2193,67 +2385,6 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id3, id2, id1, id4));
-	}
-
-	@Test
-	public void testSortByReference() {
-		String methodName = "testSortByReference";
-		
-		Organization o1 = new Organization();
-		IIdType oid1 = ourOrganizationDao.create(o1).getId().toUnqualifiedVersionless();
-		
-		Organization o2 = new Organization();
-		IIdType oid2 = ourOrganizationDao.create(o2).getId().toUnqualifiedVersionless();
-		
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("testSortF1").addGiven("testSortG1");
-		p.getManagingOrganization().setReference(oid1);
-		IIdType id1 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("testSortF2").addGiven("testSortG2");
-		p.getManagingOrganization().setReference(oid2);
-		IIdType id2 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("testSortF3").addGiven("testSortG3");
-		p.getManagingOrganization().setReference(oid1);
-		IIdType id3 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
-		
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.getManagingOrganization().setReference(oid2);
-		IIdType id4 = ourPatientDao.create(p).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap pm;
-		List<IIdType> actual;
-
-		pm = new SearchParameterMap();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION));
-		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
-		assertEquals(4, actual.size());
-		assertThat(actual.subList(0, 2), containsInAnyOrder(id1, id3));
-		assertThat(actual.subList(2, 4), containsInAnyOrder(id2, id4));
-
-		pm = new SearchParameterMap();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.ASC));
-		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
-		assertEquals(4, actual.size());
-		assertThat(actual.subList(0, 2), containsInAnyOrder(id1, id3));
-		assertThat(actual.subList(2, 4), containsInAnyOrder(id2, id4));
-
-		pm = new SearchParameterMap();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIds(ourPatientDao.search(pm));
-		assertEquals(4, actual.size());
-		assertThat(actual.subList(0, 2), containsInAnyOrder(id2, id4));
-		assertThat(actual.subList(2, 4), containsInAnyOrder(id1, id3));
 	}
 
 	@Test
@@ -2508,7 +2639,7 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
 		assertEquals(updated, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(1)));
 		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue());
-		assertEquals(published2, ResourceMetadataKeyEnum.PUBLISHED.get( (IResource) history.get(0)));
+		assertEquals(published2, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(0)));
 		assertEquals(updated2, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(0)));
 		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue());
 
@@ -2681,31 +2812,6 @@ public class FhirResourceDaoDstu2Test  extends BaseJpaTest {
 
 	private static void deleteEverything() {
 		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
-	}
-
-	@Test
-	public void testSearchWithNoResults() {
-		Device dev = new Device();
-		dev.addIdentifier().setSystem("Foo");
-		ourDeviceDao.create(dev);
-
-		IBundleProvider value = ourDeviceDao.search(new SearchParameterMap());
-		ourLog.info("Initial size: " + value.size());
-		for (IBaseResource next : value.getResources(0, value.size())) {
-			ourLog.info("Deleting: {}", next.getIdElement());
-			ourDeviceDao.delete((IIdType) next.getIdElement());
-		}
-
-		value = ourDeviceDao.search(new SearchParameterMap());
-		if (value.size() > 0) {
-			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
-			fail(ourFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
-		}
-		assertEquals(0, value.size());
-
-		List<IBaseResource> res = value.getResources(0, 0);
-		assertTrue(res.isEmpty());
-
 	}
 
 }
