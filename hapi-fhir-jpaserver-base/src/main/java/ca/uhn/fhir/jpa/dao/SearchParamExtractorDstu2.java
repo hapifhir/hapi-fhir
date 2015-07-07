@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.AddressDt;
+import ca.uhn.fhir.model.dstu2.composite.BoundCodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
@@ -58,9 +59,11 @@ import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Patient.Communication;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.valueset.RestfulSecurityServiceEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -469,28 +472,21 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 				} else if (nextObject instanceof CodeableConceptDt) {
 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
 					if (!nextCC.getTextElement().isEmpty()) {
-						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseFhirDao.normalizeString(nextCC.getTextElement().getValue()), nextCC.getTextElement().getValue());
+						String value = nextCC.getTextElement().getValue();
+						if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+							value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+						}
+						ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(nextSpDef.getName(), BaseFhirDao.normalizeString(value), value);
 						nextEntity.setResource(theEntity);
 						retVal.add(nextEntity);
 					}
 
-					for (CodingDt nextCoding : nextCC.getCoding()) {
-						if (nextCoding.isEmpty()) {
-							continue;
-						}
-
-						String nextSystem = nextCoding.getSystemElement().getValueAsString();
-						String nextCode = nextCoding.getCodeElement().getValue();
-						if (isNotBlank(nextSystem) || isNotBlank(nextCode)) {
-							systems.add(nextSystem);
-							codes.add(nextCode);
-						}
-
-						if (!nextCoding.getDisplayElement().isEmpty()) {
-							systems.add(null);
-							codes.add(nextCoding.getDisplayElement().getValue());
-						}
-
+					extractTokensFromCodeableConcept(systems, codes, nextCC);
+				} else if (nextObject instanceof RestSecurity) {
+					// Conformance.security search param points to something kind of useless right now - This should probably be fixed.
+					RestSecurity sec = (RestSecurity)nextObject;
+					for (BoundCodeableConceptDt<RestfulSecurityServiceEnum> nextCC : sec.getService()) {
+						extractTokensFromCodeableConcept(systems, codes, nextCC);
 					}
 				} else {
 					if (!multiType) {
@@ -536,6 +532,27 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 		theEntity.setParamsTokenPopulated(retVal.size() > 0);
 
 		return retVal;
+	}
+
+	private void extractTokensFromCodeableConcept(List<String> systems, List<String> codes, CodeableConceptDt nextCC) {
+		for (CodingDt nextCoding : nextCC.getCoding()) {
+			if (nextCoding.isEmpty()) {
+				continue;
+			}
+
+			String nextSystem = nextCoding.getSystemElement().getValueAsString();
+			String nextCode = nextCoding.getCodeElement().getValue();
+			if (isNotBlank(nextSystem) || isNotBlank(nextCode)) {
+				systems.add(nextSystem);
+				codes.add(nextCode);
+			}
+
+			if (!nextCoding.getDisplayElement().isEmpty()) {
+				systems.add(null);
+				codes.add(nextCoding.getDisplayElement().getValue());
+			}
+
+		}
 	}
 
 }

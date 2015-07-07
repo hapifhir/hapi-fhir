@@ -23,6 +23,7 @@ public class IdDtTest {
 		
 		id = new IdDt("#123");
 		assertEquals("#123", id.getValue());
+		assertEquals("#123", id.toUnqualifiedVersionless().getValue());
 		assertTrue(id.isLocal());
 		
 		id = new IdDt("#Medication/499059CE-CDD4-48BC-9014-528A35D15CED/_history/1");

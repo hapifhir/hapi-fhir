@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -36,6 +37,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.access.InvalidInvocationException;
+
+import com.ctc.wstx.util.StringUtil;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -1715,6 +1718,37 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	}
 
+	
+	@Test
+	public void testSearchStringParamReallyLong() {
+		String methodName = "testSearchStringParamReallyLong";
+		String value = StringUtils.rightPad(methodName, 200, 'a');
+
+		IIdType longId;
+		IIdType shortId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily(value);
+			longId = (IdDt) ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			shortId = (IdDt) ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		Map<String, IQueryParameterType> params = new HashMap<String, IQueryParameterType>();
+		String substring = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		params.put(Patient.SP_FAMILY, new StringParam(substring));
+		IBundleProvider found = ourPatientDao.search(params);
+		assertEquals(1, toList(found).size());
+		assertThat(toUnqualifiedVersionlessIds(found), contains(longId));
+		assertThat(toUnqualifiedVersionlessIds(found), not(contains(shortId)));
+
+	}
+
+	
 	@Test
 	public void testSearchStringParamWithNonNormalized() {
 		{

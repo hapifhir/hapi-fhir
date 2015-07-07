@@ -23,6 +23,7 @@ package ca.uhn.fhir.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
@@ -68,29 +69,26 @@ public class FhirTerser {
 	}
 
 	/**
-	 * Returns a list containing all child elements (including the resource itself) which are <b>non-empty</b> and are
-	 * either of the exact type specified, or are a subclass of that type.
+	 * Returns a list containing all child elements (including the resource itself) which are <b>non-empty</b> and are either of the exact type specified, or are a subclass of that type.
 	 * <p>
-	 * For example, specifying a type of {@link StringDt} would return all non-empty string instances within the
-	 * message. Specifying a type of {@link IResource} would return the resource itself, as well as any contained
-	 * resources.
+	 * For example, specifying a type of {@link StringDt} would return all non-empty string instances within the message. Specifying a type of {@link IResource} would return the resource itself, as
+	 * well as any contained resources.
 	 * </p>
 	 * <p>
-	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well,
-	 * but will not descend into linked resources (e.g. {@link BaseResourceReferenceDt#getResource()}) or embedded
-	 * resources (e.g. Bundle.entry.resource)
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not descend into linked resources (e.g.
+	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
 	 * </p>
 	 * 
 	 * @param theResource
-	 *            The resource instance to search. Must not be null.
+	 *           The resource instance to search. Must not be null.
 	 * @param theType
-	 *            The type to search for. Must not be null.
+	 *           The type to search for. Must not be null.
 	 * @return Returns a list of all matching elements
 	 */
 	public <T extends IBase> List<T> getAllPopulatedChildElementsOfType(IBaseResource theResource, final Class<T> theType) {
 		final ArrayList<T> retVal = new ArrayList<T>();
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(theResource, null, null, def, new IModelVisitor() {
+		visit(new IdentityHashMap<Object, Object>(), theResource, null, null, def, new IModelVisitor() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
@@ -105,8 +103,8 @@ public class FhirTerser {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
-					ExtensionDt theNextExt) {
+			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
+					BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
 				if (theType.isAssignableFrom(theNextExt.getClass())) {
 					retVal.add((T) theNextExt);
 				}
@@ -118,32 +116,32 @@ public class FhirTerser {
 		return retVal;
 	}
 
-    public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
-        final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
-        BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-        visit(theResource, null, null, def, new IModelVisitor() {
-            @Override
-            public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-                if (theElement == null || theElement.isEmpty()) {
-                    return;
-                }
-                if (IBaseReference.class.isAssignableFrom(theElement.getClass())) {
-                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (IBaseReference)theElement));
-                }
-            }
+	public List<ResourceReferenceInfo> getAllResourceReferences(final IBaseResource theResource) {
+		final ArrayList<ResourceReferenceInfo> retVal = new ArrayList<ResourceReferenceInfo>();
+		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
+		visit(new IdentityHashMap<Object, Object>(),theResource, null, null, def, new IModelVisitor() {
+			@Override
+			public void acceptElement(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				if (theElement == null || theElement.isEmpty()) {
+					return;
+				}
+				if (IBaseReference.class.isAssignableFrom(theElement.getClass())) {
+					retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (IBaseReference) theElement));
+				}
+			}
 
-            @Override
-            public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition,
-                                                  ExtensionDt theNextExt) {
-                if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
-                    retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (BaseResourceReferenceDt)theNextExt.getValue()));
-                }
-            }
-        });
-        return retVal;
-    }
+			@Override
+			public void acceptUndeclaredExtension(ISupportsUndeclaredExtensions theContainingElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
+					BaseRuntimeElementDefinition<?> theDefinition, ExtensionDt theNextExt) {
+				if (theNextExt.getValue() != null && BaseResourceReferenceDt.class.isAssignableFrom(theNextExt.getValue().getClass())) {
+					retVal.add(new ResourceReferenceInfo(myContext, theResource, thePathToElement, (BaseResourceReferenceDt) theNextExt.getValue()));
+				}
+			}
+		});
+		return retVal;
+	}
 
-    private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
+	private BaseRuntimeChildDefinition getDefinition(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, List<String> theSubList) {
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(theSubList.get(0));
 
 		if (theSubList.size() == 1) {
@@ -214,7 +212,7 @@ public class FhirTerser {
 
 	public List<Object> getValues(IBaseResource theResource, String thePath) {
 		Class<Object> wantedClass = Object.class;
-		
+
 		return getValues(theResource, thePath, wantedClass);
 
 	}
@@ -233,24 +231,30 @@ public class FhirTerser {
 		return getValues(currentDef, currentObj, subList, theWantedClass);
 	}
 
-    private List<String> addNameToList(List<String> theCurrentList, BaseRuntimeChildDefinition theChildDefinition) {
-        if (theChildDefinition == null)
-            return null;
-        if (theCurrentList== null || theCurrentList.isEmpty())
-            return new ArrayList<String>(Arrays.asList(theChildDefinition.getElementName()));
-        List<String> newList = new ArrayList<String>(theCurrentList);
-        newList.add(theChildDefinition.getElementName());
-        return newList;
-    }
+	private List<String> addNameToList(List<String> theCurrentList, BaseRuntimeChildDefinition theChildDefinition) {
+		if (theChildDefinition == null)
+			return null;
+		if (theCurrentList == null || theCurrentList.isEmpty())
+			return new ArrayList<String>(Arrays.asList(theChildDefinition.getElementName()));
+		List<String> newList = new ArrayList<String>(theCurrentList);
+		newList.add(theChildDefinition.getElementName());
+		return newList;
+	}
 
-	private void visit(IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
-        List<String> pathToElement = addNameToList(thePathToElement, theChildDefinition);
+	private void visit(IdentityHashMap<Object, Object> theStack, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition,
+			BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor theCallback) {
+		List<String> pathToElement = addNameToList(thePathToElement, theChildDefinition);
+
+		if (theStack.put(theElement, theElement) != null) {
+			return;
+		}
+		
 		theCallback.acceptElement(theElement, pathToElement, theChildDefinition, theDefinition);
 		addUndeclaredExtensions(theElement, theDefinition, theChildDefinition, theCallback);
 
-		// if (theElement.isEmpty()) {
-		// return;
-		// }
+		 if (theElement.isEmpty()) {
+		 return;
+		 }
 
 		switch (theDefinition.getChildType()) {
 		case ID_DATATYPE:
@@ -265,7 +269,7 @@ public class FhirTerser {
 				IBaseResource theResource = resRefDt.getResource();
 				if (theResource.getIdElement() == null || theResource.getIdElement().isEmpty() || theResource.getIdElement().isLocal()) {
 					BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-					visit(theResource, pathToElement, null, def, theCallback);
+					visit(theStack, theResource, pathToElement, null, def, theCallback);
 				}
 			}
 			break;
@@ -287,14 +291,14 @@ public class FhirTerser {
 						childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
 
 						if (childElementDef == null) {
-							childElementDef = myContext.getElementDefinition(nextValue.getClass()); 
+							childElementDef = myContext.getElementDefinition(nextValue.getClass());
 						}
 
 						if (nextChild instanceof RuntimeChildDirectResource) {
 							// Don't descend into embedded resources
 							theCallback.acceptElement(nextValue, null, nextChild, childElementDef);
 						} else {
-							visit(nextValue, pathToElement, nextChild, childElementDef, theCallback);
+							visit(theStack, nextValue, pathToElement, nextChild, childElementDef, theCallback);
 						}
 					}
 				}
@@ -305,7 +309,7 @@ public class FhirTerser {
 			BaseContainedDt value = (BaseContainedDt) theElement;
 			for (IResource next : value.getContainedResources()) {
 				BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(next);
-				visit(next, pathToElement, null, def, theCallback);
+				visit(theStack, next, pathToElement, null, def, theCallback);
 			}
 			break;
 		}
@@ -316,21 +320,25 @@ public class FhirTerser {
 		case CONTAINED_RESOURCE_LIST:
 			if (theElement != null) {
 				BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
-				visit(theElement, pathToElement, null, def, theCallback);
+				visit(theStack, theElement, pathToElement, null, def, theCallback);
 			}
 			break;
 		}
+		
+		theStack.remove(theElement);
+		
 	}
 
-	private void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor2 theCallback, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-			List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+	private void visit(IBase theElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition, IModelVisitor2 theCallback, List<IBase> theContainingElementPath,
+			List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
 		if (theChildDefinition != null) {
 			theChildDefinitionPath.add(theChildDefinition);
 		}
 		theContainingElementPath.add(theElement);
 		theElementDefinitionPath.add(theDefinition);
 
-		theCallback.acceptElement(theElement, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath), Collections.unmodifiableList(theElementDefinitionPath));
+		theCallback.acceptElement(theElement, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath),
+				Collections.unmodifiableList(theElementDefinitionPath));
 
 		/*
 		 * Visit undeclared extensions
@@ -405,7 +413,8 @@ public class FhirTerser {
 							theContainingElementPath.add(nextValue);
 							theChildDefinitionPath.add(nextChild);
 							theElementDefinitionPath.add(myContext.getElementDefinition(nextValue.getClass()));
-							theCallback.acceptElement(nextValue, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath), Collections.unmodifiableList(theElementDefinitionPath));
+							theCallback.acceptElement(nextValue, Collections.unmodifiableList(theContainingElementPath), Collections.unmodifiableList(theChildDefinitionPath),
+									Collections.unmodifiableList(theElementDefinitionPath));
 							theChildDefinitionPath.remove(theChildDefinitionPath.size() - 1);
 							theContainingElementPath.remove(theContainingElementPath.size() - 1);
 							theElementDefinitionPath.remove(theElementDefinitionPath.size() - 1);
@@ -449,19 +458,18 @@ public class FhirTerser {
 	 * Visit all elements in a given resource
 	 * 
 	 * <p>
-	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well,
-	 * but will not descend into linked resources (e.g. {@link BaseResourceReferenceDt#getResource()}) or embedded
-	 * resources (e.g. Bundle.entry.resource)
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not descend into linked resources (e.g.
+	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
 	 * </p>
 	 * 
 	 * @param theResource
-	 *            The resource to visit
+	 *           The resource to visit
 	 * @param theVisitor
-	 *            The visitor
+	 *           The visitor
 	 */
 	public void visit(IBaseResource theResource, IModelVisitor theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
-		visit(theResource, null, null, def, theVisitor);
+		visit(new IdentityHashMap<Object, Object>(), theResource, null, null, def, theVisitor);
 	}
 
 	/**
@@ -470,15 +478,14 @@ public class FhirTerser {
 	 * THIS ALTERNATE METHOD IS STILL EXPERIMENTAL
 	 * 
 	 * <p>
-	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well,
-	 * but will not descend into linked resources (e.g. {@link BaseResourceReferenceDt#getResource()}) or embedded
-	 * resources (e.g. Bundle.entry.resource)
+	 * Note on scope: This method will descend into any contained resources ({@link IResource#getContained()}) as well, but will not descend into linked resources (e.g.
+	 * {@link BaseResourceReferenceDt#getResource()}) or embedded resources (e.g. Bundle.entry.resource)
 	 * </p>
 	 * 
 	 * @param theResource
-	 *            The resource to visit
+	 *           The resource to visit
 	 * @param theVisitor
-	 *            The visitor
+	 *           The visitor
 	 */
 	void visit(IBaseResource theResource, IModelVisitor2 theVisitor) {
 		BaseRuntimeElementCompositeDefinition<?> def = myContext.getResourceDefinition(theResource);
@@ -487,7 +494,7 @@ public class FhirTerser {
 
 	public Object getSingleValueOrNull(IBase theTarget, String thePath) {
 		Class<Object> wantedType = Object.class;
-		
+
 		return getSingleValueOrNull(theTarget, thePath, wantedType);
 	}
 
@@ -511,6 +518,5 @@ public class FhirTerser {
 			return retVal.get(0);
 		}
 	}
-
 
 }

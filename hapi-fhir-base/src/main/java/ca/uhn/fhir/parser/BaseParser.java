@@ -87,7 +87,6 @@ public abstract class BaseParser implements IParser {
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
-
 		Set<String> allIds = new HashSet<String>();
 		Map<String, IBaseResource> existingIdToContainedResource = null;
 
@@ -131,6 +130,10 @@ public abstract class BaseParser implements IParser {
 				IBaseResource resource = next.getResource();
 				if (resource != null) {
 					if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
+						if (theContained.getResourceId(resource) != null) {
+							// Prevent infinite recursion if there are circular loops in the contained resources
+							continue;
+						}
 						theContained.addContained(resource);
 					} else {
 						continue;

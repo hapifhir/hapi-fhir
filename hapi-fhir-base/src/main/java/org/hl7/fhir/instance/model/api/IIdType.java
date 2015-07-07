@@ -87,6 +87,9 @@ public interface IIdType {
 
 	IIdType withServerBase(String theServerBase, String theResourceName);
 
+	/**
+	 * Returns <code>true</code> if this ID contains an absolute URL (in other words, a URL starting with "http://" or "https://"
+	 */
 	boolean isAbsolute();
 
 	boolean isIdPartValidLong();

@@ -1684,7 +1684,7 @@ class ParserState<T> {
 		@Override
 		public void endingElement() throws DataFormatException {
 			if (myExtension.getValue() != null && myExtension.getExtension().size() > 0) {
-				throw new DataFormatException("Extension must not have both a value and other contained extensions");
+				throw new DataFormatException("Extension (URL='" + myExtension.getUrl() + "') must not have both a value and other contained extensions");
 			}
 			pop();
 		}

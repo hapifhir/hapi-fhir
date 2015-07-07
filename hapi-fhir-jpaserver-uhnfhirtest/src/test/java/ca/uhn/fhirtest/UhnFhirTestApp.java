@@ -25,11 +25,12 @@ public class UhnFhirTestApp {
 
 		int myPort = 8888;
 		String base = "http://localhost:" + myPort + "/base";
-
+		
 		//		new File("target/testdb").mkdirs();
 		System.setProperty("fhir.db.location", "./target/testdb");
 		System.setProperty("fhir.db.location.dstu2", "./target/testdb_dstu2");
-		System.setProperty("fhir.baseurl", base);
+		System.setProperty("fhir.baseurl.dstu1", base + "Dstu1");
+		System.setProperty("fhir.baseurl.dstu2", base + "Dstu1");
 		
 		Server server = new Server(myPort);
 

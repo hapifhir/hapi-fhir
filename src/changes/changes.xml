@@ -146,6 +146,10 @@
 				e.g. "Location.partof.partof.organization". Thanks to Ismael Sarmento Jr for
 				reporting!
 			</action>
+			<action type="fix">
+				Prevent crash when encoding resources with contained resources 
+				if the contained resources contained a circular reference to each other
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

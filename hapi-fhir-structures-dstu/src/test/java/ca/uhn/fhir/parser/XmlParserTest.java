@@ -500,6 +500,28 @@ public class XmlParserTest {
 
 	}
 
+	
+	@Test
+	public void testEncodeContainedWithSelfReference() {
+		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
+
+		// Create an organization, note that the organization does not have an ID
+		Organization org = new Organization();
+		org.getName().setValue("Contained Test Organization");
+		org.setPartOf(new ResourceReferenceDt(org));
+
+		// Create a patient
+		Patient patient = new Patient();
+		patient.getManagingOrganization().setResource(org);
+
+		String encoded = xmlParser.encodeResourceToString(patient);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("<contained>"));
+		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
+	}
+	
+	
+	
 	@Test
 	public void testEncodeContained() {
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);

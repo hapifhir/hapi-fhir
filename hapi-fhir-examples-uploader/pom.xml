@@ -1,0 +1,128 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- 
+	Note: HAPI projects use the "hapi-fhir" POM as their base to provide
+	easy management.
+	 
+	You do not need to use this in your own projects, so the 
+	"parent" tag and it's contents below may be removed if you
+	are using this file as a basis for your own project.
+	-->
+	<parent>
+		<groupId>ca.uhn.hapi.fhir</groupId>
+		<artifactId>hapi-fhir</artifactId>
+		<version>1.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<groupId>ca.uhn.hapi.example</groupId>
+	<artifactId>hapi-fhir-examples-uploader</artifactId>
+	<version>1.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>HAPI FHIR - Examples Uploader</name>
+
+	<dependencies>
+
+		<!-- This dependency includes the core HAPI-FHIR classes -->
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>1.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-dstu2</artifactId>
+			<version>1.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		
+	</dependencies>
+
+	<build>
+		
+		<!-- 
+		Tells Maven to name the generated WAR file as
+		hapi-fhir-jpaserver-example.war
+		-->
+		<finalName>hapi-fhir-jpaserver-example</finalName>
+		
+		<!-- 
+		The following is not required for the application to build, but
+		allows you to test it by issuing "mvn jetty:run" from the command
+		line. 
+		-->
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>9.1.1.v20140108</version>
+					<configuration>
+						<webApp>
+							<contextPath>/hapi-fhir-jpaserver-example</contextPath>
+						</webApp>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	
+		<plugins>
+			<!-- 
+			Tell Maven which Java source version you want to use
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+			
+			<!-- 
+			The configuration here tells the WAR plugin to include the FHIR Tester
+			overlay. You can omit it if you are not using that feature.
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<overlays>
+						<overlay>
+							<groupId>ca.uhn.hapi.fhir</groupId>
+							<artifactId>hapi-fhir-testpage-overlay</artifactId>
+						</overlay>
+					</overlays>
+				</configuration>
+			</plugin>
+			
+			<!-- 
+			This plugin is just a part of the HAPI internal build process, you do not
+			need to incude it in your own projects
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+    		
+		</plugins>
+	</build>
+
+</project>
