@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -105,12 +105,12 @@ public class Group extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PERSON: return "http://hl7.org.fhir/group-type";
-            case ANIMAL: return "http://hl7.org.fhir/group-type";
-            case PRACTITIONER: return "http://hl7.org.fhir/group-type";
-            case DEVICE: return "http://hl7.org.fhir/group-type";
-            case MEDICATION: return "http://hl7.org.fhir/group-type";
-            case SUBSTANCE: return "http://hl7.org.fhir/group-type";
+            case PERSON: return "http://hl7.org/fhir/group-type";
+            case ANIMAL: return "http://hl7.org/fhir/group-type";
+            case PRACTITIONER: return "http://hl7.org/fhir/group-type";
+            case DEVICE: return "http://hl7.org/fhir/group-type";
+            case MEDICATION: return "http://hl7.org/fhir/group-type";
+            case SUBSTANCE: return "http://hl7.org/fhir/group-type";
             default: return "?";
           }
         }
@@ -256,6 +256,10 @@ public class Group extends DomainResource {
           return (CodeableConcept) this.value;
         }
 
+        public boolean hasValueCodeableConcept() throws Exception { 
+          return this.value instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
@@ -263,6 +267,10 @@ public class Group extends DomainResource {
           if (!(this.value instanceof BooleanType))
             throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
+        }
+
+        public boolean hasValueBooleanType() throws Exception { 
+          return this.value instanceof BooleanType;
         }
 
         /**
@@ -274,6 +282,10 @@ public class Group extends DomainResource {
           return (Quantity) this.value;
         }
 
+        public boolean hasValueQuantity() throws Exception { 
+          return this.value instanceof Quantity;
+        }
+
         /**
          * @return {@link #value} (The value of the trait that holds (or does not hold - see 'exclude') for members of the group.)
          */
@@ -281,6 +293,10 @@ public class Group extends DomainResource {
           if (!(this.value instanceof Range))
             throw new Exception("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
+        }
+
+        public boolean hasValueRange() throws Exception { 
+          return this.value instanceof Range;
         }
 
         public boolean hasValue() { 

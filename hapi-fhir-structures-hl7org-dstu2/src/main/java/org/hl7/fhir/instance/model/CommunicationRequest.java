@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -133,16 +133,16 @@ public class CommunicationRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "http://hl7.org.fhir/communication-request-status";
-            case PLANNED: return "http://hl7.org.fhir/communication-request-status";
-            case REQUESTED: return "http://hl7.org.fhir/communication-request-status";
-            case RECEIVED: return "http://hl7.org.fhir/communication-request-status";
-            case ACCEPTED: return "http://hl7.org.fhir/communication-request-status";
-            case INPROGRESS: return "http://hl7.org.fhir/communication-request-status";
-            case COMPLETED: return "http://hl7.org.fhir/communication-request-status";
-            case SUSPENDED: return "http://hl7.org.fhir/communication-request-status";
-            case REJECTED: return "http://hl7.org.fhir/communication-request-status";
-            case FAILED: return "http://hl7.org.fhir/communication-request-status";
+            case PROPOSED: return "http://hl7.org/fhir/communication-request-status";
+            case PLANNED: return "http://hl7.org/fhir/communication-request-status";
+            case REQUESTED: return "http://hl7.org/fhir/communication-request-status";
+            case RECEIVED: return "http://hl7.org/fhir/communication-request-status";
+            case ACCEPTED: return "http://hl7.org/fhir/communication-request-status";
+            case INPROGRESS: return "http://hl7.org/fhir/communication-request-status";
+            case COMPLETED: return "http://hl7.org/fhir/communication-request-status";
+            case SUSPENDED: return "http://hl7.org/fhir/communication-request-status";
+            case REJECTED: return "http://hl7.org/fhir/communication-request-status";
+            case FAILED: return "http://hl7.org/fhir/communication-request-status";
             default: return "?";
           }
         }
@@ -272,6 +272,10 @@ public class CommunicationRequest extends DomainResource {
           return (StringType) this.content;
         }
 
+        public boolean hasContentStringType() throws Exception { 
+          return this.content instanceof StringType;
+        }
+
         /**
          * @return {@link #content} (An individual message part for multi-part messages.)
          */
@@ -281,6 +285,10 @@ public class CommunicationRequest extends DomainResource {
           return (Attachment) this.content;
         }
 
+        public boolean hasContentAttachment() throws Exception { 
+          return this.content instanceof Attachment;
+        }
+
         /**
          * @return {@link #content} (An individual message part for multi-part messages.)
          */
@@ -288,6 +296,10 @@ public class CommunicationRequest extends DomainResource {
           if (!(this.content instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
+        }
+
+        public boolean hasContentReference() throws Exception { 
+          return this.content instanceof Reference;
         }
 
         public boolean hasContent() { 

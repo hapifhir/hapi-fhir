@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -70,7 +70,7 @@ public class MedicationPrescription extends DomainResource {
         /**
          * The prescription was replaced by a newer one, which encompasses all the information in the previous one.
          */
-        SUPERCEDED, 
+        SUPERSEDED, 
         /**
          * The prescription is not yet 'actionable', i.e. it is a work in progress, required sign-off, need to be run through decision support.
          */
@@ -92,8 +92,8 @@ public class MedicationPrescription extends DomainResource {
           return ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return STOPPED;
-        if ("superceded".equals(codeString))
-          return SUPERCEDED;
+        if ("superseded".equals(codeString))
+          return SUPERSEDED;
         if ("draft".equals(codeString))
           return DRAFT;
         throw new Exception("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
@@ -105,20 +105,20 @@ public class MedicationPrescription extends DomainResource {
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case STOPPED: return "stopped";
-            case SUPERCEDED: return "superceded";
+            case SUPERSEDED: return "superseded";
             case DRAFT: return "draft";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case ACTIVE: return "http://hl7.org.fhir/medication-prescription-status";
-            case ONHOLD: return "http://hl7.org.fhir/medication-prescription-status";
-            case COMPLETED: return "http://hl7.org.fhir/medication-prescription-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/medication-prescription-status";
-            case STOPPED: return "http://hl7.org.fhir/medication-prescription-status";
-            case SUPERCEDED: return "http://hl7.org.fhir/medication-prescription-status";
-            case DRAFT: return "http://hl7.org.fhir/medication-prescription-status";
+            case ACTIVE: return "http://hl7.org/fhir/medication-prescription-status";
+            case ONHOLD: return "http://hl7.org/fhir/medication-prescription-status";
+            case COMPLETED: return "http://hl7.org/fhir/medication-prescription-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/medication-prescription-status";
+            case STOPPED: return "http://hl7.org/fhir/medication-prescription-status";
+            case SUPERSEDED: return "http://hl7.org/fhir/medication-prescription-status";
+            case DRAFT: return "http://hl7.org/fhir/medication-prescription-status";
             default: return "?";
           }
         }
@@ -129,7 +129,7 @@ public class MedicationPrescription extends DomainResource {
             case COMPLETED: return "All actions that are implied by the prescription have occurred (this will rarely be made explicit).";
             case ENTEREDINERROR: return "The prescription was entered in error and therefore nullified.";
             case STOPPED: return "Actions implied by the prescription have been permanently halted, before all of them occurred.";
-            case SUPERCEDED: return "The prescription was replaced by a newer one, which encompasses all the information in the previous one.";
+            case SUPERSEDED: return "The prescription was replaced by a newer one, which encompasses all the information in the previous one.";
             case DRAFT: return "The prescription is not yet 'actionable', i.e. it is a work in progress, required sign-off, need to be run through decision support.";
             default: return "?";
           }
@@ -141,7 +141,7 @@ public class MedicationPrescription extends DomainResource {
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered In Error";
             case STOPPED: return "Stopped";
-            case SUPERCEDED: return "Superceded";
+            case SUPERSEDED: return "Superseded";
             case DRAFT: return "Draft";
             default: return "?";
           }
@@ -163,8 +163,8 @@ public class MedicationPrescription extends DomainResource {
           return MedicationPrescriptionStatus.ENTEREDINERROR;
         if ("stopped".equals(codeString))
           return MedicationPrescriptionStatus.STOPPED;
-        if ("superceded".equals(codeString))
-          return MedicationPrescriptionStatus.SUPERCEDED;
+        if ("superseded".equals(codeString))
+          return MedicationPrescriptionStatus.SUPERSEDED;
         if ("draft".equals(codeString))
           return MedicationPrescriptionStatus.DRAFT;
         throw new IllegalArgumentException("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
@@ -180,8 +180,8 @@ public class MedicationPrescription extends DomainResource {
         return "entered-in-error";
       if (code == MedicationPrescriptionStatus.STOPPED)
         return "stopped";
-      if (code == MedicationPrescriptionStatus.SUPERCEDED)
-        return "superceded";
+      if (code == MedicationPrescriptionStatus.SUPERSEDED)
+        return "superseded";
       if (code == MedicationPrescriptionStatus.DRAFT)
         return "draft";
       return "?";
@@ -358,6 +358,10 @@ public class MedicationPrescription extends DomainResource {
           return (DateTimeType) this.scheduled;
         }
 
+        public boolean hasScheduledDateTimeType() throws Exception { 
+          return this.scheduled instanceof DateTimeType;
+        }
+
         /**
          * @return {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
@@ -367,6 +371,10 @@ public class MedicationPrescription extends DomainResource {
           return (Period) this.scheduled;
         }
 
+        public boolean hasScheduledPeriod() throws Exception { 
+          return this.scheduled instanceof Period;
+        }
+
         /**
          * @return {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
@@ -374,6 +382,10 @@ public class MedicationPrescription extends DomainResource {
           if (!(this.scheduled instanceof Timing))
             throw new Exception("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Timing) this.scheduled;
+        }
+
+        public boolean hasScheduledTiming() throws Exception { 
+          return this.scheduled instanceof Timing;
         }
 
         public boolean hasScheduled() { 
@@ -404,6 +416,10 @@ public class MedicationPrescription extends DomainResource {
           return (BooleanType) this.asNeeded;
         }
 
+        public boolean hasAsNeededBooleanType() throws Exception { 
+          return this.asNeeded instanceof BooleanType;
+        }
+
         /**
          * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
          */
@@ -411,6 +427,10 @@ public class MedicationPrescription extends DomainResource {
           if (!(this.asNeeded instanceof CodeableConcept))
             throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
           return (CodeableConcept) this.asNeeded;
+        }
+
+        public boolean hasAsNeededCodeableConcept() throws Exception { 
+          return this.asNeeded instanceof CodeableConcept;
         }
 
         public boolean hasAsNeeded() { 
@@ -513,6 +533,10 @@ public class MedicationPrescription extends DomainResource {
           return (Range) this.dose;
         }
 
+        public boolean hasDoseRange() throws Exception { 
+          return this.dose instanceof Range;
+        }
+
         /**
          * @return {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
          */
@@ -520,6 +544,10 @@ public class MedicationPrescription extends DomainResource {
           if (!(this.dose instanceof Quantity))
             throw new Exception("Type mismatch: the type Quantity was expected, but "+this.dose.getClass().getName()+" was encountered");
           return (Quantity) this.dose;
+        }
+
+        public boolean hasDoseQuantity() throws Exception { 
+          return this.dose instanceof Quantity;
         }
 
         public boolean hasDose() { 
@@ -707,6 +735,10 @@ public class MedicationPrescription extends DomainResource {
           return (CodeableConcept) this.medication;
         }
 
+        public boolean hasMedicationCodeableConcept() throws Exception { 
+          return this.medication instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
          */
@@ -714,6 +746,10 @@ public class MedicationPrescription extends DomainResource {
           if (!(this.medication instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
           return (Reference) this.medication;
+        }
+
+        public boolean hasMedicationReference() throws Exception { 
+          return this.medication instanceof Reference;
         }
 
         public boolean hasMedication() { 
@@ -1035,7 +1071,7 @@ public class MedicationPrescription extends DomainResource {
      * A code specifying the state of the order.  Generally this will be active or completed state.
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
-    @Description(shortDefinition="active | on-hold | completed | entered-in-error | stopped | superceded | draft", formalDefinition="A code specifying the state of the order.  Generally this will be active or completed state." )
+    @Description(shortDefinition="active | on-hold | completed | entered-in-error | stopped | superseded | draft", formalDefinition="A code specifying the state of the order.  Generally this will be active or completed state." )
     protected Enumeration<MedicationPrescriptionStatus> status;
 
     /**
@@ -1419,6 +1455,10 @@ public class MedicationPrescription extends DomainResource {
       return (CodeableConcept) this.reason;
     }
 
+    public boolean hasReasonCodeableConcept() throws Exception { 
+      return this.reason instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
@@ -1426,6 +1466,10 @@ public class MedicationPrescription extends DomainResource {
       if (!(this.reason instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
+    }
+
+    public boolean hasReasonReference() throws Exception { 
+      return this.reason instanceof Reference;
     }
 
     public boolean hasReason() { 
@@ -1505,6 +1549,10 @@ public class MedicationPrescription extends DomainResource {
       return (CodeableConcept) this.medication;
     }
 
+    public boolean hasMedicationCodeableConcept() throws Exception { 
+      return this.medication instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
      */
@@ -1512,6 +1560,10 @@ public class MedicationPrescription extends DomainResource {
       if (!(this.medication instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
+    }
+
+    public boolean hasMedicationReference() throws Exception { 
+      return this.medication instanceof Reference;
     }
 
     public boolean hasMedication() { 

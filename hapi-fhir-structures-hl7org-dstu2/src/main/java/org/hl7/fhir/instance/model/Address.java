@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -90,10 +90,10 @@ public class Address extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case HOME: return "http://hl7.org.fhir/address-use";
-            case WORK: return "http://hl7.org.fhir/address-use";
-            case TEMP: return "http://hl7.org.fhir/address-use";
-            case OLD: return "http://hl7.org.fhir/address-use";
+            case HOME: return "http://hl7.org/fhir/address-use";
+            case WORK: return "http://hl7.org/fhir/address-use";
+            case TEMP: return "http://hl7.org/fhir/address-use";
+            case OLD: return "http://hl7.org/fhir/address-use";
             default: return "?";
           }
         }
@@ -110,8 +110,8 @@ public class Address extends Type implements ICompositeType {
           switch (this) {
             case HOME: return "Home";
             case WORK: return "Work";
-            case TEMP: return "Temp";
-            case OLD: return "Old";
+            case TEMP: return "Temporary";
+            case OLD: return "Old / Incorrect";
             default: return "?";
           }
         }
@@ -145,6 +145,92 @@ public class Address extends Type implements ICompositeType {
       }
     }
 
+    public enum AddressType {
+        /**
+         * Mailing addresses - PO Boxes and care-of addresses
+         */
+        POSTAL, 
+        /**
+         * A physical address that can be visited
+         */
+        PHYSICAL, 
+        /**
+         * An address that is both physical and postal
+         */
+        BOTH, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static AddressType fromCode(String codeString) throws Exception {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("postal".equals(codeString))
+          return POSTAL;
+        if ("physical".equals(codeString))
+          return PHYSICAL;
+        if ("both".equals(codeString))
+          return BOTH;
+        throw new Exception("Unknown AddressType code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case POSTAL: return "postal";
+            case PHYSICAL: return "physical";
+            case BOTH: return "both";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case POSTAL: return "http://hl7.org/fhir/address-type";
+            case PHYSICAL: return "http://hl7.org/fhir/address-type";
+            case BOTH: return "http://hl7.org/fhir/address-type";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case POSTAL: return "Mailing addresses - PO Boxes and care-of addresses";
+            case PHYSICAL: return "A physical address that can be visited";
+            case BOTH: return "An address that is both physical and postal";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case POSTAL: return "Postal";
+            case PHYSICAL: return "Physical";
+            case BOTH: return "Postal & Physical";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class AddressTypeEnumFactory implements EnumFactory<AddressType> {
+    public AddressType fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("postal".equals(codeString))
+          return AddressType.POSTAL;
+        if ("physical".equals(codeString))
+          return AddressType.PHYSICAL;
+        if ("both".equals(codeString))
+          return AddressType.BOTH;
+        throw new IllegalArgumentException("Unknown AddressType code '"+codeString+"'");
+        }
+    public String toCode(AddressType code) {
+      if (code == AddressType.POSTAL)
+        return "postal";
+      if (code == AddressType.PHYSICAL)
+        return "physical";
+      if (code == AddressType.BOTH)
+        return "both";
+      return "?";
+      }
+    }
+
     /**
      * The purpose of this address.
      */
@@ -153,9 +239,16 @@ public class Address extends Type implements ICompositeType {
     protected Enumeration<AddressUse> use;
 
     /**
+     * Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.
+     */
+    @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
+    @Description(shortDefinition="postal | physical | both", formalDefinition="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both." )
+    protected Enumeration<AddressType> type;
+
+    /**
      * A full text representation of the address.
      */
-    @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Text representation of the address", formalDefinition="A full text representation of the address." )
     protected StringType text;
 
@@ -163,46 +256,46 @@ public class Address extends Type implements ICompositeType {
      * This component contains the house number, apartment number, street name, street direction, 
 P.O. Box number, delivery hints, and similar address information.
      */
-    @Child(name = "line", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "line", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Street name, number, direction & P.O. Box etc", formalDefinition="This component contains the house number, apartment number, street name, street direction, \nP.O. Box number, delivery hints, and similar address information." )
     protected List<StringType> line;
 
     /**
      * The name of the city, town, village or other community or delivery center.
      */
-    @Child(name = "city", type = {StringType.class}, order=3, min=0, max=1)
+    @Child(name = "city", type = {StringType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Name of city, town etc.", formalDefinition="The name of the city, town, village or other community or delivery center." )
     protected StringType city;
 
     /**
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      */
-    @Child(name = "state", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "state", type = {StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Sub-unit of country (abreviations ok)", formalDefinition="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)." )
     protected StringType state;
 
     /**
      * A postal code designating a region defined by the postal service.
      */
-    @Child(name = "postalCode", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "postalCode", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Postal code for area", formalDefinition="A postal code designating a region defined by the postal service." )
     protected StringType postalCode;
 
     /**
      * Country - a nation as commonly understood or generally accepted.
      */
-    @Child(name = "country", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "country", type = {StringType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Country (can be ISO 3166 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
     protected StringType country;
 
     /**
      * Time period when address was/is in use.
      */
-    @Child(name = "period", type = {Period.class}, order=7, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Time period when address was/is in use", formalDefinition="Time period when address was/is in use." )
     protected Period period;
 
-    private static final long serialVersionUID = -470351694L;
+    private static final long serialVersionUID = 1890613287L;
 
   /*
    * Constructor
@@ -256,6 +349,55 @@ P.O. Box number, delivery hints, and similar address information.
         if (this.use == null)
           this.use = new Enumeration<AddressUse>(new AddressUseEnumFactory());
         this.use.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #type} (Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     */
+    public Enumeration<AddressType> getTypeElement() { 
+      if (this.type == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Address.type");
+        else if (Configuration.doAutoCreate())
+          this.type = new Enumeration<AddressType>(new AddressTypeEnumFactory()); // bb
+      return this.type;
+    }
+
+    public boolean hasTypeElement() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    public boolean hasType() { 
+      return this.type != null && !this.type.isEmpty();
+    }
+
+    /**
+     * @param value {@link #type} (Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     */
+    public Address setTypeElement(Enumeration<AddressType> value) { 
+      this.type = value;
+      return this;
+    }
+
+    /**
+     * @return Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.
+     */
+    public AddressType getType() { 
+      return this.type == null ? null : this.type.getValue();
+    }
+
+    /**
+     * @param value Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.
+     */
+    public Address setType(AddressType value) { 
+      if (value == null)
+        this.type = null;
+      else {
+        if (this.type == null)
+          this.type = new Enumeration<AddressType>(new AddressTypeEnumFactory());
+        this.type.setValue(value);
       }
       return this;
     }
@@ -590,6 +732,7 @@ P.O. Box number, delivery hints, and similar address information.)
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("use", "code", "The purpose of this address.", 0, java.lang.Integer.MAX_VALUE, use));
+        childrenList.add(new Property("type", "code", "Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("text", "string", "A full text representation of the address.", 0, java.lang.Integer.MAX_VALUE, text));
         childrenList.add(new Property("line", "string", "This component contains the house number, apartment number, street name, street direction, \nP.O. Box number, delivery hints, and similar address information.", 0, java.lang.Integer.MAX_VALUE, line));
         childrenList.add(new Property("city", "string", "The name of the city, town, village or other community or delivery center.", 0, java.lang.Integer.MAX_VALUE, city));
@@ -603,6 +746,7 @@ P.O. Box number, delivery hints, and similar address information.)
         Address dst = new Address();
         copyValues(dst);
         dst.use = use == null ? null : use.copy();
+        dst.type = type == null ? null : type.copy();
         dst.text = text == null ? null : text.copy();
         if (line != null) {
           dst.line = new ArrayList<StringType>();
@@ -628,9 +772,10 @@ P.O. Box number, delivery hints, and similar address information.)
         if (!(other instanceof Address))
           return false;
         Address o = (Address) other;
-        return compareDeep(use, o.use, true) && compareDeep(text, o.text, true) && compareDeep(line, o.line, true)
-           && compareDeep(city, o.city, true) && compareDeep(state, o.state, true) && compareDeep(postalCode, o.postalCode, true)
-           && compareDeep(country, o.country, true) && compareDeep(period, o.period, true);
+        return compareDeep(use, o.use, true) && compareDeep(type, o.type, true) && compareDeep(text, o.text, true)
+           && compareDeep(line, o.line, true) && compareDeep(city, o.city, true) && compareDeep(state, o.state, true)
+           && compareDeep(postalCode, o.postalCode, true) && compareDeep(country, o.country, true) && compareDeep(period, o.period, true)
+          ;
       }
 
       @Override
@@ -640,15 +785,15 @@ P.O. Box number, delivery hints, and similar address information.)
         if (!(other instanceof Address))
           return false;
         Address o = (Address) other;
-        return compareValues(use, o.use, true) && compareValues(text, o.text, true) && compareValues(line, o.line, true)
-           && compareValues(city, o.city, true) && compareValues(state, o.state, true) && compareValues(postalCode, o.postalCode, true)
-           && compareValues(country, o.country, true);
+        return compareValues(use, o.use, true) && compareValues(type, o.type, true) && compareValues(text, o.text, true)
+           && compareValues(line, o.line, true) && compareValues(city, o.city, true) && compareValues(state, o.state, true)
+           && compareValues(postalCode, o.postalCode, true) && compareValues(country, o.country, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (use == null || use.isEmpty()) && (text == null || text.isEmpty())
-           && (line == null || line.isEmpty()) && (city == null || city.isEmpty()) && (state == null || state.isEmpty())
-           && (postalCode == null || postalCode.isEmpty()) && (country == null || country.isEmpty())
+        return super.isEmpty() && (use == null || use.isEmpty()) && (type == null || type.isEmpty())
+           && (text == null || text.isEmpty()) && (line == null || line.isEmpty()) && (city == null || city.isEmpty())
+           && (state == null || state.isEmpty()) && (postalCode == null || postalCode.isEmpty()) && (country == null || country.isEmpty())
            && (period == null || period.isEmpty());
       }
 

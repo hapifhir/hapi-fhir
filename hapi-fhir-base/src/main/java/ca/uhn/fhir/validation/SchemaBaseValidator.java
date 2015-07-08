@@ -49,7 +49,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome.BaseIssue;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
@@ -77,7 +76,7 @@ class SchemaBaseValidator implements IValidator {
 		myCtx = theContext;
 	}
 
-	private void doValidate(ValidationContext<?> theContext, String schemaName) {
+	private void doValidate(IValidationContext<?> theContext, String schemaName) {
 		Schema schema = loadSchema("dstu", schemaName);
 
 		try {
@@ -148,7 +147,7 @@ class SchemaBaseValidator implements IValidator {
 	}
 
 	@Override
-	public void validateBundle(ValidationContext<Bundle> theContext) {
+	public void validateBundle(IValidationContext<Bundle> theContext) {
 		if (myCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
 			doValidate(theContext, "fhir-single.xsd");
 		} else {
@@ -157,15 +156,15 @@ class SchemaBaseValidator implements IValidator {
 	}
 
 	@Override
-	public void validateResource(ValidationContext<IBaseResource> theContext) {
+	public void validateResource(IValidationContext<IBaseResource> theContext) {
 		doValidate(theContext, "fhir-single.xsd");
 	}
 
 	private static class MyErrorHandler implements org.xml.sax.ErrorHandler {
 
-		private ValidationContext<?> myContext;
+		private IValidationContext<?> myContext;
 
-		public MyErrorHandler(ValidationContext<?> theContext) {
+		public MyErrorHandler(IValidationContext<?> theContext) {
 			myContext = theContext;
 		}
 

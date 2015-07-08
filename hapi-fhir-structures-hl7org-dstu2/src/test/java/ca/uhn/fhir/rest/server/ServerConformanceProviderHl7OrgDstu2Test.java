@@ -195,7 +195,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
 		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertEquals(DiagnosticReport.SP_NAME, res.getSearchParam().get(2).getName());
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(2).getName());
 
 		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(1).getName());
 
@@ -419,7 +419,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
-		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId, @OptionalParam(name = DiagnosticReport.SP_NAME) TokenOrListParam theNames,
+		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId, @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames,
 				@OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange, @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}

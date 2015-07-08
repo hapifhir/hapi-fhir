@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -98,11 +98,11 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UNCONFIRMED: return "http://hl7.org.fhir/allergy-intolerance-status";
-            case CONFIRMED: return "http://hl7.org.fhir/allergy-intolerance-status";
-            case RESOLVED: return "http://hl7.org.fhir/allergy-intolerance-status";
-            case REFUTED: return "http://hl7.org.fhir/allergy-intolerance-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/allergy-intolerance-status";
+            case UNCONFIRMED: return "http://hl7.org/fhir/allergy-intolerance-status";
+            case CONFIRMED: return "http://hl7.org/fhir/allergy-intolerance-status";
+            case RESOLVED: return "http://hl7.org/fhir/allergy-intolerance-status";
+            case REFUTED: return "http://hl7.org/fhir/allergy-intolerance-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/allergy-intolerance-status";
             default: return "?";
           }
         }
@@ -198,9 +198,9 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case LOW: return "http://hl7.org.fhir/allergy-intolerance-criticality";
-            case HIGH: return "http://hl7.org.fhir/allergy-intolerance-criticality";
-            case UNASSESSIBLE: return "http://hl7.org.fhir/allergy-intolerance-criticality";
+            case LOW: return "http://hl7.org/fhir/allergy-intolerance-criticality";
+            case HIGH: return "http://hl7.org/fhir/allergy-intolerance-criticality";
+            case UNASSESSIBLE: return "http://hl7.org/fhir/allergy-intolerance-criticality";
             default: return "?";
           }
         }
@@ -277,8 +277,8 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case IMMUNE: return "http://hl7.org.fhir/allergy-intolerance-type";
-            case NONIMMUNE: return "http://hl7.org.fhir/allergy-intolerance-type";
+            case IMMUNE: return "http://hl7.org/fhir/allergy-intolerance-type";
+            case NONIMMUNE: return "http://hl7.org/fhir/allergy-intolerance-type";
             default: return "?";
           }
         }
@@ -356,9 +356,9 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case FOOD: return "http://hl7.org.fhir/allergy-intolerance-category";
-            case MEDICATION: return "http://hl7.org.fhir/allergy-intolerance-category";
-            case ENVIRONMENT: return "http://hl7.org.fhir/allergy-intolerance-category";
+            case FOOD: return "http://hl7.org/fhir/allergy-intolerance-category";
+            case MEDICATION: return "http://hl7.org/fhir/allergy-intolerance-category";
+            case ENVIRONMENT: return "http://hl7.org/fhir/allergy-intolerance-category";
             default: return "?";
           }
         }
@@ -442,9 +442,9 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UNLIKELY: return "http://hl7.org.fhir/reaction-event-certainty";
-            case LIKELY: return "http://hl7.org.fhir/reaction-event-certainty";
-            case CONFIRMED: return "http://hl7.org.fhir/reaction-event-certainty";
+            case UNLIKELY: return "http://hl7.org/fhir/reaction-event-certainty";
+            case LIKELY: return "http://hl7.org/fhir/reaction-event-certainty";
+            case CONFIRMED: return "http://hl7.org/fhir/reaction-event-certainty";
             default: return "?";
           }
         }
@@ -528,9 +528,9 @@ public class AllergyIntolerance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case MILD: return "http://hl7.org.fhir/reaction-event-severity";
-            case MODERATE: return "http://hl7.org.fhir/reaction-event-severity";
-            case SEVERE: return "http://hl7.org.fhir/reaction-event-severity";
+            case MILD: return "http://hl7.org/fhir/reaction-event-severity";
+            case MODERATE: return "http://hl7.org/fhir/reaction-event-severity";
+            case SEVERE: return "http://hl7.org/fhir/reaction-event-severity";
             default: return "?";
           }
         }

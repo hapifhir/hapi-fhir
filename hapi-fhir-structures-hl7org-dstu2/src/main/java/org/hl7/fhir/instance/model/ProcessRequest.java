@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -92,10 +92,10 @@ public class ProcessRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CANCEL: return "http://hl7.org.fhir/actionlist";
-            case POLL: return "http://hl7.org.fhir/actionlist";
-            case REPROCESS: return "http://hl7.org.fhir/actionlist";
-            case STATUS: return "http://hl7.org.fhir/actionlist";
+            case CANCEL: return "http://hl7.org/fhir/actionlist";
+            case POLL: return "http://hl7.org/fhir/actionlist";
+            case REPROCESS: return "http://hl7.org/fhir/actionlist";
+            case STATUS: return "http://hl7.org/fhir/actionlist";
             default: return "?";
           }
         }

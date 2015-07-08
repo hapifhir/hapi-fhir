@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -126,15 +126,15 @@ public class OrderResponse extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PENDING: return "http://hl7.org.fhir/order-status";
-            case REVIEW: return "http://hl7.org.fhir/order-status";
-            case REJECTED: return "http://hl7.org.fhir/order-status";
-            case ERROR: return "http://hl7.org.fhir/order-status";
-            case ACCEPTED: return "http://hl7.org.fhir/order-status";
-            case CANCELLED: return "http://hl7.org.fhir/order-status";
-            case REPLACED: return "http://hl7.org.fhir/order-status";
-            case ABORTED: return "http://hl7.org.fhir/order-status";
-            case COMPLETED: return "http://hl7.org.fhir/order-status";
+            case PENDING: return "http://hl7.org/fhir/order-status";
+            case REVIEW: return "http://hl7.org/fhir/order-status";
+            case REJECTED: return "http://hl7.org/fhir/order-status";
+            case ERROR: return "http://hl7.org/fhir/order-status";
+            case ACCEPTED: return "http://hl7.org/fhir/order-status";
+            case CANCELLED: return "http://hl7.org/fhir/order-status";
+            case REPLACED: return "http://hl7.org/fhir/order-status";
+            case ABORTED: return "http://hl7.org/fhir/order-status";
+            case COMPLETED: return "http://hl7.org/fhir/order-status";
             default: return "?";
           }
         }
@@ -255,30 +255,23 @@ public class OrderResponse extends DomainResource {
     protected Resource whoTarget;
 
     /**
-     * A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.
-     */
-    @Child(name = "authority", type = {CodeableConcept.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="If required by policy", formalDefinition="A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection." )
-    protected Type authority;
-
-    /**
      * What this response says about the status of the original order.
      */
-    @Child(name = "orderStatus", type = {CodeType.class}, order=5, min=1, max=1)
+    @Child(name = "orderStatus", type = {CodeType.class}, order=4, min=1, max=1)
     @Description(shortDefinition="pending | review | rejected | error | accepted | cancelled | replaced | aborted | completed", formalDefinition="What this response says about the status of the original order." )
     protected Enumeration<OrderStatus> orderStatus;
 
     /**
      * Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.
      */
-    @Child(name = "description", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Additional description of the response", formalDefinition="Additional description about the response - e.g. a text description provided by a human user when making decisions about the order." )
     protected StringType description;
 
     /**
      * Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.
      */
-    @Child(name = "fulfillment", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "fulfillment", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Details of the outcome of performing the order", formalDefinition="Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order." )
     protected List<Reference> fulfillment;
     /**
@@ -287,7 +280,7 @@ public class OrderResponse extends DomainResource {
     protected List<Resource> fulfillmentTarget;
 
 
-    private static final long serialVersionUID = -1983664888L;
+    private static final long serialVersionUID = -856633109L;
 
   /*
    * Constructor
@@ -478,43 +471,6 @@ public class OrderResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #authority} (A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.)
-     */
-    public Type getAuthority() { 
-      return this.authority;
-    }
-
-    /**
-     * @return {@link #authority} (A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.)
-     */
-    public CodeableConcept getAuthorityCodeableConcept() throws Exception { 
-      if (!(this.authority instanceof CodeableConcept))
-        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.authority.getClass().getName()+" was encountered");
-      return (CodeableConcept) this.authority;
-    }
-
-    /**
-     * @return {@link #authority} (A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.)
-     */
-    public Reference getAuthorityReference() throws Exception { 
-      if (!(this.authority instanceof Reference))
-        throw new Exception("Type mismatch: the type Reference was expected, but "+this.authority.getClass().getName()+" was encountered");
-      return (Reference) this.authority;
-    }
-
-    public boolean hasAuthority() { 
-      return this.authority != null && !this.authority.isEmpty();
-    }
-
-    /**
-     * @param value {@link #authority} (A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.)
-     */
-    public OrderResponse setAuthority(Type value) { 
-      this.authority = value;
-      return this;
-    }
-
-    /**
      * @return {@link #orderStatus} (What this response says about the status of the original order.). This is the underlying object with id, value and extensions. The accessor "getOrderStatus" gives direct access to the value
      */
     public Enumeration<OrderStatus> getOrderStatusElement() { 
@@ -663,7 +619,6 @@ public class OrderResponse extends DomainResource {
         childrenList.add(new Property("request", "Reference(Order)", "A reference to the order that this is in response to.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("date", "dateTime", "The date and time at which this order response was made (created/posted).", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("who", "Reference(Practitioner|Organization|Device)", "The person, organization, or device credited with making the response.", 0, java.lang.Integer.MAX_VALUE, who));
-        childrenList.add(new Property("authority[x]", "CodeableConcept|Reference(Any)", "A reference to an authority policy that is the reason for the response. Usually this is used when the order is rejected, to provide a reason for rejection.", 0, java.lang.Integer.MAX_VALUE, authority));
         childrenList.add(new Property("orderStatus", "code", "What this response says about the status of the original order.", 0, java.lang.Integer.MAX_VALUE, orderStatus));
         childrenList.add(new Property("description", "string", "Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("fulfillment", "Reference(Any)", "Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.", 0, java.lang.Integer.MAX_VALUE, fulfillment));
@@ -680,7 +635,6 @@ public class OrderResponse extends DomainResource {
         dst.request = request == null ? null : request.copy();
         dst.date = date == null ? null : date.copy();
         dst.who = who == null ? null : who.copy();
-        dst.authority = authority == null ? null : authority.copy();
         dst.orderStatus = orderStatus == null ? null : orderStatus.copy();
         dst.description = description == null ? null : description.copy();
         if (fulfillment != null) {
@@ -703,9 +657,8 @@ public class OrderResponse extends DomainResource {
           return false;
         OrderResponse o = (OrderResponse) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(request, o.request, true) && compareDeep(date, o.date, true)
-           && compareDeep(who, o.who, true) && compareDeep(authority, o.authority, true) && compareDeep(orderStatus, o.orderStatus, true)
-           && compareDeep(description, o.description, true) && compareDeep(fulfillment, o.fulfillment, true)
-          ;
+           && compareDeep(who, o.who, true) && compareDeep(orderStatus, o.orderStatus, true) && compareDeep(description, o.description, true)
+           && compareDeep(fulfillment, o.fulfillment, true);
       }
 
       @Override
@@ -721,9 +674,9 @@ public class OrderResponse extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (request == null || request.isEmpty())
-           && (date == null || date.isEmpty()) && (who == null || who.isEmpty()) && (authority == null || authority.isEmpty())
-           && (orderStatus == null || orderStatus.isEmpty()) && (description == null || description.isEmpty())
-           && (fulfillment == null || fulfillment.isEmpty());
+           && (date == null || date.isEmpty()) && (who == null || who.isEmpty()) && (orderStatus == null || orderStatus.isEmpty())
+           && (description == null || description.isEmpty()) && (fulfillment == null || fulfillment.isEmpty())
+          ;
       }
 
   @Override

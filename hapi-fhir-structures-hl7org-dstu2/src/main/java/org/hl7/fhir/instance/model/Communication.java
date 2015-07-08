@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -98,11 +98,11 @@ public class Communication extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org.fhir/communication-status";
-            case COMPLETED: return "http://hl7.org.fhir/communication-status";
-            case SUSPENDED: return "http://hl7.org.fhir/communication-status";
-            case REJECTED: return "http://hl7.org.fhir/communication-status";
-            case FAILED: return "http://hl7.org.fhir/communication-status";
+            case INPROGRESS: return "http://hl7.org/fhir/communication-status";
+            case COMPLETED: return "http://hl7.org/fhir/communication-status";
+            case SUSPENDED: return "http://hl7.org/fhir/communication-status";
+            case REJECTED: return "http://hl7.org/fhir/communication-status";
+            case FAILED: return "http://hl7.org/fhir/communication-status";
             default: return "?";
           }
         }
@@ -202,6 +202,10 @@ public class Communication extends DomainResource {
           return (StringType) this.content;
         }
 
+        public boolean hasContentStringType() throws Exception { 
+          return this.content instanceof StringType;
+        }
+
         /**
          * @return {@link #content} (An individual message part for multi-part messages.)
          */
@@ -211,6 +215,10 @@ public class Communication extends DomainResource {
           return (Attachment) this.content;
         }
 
+        public boolean hasContentAttachment() throws Exception { 
+          return this.content instanceof Attachment;
+        }
+
         /**
          * @return {@link #content} (An individual message part for multi-part messages.)
          */
@@ -218,6 +226,10 @@ public class Communication extends DomainResource {
           if (!(this.content instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
+        }
+
+        public boolean hasContentReference() throws Exception { 
+          return this.content instanceof Reference;
         }
 
         public boolean hasContent() { 

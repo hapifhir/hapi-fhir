@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -105,12 +105,12 @@ public class Condition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROVISIONAL: return "http://hl7.org.fhir/condition-status";
-            case WORKING: return "http://hl7.org.fhir/condition-status";
-            case CONFIRMED: return "http://hl7.org.fhir/condition-status";
-            case REFUTED: return "http://hl7.org.fhir/condition-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/condition-status";
-            case UNKNOWN: return "http://hl7.org.fhir/condition-status";
+            case PROVISIONAL: return "http://hl7.org/fhir/condition-status";
+            case WORKING: return "http://hl7.org/fhir/condition-status";
+            case CONFIRMED: return "http://hl7.org/fhir/condition-status";
+            case REFUTED: return "http://hl7.org/fhir/condition-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/condition-status";
+            case UNKNOWN: return "http://hl7.org/fhir/condition-status";
             default: return "?";
           }
         }
@@ -504,6 +504,10 @@ public class Condition extends DomainResource {
           return (CodeableConcept) this.site;
         }
 
+        public boolean hasSiteCodeableConcept() throws Exception { 
+          return this.site instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #site} (Code that identifies the structural location.)
          */
@@ -511,6 +515,10 @@ public class Condition extends DomainResource {
           if (!(this.site instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
           return (Reference) this.site;
+        }
+
+        public boolean hasSiteReference() throws Exception { 
+          return this.site instanceof Reference;
         }
 
         public boolean hasSite() { 
@@ -1333,6 +1341,10 @@ public class Condition extends DomainResource {
       return (DateTimeType) this.onset;
     }
 
+    public boolean hasOnsetDateTimeType() throws Exception { 
+      return this.onset instanceof DateTimeType;
+    }
+
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
@@ -1340,6 +1352,10 @@ public class Condition extends DomainResource {
       if (!(this.onset instanceof Age))
         throw new Exception("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (Age) this.onset;
+    }
+
+    public boolean hasOnsetAge() throws Exception { 
+      return this.onset instanceof Age;
     }
 
     /**
@@ -1351,6 +1367,10 @@ public class Condition extends DomainResource {
       return (Period) this.onset;
     }
 
+    public boolean hasOnsetPeriod() throws Exception { 
+      return this.onset instanceof Period;
+    }
+
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
@@ -1360,6 +1380,10 @@ public class Condition extends DomainResource {
       return (Range) this.onset;
     }
 
+    public boolean hasOnsetRange() throws Exception { 
+      return this.onset instanceof Range;
+    }
+
     /**
      * @return {@link #onset} (Estimated or actual date or date-time  the condition began, in the opinion of the clinician.)
      */
@@ -1367,6 +1391,10 @@ public class Condition extends DomainResource {
       if (!(this.onset instanceof StringType))
         throw new Exception("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
       return (StringType) this.onset;
+    }
+
+    public boolean hasOnsetStringType() throws Exception { 
+      return this.onset instanceof StringType;
     }
 
     public boolean hasOnset() { 
@@ -1397,6 +1425,10 @@ public class Condition extends DomainResource {
       return (DateType) this.abatement;
     }
 
+    public boolean hasAbatementDateType() throws Exception { 
+      return this.abatement instanceof DateType;
+    }
+
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
@@ -1404,6 +1436,10 @@ public class Condition extends DomainResource {
       if (!(this.abatement instanceof Age))
         throw new Exception("Type mismatch: the type Age was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Age) this.abatement;
+    }
+
+    public boolean hasAbatementAge() throws Exception { 
+      return this.abatement instanceof Age;
     }
 
     /**
@@ -1415,6 +1451,10 @@ public class Condition extends DomainResource {
       return (BooleanType) this.abatement;
     }
 
+    public boolean hasAbatementBooleanType() throws Exception { 
+      return this.abatement instanceof BooleanType;
+    }
+
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
@@ -1422,6 +1462,10 @@ public class Condition extends DomainResource {
       if (!(this.abatement instanceof Period))
         throw new Exception("Type mismatch: the type Period was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (Period) this.abatement;
+    }
+
+    public boolean hasAbatementPeriod() throws Exception { 
+      return this.abatement instanceof Period;
     }
 
     /**
@@ -1433,6 +1477,10 @@ public class Condition extends DomainResource {
       return (Range) this.abatement;
     }
 
+    public boolean hasAbatementRange() throws Exception { 
+      return this.abatement instanceof Range;
+    }
+
     /**
      * @return {@link #abatement} (The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.)
      */
@@ -1440,6 +1488,10 @@ public class Condition extends DomainResource {
       if (!(this.abatement instanceof StringType))
         throw new Exception("Type mismatch: the type StringType was expected, but "+this.abatement.getClass().getName()+" was encountered");
       return (StringType) this.abatement;
+    }
+
+    public boolean hasAbatementStringType() throws Exception { 
+      return this.abatement instanceof StringType;
     }
 
     public boolean hasAbatement() { 

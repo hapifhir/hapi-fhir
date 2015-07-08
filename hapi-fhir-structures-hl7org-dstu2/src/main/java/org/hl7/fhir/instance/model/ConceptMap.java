@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -207,12 +207,12 @@ public class ConceptMap extends DomainResource {
   }
 
     @Block()
-    public static class ConceptMapElementComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SourceElementComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).
+         * An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).
          */
         @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Code System (if value set crosses code systems)", formalDefinition="An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system)." )
+        @Description(shortDefinition="Code System (if value set crosses code systems)", formalDefinition="An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system)." )
         protected UriType codeSystem;
 
         /**
@@ -223,35 +223,28 @@ public class ConceptMap extends DomainResource {
         protected CodeType code;
 
         /**
-         * A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value.
-         */
-        @Child(name = "dependsOn", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Other elements required for this mapping (from context)", formalDefinition="A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value." )
-        protected List<OtherElementComponent> dependsOn;
-
-        /**
          * A concept from the target value set that this concept maps to.
          */
-        @Child(name = "map", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Target of this map", formalDefinition="A concept from the target value set that this concept maps to." )
-        protected List<ConceptMapElementMapComponent> map;
+        @Child(name = "target", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Concept in target system for element", formalDefinition="A concept from the target value set that this concept maps to." )
+        protected List<TargetElementComponent> target;
 
-        private static final long serialVersionUID = 2079040744L;
+        private static final long serialVersionUID = -458143877L;
 
     /*
      * Constructor
      */
-      public ConceptMapElementComponent() {
+      public SourceElementComponent() {
         super();
       }
 
         /**
-         * @return {@link #codeSystem} (An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
+         * @return {@link #codeSystem} (An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
          */
         public UriType getCodeSystemElement() { 
           if (this.codeSystem == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptMapElementComponent.codeSystem");
+              throw new Error("Attempt to auto-create SourceElementComponent.codeSystem");
             else if (Configuration.doAutoCreate())
               this.codeSystem = new UriType(); // bb
           return this.codeSystem;
@@ -266,24 +259,24 @@ public class ConceptMap extends DomainResource {
         }
 
         /**
-         * @param value {@link #codeSystem} (An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
+         * @param value {@link #codeSystem} (An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
          */
-        public ConceptMapElementComponent setCodeSystemElement(UriType value) { 
+        public SourceElementComponent setCodeSystemElement(UriType value) { 
           this.codeSystem = value;
           return this;
         }
 
         /**
-         * @return An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).
+         * @return An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).
          */
         public String getCodeSystem() { 
           return this.codeSystem == null ? null : this.codeSystem.getValue();
         }
 
         /**
-         * @param value An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).
+         * @param value An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).
          */
-        public ConceptMapElementComponent setCodeSystem(String value) { 
+        public SourceElementComponent setCodeSystem(String value) { 
           if (Utilities.noString(value))
             this.codeSystem = null;
           else {
@@ -300,7 +293,7 @@ public class ConceptMap extends DomainResource {
         public CodeType getCodeElement() { 
           if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptMapElementComponent.code");
+              throw new Error("Attempt to auto-create SourceElementComponent.code");
             else if (Configuration.doAutoCreate())
               this.code = new CodeType(); // bb
           return this.code;
@@ -317,7 +310,7 @@ public class ConceptMap extends DomainResource {
         /**
          * @param value {@link #code} (Identity (code or path) or the element/item being mapped.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
-        public ConceptMapElementComponent setCodeElement(CodeType value) { 
+        public SourceElementComponent setCodeElement(CodeType value) { 
           this.code = value;
           return this;
         }
@@ -332,13 +325,354 @@ public class ConceptMap extends DomainResource {
         /**
          * @param value Identity (code or path) or the element/item being mapped.
          */
-        public ConceptMapElementComponent setCode(String value) { 
+        public SourceElementComponent setCode(String value) { 
           if (Utilities.noString(value))
             this.code = null;
           else {
             if (this.code == null)
               this.code = new CodeType();
             this.code.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #target} (A concept from the target value set that this concept maps to.)
+         */
+        public List<TargetElementComponent> getTarget() { 
+          if (this.target == null)
+            this.target = new ArrayList<TargetElementComponent>();
+          return this.target;
+        }
+
+        public boolean hasTarget() { 
+          if (this.target == null)
+            return false;
+          for (TargetElementComponent item : this.target)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #target} (A concept from the target value set that this concept maps to.)
+         */
+    // syntactic sugar
+        public TargetElementComponent addTarget() { //3
+          TargetElementComponent t = new TargetElementComponent();
+          if (this.target == null)
+            this.target = new ArrayList<TargetElementComponent>();
+          this.target.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public SourceElementComponent addTarget(TargetElementComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.target == null)
+            this.target = new ArrayList<TargetElementComponent>();
+          this.target.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("codeSystem", "uri", "An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
+          childrenList.add(new Property("code", "code", "Identity (code or path) or the element/item being mapped.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("target", "", "A concept from the target value set that this concept maps to.", 0, java.lang.Integer.MAX_VALUE, target));
+        }
+
+      public SourceElementComponent copy() {
+        SourceElementComponent dst = new SourceElementComponent();
+        copyValues(dst);
+        dst.codeSystem = codeSystem == null ? null : codeSystem.copy();
+        dst.code = code == null ? null : code.copy();
+        if (target != null) {
+          dst.target = new ArrayList<TargetElementComponent>();
+          for (TargetElementComponent i : target)
+            dst.target.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SourceElementComponent))
+          return false;
+        SourceElementComponent o = (SourceElementComponent) other;
+        return compareDeep(codeSystem, o.codeSystem, true) && compareDeep(code, o.code, true) && compareDeep(target, o.target, true)
+          ;
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SourceElementComponent))
+          return false;
+        SourceElementComponent o = (SourceElementComponent) other;
+        return compareValues(codeSystem, o.codeSystem, true) && compareValues(code, o.code, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (codeSystem == null || codeSystem.isEmpty()) && (code == null || code.isEmpty())
+           && (target == null || target.isEmpty());
+      }
+
+  }
+
+    @Block()
+    public static class TargetElementComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
+         */
+        @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="System of the target (if necessary)", formalDefinition="An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems)." )
+        protected UriType codeSystem;
+
+        /**
+         * Identity (code or path) or the element/item that the map refers to.
+         */
+        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="Code that identifies the target element", formalDefinition="Identity (code or path) or the element/item that the map refers to." )
+        protected CodeType code;
+
+        /**
+         * The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).
+         */
+        @Child(name = "equivalence", type = {CodeType.class}, order=3, min=1, max=1)
+        @Description(shortDefinition="equivalent | equal | wider | subsumes | narrower | specializes | inexact | unmatched | disjoint", formalDefinition="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source)." )
+        protected Enumeration<ConceptMapEquivalence> equivalence;
+
+        /**
+         * A description of status/issues in mapping that conveys additional information not represented in  the structured data.
+         */
+        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1)
+        @Description(shortDefinition="Description of status/issues in mapping", formalDefinition="A description of status/issues in mapping that conveys additional information not represented in  the structured data." )
+        protected StringType comments;
+
+        /**
+         * A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value.
+         */
+        @Child(name = "dependsOn", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Other elements required for this mapping (from context)", formalDefinition="A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value." )
+        protected List<OtherElementComponent> dependsOn;
+
+        /**
+         * A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.
+         */
+        @Child(name = "product", type = {OtherElementComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Other concepts that this mapping also produces", formalDefinition="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on." )
+        protected List<OtherElementComponent> product;
+
+        private static final long serialVersionUID = -804990059L;
+
+    /*
+     * Constructor
+     */
+      public TargetElementComponent() {
+        super();
+      }
+
+    /*
+     * Constructor
+     */
+      public TargetElementComponent(Enumeration<ConceptMapEquivalence> equivalence) {
+        super();
+        this.equivalence = equivalence;
+      }
+
+        /**
+         * @return {@link #codeSystem} (An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
+         */
+        public UriType getCodeSystemElement() { 
+          if (this.codeSystem == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TargetElementComponent.codeSystem");
+            else if (Configuration.doAutoCreate())
+              this.codeSystem = new UriType(); // bb
+          return this.codeSystem;
+        }
+
+        public boolean hasCodeSystemElement() { 
+          return this.codeSystem != null && !this.codeSystem.isEmpty();
+        }
+
+        public boolean hasCodeSystem() { 
+          return this.codeSystem != null && !this.codeSystem.isEmpty();
+        }
+
+        /**
+         * @param value {@link #codeSystem} (An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
+         */
+        public TargetElementComponent setCodeSystemElement(UriType value) { 
+          this.codeSystem = value;
+          return this;
+        }
+
+        /**
+         * @return An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
+         */
+        public String getCodeSystem() { 
+          return this.codeSystem == null ? null : this.codeSystem.getValue();
+        }
+
+        /**
+         * @param value An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
+         */
+        public TargetElementComponent setCodeSystem(String value) { 
+          if (Utilities.noString(value))
+            this.codeSystem = null;
+          else {
+            if (this.codeSystem == null)
+              this.codeSystem = new UriType();
+            this.codeSystem.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #code} (Identity (code or path) or the element/item that the map refers to.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         */
+        public CodeType getCodeElement() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TargetElementComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeType(); // bb
+          return this.code;
+        }
+
+        public boolean hasCodeElement() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (Identity (code or path) or the element/item that the map refers to.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         */
+        public TargetElementComponent setCodeElement(CodeType value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return Identity (code or path) or the element/item that the map refers to.
+         */
+        public String getCode() { 
+          return this.code == null ? null : this.code.getValue();
+        }
+
+        /**
+         * @param value Identity (code or path) or the element/item that the map refers to.
+         */
+        public TargetElementComponent setCode(String value) { 
+          if (Utilities.noString(value))
+            this.code = null;
+          else {
+            if (this.code == null)
+              this.code = new CodeType();
+            this.code.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
+         */
+        public Enumeration<ConceptMapEquivalence> getEquivalenceElement() { 
+          if (this.equivalence == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TargetElementComponent.equivalence");
+            else if (Configuration.doAutoCreate())
+              this.equivalence = new Enumeration<ConceptMapEquivalence>(new ConceptMapEquivalenceEnumFactory()); // bb
+          return this.equivalence;
+        }
+
+        public boolean hasEquivalenceElement() { 
+          return this.equivalence != null && !this.equivalence.isEmpty();
+        }
+
+        public boolean hasEquivalence() { 
+          return this.equivalence != null && !this.equivalence.isEmpty();
+        }
+
+        /**
+         * @param value {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
+         */
+        public TargetElementComponent setEquivalenceElement(Enumeration<ConceptMapEquivalence> value) { 
+          this.equivalence = value;
+          return this;
+        }
+
+        /**
+         * @return The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).
+         */
+        public ConceptMapEquivalence getEquivalence() { 
+          return this.equivalence == null ? null : this.equivalence.getValue();
+        }
+
+        /**
+         * @param value The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).
+         */
+        public TargetElementComponent setEquivalence(ConceptMapEquivalence value) { 
+            if (this.equivalence == null)
+              this.equivalence = new Enumeration<ConceptMapEquivalence>(new ConceptMapEquivalenceEnumFactory());
+            this.equivalence.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #comments} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+         */
+        public StringType getCommentsElement() { 
+          if (this.comments == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TargetElementComponent.comments");
+            else if (Configuration.doAutoCreate())
+              this.comments = new StringType(); // bb
+          return this.comments;
+        }
+
+        public boolean hasCommentsElement() { 
+          return this.comments != null && !this.comments.isEmpty();
+        }
+
+        public boolean hasComments() { 
+          return this.comments != null && !this.comments.isEmpty();
+        }
+
+        /**
+         * @param value {@link #comments} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
+         */
+        public TargetElementComponent setCommentsElement(StringType value) { 
+          this.comments = value;
+          return this;
+        }
+
+        /**
+         * @return A description of status/issues in mapping that conveys additional information not represented in  the structured data.
+         */
+        public String getComments() { 
+          return this.comments == null ? null : this.comments.getValue();
+        }
+
+        /**
+         * @param value A description of status/issues in mapping that conveys additional information not represented in  the structured data.
+         */
+        public TargetElementComponent setComments(String value) { 
+          if (Utilities.noString(value))
+            this.comments = null;
+          else {
+            if (this.comments == null)
+              this.comments = new StringType();
+            this.comments.setValue(value);
           }
           return this;
         }
@@ -374,7 +708,7 @@ public class ConceptMap extends DomainResource {
         }
 
     // syntactic sugar
-        public ConceptMapElementComponent addDependsOn(OtherElementComponent t) { //3
+        public TargetElementComponent addDependsOn(OtherElementComponent t) { //3
           if (t == null)
             return this;
           if (this.dependsOn == null)
@@ -384,67 +718,71 @@ public class ConceptMap extends DomainResource {
         }
 
         /**
-         * @return {@link #map} (A concept from the target value set that this concept maps to.)
+         * @return {@link #product} (A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.)
          */
-        public List<ConceptMapElementMapComponent> getMap() { 
-          if (this.map == null)
-            this.map = new ArrayList<ConceptMapElementMapComponent>();
-          return this.map;
+        public List<OtherElementComponent> getProduct() { 
+          if (this.product == null)
+            this.product = new ArrayList<OtherElementComponent>();
+          return this.product;
         }
 
-        public boolean hasMap() { 
-          if (this.map == null)
+        public boolean hasProduct() { 
+          if (this.product == null)
             return false;
-          for (ConceptMapElementMapComponent item : this.map)
+          for (OtherElementComponent item : this.product)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
         /**
-         * @return {@link #map} (A concept from the target value set that this concept maps to.)
+         * @return {@link #product} (A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.)
          */
     // syntactic sugar
-        public ConceptMapElementMapComponent addMap() { //3
-          ConceptMapElementMapComponent t = new ConceptMapElementMapComponent();
-          if (this.map == null)
-            this.map = new ArrayList<ConceptMapElementMapComponent>();
-          this.map.add(t);
+        public OtherElementComponent addProduct() { //3
+          OtherElementComponent t = new OtherElementComponent();
+          if (this.product == null)
+            this.product = new ArrayList<OtherElementComponent>();
+          this.product.add(t);
           return t;
         }
 
     // syntactic sugar
-        public ConceptMapElementComponent addMap(ConceptMapElementMapComponent t) { //3
+        public TargetElementComponent addProduct(OtherElementComponent t) { //3
           if (t == null)
             return this;
-          if (this.map == null)
-            this.map = new ArrayList<ConceptMapElementMapComponent>();
-          this.map.add(t);
+          if (this.product == null)
+            this.product = new ArrayList<OtherElementComponent>();
+          this.product.add(t);
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("codeSystem", "uri", "An absolute URI that identifies the Code System (if the source is a value value set that crosses more than one code system).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
-          childrenList.add(new Property("code", "code", "Identity (code or path) or the element/item being mapped.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("codeSystem", "uri", "An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
+          childrenList.add(new Property("code", "code", "Identity (code or path) or the element/item that the map refers to.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("equivalence", "code", "The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).", 0, java.lang.Integer.MAX_VALUE, equivalence));
+          childrenList.add(new Property("comments", "string", "A description of status/issues in mapping that conveys additional information not represented in  the structured data.", 0, java.lang.Integer.MAX_VALUE, comments));
           childrenList.add(new Property("dependsOn", "", "A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value.", 0, java.lang.Integer.MAX_VALUE, dependsOn));
-          childrenList.add(new Property("map", "", "A concept from the target value set that this concept maps to.", 0, java.lang.Integer.MAX_VALUE, map));
+          childrenList.add(new Property("product", "@ConceptMap.element.target.dependsOn", "A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.", 0, java.lang.Integer.MAX_VALUE, product));
         }
 
-      public ConceptMapElementComponent copy() {
-        ConceptMapElementComponent dst = new ConceptMapElementComponent();
+      public TargetElementComponent copy() {
+        TargetElementComponent dst = new TargetElementComponent();
         copyValues(dst);
         dst.codeSystem = codeSystem == null ? null : codeSystem.copy();
         dst.code = code == null ? null : code.copy();
+        dst.equivalence = equivalence == null ? null : equivalence.copy();
+        dst.comments = comments == null ? null : comments.copy();
         if (dependsOn != null) {
           dst.dependsOn = new ArrayList<OtherElementComponent>();
           for (OtherElementComponent i : dependsOn)
             dst.dependsOn.add(i.copy());
         };
-        if (map != null) {
-          dst.map = new ArrayList<ConceptMapElementMapComponent>();
-          for (ConceptMapElementMapComponent i : map)
-            dst.map.add(i.copy());
+        if (product != null) {
+          dst.product = new ArrayList<OtherElementComponent>();
+          for (OtherElementComponent i : product)
+            dst.product.add(i.copy());
         };
         return dst;
       }
@@ -453,26 +791,29 @@ public class ConceptMap extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof ConceptMapElementComponent))
+        if (!(other instanceof TargetElementComponent))
           return false;
-        ConceptMapElementComponent o = (ConceptMapElementComponent) other;
-        return compareDeep(codeSystem, o.codeSystem, true) && compareDeep(code, o.code, true) && compareDeep(dependsOn, o.dependsOn, true)
-           && compareDeep(map, o.map, true);
+        TargetElementComponent o = (TargetElementComponent) other;
+        return compareDeep(codeSystem, o.codeSystem, true) && compareDeep(code, o.code, true) && compareDeep(equivalence, o.equivalence, true)
+           && compareDeep(comments, o.comments, true) && compareDeep(dependsOn, o.dependsOn, true) && compareDeep(product, o.product, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof ConceptMapElementComponent))
+        if (!(other instanceof TargetElementComponent))
           return false;
-        ConceptMapElementComponent o = (ConceptMapElementComponent) other;
-        return compareValues(codeSystem, o.codeSystem, true) && compareValues(code, o.code, true);
+        TargetElementComponent o = (TargetElementComponent) other;
+        return compareValues(codeSystem, o.codeSystem, true) && compareValues(code, o.code, true) && compareValues(equivalence, o.equivalence, true)
+           && compareValues(comments, o.comments, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (codeSystem == null || codeSystem.isEmpty()) && (code == null || code.isEmpty())
-           && (dependsOn == null || dependsOn.isEmpty()) && (map == null || map.isEmpty());
+           && (equivalence == null || equivalence.isEmpty()) && (comments == null || comments.isEmpty())
+           && (dependsOn == null || dependsOn.isEmpty()) && (product == null || product.isEmpty());
       }
 
   }
@@ -699,351 +1040,11 @@ public class ConceptMap extends DomainResource {
 
   }
 
-    @Block()
-    public static class ConceptMapElementMapComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
-         */
-        @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="System of the target (if necessary)", formalDefinition="An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems)." )
-        protected UriType codeSystem;
-
-        /**
-         * Identity (code or path) or the element/item that the map refers to.
-         */
-        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Code that identifies the target element", formalDefinition="Identity (code or path) or the element/item that the map refers to." )
-        protected CodeType code;
-
-        /**
-         * The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.
-         */
-        @Child(name = "equivalence", type = {CodeType.class}, order=3, min=1, max=1)
-        @Description(shortDefinition="equivalent | equal | wider | subsumes | narrower | specialises | inexact | unmatched | disjoint", formalDefinition="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target." )
-        protected Enumeration<ConceptMapEquivalence> equivalence;
-
-        /**
-         * A description of status/issues in mapping that conveys additional information not represented in  the structured data.
-         */
-        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Description of status/issues in mapping", formalDefinition="A description of status/issues in mapping that conveys additional information not represented in  the structured data." )
-        protected StringType comments;
-
-        /**
-         * A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.
-         */
-        @Child(name = "product", type = {OtherElementComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Other concepts that this mapping also produces", formalDefinition="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on." )
-        protected List<OtherElementComponent> product;
-
-        private static final long serialVersionUID = 949452924L;
-
-    /*
-     * Constructor
-     */
-      public ConceptMapElementMapComponent() {
-        super();
-      }
-
-    /*
-     * Constructor
-     */
-      public ConceptMapElementMapComponent(Enumeration<ConceptMapEquivalence> equivalence) {
-        super();
-        this.equivalence = equivalence;
-      }
-
-        /**
-         * @return {@link #codeSystem} (An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
-         */
-        public UriType getCodeSystemElement() { 
-          if (this.codeSystem == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptMapElementMapComponent.codeSystem");
-            else if (Configuration.doAutoCreate())
-              this.codeSystem = new UriType(); // bb
-          return this.codeSystem;
-        }
-
-        public boolean hasCodeSystemElement() { 
-          return this.codeSystem != null && !this.codeSystem.isEmpty();
-        }
-
-        public boolean hasCodeSystem() { 
-          return this.codeSystem != null && !this.codeSystem.isEmpty();
-        }
-
-        /**
-         * @param value {@link #codeSystem} (An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
-         */
-        public ConceptMapElementMapComponent setCodeSystemElement(UriType value) { 
-          this.codeSystem = value;
-          return this;
-        }
-
-        /**
-         * @return An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
-         */
-        public String getCodeSystem() { 
-          return this.codeSystem == null ? null : this.codeSystem.getValue();
-        }
-
-        /**
-         * @param value An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
-         */
-        public ConceptMapElementMapComponent setCodeSystem(String value) { 
-          if (Utilities.noString(value))
-            this.codeSystem = null;
-          else {
-            if (this.codeSystem == null)
-              this.codeSystem = new UriType();
-            this.codeSystem.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #code} (Identity (code or path) or the element/item that the map refers to.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
-         */
-        public CodeType getCodeElement() { 
-          if (this.code == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptMapElementMapComponent.code");
-            else if (Configuration.doAutoCreate())
-              this.code = new CodeType(); // bb
-          return this.code;
-        }
-
-        public boolean hasCodeElement() { 
-          return this.code != null && !this.code.isEmpty();
-        }
-
-        public boolean hasCode() { 
-          return this.code != null && !this.code.isEmpty();
-        }
-
-        /**
-         * @param value {@link #code} (Identity (code or path) or the element/item that the map refers to.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
-         */
-        public ConceptMapElementMapComponent setCodeElement(CodeType value) { 
-          this.code = value;
-          return this;
-        }
-
-        /**
-         * @return Identity (code or path) or the element/item that the map refers to.
-         */
-        public String getCode() { 
-          return this.code == null ? null : this.code.getValue();
-        }
-
-        /**
-         * @param value Identity (code or path) or the element/item that the map refers to.
-         */
-        public ConceptMapElementMapComponent setCode(String value) { 
-          if (Utilities.noString(value))
-            this.code = null;
-          else {
-            if (this.code == null)
-              this.code = new CodeType();
-            this.code.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
-         */
-        public Enumeration<ConceptMapEquivalence> getEquivalenceElement() { 
-          if (this.equivalence == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptMapElementMapComponent.equivalence");
-            else if (Configuration.doAutoCreate())
-              this.equivalence = new Enumeration<ConceptMapEquivalence>(new ConceptMapEquivalenceEnumFactory()); // bb
-          return this.equivalence;
-        }
-
-        public boolean hasEquivalenceElement() { 
-          return this.equivalence != null && !this.equivalence.isEmpty();
-        }
-
-        public boolean hasEquivalence() { 
-          return this.equivalence != null && !this.equivalence.isEmpty();
-        }
-
-        /**
-         * @param value {@link #equivalence} (The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.). This is the underlying object with id, value and extensions. The accessor "getEquivalence" gives direct access to the value
-         */
-        public ConceptMapElementMapComponent setEquivalenceElement(Enumeration<ConceptMapEquivalence> value) { 
-          this.equivalence = value;
-          return this;
-        }
-
-        /**
-         * @return The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.
-         */
-        public ConceptMapEquivalence getEquivalence() { 
-          return this.equivalence == null ? null : this.equivalence.getValue();
-        }
-
-        /**
-         * @param value The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.
-         */
-        public ConceptMapElementMapComponent setEquivalence(ConceptMapEquivalence value) { 
-            if (this.equivalence == null)
-              this.equivalence = new Enumeration<ConceptMapEquivalence>(new ConceptMapEquivalenceEnumFactory());
-            this.equivalence.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #comments} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
-         */
-        public StringType getCommentsElement() { 
-          if (this.comments == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ConceptMapElementMapComponent.comments");
-            else if (Configuration.doAutoCreate())
-              this.comments = new StringType(); // bb
-          return this.comments;
-        }
-
-        public boolean hasCommentsElement() { 
-          return this.comments != null && !this.comments.isEmpty();
-        }
-
-        public boolean hasComments() { 
-          return this.comments != null && !this.comments.isEmpty();
-        }
-
-        /**
-         * @param value {@link #comments} (A description of status/issues in mapping that conveys additional information not represented in  the structured data.). This is the underlying object with id, value and extensions. The accessor "getComments" gives direct access to the value
-         */
-        public ConceptMapElementMapComponent setCommentsElement(StringType value) { 
-          this.comments = value;
-          return this;
-        }
-
-        /**
-         * @return A description of status/issues in mapping that conveys additional information not represented in  the structured data.
-         */
-        public String getComments() { 
-          return this.comments == null ? null : this.comments.getValue();
-        }
-
-        /**
-         * @param value A description of status/issues in mapping that conveys additional information not represented in  the structured data.
-         */
-        public ConceptMapElementMapComponent setComments(String value) { 
-          if (Utilities.noString(value))
-            this.comments = null;
-          else {
-            if (this.comments == null)
-              this.comments = new StringType();
-            this.comments.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #product} (A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.)
-         */
-        public List<OtherElementComponent> getProduct() { 
-          if (this.product == null)
-            this.product = new ArrayList<OtherElementComponent>();
-          return this.product;
-        }
-
-        public boolean hasProduct() { 
-          if (this.product == null)
-            return false;
-          for (OtherElementComponent item : this.product)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #product} (A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.)
-         */
-    // syntactic sugar
-        public OtherElementComponent addProduct() { //3
-          OtherElementComponent t = new OtherElementComponent();
-          if (this.product == null)
-            this.product = new ArrayList<OtherElementComponent>();
-          this.product.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public ConceptMapElementMapComponent addProduct(OtherElementComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.product == null)
-            this.product = new ArrayList<OtherElementComponent>();
-          this.product.add(t);
-          return this;
-        }
-
-        protected void listChildren(List<Property> childrenList) {
-          super.listChildren(childrenList);
-          childrenList.add(new Property("codeSystem", "uri", "An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
-          childrenList.add(new Property("code", "code", "Identity (code or path) or the element/item that the map refers to.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("equivalence", "code", "The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from source to target (e.g. the source is 'wider' than the target.", 0, java.lang.Integer.MAX_VALUE, equivalence));
-          childrenList.add(new Property("comments", "string", "A description of status/issues in mapping that conveys additional information not represented in  the structured data.", 0, java.lang.Integer.MAX_VALUE, comments));
-          childrenList.add(new Property("product", "@ConceptMap.element.dependsOn", "A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.", 0, java.lang.Integer.MAX_VALUE, product));
-        }
-
-      public ConceptMapElementMapComponent copy() {
-        ConceptMapElementMapComponent dst = new ConceptMapElementMapComponent();
-        copyValues(dst);
-        dst.codeSystem = codeSystem == null ? null : codeSystem.copy();
-        dst.code = code == null ? null : code.copy();
-        dst.equivalence = equivalence == null ? null : equivalence.copy();
-        dst.comments = comments == null ? null : comments.copy();
-        if (product != null) {
-          dst.product = new ArrayList<OtherElementComponent>();
-          for (OtherElementComponent i : product)
-            dst.product.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other) {
-        if (!super.equalsDeep(other))
-          return false;
-        if (!(other instanceof ConceptMapElementMapComponent))
-          return false;
-        ConceptMapElementMapComponent o = (ConceptMapElementMapComponent) other;
-        return compareDeep(codeSystem, o.codeSystem, true) && compareDeep(code, o.code, true) && compareDeep(equivalence, o.equivalence, true)
-           && compareDeep(comments, o.comments, true) && compareDeep(product, o.product, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other) {
-        if (!super.equalsShallow(other))
-          return false;
-        if (!(other instanceof ConceptMapElementMapComponent))
-          return false;
-        ConceptMapElementMapComponent o = (ConceptMapElementMapComponent) other;
-        return compareValues(codeSystem, o.codeSystem, true) && compareValues(code, o.code, true) && compareValues(equivalence, o.equivalence, true)
-           && compareValues(comments, o.comments, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && (codeSystem == null || codeSystem.isEmpty()) && (code == null || code.isEmpty())
-           && (equivalence == null || equivalence.isEmpty()) && (comments == null || comments.isEmpty())
-           && (product == null || product.isEmpty());
-      }
-
-  }
-
     /**
-     * An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
-    @Description(shortDefinition="Globally unique logical id for concept map", formalDefinition="An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:)." )
+    @Description(shortDefinition="Globally unique logical id for concept map", formalDefinition="An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)." )
     protected UriType url;
 
     /**
@@ -1149,9 +1150,9 @@ public class ConceptMap extends DomainResource {
      */
     @Child(name = "element", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Mappings for a concept from the source set", formalDefinition="Mappings for an individual concept in the source to one or more concepts in the target." )
-    protected List<ConceptMapElementComponent> element;
+    protected List<SourceElementComponent> element;
 
-    private static final long serialVersionUID = 729155675L;
+    private static final long serialVersionUID = -1713063390L;
 
   /*
    * Constructor
@@ -1171,7 +1172,7 @@ public class ConceptMap extends DomainResource {
     }
 
     /**
-     * @return {@link #url} (An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1191,7 +1192,7 @@ public class ConceptMap extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ConceptMap setUrlElement(UriType value) { 
       this.url = value;
@@ -1199,14 +1200,14 @@ public class ConceptMap extends DomainResource {
     }
 
     /**
-     * @return An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * @return An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * @param value An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     public ConceptMap setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1772,6 +1773,10 @@ public class ConceptMap extends DomainResource {
       return (UriType) this.source;
     }
 
+    public boolean hasSourceUriType() throws Exception { 
+      return this.source instanceof UriType;
+    }
+
     /**
      * @return {@link #source} (The source value set that specifies the concepts that are being mapped.)
      */
@@ -1779,6 +1784,10 @@ public class ConceptMap extends DomainResource {
       if (!(this.source instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.source.getClass().getName()+" was encountered");
       return (Reference) this.source;
+    }
+
+    public boolean hasSourceReference() throws Exception { 
+      return this.source instanceof Reference;
     }
 
     public boolean hasSource() { 
@@ -1809,6 +1818,10 @@ public class ConceptMap extends DomainResource {
       return (UriType) this.target;
     }
 
+    public boolean hasTargetUriType() throws Exception { 
+      return this.target instanceof UriType;
+    }
+
     /**
      * @return {@link #target} (The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.)
      */
@@ -1816,6 +1829,10 @@ public class ConceptMap extends DomainResource {
       if (!(this.target instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.target.getClass().getName()+" was encountered");
       return (Reference) this.target;
+    }
+
+    public boolean hasTargetReference() throws Exception { 
+      return this.target instanceof Reference;
     }
 
     public boolean hasTarget() { 
@@ -1833,16 +1850,16 @@ public class ConceptMap extends DomainResource {
     /**
      * @return {@link #element} (Mappings for an individual concept in the source to one or more concepts in the target.)
      */
-    public List<ConceptMapElementComponent> getElement() { 
+    public List<SourceElementComponent> getElement() { 
       if (this.element == null)
-        this.element = new ArrayList<ConceptMapElementComponent>();
+        this.element = new ArrayList<SourceElementComponent>();
       return this.element;
     }
 
     public boolean hasElement() { 
       if (this.element == null)
         return false;
-      for (ConceptMapElementComponent item : this.element)
+      for (SourceElementComponent item : this.element)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1852,27 +1869,27 @@ public class ConceptMap extends DomainResource {
      * @return {@link #element} (Mappings for an individual concept in the source to one or more concepts in the target.)
      */
     // syntactic sugar
-    public ConceptMapElementComponent addElement() { //3
-      ConceptMapElementComponent t = new ConceptMapElementComponent();
+    public SourceElementComponent addElement() { //3
+      SourceElementComponent t = new SourceElementComponent();
       if (this.element == null)
-        this.element = new ArrayList<ConceptMapElementComponent>();
+        this.element = new ArrayList<SourceElementComponent>();
       this.element.add(t);
       return t;
     }
 
     // syntactic sugar
-    public ConceptMap addElement(ConceptMapElementComponent t) { //3
+    public ConceptMap addElement(SourceElementComponent t) { //3
       if (t == null)
         return this;
       if (this.element == null)
-        this.element = new ArrayList<ConceptMapElementComponent>();
+        this.element = new ArrayList<SourceElementComponent>();
       this.element.add(t);
       return this;
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute uri that is used to identify this concept map when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A free text natural language name describing the concept map.", 0, java.lang.Integer.MAX_VALUE, name));
@@ -1917,8 +1934,8 @@ public class ConceptMap extends DomainResource {
         dst.source = source == null ? null : source.copy();
         dst.target = target == null ? null : target.copy();
         if (element != null) {
-          dst.element = new ArrayList<ConceptMapElementComponent>();
-          for (ConceptMapElementComponent i : element)
+          dst.element = new ArrayList<SourceElementComponent>();
+          for (SourceElementComponent i : element)
             dst.element.add(i.copy());
         };
         return dst;
@@ -1975,28 +1992,34 @@ public class ConceptMap extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ConceptMap.identifier", description="Additional identifier for the concept map", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="product", path="ConceptMap.element.map.product.element", description="Reference to element/field/valueset mapping depends on", type="uri" )
+  @SearchParamDefinition(name="product", path="ConceptMap.element.target.product.element", description="Reference to element/field/valueset mapping depends on", type="uri" )
   public static final String SP_PRODUCT = "product";
-  @SearchParamDefinition(name="dependson", path="ConceptMap.element.dependsOn.element", description="Reference to element/field/valueset mapping depends on", type="uri" )
+  @SearchParamDefinition(name="dependson", path="ConceptMap.element.target.dependsOn.element", description="Reference to element/field/valueset mapping depends on", type="uri" )
   public static final String SP_DEPENDSON = "dependson";
   @SearchParamDefinition(name="description", path="ConceptMap.description", description="Text search in the description of the concept map", type="string" )
   public static final String SP_DESCRIPTION = "description";
+  @SearchParamDefinition(name="targetsystem", path="ConceptMap.element.target.codeSystem", description="System of the target (if necessary)", type="uri" )
+  public static final String SP_TARGETSYSTEM = "targetsystem";
   @SearchParamDefinition(name="source", path="ConceptMap.source[x]", description="The system for any concepts mapped by this concept map", type="reference" )
   public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="version", path="ConceptMap.version", description="The version identifier of the concept map", type="token" )
   public static final String SP_VERSION = "version";
+  @SearchParamDefinition(name="sourcesystem", path="ConceptMap.element.codeSystem", description="Code System (if value set crosses code systems)", type="uri" )
+  public static final String SP_SOURCESYSTEM = "sourcesystem";
   @SearchParamDefinition(name="url", path="ConceptMap.url", description="The url of the concept map", type="uri" )
   public static final String SP_URL = "url";
   @SearchParamDefinition(name="target", path="ConceptMap.target[x]", description="Provides context to the mappings", type="reference" )
   public static final String SP_TARGET = "target";
-  @SearchParamDefinition(name="system", path="ConceptMap.element.map.codeSystem", description="The system for any destination concepts mapped by this map", type="uri" )
-  public static final String SP_SYSTEM = "system";
+  @SearchParamDefinition(name="sourcecode", path="ConceptMap.element.code", description="Identifies element being mapped", type="token" )
+  public static final String SP_SOURCECODE = "sourcecode";
   @SearchParamDefinition(name="name", path="ConceptMap.name", description="Name of the concept map", type="string" )
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="context", path="ConceptMap.useContext", description="A use context assigned to the concept map", type="token" )
   public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="publisher", path="ConceptMap.publisher", description="Name of the publisher of the concept map", type="string" )
   public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="targetcode", path="ConceptMap.element.target.code", description="Code that identifies the target element", type="token" )
+  public static final String SP_TARGETCODE = "targetcode";
   @SearchParamDefinition(name="status", path="ConceptMap.status", description="Status of the concept map", type="token" )
   public static final String SP_STATUS = "status";
 

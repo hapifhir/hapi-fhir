@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -85,9 +85,9 @@ public class Patient extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REPLACE: return "http://hl7.org.fhir/link-type";
-            case REFER: return "http://hl7.org.fhir/link-type";
-            case SEEALSO: return "http://hl7.org.fhir/link-type";
+            case REPLACE: return "http://hl7.org/fhir/link-type";
+            case REFER: return "http://hl7.org/fhir/link-type";
+            case SEEALSO: return "http://hl7.org/fhir/link-type";
             default: return "?";
           }
         }
@@ -1052,10 +1052,10 @@ public class Patient extends DomainResource {
     protected List<ContactComponent> contact;
 
     /**
-     * This element has a value if the patient is an animal.
+     * This patient is known to be an animal.
      */
     @Child(name = "animal", type = {}, order=11, min=0, max=1)
-    @Description(shortDefinition="If this patient is an animal (non-human)", formalDefinition="This element has a value if the patient is an animal." )
+    @Description(shortDefinition="This patient is known to be an animal (non-human)", formalDefinition="This patient is known to be an animal." )
     protected AnimalComponent animal;
 
     /**
@@ -1346,6 +1346,10 @@ public class Patient extends DomainResource {
       return (BooleanType) this.deceased;
     }
 
+    public boolean hasDeceasedBooleanType() throws Exception { 
+      return this.deceased instanceof BooleanType;
+    }
+
     /**
      * @return {@link #deceased} (Indicates if the individual is deceased or not.)
      */
@@ -1353,6 +1357,10 @@ public class Patient extends DomainResource {
       if (!(this.deceased instanceof DateTimeType))
         throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateTimeType) this.deceased;
+    }
+
+    public boolean hasDeceasedDateTimeType() throws Exception { 
+      return this.deceased instanceof DateTimeType;
     }
 
     public boolean hasDeceased() { 
@@ -1447,6 +1455,10 @@ public class Patient extends DomainResource {
       return (BooleanType) this.multipleBirth;
     }
 
+    public boolean hasMultipleBirthBooleanType() throws Exception { 
+      return this.multipleBirth instanceof BooleanType;
+    }
+
     /**
      * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple or indicates the actual birth order.)
      */
@@ -1454,6 +1466,10 @@ public class Patient extends DomainResource {
       if (!(this.multipleBirth instanceof IntegerType))
         throw new Exception("Type mismatch: the type IntegerType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (IntegerType) this.multipleBirth;
+    }
+
+    public boolean hasMultipleBirthIntegerType() throws Exception { 
+      return this.multipleBirth instanceof IntegerType;
     }
 
     public boolean hasMultipleBirth() { 
@@ -1549,7 +1565,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #animal} (This element has a value if the patient is an animal.)
+     * @return {@link #animal} (This patient is known to be an animal.)
      */
     public AnimalComponent getAnimal() { 
       if (this.animal == null)
@@ -1565,7 +1581,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @param value {@link #animal} (This element has a value if the patient is an animal.)
+     * @param value {@link #animal} (This patient is known to be an animal.)
      */
     public Patient setAnimal(AnimalComponent value) { 
       this.animal = value;
@@ -1803,7 +1819,7 @@ public class Patient extends DomainResource {
         childrenList.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple or indicates the actual birth order.", 0, java.lang.Integer.MAX_VALUE, multipleBirth));
         childrenList.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
         childrenList.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
-        childrenList.add(new Property("animal", "", "This element has a value if the patient is an animal.", 0, java.lang.Integer.MAX_VALUE, animal));
+        childrenList.add(new Property("animal", "", "This patient is known to be an animal.", 0, java.lang.Integer.MAX_VALUE, animal));
         childrenList.add(new Property("communication", "", "Languages which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
         childrenList.add(new Property("careProvider", "Reference(Organization|Practitioner)", "Patient's nominated care provider.", 0, java.lang.Integer.MAX_VALUE, careProvider));
         childrenList.add(new Property("managingOrganization", "Reference(Organization)", "Organization that is the custodian of the patient record.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
@@ -1926,6 +1942,8 @@ public class Patient extends DomainResource {
   public static final String SP_BIRTHDATE = "birthdate";
   @SearchParamDefinition(name="deceased", path="Patient.deceased[x]", description="This patient has been marked as deceased, or as a death date entered", type="token" )
   public static final String SP_DECEASED = "deceased";
+  @SearchParamDefinition(name="address-state", path="Patient.address.state", description="A state specified in an address", type="string" )
+  public static final String SP_ADDRESSSTATE = "address-state";
   @SearchParamDefinition(name="gender", path="Patient.gender", description="Gender of the patient", type="token" )
   public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="animal-species", path="Patient.animal.species", description="The species for animal patients", type="token" )
@@ -1938,8 +1956,12 @@ public class Patient extends DomainResource {
   public static final String SP_LANGUAGE = "language";
   @SearchParamDefinition(name="deathdate", path="Patient.deceased[x]", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATHDATE = "deathdate";
+  @SearchParamDefinition(name="address-postalcode", path="Patient.address.postalCode", description="A postalCode specified in an address", type="string" )
+  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="animal-breed", path="Patient.animal.breed", description="The breed for animal patients", type="token" )
   public static final String SP_ANIMALBREED = "animal-breed";
+  @SearchParamDefinition(name="address-country", path="Patient.address.country", description="A country specified in an address", type="string" )
+  public static final String SP_ADDRESSCOUNTRY = "address-country";
   @SearchParamDefinition(name="careprovider", path="Patient.careProvider", description="Patient's nominated care provider, could be a care manager, not the organization that manages the record", type="reference" )
   public static final String SP_CAREPROVIDER = "careprovider";
   @SearchParamDefinition(name="phonetic", path="", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
@@ -1948,10 +1970,14 @@ public class Patient extends DomainResource {
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="name", path="Patient.name", description="A portion of either family or given name of the patient", type="string" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="address-use", path="Patient.address.use", description="A use code specified in an address", type="token" )
+  public static final String SP_ADDRESSUSE = "address-use";
   @SearchParamDefinition(name="telecom", path="Patient.telecom", description="The value in any kind of telecom details of the patient", type="token" )
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="family", path="Patient.name.family", description="A portion of the family name of the patient", type="string" )
   public static final String SP_FAMILY = "family";
+  @SearchParamDefinition(name="address-city", path="Patient.address.city", description="A city specified in an address", type="string" )
+  public static final String SP_ADDRESSCITY = "address-city";
 
 }
 

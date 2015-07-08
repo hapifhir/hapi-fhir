@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -98,11 +98,11 @@ public class MedicationDispense extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org.fhir/medication-dispense-status";
-            case ONHOLD: return "http://hl7.org.fhir/medication-dispense-status";
-            case COMPLETED: return "http://hl7.org.fhir/medication-dispense-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/medication-dispense-status";
-            case STOPPED: return "http://hl7.org.fhir/medication-dispense-status";
+            case INPROGRESS: return "http://hl7.org/fhir/medication-dispense-status";
+            case ONHOLD: return "http://hl7.org/fhir/medication-dispense-status";
+            case COMPLETED: return "http://hl7.org/fhir/medication-dispense-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/medication-dispense-status";
+            case STOPPED: return "http://hl7.org/fhir/medication-dispense-status";
             default: return "?";
           }
         }
@@ -330,6 +330,10 @@ public class MedicationDispense extends DomainResource {
           return (DateTimeType) this.schedule;
         }
 
+        public boolean hasScheduleDateTimeType() throws Exception { 
+          return this.schedule instanceof DateTimeType;
+        }
+
         /**
          * @return {@link #schedule} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
@@ -339,6 +343,10 @@ public class MedicationDispense extends DomainResource {
           return (Period) this.schedule;
         }
 
+        public boolean hasSchedulePeriod() throws Exception { 
+          return this.schedule instanceof Period;
+        }
+
         /**
          * @return {@link #schedule} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
@@ -346,6 +354,10 @@ public class MedicationDispense extends DomainResource {
           if (!(this.schedule instanceof Timing))
             throw new Exception("Type mismatch: the type Timing was expected, but "+this.schedule.getClass().getName()+" was encountered");
           return (Timing) this.schedule;
+        }
+
+        public boolean hasScheduleTiming() throws Exception { 
+          return this.schedule instanceof Timing;
         }
 
         public boolean hasSchedule() { 
@@ -376,6 +388,10 @@ public class MedicationDispense extends DomainResource {
           return (BooleanType) this.asNeeded;
         }
 
+        public boolean hasAsNeededBooleanType() throws Exception { 
+          return this.asNeeded instanceof BooleanType;
+        }
+
         /**
          * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
          */
@@ -383,6 +399,10 @@ public class MedicationDispense extends DomainResource {
           if (!(this.asNeeded instanceof CodeableConcept))
             throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
           return (CodeableConcept) this.asNeeded;
+        }
+
+        public boolean hasAsNeededCodeableConcept() throws Exception { 
+          return this.asNeeded instanceof CodeableConcept;
         }
 
         public boolean hasAsNeeded() { 
@@ -485,6 +505,10 @@ public class MedicationDispense extends DomainResource {
           return (Range) this.dose;
         }
 
+        public boolean hasDoseRange() throws Exception { 
+          return this.dose instanceof Range;
+        }
+
         /**
          * @return {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
          */
@@ -492,6 +516,10 @@ public class MedicationDispense extends DomainResource {
           if (!(this.dose instanceof Quantity))
             throw new Exception("Type mismatch: the type Quantity was expected, but "+this.dose.getClass().getName()+" was encountered");
           return (Quantity) this.dose;
+        }
+
+        public boolean hasDoseQuantity() throws Exception { 
+          return this.dose instanceof Quantity;
         }
 
         public boolean hasDose() { 
@@ -1303,6 +1331,10 @@ public class MedicationDispense extends DomainResource {
       return (CodeableConcept) this.medication;
     }
 
+    public boolean hasMedicationCodeableConcept() throws Exception { 
+      return this.medication instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
@@ -1310,6 +1342,10 @@ public class MedicationDispense extends DomainResource {
       if (!(this.medication instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
+    }
+
+    public boolean hasMedicationReference() throws Exception { 
+      return this.medication instanceof Reference;
     }
 
     public boolean hasMedication() { 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -98,11 +98,11 @@ public class Composition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PRELIMINARY: return "http://hl7.org.fhir/composition-status";
-            case FINAL: return "http://hl7.org.fhir/composition-status";
-            case APPENDED: return "http://hl7.org.fhir/composition-status";
-            case AMENDED: return "http://hl7.org.fhir/composition-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/composition-status";
+            case PRELIMINARY: return "http://hl7.org/fhir/composition-status";
+            case FINAL: return "http://hl7.org/fhir/composition-status";
+            case APPENDED: return "http://hl7.org/fhir/composition-status";
+            case AMENDED: return "http://hl7.org/fhir/composition-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/composition-status";
             default: return "?";
           }
         }
@@ -205,10 +205,10 @@ public class Composition extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PERSONAL: return "http://hl7.org.fhir/composition-attestation-mode";
-            case PROFESSIONAL: return "http://hl7.org.fhir/composition-attestation-mode";
-            case LEGAL: return "http://hl7.org.fhir/composition-attestation-mode";
-            case OFFICIAL: return "http://hl7.org.fhir/composition-attestation-mode";
+            case PERSONAL: return "http://hl7.org/fhir/composition-attestation-mode";
+            case PROFESSIONAL: return "http://hl7.org/fhir/composition-attestation-mode";
+            case LEGAL: return "http://hl7.org/fhir/composition-attestation-mode";
+            case OFFICIAL: return "http://hl7.org/fhir/composition-attestation-mode";
             default: return "?";
           }
         }
@@ -964,7 +964,7 @@ public class Composition extends DomainResource {
     /**
      * A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.
      */
-    @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "class_", type = {CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type." )
     protected CodeableConcept class_;
 

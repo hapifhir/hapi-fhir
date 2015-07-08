@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -106,12 +106,12 @@ public class ValueSet extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case EQUAL: return "http://hl7.org.fhir/filter-operator";
-            case ISA: return "http://hl7.org.fhir/filter-operator";
-            case ISNOTA: return "http://hl7.org.fhir/filter-operator";
-            case REGEX: return "http://hl7.org.fhir/filter-operator";
-            case IN: return "http://hl7.org.fhir/filter-operator";
-            case NOTIN: return "http://hl7.org.fhir/filter-operator";
+            case EQUAL: return "http://hl7.org/fhir/filter-operator";
+            case ISA: return "http://hl7.org/fhir/filter-operator";
+            case ISNOTA: return "http://hl7.org/fhir/filter-operator";
+            case REGEX: return "http://hl7.org/fhir/filter-operator";
+            case IN: return "http://hl7.org/fhir/filter-operator";
+            case NOTIN: return "http://hl7.org/fhir/filter-operator";
             default: return "?";
           }
         }
@@ -128,12 +128,12 @@ public class ValueSet extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case EQUAL: return " ";
-            case ISA: return "Is A";
-            case ISNOTA: return "Is Not A";
-            case REGEX: return "Regex";
-            case IN: return "In";
-            case NOTIN: return "Not In";
+            case EQUAL: return "Equals";
+            case ISA: return "Is A (by subsumption)";
+            case ISNOTA: return "Not (Is A) (by subsumption)";
+            case REGEX: return "Regular Expression";
+            case IN: return "In Set";
+            case NOTIN: return "Not in Set";
             default: return "?";
           }
         }
@@ -624,7 +624,7 @@ public class ValueSet extends DomainResource {
         /**
          * If this code is not for use as a real concept.
          */
-        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "abstract_", type = {BooleanType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="If this code is not for use as a real concept", formalDefinition="If this code is not for use as a real concept." )
         protected BooleanType abstract_;
 
@@ -643,10 +643,10 @@ public class ValueSet extends DomainResource {
         protected StringType definition;
 
         /**
-         * Additional representations for the concept - other languages, aliases, specialised purposes, used for particular purposes, etc.
+         * Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.
          */
         @Child(name = "designation", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Additional representations for the concept", formalDefinition="Additional representations for the concept - other languages, aliases, specialised purposes, used for particular purposes, etc." )
+        @Description(shortDefinition="Additional representations for the concept", formalDefinition="Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc." )
         protected List<ConceptDefinitionDesignationComponent> designation;
 
         /**
@@ -862,7 +862,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #designation} (Additional representations for the concept - other languages, aliases, specialised purposes, used for particular purposes, etc.)
+         * @return {@link #designation} (Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.)
          */
         public List<ConceptDefinitionDesignationComponent> getDesignation() { 
           if (this.designation == null)
@@ -880,7 +880,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #designation} (Additional representations for the concept - other languages, aliases, specialised purposes, used for particular purposes, etc.)
+         * @return {@link #designation} (Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.)
          */
     // syntactic sugar
         public ConceptDefinitionDesignationComponent addDesignation() { //3
@@ -947,7 +947,7 @@ public class ValueSet extends DomainResource {
           childrenList.add(new Property("abstract", "boolean", "If this code is not for use as a real concept.", 0, java.lang.Integer.MAX_VALUE, abstract_));
           childrenList.add(new Property("display", "string", "Text to Display to the user.", 0, java.lang.Integer.MAX_VALUE, display));
           childrenList.add(new Property("definition", "string", "The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, java.lang.Integer.MAX_VALUE, definition));
-          childrenList.add(new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialised purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
+          childrenList.add(new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
           childrenList.add(new Property("concept", "@ValueSet.define.concept", "Child Concepts (is-a / contains).", 0, java.lang.Integer.MAX_VALUE, concept));
         }
 
@@ -1009,7 +1009,7 @@ public class ValueSet extends DomainResource {
          * The language this designation is defined for.
          */
         @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Language of the designation", formalDefinition="The language this designation is defined for." )
+        @Description(shortDefinition="Human language of the designation", formalDefinition="The language this designation is defined for." )
         protected CodeType language;
 
         /**
@@ -1210,7 +1210,7 @@ public class ValueSet extends DomainResource {
         /**
          * Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.
          */
-        @Child(name = "import", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "import_", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Import the contents of another value set", formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri." )
         protected List<UriType> import_;
 
@@ -1719,10 +1719,10 @@ public class ValueSet extends DomainResource {
         protected StringType display;
 
         /**
-         * Additional representations for this concept when used in this value set - other languages, aliases, specialised purposes, used for particular purposes, etc.
+         * Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.
          */
         @Child(name = "designation", type = {ConceptDefinitionDesignationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Additional representations for this valueset", formalDefinition="Additional representations for this concept when used in this value set - other languages, aliases, specialised purposes, used for particular purposes, etc." )
+        @Description(shortDefinition="Additional representations for this valueset", formalDefinition="Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc." )
         protected List<ConceptDefinitionDesignationComponent> designation;
 
         private static final long serialVersionUID = -1513912691L;
@@ -1837,7 +1837,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialised purposes, used for particular purposes, etc.)
+         * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.)
          */
         public List<ConceptDefinitionDesignationComponent> getDesignation() { 
           if (this.designation == null)
@@ -1855,7 +1855,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialised purposes, used for particular purposes, etc.)
+         * @return {@link #designation} (Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.)
          */
     // syntactic sugar
         public ConceptDefinitionDesignationComponent addDesignation() { //3
@@ -1880,7 +1880,7 @@ public class ValueSet extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Specifies a code for the concept to be included or excluded.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("display", "string", "The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system.", 0, java.lang.Integer.MAX_VALUE, display));
-          childrenList.add(new Property("designation", "@ValueSet.define.concept.designation", "Additional representations for this concept when used in this value set - other languages, aliases, specialised purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
+          childrenList.add(new Property("designation", "@ValueSet.define.concept.designation", "Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
         }
 
       public ConceptReferenceComponent copy() {
@@ -2163,20 +2163,34 @@ public class ValueSet extends DomainResource {
         protected DateTimeType timestamp;
 
         /**
+         * The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.
+         */
+        @Child(name = "total", type = {IntegerType.class}, order=3, min=0, max=1)
+        @Description(shortDefinition="Total number of codes in the expansion", formalDefinition="The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter." )
+        protected IntegerType total;
+
+        /**
+         * If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
+         */
+        @Child(name = "count", type = {IntegerType.class}, order=4, min=0, max=1)
+        @Description(shortDefinition="Offset at which this resource starts", formalDefinition="If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present." )
+        protected IntegerType count;
+
+        /**
          * A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.
          */
-        @Child(name = "parameter", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "parameter", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Parameter that controlled the expansion process", formalDefinition="A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion." )
         protected List<ValueSetExpansionParameterComponent> parameter;
 
         /**
          * The codes that are contained in the value set expansion.
          */
-        @Child(name = "contains", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "contains", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Codes in the value set", formalDefinition="The codes that are contained in the value set expansion." )
         protected List<ValueSetExpansionContainsComponent> contains;
 
-        private static final long serialVersionUID = 148339098L;
+        private static final long serialVersionUID = -831777781L;
 
     /*
      * Constructor
@@ -2285,6 +2299,96 @@ public class ValueSet extends DomainResource {
         }
 
         /**
+         * @return {@link #total} (The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
+         */
+        public IntegerType getTotalElement() { 
+          if (this.total == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ValueSetExpansionComponent.total");
+            else if (Configuration.doAutoCreate())
+              this.total = new IntegerType(); // bb
+          return this.total;
+        }
+
+        public boolean hasTotalElement() { 
+          return this.total != null && !this.total.isEmpty();
+        }
+
+        public boolean hasTotal() { 
+          return this.total != null && !this.total.isEmpty();
+        }
+
+        /**
+         * @param value {@link #total} (The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
+         */
+        public ValueSetExpansionComponent setTotalElement(IntegerType value) { 
+          this.total = value;
+          return this;
+        }
+
+        /**
+         * @return The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.
+         */
+        public int getTotal() { 
+          return this.total == null || this.total.isEmpty() ? 0 : this.total.getValue();
+        }
+
+        /**
+         * @param value The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.
+         */
+        public ValueSetExpansionComponent setTotal(int value) { 
+            if (this.total == null)
+              this.total = new IntegerType();
+            this.total.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #count} (If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         */
+        public IntegerType getCountElement() { 
+          if (this.count == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ValueSetExpansionComponent.count");
+            else if (Configuration.doAutoCreate())
+              this.count = new IntegerType(); // bb
+          return this.count;
+        }
+
+        public boolean hasCountElement() { 
+          return this.count != null && !this.count.isEmpty();
+        }
+
+        public boolean hasCount() { 
+          return this.count != null && !this.count.isEmpty();
+        }
+
+        /**
+         * @param value {@link #count} (If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         */
+        public ValueSetExpansionComponent setCountElement(IntegerType value) { 
+          this.count = value;
+          return this;
+        }
+
+        /**
+         * @return If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
+         */
+        public int getCount() { 
+          return this.count == null || this.count.isEmpty() ? 0 : this.count.getValue();
+        }
+
+        /**
+         * @param value If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
+         */
+        public ValueSetExpansionComponent setCount(int value) { 
+            if (this.count == null)
+              this.count = new IntegerType();
+            this.count.setValue(value);
+          return this;
+        }
+
+        /**
          * @return {@link #parameter} (A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.)
          */
         public List<ValueSetExpansionParameterComponent> getParameter() { 
@@ -2368,6 +2472,8 @@ public class ValueSet extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("identifier", "uri", "An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("timestamp", "dateTime", "The time at which the expansion was produced by the expanding system.", 0, java.lang.Integer.MAX_VALUE, timestamp));
+          childrenList.add(new Property("total", "integer", "The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.", 0, java.lang.Integer.MAX_VALUE, total));
+          childrenList.add(new Property("count", "integer", "If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.", 0, java.lang.Integer.MAX_VALUE, count));
           childrenList.add(new Property("parameter", "", "A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.", 0, java.lang.Integer.MAX_VALUE, parameter));
           childrenList.add(new Property("contains", "", "The codes that are contained in the value set expansion.", 0, java.lang.Integer.MAX_VALUE, contains));
         }
@@ -2377,6 +2483,8 @@ public class ValueSet extends DomainResource {
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.timestamp = timestamp == null ? null : timestamp.copy();
+        dst.total = total == null ? null : total.copy();
+        dst.count = count == null ? null : count.copy();
         if (parameter != null) {
           dst.parameter = new ArrayList<ValueSetExpansionParameterComponent>();
           for (ValueSetExpansionParameterComponent i : parameter)
@@ -2398,7 +2506,8 @@ public class ValueSet extends DomainResource {
           return false;
         ValueSetExpansionComponent o = (ValueSetExpansionComponent) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(timestamp, o.timestamp, true)
-           && compareDeep(parameter, o.parameter, true) && compareDeep(contains, o.contains, true);
+           && compareDeep(total, o.total, true) && compareDeep(count, o.count, true) && compareDeep(parameter, o.parameter, true)
+           && compareDeep(contains, o.contains, true);
       }
 
       @Override
@@ -2409,13 +2518,13 @@ public class ValueSet extends DomainResource {
           return false;
         ValueSetExpansionComponent o = (ValueSetExpansionComponent) other;
         return compareValues(identifier, o.identifier, true) && compareValues(timestamp, o.timestamp, true)
-          ;
+           && compareValues(total, o.total, true) && compareValues(count, o.count, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (timestamp == null || timestamp.isEmpty())
-           && (parameter == null || parameter.isEmpty()) && (contains == null || contains.isEmpty())
-          ;
+           && (total == null || total.isEmpty()) && (count == null || count.isEmpty()) && (parameter == null || parameter.isEmpty())
+           && (contains == null || contains.isEmpty());
       }
 
   }
@@ -2433,7 +2542,7 @@ public class ValueSet extends DomainResource {
          * The value of the parameter.
          */
         @Child(name = "value", type = {StringType.class, BooleanType.class, IntegerType.class, DecimalType.class, UriType.class, CodeType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Value of the parameter", formalDefinition="The value of the parameter." )
+        @Description(shortDefinition="Value of the named parameter", formalDefinition="The value of the parameter." )
         protected Type value;
 
         private static final long serialVersionUID = 1172641169L;
@@ -2514,6 +2623,10 @@ public class ValueSet extends DomainResource {
           return (StringType) this.value;
         }
 
+        public boolean hasValueStringType() throws Exception { 
+          return this.value instanceof StringType;
+        }
+
         /**
          * @return {@link #value} (The value of the parameter.)
          */
@@ -2521,6 +2634,10 @@ public class ValueSet extends DomainResource {
           if (!(this.value instanceof BooleanType))
             throw new Exception("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
+        }
+
+        public boolean hasValueBooleanType() throws Exception { 
+          return this.value instanceof BooleanType;
         }
 
         /**
@@ -2532,6 +2649,10 @@ public class ValueSet extends DomainResource {
           return (IntegerType) this.value;
         }
 
+        public boolean hasValueIntegerType() throws Exception { 
+          return this.value instanceof IntegerType;
+        }
+
         /**
          * @return {@link #value} (The value of the parameter.)
          */
@@ -2539,6 +2660,10 @@ public class ValueSet extends DomainResource {
           if (!(this.value instanceof DecimalType))
             throw new Exception("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
+        }
+
+        public boolean hasValueDecimalType() throws Exception { 
+          return this.value instanceof DecimalType;
         }
 
         /**
@@ -2550,6 +2675,10 @@ public class ValueSet extends DomainResource {
           return (UriType) this.value;
         }
 
+        public boolean hasValueUriType() throws Exception { 
+          return this.value instanceof UriType;
+        }
+
         /**
          * @return {@link #value} (The value of the parameter.)
          */
@@ -2557,6 +2686,10 @@ public class ValueSet extends DomainResource {
           if (!(this.value instanceof CodeType))
             throw new Exception("Type mismatch: the type CodeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeType) this.value;
+        }
+
+        public boolean hasValueCodeType() throws Exception { 
+          return this.value instanceof CodeType;
         }
 
         public boolean hasValue() { 
@@ -2624,7 +2757,7 @@ public class ValueSet extends DomainResource {
         /**
          * If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.
          */
-        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "abstract_", type = {BooleanType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="If user cannot select this entry", formalDefinition="If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value." )
         protected BooleanType abstract_;
 
@@ -3004,10 +3137,10 @@ public class ValueSet extends DomainResource {
   }
 
     /**
-     * An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
-    @Description(shortDefinition="Globally unique logical id for  value set", formalDefinition="An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:)." )
+    @Description(shortDefinition="Globally unique logical id for  value set", formalDefinition="An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)." )
     protected UriType url;
 
     /**
@@ -3154,7 +3287,7 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return {@link #url} (An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -3174,7 +3307,7 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public ValueSet setUrlElement(UriType value) { 
       this.url = value;
@@ -3182,14 +3315,14 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * @return An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * @param value An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     public ValueSet setUrl(String value) { 
       if (Utilities.noString(value))
@@ -3952,7 +4085,7 @@ public class ValueSet extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute uri that is used to identify this value set when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("version", "string", "Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "A free text natural language name describing the value set.", 0, java.lang.Integer.MAX_VALUE, name));

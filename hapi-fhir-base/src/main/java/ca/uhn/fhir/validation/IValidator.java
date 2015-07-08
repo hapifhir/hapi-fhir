@@ -4,6 +4,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
 
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,11 +25,13 @@ import ca.uhn.fhir.model.api.Bundle;
  * #L%
  */
 
+/**
+ * Registers 
+ */
+public interface IValidator {
 
-interface IValidator {
+	void validateResource(IValidationContext<IBaseResource> theCtx);
 
-	void validateResource(ValidationContext<IBaseResource> theCtx);
-
-	void validateBundle(ValidationContext<Bundle> theContext);
+	void validateBundle(IValidationContext<Bundle> theContext);
 
 }

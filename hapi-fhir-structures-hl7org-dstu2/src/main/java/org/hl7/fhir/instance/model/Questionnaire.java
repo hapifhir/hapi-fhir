@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class Questionnaire extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "http://hl7.org.fhir/questionnaire-status";
-            case PUBLISHED: return "http://hl7.org.fhir/questionnaire-status";
-            case RETIRED: return "http://hl7.org.fhir/questionnaire-status";
+            case DRAFT: return "http://hl7.org/fhir/questionnaire-status";
+            case PUBLISHED: return "http://hl7.org/fhir/questionnaire-status";
+            case RETIRED: return "http://hl7.org/fhir/questionnaire-status";
             default: return "?";
           }
         }
@@ -254,21 +254,21 @@ public class Questionnaire extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case BOOLEAN: return "http://hl7.org.fhir/answer-format";
-            case DECIMAL: return "http://hl7.org.fhir/answer-format";
-            case INTEGER: return "http://hl7.org.fhir/answer-format";
-            case DATE: return "http://hl7.org.fhir/answer-format";
-            case DATETIME: return "http://hl7.org.fhir/answer-format";
-            case INSTANT: return "http://hl7.org.fhir/answer-format";
-            case TIME: return "http://hl7.org.fhir/answer-format";
-            case STRING: return "http://hl7.org.fhir/answer-format";
-            case TEXT: return "http://hl7.org.fhir/answer-format";
-            case URL: return "http://hl7.org.fhir/answer-format";
-            case CHOICE: return "http://hl7.org.fhir/answer-format";
-            case OPENCHOICE: return "http://hl7.org.fhir/answer-format";
-            case ATTACHMENT: return "http://hl7.org.fhir/answer-format";
-            case REFERENCE: return "http://hl7.org.fhir/answer-format";
-            case QUANTITY: return "http://hl7.org.fhir/answer-format";
+            case BOOLEAN: return "http://hl7.org/fhir/answer-format";
+            case DECIMAL: return "http://hl7.org/fhir/answer-format";
+            case INTEGER: return "http://hl7.org/fhir/answer-format";
+            case DATE: return "http://hl7.org/fhir/answer-format";
+            case DATETIME: return "http://hl7.org/fhir/answer-format";
+            case INSTANT: return "http://hl7.org/fhir/answer-format";
+            case TIME: return "http://hl7.org/fhir/answer-format";
+            case STRING: return "http://hl7.org/fhir/answer-format";
+            case TEXT: return "http://hl7.org/fhir/answer-format";
+            case URL: return "http://hl7.org/fhir/answer-format";
+            case CHOICE: return "http://hl7.org/fhir/answer-format";
+            case OPENCHOICE: return "http://hl7.org/fhir/answer-format";
+            case ATTACHMENT: return "http://hl7.org/fhir/answer-format";
+            case REFERENCE: return "http://hl7.org/fhir/answer-format";
+            case QUANTITY: return "http://hl7.org/fhir/answer-format";
             default: return "?";
           }
         }

@@ -34,7 +34,9 @@ import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.ToolingExtensions;
+import org.hl7.fhir.utilities.Utilities;
 
 public class ValidationMessage 
 {
@@ -45,7 +47,9 @@ public class ValidationMessage
     InstanceValidator,
     Schema,
     Schematron,
-    Publisher
+    Publisher, 
+    Ontology,
+    ProfileComparer
   }
   
   private Source source;
@@ -53,21 +57,65 @@ public class ValidationMessage
   private int col; 
   private String location;
   private String message;
-  private String type;
+  private IssueType type;
   private IssueSeverity level;
+  private String html;
   
   
-  public ValidationMessage(Source source, String type, int line, int col, String path, String message, IssueSeverity level) {
+  public ValidationMessage(Source source, IssueType type, String path, String message, IssueSeverity level) {
+    super();
+    this.line = -1;
+    this.col = -1;
+    this.location = path;
+    this.message = message;
+    this.html = Utilities.escapeXml(message);
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+  
+  public ValidationMessage(Source source, IssueType type, int line, int col, String path, String message, IssueSeverity level) {
     super();
     this.line = line;
     this.col = col;
     this.location = path;
     this.message = message;
+    this.html = Utilities.escapeXml(message);
     this.level = level;
     this.source = source;
     this.type = type;
     if (type == null)
     	throw new Error("A type must be provided");
+  }
+  
+  public ValidationMessage(Source source, IssueType type, String path, String message, String html, IssueSeverity level) {
+    super();
+    this.line = -1;
+    this.col = -1;
+    this.location = path;
+    this.message = message;
+    this.html = html;
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+  
+  public ValidationMessage(Source source, IssueType type, int line, int col, String path, String message, String html, IssueSeverity level) {
+    super();
+    this.line = line;
+    this.col = col;
+    this.location = path;
+    this.message = message;
+    this.html = html;
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (type == null)
+      throw new Error("A type must be provided");
   }
   
   public ValidationMessage() {
@@ -99,11 +147,11 @@ public class ValidationMessage
     this.location = location;
   }
 
-  public String getType() {
+  public IssueType getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public void setType(IssueType type) {
     this.type = type;
   }
 
@@ -114,7 +162,7 @@ public class ValidationMessage
   public OperationOutcomeIssueComponent asIssue(OperationOutcome op) throws Exception {
     OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent();
     issue.setCode(new CodeableConcept());
-    issue.getCode().addCoding().setSystem("http://hl7.org/fhir/issue-type").setCode(type);
+    issue.getCode().addCoding().setSystem(type.getSystem()).setCode(type.toCode());
     if (location != null) {
       StringType s = new StringType();
       s.setValue(location+(line>= 0 && col >= 0 ? " (line "+Integer.toString(line)+", col"+Integer.toString(col)+")" : "") );
@@ -127,10 +175,14 @@ public class ValidationMessage
     }
     return issue;
   }
-
-  @Override
-  public String toString() {
-    return "ValidationMessage[" + summary() + "]";
+  
+  public String toXML() {
+  	return "<message source=\"" + source + "\" line=\"" + line + "\" col=\"" + col + "\" location=\"" + location + "\" type=\"" + type + "\" level=\"" + level + "\"><html>"+html+"</html>" + Utilities.escapeXml(message) + "</message>";
   }
+
+  public String getHtml() {
+    return html == null ? Utilities.escapeXml(message) : html;
+  }
+  
   
 }

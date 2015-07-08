@@ -143,7 +143,7 @@ public class FhirValidator {
 	public void validate(Bundle theBundle) {
 		Validate.notNull(theBundle, "theBundle must not be null");
 
-		ValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
+		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
 		for (IValidator next : myValidators) {
 			next.validateBundle(ctx);
@@ -184,7 +184,7 @@ public class FhirValidator {
     public ValidationResult validateWithResult(Bundle theBundle) {
         Validate.notNull(theBundle, "theBundle must not be null");
 
-        ValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
+        IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
 		for (IValidator next : myValidators) {
 			next.validateBundle(ctx);
@@ -204,7 +204,7 @@ public class FhirValidator {
     public ValidationResult validateWithResult(IBaseResource theResource) {
         Validate.notNull(theResource, "theResource must not be null");
 
-        ValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource);
+        IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource);
 
         for (IValidator next : myValidators) {
             next.validateResource(ctx);

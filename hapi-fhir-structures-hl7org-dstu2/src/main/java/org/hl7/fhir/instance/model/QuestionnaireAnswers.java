@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class QuestionnaireAnswers extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org.fhir/questionnaire-answers-status";
-            case COMPLETED: return "http://hl7.org.fhir/questionnaire-answers-status";
-            case AMENDED: return "http://hl7.org.fhir/questionnaire-answers-status";
+            case INPROGRESS: return "http://hl7.org/fhir/questionnaire-answers-status";
+            case COMPLETED: return "http://hl7.org/fhir/questionnaire-answers-status";
+            case AMENDED: return "http://hl7.org/fhir/questionnaire-answers-status";
             default: return "?";
           }
         }
@@ -822,6 +822,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (BooleanType) this.value;
         }
 
+        public boolean hasValueBooleanType() throws Exception { 
+          return this.value instanceof BooleanType;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -829,6 +833,10 @@ public class QuestionnaireAnswers extends DomainResource {
           if (!(this.value instanceof DecimalType))
             throw new Exception("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
+        }
+
+        public boolean hasValueDecimalType() throws Exception { 
+          return this.value instanceof DecimalType;
         }
 
         /**
@@ -840,6 +848,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (IntegerType) this.value;
         }
 
+        public boolean hasValueIntegerType() throws Exception { 
+          return this.value instanceof IntegerType;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -847,6 +859,10 @@ public class QuestionnaireAnswers extends DomainResource {
           if (!(this.value instanceof DateType))
             throw new Exception("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
+        }
+
+        public boolean hasValueDateType() throws Exception { 
+          return this.value instanceof DateType;
         }
 
         /**
@@ -858,6 +874,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (DateTimeType) this.value;
         }
 
+        public boolean hasValueDateTimeType() throws Exception { 
+          return this.value instanceof DateTimeType;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -865,6 +885,10 @@ public class QuestionnaireAnswers extends DomainResource {
           if (!(this.value instanceof InstantType))
             throw new Exception("Type mismatch: the type InstantType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (InstantType) this.value;
+        }
+
+        public boolean hasValueInstantType() throws Exception { 
+          return this.value instanceof InstantType;
         }
 
         /**
@@ -876,6 +900,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (TimeType) this.value;
         }
 
+        public boolean hasValueTimeType() throws Exception { 
+          return this.value instanceof TimeType;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -883,6 +911,10 @@ public class QuestionnaireAnswers extends DomainResource {
           if (!(this.value instanceof StringType))
             throw new Exception("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
+        }
+
+        public boolean hasValueStringType() throws Exception { 
+          return this.value instanceof StringType;
         }
 
         /**
@@ -894,6 +926,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (UriType) this.value;
         }
 
+        public boolean hasValueUriType() throws Exception { 
+          return this.value instanceof UriType;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -901,6 +937,10 @@ public class QuestionnaireAnswers extends DomainResource {
           if (!(this.value instanceof Attachment))
             throw new Exception("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
+        }
+
+        public boolean hasValueAttachment() throws Exception { 
+          return this.value instanceof Attachment;
         }
 
         /**
@@ -912,6 +952,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (Coding) this.value;
         }
 
+        public boolean hasValueCoding() throws Exception { 
+          return this.value instanceof Coding;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -921,6 +965,10 @@ public class QuestionnaireAnswers extends DomainResource {
           return (Quantity) this.value;
         }
 
+        public boolean hasValueQuantity() throws Exception { 
+          return this.value instanceof Quantity;
+        }
+
         /**
          * @return {@link #value} (The answer (or one of the answers) provided by the respondant to the question.)
          */
@@ -928,6 +976,10 @@ public class QuestionnaireAnswers extends DomainResource {
           if (!(this.value instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
+        }
+
+        public boolean hasValueReference() throws Exception { 
+          return this.value instanceof Reference;
         }
 
         public boolean hasValue() { 

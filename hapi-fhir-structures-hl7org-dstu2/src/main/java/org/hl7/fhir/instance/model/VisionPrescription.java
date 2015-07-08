@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -78,8 +78,8 @@ public class VisionPrescription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case RIGHT: return "http://hl7.org.fhir/eye-codes";
-            case LEFT: return "http://hl7.org.fhir/eye-codes";
+            case RIGHT: return "http://hl7.org/fhir/eye-codes";
+            case LEFT: return "http://hl7.org/fhir/eye-codes";
             default: return "?";
           }
         }
@@ -164,10 +164,10 @@ public class VisionPrescription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UP: return "http://hl7.org.fhir/base-codes";
-            case DOWN: return "http://hl7.org.fhir/base-codes";
-            case IN: return "http://hl7.org.fhir/base-codes";
-            case OUT: return "http://hl7.org.fhir/base-codes";
+            case UP: return "http://hl7.org/fhir/base-codes";
+            case DOWN: return "http://hl7.org/fhir/base-codes";
+            case IN: return "http://hl7.org/fhir/base-codes";
+            case OUT: return "http://hl7.org/fhir/base-codes";
             default: return "?";
           }
         }
@@ -1414,6 +1414,10 @@ public class VisionPrescription extends DomainResource {
       return (CodeableConcept) this.reason;
     }
 
+    public boolean hasReasonCodeableConcept() throws Exception { 
+      return this.reason instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
@@ -1421,6 +1425,10 @@ public class VisionPrescription extends DomainResource {
       if (!(this.reason instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
+    }
+
+    public boolean hasReasonReference() throws Exception { 
+      return this.reason instanceof Reference;
     }
 
     public boolean hasReason() { 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -92,10 +92,10 @@ public class Person extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case LEVEL1: return "http://hl7.org.fhir/identity-assuranceLevel";
-            case LEVEL2: return "http://hl7.org.fhir/identity-assuranceLevel";
-            case LEVEL3: return "http://hl7.org.fhir/identity-assuranceLevel";
-            case LEVEL4: return "http://hl7.org.fhir/identity-assuranceLevel";
+            case LEVEL1: return "http://hl7.org/fhir/identity-assuranceLevel";
+            case LEVEL2: return "http://hl7.org/fhir/identity-assuranceLevel";
+            case LEVEL3: return "http://hl7.org/fhir/identity-assuranceLevel";
+            case LEVEL4: return "http://hl7.org/fhir/identity-assuranceLevel";
             default: return "?";
           }
         }
@@ -345,9 +345,9 @@ public class Person extends DomainResource {
     /**
      * The birth date for the person.
      */
-    @Child(name = "birthDate", type = {DateTimeType.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="The birth date for the person", formalDefinition="The birth date for the person." )
-    protected DateTimeType birthDate;
+    @Child(name = "birthDate", type = {DateType.class}, order=4, min=0, max=1)
+    @Description(shortDefinition="The date on which the person was born", formalDefinition="The birth date for the person." )
+    protected DateType birthDate;
 
     /**
      * One or more addresses for the person.
@@ -389,7 +389,7 @@ public class Person extends DomainResource {
     @Description(shortDefinition="Link to a resource that concerns the same actual person", formalDefinition="Link to a resource that concerns the same actual person." )
     protected List<PersonLinkComponent> link;
 
-    private static final long serialVersionUID = -2072707611L;
+    private static final long serialVersionUID = -117464654L;
 
   /*
    * Constructor
@@ -570,12 +570,12 @@ public class Person extends DomainResource {
     /**
      * @return {@link #birthDate} (The birth date for the person.). This is the underlying object with id, value and extensions. The accessor "getBirthDate" gives direct access to the value
      */
-    public DateTimeType getBirthDateElement() { 
+    public DateType getBirthDateElement() { 
       if (this.birthDate == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Person.birthDate");
         else if (Configuration.doAutoCreate())
-          this.birthDate = new DateTimeType(); // bb
+          this.birthDate = new DateType(); // bb
       return this.birthDate;
     }
 
@@ -590,7 +590,7 @@ public class Person extends DomainResource {
     /**
      * @param value {@link #birthDate} (The birth date for the person.). This is the underlying object with id, value and extensions. The accessor "getBirthDate" gives direct access to the value
      */
-    public Person setBirthDateElement(DateTimeType value) { 
+    public Person setBirthDateElement(DateType value) { 
       this.birthDate = value;
       return this;
     }
@@ -610,7 +610,7 @@ public class Person extends DomainResource {
         this.birthDate = null;
       else {
         if (this.birthDate == null)
-          this.birthDate = new DateTimeType();
+          this.birthDate = new DateType();
         this.birthDate.setValue(value);
       }
       return this;
@@ -815,7 +815,7 @@ public class Person extends DomainResource {
         childrenList.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("gender", "code", "Administrative Gender.", 0, java.lang.Integer.MAX_VALUE, gender));
-        childrenList.add(new Property("birthDate", "dateTime", "The birth date for the person.", 0, java.lang.Integer.MAX_VALUE, birthDate));
+        childrenList.add(new Property("birthDate", "date", "The birth date for the person.", 0, java.lang.Integer.MAX_VALUE, birthDate));
         childrenList.add(new Property("address", "Address", "One or more addresses for the person.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("photo", "Attachment", "An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.", 0, java.lang.Integer.MAX_VALUE, photo));
         childrenList.add(new Property("managingOrganization", "Reference(Organization)", "The Organization that is the custodian of the person record.", 0, java.lang.Integer.MAX_VALUE, managingOrganization));
@@ -901,28 +901,38 @@ public class Person extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="Person.identifier", description="A person Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
-  public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="Person.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
   @SearchParamDefinition(name="birthdate", path="Person.birthDate", description="The person's date of birth", type="date" )
   public static final String SP_BIRTHDATE = "birthdate";
+  @SearchParamDefinition(name="address-state", path="Person.address.state", description="A state specified in an address", type="string" )
+  public static final String SP_ADDRESSSTATE = "address-state";
   @SearchParamDefinition(name="gender", path="Person.gender", description="The gender of the person", type="token" )
   public static final String SP_GENDER = "gender";
   @SearchParamDefinition(name="practitioner", path="Person.link.target", description="The Person links to this Practitioner", type="reference" )
   public static final String SP_PRACTITIONER = "practitioner";
+  @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference" )
+  public static final String SP_LINK = "link";
+  @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference" )
+  public static final String SP_RELATEDPERSON = "relatedperson";
+  @SearchParamDefinition(name="address-postalcode", path="Person.address.postalCode", description="A postalCode specified in an address", type="string" )
+  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string" )
+  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="name", path="Person.name", description="A portion of name in any name part", type="string" )
   public static final String SP_NAME = "name";
-  @SearchParamDefinition(name="link", path="Person.link.target", description="Any link has this Patient, Person, RelatedPerson or Practitioner reference", type="reference" )
-  public static final String SP_LINK = "link";
+  @SearchParamDefinition(name="address-use", path="Person.address.use", description="A use code specified in an address", type="token" )
+  public static final String SP_ADDRESSUSE = "address-use";
   @SearchParamDefinition(name="telecom", path="Person.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
-  @SearchParamDefinition(name="relatedperson", path="Person.link.target", description="The Person links to this RelatedPerson", type="reference" )
-  public static final String SP_RELATEDPERSON = "relatedperson";
+  @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string" )
+  public static final String SP_ADDRESSCITY = "address-city";
 
 }
 

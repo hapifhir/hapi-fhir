@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -91,10 +91,10 @@ public class Quantity extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case LESS_THAN: return "http://hl7.org.fhir/quantity-comparator";
-            case LESS_OR_EQUAL: return "http://hl7.org.fhir/quantity-comparator";
-            case GREATER_OR_EQUAL: return "http://hl7.org.fhir/quantity-comparator";
-            case GREATER_THAN: return "http://hl7.org.fhir/quantity-comparator";
+            case LESS_THAN: return "http://hl7.org/fhir/quantity-comparator";
+            case LESS_OR_EQUAL: return "http://hl7.org/fhir/quantity-comparator";
+            case GREATER_OR_EQUAL: return "http://hl7.org/fhir/quantity-comparator";
+            case GREATER_THAN: return "http://hl7.org/fhir/quantity-comparator";
             default: return "?";
           }
         }
@@ -109,10 +109,10 @@ public class Quantity extends Type implements ICompositeType {
         }
         public String getDisplay() {
           switch (this) {
-            case LESS_THAN: return " ";
-            case LESS_OR_EQUAL: return "  ";
-            case GREATER_OR_EQUAL: return "  ";
-            case GREATER_THAN: return " ";
+            case LESS_THAN: return "Less than";
+            case LESS_OR_EQUAL: return "Less or Equal to";
+            case GREATER_OR_EQUAL: return "Greater or Equal to";
+            case GREATER_THAN: return "Greater than";
             default: return "?";
           }
         }

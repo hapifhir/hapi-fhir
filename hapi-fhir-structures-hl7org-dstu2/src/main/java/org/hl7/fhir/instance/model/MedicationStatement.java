@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class MedicationStatement extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org.fhir/medication-statement-status";
-            case COMPLETED: return "http://hl7.org.fhir/medication-statement-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/medication-statement-status";
+            case INPROGRESS: return "http://hl7.org/fhir/medication-statement-status";
+            case COMPLETED: return "http://hl7.org/fhir/medication-statement-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/medication-statement-status";
             default: return "?";
           }
         }
@@ -295,6 +295,10 @@ public class MedicationStatement extends DomainResource {
           return (BooleanType) this.asNeeded;
         }
 
+        public boolean hasAsNeededBooleanType() throws Exception { 
+          return this.asNeeded instanceof BooleanType;
+        }
+
         /**
          * @return {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.)
          */
@@ -302,6 +306,10 @@ public class MedicationStatement extends DomainResource {
           if (!(this.asNeeded instanceof CodeableConcept))
             throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
           return (CodeableConcept) this.asNeeded;
+        }
+
+        public boolean hasAsNeededCodeableConcept() throws Exception { 
+          return this.asNeeded instanceof CodeableConcept;
         }
 
         public boolean hasAsNeeded() { 
@@ -950,6 +958,10 @@ public class MedicationStatement extends DomainResource {
       return (CodeableConcept) this.reasonForUse;
     }
 
+    public boolean hasReasonForUseCodeableConcept() throws Exception { 
+      return this.reasonForUse instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #reasonForUse} (A reason for why the medication is being/was taken.)
      */
@@ -957,6 +969,10 @@ public class MedicationStatement extends DomainResource {
       if (!(this.reasonForUse instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.reasonForUse.getClass().getName()+" was encountered");
       return (Reference) this.reasonForUse;
+    }
+
+    public boolean hasReasonForUseReference() throws Exception { 
+      return this.reasonForUse instanceof Reference;
     }
 
     public boolean hasReasonForUse() { 
@@ -987,6 +1003,10 @@ public class MedicationStatement extends DomainResource {
       return (DateTimeType) this.effective;
     }
 
+    public boolean hasEffectiveDateTimeType() throws Exception { 
+      return this.effective instanceof DateTimeType;
+    }
+
     /**
      * @return {@link #effective} (The interval of time during which it is being asserted that the patient was taking the medication (or was not taking, when the 'wasNotGiven' attribute is true).)
      */
@@ -994,6 +1014,10 @@ public class MedicationStatement extends DomainResource {
       if (!(this.effective instanceof Period))
         throw new Exception("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
+    }
+
+    public boolean hasEffectivePeriod() throws Exception { 
+      return this.effective instanceof Period;
     }
 
     public boolean hasEffective() { 
@@ -1073,6 +1097,10 @@ public class MedicationStatement extends DomainResource {
       return (CodeableConcept) this.medication;
     }
 
+    public boolean hasMedicationCodeableConcept() throws Exception { 
+      return this.medication instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #medication} (Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.)
      */
@@ -1080,6 +1108,10 @@ public class MedicationStatement extends DomainResource {
       if (!(this.medication instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
       return (Reference) this.medication;
+    }
+
+    public boolean hasMedicationReference() throws Exception { 
+      return this.medication instanceof Reference;
     }
 
     public boolean hasMedication() { 

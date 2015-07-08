@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A supply - a  request for something.
+ * A record of a request for a medication, substance or device used in the healthcare setting.
  */
 @ResourceDef(name="SupplyRequest", profile="http://hl7.org/fhir/Profile/SupplyRequest")
 public class SupplyRequest extends DomainResource {
@@ -91,10 +91,10 @@ public class SupplyRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REQUESTED: return "http://hl7.org.fhir/valueset-supplyrequest-status";
-            case COMPLETED: return "http://hl7.org.fhir/valueset-supplyrequest-status";
-            case FAILED: return "http://hl7.org.fhir/valueset-supplyrequest-status";
-            case CANCELLED: return "http://hl7.org.fhir/valueset-supplyrequest-status";
+            case REQUESTED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
+            case COMPLETED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
+            case FAILED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
+            case CANCELLED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
             default: return "?";
           }
         }
@@ -146,31 +146,176 @@ public class SupplyRequest extends DomainResource {
       }
     }
 
-    /**
-     * Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.
+    @Block()
+    public static class SupplyRequestWhenComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Fulfilment code.
+         */
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="Fulfilment code", formalDefinition="Fulfilment code." )
+        protected CodeableConcept code;
+
+        /**
+         * Formal fulfillment schedule.
+         */
+        @Child(name = "schedule", type = {Timing.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="Formal fulfillment schedule", formalDefinition="Formal fulfillment schedule." )
+        protected Timing schedule;
+
+        private static final long serialVersionUID = 307115287L;
+
+    /*
+     * Constructor
      */
-    @Child(name = "kind", type = {CodeableConcept.class}, order=0, min=0, max=1)
-    @Description(shortDefinition="The kind of supply (central, non-stock, etc)", formalDefinition="Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process." )
-    protected CodeableConcept kind;
+      public SupplyRequestWhenComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #code} (Fulfilment code.)
+         */
+        public CodeableConcept getCode() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SupplyRequestWhenComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeableConcept(); // cc
+          return this.code;
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (Fulfilment code.)
+         */
+        public SupplyRequestWhenComponent setCode(CodeableConcept value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #schedule} (Formal fulfillment schedule.)
+         */
+        public Timing getSchedule() { 
+          if (this.schedule == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SupplyRequestWhenComponent.schedule");
+            else if (Configuration.doAutoCreate())
+              this.schedule = new Timing(); // cc
+          return this.schedule;
+        }
+
+        public boolean hasSchedule() { 
+          return this.schedule != null && !this.schedule.isEmpty();
+        }
+
+        /**
+         * @param value {@link #schedule} (Formal fulfillment schedule.)
+         */
+        public SupplyRequestWhenComponent setSchedule(Timing value) { 
+          this.schedule = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("code", "CodeableConcept", "Fulfilment code.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("schedule", "Timing", "Formal fulfillment schedule.", 0, java.lang.Integer.MAX_VALUE, schedule));
+        }
+
+      public SupplyRequestWhenComponent copy() {
+        SupplyRequestWhenComponent dst = new SupplyRequestWhenComponent();
+        copyValues(dst);
+        dst.code = code == null ? null : code.copy();
+        dst.schedule = schedule == null ? null : schedule.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof SupplyRequestWhenComponent))
+          return false;
+        SupplyRequestWhenComponent o = (SupplyRequestWhenComponent) other;
+        return compareDeep(code, o.code, true) && compareDeep(schedule, o.schedule, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof SupplyRequestWhenComponent))
+          return false;
+        SupplyRequestWhenComponent o = (SupplyRequestWhenComponent) other;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (code == null || code.isEmpty()) && (schedule == null || schedule.isEmpty())
+          ;
+      }
+
+  }
+
+    /**
+     * A link to a resource representing the person whom the ordered item is for.
+     */
+    @Child(name = "patient", type = {Patient.class}, order=0, min=0, max=1)
+    @Description(shortDefinition="Patient for whom the item is supplied", formalDefinition="A link to a resource representing the person whom the ordered item is for." )
+    protected Reference patient;
+
+    /**
+     * The actual object that is the target of the reference (A link to a resource representing the person whom the ordered item is for.)
+     */
+    protected Patient patientTarget;
+
+    /**
+     * The Practitioner , Organization or Patient who initiated this order for the Supply.
+     */
+    @Child(name = "source", type = {Practitioner.class, Organization.class, Patient.class}, order=1, min=0, max=1)
+    @Description(shortDefinition="Who initiated this order", formalDefinition="The Practitioner , Organization or Patient who initiated this order for the Supply." )
+    protected Reference source;
+
+    /**
+     * The actual object that is the target of the reference (The Practitioner , Organization or Patient who initiated this order for the Supply.)
+     */
+    protected Resource sourceTarget;
+
+    /**
+     * When the request was made.
+     */
+    @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1)
+    @Description(shortDefinition="When the request was made", formalDefinition="When the request was made." )
+    protected DateTimeType date;
 
     /**
      * Unique identifier for this supply request.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Unique identifier", formalDefinition="Unique identifier for this supply request." )
     protected Identifier identifier;
 
     /**
      * Status of the supply request.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1)
     @Description(shortDefinition="requested | completed | failed | cancelled", formalDefinition="Status of the supply request." )
     protected Enumeration<SupplyRequestStatus> status;
 
     /**
+     * Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.
+     */
+    @Child(name = "kind", type = {CodeableConcept.class}, order=5, min=0, max=1)
+    @Description(shortDefinition="The kind of supply (central, non-stock, etc)", formalDefinition="Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process." )
+    protected CodeableConcept kind;
+
+    /**
      * The item that is requested to be supplied.
      */
-    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order=3, min=0, max=1)
+    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied." )
     protected Reference orderedItem;
 
@@ -180,18 +325,32 @@ public class SupplyRequest extends DomainResource {
     protected Resource orderedItemTarget;
 
     /**
-     * A link to a resource representing the person whom the ordered item is for.
+     * Who is intended to fulfill the request.
      */
-    @Child(name = "patient", type = {Patient.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="Patient for whom the item is supplied", formalDefinition="A link to a resource representing the person whom the ordered item is for." )
-    protected Reference patient;
+    @Child(name = "supplier", type = {Organization.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Who is intended to fulfill the request", formalDefinition="Who is intended to fulfill the request." )
+    protected List<Reference> supplier;
+    /**
+     * The actual objects that are the target of the reference (Who is intended to fulfill the request.)
+     */
+    protected List<Organization> supplierTarget;
+
 
     /**
-     * The actual object that is the target of the reference (A link to a resource representing the person whom the ordered item is for.)
+     * Why the supply item was requested.
      */
-    protected Patient patientTarget;
+    @Child(name = "reason", type = {CodeableConcept.class}, order=8, min=0, max=1)
+    @Description(shortDefinition="Why the supply item was requested", formalDefinition="Why the supply item was requested." )
+    protected Type reason;
 
-    private static final long serialVersionUID = 1806725371L;
+    /**
+     * When the request should be fulfilled.
+     */
+    @Child(name = "when", type = {}, order=9, min=0, max=1)
+    @Description(shortDefinition="When the request should be fulfilled", formalDefinition="When the request should be fulfilled." )
+    protected SupplyRequestWhenComponent when;
+
+    private static final long serialVersionUID = 1649766198L;
 
   /*
    * Constructor
@@ -201,26 +360,134 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #kind} (Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.)
+     * @return {@link #patient} (A link to a resource representing the person whom the ordered item is for.)
      */
-    public CodeableConcept getKind() { 
-      if (this.kind == null)
+    public Reference getPatient() { 
+      if (this.patient == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SupplyRequest.kind");
+          throw new Error("Attempt to auto-create SupplyRequest.patient");
         else if (Configuration.doAutoCreate())
-          this.kind = new CodeableConcept(); // cc
-      return this.kind;
+          this.patient = new Reference(); // cc
+      return this.patient;
     }
 
-    public boolean hasKind() { 
-      return this.kind != null && !this.kind.isEmpty();
+    public boolean hasPatient() { 
+      return this.patient != null && !this.patient.isEmpty();
     }
 
     /**
-     * @param value {@link #kind} (Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.)
+     * @param value {@link #patient} (A link to a resource representing the person whom the ordered item is for.)
      */
-    public SupplyRequest setKind(CodeableConcept value) { 
-      this.kind = value;
+    public SupplyRequest setPatient(Reference value) { 
+      this.patient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to a resource representing the person whom the ordered item is for.)
+     */
+    public Patient getPatientTarget() { 
+      if (this.patientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SupplyRequest.patient");
+        else if (Configuration.doAutoCreate())
+          this.patientTarget = new Patient(); // aa
+      return this.patientTarget;
+    }
+
+    /**
+     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource representing the person whom the ordered item is for.)
+     */
+    public SupplyRequest setPatientTarget(Patient value) { 
+      this.patientTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #source} (The Practitioner , Organization or Patient who initiated this order for the Supply.)
+     */
+    public Reference getSource() { 
+      if (this.source == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SupplyRequest.source");
+        else if (Configuration.doAutoCreate())
+          this.source = new Reference(); // cc
+      return this.source;
+    }
+
+    public boolean hasSource() { 
+      return this.source != null && !this.source.isEmpty();
+    }
+
+    /**
+     * @param value {@link #source} (The Practitioner , Organization or Patient who initiated this order for the Supply.)
+     */
+    public SupplyRequest setSource(Reference value) { 
+      this.source = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Practitioner , Organization or Patient who initiated this order for the Supply.)
+     */
+    public Resource getSourceTarget() { 
+      return this.sourceTarget;
+    }
+
+    /**
+     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Practitioner , Organization or Patient who initiated this order for the Supply.)
+     */
+    public SupplyRequest setSourceTarget(Resource value) { 
+      this.sourceTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (When the request was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SupplyRequest.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (When the request was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public SupplyRequest setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return When the request was made.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value When the request was made.
+     */
+    public SupplyRequest setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
       return this;
     }
 
@@ -298,6 +565,30 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
+     * @return {@link #kind} (Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.)
+     */
+    public CodeableConcept getKind() { 
+      if (this.kind == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SupplyRequest.kind");
+        else if (Configuration.doAutoCreate())
+          this.kind = new CodeableConcept(); // cc
+      return this.kind;
+    }
+
+    public boolean hasKind() { 
+      return this.kind != null && !this.kind.isEmpty();
+    }
+
+    /**
+     * @param value {@link #kind} (Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.)
+     */
+    public SupplyRequest setKind(CodeableConcept value) { 
+      this.kind = value;
+      return this;
+    }
+
+    /**
      * @return {@link #orderedItem} (The item that is requested to be supplied.)
      */
     public Reference getOrderedItem() { 
@@ -337,66 +628,166 @@ public class SupplyRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #patient} (A link to a resource representing the person whom the ordered item is for.)
+     * @return {@link #supplier} (Who is intended to fulfill the request.)
      */
-    public Reference getPatient() { 
-      if (this.patient == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SupplyRequest.patient");
-        else if (Configuration.doAutoCreate())
-          this.patient = new Reference(); // cc
-      return this.patient;
+    public List<Reference> getSupplier() { 
+      if (this.supplier == null)
+        this.supplier = new ArrayList<Reference>();
+      return this.supplier;
     }
 
-    public boolean hasPatient() { 
-      return this.patient != null && !this.patient.isEmpty();
+    public boolean hasSupplier() { 
+      if (this.supplier == null)
+        return false;
+      for (Reference item : this.supplier)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #patient} (A link to a resource representing the person whom the ordered item is for.)
+     * @return {@link #supplier} (Who is intended to fulfill the request.)
      */
-    public SupplyRequest setPatient(Reference value) { 
-      this.patient = value;
+    // syntactic sugar
+    public Reference addSupplier() { //3
+      Reference t = new Reference();
+      if (this.supplier == null)
+        this.supplier = new ArrayList<Reference>();
+      this.supplier.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public SupplyRequest addSupplier(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.supplier == null)
+        this.supplier = new ArrayList<Reference>();
+      this.supplier.add(t);
       return this;
     }
 
     /**
-     * @return {@link #patient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to a resource representing the person whom the ordered item is for.)
+     * @return {@link #supplier} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Who is intended to fulfill the request.)
      */
-    public Patient getPatientTarget() { 
-      if (this.patientTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SupplyRequest.patient");
-        else if (Configuration.doAutoCreate())
-          this.patientTarget = new Patient(); // aa
-      return this.patientTarget;
+    public List<Organization> getSupplierTarget() { 
+      if (this.supplierTarget == null)
+        this.supplierTarget = new ArrayList<Organization>();
+      return this.supplierTarget;
+    }
+
+    // syntactic sugar
+    /**
+     * @return {@link #supplier} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Who is intended to fulfill the request.)
+     */
+    public Organization addSupplierTarget() { 
+      Organization r = new Organization();
+      if (this.supplierTarget == null)
+        this.supplierTarget = new ArrayList<Organization>();
+      this.supplierTarget.add(r);
+      return r;
     }
 
     /**
-     * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource representing the person whom the ordered item is for.)
+     * @return {@link #reason} (Why the supply item was requested.)
      */
-    public SupplyRequest setPatientTarget(Patient value) { 
-      this.patientTarget = value;
+    public Type getReason() { 
+      return this.reason;
+    }
+
+    /**
+     * @return {@link #reason} (Why the supply item was requested.)
+     */
+    public CodeableConcept getReasonCodeableConcept() throws Exception { 
+      if (!(this.reason instanceof CodeableConcept))
+        throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.reason;
+    }
+
+    public boolean hasReasonCodeableConcept() throws Exception { 
+      return this.reason instanceof CodeableConcept;
+    }
+
+    /**
+     * @return {@link #reason} (Why the supply item was requested.)
+     */
+    public Reference getReasonReference() throws Exception { 
+      if (!(this.reason instanceof Reference))
+        throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
+      return (Reference) this.reason;
+    }
+
+    public boolean hasReasonReference() throws Exception { 
+      return this.reason instanceof Reference;
+    }
+
+    public boolean hasReason() { 
+      return this.reason != null && !this.reason.isEmpty();
+    }
+
+    /**
+     * @param value {@link #reason} (Why the supply item was requested.)
+     */
+    public SupplyRequest setReason(Type value) { 
+      this.reason = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #when} (When the request should be fulfilled.)
+     */
+    public SupplyRequestWhenComponent getWhen() { 
+      if (this.when == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SupplyRequest.when");
+        else if (Configuration.doAutoCreate())
+          this.when = new SupplyRequestWhenComponent(); // cc
+      return this.when;
+    }
+
+    public boolean hasWhen() { 
+      return this.when != null && !this.when.isEmpty();
+    }
+
+    /**
+     * @param value {@link #when} (When the request should be fulfilled.)
+     */
+    public SupplyRequest setWhen(SupplyRequestWhenComponent value) { 
+      this.when = value;
       return this;
     }
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("kind", "CodeableConcept", "Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.", 0, java.lang.Integer.MAX_VALUE, kind));
+        childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person whom the ordered item is for.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("source", "Reference(Practitioner|Organization|Patient)", "The Practitioner , Organization or Patient who initiated this order for the Supply.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("date", "dateTime", "When the request was made.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier for this supply request.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("status", "code", "Status of the supply request.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("kind", "CodeableConcept", "Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("orderedItem", "Reference(Medication|Substance|Device)", "The item that is requested to be supplied.", 0, java.lang.Integer.MAX_VALUE, orderedItem));
-        childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person whom the ordered item is for.", 0, java.lang.Integer.MAX_VALUE, patient));
+        childrenList.add(new Property("supplier", "Reference(Organization)", "Who is intended to fulfill the request.", 0, java.lang.Integer.MAX_VALUE, supplier));
+        childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(any)", "Why the supply item was requested.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("when", "", "When the request should be fulfilled.", 0, java.lang.Integer.MAX_VALUE, when));
       }
 
       public SupplyRequest copy() {
         SupplyRequest dst = new SupplyRequest();
         copyValues(dst);
-        dst.kind = kind == null ? null : kind.copy();
+        dst.patient = patient == null ? null : patient.copy();
+        dst.source = source == null ? null : source.copy();
+        dst.date = date == null ? null : date.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
+        dst.kind = kind == null ? null : kind.copy();
         dst.orderedItem = orderedItem == null ? null : orderedItem.copy();
-        dst.patient = patient == null ? null : patient.copy();
+        if (supplier != null) {
+          dst.supplier = new ArrayList<Reference>();
+          for (Reference i : supplier)
+            dst.supplier.add(i.copy());
+        };
+        dst.reason = reason == null ? null : reason.copy();
+        dst.when = when == null ? null : when.copy();
         return dst;
       }
 
@@ -411,8 +802,10 @@ public class SupplyRequest extends DomainResource {
         if (!(other instanceof SupplyRequest))
           return false;
         SupplyRequest o = (SupplyRequest) other;
-        return compareDeep(kind, o.kind, true) && compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true)
-           && compareDeep(orderedItem, o.orderedItem, true) && compareDeep(patient, o.patient, true);
+        return compareDeep(patient, o.patient, true) && compareDeep(source, o.source, true) && compareDeep(date, o.date, true)
+           && compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(kind, o.kind, true)
+           && compareDeep(orderedItem, o.orderedItem, true) && compareDeep(supplier, o.supplier, true) && compareDeep(reason, o.reason, true)
+           && compareDeep(when, o.when, true);
       }
 
       @Override
@@ -422,13 +815,14 @@ public class SupplyRequest extends DomainResource {
         if (!(other instanceof SupplyRequest))
           return false;
         SupplyRequest o = (SupplyRequest) other;
-        return compareValues(status, o.status, true);
+        return compareValues(date, o.date, true) && compareValues(status, o.status, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (kind == null || kind.isEmpty()) && (identifier == null || identifier.isEmpty())
-           && (status == null || status.isEmpty()) && (orderedItem == null || orderedItem.isEmpty())
-           && (patient == null || patient.isEmpty());
+        return super.isEmpty() && (patient == null || patient.isEmpty()) && (source == null || source.isEmpty())
+           && (date == null || date.isEmpty()) && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
+           && (kind == null || kind.isEmpty()) && (orderedItem == null || orderedItem.isEmpty()) && (supplier == null || supplier.isEmpty())
+           && (reason == null || reason.isEmpty()) && (when == null || when.isEmpty());
       }
 
   @Override
@@ -436,12 +830,18 @@ public class SupplyRequest extends DomainResource {
     return ResourceType.SupplyRequest;
    }
 
+  @SearchParamDefinition(name="date", path="SupplyRequest.date", description="When the request was made", type="date" )
+  public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="SupplyRequest.identifier", description="Unique identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="kind", path="SupplyRequest.kind", description="The kind of supply (central, non-stock, etc)", type="token" )
   public static final String SP_KIND = "kind";
   @SearchParamDefinition(name="patient", path="SupplyRequest.patient", description="Patient for whom the item is supplied", type="reference" )
   public static final String SP_PATIENT = "patient";
+  @SearchParamDefinition(name="supplier", path="SupplyRequest.supplier", description="Who is intended to fulfill the request", type="reference" )
+  public static final String SP_SUPPLIER = "supplier";
+  @SearchParamDefinition(name="source", path="SupplyRequest.source", description="Who initiated this order", type="reference" )
+  public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="status", path="SupplyRequest.status", description="requested | completed | failed | cancelled", type="token" )
   public static final String SP_STATUS = "status";
 

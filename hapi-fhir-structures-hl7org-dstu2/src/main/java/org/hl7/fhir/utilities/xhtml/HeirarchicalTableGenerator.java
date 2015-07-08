@@ -202,6 +202,7 @@ public class HeirarchicalTableGenerator  {
     private String icon;
     private String anchor;
     private String hint;
+    private String color;
     
     public List<Row> getSubRows() {
       return subRows;
@@ -224,6 +225,12 @@ public class HeirarchicalTableGenerator  {
     }
     public String getHint() {
       return hint;
+    }
+    public String getColor() {
+      return color;
+    }
+    public void setColor(String color) {
+      this.color = color;
     }
     
     
@@ -294,12 +301,12 @@ public class HeirarchicalTableGenerator  {
     tr.setAttribute("style", "border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;");
     XhtmlNode tc = null;
     for (Title t : model.getTitles()) {
-      tc = renderCell(tr, t, "th", null, null, null, false, null);
+      tc = renderCell(tr, t, "th", null, null, null, false, null, "white");
       if (t.width != 0)
         tc.setAttribute("style", "width: "+Integer.toString(t.width)+"px");
     }
     if (tc != null && model.getDocoRef() != null)
-      tc.addTag("span").setAttribute("style", "float: right").addTag("a").setAttribute("title", "Legend for this format").setAttribute("href", model.getDocoRef()).addTag("img").setAttribute("alt", "doco").setAttribute("src", model.getDocoImg());
+      tc.addTag("span").setAttribute("style", "float: right").addTag("a").setAttribute("title", "Legend for this format").setAttribute("href", model.getDocoRef()).addTag("img").setAttribute("alt", "doco").setAttribute("style", "background-color: inherit").setAttribute("src", model.getDocoImg());
       
     for (Row r : model.getRows()) {
       renderRow(table, r, 0, new ArrayList<Boolean>());
@@ -310,10 +317,13 @@ public class HeirarchicalTableGenerator  {
 
   private void renderRow(XhtmlNode table, Row r, int indent, List<Boolean> indents) throws Exception {
     XhtmlNode tr = table.addTag("tr");
-    tr.setAttribute("style", "border: 0px; padding:0px; vertical-align: top; background-color: white;");
+    String color = "white";
+    if (r.getColor() != null)
+      color = r.getColor();
+    tr.setAttribute("style", "border: 0px; padding:0px; vertical-align: top; background-color: "+color+";");
     boolean first = true;
     for (Cell t : r.getCells()) {
-      renderCell(tr, t, "td", first ? r.getIcon() : null, first ? r.getHint() : null, first ? indents : null, !r.getSubRows().isEmpty(), first ? r.getAnchor() : null);
+      renderCell(tr, t, "td", first ? r.getIcon() : null, first ? r.getHint() : null, first ? indents : null, !r.getSubRows().isEmpty(), first ? r.getAnchor() : null, color);
       first = false;
     }
     table.addText("\r\n");
@@ -331,28 +341,28 @@ public class HeirarchicalTableGenerator  {
   }
 
 
-  private XhtmlNode renderCell(XhtmlNode tr, Cell c, String name, String icon, String hint, List<Boolean> indents, boolean hasChildren, String anchor) throws Exception {
+  private XhtmlNode renderCell(XhtmlNode tr, Cell c, String name, String icon, String hint, List<Boolean> indents, boolean hasChildren, String anchor, String color) throws Exception {
     XhtmlNode tc = tr.addTag(name);
     tc.setAttribute("class", "heirarchy");
     if (indents != null) {
-      tc.addTag("img").setAttribute("src", srcFor("tbl_spacer.png")).setAttribute("class", "heirarchy").setAttribute("alt", ".");
-      tc.setAttribute("style", "vertical-align: top; text-align : left; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url("+checkExists(indents, hasChildren)+")");
+      tc.addTag("img").setAttribute("src", srcFor("tbl_spacer.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");
+      tc.setAttribute("style", "vertical-align: top; text-align : left; background-color: "+color+"; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url("+checkExists(indents, hasChildren)+")");
       for (int i = 0; i < indents.size()-1; i++) { 
         if (indents.get(i))
-          tc.addTag("img").setAttribute("src", srcFor("tbl_blank.png")).setAttribute("class", "heirarchy").setAttribute("alt", ".");
+          tc.addTag("img").setAttribute("src", srcFor("tbl_blank.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");
         else
-          tc.addTag("img").setAttribute("src", srcFor("tbl_vline.png")).setAttribute("class", "heirarchy").setAttribute("alt", ".");
+          tc.addTag("img").setAttribute("src", srcFor("tbl_vline.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");
       }
       if (!indents.isEmpty())
         if (indents.get(indents.size()-1))
-          tc.addTag("img").setAttribute("src", srcFor("tbl_vjoin_end.png")).setAttribute("class", "heirarchy").setAttribute("alt", ".");
+          tc.addTag("img").setAttribute("src", srcFor("tbl_vjoin_end.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");
         else
-          tc.addTag("img").setAttribute("src", srcFor("tbl_vjoin.png")).setAttribute("class", "heirarchy").setAttribute("alt", ".");
+          tc.addTag("img").setAttribute("src", srcFor("tbl_vjoin.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");
     }
     else
-      tc.setAttribute("style", "vertical-align: top; text-align : left; padding:0px 4px 0px 4px");
+      tc.setAttribute("style", "vertical-align: top; text-align : left; background-color: "+color+"; padding:0px 4px 0px 4px");
     if (!Utilities.noString(icon)) {
-      XhtmlNode img = tc.addTag("img").setAttribute("src", srcFor(icon)).setAttribute("class", "heirarchy").setAttribute("style", "background-color: white;").setAttribute("alt", ".");
+      XhtmlNode img = tc.addTag("img").setAttribute("src", srcFor(icon)).setAttribute("class", "heirarchy").setAttribute("style", "background-color: "+color+"; background-color: inherit").setAttribute("alt", ".");
       if (hint != null)
         img.setAttribute("title", hint);
       tc.addText(" ");
@@ -486,16 +496,21 @@ public class HeirarchicalTableGenerator  {
 
 
   private void genImage(List<Boolean> indents, boolean hasChildren, OutputStream stream) throws IOException {
-    BufferedImage bi = new BufferedImage(800, 2, BufferedImage.TYPE_BYTE_BINARY);
-    Graphics2D graphics = bi.createGraphics();
-    graphics.setBackground(Color.WHITE);
-    graphics.clearRect(0, 0, 800, 2);
+    BufferedImage bi = new BufferedImage(800, 2, BufferedImage.TYPE_INT_ARGB);
+    // i have no idea why this works to make these pixels transparent. It defies logic. 
+    // But this combination of INT_ARGB and filling with grey magically worked when nothing else did. So it stays as is.
+    Color grey = new Color(99,99,99,0); 
+    for (int i = 0; i < 800; i++) {
+      bi.setRGB(i, 0, grey.getRGB());
+      bi.setRGB(i, 1, grey.getRGB());
+    }
+    Color black = new Color(0, 0, 0);
     for (int i = 0; i < indents.size(); i++) {
       if (!indents.get(i))
-        bi.setRGB(12+(i*16), 0, 0);
+        bi.setRGB(12+(i*16), 0, black.getRGB());
     }
     if (hasChildren)
-      bi.setRGB(12+(indents.size()*16), 0, 0);
+      bi.setRGB(12+(indents.size()*16), 0, black.getRGB());
     ImageIO.write(bi, "PNG", stream);
   }
 

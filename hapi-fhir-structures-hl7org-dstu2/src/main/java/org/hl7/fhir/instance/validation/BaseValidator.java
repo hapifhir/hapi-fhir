@@ -32,62 +32,100 @@ POSSIBILITY OF SUCH DAMAGE.
 import java.util.List;
 
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
+import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.validation.ValidationMessage.Source;
 
 public class BaseValidator {
 
   protected Source source;
   
-  protected boolean fail(List<ValidationMessage> errors, String type, int line, int col, String path, boolean b, String msg) {
+  protected boolean fail(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.FATAL));
     return b;
   }
 
   
-  protected boolean rule(List<ValidationMessage> errors, String type, int line, int col, String path, boolean b, String msg) {
+  protected boolean rule(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean b, String msg) {
   	if (!b)
   		errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.ERROR));
   	return b;
   }
 
-  protected boolean hint(List<ValidationMessage> errors, String type, int line, int col, String path, boolean b, String msg) {
+  protected boolean hint(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.INFORMATION));
     return b;
   }
 
-  protected boolean warning(List<ValidationMessage> errors, String type, int line, int col, String path, boolean b, String msg) {
+  protected boolean warning(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.WARNING));
     return b;
     
   }
 
-  protected boolean fail(List<ValidationMessage> errors, String type, String path, boolean b, String msg) {
+  protected boolean fail(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.FATAL));
     return b;
   }
 
   
-  protected boolean rule(List<ValidationMessage> errors, String type, String path, boolean b, String msg) {
+  protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.ERROR));
     return b;
   }
 
-  protected boolean hint(List<ValidationMessage> errors, String type, String path, boolean b, String msg) {
+  protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg, String html) {
+    if (!b)
+      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, html, IssueSeverity.ERROR));
+    return b;
+  }
+
+  protected boolean hint(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.INFORMATION));
     return b;
   }
 
-  protected boolean warning(List<ValidationMessage> errors, String type, String path, boolean b, String msg) {
+  protected boolean warning(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg) {
     if (!b)
       errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.WARNING));
     return b;
-    
   }
+  
+  protected boolean warning(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg, String html) {
+    if (!b)
+      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, html, IssueSeverity.WARNING));
+    return b;    
+  }
+
+  protected boolean grammarWord(String w) {
+    return w.equals("and") || w.equals("or") || w.equals("a") || w.equals("the") || w.equals("for") || w.equals("this") || w.equals("that") || w.equals("of");
+  }
+
+  protected String splitByCamelCase(String s) {
+    StringBuilder b = new StringBuilder();
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (Character.isUpperCase(c) && !(i == 0 || Character.isUpperCase(s.charAt(i-1))))
+        b.append(' ');
+      b.append(c);
+    }
+    return b.toString();
+  }
+    
+  protected String stripPunctuation(String s, boolean numbers) {
+    StringBuilder b = new StringBuilder();
+    for (char c : s.toCharArray()) {
+      int t = Character.getType(c);
+      if (t == Character.UPPERCASE_LETTER || t == Character.LOWERCASE_LETTER || t == Character.TITLECASE_LETTER || t == Character.MODIFIER_LETTER || t == Character.OTHER_LETTER || (t == Character.DECIMAL_DIGIT_NUMBER && numbers) || (t == Character.LETTER_NUMBER && numbers) || c == ' ')
+        b.append(c);
+  }
+    return b.toString();
+  }
+
 
 }

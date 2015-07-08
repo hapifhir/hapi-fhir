@@ -354,7 +354,7 @@ public class IncludeHl7OrgDstu2Test {
 
 			DiagnosticReport rep = new DiagnosticReport();
 			rep.setId("DiagnosticReport/999");
-			rep.getName().setText("Rep");
+			rep.getCode().setText("Rep");
 			rep.addResult().setResource(o1);
 			rep.addResult().setResource(o2);
 			rep.addResult().setResource(o3);

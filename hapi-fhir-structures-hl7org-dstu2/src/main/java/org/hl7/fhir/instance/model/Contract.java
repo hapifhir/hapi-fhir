@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -292,6 +292,10 @@ public class Contract extends DomainResource {
           return (CodeableConcept) this.entity;
         }
 
+        public boolean hasEntityCodeableConcept() throws Exception { 
+          return this.entity instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #entity} (Specific type of Contract Valued Item that may be priced.)
          */
@@ -299,6 +303,10 @@ public class Contract extends DomainResource {
           if (!(this.entity instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
+        }
+
+        public boolean hasEntityReference() throws Exception { 
+          return this.entity instanceof Reference;
         }
 
         public boolean hasEntity() { 
@@ -1679,6 +1687,10 @@ public class Contract extends DomainResource {
           return (CodeableConcept) this.entity;
         }
 
+        public boolean hasEntityCodeableConcept() throws Exception { 
+          return this.entity instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #entity} (Specific type of Contract Provision Valued Item that may be priced.)
          */
@@ -1686,6 +1698,10 @@ public class Contract extends DomainResource {
           if (!(this.entity instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
+        }
+
+        public boolean hasEntityReference() throws Exception { 
+          return this.entity instanceof Reference;
         }
 
         public boolean hasEntity() { 
@@ -2043,6 +2059,10 @@ public class Contract extends DomainResource {
           return (Attachment) this.content;
         }
 
+        public boolean hasContentAttachment() throws Exception { 
+          return this.content instanceof Attachment;
+        }
+
         /**
          * @return {@link #content} (Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.)
          */
@@ -2050,6 +2070,10 @@ public class Contract extends DomainResource {
           if (!(this.content instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
+        }
+
+        public boolean hasContentReference() throws Exception { 
+          return this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -2144,6 +2168,10 @@ public class Contract extends DomainResource {
           return (Attachment) this.content;
         }
 
+        public boolean hasContentAttachment() throws Exception { 
+          return this.content instanceof Attachment;
+        }
+
         /**
          * @return {@link #content} (Contract legal text in human renderable form.)
          */
@@ -2151,6 +2179,10 @@ public class Contract extends DomainResource {
           if (!(this.content instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
+        }
+
+        public boolean hasContentReference() throws Exception { 
+          return this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -2245,6 +2277,10 @@ public class Contract extends DomainResource {
           return (Attachment) this.content;
         }
 
+        public boolean hasContentAttachment() throws Exception { 
+          return this.content instanceof Attachment;
+        }
+
         /**
          * @return {@link #content} (Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).)
          */
@@ -2252,6 +2288,10 @@ public class Contract extends DomainResource {
           if (!(this.content instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
+        }
+
+        public boolean hasContentReference() throws Exception { 
+          return this.content instanceof Reference;
         }
 
         public boolean hasContent() { 
@@ -3042,6 +3082,10 @@ public class Contract extends DomainResource {
       return (Attachment) this.binding;
     }
 
+    public boolean hasBindingAttachment() throws Exception { 
+      return this.binding instanceof Attachment;
+    }
+
     /**
      * @return {@link #binding} (Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.)
      */
@@ -3049,6 +3093,10 @@ public class Contract extends DomainResource {
       if (!(this.binding instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.binding.getClass().getName()+" was encountered");
       return (Reference) this.binding;
+    }
+
+    public boolean hasBindingReference() throws Exception { 
+      return this.binding instanceof Reference;
     }
 
     public boolean hasBinding() { 

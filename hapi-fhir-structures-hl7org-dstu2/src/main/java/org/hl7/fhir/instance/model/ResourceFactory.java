@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 public class ResourceFactory extends Factory {
 
@@ -38,6 +38,8 @@ public class ResourceFactory extends Factory {
             return new Appointment();
         if ("ReferralRequest".equals(name))
             return new ReferralRequest();
+        if ("Account".equals(name))
+            return new Account();
         if ("Provenance".equals(name))
             return new Provenance();
         if ("Questionnaire".equals(name))
@@ -144,6 +146,8 @@ public class ResourceFactory extends Factory {
             return new PaymentNotice();
         if ("Organization".equals(name))
             return new Organization();
+        if ("ImplementationGuide".equals(name))
+            return new ImplementationGuide();
         if ("ClaimResponse".equals(name))
             return new ClaimResponse();
         if ("EligibilityRequest".equals(name))
@@ -229,22 +233,10 @@ public class ResourceFactory extends Factory {
             return new Meta();
         if ("Address".equals(name))
             return new Address();
-        if ("Reference".equals(name))
-            return new Reference();
-        if ("Quantity".equals(name))
-            return new Quantity();
-        if ("Period".equals(name))
-            return new Period();
         if ("Attachment".equals(name))
             return new Attachment();
-        if ("Duration".equals(name))
-            return new Duration();
         if ("Count".equals(name))
             return new Count();
-        if ("Range".equals(name))
-            return new Range();
-        if ("Extension".equals(name))
-            return new Extension();
         if ("Money".equals(name))
             return new Money();
         if ("HumanName".equals(name))
@@ -257,20 +249,34 @@ public class ResourceFactory extends Factory {
             return new Narrative();
         if ("Coding".equals(name))
             return new Coding();
-        if ("Signature".equals(name))
-            return new Signature();
         if ("SampledData".equals(name))
             return new SampledData();
         if ("Ratio".equals(name))
             return new Ratio();
-        if ("Timing".equals(name))
-            return new Timing();
         if ("ElementDefinition".equals(name))
             return new ElementDefinition();
         if ("Distance".equals(name))
             return new Distance();
         if ("Age".equals(name))
             return new Age();
+        if ("Reference".equals(name))
+            return new Reference();
+        if ("Quantity".equals(name))
+            return new Quantity();
+        if ("Period".equals(name))
+            return new Period();
+        if ("Duration".equals(name))
+            return new Duration();
+        if ("Range".equals(name))
+            return new Range();
+        if ("Annotation".equals(name))
+            return new Annotation();
+        if ("Extension".equals(name))
+            return new Extension();
+        if ("Signature".equals(name))
+            return new Signature();
+        if ("Timing".equals(name))
+            return new Timing();
         if ("CodeableConcept".equals(name))
             return new CodeableConcept();
         else

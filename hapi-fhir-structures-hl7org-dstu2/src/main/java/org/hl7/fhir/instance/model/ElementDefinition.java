@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -70,7 +70,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case XMLATTR: return "http://hl7.org.fhir/property-representation";
+            case XMLATTR: return "http://hl7.org/fhir/property-representation";
             default: return "?";
           }
         }
@@ -142,9 +142,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case CLOSED: return "http://hl7.org.fhir/resource-slicing-rules";
-            case OPEN: return "http://hl7.org.fhir/resource-slicing-rules";
-            case OPENATEND: return "http://hl7.org.fhir/resource-slicing-rules";
+            case CLOSED: return "http://hl7.org/fhir/resource-slicing-rules";
+            case OPEN: return "http://hl7.org/fhir/resource-slicing-rules";
+            case OPENATEND: return "http://hl7.org/fhir/resource-slicing-rules";
             default: return "?";
           }
         }
@@ -228,9 +228,9 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case CONTAINED: return "http://hl7.org.fhir/resource-aggregation-mode";
-            case REFERENCED: return "http://hl7.org.fhir/resource-aggregation-mode";
-            case BUNDLED: return "http://hl7.org.fhir/resource-aggregation-mode";
+            case CONTAINED: return "http://hl7.org/fhir/resource-aggregation-mode";
+            case REFERENCED: return "http://hl7.org/fhir/resource-aggregation-mode";
+            case BUNDLED: return "http://hl7.org/fhir/resource-aggregation-mode";
             default: return "?";
           }
         }
@@ -307,8 +307,8 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case ERROR: return "http://hl7.org.fhir/constraint-severity";
-            case WARNING: return "http://hl7.org.fhir/constraint-severity";
+            case ERROR: return "http://hl7.org/fhir/constraint-severity";
+            case WARNING: return "http://hl7.org/fhir/constraint-severity";
             default: return "?";
           }
         }
@@ -344,106 +344,6 @@ public class ElementDefinition extends Type implements ICompositeType {
         return "error";
       if (code == ConstraintSeverity.WARNING)
         return "warning";
-      return "?";
-      }
-    }
-
-    public enum BindingStrength {
-        /**
-         * To be conformant, instances of this element SHALL include a code from the specified value set
-         */
-        REQUIRED, 
-        /**
-         * To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.
-         */
-        EXTENSIBLE, 
-        /**
-         * Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant
-         */
-        PREFERRED, 
-        /**
-         * Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included
-         */
-        EXAMPLE, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static BindingStrength fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("required".equals(codeString))
-          return REQUIRED;
-        if ("extensible".equals(codeString))
-          return EXTENSIBLE;
-        if ("preferred".equals(codeString))
-          return PREFERRED;
-        if ("example".equals(codeString))
-          return EXAMPLE;
-        throw new Exception("Unknown BindingStrength code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case REQUIRED: return "required";
-            case EXTENSIBLE: return "extensible";
-            case PREFERRED: return "preferred";
-            case EXAMPLE: return "example";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case REQUIRED: return "http://hl7.org.fhir/binding-strength";
-            case EXTENSIBLE: return "http://hl7.org.fhir/binding-strength";
-            case PREFERRED: return "http://hl7.org.fhir/binding-strength";
-            case EXAMPLE: return "http://hl7.org.fhir/binding-strength";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case REQUIRED: return "To be conformant, instances of this element SHALL include a code from the specified value set";
-            case EXTENSIBLE: return "To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.";
-            case PREFERRED: return "Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant";
-            case EXAMPLE: return "Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case REQUIRED: return "Required";
-            case EXTENSIBLE: return "Extensible";
-            case PREFERRED: return "Preferred";
-            case EXAMPLE: return "Example";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class BindingStrengthEnumFactory implements EnumFactory<BindingStrength> {
-    public BindingStrength fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("required".equals(codeString))
-          return BindingStrength.REQUIRED;
-        if ("extensible".equals(codeString))
-          return BindingStrength.EXTENSIBLE;
-        if ("preferred".equals(codeString))
-          return BindingStrength.PREFERRED;
-        if ("example".equals(codeString))
-          return BindingStrength.EXAMPLE;
-        throw new IllegalArgumentException("Unknown BindingStrength code '"+codeString+"'");
-        }
-    public String toCode(BindingStrength code) {
-      if (code == BindingStrength.REQUIRED)
-        return "required";
-      if (code == BindingStrength.EXTENSIBLE)
-        return "extensible";
-      if (code == BindingStrength.PREFERRED)
-        return "preferred";
-      if (code == BindingStrength.EXAMPLE)
-        return "example";
       return "?";
       }
     }
@@ -749,11 +649,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected CodeType code;
 
         /**
-         * Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile.
+         * Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them.
          */
-        @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Profile.structure to apply", formalDefinition="Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile." )
-        protected UriType profile;
+        @Child(name = "profile", type = {UriType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Profile (StructureDefinition) to apply", formalDefinition="Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them." )
+        protected List<UriType> profile;
 
         /**
          * If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.
@@ -762,7 +662,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         @Description(shortDefinition="contained | referenced | bundled - how aggregated", formalDefinition="If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle." )
         protected List<Enumeration<AggregationMode>> aggregation;
 
-        private static final long serialVersionUID = -345007341L;
+        private static final long serialVersionUID = -988693373L;
 
     /*
      * Constructor
@@ -825,52 +725,57 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #profile} (Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @return {@link #profile} (Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them.)
          */
-        public UriType getProfileElement() { 
+        public List<UriType> getProfile() { 
           if (this.profile == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TypeRefComponent.profile");
-            else if (Configuration.doAutoCreate())
-              this.profile = new UriType(); // bb
+            this.profile = new ArrayList<UriType>();
           return this.profile;
         }
 
-        public boolean hasProfileElement() { 
-          return this.profile != null && !this.profile.isEmpty();
-        }
-
         public boolean hasProfile() { 
-          return this.profile != null && !this.profile.isEmpty();
+          if (this.profile == null)
+            return false;
+          for (UriType item : this.profile)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
         /**
-         * @param value {@link #profile} (Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile.). This is the underlying object with id, value and extensions. The accessor "getProfile" gives direct access to the value
+         * @return {@link #profile} (Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them.)
          */
-        public TypeRefComponent setProfileElement(UriType value) { 
-          this.profile = value;
+    // syntactic sugar
+        public UriType addProfileElement() {//2 
+          UriType t = new UriType();
+          if (this.profile == null)
+            this.profile = new ArrayList<UriType>();
+          this.profile.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #profile} (Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them.)
+         */
+        public TypeRefComponent addProfile(String value) { //1
+          UriType t = new UriType();
+          t.setValue(value);
+          if (this.profile == null)
+            this.profile = new ArrayList<UriType>();
+          this.profile.add(t);
           return this;
         }
 
         /**
-         * @return Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile.
+         * @param value {@link #profile} (Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them.)
          */
-        public String getProfile() { 
-          return this.profile == null ? null : this.profile.getValue();
-        }
-
-        /**
-         * @param value Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile.
-         */
-        public TypeRefComponent setProfile(String value) { 
-          if (Utilities.noString(value))
-            this.profile = null;
-          else {
-            if (this.profile == null)
-              this.profile = new UriType();
-            this.profile.setValue(value);
-          }
-          return this;
+        public boolean hasProfile(String value) { 
+          if (this.profile == null)
+            return false;
+          for (UriType v : this.profile)
+            if (v.equals(value)) // uri
+              return true;
+          return false;
         }
 
         /**
@@ -930,7 +835,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Name of Data type or Resource that is a(or the) type used for this element.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("profile", "uri", "Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile.", 0, java.lang.Integer.MAX_VALUE, profile));
+          childrenList.add(new Property("profile", "uri", "Identifies a profile structure that SHALL hold for resources or datatypes referenced as the type of this element. Can be a local reference - to another structure in this profile, or a reference to a structure in another profile. When more than one profile is specified, the content must conform to all of them.", 0, java.lang.Integer.MAX_VALUE, profile));
           childrenList.add(new Property("aggregation", "code", "If the type is a reference to another resource, how the resource is or can be aggreated - is it a contained resource, or a reference, and if the context is a bundle, is it included in the bundle.", 0, java.lang.Integer.MAX_VALUE, aggregation));
         }
 
@@ -938,7 +843,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         TypeRefComponent dst = new TypeRefComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
-        dst.profile = profile == null ? null : profile.copy();
+        if (profile != null) {
+          dst.profile = new ArrayList<UriType>();
+          for (UriType i : profile)
+            dst.profile.add(i.copy());
+        };
         if (aggregation != null) {
           dst.aggregation = new ArrayList<Enumeration<AggregationMode>>();
           for (Enumeration<AggregationMode> i : aggregation)
@@ -986,11 +895,11 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected IdType key;
 
         /**
-         * Used to label the constraint in OCL or in short displays incapable of displaying the full human description.
+         * Description of why this constraint is necessary or appropriate.
          */
-        @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Short human label", formalDefinition="Used to label the constraint in OCL or in short displays incapable of displaying the full human description." )
-        protected StringType name;
+        @Child(name = "requirements", type = {StringType.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="Why this constraint necessary or appropriate", formalDefinition="Description of why this constraint is necessary or appropriate." )
+        protected StringType requirements;
 
         /**
          * Identifies the impact constraint violation has on the conformance of the instance.
@@ -1013,7 +922,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         @Description(shortDefinition="XPath expression of constraint", formalDefinition="An XPath expression of constraint that can be executed to see if this constraint is met." )
         protected StringType xpath;
 
-        private static final long serialVersionUID = -1195616532L;
+        private static final long serialVersionUID = 854521265L;
 
     /*
      * Constructor
@@ -1079,50 +988,50 @@ public class ElementDefinition extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #name} (Used to label the constraint in OCL or in short displays incapable of displaying the full human description.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @return {@link #requirements} (Description of why this constraint is necessary or appropriate.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
          */
-        public StringType getNameElement() { 
-          if (this.name == null)
+        public StringType getRequirementsElement() { 
+          if (this.requirements == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ElementDefinitionConstraintComponent.name");
+              throw new Error("Attempt to auto-create ElementDefinitionConstraintComponent.requirements");
             else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
+              this.requirements = new StringType(); // bb
+          return this.requirements;
         }
 
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
+        public boolean hasRequirementsElement() { 
+          return this.requirements != null && !this.requirements.isEmpty();
         }
 
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
+        public boolean hasRequirements() { 
+          return this.requirements != null && !this.requirements.isEmpty();
         }
 
         /**
-         * @param value {@link #name} (Used to label the constraint in OCL or in short displays incapable of displaying the full human description.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         * @param value {@link #requirements} (Description of why this constraint is necessary or appropriate.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
          */
-        public ElementDefinitionConstraintComponent setNameElement(StringType value) { 
-          this.name = value;
+        public ElementDefinitionConstraintComponent setRequirementsElement(StringType value) { 
+          this.requirements = value;
           return this;
         }
 
         /**
-         * @return Used to label the constraint in OCL or in short displays incapable of displaying the full human description.
+         * @return Description of why this constraint is necessary or appropriate.
          */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
+        public String getRequirements() { 
+          return this.requirements == null ? null : this.requirements.getValue();
         }
 
         /**
-         * @param value Used to label the constraint in OCL or in short displays incapable of displaying the full human description.
+         * @param value Description of why this constraint is necessary or appropriate.
          */
-        public ElementDefinitionConstraintComponent setName(String value) { 
+        public ElementDefinitionConstraintComponent setRequirements(String value) { 
           if (Utilities.noString(value))
-            this.name = null;
+            this.requirements = null;
           else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
+            if (this.requirements == null)
+              this.requirements = new StringType();
+            this.requirements.setValue(value);
           }
           return this;
         }
@@ -1265,7 +1174,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("key", "id", "Allows identification of which elements have their cardinalities impacted by the constraint.  Will not be referenced for constraints that do not affect cardinality.", 0, java.lang.Integer.MAX_VALUE, key));
-          childrenList.add(new Property("name", "string", "Used to label the constraint in OCL or in short displays incapable of displaying the full human description.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("requirements", "string", "Description of why this constraint is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, requirements));
           childrenList.add(new Property("severity", "code", "Identifies the impact constraint violation has on the conformance of the instance.", 0, java.lang.Integer.MAX_VALUE, severity));
           childrenList.add(new Property("human", "string", "Text that can be used to describe the constraint in messages identifying that the constraint has been violated.", 0, java.lang.Integer.MAX_VALUE, human));
           childrenList.add(new Property("xpath", "string", "An XPath expression of constraint that can be executed to see if this constraint is met.", 0, java.lang.Integer.MAX_VALUE, xpath));
@@ -1275,7 +1184,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         ElementDefinitionConstraintComponent dst = new ElementDefinitionConstraintComponent();
         copyValues(dst);
         dst.key = key == null ? null : key.copy();
-        dst.name = name == null ? null : name.copy();
+        dst.requirements = requirements == null ? null : requirements.copy();
         dst.severity = severity == null ? null : severity.copy();
         dst.human = human == null ? null : human.copy();
         dst.xpath = xpath == null ? null : xpath.copy();
@@ -1289,7 +1198,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (!(other instanceof ElementDefinitionConstraintComponent))
           return false;
         ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other;
-        return compareDeep(key, o.key, true) && compareDeep(name, o.name, true) && compareDeep(severity, o.severity, true)
+        return compareDeep(key, o.key, true) && compareDeep(requirements, o.requirements, true) && compareDeep(severity, o.severity, true)
            && compareDeep(human, o.human, true) && compareDeep(xpath, o.xpath, true);
       }
 
@@ -1300,12 +1209,12 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (!(other instanceof ElementDefinitionConstraintComponent))
           return false;
         ElementDefinitionConstraintComponent o = (ElementDefinitionConstraintComponent) other;
-        return compareValues(key, o.key, true) && compareValues(name, o.name, true) && compareValues(severity, o.severity, true)
+        return compareValues(key, o.key, true) && compareValues(requirements, o.requirements, true) && compareValues(severity, o.severity, true)
            && compareValues(human, o.human, true) && compareValues(xpath, o.xpath, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (key == null || key.isEmpty()) && (name == null || name.isEmpty())
+        return super.isEmpty() && (key == null || key.isEmpty()) && (requirements == null || requirements.isEmpty())
            && (severity == null || severity.isEmpty()) && (human == null || human.isEmpty()) && (xpath == null || xpath.isEmpty())
           ;
       }
@@ -1317,7 +1226,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         /**
          * A descriptive name for this - can be useful for generating implementation artifacts.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Descriptive Name", formalDefinition="A descriptive name for this - can be useful for generating implementation artifacts." )
         protected StringType name;
 
@@ -1354,9 +1263,8 @@ public class ElementDefinition extends Type implements ICompositeType {
     /*
      * Constructor
      */
-      public ElementDefinitionBindingComponent(StringType name, Enumeration<BindingStrength> strength) {
+      public ElementDefinitionBindingComponent(Enumeration<BindingStrength> strength) {
         super();
-        this.name = name;
         this.strength = strength;
       }
 
@@ -1399,9 +1307,13 @@ public class ElementDefinition extends Type implements ICompositeType {
          * @param value A descriptive name for this - can be useful for generating implementation artifacts.
          */
         public ElementDefinitionBindingComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
             if (this.name == null)
               this.name = new StringType();
             this.name.setValue(value);
+          }
           return this;
         }
 
@@ -1515,6 +1427,10 @@ public class ElementDefinition extends Type implements ICompositeType {
           return (UriType) this.valueSet;
         }
 
+        public boolean hasValueSetUriType() throws Exception { 
+          return this.valueSet instanceof UriType;
+        }
+
         /**
          * @return {@link #valueSet} (Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.)
          */
@@ -1522,6 +1438,10 @@ public class ElementDefinition extends Type implements ICompositeType {
           if (!(this.valueSet instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.valueSet.getClass().getName()+" was encountered");
           return (Reference) this.valueSet;
+        }
+
+        public boolean hasValueSetReference() throws Exception { 
+          return this.valueSet instanceof Reference;
         }
 
         public boolean hasValueSet() { 
@@ -1854,7 +1774,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification).
      */
-    @Child(name = "short", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "short_", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Concise definition for xml presentation", formalDefinition="A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification)." )
     protected StringType short_;
 

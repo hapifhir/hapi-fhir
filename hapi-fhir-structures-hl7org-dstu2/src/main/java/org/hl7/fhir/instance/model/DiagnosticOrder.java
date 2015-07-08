@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -154,19 +154,19 @@ public class DiagnosticOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case DRAFT: return "http://hl7.org.fhir/diagnostic-order-status";
-            case PLANNED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case REQUESTED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case RECEIVED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case ACCEPTED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case INPROGRESS: return "http://hl7.org.fhir/diagnostic-order-status";
-            case REVIEW: return "http://hl7.org.fhir/diagnostic-order-status";
-            case COMPLETED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case CANCELLED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case SUSPENDED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case REJECTED: return "http://hl7.org.fhir/diagnostic-order-status";
-            case FAILED: return "http://hl7.org.fhir/diagnostic-order-status";
+            case PROPOSED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case DRAFT: return "http://hl7.org/fhir/diagnostic-order-status";
+            case PLANNED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case REQUESTED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case RECEIVED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case ACCEPTED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case INPROGRESS: return "http://hl7.org/fhir/diagnostic-order-status";
+            case REVIEW: return "http://hl7.org/fhir/diagnostic-order-status";
+            case COMPLETED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case CANCELLED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case SUSPENDED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case REJECTED: return "http://hl7.org/fhir/diagnostic-order-status";
+            case FAILED: return "http://hl7.org/fhir/diagnostic-order-status";
             default: return "?";
           }
         }
@@ -317,10 +317,10 @@ public class DiagnosticOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ROUTINE: return "http://hl7.org.fhir/diagnostic-order-priority";
-            case URGENT: return "http://hl7.org.fhir/diagnostic-order-priority";
-            case STAT: return "http://hl7.org.fhir/diagnostic-order-priority";
-            case ASAP: return "http://hl7.org.fhir/diagnostic-order-priority";
+            case ROUTINE: return "http://hl7.org/fhir/diagnostic-order-priority";
+            case URGENT: return "http://hl7.org/fhir/diagnostic-order-priority";
+            case STAT: return "http://hl7.org/fhir/diagnostic-order-priority";
+            case ASAP: return "http://hl7.org/fhir/diagnostic-order-priority";
             default: return "?";
           }
         }
@@ -784,6 +784,10 @@ public class DiagnosticOrder extends DomainResource {
           return (CodeableConcept) this.bodySite;
         }
 
+        public boolean hasBodySiteCodeableConcept() throws Exception { 
+          return this.bodySite instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #bodySite} (Anatomical location where the request test should be performed.  This is the target site.)
          */
@@ -791,6 +795,10 @@ public class DiagnosticOrder extends DomainResource {
           if (!(this.bodySite instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
           return (Reference) this.bodySite;
+        }
+
+        public boolean hasBodySiteReference() throws Exception { 
+          return this.bodySite instanceof Reference;
         }
 
         public boolean hasBodySite() { 

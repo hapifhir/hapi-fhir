@@ -27,24 +27,33 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-class ValidationContext<T> {
+class ValidationContext<T> implements IValidationContext<T> {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationContext.class);
 	private final IEncoder myEncoder;
 	private final FhirContext myFhirContext;
 	private IBaseOperationOutcome myOperationOutcome;
 	private final T myResource;
 	private String myXmlEncodedResource;
-private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidationContext.class);
+
 	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder) {
 		myFhirContext = theContext;
 		myResource = theResource;
 		myEncoder = theEncoder;
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.validation.IValidationContext#getFhirContext()
+	 */
+	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.validation.IValidationContext#getOperationOutcome()
+	 */
+	@Override
 	public IBaseOperationOutcome getOperationOutcome() {
 		if (myOperationOutcome == null) {
 			try {
@@ -57,10 +66,18 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		return myOperationOutcome;
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.validation.IValidationContext#getResource()
+	 */
+	@Override
 	public T getResource() {
 		return myResource;
 	}
 
+	/* (non-Javadoc)
+	 * @see ca.uhn.fhir.validation.IValidationContext#getXmlEncodedResource()
+	 */
+	@Override
 	public String getXmlEncodedResource() {
 		if (myXmlEncodedResource == null) {
 			myXmlEncodedResource = myEncoder.encode();
@@ -68,7 +85,7 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		return myXmlEncodedResource;
 	}
 
-	public static ValidationContext<Bundle> forBundle(final FhirContext theContext, final Bundle theBundle) {
+	public static IValidationContext<Bundle> forBundle(final FhirContext theContext, final Bundle theBundle) {
 		return new ValidationContext<Bundle>(theContext, theBundle, new IEncoder() {
 			@Override
 			public String encode() {
@@ -77,7 +94,7 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		});
 	}
 
-	public static <T extends IBaseResource> ValidationContext<T> forResource(final FhirContext theContext, final T theResource) {
+	public static <T extends IBaseResource> IValidationContext<T> forResource(final FhirContext theContext, final T theResource) {
 		return new ValidationContext<T>(theContext, theResource, new IEncoder() {
 			@Override
 			public String encode() {
@@ -86,8 +103,8 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 		});
 	}
 
-	public static ValidationContext<IBaseResource> newChild(ValidationContext<Bundle> theContext, IBaseResource theResource) {
-		ValidationContext<IBaseResource> retVal = forResource(theContext.getFhirContext(), theResource);
+	public static IValidationContext<IBaseResource> newChild(IValidationContext<Bundle> theContext, IBaseResource theResource) {
+		ValidationContext<IBaseResource> retVal = (ValidationContext<IBaseResource>) forResource(theContext.getFhirContext(), theResource);
 		retVal.myOperationOutcome = theContext.getOperationOutcome();
 		return retVal;
 	}

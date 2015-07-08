@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -141,6 +141,10 @@ public class RiskAssessment extends DomainResource {
           return (DecimalType) this.probability;
         }
 
+        public boolean hasProbabilityDecimalType() throws Exception { 
+          return this.probability instanceof DecimalType;
+        }
+
         /**
          * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
          */
@@ -150,6 +154,10 @@ public class RiskAssessment extends DomainResource {
           return (Range) this.probability;
         }
 
+        public boolean hasProbabilityRange() throws Exception { 
+          return this.probability instanceof Range;
+        }
+
         /**
          * @return {@link #probability} (How likely is the outcome (in the specified timeframe).)
          */
@@ -157,6 +165,10 @@ public class RiskAssessment extends DomainResource {
           if (!(this.probability instanceof CodeableConcept))
             throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (CodeableConcept) this.probability;
+        }
+
+        public boolean hasProbabilityCodeableConcept() throws Exception { 
+          return this.probability instanceof CodeableConcept;
         }
 
         public boolean hasProbability() { 
@@ -236,6 +248,10 @@ public class RiskAssessment extends DomainResource {
           return (Period) this.when;
         }
 
+        public boolean hasWhenPeriod() throws Exception { 
+          return this.when instanceof Period;
+        }
+
         /**
          * @return {@link #when} (Indicates the period of time or age range of the subject to which the specified probability applies.)
          */
@@ -243,6 +259,10 @@ public class RiskAssessment extends DomainResource {
           if (!(this.when instanceof Range))
             throw new Exception("Type mismatch: the type Range was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Range) this.when;
+        }
+
+        public boolean hasWhenRange() throws Exception { 
+          return this.when instanceof Range;
         }
 
         public boolean hasWhen() { 

@@ -761,7 +761,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeContainedAndIncludedResources() {
 
 		DiagnosticReport rpt = new DiagnosticReport();
-		rpt.getName().setText("Report");
+		rpt.getCode().setText("Report");
 
 		Specimen spm = new Specimen();
 		spm.addIdentifier().setValue("Report1ContainedSpecimen1");

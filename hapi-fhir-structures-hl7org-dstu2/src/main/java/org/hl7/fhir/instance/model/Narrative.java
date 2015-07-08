@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -91,10 +91,10 @@ public class Narrative extends BaseNarrative implements INarrative {
         }
         public String getSystem() {
           switch (this) {
-            case GENERATED: return "http://hl7.org.fhir/narrative-status";
-            case EXTENSIONS: return "http://hl7.org.fhir/narrative-status";
-            case ADDITIONAL: return "http://hl7.org.fhir/narrative-status";
-            case EMPTY: return "http://hl7.org.fhir/narrative-status";
+            case GENERATED: return "http://hl7.org/fhir/narrative-status";
+            case EXTENSIONS: return "http://hl7.org/fhir/narrative-status";
+            case ADDITIONAL: return "http://hl7.org/fhir/narrative-status";
+            case EMPTY: return "http://hl7.org/fhir/narrative-status";
             default: return "?";
           }
         }

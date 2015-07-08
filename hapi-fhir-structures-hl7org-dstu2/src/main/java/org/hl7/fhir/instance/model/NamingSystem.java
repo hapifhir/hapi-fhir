@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -85,9 +85,9 @@ public class NamingSystem extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CODESYSTEM: return "http://hl7.org.fhir/namingsystem-type";
-            case IDENTIFIER: return "http://hl7.org.fhir/namingsystem-type";
-            case ROOT: return "http://hl7.org.fhir/namingsystem-type";
+            case CODESYSTEM: return "http://hl7.org/fhir/namingsystem-type";
+            case IDENTIFIER: return "http://hl7.org/fhir/namingsystem-type";
+            case ROOT: return "http://hl7.org/fhir/namingsystem-type";
             default: return "?";
           }
         }
@@ -178,10 +178,10 @@ public class NamingSystem extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case OID: return "http://hl7.org.fhir/namingsystem-identifier-type";
-            case UUID: return "http://hl7.org.fhir/namingsystem-identifier-type";
-            case URI: return "http://hl7.org.fhir/namingsystem-identifier-type";
-            case OTHER: return "http://hl7.org.fhir/namingsystem-identifier-type";
+            case OID: return "http://hl7.org/fhir/namingsystem-identifier-type";
+            case UUID: return "http://hl7.org/fhir/namingsystem-identifier-type";
+            case URI: return "http://hl7.org/fhir/namingsystem-identifier-type";
+            case OTHER: return "http://hl7.org/fhir/namingsystem-identifier-type";
             default: return "?";
           }
         }

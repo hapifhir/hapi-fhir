@@ -53,7 +53,7 @@ public class SchematronBaseValidator implements IValidator {
 	}
 
 	@Override
-	public void validateResource(ValidationContext<IBaseResource> theCtx) {
+	public void validateResource(IValidationContext<IBaseResource> theCtx) {
 
 		ISchematronResource sch = getSchematron(theCtx);
 		StreamSource source = new StreamSource(new StringReader(theCtx.getXmlEncodedResource()));
@@ -93,14 +93,14 @@ public class SchematronBaseValidator implements IValidator {
 
 	}
 
-	private ISchematronResource getSchematron(ValidationContext<IBaseResource> theCtx) {
+	private ISchematronResource getSchematron(IValidationContext<IBaseResource> theCtx) {
 		Class<? extends IBaseResource> resource = theCtx.getResource().getClass();
 		Class<? extends IBaseResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
 		return getSchematronAndCache(theCtx, "dstu", baseResourceClass);
 	}
 
-	private ISchematronResource getSchematronAndCache(ValidationContext<IBaseResource> theCtx, String theVersion, Class<? extends IBaseResource> theClass) {
+	private ISchematronResource getSchematronAndCache(IValidationContext<IBaseResource> theCtx, String theVersion, Class<? extends IBaseResource> theClass) {
 		synchronized (myClassToSchematron) {
 			ISchematronResource retVal = myClassToSchematron.get(theClass);
 			if (retVal != null) {
@@ -122,10 +122,10 @@ public class SchematronBaseValidator implements IValidator {
 	}
 
 	@Override
-	public void validateBundle(ValidationContext<Bundle> theContext) {
+	public void validateBundle(IValidationContext<Bundle> theContext) {
 		for (BundleEntry next : theContext.getResource().getEntries()) {
 			if (next.getResource() != null) {
-				ValidationContext<IBaseResource> ctx = ValidationContext.newChild(theContext, next.getResource());
+				IValidationContext<IBaseResource> ctx = ValidationContext.newChild(theContext, next.getResource());
 				validateResource(ctx);
 			}
 		}

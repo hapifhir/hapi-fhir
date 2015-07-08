@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -140,17 +140,17 @@ public class DeviceComponent extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case OTHER: return "http://hl7.org.fhir/measurement-principle";
-            case CHEMICAL: return "http://hl7.org.fhir/measurement-principle";
-            case ELECTRICAL: return "http://hl7.org.fhir/measurement-principle";
-            case IMPEDANCE: return "http://hl7.org.fhir/measurement-principle";
-            case NUCLEAR: return "http://hl7.org.fhir/measurement-principle";
-            case OPTICAL: return "http://hl7.org.fhir/measurement-principle";
-            case THERMAL: return "http://hl7.org.fhir/measurement-principle";
-            case BIOLOGICAL: return "http://hl7.org.fhir/measurement-principle";
-            case MECHANICAL: return "http://hl7.org.fhir/measurement-principle";
-            case ACOUSTICAL: return "http://hl7.org.fhir/measurement-principle";
-            case MANUAL: return "http://hl7.org.fhir/measurement-principle";
+            case OTHER: return "http://hl7.org/fhir/measurement-principle";
+            case CHEMICAL: return "http://hl7.org/fhir/measurement-principle";
+            case ELECTRICAL: return "http://hl7.org/fhir/measurement-principle";
+            case IMPEDANCE: return "http://hl7.org/fhir/measurement-principle";
+            case NUCLEAR: return "http://hl7.org/fhir/measurement-principle";
+            case OPTICAL: return "http://hl7.org/fhir/measurement-principle";
+            case THERMAL: return "http://hl7.org/fhir/measurement-principle";
+            case BIOLOGICAL: return "http://hl7.org/fhir/measurement-principle";
+            case MECHANICAL: return "http://hl7.org/fhir/measurement-principle";
+            case ACOUSTICAL: return "http://hl7.org/fhir/measurement-principle";
+            case MANUAL: return "http://hl7.org/fhir/measurement-principle";
             default: return "?";
           }
         }

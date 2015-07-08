@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -105,12 +105,12 @@ public class EpisodeOfCare extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PLANNED: return "http://hl7.org.fhir/episode-of-care-status";
-            case WAITLIST: return "http://hl7.org.fhir/episode-of-care-status";
-            case ACTIVE: return "http://hl7.org.fhir/episode-of-care-status";
-            case ONHOLD: return "http://hl7.org.fhir/episode-of-care-status";
-            case FINISHED: return "http://hl7.org.fhir/episode-of-care-status";
-            case CANCELLED: return "http://hl7.org.fhir/episode-of-care-status";
+            case PLANNED: return "http://hl7.org/fhir/episode-of-care-status";
+            case WAITLIST: return "http://hl7.org/fhir/episode-of-care-status";
+            case ACTIVE: return "http://hl7.org/fhir/episode-of-care-status";
+            case ONHOLD: return "http://hl7.org/fhir/episode-of-care-status";
+            case FINISHED: return "http://hl7.org/fhir/episode-of-care-status";
+            case CANCELLED: return "http://hl7.org/fhir/episode-of-care-status";
             default: return "?";
           }
         }

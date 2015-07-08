@@ -29,18 +29,17 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.ResourceDef;
+import org.hl7.fhir.instance.model.annotations.SearchParamDefinition;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.ResourceDef;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
@@ -92,10 +91,10 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
         public String getSystem() {
           switch (this) {
-            case FATAL: return "http://hl7.org.fhir/issue-severity";
-            case ERROR: return "http://hl7.org.fhir/issue-severity";
-            case WARNING: return "http://hl7.org.fhir/issue-severity";
-            case INFORMATION: return "http://hl7.org.fhir/issue-severity";
+            case FATAL: return "http://hl7.org/fhir/issue-severity";
+            case ERROR: return "http://hl7.org/fhir/issue-severity";
+            case WARNING: return "http://hl7.org/fhir/issue-severity";
+            case INFORMATION: return "http://hl7.org/fhir/issue-severity";
             default: return "?";
           }
         }

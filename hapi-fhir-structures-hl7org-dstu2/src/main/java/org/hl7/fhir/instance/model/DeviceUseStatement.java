@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -153,6 +153,10 @@ public class DeviceUseStatement extends DomainResource {
       return (CodeableConcept) this.bodySite;
     }
 
+    public boolean hasBodySiteCodeableConcept() throws Exception { 
+      return this.bodySite instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #bodySite} (Indicates the site on the subject's body where the device was used ( i.e. the target site).)
      */
@@ -160,6 +164,10 @@ public class DeviceUseStatement extends DomainResource {
       if (!(this.bodySite instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
       return (Reference) this.bodySite;
+    }
+
+    public boolean hasBodySiteReference() throws Exception { 
+      return this.bodySite instanceof Reference;
     }
 
     public boolean hasBodySite() { 
@@ -485,6 +493,10 @@ public class DeviceUseStatement extends DomainResource {
       return (Timing) this.timing;
     }
 
+    public boolean hasTimingTiming() throws Exception { 
+      return this.timing instanceof Timing;
+    }
+
     /**
      * @return {@link #timing} (How often the device was used.)
      */
@@ -494,6 +506,10 @@ public class DeviceUseStatement extends DomainResource {
       return (Period) this.timing;
     }
 
+    public boolean hasTimingPeriod() throws Exception { 
+      return this.timing instanceof Period;
+    }
+
     /**
      * @return {@link #timing} (How often the device was used.)
      */
@@ -501,6 +517,10 @@ public class DeviceUseStatement extends DomainResource {
       if (!(this.timing instanceof DateTimeType))
         throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateTimeType) this.timing;
+    }
+
+    public boolean hasTimingDateTimeType() throws Exception { 
+      return this.timing instanceof DateTimeType;
     }
 
     public boolean hasTiming() { 

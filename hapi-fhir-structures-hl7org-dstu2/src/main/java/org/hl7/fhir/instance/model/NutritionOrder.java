@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -119,14 +119,14 @@ public class NutritionOrder extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "http://hl7.org.fhir/nutrition-order-status";
-            case DRAFT: return "http://hl7.org.fhir/nutrition-order-status";
-            case PLANNED: return "http://hl7.org.fhir/nutrition-order-status";
-            case REQUESTED: return "http://hl7.org.fhir/nutrition-order-status";
-            case ACTIVE: return "http://hl7.org.fhir/nutrition-order-status";
-            case ONHOLD: return "http://hl7.org.fhir/nutrition-order-status";
-            case COMPLETED: return "http://hl7.org.fhir/nutrition-order-status";
-            case CANCELLED: return "http://hl7.org.fhir/nutrition-order-status";
+            case PROPOSED: return "http://hl7.org/fhir/nutrition-order-status";
+            case DRAFT: return "http://hl7.org/fhir/nutrition-order-status";
+            case PLANNED: return "http://hl7.org/fhir/nutrition-order-status";
+            case REQUESTED: return "http://hl7.org/fhir/nutrition-order-status";
+            case ACTIVE: return "http://hl7.org/fhir/nutrition-order-status";
+            case ONHOLD: return "http://hl7.org/fhir/nutrition-order-status";
+            case COMPLETED: return "http://hl7.org/fhir/nutrition-order-status";
+            case CANCELLED: return "http://hl7.org/fhir/nutrition-order-status";
             default: return "?";
           }
         }
@@ -1634,6 +1634,10 @@ public class NutritionOrder extends DomainResource {
           return (Quantity) this.rate;
         }
 
+        public boolean hasRateQuantity() throws Exception { 
+          return this.rate instanceof Quantity;
+        }
+
         /**
          * @return {@link #rate} (The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule.)
          */
@@ -1641,6 +1645,10 @@ public class NutritionOrder extends DomainResource {
           if (!(this.rate instanceof Ratio))
             throw new Exception("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
+        }
+
+        public boolean hasRateRatio() throws Exception { 
+          return this.rate instanceof Ratio;
         }
 
         public boolean hasRate() { 

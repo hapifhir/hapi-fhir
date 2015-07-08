@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -91,10 +91,10 @@ public class Provenance extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DERIVATION: return "http://hl7.org.fhir/provenance-entity-role";
-            case REVISION: return "http://hl7.org.fhir/provenance-entity-role";
-            case QUOTATION: return "http://hl7.org.fhir/provenance-entity-role";
-            case SOURCE: return "http://hl7.org.fhir/provenance-entity-role";
+            case DERIVATION: return "http://hl7.org/fhir/provenance-entity-role";
+            case REVISION: return "http://hl7.org/fhir/provenance-entity-role";
+            case QUOTATION: return "http://hl7.org/fhir/provenance-entity-role";
+            case SOURCE: return "http://hl7.org/fhir/provenance-entity-role";
             default: return "?";
           }
         }
@@ -156,27 +156,25 @@ public class Provenance extends DomainResource {
         protected Coding role;
 
         /**
-         * The type of participation of the agent.
+         * The individual, device or organization that participated in the event.
          */
-        @Child(name = "type", type = {Coding.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="Agent Type", formalDefinition="The type of participation of the agent." )
-        protected Coding type;
+        @Child(name = "actor", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class}, order=2, min=0, max=1)
+        @Description(shortDefinition="Individual, device or organization playing role", formalDefinition="The individual, device or organization that participated in the event." )
+        protected Reference actor;
 
         /**
-         * Identity of participant as a Resource or uri.
+         * The actual object that is the target of the reference (The individual, device or organization that participated in the event.)
          */
-        @Child(name = "reference", type = {UriType.class, Practitioner.class, RelatedPerson.class, Patient.class, Device.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Identity of agent", formalDefinition="Identity of participant as a Resource or uri." )
-        protected Type reference;
+        protected Resource actorTarget;
 
         /**
-         * Human-readable description of the participant.
+         * The identify of the agent as known by the authorization system.
          */
-        @Child(name = "display", type = {StringType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Human description of participant", formalDefinition="Human-readable description of the participant." )
-        protected StringType display;
+        @Child(name = "userId", type = {Identifier.class}, order=3, min=0, max=1)
+        @Description(shortDefinition="Authorization-system identifier for the agent", formalDefinition="The identify of the agent as known by the authorization system." )
+        protected Identifier userId;
 
-        private static final long serialVersionUID = -689391376L;
+        private static final long serialVersionUID = -1847456681L;
 
     /*
      * Constructor
@@ -188,10 +186,9 @@ public class Provenance extends DomainResource {
     /*
      * Constructor
      */
-      public ProvenanceAgentComponent(Coding role, Coding type) {
+      public ProvenanceAgentComponent(Coding role) {
         super();
         this.role = role;
-        this.type = type;
       }
 
         /**
@@ -219,130 +216,81 @@ public class Provenance extends DomainResource {
         }
 
         /**
-         * @return {@link #type} (The type of participation of the agent.)
+         * @return {@link #actor} (The individual, device or organization that participated in the event.)
          */
-        public Coding getType() { 
-          if (this.type == null)
+        public Reference getActor() { 
+          if (this.actor == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceAgentComponent.type");
+              throw new Error("Attempt to auto-create ProvenanceAgentComponent.actor");
             else if (Configuration.doAutoCreate())
-              this.type = new Coding(); // cc
-          return this.type;
+              this.actor = new Reference(); // cc
+          return this.actor;
         }
 
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
+        public boolean hasActor() { 
+          return this.actor != null && !this.actor.isEmpty();
         }
 
         /**
-         * @param value {@link #type} (The type of participation of the agent.)
+         * @param value {@link #actor} (The individual, device or organization that participated in the event.)
          */
-        public ProvenanceAgentComponent setType(Coding value) { 
-          this.type = value;
+        public ProvenanceAgentComponent setActor(Reference value) { 
+          this.actor = value;
           return this;
         }
 
         /**
-         * @return {@link #reference} (Identity of participant as a Resource or uri.)
+         * @return {@link #actor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual, device or organization that participated in the event.)
          */
-        public Type getReference() { 
-          return this.reference;
+        public Resource getActorTarget() { 
+          return this.actorTarget;
         }
 
         /**
-         * @return {@link #reference} (Identity of participant as a Resource or uri.)
+         * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual, device or organization that participated in the event.)
          */
-        public UriType getReferenceUriType() throws Exception { 
-          if (!(this.reference instanceof UriType))
-            throw new Exception("Type mismatch: the type UriType was expected, but "+this.reference.getClass().getName()+" was encountered");
-          return (UriType) this.reference;
-        }
-
-        /**
-         * @return {@link #reference} (Identity of participant as a Resource or uri.)
-         */
-        public Reference getReferenceReference() throws Exception { 
-          if (!(this.reference instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.reference.getClass().getName()+" was encountered");
-          return (Reference) this.reference;
-        }
-
-        public boolean hasReference() { 
-          return this.reference != null && !this.reference.isEmpty();
-        }
-
-        /**
-         * @param value {@link #reference} (Identity of participant as a Resource or uri.)
-         */
-        public ProvenanceAgentComponent setReference(Type value) { 
-          this.reference = value;
+        public ProvenanceAgentComponent setActorTarget(Resource value) { 
+          this.actorTarget = value;
           return this;
         }
 
         /**
-         * @return {@link #display} (Human-readable description of the participant.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         * @return {@link #userId} (The identify of the agent as known by the authorization system.)
          */
-        public StringType getDisplayElement() { 
-          if (this.display == null)
+        public Identifier getUserId() { 
+          if (this.userId == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ProvenanceAgentComponent.display");
+              throw new Error("Attempt to auto-create ProvenanceAgentComponent.userId");
             else if (Configuration.doAutoCreate())
-              this.display = new StringType(); // bb
-          return this.display;
+              this.userId = new Identifier(); // cc
+          return this.userId;
         }
 
-        public boolean hasDisplayElement() { 
-          return this.display != null && !this.display.isEmpty();
-        }
-
-        public boolean hasDisplay() { 
-          return this.display != null && !this.display.isEmpty();
+        public boolean hasUserId() { 
+          return this.userId != null && !this.userId.isEmpty();
         }
 
         /**
-         * @param value {@link #display} (Human-readable description of the participant.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         * @param value {@link #userId} (The identify of the agent as known by the authorization system.)
          */
-        public ProvenanceAgentComponent setDisplayElement(StringType value) { 
-          this.display = value;
-          return this;
-        }
-
-        /**
-         * @return Human-readable description of the participant.
-         */
-        public String getDisplay() { 
-          return this.display == null ? null : this.display.getValue();
-        }
-
-        /**
-         * @param value Human-readable description of the participant.
-         */
-        public ProvenanceAgentComponent setDisplay(String value) { 
-          if (Utilities.noString(value))
-            this.display = null;
-          else {
-            if (this.display == null)
-              this.display = new StringType();
-            this.display.setValue(value);
-          }
+        public ProvenanceAgentComponent setUserId(Identifier value) { 
+          this.userId = value;
           return this;
         }
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "Coding", "The function of the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("type", "Coding", "The type of participation of the agent.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("reference[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device)", "Identity of participant as a Resource or uri.", 0, java.lang.Integer.MAX_VALUE, reference));
-          childrenList.add(new Property("display", "string", "Human-readable description of the participant.", 0, java.lang.Integer.MAX_VALUE, display));
+          childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
+          childrenList.add(new Property("userId", "Identifier", "The identify of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
         }
 
       public ProvenanceAgentComponent copy() {
         ProvenanceAgentComponent dst = new ProvenanceAgentComponent();
         copyValues(dst);
         dst.role = role == null ? null : role.copy();
-        dst.type = type == null ? null : type.copy();
-        dst.reference = reference == null ? null : reference.copy();
-        dst.display = display == null ? null : display.copy();
+        dst.actor = actor == null ? null : actor.copy();
+        dst.userId = userId == null ? null : userId.copy();
         return dst;
       }
 
@@ -353,8 +301,8 @@ public class Provenance extends DomainResource {
         if (!(other instanceof ProvenanceAgentComponent))
           return false;
         ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
-        return compareDeep(role, o.role, true) && compareDeep(type, o.type, true) && compareDeep(reference, o.reference, true)
-           && compareDeep(display, o.display, true);
+        return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true) && compareDeep(userId, o.userId, true)
+          ;
       }
 
       @Override
@@ -364,12 +312,12 @@ public class Provenance extends DomainResource {
         if (!(other instanceof ProvenanceAgentComponent))
           return false;
         ProvenanceAgentComponent o = (ProvenanceAgentComponent) other;
-        return compareValues(display, o.display, true);
+        return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (role == null || role.isEmpty()) && (type == null || type.isEmpty())
-           && (reference == null || reference.isEmpty()) && (display == null || display.isEmpty());
+        return super.isEmpty() && (role == null || role.isEmpty()) && (actor == null || actor.isEmpty())
+           && (userId == null || userId.isEmpty());
       }
 
   }
@@ -1206,6 +1154,10 @@ public class Provenance extends DomainResource {
 
   @SearchParamDefinition(name="sigtype", path="Provenance.signature.type", description="Indication of the reason the entity signed the object(s)", type="token" )
   public static final String SP_SIGTYPE = "sigtype";
+  @SearchParamDefinition(name="agent", path="Provenance.agent.actor", description="Individual, device or organization playing role", type="reference" )
+  public static final String SP_AGENT = "agent";
+  @SearchParamDefinition(name="entitytype", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
+  public static final String SP_ENTITYTYPE = "entitytype";
   @SearchParamDefinition(name="patient", path="", description="A patient that the target resource(s) refer to", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date" )
@@ -1214,10 +1166,10 @@ public class Provenance extends DomainResource {
   public static final String SP_END = "end";
   @SearchParamDefinition(name="location", path="Provenance.location", description="Where the activity occurred, if relevant", type="reference" )
   public static final String SP_LOCATION = "location";
-  @SearchParamDefinition(name="partytype", path="Provenance.agent.type", description="Agent Type", type="token" )
-  public static final String SP_PARTYTYPE = "partytype";
-  @SearchParamDefinition(name="party", path="Provenance.agent.reference[x]", description="Identity of agent", type="reference" )
-  public static final String SP_PARTY = "party";
+  @SearchParamDefinition(name="userid", path="Provenance.agent.userId", description="Authorization-system identifier for the agent", type="token" )
+  public static final String SP_USERID = "userid";
+  @SearchParamDefinition(name="entity", path="Provenance.entity.type", description="Entity Type", type="token" )
+  public static final String SP_ENTITY = "entity";
   @SearchParamDefinition(name="target", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_TARGET = "target";
 

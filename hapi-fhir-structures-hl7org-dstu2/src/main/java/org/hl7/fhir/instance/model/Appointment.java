@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -105,12 +105,12 @@ public class Appointment extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PENDING: return "http://hl7.org.fhir/appointmentstatus";
-            case BOOKED: return "http://hl7.org.fhir/appointmentstatus";
-            case ARRIVED: return "http://hl7.org.fhir/appointmentstatus";
-            case FULFILLED: return "http://hl7.org.fhir/appointmentstatus";
-            case CANCELLED: return "http://hl7.org.fhir/appointmentstatus";
-            case NOSHOW: return "http://hl7.org.fhir/appointmentstatus";
+            case PENDING: return "http://hl7.org/fhir/appointmentstatus";
+            case BOOKED: return "http://hl7.org/fhir/appointmentstatus";
+            case ARRIVED: return "http://hl7.org/fhir/appointmentstatus";
+            case FULFILLED: return "http://hl7.org/fhir/appointmentstatus";
+            case CANCELLED: return "http://hl7.org/fhir/appointmentstatus";
+            case NOSHOW: return "http://hl7.org/fhir/appointmentstatus";
             default: return "?";
           }
         }
@@ -212,9 +212,9 @@ public class Appointment extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REQUIRED: return "http://hl7.org.fhir/participantrequired";
-            case OPTIONAL: return "http://hl7.org.fhir/participantrequired";
-            case INFORMATIONONLY: return "http://hl7.org.fhir/participantrequired";
+            case REQUIRED: return "http://hl7.org/fhir/participantrequired";
+            case OPTIONAL: return "http://hl7.org/fhir/participantrequired";
+            case INFORMATIONONLY: return "http://hl7.org/fhir/participantrequired";
             default: return "?";
           }
         }
@@ -305,10 +305,10 @@ public class Appointment extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ACCEPTED: return "http://hl7.org.fhir/participationstatus";
-            case DECLINED: return "http://hl7.org.fhir/participationstatus";
-            case TENTATIVE: return "http://hl7.org.fhir/participationstatus";
-            case NEEDSACTION: return "http://hl7.org.fhir/participationstatus";
+            case ACCEPTED: return "http://hl7.org/fhir/participationstatus";
+            case DECLINED: return "http://hl7.org/fhir/participationstatus";
+            case TENTATIVE: return "http://hl7.org/fhir/participationstatus";
+            case NEEDSACTION: return "http://hl7.org/fhir/participationstatus";
             default: return "?";
           }
         }

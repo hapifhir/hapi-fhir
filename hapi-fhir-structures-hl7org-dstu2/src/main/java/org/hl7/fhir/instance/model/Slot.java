@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -91,10 +91,10 @@ public class Slot extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case BUSY: return "http://hl7.org.fhir/slotstatus";
-            case FREE: return "http://hl7.org.fhir/slotstatus";
-            case BUSYUNAVAILABLE: return "http://hl7.org.fhir/slotstatus";
-            case BUSYTENTATIVE: return "http://hl7.org.fhir/slotstatus";
+            case BUSY: return "http://hl7.org/fhir/slotstatus";
+            case FREE: return "http://hl7.org/fhir/slotstatus";
+            case BUSYUNAVAILABLE: return "http://hl7.org/fhir/slotstatus";
+            case BUSYTENTATIVE: return "http://hl7.org/fhir/slotstatus";
             default: return "?";
           }
         }

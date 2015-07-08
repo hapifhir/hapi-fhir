@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -78,8 +78,8 @@ public class Location extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INSTANCE: return "http://hl7.org.fhir/location-mode";
-            case KIND: return "http://hl7.org.fhir/location-mode";
+            case INSTANCE: return "http://hl7.org/fhir/location-mode";
+            case KIND: return "http://hl7.org/fhir/location-mode";
             default: return "?";
           }
         }
@@ -157,9 +157,9 @@ public class Location extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ACTIVE: return "http://hl7.org.fhir/location-status";
-            case SUSPENDED: return "http://hl7.org.fhir/location-status";
-            case INACTIVE: return "http://hl7.org.fhir/location-status";
+            case ACTIVE: return "http://hl7.org/fhir/location-status";
+            case SUSPENDED: return "http://hl7.org/fhir/location-status";
+            case INACTIVE: return "http://hl7.org/fhir/location-status";
             default: return "?";
           }
         }
@@ -1085,14 +1085,24 @@ public class Location extends DomainResource {
   public static final String SP_NEARDISTANCE = "near-distance";
   @SearchParamDefinition(name="address", path="Location.address", description="A (part of the) address of the location", type="string" )
   public static final String SP_ADDRESS = "address";
+  @SearchParamDefinition(name="address-state", path="Location.address.state", description="A state specified in an address", type="string" )
+  public static final String SP_ADDRESSSTATE = "address-state";
+  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
+  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="address-postalcode", path="Location.address.postalCode", description="A postalCode specified in an address", type="string" )
+  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  @SearchParamDefinition(name="address-country", path="Location.address.country", description="A country specified in an address", type="string" )
+  public static final String SP_ADDRESSCOUNTRY = "address-country";
   @SearchParamDefinition(name="organization", path="Location.managingOrganization", description="Searches for locations that are managed by the provided organization", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="name", path="Location.name", description="A (portion of the) name of the location", type="string" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="address-use", path="Location.address.use", description="A use code specified in an address", type="token" )
+  public static final String SP_ADDRESSUSE = "address-use";
   @SearchParamDefinition(name="near", path="", description="The coordinates expressed as [lat],[long] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)", type="token" )
   public static final String SP_NEAR = "near";
-  @SearchParamDefinition(name="type", path="Location.type", description="A code for the type of location", type="token" )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="address-city", path="Location.address.city", description="A city specified in an address", type="string" )
+  public static final String SP_ADDRESSCITY = "address-city";
   @SearchParamDefinition(name="status", path="Location.status", description="Searches for locations with a specific kind of status", type="token" )
   public static final String SP_STATUS = "status";
 

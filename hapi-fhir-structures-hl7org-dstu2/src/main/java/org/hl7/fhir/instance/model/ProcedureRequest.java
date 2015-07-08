@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -133,16 +133,16 @@ public class ProcedureRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSED: return "http://hl7.org.fhir/procedure-request-status";
-            case DRAFT: return "http://hl7.org.fhir/procedure-request-status";
-            case REQUESTED: return "http://hl7.org.fhir/procedure-request-status";
-            case RECEIVED: return "http://hl7.org.fhir/procedure-request-status";
-            case ACCEPTED: return "http://hl7.org.fhir/procedure-request-status";
-            case INPROGRESS: return "http://hl7.org.fhir/procedure-request-status";
-            case COMPLETED: return "http://hl7.org.fhir/procedure-request-status";
-            case SUSPENDED: return "http://hl7.org.fhir/procedure-request-status";
-            case REJECTED: return "http://hl7.org.fhir/procedure-request-status";
-            case ABORTED: return "http://hl7.org.fhir/procedure-request-status";
+            case PROPOSED: return "http://hl7.org/fhir/procedure-request-status";
+            case DRAFT: return "http://hl7.org/fhir/procedure-request-status";
+            case REQUESTED: return "http://hl7.org/fhir/procedure-request-status";
+            case RECEIVED: return "http://hl7.org/fhir/procedure-request-status";
+            case ACCEPTED: return "http://hl7.org/fhir/procedure-request-status";
+            case INPROGRESS: return "http://hl7.org/fhir/procedure-request-status";
+            case COMPLETED: return "http://hl7.org/fhir/procedure-request-status";
+            case SUSPENDED: return "http://hl7.org/fhir/procedure-request-status";
+            case REJECTED: return "http://hl7.org/fhir/procedure-request-status";
+            case ABORTED: return "http://hl7.org/fhir/procedure-request-status";
             default: return "?";
           }
         }
@@ -275,10 +275,10 @@ public class ProcedureRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ROUTINE: return "http://hl7.org.fhir/procedure-request-priority";
-            case URGENT: return "http://hl7.org.fhir/procedure-request-priority";
-            case STAT: return "http://hl7.org.fhir/procedure-request-priority";
-            case ASAP: return "http://hl7.org.fhir/procedure-request-priority";
+            case ROUTINE: return "http://hl7.org/fhir/procedure-request-priority";
+            case URGENT: return "http://hl7.org/fhir/procedure-request-priority";
+            case STAT: return "http://hl7.org/fhir/procedure-request-priority";
+            case ASAP: return "http://hl7.org/fhir/procedure-request-priority";
             default: return "?";
           }
         }
@@ -372,6 +372,10 @@ public class ProcedureRequest extends DomainResource {
           return (CodeableConcept) this.site;
         }
 
+        public boolean hasSiteCodeableConcept() throws Exception { 
+          return this.site instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #site} (Indicates the site on the subject's body where the procedure should be performed ( i.e. the target sites).)
          */
@@ -379,6 +383,10 @@ public class ProcedureRequest extends DomainResource {
           if (!(this.site instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.site.getClass().getName()+" was encountered");
           return (Reference) this.site;
+        }
+
+        public boolean hasSiteReference() throws Exception { 
+          return this.site instanceof Reference;
         }
 
         public boolean hasSite() { 
@@ -771,6 +779,10 @@ public class ProcedureRequest extends DomainResource {
       return (DateTimeType) this.timing;
     }
 
+    public boolean hasTimingDateTimeType() throws Exception { 
+      return this.timing instanceof DateTimeType;
+    }
+
     /**
      * @return {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
@@ -780,6 +792,10 @@ public class ProcedureRequest extends DomainResource {
       return (Period) this.timing;
     }
 
+    public boolean hasTimingPeriod() throws Exception { 
+      return this.timing instanceof Period;
+    }
+
     /**
      * @return {@link #timing} (The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
      */
@@ -787,6 +803,10 @@ public class ProcedureRequest extends DomainResource {
       if (!(this.timing instanceof Timing))
         throw new Exception("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Timing) this.timing;
+    }
+
+    public boolean hasTimingTiming() throws Exception { 
+      return this.timing instanceof Timing;
     }
 
     public boolean hasTiming() { 
@@ -1003,6 +1023,10 @@ public class ProcedureRequest extends DomainResource {
       return (BooleanType) this.asNeeded;
     }
 
+    public boolean hasAsNeededBooleanType() throws Exception { 
+      return this.asNeeded instanceof BooleanType;
+    }
+
     /**
      * @return {@link #asNeeded} (If a CodeableConcept is present, it indicates the pre-condition for performing the procedure.)
      */
@@ -1010,6 +1034,10 @@ public class ProcedureRequest extends DomainResource {
       if (!(this.asNeeded instanceof CodeableConcept))
         throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;
+    }
+
+    public boolean hasAsNeededCodeableConcept() throws Exception { 
+      return this.asNeeded instanceof CodeableConcept;
     }
 
     public boolean hasAsNeeded() { 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.api.*;
@@ -39,6 +39,7 @@ public class Enumerations {
 // In here: 
 //   AdministrativeGender: The gender of a person used for administrative purposes
 //   AgeUnits: A valueSet of UCUM codes for representing age value units
+//   BindingStrength: Indication of the degree of conformance expectations associated with a binding
 //   ConceptMapEquivalence: The degree of equivalence between concepts
 //   ConformanceResourceStatus: The lifecycle status of a Value Set or Concept Map
 //   DataAbsentReason: Used to specify why the normally expected content of the data element is missing
@@ -98,10 +99,10 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case MALE: return "http://hl7.org.fhir/administrative-gender";
-            case FEMALE: return "http://hl7.org.fhir/administrative-gender";
-            case OTHER: return "http://hl7.org.fhir/administrative-gender";
-            case UNKNOWN: return "http://hl7.org.fhir/administrative-gender";
+            case MALE: return "http://hl7.org/fhir/administrative-gender";
+            case FEMALE: return "http://hl7.org/fhir/administrative-gender";
+            case OTHER: return "http://hl7.org/fhir/administrative-gender";
+            case UNKNOWN: return "http://hl7.org/fhir/administrative-gender";
             default: return "?";
           }
         }
@@ -281,6 +282,106 @@ public class Enumerations {
       }
     }
 
+    public enum BindingStrength {
+        /**
+         * To be conformant, instances of this element SHALL include a code from the specified value set
+         */
+        REQUIRED, 
+        /**
+         * To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.
+         */
+        EXTENSIBLE, 
+        /**
+         * Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant
+         */
+        PREFERRED, 
+        /**
+         * Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included
+         */
+        EXAMPLE, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static BindingStrength fromCode(String codeString) throws Exception {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("required".equals(codeString))
+          return REQUIRED;
+        if ("extensible".equals(codeString))
+          return EXTENSIBLE;
+        if ("preferred".equals(codeString))
+          return PREFERRED;
+        if ("example".equals(codeString))
+          return EXAMPLE;
+        throw new Exception("Unknown BindingStrength code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case REQUIRED: return "required";
+            case EXTENSIBLE: return "extensible";
+            case PREFERRED: return "preferred";
+            case EXAMPLE: return "example";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case REQUIRED: return "http://hl7.org/fhir/binding-strength";
+            case EXTENSIBLE: return "http://hl7.org/fhir/binding-strength";
+            case PREFERRED: return "http://hl7.org/fhir/binding-strength";
+            case EXAMPLE: return "http://hl7.org/fhir/binding-strength";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case REQUIRED: return "To be conformant, instances of this element SHALL include a code from the specified value set";
+            case EXTENSIBLE: return "To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.";
+            case PREFERRED: return "Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant";
+            case EXAMPLE: return "Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case REQUIRED: return "Required";
+            case EXTENSIBLE: return "Extensible";
+            case PREFERRED: return "Preferred";
+            case EXAMPLE: return "Example";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class BindingStrengthEnumFactory implements EnumFactory<BindingStrength> {
+    public BindingStrength fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("required".equals(codeString))
+          return BindingStrength.REQUIRED;
+        if ("extensible".equals(codeString))
+          return BindingStrength.EXTENSIBLE;
+        if ("preferred".equals(codeString))
+          return BindingStrength.PREFERRED;
+        if ("example".equals(codeString))
+          return BindingStrength.EXAMPLE;
+        throw new IllegalArgumentException("Unknown BindingStrength code '"+codeString+"'");
+        }
+    public String toCode(BindingStrength code) {
+      if (code == BindingStrength.REQUIRED)
+        return "required";
+      if (code == BindingStrength.EXTENSIBLE)
+        return "extensible";
+      if (code == BindingStrength.PREFERRED)
+        return "preferred";
+      if (code == BindingStrength.EXAMPLE)
+        return "example";
+      return "?";
+      }
+    }
+
     public enum ConceptMapEquivalence {
         /**
          * The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical)
@@ -303,9 +404,9 @@ public class Enumerations {
          */
         NARROWER, 
         /**
-         * The target mapping specialises the meaning of the source concept (e.g. the target is-a source)
+         * The target mapping specializes the meaning of the source concept (e.g. the target is-a source)
          */
-        SPECIALISES, 
+        SPECIALIZES, 
         /**
          * The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally
          */
@@ -335,8 +436,8 @@ public class Enumerations {
           return SUBSUMES;
         if ("narrower".equals(codeString))
           return NARROWER;
-        if ("specialises".equals(codeString))
-          return SPECIALISES;
+        if ("specializes".equals(codeString))
+          return SPECIALIZES;
         if ("inexact".equals(codeString))
           return INEXACT;
         if ("unmatched".equals(codeString))
@@ -352,7 +453,7 @@ public class Enumerations {
             case WIDER: return "wider";
             case SUBSUMES: return "subsumes";
             case NARROWER: return "narrower";
-            case SPECIALISES: return "specialises";
+            case SPECIALIZES: return "specializes";
             case INEXACT: return "inexact";
             case UNMATCHED: return "unmatched";
             case DISJOINT: return "disjoint";
@@ -361,15 +462,15 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case EQUIVALENT: return "http://hl7.org.fhir/concept-map-equivalence";
-            case EQUAL: return "http://hl7.org.fhir/concept-map-equivalence";
-            case WIDER: return "http://hl7.org.fhir/concept-map-equivalence";
-            case SUBSUMES: return "http://hl7.org.fhir/concept-map-equivalence";
-            case NARROWER: return "http://hl7.org.fhir/concept-map-equivalence";
-            case SPECIALISES: return "http://hl7.org.fhir/concept-map-equivalence";
-            case INEXACT: return "http://hl7.org.fhir/concept-map-equivalence";
-            case UNMATCHED: return "http://hl7.org.fhir/concept-map-equivalence";
-            case DISJOINT: return "http://hl7.org.fhir/concept-map-equivalence";
+            case EQUIVALENT: return "http://hl7.org/fhir/concept-map-equivalence";
+            case EQUAL: return "http://hl7.org/fhir/concept-map-equivalence";
+            case WIDER: return "http://hl7.org/fhir/concept-map-equivalence";
+            case SUBSUMES: return "http://hl7.org/fhir/concept-map-equivalence";
+            case NARROWER: return "http://hl7.org/fhir/concept-map-equivalence";
+            case SPECIALIZES: return "http://hl7.org/fhir/concept-map-equivalence";
+            case INEXACT: return "http://hl7.org/fhir/concept-map-equivalence";
+            case UNMATCHED: return "http://hl7.org/fhir/concept-map-equivalence";
+            case DISJOINT: return "http://hl7.org/fhir/concept-map-equivalence";
             default: return "?";
           }
         }
@@ -380,7 +481,7 @@ public class Enumerations {
             case WIDER: return "The target mapping is wider in meaning than the source concept";
             case SUBSUMES: return "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target)";
             case NARROWER: return "The target mapping is narrower in meaning that the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally";
-            case SPECIALISES: return "The target mapping specialises the meaning of the source concept (e.g. the target is-a source)";
+            case SPECIALIZES: return "The target mapping specializes the meaning of the source concept (e.g. the target is-a source)";
             case INEXACT: return "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when atempting to use these mappings operationally";
             case UNMATCHED: return "There is no match for this concept in the destination concept system";
             case DISJOINT: return "This is an explicit assertion that there is no mapping between the source and target concept";
@@ -394,7 +495,7 @@ public class Enumerations {
             case WIDER: return "Wider";
             case SUBSUMES: return "Subsumes";
             case NARROWER: return "Narrower";
-            case SPECIALISES: return "Specialises";
+            case SPECIALIZES: return "Specializes";
             case INEXACT: return "Inexact";
             case UNMATCHED: return "Unmatched";
             case DISJOINT: return "Disjoint";
@@ -418,8 +519,8 @@ public class Enumerations {
           return ConceptMapEquivalence.SUBSUMES;
         if ("narrower".equals(codeString))
           return ConceptMapEquivalence.NARROWER;
-        if ("specialises".equals(codeString))
-          return ConceptMapEquivalence.SPECIALISES;
+        if ("specializes".equals(codeString))
+          return ConceptMapEquivalence.SPECIALIZES;
         if ("inexact".equals(codeString))
           return ConceptMapEquivalence.INEXACT;
         if ("unmatched".equals(codeString))
@@ -439,8 +540,8 @@ public class Enumerations {
         return "subsumes";
       if (code == ConceptMapEquivalence.NARROWER)
         return "narrower";
-      if (code == ConceptMapEquivalence.SPECIALISES)
-        return "specialises";
+      if (code == ConceptMapEquivalence.SPECIALIZES)
+        return "specializes";
       if (code == ConceptMapEquivalence.INEXACT)
         return "inexact";
       if (code == ConceptMapEquivalence.UNMATCHED)
@@ -461,7 +562,7 @@ public class Enumerations {
          */
         ACTIVE, 
         /**
-         * This resource has been withdrawn or superceded and should no longer be used
+         * This resource has been withdrawn or superseded and should no longer be used
          */
         RETIRED, 
         /**
@@ -489,9 +590,9 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "http://hl7.org.fhir/conformance-resource-status";
-            case ACTIVE: return "http://hl7.org.fhir/conformance-resource-status";
-            case RETIRED: return "http://hl7.org.fhir/conformance-resource-status";
+            case DRAFT: return "http://hl7.org/fhir/conformance-resource-status";
+            case ACTIVE: return "http://hl7.org/fhir/conformance-resource-status";
+            case RETIRED: return "http://hl7.org/fhir/conformance-resource-status";
             default: return "?";
           }
         }
@@ -499,7 +600,7 @@ public class Enumerations {
           switch (this) {
             case DRAFT: return "This resource is still under development";
             case ACTIVE: return "This resource is ready for normal use";
-            case RETIRED: return "This resource has been withdrawn or superceded and should no longer be used";
+            case RETIRED: return "This resource has been withdrawn or superseded and should no longer be used";
             default: return "?";
           }
         }
@@ -610,14 +711,14 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case UNKNOWN: return "http://hl7.org.fhir/data-absent-reason";
-            case ASKED: return "http://hl7.org.fhir/data-absent-reason";
-            case TEMP: return "http://hl7.org.fhir/data-absent-reason";
-            case NOTASKED: return "http://hl7.org.fhir/data-absent-reason";
-            case MASKED: return "http://hl7.org.fhir/data-absent-reason";
-            case UNSUPPORTED: return "http://hl7.org.fhir/data-absent-reason";
-            case ASTEXT: return "http://hl7.org.fhir/data-absent-reason";
-            case ERROR: return "http://hl7.org.fhir/data-absent-reason";
+            case UNKNOWN: return "http://hl7.org/fhir/data-absent-reason";
+            case ASKED: return "http://hl7.org/fhir/data-absent-reason";
+            case TEMP: return "http://hl7.org/fhir/data-absent-reason";
+            case NOTASKED: return "http://hl7.org/fhir/data-absent-reason";
+            case MASKED: return "http://hl7.org/fhir/data-absent-reason";
+            case UNSUPPORTED: return "http://hl7.org/fhir/data-absent-reason";
+            case ASTEXT: return "http://hl7.org/fhir/data-absent-reason";
+            case ERROR: return "http://hl7.org/fhir/data-absent-reason";
             default: return "?";
           }
         }
@@ -743,9 +844,9 @@ public class Enumerations {
          */
         CURRENT, 
         /**
-         * This reference has been superceded by another reference
+         * This reference has been superseded by another reference
          */
-        SUPERCEDED, 
+        SUPERSEDED, 
         /**
          * This reference was created in error
          */
@@ -759,8 +860,8 @@ public class Enumerations {
                 return null;
         if ("current".equals(codeString))
           return CURRENT;
-        if ("superceded".equals(codeString))
-          return SUPERCEDED;
+        if ("superseded".equals(codeString))
+          return SUPERSEDED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
         throw new Exception("Unknown DocumentReferenceStatus code '"+codeString+"'");
@@ -768,23 +869,23 @@ public class Enumerations {
         public String toCode() {
           switch (this) {
             case CURRENT: return "current";
-            case SUPERCEDED: return "superceded";
+            case SUPERSEDED: return "superseded";
             case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case CURRENT: return "http://hl7.org.fhir/document-reference-status";
-            case SUPERCEDED: return "http://hl7.org.fhir/document-reference-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/document-reference-status";
+            case CURRENT: return "http://hl7.org/fhir/document-reference-status";
+            case SUPERSEDED: return "http://hl7.org/fhir/document-reference-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/document-reference-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
             case CURRENT: return "This is the current reference for this document";
-            case SUPERCEDED: return "This reference has been superceded by another reference";
+            case SUPERSEDED: return "This reference has been superseded by another reference";
             case ENTEREDINERROR: return "This reference was created in error";
             default: return "?";
           }
@@ -792,7 +893,7 @@ public class Enumerations {
         public String getDisplay() {
           switch (this) {
             case CURRENT: return "Current";
-            case SUPERCEDED: return "Superceded";
+            case SUPERSEDED: return "Superseded";
             case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
@@ -806,8 +907,8 @@ public class Enumerations {
                 return null;
         if ("current".equals(codeString))
           return DocumentReferenceStatus.CURRENT;
-        if ("superceded".equals(codeString))
-          return DocumentReferenceStatus.SUPERCEDED;
+        if ("superseded".equals(codeString))
+          return DocumentReferenceStatus.SUPERSEDED;
         if ("entered-in-error".equals(codeString))
           return DocumentReferenceStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown DocumentReferenceStatus code '"+codeString+"'");
@@ -815,8 +916,8 @@ public class Enumerations {
     public String toCode(DocumentReferenceStatus code) {
       if (code == DocumentReferenceStatus.CURRENT)
         return "current";
-      if (code == DocumentReferenceStatus.SUPERCEDED)
-        return "superceded";
+      if (code == DocumentReferenceStatus.SUPERSEDED)
+        return "superseded";
       if (code == DocumentReferenceStatus.ENTEREDINERROR)
         return "entered-in-error";
       return "?";
@@ -949,9 +1050,9 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case DISPLAY: return "http://hl7.org.fhir/note-type";
-            case PRINT: return "http://hl7.org.fhir/note-type";
-            case PRINTOPER: return "http://hl7.org.fhir/note-type";
+            case DISPLAY: return "http://hl7.org/fhir/note-type";
+            case PRINT: return "http://hl7.org/fhir/note-type";
+            case PRINTOPER: return "http://hl7.org/fhir/note-type";
             default: return "?";
           }
         }
@@ -1028,8 +1129,8 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case COMPLETE: return "http://hl7.org.fhir/remittance-outcome";
-            case ERROR: return "http://hl7.org.fhir/remittance-outcome";
+            case COMPLETE: return "http://hl7.org/fhir/remittance-outcome";
+            case ERROR: return "http://hl7.org/fhir/remittance-outcome";
             default: return "?";
           }
         }
@@ -1186,14 +1287,14 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case NUMBER: return "http://hl7.org.fhir/search-param-type";
-            case DATE: return "http://hl7.org.fhir/search-param-type";
-            case STRING: return "http://hl7.org.fhir/search-param-type";
-            case TOKEN: return "http://hl7.org.fhir/search-param-type";
-            case REFERENCE: return "http://hl7.org.fhir/search-param-type";
-            case COMPOSITE: return "http://hl7.org.fhir/search-param-type";
-            case QUANTITY: return "http://hl7.org.fhir/search-param-type";
-            case URI: return "http://hl7.org.fhir/search-param-type";
+            case NUMBER: return "http://hl7.org/fhir/search-param-type";
+            case DATE: return "http://hl7.org/fhir/search-param-type";
+            case STRING: return "http://hl7.org/fhir/search-param-type";
+            case TOKEN: return "http://hl7.org/fhir/search-param-type";
+            case REFERENCE: return "http://hl7.org/fhir/search-param-type";
+            case COMPOSITE: return "http://hl7.org/fhir/search-param-type";
+            case QUANTITY: return "http://hl7.org/fhir/search-param-type";
+            case URI: return "http://hl7.org/fhir/search-param-type";
             default: return "?";
           }
         }
@@ -1328,12 +1429,12 @@ public class Enumerations {
         }
         public String getSystem() {
           switch (this) {
-            case TRUE: return "http://hl7.org.fhir/special-values";
-            case FALSE: return "http://hl7.org.fhir/special-values";
-            case TRACE: return "http://hl7.org.fhir/special-values";
-            case SUFFICIENT: return "http://hl7.org.fhir/special-values";
-            case WITHDRAWN: return "http://hl7.org.fhir/special-values";
-            case NILKNOWN: return "http://hl7.org.fhir/special-values";
+            case TRUE: return "http://hl7.org/fhir/special-values";
+            case FALSE: return "http://hl7.org/fhir/special-values";
+            case TRACE: return "http://hl7.org/fhir/special-values";
+            case SUFFICIENT: return "http://hl7.org/fhir/special-values";
+            case WITHDRAWN: return "http://hl7.org/fhir/special-values";
+            case NILKNOWN: return "http://hl7.org/fhir/special-values";
             default: return "?";
           }
         }

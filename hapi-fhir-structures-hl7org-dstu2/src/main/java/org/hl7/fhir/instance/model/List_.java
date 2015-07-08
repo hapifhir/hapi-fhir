@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class List_ extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case CURRENT: return "http://hl7.org.fhir/list-status";
-            case RETIRED: return "http://hl7.org.fhir/list-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/list-status";
+            case CURRENT: return "http://hl7.org/fhir/list-status";
+            case RETIRED: return "http://hl7.org/fhir/list-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/list-status";
             default: return "?";
           }
         }
@@ -142,7 +142,7 @@ public class List_ extends DomainResource {
          */
         SNAPSHOT, 
         /**
-         * The list is prepared as a statement of changes that have been made or recommended
+         * A list that indicates where changes have been made or recommended
          */
         CHANGES, 
         /**
@@ -170,9 +170,9 @@ public class List_ extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case WORKING: return "http://hl7.org.fhir/list-mode";
-            case SNAPSHOT: return "http://hl7.org.fhir/list-mode";
-            case CHANGES: return "http://hl7.org.fhir/list-mode";
+            case WORKING: return "http://hl7.org/fhir/list-mode";
+            case SNAPSHOT: return "http://hl7.org/fhir/list-mode";
+            case CHANGES: return "http://hl7.org/fhir/list-mode";
             default: return "?";
           }
         }
@@ -180,7 +180,7 @@ public class List_ extends DomainResource {
           switch (this) {
             case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes";
             case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current";
-            case CHANGES: return "The list is prepared as a statement of changes that have been made or recommended";
+            case CHANGES: return "A list that indicates where changes have been made or recommended";
             default: return "?";
           }
         }
@@ -539,55 +539,67 @@ public class List_ extends DomainResource {
     protected Resource sourceTarget;
 
     /**
+     * The encounter that is the context in which this list was created.
+     */
+    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1)
+    @Description(shortDefinition="Context in which list created", formalDefinition="The encounter that is the context in which this list was created." )
+    protected Reference encounter;
+
+    /**
+     * The actual object that is the target of the reference (The encounter that is the context in which this list was created.)
+     */
+    protected Encounter encounterTarget;
+
+    /**
      * Indicates the current state of this list.
      */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1)
     @Description(shortDefinition="current | retired | entered-in-error", formalDefinition="Indicates the current state of this list." )
     protected Enumeration<ListStatus> status;
 
     /**
      * The date that the list was prepared.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="When the list was prepared", formalDefinition="The date that the list was prepared." )
     protected DateTimeType date;
 
     /**
      * What order applies to the items in the list.
      */
-    @Child(name = "orderedBy", type = {CodeableConcept.class}, order=7, min=0, max=1)
+    @Child(name = "orderedBy", type = {CodeableConcept.class}, order=8, min=0, max=1)
     @Description(shortDefinition="What order the list has", formalDefinition="What order applies to the items in the list." )
     protected CodeableConcept orderedBy;
 
     /**
      * How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
      */
-    @Child(name = "mode", type = {CodeType.class}, order=8, min=1, max=1)
+    @Child(name = "mode", type = {CodeType.class}, order=9, min=1, max=1)
     @Description(shortDefinition="working | snapshot | changes", formalDefinition="How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
     protected Enumeration<ListMode> mode;
 
     /**
      * Comments that apply to the overall list.
      */
-    @Child(name = "note", type = {StringType.class}, order=9, min=0, max=1)
-    @Description(shortDefinition="Comments about the note", formalDefinition="Comments that apply to the overall list." )
+    @Child(name = "note", type = {StringType.class}, order=10, min=0, max=1)
+    @Description(shortDefinition="Comments about the list", formalDefinition="Comments that apply to the overall list." )
     protected StringType note;
 
     /**
      * Entries in this list.
      */
-    @Child(name = "entry", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "entry", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Entries in the list", formalDefinition="Entries in this list." )
     protected List<ListEntryComponent> entry;
 
     /**
      * If the list is empty, why the list is empty.
      */
-    @Child(name = "emptyReason", type = {CodeableConcept.class}, order=11, min=0, max=1)
+    @Child(name = "emptyReason", type = {CodeableConcept.class}, order=12, min=0, max=1)
     @Description(shortDefinition="Why list is empty", formalDefinition="If the list is empty, why the list is empty." )
     protected CodeableConcept emptyReason;
 
-    private static final long serialVersionUID = -558571391L;
+    private static final long serialVersionUID = 1819128642L;
 
   /*
    * Constructor
@@ -793,6 +805,50 @@ public class List_ extends DomainResource {
      */
     public List_ setSourceTarget(Resource value) { 
       this.sourceTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #encounter} (The encounter that is the context in which this list was created.)
+     */
+    public Reference getEncounter() { 
+      if (this.encounter == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create List_.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounter = new Reference(); // cc
+      return this.encounter;
+    }
+
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
+    }
+
+    /**
+     * @param value {@link #encounter} (The encounter that is the context in which this list was created.)
+     */
+    public List_ setEncounter(Reference value) { 
+      this.encounter = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter that is the context in which this list was created.)
+     */
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create List_.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
+    }
+
+    /**
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter that is the context in which this list was created.)
+     */
+    public List_ setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -1079,6 +1135,7 @@ public class List_ extends DomainResource {
         childrenList.add(new Property("code", "CodeableConcept", "This code defines the purpose of the list - why it was created.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list, if there is one.", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("source", "Reference(Practitioner|Patient|Device)", "The entity responsible for deciding what the contents of the list were.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter that is the context in which this list was created.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("status", "code", "Indicates the current state of this list.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("date", "dateTime", "The date that the list was prepared.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("orderedBy", "CodeableConcept", "What order applies to the items in the list.", 0, java.lang.Integer.MAX_VALUE, orderedBy));
@@ -1100,6 +1157,7 @@ public class List_ extends DomainResource {
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.source = source == null ? null : source.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.status = status == null ? null : status.copy();
         dst.date = date == null ? null : date.copy();
         dst.orderedBy = orderedBy == null ? null : orderedBy.copy();
@@ -1126,10 +1184,10 @@ public class List_ extends DomainResource {
           return false;
         List_ o = (List_) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(title, o.title, true) && compareDeep(code, o.code, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(source, o.source, true) && compareDeep(status, o.status, true)
-           && compareDeep(date, o.date, true) && compareDeep(orderedBy, o.orderedBy, true) && compareDeep(mode, o.mode, true)
-           && compareDeep(note, o.note, true) && compareDeep(entry, o.entry, true) && compareDeep(emptyReason, o.emptyReason, true)
-          ;
+           && compareDeep(subject, o.subject, true) && compareDeep(source, o.source, true) && compareDeep(encounter, o.encounter, true)
+           && compareDeep(status, o.status, true) && compareDeep(date, o.date, true) && compareDeep(orderedBy, o.orderedBy, true)
+           && compareDeep(mode, o.mode, true) && compareDeep(note, o.note, true) && compareDeep(entry, o.entry, true)
+           && compareDeep(emptyReason, o.emptyReason, true);
       }
 
       @Override
@@ -1146,9 +1204,9 @@ public class List_ extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (title == null || title.isEmpty())
            && (code == null || code.isEmpty()) && (subject == null || subject.isEmpty()) && (source == null || source.isEmpty())
-           && (status == null || status.isEmpty()) && (date == null || date.isEmpty()) && (orderedBy == null || orderedBy.isEmpty())
-           && (mode == null || mode.isEmpty()) && (note == null || note.isEmpty()) && (entry == null || entry.isEmpty())
-           && (emptyReason == null || emptyReason.isEmpty());
+           && (encounter == null || encounter.isEmpty()) && (status == null || status.isEmpty()) && (date == null || date.isEmpty())
+           && (orderedBy == null || orderedBy.isEmpty()) && (mode == null || mode.isEmpty()) && (note == null || note.isEmpty())
+           && (entry == null || entry.isEmpty()) && (emptyReason == null || emptyReason.isEmpty());
       }
 
   @Override
@@ -1164,7 +1222,7 @@ public class List_ extends DomainResource {
   public static final String SP_EMPTYREASON = "empty-reason";
   @SearchParamDefinition(name="code", path="List.code", description="What the purpose of this list is", type="token" )
   public static final String SP_CODE = "code";
-  @SearchParamDefinition(name="notes", path="List.note", description="Comments about the note", type="string" )
+  @SearchParamDefinition(name="notes", path="List.note", description="Comments about the list", type="string" )
   public static final String SP_NOTES = "notes";
   @SearchParamDefinition(name="subject", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_SUBJECT = "subject";
@@ -1172,6 +1230,8 @@ public class List_ extends DomainResource {
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents", type="reference" )
   public static final String SP_SOURCE = "source";
+  @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="title", path="List.title", description="Descriptive name for the list", type="string" )
   public static final String SP_TITLE = "title";
   @SearchParamDefinition(name="status", path="List.status", description="current | retired | entered-in-error", type="token" )

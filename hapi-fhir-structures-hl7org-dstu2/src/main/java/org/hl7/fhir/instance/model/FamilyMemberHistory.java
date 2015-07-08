@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -158,6 +158,10 @@ public class FamilyMemberHistory extends DomainResource {
           return (Age) this.onset;
         }
 
+        public boolean hasOnsetAge() throws Exception { 
+          return this.onset instanceof Age;
+        }
+
         /**
          * @return {@link #onset} (Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.)
          */
@@ -167,6 +171,10 @@ public class FamilyMemberHistory extends DomainResource {
           return (Range) this.onset;
         }
 
+        public boolean hasOnsetRange() throws Exception { 
+          return this.onset instanceof Range;
+        }
+
         /**
          * @return {@link #onset} (Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.)
          */
@@ -174,6 +182,10 @@ public class FamilyMemberHistory extends DomainResource {
           if (!(this.onset instanceof StringType))
             throw new Exception("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (StringType) this.onset;
+        }
+
+        public boolean hasOnsetStringType() throws Exception { 
+          return this.onset instanceof StringType;
         }
 
         public boolean hasOnset() { 
@@ -654,6 +666,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (Period) this.born;
     }
 
+    public boolean hasBornPeriod() throws Exception { 
+      return this.born instanceof Period;
+    }
+
     /**
      * @return {@link #born} (The actual or approximate date of birth of the relative.)
      */
@@ -663,6 +679,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (DateType) this.born;
     }
 
+    public boolean hasBornDateType() throws Exception { 
+      return this.born instanceof DateType;
+    }
+
     /**
      * @return {@link #born} (The actual or approximate date of birth of the relative.)
      */
@@ -670,6 +690,10 @@ public class FamilyMemberHistory extends DomainResource {
       if (!(this.born instanceof StringType))
         throw new Exception("Type mismatch: the type StringType was expected, but "+this.born.getClass().getName()+" was encountered");
       return (StringType) this.born;
+    }
+
+    public boolean hasBornStringType() throws Exception { 
+      return this.born instanceof StringType;
     }
 
     public boolean hasBorn() { 
@@ -700,6 +724,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (Age) this.age;
     }
 
+    public boolean hasAgeAge() throws Exception { 
+      return this.age instanceof Age;
+    }
+
     /**
      * @return {@link #age} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
@@ -709,6 +737,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (Range) this.age;
     }
 
+    public boolean hasAgeRange() throws Exception { 
+      return this.age instanceof Range;
+    }
+
     /**
      * @return {@link #age} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
@@ -716,6 +748,10 @@ public class FamilyMemberHistory extends DomainResource {
       if (!(this.age instanceof StringType))
         throw new Exception("Type mismatch: the type StringType was expected, but "+this.age.getClass().getName()+" was encountered");
       return (StringType) this.age;
+    }
+
+    public boolean hasAgeStringType() throws Exception { 
+      return this.age instanceof StringType;
     }
 
     public boolean hasAge() { 
@@ -746,6 +782,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (BooleanType) this.deceased;
     }
 
+    public boolean hasDeceasedBooleanType() throws Exception { 
+      return this.deceased instanceof BooleanType;
+    }
+
     /**
      * @return {@link #deceased} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
@@ -753,6 +793,10 @@ public class FamilyMemberHistory extends DomainResource {
       if (!(this.deceased instanceof Age))
         throw new Exception("Type mismatch: the type Age was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (Age) this.deceased;
+    }
+
+    public boolean hasDeceasedAge() throws Exception { 
+      return this.deceased instanceof Age;
     }
 
     /**
@@ -764,6 +808,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (Range) this.deceased;
     }
 
+    public boolean hasDeceasedRange() throws Exception { 
+      return this.deceased instanceof Range;
+    }
+
     /**
      * @return {@link #deceased} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
@@ -773,6 +821,10 @@ public class FamilyMemberHistory extends DomainResource {
       return (DateType) this.deceased;
     }
 
+    public boolean hasDeceasedDateType() throws Exception { 
+      return this.deceased instanceof DateType;
+    }
+
     /**
      * @return {@link #deceased} (The actual or approximate age of the relative at the time the family member history is recorded.)
      */
@@ -780,6 +832,10 @@ public class FamilyMemberHistory extends DomainResource {
       if (!(this.deceased instanceof StringType))
         throw new Exception("Type mismatch: the type StringType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (StringType) this.deceased;
+    }
+
+    public boolean hasDeceasedStringType() throws Exception { 
+      return this.deceased instanceof StringType;
     }
 
     public boolean hasDeceased() { 

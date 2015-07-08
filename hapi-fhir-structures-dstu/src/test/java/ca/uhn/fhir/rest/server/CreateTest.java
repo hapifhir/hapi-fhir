@@ -92,6 +92,50 @@ public class CreateTest {
 	}
 
 	@Test
+	public void testCreateWithWrongContentTypeXml() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		String inputString = ourCtx.newJsonParser().encodeResourceToString(patient);
+		ContentType inputCt = ContentType.create(Constants.CT_FHIR_XML, "UTF-8");
+		httpPost.setEntity(new StringEntity(inputString, inputCt));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Unexpected character"));
+	}
+
+	@Test
+	public void testCreateWithWrongContentTypeJson() throws Exception {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setValue("001");
+		patient.addIdentifier().setValue("002");
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		String inputString = ourCtx.newXmlParser().encodeResourceToString(patient);
+		ContentType inputCt = ContentType.create(Constants.CT_FHIR_JSON, "UTF-8");
+		httpPost.setEntity(new StringEntity(inputString, inputCt));
+
+		HttpResponse status = ourClient.execute(httpPost);
+
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info("Response was:\n{}", responseContent);
+
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, containsString("Unexpected char"));
+	}
+
+	@Test
 	public void testCreateById() throws Exception {
 
 		Patient patient = new Patient();

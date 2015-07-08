@@ -1,15 +1,12 @@
 package org.hl7.fhir.instance.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import org.hl7.fhir.instance.client.FeedFormat;
 import org.hl7.fhir.instance.client.IFHIRClient;
@@ -17,7 +14,7 @@ import org.hl7.fhir.instance.client.ResourceFormat;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.ConceptMap;
 import org.hl7.fhir.instance.model.Conformance;
-import org.hl7.fhir.instance.model.ElementDefinition;
+import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.Resource;
@@ -27,7 +24,7 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.terminologies.ITerminologyServices;
-import org.hl7.fhir.utilities.CSFileInputStream;
+import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 
 /*
  *  private static Map<String, StructureDefinition> loadProfiles() throws Exception {
@@ -44,8 +41,12 @@ import org.hl7.fhir.utilities.CSFileInputStream;
   private static final String TEST_PROFILE = "C:\\work\\org.hl7.fhir\\build\\publish\\namespace.profile.xml";
   private static final String PROFILES = "C:\\work\\org.hl7.fhir\\build\\publish\\profiles-resources.xml";
 
+igtodo - things to add: 
+- version
+- list of resource names
+
  */
-public class WorkerContext {
+public class WorkerContext implements NameResolver {
 
 	private ITerminologyServices terminologyServices = new NullTerminologyServices();
   private IFHIRClient client = new NullClient();
@@ -54,6 +55,8 @@ public class WorkerContext {
   private Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
   private Map<String, StructureDefinition> profiles = new HashMap<String, StructureDefinition>();
   private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
+  private String version;
+  private List<String> resourceNames = new ArrayList<String>();
 
 
   public WorkerContext() {
@@ -116,80 +119,13 @@ public class WorkerContext {
   public WorkerContext clone(IFHIRClient altClient) {
     WorkerContext res = new WorkerContext(terminologyServices, null, codeSystems, valueSets, maps, profiles);
     res.extensionDefinitions.putAll(extensionDefinitions);
+    res.version = version;
     res.client = altClient;
     return res;
   }
 
-  // -- Initializations
-  /**
-   * Load the working context from the validation pack
-   * 
-   * @param path filename of the validation pack
-   * @return
-   * @throws Exception 
-   */
-  public static WorkerContext fromPack(String path) throws Exception {
-    WorkerContext res = new WorkerContext();
-    res.loadFromPack(path);
-    return res;
-  }
-
-  public static WorkerContext fromClassPath() throws Exception {
-    WorkerContext res = new WorkerContext();
-    res.loadFromStream(WorkerContext.class.getResourceAsStream("validation.zip"));
-    return res;
-  }
 
 
-
-  public static WorkerContext fromDefinitions(Map<String, byte[]> source) throws Exception {
-    WorkerContext res = new WorkerContext();
-    for (String name : source.keySet()) {
-      if (name.endsWith(".xml")) {
-        res.loadFromFile(new ByteArrayInputStream(source.get(name)), name);        
-      }
-    }
-    return res;
-  }
-
-  private void loadFromPack(String path) throws Exception {
-    loadFromStream(new CSFileInputStream(path));
-  }
-  
-  private void loadFromStream(InputStream stream) throws Exception {
-    ZipInputStream zip = new ZipInputStream(stream);
-    ZipEntry ze;
-    while ((ze = zip.getNextEntry()) != null) {
-      if (ze.getName().endsWith(".xml")) { 
-        String name = ze.getName();
-        loadFromFile(zip, name);
-      }
-      zip.closeEntry();
-    }
-    zip.close();    
-  }
-
-  @SuppressWarnings("unchecked")
-  private void loadFromFile(InputStream stream, String name) throws Exception {
-	  throw new IllegalStateException();
-//    XmlParser xml = new XmlParser();
-//    Bundle f = (Bundle) xml.parse(stream);
-//    for (BundleEntryComponent e : f.getEntry()) {
-//    	String base = e.hasBase() ? e.getBase() : f.getBase();
-//    	
-//      if (e.getResource().getId() == null) {
-//        System.out.println("unidentified resource in "+name);
-//      }
-//      if (e.getResource() instanceof StructureDefinition)
-//        seeProfile(base, (StructureDefinition) e.getResource());
-//      else if (e.getResource() instanceof ValueSet)
-//        seeValueSet(base, (ValueSet) e.getResource());
-//      else if (e.getResource() instanceof StructureDefinition)
-//        seeExtensionDefinition(base, (StructureDefinition) e.getResource());
-//      else if (e.getResource() instanceof ConceptMap)
-//        maps.put(((ConceptMap) e.getResource()).getUrl(), (ConceptMap) e.getResource());
-//    }
-      }
 
   public void seeExtensionDefinition(String base, StructureDefinition ed) throws Exception {
     if (extensionDefinitions.get(ed.getUrl()) != null)
@@ -405,14 +341,6 @@ public class WorkerContext {
 	  }
   }
 
-  private ElementDefinition getElement(String context, List<ElementDefinition> elements, String path) throws Exception {
-    for (ElementDefinition element : elements) {
-      if (element.getPath().equals("Extension."+path))
-        return element;
-    }
-    throw new Exception("Unable to find extension path "+context);
-  }
-
   public class NullTerminologyServices implements ITerminologyServices {
 
     @Override
@@ -446,10 +374,37 @@ public class WorkerContext {
     }
 
     @Override
-    public ValueSet expandVS(ValueSet vs) {
+    public ValueSetExpansionOutcome expand(ValueSet vs) {
       throw new Error("call to NullTerminologyServices");
     }
 
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
+  @Override
+  public boolean isResource(String name) {
+    if (resourceNames.contains(name))
+      return true;
+    StructureDefinition sd = profiles.get("http://hl7.org/fhir/StructureDefinition/"+name);
+    return sd != null && (sd.getBase().endsWith("Resource") || sd.getBase().endsWith("DomainResource"));
+  }
+
+  public List<String> getResourceNames() {
+    return resourceNames;
+  }
+
+  public StructureDefinition getTypeStructure(TypeRefComponent type) {
+    if (type.hasProfile())
+      return profiles.get(type.getProfile());
+    else
+      return profiles.get(type.getCode());
   }
 
 }

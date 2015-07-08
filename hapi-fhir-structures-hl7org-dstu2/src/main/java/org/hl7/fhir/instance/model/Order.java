@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -188,14 +188,14 @@ public class Order extends DomainResource {
     /**
      * Who initiated the order.
      */
-    @Child(name = "source", type = {Practitioner.class}, order=3, min=0, max=1)
+    @Child(name = "source", type = {Practitioner.class, Organization.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Who initiated the order", formalDefinition="Who initiated the order." )
     protected Reference source;
 
     /**
      * The actual object that is the target of the reference (Who initiated the order.)
      */
-    protected Practitioner sourceTarget;
+    protected Resource sourceTarget;
 
     /**
      * Who is intended to fulfill the order.
@@ -217,28 +217,16 @@ public class Order extends DomainResource {
     protected Type reason;
 
     /**
-     * If required by policy.
-     */
-    @Child(name = "authority", type = {}, order=6, min=0, max=1)
-    @Description(shortDefinition="If required by policy", formalDefinition="If required by policy." )
-    protected Reference authority;
-
-    /**
-     * The actual object that is the target of the reference (If required by policy.)
-     */
-    protected Resource authorityTarget;
-
-    /**
      * When order should be fulfilled.
      */
-    @Child(name = "when", type = {}, order=7, min=0, max=1)
+    @Child(name = "when", type = {}, order=6, min=0, max=1)
     @Description(shortDefinition="When order should be fulfilled", formalDefinition="When order should be fulfilled." )
     protected OrderWhenComponent when;
 
     /**
      * What action is being ordered.
      */
-    @Child(name = "detail", type = {}, order=8, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "detail", type = {}, order=7, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="What action is being ordered", formalDefinition="What action is being ordered." )
     protected List<Reference> detail;
     /**
@@ -247,7 +235,7 @@ public class Order extends DomainResource {
     protected List<Resource> detailTarget;
 
 
-    private static final long serialVersionUID = 595782234L;
+    private static final long serialVersionUID = -1392311096L;
 
   /*
    * Constructor
@@ -411,19 +399,14 @@ public class Order extends DomainResource {
     /**
      * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Who initiated the order.)
      */
-    public Practitioner getSourceTarget() { 
-      if (this.sourceTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Order.source");
-        else if (Configuration.doAutoCreate())
-          this.sourceTarget = new Practitioner(); // aa
+    public Resource getSourceTarget() { 
       return this.sourceTarget;
     }
 
     /**
      * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Who initiated the order.)
      */
-    public Order setSourceTarget(Practitioner value) { 
+    public Order setSourceTarget(Resource value) { 
       this.sourceTarget = value;
       return this;
     }
@@ -483,6 +466,10 @@ public class Order extends DomainResource {
       return (CodeableConcept) this.reason;
     }
 
+    public boolean hasReasonCodeableConcept() throws Exception { 
+      return this.reason instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #reason} (Text - why the order was made.)
      */
@@ -490,6 +477,10 @@ public class Order extends DomainResource {
       if (!(this.reason instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
       return (Reference) this.reason;
+    }
+
+    public boolean hasReasonReference() throws Exception { 
+      return this.reason instanceof Reference;
     }
 
     public boolean hasReason() { 
@@ -501,45 +492,6 @@ public class Order extends DomainResource {
      */
     public Order setReason(Type value) { 
       this.reason = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #authority} (If required by policy.)
-     */
-    public Reference getAuthority() { 
-      if (this.authority == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Order.authority");
-        else if (Configuration.doAutoCreate())
-          this.authority = new Reference(); // cc
-      return this.authority;
-    }
-
-    public boolean hasAuthority() { 
-      return this.authority != null && !this.authority.isEmpty();
-    }
-
-    /**
-     * @param value {@link #authority} (If required by policy.)
-     */
-    public Order setAuthority(Reference value) { 
-      this.authority = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #authority} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (If required by policy.)
-     */
-    public Resource getAuthorityTarget() { 
-      return this.authorityTarget;
-    }
-
-    /**
-     * @param value {@link #authority} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (If required by policy.)
-     */
-    public Order setAuthorityTarget(Resource value) { 
-      this.authorityTarget = value;
       return this;
     }
 
@@ -621,10 +573,9 @@ public class Order extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("date", "dateTime", "When the order was made.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Substance)", "Patient this order is about.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("source", "Reference(Practitioner)", "Who initiated the order.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("source", "Reference(Practitioner|Organization)", "Who initiated the order.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("target", "Reference(Organization|Device|Practitioner)", "Who is intended to fulfill the order.", 0, java.lang.Integer.MAX_VALUE, target));
         childrenList.add(new Property("reason[x]", "CodeableConcept|Reference(Any)", "Text - why the order was made.", 0, java.lang.Integer.MAX_VALUE, reason));
-        childrenList.add(new Property("authority", "Reference(Any)", "If required by policy.", 0, java.lang.Integer.MAX_VALUE, authority));
         childrenList.add(new Property("when", "", "When order should be fulfilled.", 0, java.lang.Integer.MAX_VALUE, when));
         childrenList.add(new Property("detail", "Reference(Any)", "What action is being ordered.", 0, java.lang.Integer.MAX_VALUE, detail));
       }
@@ -642,7 +593,6 @@ public class Order extends DomainResource {
         dst.source = source == null ? null : source.copy();
         dst.target = target == null ? null : target.copy();
         dst.reason = reason == null ? null : reason.copy();
-        dst.authority = authority == null ? null : authority.copy();
         dst.when = when == null ? null : when.copy();
         if (detail != null) {
           dst.detail = new ArrayList<Reference>();
@@ -665,8 +615,7 @@ public class Order extends DomainResource {
         Order o = (Order) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(date, o.date, true) && compareDeep(subject, o.subject, true)
            && compareDeep(source, o.source, true) && compareDeep(target, o.target, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(authority, o.authority, true) && compareDeep(when, o.when, true) && compareDeep(detail, o.detail, true)
-          ;
+           && compareDeep(when, o.when, true) && compareDeep(detail, o.detail, true);
       }
 
       @Override
@@ -682,8 +631,8 @@ public class Order extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (date == null || date.isEmpty())
            && (subject == null || subject.isEmpty()) && (source == null || source.isEmpty()) && (target == null || target.isEmpty())
-           && (reason == null || reason.isEmpty()) && (authority == null || authority.isEmpty()) && (when == null || when.isEmpty())
-           && (detail == null || detail.isEmpty());
+           && (reason == null || reason.isEmpty()) && (when == null || when.isEmpty()) && (detail == null || detail.isEmpty())
+          ;
       }
 
   @Override
@@ -693,12 +642,12 @@ public class Order extends DomainResource {
 
   @SearchParamDefinition(name="date", path="Order.date", description="When the order was made", type="date" )
   public static final String SP_DATE = "date";
+  @SearchParamDefinition(name="identifier", path="Order.identifier", description="Instance id fromsource, target, and/or  others", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="subject", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="Order.subject", description="Patient this order is about", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="authority", path="Order.authority", description="If required by policy", type="reference" )
-  public static final String SP_AUTHORITY = "authority";
   @SearchParamDefinition(name="source", path="Order.source", description="Who initiated the order", type="reference" )
   public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="detail", path="Order.detail", description="What action is being ordered", type="reference" )

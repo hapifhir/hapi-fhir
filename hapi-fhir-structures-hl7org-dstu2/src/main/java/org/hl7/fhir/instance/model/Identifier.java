@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -90,10 +90,10 @@ public class Identifier extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case USUAL: return "http://hl7.org.fhir/identifier-use";
-            case OFFICIAL: return "http://hl7.org.fhir/identifier-use";
-            case TEMP: return "http://hl7.org.fhir/identifier-use";
-            case SECONDARY: return "http://hl7.org.fhir/identifier-use";
+            case USUAL: return "http://hl7.org/fhir/identifier-use";
+            case OFFICIAL: return "http://hl7.org/fhir/identifier-use";
+            case TEMP: return "http://hl7.org/fhir/identifier-use";
+            case SECONDARY: return "http://hl7.org/fhir/identifier-use";
             default: return "?";
           }
         }

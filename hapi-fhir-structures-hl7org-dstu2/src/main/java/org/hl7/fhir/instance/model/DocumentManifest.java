@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -89,6 +89,10 @@ public class DocumentManifest extends DomainResource {
           return (Attachment) this.p;
         }
 
+        public boolean hasPAttachment() throws Exception { 
+          return this.p instanceof Attachment;
+        }
+
         /**
          * @return {@link #p} (The list of DocumentReference or Media Resources, or Attachment that consist of the parts of this document manifest. Usually, these would be document references, but direct references to Media or Attachments are also allowed.)
          */
@@ -96,6 +100,10 @@ public class DocumentManifest extends DomainResource {
           if (!(this.p instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.p.getClass().getName()+" was encountered");
           return (Reference) this.p;
+        }
+
+        public boolean hasPReference() throws Exception { 
+          return this.p instanceof Reference;
         }
 
         public boolean hasP() { 
@@ -357,7 +365,7 @@ public class DocumentManifest extends DomainResource {
      * The status of this document manifest.
      */
     @Child(name = "status", type = {CodeType.class}, order=8, min=1, max=1)
-    @Description(shortDefinition="current | superceded | entered-in-error", formalDefinition="The status of this document manifest." )
+    @Description(shortDefinition="current | superseded | entered-in-error", formalDefinition="The status of this document manifest." )
     protected Enumeration<DocumentReferenceStatus> status;
 
     /**
@@ -1013,7 +1021,7 @@ public class DocumentManifest extends DomainResource {
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="recipient", path="DocumentManifest.recipient", description="Intended to get notified about this set of documents", type="reference" )
   public static final String SP_RECIPIENT = "recipient";
-  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superceded | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="DocumentManifest.status", description="current | superseded | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
   @SearchParamDefinition(name="contentref", path="DocumentManifest.content.pReference", description="Contents of this set of documents", type="reference" )
   public static final String SP_CONTENTREF = "contentref";

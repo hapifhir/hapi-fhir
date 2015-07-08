@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -218,6 +218,10 @@ public class Specimen extends DomainResource {
           return (DateTimeType) this.collected;
         }
 
+        public boolean hasCollectedDateTimeType() throws Exception { 
+          return this.collected instanceof DateTimeType;
+        }
+
         /**
          * @return {@link #collected} (Time when specimen was collected from subject - the physiologically relevant time.)
          */
@@ -225,6 +229,10 @@ public class Specimen extends DomainResource {
           if (!(this.collected instanceof Period))
             throw new Exception("Type mismatch: the type Period was expected, but "+this.collected.getClass().getName()+" was encountered");
           return (Period) this.collected;
+        }
+
+        public boolean hasCollectedPeriod() throws Exception { 
+          return this.collected instanceof Period;
         }
 
         public boolean hasCollected() { 
@@ -303,6 +311,10 @@ public class Specimen extends DomainResource {
           return (CodeableConcept) this.bodySite;
         }
 
+        public boolean hasBodySiteCodeableConcept() throws Exception { 
+          return this.bodySite instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
@@ -310,6 +322,10 @@ public class Specimen extends DomainResource {
           if (!(this.bodySite instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
           return (Reference) this.bodySite;
+        }
+
+        public boolean hasBodySiteReference() throws Exception { 
+          return this.bodySite instanceof Reference;
         }
 
         public boolean hasBodySite() { 
@@ -829,6 +845,10 @@ public class Specimen extends DomainResource {
           return (CodeableConcept) this.additive;
         }
 
+        public boolean hasAdditiveCodeableConcept() throws Exception { 
+          return this.additive instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #additive} (Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.)
          */
@@ -836,6 +856,10 @@ public class Specimen extends DomainResource {
           if (!(this.additive instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (Reference) this.additive;
+        }
+
+        public boolean hasAdditiveReference() throws Exception { 
+          return this.additive instanceof Reference;
         }
 
         public boolean hasAdditive() { 

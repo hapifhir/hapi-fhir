@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class CarePlan extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case PLANNED: return "http://hl7.org.fhir/care-plan-status";
-            case ACTIVE: return "http://hl7.org.fhir/care-plan-status";
-            case COMPLETED: return "http://hl7.org.fhir/care-plan-status";
+            case PLANNED: return "http://hl7.org/fhir/care-plan-status";
+            case ACTIVE: return "http://hl7.org/fhir/care-plan-status";
+            case COMPLETED: return "http://hl7.org/fhir/care-plan-status";
             default: return "?";
           }
         }
@@ -198,13 +198,13 @@ public class CarePlan extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DIET: return "http://hl7.org.fhir/care-plan-activity-category";
-            case DRUG: return "http://hl7.org.fhir/care-plan-activity-category";
-            case ENCOUNTER: return "http://hl7.org.fhir/care-plan-activity-category";
-            case OBSERVATION: return "http://hl7.org.fhir/care-plan-activity-category";
-            case PROCEDURE: return "http://hl7.org.fhir/care-plan-activity-category";
-            case SUPPLY: return "http://hl7.org.fhir/care-plan-activity-category";
-            case OTHER: return "http://hl7.org.fhir/care-plan-activity-category";
+            case DIET: return "http://hl7.org/fhir/care-plan-activity-category";
+            case DRUG: return "http://hl7.org/fhir/care-plan-activity-category";
+            case ENCOUNTER: return "http://hl7.org/fhir/care-plan-activity-category";
+            case OBSERVATION: return "http://hl7.org/fhir/care-plan-activity-category";
+            case PROCEDURE: return "http://hl7.org/fhir/care-plan-activity-category";
+            case SUPPLY: return "http://hl7.org/fhir/care-plan-activity-category";
+            case OTHER: return "http://hl7.org/fhir/care-plan-activity-category";
             default: return "?";
           }
         }
@@ -333,12 +333,12 @@ public class CarePlan extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case NOTSTARTED: return "http://hl7.org.fhir/care-plan-activity-status";
-            case SCHEDULED: return "http://hl7.org.fhir/care-plan-activity-status";
-            case INPROGRESS: return "http://hl7.org.fhir/care-plan-activity-status";
-            case ONHOLD: return "http://hl7.org.fhir/care-plan-activity-status";
-            case COMPLETED: return "http://hl7.org.fhir/care-plan-activity-status";
-            case CANCELLED: return "http://hl7.org.fhir/care-plan-activity-status";
+            case NOTSTARTED: return "http://hl7.org/fhir/care-plan-activity-status";
+            case SCHEDULED: return "http://hl7.org/fhir/care-plan-activity-status";
+            case INPROGRESS: return "http://hl7.org/fhir/care-plan-activity-status";
+            case ONHOLD: return "http://hl7.org/fhir/care-plan-activity-status";
+            case COMPLETED: return "http://hl7.org/fhir/care-plan-activity-status";
+            case CANCELLED: return "http://hl7.org/fhir/care-plan-activity-status";
             default: return "?";
           }
         }
@@ -1027,6 +1027,10 @@ public class CarePlan extends DomainResource {
           return (CodeableConcept) this.reason;
         }
 
+        public boolean hasReasonCodeableConcept() throws Exception { 
+          return this.reason instanceof CodeableConcept;
+        }
+
         /**
          * @return {@link #reason} (Provides the health condition(s) or other rationale that drove the inclusion of this particular activity as part of the plan.)
          */
@@ -1034,6 +1038,10 @@ public class CarePlan extends DomainResource {
           if (!(this.reason instanceof Reference))
             throw new Exception("Type mismatch: the type Reference was expected, but "+this.reason.getClass().getName()+" was encountered");
           return (Reference) this.reason;
+        }
+
+        public boolean hasReasonReference() throws Exception { 
+          return this.reason instanceof Reference;
         }
 
         public boolean hasReason() { 
@@ -1243,6 +1251,10 @@ public class CarePlan extends DomainResource {
           return (Timing) this.scheduled;
         }
 
+        public boolean hasScheduledTiming() throws Exception { 
+          return this.scheduled instanceof Timing;
+        }
+
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
@@ -1252,6 +1264,10 @@ public class CarePlan extends DomainResource {
           return (Period) this.scheduled;
         }
 
+        public boolean hasScheduledPeriod() throws Exception { 
+          return this.scheduled instanceof Period;
+        }
+
         /**
          * @return {@link #scheduled} (The period, timing or frequency upon which the described activity is to occur.)
          */
@@ -1259,6 +1275,10 @@ public class CarePlan extends DomainResource {
           if (!(this.scheduled instanceof StringType))
             throw new Exception("Type mismatch: the type StringType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (StringType) this.scheduled;
+        }
+
+        public boolean hasScheduledStringType() throws Exception { 
+          return this.scheduled instanceof StringType;
         }
 
         public boolean hasScheduled() { 

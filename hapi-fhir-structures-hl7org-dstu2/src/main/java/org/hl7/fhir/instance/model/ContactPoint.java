@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -90,10 +90,10 @@ public class ContactPoint extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case PHONE: return "http://hl7.org.fhir/contact-point-system";
-            case FAX: return "http://hl7.org.fhir/contact-point-system";
-            case EMAIL: return "http://hl7.org.fhir/contact-point-system";
-            case URL: return "http://hl7.org.fhir/contact-point-system";
+            case PHONE: return "http://hl7.org/fhir/contact-point-system";
+            case FAX: return "http://hl7.org/fhir/contact-point-system";
+            case EMAIL: return "http://hl7.org/fhir/contact-point-system";
+            case URL: return "http://hl7.org/fhir/contact-point-system";
             default: return "?";
           }
         }
@@ -197,11 +197,11 @@ public class ContactPoint extends Type implements ICompositeType {
         }
         public String getSystem() {
           switch (this) {
-            case HOME: return "http://hl7.org.fhir/contact-point-use";
-            case WORK: return "http://hl7.org.fhir/contact-point-use";
-            case TEMP: return "http://hl7.org.fhir/contact-point-use";
-            case OLD: return "http://hl7.org.fhir/contact-point-use";
-            case MOBILE: return "http://hl7.org.fhir/contact-point-use";
+            case HOME: return "http://hl7.org/fhir/contact-point-use";
+            case WORK: return "http://hl7.org/fhir/contact-point-use";
+            case TEMP: return "http://hl7.org/fhir/contact-point-use";
+            case OLD: return "http://hl7.org/fhir/contact-point-use";
+            case MOBILE: return "http://hl7.org/fhir/contact-point-use";
             default: return "?";
           }
         }

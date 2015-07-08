@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -112,13 +112,13 @@ public class ReferralRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "http://hl7.org.fhir/referralstatus";
-            case REQUESTED: return "http://hl7.org.fhir/referralstatus";
-            case ACTIVE: return "http://hl7.org.fhir/referralstatus";
-            case CANCELLED: return "http://hl7.org.fhir/referralstatus";
-            case ACCEPTED: return "http://hl7.org.fhir/referralstatus";
-            case REJECTED: return "http://hl7.org.fhir/referralstatus";
-            case COMPLETED: return "http://hl7.org.fhir/referralstatus";
+            case DRAFT: return "http://hl7.org/fhir/referralstatus";
+            case REQUESTED: return "http://hl7.org/fhir/referralstatus";
+            case ACTIVE: return "http://hl7.org/fhir/referralstatus";
+            case CANCELLED: return "http://hl7.org/fhir/referralstatus";
+            case ACCEPTED: return "http://hl7.org/fhir/referralstatus";
+            case REJECTED: return "http://hl7.org/fhir/referralstatus";
+            case COMPLETED: return "http://hl7.org/fhir/referralstatus";
             default: return "?";
           }
         }

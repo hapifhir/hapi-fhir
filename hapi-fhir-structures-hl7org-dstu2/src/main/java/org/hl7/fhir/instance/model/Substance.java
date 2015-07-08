@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -367,34 +367,41 @@ public class Substance extends DomainResource {
   }
 
     /**
+     * Unique identifier for the substance.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Unique identifier", formalDefinition="Unique identifier for the substance." )
+    protected List<Identifier> identifier;
+
+    /**
      * A code (or set of codes) that identify this substance.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1)
     @Description(shortDefinition="What kind of substance this is", formalDefinition="A code (or set of codes) that identify this substance." )
     protected CodeableConcept type;
 
     /**
      * A description of the substance - its appearance, handling requirements, and other usage notes.
      */
-    @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="Textual description of the substance, comments", formalDefinition="A description of the substance - its appearance, handling requirements, and other usage notes." )
     protected StringType description;
 
     /**
      * Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.
      */
-    @Child(name = "instance", type = {}, order=2, min=0, max=1)
+    @Child(name = "instance", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="If this describes a specific package/container of the substance", formalDefinition="Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance." )
-    protected SubstanceInstanceComponent instance;
+    protected List<SubstanceInstanceComponent> instance;
 
     /**
      * A substance can be composed of other substances.
      */
-    @Child(name = "ingredient", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "ingredient", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Composition information about the substance", formalDefinition="A substance can be composed of other substances." )
     protected List<SubstanceIngredientComponent> ingredient;
 
-    private static final long serialVersionUID = 1881086620L;
+    private static final long serialVersionUID = 373963428L;
 
   /*
    * Constructor
@@ -409,6 +416,46 @@ public class Substance extends DomainResource {
     public Substance(CodeableConcept type) {
       super();
       this.type = type;
+    }
+
+    /**
+     * @return {@link #identifier} (Unique identifier for the substance.)
+     */
+    public List<Identifier> getIdentifier() { 
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      return this.identifier;
+    }
+
+    public boolean hasIdentifier() { 
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #identifier} (Unique identifier for the substance.)
+     */
+    // syntactic sugar
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Substance addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
@@ -487,24 +534,40 @@ public class Substance extends DomainResource {
     /**
      * @return {@link #instance} (Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.)
      */
-    public SubstanceInstanceComponent getInstance() { 
+    public List<SubstanceInstanceComponent> getInstance() { 
       if (this.instance == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Substance.instance");
-        else if (Configuration.doAutoCreate())
-          this.instance = new SubstanceInstanceComponent(); // cc
+        this.instance = new ArrayList<SubstanceInstanceComponent>();
       return this.instance;
     }
 
     public boolean hasInstance() { 
-      return this.instance != null && !this.instance.isEmpty();
+      if (this.instance == null)
+        return false;
+      for (SubstanceInstanceComponent item : this.instance)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #instance} (Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.)
+     * @return {@link #instance} (Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.)
      */
-    public Substance setInstance(SubstanceInstanceComponent value) { 
-      this.instance = value;
+    // syntactic sugar
+    public SubstanceInstanceComponent addInstance() { //3
+      SubstanceInstanceComponent t = new SubstanceInstanceComponent();
+      if (this.instance == null)
+        this.instance = new ArrayList<SubstanceInstanceComponent>();
+      this.instance.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Substance addInstance(SubstanceInstanceComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.instance == null)
+        this.instance = new ArrayList<SubstanceInstanceComponent>();
+      this.instance.add(t);
       return this;
     }
 
@@ -550,6 +613,7 @@ public class Substance extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
+        childrenList.add(new Property("identifier", "Identifier", "Unique identifier for the substance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("description", "string", "A description of the substance - its appearance, handling requirements, and other usage notes.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance));
@@ -559,9 +623,18 @@ public class Substance extends DomainResource {
       public Substance copy() {
         Substance dst = new Substance();
         copyValues(dst);
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.type = type == null ? null : type.copy();
         dst.description = description == null ? null : description.copy();
-        dst.instance = instance == null ? null : instance.copy();
+        if (instance != null) {
+          dst.instance = new ArrayList<SubstanceInstanceComponent>();
+          for (SubstanceInstanceComponent i : instance)
+            dst.instance.add(i.copy());
+        };
         if (ingredient != null) {
           dst.ingredient = new ArrayList<SubstanceIngredientComponent>();
           for (SubstanceIngredientComponent i : ingredient)
@@ -581,8 +654,8 @@ public class Substance extends DomainResource {
         if (!(other instanceof Substance))
           return false;
         Substance o = (Substance) other;
-        return compareDeep(type, o.type, true) && compareDeep(description, o.description, true) && compareDeep(instance, o.instance, true)
-           && compareDeep(ingredient, o.ingredient, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
+           && compareDeep(instance, o.instance, true) && compareDeep(ingredient, o.ingredient, true);
       }
 
       @Override
@@ -596,9 +669,9 @@ public class Substance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (type == null || type.isEmpty()) && (description == null || description.isEmpty())
-           && (instance == null || instance.isEmpty()) && (ingredient == null || ingredient.isEmpty())
-          ;
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
+           && (description == null || description.isEmpty()) && (instance == null || instance.isEmpty())
+           && (ingredient == null || ingredient.isEmpty());
       }
 
   @Override
@@ -606,13 +679,15 @@ public class Substance extends DomainResource {
     return ResourceType.Substance;
    }
 
-  @SearchParamDefinition(name="identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
+  @SearchParamDefinition(name="identifier", path="Substance.identifier", description="Unique identifier for the substance", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
+  public static final String SP_CONTAINERIDENTIFIER = "container-identifier";
   @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="number" )
   public static final String SP_QUANTITY = "quantity";
   @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
   public static final String SP_SUBSTANCE = "substance";
-  @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="When no longer valid to use", type="date" )
+  @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date" )
   public static final String SP_EXPIRY = "expiry";
   @SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token" )
   public static final String SP_TYPE = "type";

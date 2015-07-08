@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -106,12 +106,12 @@ public class DataElement extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case COMPARABLE: return "http://hl7.org.fhir/dataelement-specificity";
-            case FULLYSPECIFIED: return "http://hl7.org.fhir/dataelement-specificity";
-            case EQUIVALENT: return "http://hl7.org.fhir/dataelement-specificity";
-            case CONVERTABLE: return "http://hl7.org.fhir/dataelement-specificity";
-            case SCALEABLE: return "http://hl7.org.fhir/dataelement-specificity";
-            case FLEXIBLE: return "http://hl7.org.fhir/dataelement-specificity";
+            case COMPARABLE: return "http://hl7.org/fhir/dataelement-specificity";
+            case FULLYSPECIFIED: return "http://hl7.org/fhir/dataelement-specificity";
+            case EQUIVALENT: return "http://hl7.org/fhir/dataelement-specificity";
+            case CONVERTABLE: return "http://hl7.org/fhir/dataelement-specificity";
+            case SCALEABLE: return "http://hl7.org/fhir/dataelement-specificity";
+            case FLEXIBLE: return "http://hl7.org/fhir/dataelement-specificity";
             default: return "?";
           }
         }
@@ -621,10 +621,10 @@ public class DataElement extends DomainResource {
   }
 
     /**
-     * An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
-    @Description(shortDefinition="Globally unique logical id for data element", formalDefinition="An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:)." )
+    @Description(shortDefinition="Globally unique logical id for data element", formalDefinition="An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)." )
     protected UriType url;
 
     /**
@@ -736,7 +736,7 @@ public class DataElement extends DomainResource {
     }
 
     /**
-     * @return {@link #url} (An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -756,7 +756,7 @@ public class DataElement extends DomainResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public DataElement setUrlElement(UriType value) { 
       this.url = value;
@@ -764,14 +764,14 @@ public class DataElement extends DomainResource {
     }
 
     /**
-     * @return An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * @return An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).
+     * @param value An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).
      */
     public DataElement setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1354,7 +1354,7 @@ public class DataElement extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("url", "uri", "An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and an be urn:uuid: or urn:oid:).", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("url", "uri", "An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:).", 0, java.lang.Integer.MAX_VALUE, url));
         childrenList.add(new Property("identifier", "Identifier", "Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually.", 0, java.lang.Integer.MAX_VALUE, version));
         childrenList.add(new Property("name", "string", "The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used.", 0, java.lang.Integer.MAX_VALUE, name));

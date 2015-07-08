@@ -18,11 +18,5 @@
     </sch:pattern>
   <sch:pattern>
     <sch:title>Binary</sch:title>
-    <sch:rule context="f:Binary/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:Binary/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
     </sch:pattern>
 </sch:schema>

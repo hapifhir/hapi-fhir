@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class DeviceMetric extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ON: return "http://hl7.org.fhir/metric-operational-status";
-            case OFF: return "http://hl7.org.fhir/metric-operational-status";
-            case STANDBY: return "http://hl7.org.fhir/metric-operational-status";
+            case ON: return "http://hl7.org/fhir/metric-operational-status";
+            case OFF: return "http://hl7.org/fhir/metric-operational-status";
+            case STANDBY: return "http://hl7.org/fhir/metric-operational-status";
             default: return "?";
           }
         }
@@ -205,14 +205,14 @@ public class DeviceMetric extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case BLACK: return "http://hl7.org.fhir/metric-color";
-            case RED: return "http://hl7.org.fhir/metric-color";
-            case GREEN: return "http://hl7.org.fhir/metric-color";
-            case YELLOW: return "http://hl7.org.fhir/metric-color";
-            case BLUE: return "http://hl7.org.fhir/metric-color";
-            case MAGENTA: return "http://hl7.org.fhir/metric-color";
-            case CYAN: return "http://hl7.org.fhir/metric-color";
-            case WHITE: return "http://hl7.org.fhir/metric-color";
+            case BLACK: return "http://hl7.org/fhir/metric-color";
+            case RED: return "http://hl7.org/fhir/metric-color";
+            case GREEN: return "http://hl7.org/fhir/metric-color";
+            case YELLOW: return "http://hl7.org/fhir/metric-color";
+            case BLUE: return "http://hl7.org/fhir/metric-color";
+            case MAGENTA: return "http://hl7.org/fhir/metric-color";
+            case CYAN: return "http://hl7.org/fhir/metric-color";
+            case WHITE: return "http://hl7.org/fhir/metric-color";
             default: return "?";
           }
         }
@@ -333,10 +333,10 @@ public class DeviceMetric extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case MEASUREMENT: return "http://hl7.org.fhir/metric-category";
-            case SETTING: return "http://hl7.org.fhir/metric-category";
-            case CALCULATION: return "http://hl7.org.fhir/metric-category";
-            case UNSPECIFIED: return "http://hl7.org.fhir/metric-category";
+            case MEASUREMENT: return "http://hl7.org/fhir/metric-category";
+            case SETTING: return "http://hl7.org/fhir/metric-category";
+            case CALCULATION: return "http://hl7.org/fhir/metric-category";
+            case UNSPECIFIED: return "http://hl7.org/fhir/metric-category";
             default: return "?";
           }
         }
@@ -433,10 +433,10 @@ public class DeviceMetric extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UNSPECIFIED: return "http://hl7.org.fhir/metric-calibration-type";
-            case OFFSET: return "http://hl7.org.fhir/metric-calibration-type";
-            case GAIN: return "http://hl7.org.fhir/metric-calibration-type";
-            case TWOPOINT: return "http://hl7.org.fhir/metric-calibration-type";
+            case UNSPECIFIED: return "http://hl7.org/fhir/metric-calibration-type";
+            case OFFSET: return "http://hl7.org/fhir/metric-calibration-type";
+            case GAIN: return "http://hl7.org/fhir/metric-calibration-type";
+            case TWOPOINT: return "http://hl7.org/fhir/metric-calibration-type";
             default: return "?";
           }
         }
@@ -533,10 +533,10 @@ public class DeviceMetric extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case NOTCALIBRATED: return "http://hl7.org.fhir/metric-calibration-state";
-            case CALIBRATIONREQUIRED: return "http://hl7.org.fhir/metric-calibration-state";
-            case CALIBRATED: return "http://hl7.org.fhir/metric-calibration-state";
-            case UNSPECIFIED: return "http://hl7.org.fhir/metric-calibration-state";
+            case NOTCALIBRATED: return "http://hl7.org/fhir/metric-calibration-state";
+            case CALIBRATIONREQUIRED: return "http://hl7.org/fhir/metric-calibration-state";
+            case CALIBRATED: return "http://hl7.org/fhir/metric-calibration-state";
+            case UNSPECIFIED: return "http://hl7.org/fhir/metric-calibration-state";
             default: return "?";
           }
         }
@@ -868,10 +868,10 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     protected Enumeration<DeviceMetricOperationalStatus> operationalStatus;
 
     /**
-     * Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
+     * Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.
      */
     @Child(name = "color", type = {CodeType.class}, order=6, min=0, max=1)
-    @Description(shortDefinition="black | red | green | yellow | blue | magenta | cyan | white", formalDefinition="Describes the typical color of the representation of observations that have been generated for this DeviceMetric." )
+    @Description(shortDefinition="black | red | green | yellow | blue | magenta | cyan | white", formalDefinition="Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta." )
     protected Enumeration<DeviceMetricColor> color;
 
     /**
@@ -882,12 +882,12 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     protected Enumeration<DeviceMetricCategory> category;
 
     /**
-     * Describes the measurement repetition time. This is not
-necessarily the same as the update
-period.
+     * Describes the measurement repetition time. This is not necessarily the same as the update period.
+The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.
+The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.
      */
     @Child(name = "measurementPeriod", type = {Timing.class}, order=8, min=0, max=1)
-    @Description(shortDefinition="Describes the measurement repetition time", formalDefinition="Describes the measurement repetition time. This is not\nnecessarily the same as the update\nperiod." )
+    @Description(shortDefinition="Describes the measurement repetition time", formalDefinition="Describes the measurement repetition time. This is not necessarily the same as the update period.\nThe measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.\nThe update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured." )
     protected Timing measurementPeriod;
 
     /**
@@ -1132,7 +1132,7 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     }
 
     /**
-     * @return {@link #color} (Describes the typical color of the representation of observations that have been generated for this DeviceMetric.). This is the underlying object with id, value and extensions. The accessor "getColor" gives direct access to the value
+     * @return {@link #color} (Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.). This is the underlying object with id, value and extensions. The accessor "getColor" gives direct access to the value
      */
     public Enumeration<DeviceMetricColor> getColorElement() { 
       if (this.color == null)
@@ -1152,7 +1152,7 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     }
 
     /**
-     * @param value {@link #color} (Describes the typical color of the representation of observations that have been generated for this DeviceMetric.). This is the underlying object with id, value and extensions. The accessor "getColor" gives direct access to the value
+     * @param value {@link #color} (Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.). This is the underlying object with id, value and extensions. The accessor "getColor" gives direct access to the value
      */
     public DeviceMetric setColorElement(Enumeration<DeviceMetricColor> value) { 
       this.color = value;
@@ -1160,14 +1160,14 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     }
 
     /**
-     * @return Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
+     * @return Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.
      */
     public DeviceMetricColor getColor() { 
       return this.color == null ? null : this.color.getValue();
     }
 
     /**
-     * @param value Describes the typical color of the representation of observations that have been generated for this DeviceMetric.
+     * @param value Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.
      */
     public DeviceMetric setColor(DeviceMetricColor value) { 
       if (value == null)
@@ -1226,9 +1226,9 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     }
 
     /**
-     * @return {@link #measurementPeriod} (Describes the measurement repetition time. This is not
-necessarily the same as the update
-period.)
+     * @return {@link #measurementPeriod} (Describes the measurement repetition time. This is not necessarily the same as the update period.
+The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.
+The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.)
      */
     public Timing getMeasurementPeriod() { 
       if (this.measurementPeriod == null)
@@ -1244,9 +1244,9 @@ period.)
     }
 
     /**
-     * @param value {@link #measurementPeriod} (Describes the measurement repetition time. This is not
-necessarily the same as the update
-period.)
+     * @param value {@link #measurementPeriod} (Describes the measurement repetition time. This is not necessarily the same as the update period.
+The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.
+The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.)
      */
     public DeviceMetric setMeasurementPeriod(Timing value) { 
       this.measurementPeriod = value;
@@ -1301,9 +1301,9 @@ period.)
         childrenList.add(new Property("source", "Reference(Device)", "Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("parent", "Reference(DeviceComponent)", "Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.\nAn example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.", 0, java.lang.Integer.MAX_VALUE, parent));
         childrenList.add(new Property("operationalStatus", "code", "Indicates current operational state of the device. For example: On, Off, Standby, etc.", 0, java.lang.Integer.MAX_VALUE, operationalStatus));
-        childrenList.add(new Property("color", "code", "Describes the typical color of the representation of observations that have been generated for this DeviceMetric.", 0, java.lang.Integer.MAX_VALUE, color));
+        childrenList.add(new Property("color", "code", "Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.", 0, java.lang.Integer.MAX_VALUE, color));
         childrenList.add(new Property("category", "code", "Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.", 0, java.lang.Integer.MAX_VALUE, category));
-        childrenList.add(new Property("measurementPeriod", "Timing", "Describes the measurement repetition time. This is not\nnecessarily the same as the update\nperiod.", 0, java.lang.Integer.MAX_VALUE, measurementPeriod));
+        childrenList.add(new Property("measurementPeriod", "Timing", "Describes the measurement repetition time. This is not necessarily the same as the update period.\nThe measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.\nThe update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.", 0, java.lang.Integer.MAX_VALUE, measurementPeriod));
         childrenList.add(new Property("calibration", "", "Describes the calibrations that have been performed or that are required to be performed.", 0, java.lang.Integer.MAX_VALUE, calibration));
       }
 

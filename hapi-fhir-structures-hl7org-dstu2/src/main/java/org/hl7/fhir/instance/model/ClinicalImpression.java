@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -84,9 +84,9 @@ public class ClinicalImpression extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INPROGRESS: return "http://hl7.org.fhir/clinical-impression-status";
-            case COMPLETED: return "http://hl7.org.fhir/clinical-impression-status";
-            case ENTEREDINERROR: return "http://hl7.org.fhir/clinical-impression-status";
+            case INPROGRESS: return "http://hl7.org/fhir/clinical-impression-status";
+            case COMPLETED: return "http://hl7.org/fhir/clinical-impression-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/clinical-impression-status";
             default: return "?";
           }
         }
@@ -1089,6 +1089,10 @@ public class ClinicalImpression extends DomainResource {
       return (CodeableConcept) this.trigger;
     }
 
+    public boolean hasTriggerCodeableConcept() throws Exception { 
+      return this.trigger instanceof CodeableConcept;
+    }
+
     /**
      * @return {@link #trigger} (The request or event that necessitated this assessment. This may be a diagnosis, a Care Plan, a Request Referral, or some other resource.)
      */
@@ -1096,6 +1100,10 @@ public class ClinicalImpression extends DomainResource {
       if (!(this.trigger instanceof Reference))
         throw new Exception("Type mismatch: the type Reference was expected, but "+this.trigger.getClass().getName()+" was encountered");
       return (Reference) this.trigger;
+    }
+
+    public boolean hasTriggerReference() throws Exception { 
+      return this.trigger instanceof Reference;
     }
 
     public boolean hasTrigger() { 

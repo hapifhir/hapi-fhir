@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -113,13 +113,13 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getSystem() {
           switch (this) {
-            case DOCUMENT: return "http://hl7.org.fhir/bundle-type";
-            case MESSAGE: return "http://hl7.org.fhir/bundle-type";
-            case TRANSACTION: return "http://hl7.org.fhir/bundle-type";
-            case TRANSACTIONRESPONSE: return "http://hl7.org.fhir/bundle-type";
-            case HISTORY: return "http://hl7.org.fhir/bundle-type";
-            case SEARCHSET: return "http://hl7.org.fhir/bundle-type";
-            case COLLECTION: return "http://hl7.org.fhir/bundle-type";
+            case DOCUMENT: return "http://hl7.org/fhir/bundle-type";
+            case MESSAGE: return "http://hl7.org/fhir/bundle-type";
+            case TRANSACTION: return "http://hl7.org/fhir/bundle-type";
+            case TRANSACTIONRESPONSE: return "http://hl7.org/fhir/bundle-type";
+            case HISTORY: return "http://hl7.org/fhir/bundle-type";
+            case SEARCHSET: return "http://hl7.org/fhir/bundle-type";
+            case COLLECTION: return "http://hl7.org/fhir/bundle-type";
             default: return "?";
           }
         }
@@ -199,6 +199,10 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         INCLUDE, 
         /**
+         * An OperationOutcome that provides additional information about the processing of a search
+         */
+        OUTCOME, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -209,19 +213,23 @@ public class Bundle extends Resource implements IBaseBundle {
           return MATCH;
         if ("include".equals(codeString))
           return INCLUDE;
+        if ("outcome".equals(codeString))
+          return OUTCOME;
         throw new Exception("Unknown SearchEntryMode code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case MATCH: return "match";
             case INCLUDE: return "include";
+            case OUTCOME: return "outcome";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case MATCH: return "http://hl7.org.fhir/search-entry-mode";
-            case INCLUDE: return "http://hl7.org.fhir/search-entry-mode";
+            case MATCH: return "http://hl7.org/fhir/search-entry-mode";
+            case INCLUDE: return "http://hl7.org/fhir/search-entry-mode";
+            case OUTCOME: return "http://hl7.org/fhir/search-entry-mode";
             default: return "?";
           }
         }
@@ -229,6 +237,7 @@ public class Bundle extends Resource implements IBaseBundle {
           switch (this) {
             case MATCH: return "This resource matched the search specification";
             case INCLUDE: return "This resource is returned because it is referred to from another resource in the search set";
+            case OUTCOME: return "An OperationOutcome that provides additional information about the processing of a search";
             default: return "?";
           }
         }
@@ -236,6 +245,7 @@ public class Bundle extends Resource implements IBaseBundle {
           switch (this) {
             case MATCH: return "match";
             case INCLUDE: return "include";
+            case OUTCOME: return "outcome";
             default: return "?";
           }
         }
@@ -250,6 +260,8 @@ public class Bundle extends Resource implements IBaseBundle {
           return SearchEntryMode.MATCH;
         if ("include".equals(codeString))
           return SearchEntryMode.INCLUDE;
+        if ("outcome".equals(codeString))
+          return SearchEntryMode.OUTCOME;
         throw new IllegalArgumentException("Unknown SearchEntryMode code '"+codeString+"'");
         }
     public String toCode(SearchEntryMode code) {
@@ -257,6 +269,8 @@ public class Bundle extends Resource implements IBaseBundle {
         return "match";
       if (code == SearchEntryMode.INCLUDE)
         return "include";
+      if (code == SearchEntryMode.OUTCOME)
+        return "outcome";
       return "?";
       }
     }
@@ -306,10 +320,10 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getSystem() {
           switch (this) {
-            case GET: return "http://hl7.org.fhir/http-verb";
-            case POST: return "http://hl7.org.fhir/http-verb";
-            case PUT: return "http://hl7.org.fhir/http-verb";
-            case DELETE: return "http://hl7.org.fhir/http-verb";
+            case GET: return "http://hl7.org/fhir/http-verb";
+            case POST: return "http://hl7.org/fhir/http-verb";
+            case PUT: return "http://hl7.org/fhir/http-verb";
+            case DELETE: return "http://hl7.org/fhir/http-verb";
             default: return "?";
           }
         }
@@ -546,7 +560,7 @@ public class Bundle extends Resource implements IBaseBundle {
          * The Resources for the entry.
          */
         @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Resources in this bundle", formalDefinition="The Resources for the entry." )
+        @Description(shortDefinition="A resource in the bundle", formalDefinition="The Resources for the entry." )
         protected Resource resource;
 
         /**
@@ -821,7 +835,7 @@ public class Bundle extends Resource implements IBaseBundle {
          * Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
          */
         @Child(name = "mode", type = {CodeType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="match | include - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement." )
+        @Description(shortDefinition="match | include | outcome - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement." )
         protected Enumeration<SearchEntryMode> mode;
 
         /**
@@ -989,10 +1003,10 @@ public class Bundle extends Resource implements IBaseBundle {
         protected Enumeration<HTTPVerb> method;
 
         /**
-         * A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).
+         * The URL for this entry, relative to the root.
          */
         @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="The URL for the transaction", formalDefinition="A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation)." )
+        @Description(shortDefinition="URL for HTTP equivalent of this entry", formalDefinition="The URL for this entry, relative to the root." )
         protected UriType url;
 
         /**
@@ -1087,7 +1101,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #url} (A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @return {@link #url} (The URL for this entry, relative to the root.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
         public UriType getUrlElement() { 
           if (this.url == null)
@@ -1107,7 +1121,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #url} (A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @param value {@link #url} (The URL for this entry, relative to the root.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
         public BundleEntryTransactionComponent setUrlElement(UriType value) { 
           this.url = value;
@@ -1115,14 +1129,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).
+         * @return The URL for this entry, relative to the root.
          */
         public String getUrl() { 
           return this.url == null ? null : this.url.getValue();
         }
 
         /**
-         * @param value A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).
+         * @param value The URL for this entry, relative to the root.
          */
         public BundleEntryTransactionComponent setUrl(String value) { 
             if (this.url == null)
@@ -1330,7 +1344,7 @@ public class Bundle extends Resource implements IBaseBundle {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("method", "code", "The HTTP verb for this entry in either a update history, or a transaction/ transaction response.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("url", "uri", "A search URL for this resource that specifies how the resource is matched to an existing resource when processing a transaction (see transaction documentation).", 0, java.lang.Integer.MAX_VALUE, url));
+          childrenList.add(new Property("url", "uri", "The URL for this entry, relative to the root.", 0, java.lang.Integer.MAX_VALUE, url));
           childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation.", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
           childrenList.add(new Property("ifMatch", "string", "Only perform the operation if the Etag value matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifMatch));
           childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));

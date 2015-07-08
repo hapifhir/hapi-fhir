@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Sun, May 31, 2015 15:45-0400 for FHIR v0.5.0
+// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -95,27 +95,34 @@ public class RelatedPerson extends DomainResource {
     protected Enumeration<AdministrativeGender> gender;
 
     /**
+     * The date on which the related person was born.
+     */
+    @Child(name = "birthDate", type = {DateType.class}, order=6, min=0, max=1)
+    @Description(shortDefinition="The date on which the related person was born", formalDefinition="The date on which the related person was born." )
+    protected DateType birthDate;
+
+    /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name = "address", type = {Address.class}, order=6, min=0, max=1)
+    @Child(name = "address", type = {Address.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
     protected Address address;
 
     /**
      * Image of the person.
      */
-    @Child(name = "photo", type = {Attachment.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "photo", type = {Attachment.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Image of the person", formalDefinition="Image of the person." )
     protected List<Attachment> photo;
 
     /**
      * The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.
      */
-    @Child(name = "period", type = {Period.class}, order=8, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
-    private static final long serialVersionUID = 1871047258L;
+    private static final long serialVersionUID = 1434295859L;
 
   /*
    * Constructor
@@ -354,6 +361,55 @@ public class RelatedPerson extends DomainResource {
     }
 
     /**
+     * @return {@link #birthDate} (The date on which the related person was born.). This is the underlying object with id, value and extensions. The accessor "getBirthDate" gives direct access to the value
+     */
+    public DateType getBirthDateElement() { 
+      if (this.birthDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RelatedPerson.birthDate");
+        else if (Configuration.doAutoCreate())
+          this.birthDate = new DateType(); // bb
+      return this.birthDate;
+    }
+
+    public boolean hasBirthDateElement() { 
+      return this.birthDate != null && !this.birthDate.isEmpty();
+    }
+
+    public boolean hasBirthDate() { 
+      return this.birthDate != null && !this.birthDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #birthDate} (The date on which the related person was born.). This is the underlying object with id, value and extensions. The accessor "getBirthDate" gives direct access to the value
+     */
+    public RelatedPerson setBirthDateElement(DateType value) { 
+      this.birthDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date on which the related person was born.
+     */
+    public Date getBirthDate() { 
+      return this.birthDate == null ? null : this.birthDate.getValue();
+    }
+
+    /**
+     * @param value The date on which the related person was born.
+     */
+    public RelatedPerson setBirthDate(Date value) { 
+      if (value == null)
+        this.birthDate = null;
+      else {
+        if (this.birthDate == null)
+          this.birthDate = new DateType();
+        this.birthDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
     public Address getAddress() { 
@@ -449,6 +505,7 @@ public class RelatedPerson extends DomainResource {
         childrenList.add(new Property("name", "HumanName", "A name associated with the person.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("telecom", "ContactPoint", "A contact detail for the person, e.g. a telephone number or an email address.", 0, java.lang.Integer.MAX_VALUE, telecom));
         childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
+        childrenList.add(new Property("birthDate", "date", "The date on which the related person was born.", 0, java.lang.Integer.MAX_VALUE, birthDate));
         childrenList.add(new Property("address", "Address", "Address where the related person can be contacted or visited.", 0, java.lang.Integer.MAX_VALUE, address));
         childrenList.add(new Property("photo", "Attachment", "Image of the person.", 0, java.lang.Integer.MAX_VALUE, photo));
         childrenList.add(new Property("period", "Period", "The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown.", 0, java.lang.Integer.MAX_VALUE, period));
@@ -471,6 +528,7 @@ public class RelatedPerson extends DomainResource {
             dst.telecom.add(i.copy());
         };
         dst.gender = gender == null ? null : gender.copy();
+        dst.birthDate = birthDate == null ? null : birthDate.copy();
         dst.address = address == null ? null : address.copy();
         if (photo != null) {
           dst.photo = new ArrayList<Attachment>();
@@ -494,8 +552,8 @@ public class RelatedPerson extends DomainResource {
         RelatedPerson o = (RelatedPerson) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(patient, o.patient, true) && compareDeep(relationship, o.relationship, true)
            && compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true) && compareDeep(gender, o.gender, true)
-           && compareDeep(address, o.address, true) && compareDeep(photo, o.photo, true) && compareDeep(period, o.period, true)
-          ;
+           && compareDeep(birthDate, o.birthDate, true) && compareDeep(address, o.address, true) && compareDeep(photo, o.photo, true)
+           && compareDeep(period, o.period, true);
       }
 
       @Override
@@ -505,14 +563,14 @@ public class RelatedPerson extends DomainResource {
         if (!(other instanceof RelatedPerson))
           return false;
         RelatedPerson o = (RelatedPerson) other;
-        return compareValues(gender, o.gender, true);
+        return compareValues(gender, o.gender, true) && compareValues(birthDate, o.birthDate, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (patient == null || patient.isEmpty())
            && (relationship == null || relationship.isEmpty()) && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
-           && (gender == null || gender.isEmpty()) && (address == null || address.isEmpty()) && (photo == null || photo.isEmpty())
-           && (period == null || period.isEmpty());
+           && (gender == null || gender.isEmpty()) && (birthDate == null || birthDate.isEmpty()) && (address == null || address.isEmpty())
+           && (photo == null || photo.isEmpty()) && (period == null || period.isEmpty());
       }
 
   @Override
@@ -522,18 +580,30 @@ public class RelatedPerson extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="RelatedPerson.identifier", description="A patient Identifier", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
-  public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="address", path="RelatedPerson.address", description="An address in any kind of address/part", type="string" )
   public static final String SP_ADDRESS = "address";
+  @SearchParamDefinition(name="birthdate", path="RelatedPerson.birthDate", description="The Related Person's date of birth", type="date" )
+  public static final String SP_BIRTHDATE = "birthdate";
+  @SearchParamDefinition(name="address-state", path="RelatedPerson.address.state", description="A state specified in an address", type="string" )
+  public static final String SP_ADDRESSSTATE = "address-state";
   @SearchParamDefinition(name="gender", path="RelatedPerson.gender", description="Gender of the person", type="token" )
   public static final String SP_GENDER = "gender";
+  @SearchParamDefinition(name="address-postalcode", path="RelatedPerson.address.postalCode", description="A postalCode specified in an address", type="string" )
+  public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
+  @SearchParamDefinition(name="address-country", path="RelatedPerson.address.country", description="A country specified in an address", type="string" )
+  public static final String SP_ADDRESSCOUNTRY = "address-country";
+  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  public static final String SP_PHONETIC = "phonetic";
   @SearchParamDefinition(name="patient", path="RelatedPerson.patient", description="The patient this person is related to", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="name", path="RelatedPerson.name", description="A portion of name in any name part", type="string" )
   public static final String SP_NAME = "name";
+  @SearchParamDefinition(name="address-use", path="RelatedPerson.address.use", description="A use code specified in an address", type="token" )
+  public static final String SP_ADDRESSUSE = "address-use";
   @SearchParamDefinition(name="telecom", path="RelatedPerson.telecom", description="The value in any kind of contact", type="token" )
   public static final String SP_TELECOM = "telecom";
+  @SearchParamDefinition(name="address-city", path="RelatedPerson.address.city", description="A city specified in an address", type="string" )
+  public static final String SP_ADDRESSCITY = "address-city";
 
 }
 

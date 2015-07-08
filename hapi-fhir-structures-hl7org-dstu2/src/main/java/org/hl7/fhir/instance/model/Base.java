@@ -54,6 +54,12 @@ private Map<String, Object> userData;
     return (String) getUserData(name);
   }
 
+  public int getUserInt(String name) {
+    if (!hasUserData(name))
+      return 0;
+    return (Integer) getUserData(name);
+  }
+
   public boolean hasFormatComment() {
   	return (formatComments != null && !formatComments.isEmpty());
   }
