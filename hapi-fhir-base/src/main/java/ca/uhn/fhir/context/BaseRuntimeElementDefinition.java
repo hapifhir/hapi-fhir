@@ -89,7 +89,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	}
 
 	/**
-	 * Returns null if none
+	 * @return Returns null if none
 	 */
 	public RuntimeChildDeclaredExtensionDefinition getDeclaredExtension(String theExtensionUrl) {
 		return myUrlToExtension.get(theExtensionUrl);
@@ -166,7 +166,7 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 
 	/**
 	 * Invoked prior to use to perform any initialization and make object
-	 * mutable
+	 * mutable.
 	 * @param theContext TODO
 	 */
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
@@ -197,22 +197,22 @@ public abstract class BaseRuntimeElementDefinition<T extends IBase> {
 	public enum ChildTypeEnum {
 		COMPOSITE_DATATYPE, PRIMITIVE_DATATYPE, RESOURCE, RESOURCE_REF, RESOURCE_BLOCK, 
 		/**
-		 * HAPI style
+		 * HAPI style.
 		 */
 		PRIMITIVE_XHTML, 
 		UNDECL_EXT, EXTENSION_DECLARED, 
 		/**
-		 * HAPI structure style
+		 * HAPI structure style.
 		 */
 		CONTAINED_RESOURCES, 
 		ID_DATATYPE, 
 		/**
-		 * HL7.org structure style
+		 * HL7.org structure style.
 		 */
 		CONTAINED_RESOURCE_LIST, 
 		
 		/**
-		 * HL7.org style
+		 * HL7.org style.
 		 */
 		PRIMITIVE_XHTML_HL7ORG
 

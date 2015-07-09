@@ -1021,7 +1021,7 @@ public class StructureDefinition extends DomainResource {
     /**
      * Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type.
      */
-    @Child(name = "abstract_", type = {BooleanType.class}, order=18, min=1, max=1)
+    @Child(name = "abstract", type = {BooleanType.class}, order=18, min=1, max=1)
     @Description(shortDefinition="Whether the structure is abstract", formalDefinition="Whether structure this definition describes is abstract or not  - that is, whether an actual exchanged item can ever be of this type." )
     protected BooleanType abstract_;
 

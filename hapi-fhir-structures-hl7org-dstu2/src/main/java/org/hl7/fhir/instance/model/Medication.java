@@ -945,7 +945,7 @@ public class Medication extends DomainResource {
     /**
      * Information that only applies to packages (not products).
      */
-    @Child(name = "package_", type = {}, order=6, min=0, max=1)
+    @Child(name = "package", type = {}, order=6, min=0, max=1)
     @Description(shortDefinition="Details about packaged medications", formalDefinition="Information that only applies to packages (not products)." )
     protected MedicationPackageComponent package_;
 

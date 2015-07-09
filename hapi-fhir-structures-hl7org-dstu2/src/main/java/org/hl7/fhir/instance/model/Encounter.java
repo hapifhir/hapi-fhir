@@ -1615,7 +1615,7 @@ public class Encounter extends DomainResource {
     /**
      * inpatient | outpatient | ambulatory | emergency +.
      */
-    @Child(name = "class_", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "class", type = {CodeType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="inpatient | outpatient | ambulatory | emergency +", formalDefinition="inpatient | outpatient | ambulatory | emergency +." )
     protected Enumeration<EncounterClass> class_;
 

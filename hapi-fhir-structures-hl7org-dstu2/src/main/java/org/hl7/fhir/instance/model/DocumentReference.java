@@ -801,7 +801,7 @@ public class DocumentReference extends DomainResource {
     /**
      * A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level.
      */
-    @Child(name = "class_", type = {CodeableConcept.class}, order=4, min=0, max=1)
+    @Child(name = "class", type = {CodeableConcept.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Categorization of document", formalDefinition="A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level." )
     protected CodeableConcept class_;
 

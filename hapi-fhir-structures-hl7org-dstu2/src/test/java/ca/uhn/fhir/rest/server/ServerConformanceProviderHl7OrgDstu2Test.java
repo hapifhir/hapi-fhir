@@ -195,9 +195,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
 		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(2).getName());
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(1).getName());
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
 		assertEquals(1, res.getSearchInclude().size());
 		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());

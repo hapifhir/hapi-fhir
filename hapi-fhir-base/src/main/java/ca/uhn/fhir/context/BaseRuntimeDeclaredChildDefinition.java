@@ -283,7 +283,7 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		}
 	}
 
-	private final static class ListAccessor implements IAccessor {
+	private static final class ListAccessor implements IAccessor {
 		private final Method myAccessorMethod;
 
 		private ListAccessor(Method theAccessor) {

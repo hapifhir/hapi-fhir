@@ -40,7 +40,7 @@ public class StructureDefinitionValidatorTest {
 		StructureDefinitionValidator val = new StructureDefinitionValidator(ourCtx);
 		List<ValidationMessage> output = val.validate(input, EncodingEnum.JSON, Patient.class);
 		assertEquals(output.toString(), 1, output.size());
-		assertThat(output.toString(), containsString("/foo Element is unknown"));
+		assertThat(output.get(0).toXML(), stringContainsInOrder("/foo", "Element is unknown"));
 	}
 
 	@Test
@@ -65,6 +65,6 @@ public class StructureDefinitionValidatorTest {
 		StructureDefinitionValidator val = new StructureDefinitionValidator(ourCtx);
 		List<ValidationMessage> output = val.validate(input, EncodingEnum.XML, Patient.class);
 		assertEquals(output.toString(), 1, output.size());
-		assertThat(output.toString(), containsString("/f:Patient/f:foo Element is unknown"));
+		assertThat(output.get(0).toXML(), stringContainsInOrder("/f:Patient/f:foo", "Element is unknown"));
 	}
 }

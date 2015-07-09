@@ -22,7 +22,7 @@ package ca.uhn.fhir.context;
 
 /**
  * Non-checked exception indicating that HAPI was unable to initialize due to 
- * a detected configuration problem
+ * a detected configuration problem.
  */
 public class ConfigurationException extends RuntimeException {
 

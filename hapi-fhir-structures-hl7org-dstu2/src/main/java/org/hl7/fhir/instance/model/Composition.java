@@ -964,7 +964,7 @@ public class Composition extends DomainResource {
     /**
      * A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.
      */
-    @Child(name = "class_", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type." )
     protected CodeableConcept class_;
 
