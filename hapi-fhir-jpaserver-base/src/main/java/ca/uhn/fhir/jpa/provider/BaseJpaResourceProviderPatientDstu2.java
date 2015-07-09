@@ -22,32 +22,41 @@ package ca.uhn.fhir.jpa.provider;
 
 import java.util.Collections;
 
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.IBundleProvider;
 
 public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
 
-	@Operation(name="$everything", idempotent=true)
-	public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdDt theId) {
+	@Operation(name = "everything", idempotent = true)
+	public ca.uhn.fhir.rest.server.IBundleProvider everything(
+			javax.servlet.http.HttpServletRequest theServletRequest,
+			@IdParam ca.uhn.fhir.model.primitive.IdDt theId,
+			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
+			@OperationParam(name = "_count") 
+			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount) {
+
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
+			if (theCount != null) {
+				paramMap.setCount(theCount.getValue());
+			}
+
 			paramMap.setRevIncludes(Collections.singleton(new Include("*")));
 			paramMap.setIncludes(Collections.singleton(new Include("*")));
-			paramMap.add("_id", new StringParam(theId.getIdPart()));		
+			paramMap.add("_id", new StringParam(theId.getIdPart()));
 			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
 			return retVal;
 		} finally {
 			endRequest(theServletRequest);
 		}
+
 	}
-	
+
 }

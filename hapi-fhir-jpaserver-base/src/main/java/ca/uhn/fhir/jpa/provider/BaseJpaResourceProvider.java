@@ -24,6 +24,8 @@ import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 import org.springframework.beans.factory.annotation.Required;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -48,6 +50,7 @@ public abstract class BaseJpaResourceProvider<T extends IResource> extends BaseJ
 		// nothing
 	}
 
+	@CoverageIgnore
 	public BaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
 		myDao = theDao;
 	}

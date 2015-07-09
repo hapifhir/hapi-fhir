@@ -19,7 +19,13 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 // import ca.uhn.fhir.model.dstu2.resource.Bundle;
 // import ca.uhn.fhir.model.api.Bundle;
 
-public class ${className}ResourceProvider extends JpaResourceProvider${versionCapitalized}<${className}> {
+public class ${className}ResourceProvider extends 
+#if ( $version != 'dstu' && (${className} == 'Patient' || ${className} == 'Encounter') )
+	BaseJpaResourceProvider${className}${versionCapitalized}<${className}>
+#else
+	JpaResourceProvider${versionCapitalized}<${className}>
+#end 
+	{
 
 	@Override
 	public Class<? extends IResource> getResourceType() {
@@ -120,36 +126,5 @@ public class ${className}ResourceProvider extends JpaResourceProvider${versionCa
 			endRequest(theServletRequest);
 		}
 	}
-
-
-
-#if ( $version != 'dstu' && (${className} == 'Patient' || ${className} == 'Encounter') )
-	@Operation(name="everything", idempotent=true)
-	public ca.uhn.fhir.rest.server.IBundleProvider everything(
-			javax.servlet.http.HttpServletRequest theServletRequest, 
-			@IdParam ca.uhn.fhir.model.primitive.IdDt theId, 
-			
-			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-			@OperationParam(name="_count") ca.uhn.fhir.model.primitive.UnsignedIntDt theCount
-	){
-
-		startRequest(theServletRequest);
-		try {
-			SearchParameterMap paramMap = new SearchParameterMap();
-			if (theCount != null) {
-				paramMap.setCount(theCount.getValue());
-			}
-
-			paramMap.setRevIncludes(Collections.singleton(new Include("*")));
-			paramMap.setIncludes(Collections.singleton(new Include("*")));
-			paramMap.add("_id", new StringParam(theId.getIdPart()));		
-			ca.uhn.fhir.rest.server.IBundleProvider retVal = getDao().search(paramMap);
-			return retVal;
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-#end
 
 }
