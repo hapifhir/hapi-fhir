@@ -32,7 +32,7 @@ import ${import};
 @DatatypeDef(name="${className}") 
 public class ${className}
         extends #{if}( ${className}=="ResourceReferenceDt" || ${className}=="IdentifierDt" || ${className}=="CodingDt" || ${className}=='QuantityDt' || ${className}=='HumanNameDt') Base${className} #{else} BaseIdentifiableElement #{end} 
-        implements ICompositeDatatype
+        implements ICompositeDatatype#{if}(${className}=="MetaDt"), org.hl7.fhir.instance.model.api.IBaseMetaType #{end}#{if}(${className}=="CodingDt"), org.hl7.fhir.instance.model.api.IBaseCoding #{end} 
 {
 
 	/**
@@ -165,6 +165,13 @@ public class ${className}
 		setComparator(theComparator);
 		setSystem(theSystem);
 		setUnits(theUnits);
+	}
+
+#end
+#if ( ${className} == "MetaDt" )
+	@Override
+	public MetaDt setLastUpdated(Date theHeaderDateValue) {
+		return setLastUpdated(theHeaderDateValue, TemporalPrecisionEnum.SECOND);
 	}
 
 #end

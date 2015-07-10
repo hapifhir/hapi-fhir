@@ -150,6 +150,9 @@
 				Prevent crash when encoding resources with contained resources 
 				if the contained resources contained a circular reference to each other
 			</action>
+			<action type="add">
+				Add $meta, $meta-add, and $meta-delete operations to generic client
+			</action>
 		</release>
 		<release version="1.0" date="2015-May-8">
 			<action type="add">

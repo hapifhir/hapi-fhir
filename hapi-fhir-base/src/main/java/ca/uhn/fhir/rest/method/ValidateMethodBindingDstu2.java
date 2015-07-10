@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.util.ParametersUtil;
 
 public class ValidateMethodBindingDstu2 extends OperationMethodBinding {
 
@@ -68,7 +69,7 @@ public class ValidateMethodBindingDstu2 extends OperationMethodBinding {
 	
 	public static BaseHttpClientInvocation createValidateInvocation(FhirContext theContext, IBaseResource theResource) {
 		IBaseParameters parameters = (IBaseParameters) theContext.getResourceDefinition("Parameters").newInstance();
-		OperationParameter.addParameterToParameters(theContext, parameters, theResource, "resource");
+		ParametersUtil.addParameterToParameters(theContext, parameters, theResource, "resource");
 		
 		String resourceName = theContext.getResourceDefinition(theResource).getName();
 		String resourceId = theResource.getIdElement().getIdPart();

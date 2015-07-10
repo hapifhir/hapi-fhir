@@ -97,7 +97,8 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	//@formatter:on
 	public Parameters meta() {
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation());
+		MetaDt metaGetOperation = getDao().metaGetOperation();
+		parameters.addParameter().setName("return").setValue(metaGetOperation);
 		return parameters;
 	}
 
@@ -108,7 +109,8 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	//@formatter:on
 	public Parameters meta(@IdParam IdDt theId) {
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theId));
+		MetaDt metaGetOperation = getDao().metaGetOperation(theId);
+		parameters.addParameter().setName("return").setValue(metaGetOperation);
 		return parameters;
 	}
 
@@ -119,7 +121,8 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	//@formatter:on
 	public Parameters metaAdd(@IdParam IdDt theId, @OperationParam(name = "meta") MetaDt theMeta) {
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName("return").setValue(getDao().metaAddOperation(theId, theMeta));
+		MetaDt metaAddOperation = getDao().metaAddOperation(theId, theMeta);
+		parameters.addParameter().setName("return").setValue(metaAddOperation);
 		return parameters;
 	}
 

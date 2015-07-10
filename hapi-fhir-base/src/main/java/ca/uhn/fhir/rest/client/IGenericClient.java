@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
 import ca.uhn.fhir.rest.gclient.IGetPage;
 import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IHistory;
+import ca.uhn.fhir.rest.gclient.IMeta;
 import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
@@ -68,6 +69,14 @@ public interface IGenericClient extends IRestfulClient {
 	 * Fluent method for the "create" operation, which creates a new resource instance on the server
 	 */
 	ICreate create();
+
+	/**
+	 * Fluent method for the "meta" operations, which can be used to get, add and remove tags and other
+	 * Meta elements from a resource or across the server.
+	 * 
+	 * @since 1.1
+	 */
+	IMeta meta();
 
 	/**
 	 * Implementation of the "type create" method.

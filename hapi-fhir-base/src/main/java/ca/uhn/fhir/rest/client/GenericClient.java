@@ -20,7 +20,8 @@ package ca.uhn.fhir.rest.client;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -40,6 +41,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -86,6 +88,10 @@ import ca.uhn.fhir.rest.gclient.IGetTags;
 import ca.uhn.fhir.rest.gclient.IHistory;
 import ca.uhn.fhir.rest.gclient.IHistoryTyped;
 import ca.uhn.fhir.rest.gclient.IHistoryUntyped;
+import ca.uhn.fhir.rest.gclient.IMeta;
+import ca.uhn.fhir.rest.gclient.IMetaAddOrDeleteSourced;
+import ca.uhn.fhir.rest.gclient.IMetaAddOrDeleteUnsourced;
+import ca.uhn.fhir.rest.gclient.IMetaGetUnsourced;
 import ca.uhn.fhir.rest.gclient.IOperation;
 import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
 import ca.uhn.fhir.rest.gclient.IOperationUntyped;
@@ -130,6 +136,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.util.ICallable;
+import ca.uhn.fhir.util.ParametersUtil;
 
 /**
  * @author James Agnew
@@ -702,7 +709,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			addPreferHeader(myPrefer, invocation);
-			
+
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
 
@@ -1247,7 +1254,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type: " + theOutputParameterType.getName());
 			}
 			if (!"Parameters".equals(def.getName())) {
-				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName() + " is a resource named: " + def.getName());
+				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName()
+						+ " is a resource named: " + def.getName());
 			}
 			myParameters = (IBaseParameters) def.newInstance();
 			return this;
@@ -1266,7 +1274,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<BaseOperationOutcome> {
 
 		@Override
-		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public BaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+				throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
 				return null;
@@ -1473,6 +1482,42 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 	}
 
+	private final class MetaParametersResponseHandler<T extends IBaseMetaType> implements IClientResponseHandler<T> {
+
+		private Class<T> myType;
+
+		public MetaParametersResponseHandler(Class<T> theMetaType) {
+			myType = theMetaType;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
+			if (respType == null) {
+				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			}
+			IParser parser = respType.newParser(myContext);
+			RuntimeResourceDefinition type = myContext.getResourceDefinition("Parameters");
+			IBaseResource retVal = parser.parseResource(type.getImplementingClass(), theResponseReader);
+
+			BaseRuntimeChildDefinition paramChild = type.getChildByName("parameter");
+			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+			List<IBase> parameter = paramChild.getAccessor().getValues(retVal);
+			if (parameter == null || parameter.isEmpty()) {
+				return (T) myContext.getElementDefinition(myType).newInstance();
+			}
+			IBase param = parameter.get(0);
+
+			List<IBase> meta = paramChildElem.getChildByName("value[x]").getAccessor().getValues(param);
+			if (meta.isEmpty()) {
+				return (T) myContext.getElementDefinition(myType).newInstance();
+			}
+			return (T) meta.get(0);
+
+		}
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private class SearchInternal extends BaseClientExecutable<IQuery<Object>, Object> implements IQuery<Object>, IUntypedQuery {
 
@@ -1526,7 +1571,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			if (myParamLimit != null) {
 				addParam(params, Constants.PARAM_COUNT, Integer.toString(myParamLimit));
 			}
-			
+
 			if (myLastUpdated != null) {
 				for (DateParam next : myLastUpdated.getValuesAsQueryTokens()) {
 					addParam(params, Constants.PARAM_LASTUPDATED, next.getValueAsQueryToken());
@@ -1534,7 +1579,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			if (myReturnBundleType == null && myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify " + "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
+				throw new IllegalArgumentException("When using the client with HL7.org structures, you must specify "
+						+ "the bundle return type for the client by adding \".returnBundle(org.hl7.fhir.instance.model.Bundle.class)\" to your search method call before the \".execute()\" method");
 			}
 
 			IClientResponseHandler<? extends IBase> binding;
@@ -1852,7 +1898,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			addPreferHeader(myPrefer, invocation);
-			
+
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(myResource);
 			final String resourceName = def.getName();
 
@@ -1939,9 +1985,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IValidateUntyped resource(String theResourceRaw) {
 			Validate.notBlank(theResourceRaw, "theResourceRaw must not be null or blank");
 			myResource = parseResourceBody(theResourceRaw);
-			
+
 			EncodingEnum enc = MethodUtil.detectEncodingNoDefault(theResourceRaw);
-			if (enc==null) {
+			if (enc == null) {
 				throw new IllegalArgumentException("Could not detect encoding (XML/JSON) in string. Is this a valid FHIR resource?");
 			}
 			switch (enc) {
@@ -1955,6 +2001,126 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+	}
+
+	@SuppressWarnings("rawtypes")
+	private class MetaInternal extends BaseClientExecutable implements IMeta, IMetaAddOrDeleteUnsourced, IMetaGetUnsourced, IMetaAddOrDeleteSourced {
+
+		private MetaOperation myOperation;
+		private String myOnType;
+		private IIdType myId;
+		private Class<? extends IBaseMetaType> myMetaType;
+		private IBaseMetaType myMeta;
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object execute() {
+
+			BaseHttpClientInvocation invocation = null;
+
+			IBaseParameters parameters = ParametersUtil.newInstance(myContext);
+			switch (myOperation) {
+			case ADD:
+				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
+				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-add", parameters, false);
+				break;
+			case DELETE:
+				ParametersUtil.addParameterToParameters(myContext, parameters, myMeta, "meta");
+				invocation = OperationMethodBinding.createOperationInvocation(myContext, myId.getResourceType(), myId.getIdPart(), "$meta-delete", parameters, false);
+				break;
+			case GET:
+				if (myId != null) {
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, myId.getIdPart(), "$meta", parameters, true);
+				} else if (myOnType != null) {
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, myOnType, null, "$meta", parameters, true);
+				} else {
+					invocation = OperationMethodBinding.createOperationInvocation(myContext, null, null, "$meta", parameters, true);
+				}
+				break;
+			}
+
+			// Should not happen
+			if (invocation == null) {
+				throw new IllegalStateException();
+			}
+
+			IClientResponseHandler handler;
+			handler = new MetaParametersResponseHandler(myMetaType);
+			return invoke(null, handler, invocation);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseMetaType> IMetaGetUnsourced<T> get(Class<T> theType) {
+			myMetaType = theType;
+			myOperation = MetaOperation.GET;
+			return this;
+		}
+
+		@Override
+		public IMetaAddOrDeleteUnsourced add() {
+			myOperation = MetaOperation.ADD;
+			return this;
+		}
+
+		@Override
+		public IMetaAddOrDeleteUnsourced delete() {
+			myOperation = MetaOperation.DELETE;
+			return this;
+		}
+
+		@Override
+		public IClientExecutable fromServer() {
+			return this;
+		}
+
+		@Override
+		public IClientExecutable fromType(String theResourceName) {
+			Validate.notBlank(theResourceName, "theResourceName must not be blank");
+			myOnType = theResourceName;
+			return this;
+		}
+
+		@Override
+		public IClientExecutable fromResource(IIdType theId) {
+			setIdInternal(theId);
+			return this;
+		}
+
+		@Override
+		public IMetaAddOrDeleteSourced onResource(IIdType theId) {
+			setIdInternal(theId);
+			return this;
+		}
+
+		private void setIdInternal(IIdType theId) {
+			Validate.notBlank(theId.getResourceType(), "theId must contain a resource type");
+			Validate.notBlank(theId.getIdPart(), "theId must contain an ID part");
+			myOnType = theId.getResourceType();
+			myId = theId;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T extends IBaseMetaType> IClientExecutable<IClientExecutable<?, ?>, T> meta(T theMeta) {
+			Validate.notNull(theMeta, "theMeta must not be null");
+			myMeta = theMeta;
+			myMetaType = myMeta.getClass();
+			return this;
+		}
+
+	}
+
+	private enum MetaOperation {
+		DELETE, ADD, GET
+	}
+
+	@Override
+	public IMeta meta() {
+		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
+			throw new IllegalStateException("Can not call $meta operations on a DSTU1 client");
+		}
+		return new MetaInternal();
 	}
 
 }

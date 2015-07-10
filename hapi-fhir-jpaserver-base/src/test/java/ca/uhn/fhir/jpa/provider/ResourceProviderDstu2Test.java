@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -184,6 +185,30 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	}
 
+	@Test
+	public void testMetaOperations() throws Exception {
+		String methodName = "testMetaOperations";
+		
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+		
+		MetaDt meta = ourClient.meta().get(MetaDt.class).fromResource(id).execute();
+		assertEquals(0, meta.getTag().size());
+		
+		MetaDt inMeta = new MetaDt();
+		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
+		assertEquals(1, meta.getTag().size());
+		
+		inMeta = new MetaDt();
+		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
+		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
+		assertEquals(0, meta.getTag().size());
+		
+	}
+
+	
 	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";

@@ -41,6 +41,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -326,6 +327,152 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals(1, response.getEntry().size());
 		idx++;
+	}
+
+	@Test
+	public void testMetaAdd() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		MetaDt inMeta = new MetaDt().addProfile("urn:profile:in");
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setName("meta").setValue(new MetaDt().addProfile("urn:profile:out"));
+		final String respString = p.encodeResourceToString(outParams);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		//@formatter:off
+		MetaDt resp = client
+				.meta()
+				.add()
+				.onResource(new IdDt("Patient/123"))
+				.meta(inMeta)
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/$meta-add", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", extractBody(capt, idx));
+		idx++;
+
+	}
+
+	@Test
+	public void testMetaDelete() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		MetaDt inMeta = new MetaDt().addProfile("urn:profile:in");
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setName("meta").setValue(new MetaDt().addProfile("urn:profile:out"));
+		final String respString = p.encodeResourceToString(outParams);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		//@formatter:off
+		MetaDt resp = client
+				.meta()
+				.delete()
+				.onResource(new IdDt("Patient/123"))
+				.meta(inMeta)
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/$meta-delete", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", extractBody(capt, idx));
+		idx++;
+
+	}
+
+	@Test
+	public void testMetaGet() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("meta").setValue(new MetaDt().addProfile("urn:profile:in"));
+
+		Parameters outParams = new Parameters();
+		outParams.addParameter().setName("meta").setValue(new MetaDt().addProfile("urn:profile:out"));
+		final String respString = p.encodeResourceToString(outParams);
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(new Answer<ReaderInputStream>() {
+			@Override
+			public ReaderInputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8"));
+			}
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		int idx = 0;
+
+		//@formatter:off
+		MetaDt resp = client
+				.meta()
+				.get(MetaDt.class)
+				.fromServer()
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/$meta", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.meta()
+				.get(MetaDt.class)
+				.fromType("Patient")
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/$meta", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
+		//@formatter:off
+		resp = client
+				.meta()
+				.get(MetaDt.class)
+				.fromResource(new IdDt("Patient/123"))
+				.execute();
+		//@formatter:on
+		assertEquals("http://example.com/fhir/Patient/123/$meta", capt.getAllValues().get(idx).getURI().toASCIIString());
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("GET", capt.getAllValues().get(idx).getRequestLine().getMethod());
+		idx++;
+
 	}
 
 	@Test
@@ -1357,7 +1504,7 @@ public class GenericClientDstu2Test {
 	private OperationOutcome toOo(IBaseOperationOutcome theOperationOutcome) {
 		return (OperationOutcome) theOperationOutcome;
 	}
-
+	
 	@BeforeClass
 	public static void beforeClass() {
 		ourCtx = FhirContext.forDstu2();
