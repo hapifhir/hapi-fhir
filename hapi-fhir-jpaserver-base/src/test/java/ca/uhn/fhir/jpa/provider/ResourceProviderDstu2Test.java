@@ -64,6 +64,7 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -91,12 +92,12 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class ResourceProviderDstu2Test  extends BaseJpaTest {
+public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	private static ClassPathXmlApplicationContext ourAppCtx;
 	private static IGenericClient ourClient;
-	private static DaoConfig ourDaoConfig;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static DaoConfig ourDaoConfig;
 	private static CloseableHttpClient ourHttpClient;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
@@ -339,7 +340,8 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
+		 * make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -634,7 +636,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, (UriDt)newId);
+		Patient actual = ourClient.read(Patient.class, (UriDt) newId);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
@@ -650,7 +652,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		IIdType newId = ourClient.create().resource(p1).execute().getId();
 
-		Patient actual = ourClient.read(Patient.class, (UriDt)newId);
+		Patient actual = ourClient.read(Patient.class, (UriDt) newId);
 		assertEquals(1, actual.getContained().getContainedResources().size());
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>"));
 
@@ -713,8 +715,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
-				.execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -756,6 +757,127 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 	}
 
 	@Test
+	public void testSearchLastUpdatedParamRp() throws InterruptedException {
+		String methodName = "testSearchLastUpdatedParamRp";
+
+		int sleep = 100;
+		Thread.sleep(sleep);
+
+		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		IdDt id1a;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily(methodName).addGiven("Joe");
+			id1a = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+		IdDt id1b;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily(methodName + "XXXX").addGiven("Joe");
+			id1b = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+
+		Thread.sleep(1100);
+		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		Thread.sleep(1100);
+
+		IdDt id2;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("002");
+			patient.addName().addFamily(methodName).addGiven("John");
+			id2 = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(beforeAny, null))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id1a, id1b, id2));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(beforeR2, null))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, hasItems(id2));
+			assertThat(patients, not(hasItems(id1a, id1b)));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(beforeAny, beforeR2))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+		}
+		{
+			//@formatter:off
+			Bundle found = ourClient.search()
+					.forResource(Patient.class)
+					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
+					.lastUpdated(new DateRangeParam(null, beforeR2))
+					.execute();
+			//@formatter:on
+			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			assertThat(patients, (hasItems(id1a, id1b)));
+			assertThat(patients, not(hasItems(id2)));
+		}
+	}
+
+	@Test
+	public void testSearchReturnsSearchDate() throws Exception {
+		Date before = new Date();
+		Thread.sleep(1);
+
+		//@formatter:off
+		ca.uhn.fhir.model.dstu2.resource.Bundle found = ourClient
+				.search()
+				.forResource(Patient.class)
+				.prettyPrint()
+				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.execute();
+		//@formatter:on
+
+		Thread.sleep(1);
+		Date after = new Date();
+
+		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(found);
+		assertNotNull(updated);
+		Date value = updated.getValue();
+		assertNotNull(value);
+		ourLog.info(value.getTime() + "");
+		ourLog.info(before.getTime() + "");
+		assertTrue(value.after(before));
+		assertTrue(value.before(after));
+	}
+
+	@Test
 	public void testSearchWithInclude() throws Exception {
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
@@ -786,34 +908,6 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		assertEquals(BundleEntrySearchModeEnum.INCLUDE, found.getEntries().get(1).getResource().getResourceMetadata().get(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE));
 	}
 
-	@Test
-	public void testSearchReturnsSearchDate() throws Exception {
-		Date before = new Date();
-		Thread.sleep(1);
-		
-		//@formatter:off
-		ca.uhn.fhir.model.dstu2.resource.Bundle found = ourClient
-				.search()
-				.forResource(Patient.class)
-				.prettyPrint()
-				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-				.execute();
-		//@formatter:on
-		
-		Thread.sleep(1);
-		Date after = new Date();
-
-		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(found);
-		assertNotNull(updated);
-		Date value = updated.getValue();
-		assertNotNull(value);
-		ourLog.info(value.getTime()+"");
-		ourLog.info(before.getTime()+"");
-		assertTrue(value.after(before));
-		assertTrue(value.before(after));
-	}
-
-	
 	@Test
 	public void testSearchWithMissing() throws Exception {
 		ourLog.info("Starting testSearchWithMissing");
@@ -989,8 +1083,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		}
 
 	}
-	
-	
+
 	@Test
 	public void testUpdateResourceWithPrefer() throws IOException, Exception {
 		String methodName = "testUpdateResourceWithPrefer";
@@ -1014,7 +1107,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		Date before = new Date();
 		Thread.sleep(100);
-		
+
 		HttpPut put = new HttpPut(ourServerBase + "/Patient/" + id.getIdPart());
 		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1023,19 +1116,18 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent());
 			IOUtils.closeQuietly(response.getEntity().getContent());
-			
+
 			Patient respPt = ourCtx.newXmlParser().parseResource(Patient.class, responseString);
 			assertEquals("2", respPt.getId().getVersionIdPart());
-			
+
 			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
 			assertTrue(updateTime.getValue().after(before));
-			
+
 		} finally {
 			response.close();
 		}
 
 	}
-
 
 	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
@@ -1049,8 +1141,7 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
-				.encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1083,32 +1174,52 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		}
 	}
 
+//	@Test
+	public void testValueSetExpandOperartion() throws IOException {
 
-	@Test
-	public void testValidateResourceWithId() throws IOException {
-
-		Patient patient = new Patient();
-		patient.addName().addGiven("James");
-		patient.setBirthDate(new DateDt("2011-02-02"));
-
-		Parameters input = new Parameters();
-		input.addParameter().setName("resource").setResource(patient);
-
-		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
-		ourLog.info(inputStr);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
-		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		CloseableHttpResponse response = ourHttpClient.execute(post);
+		ValueSet upload = ourCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
+		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
+		
+		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
+			//@formatter:on
+			assertThat(resp, stringContainsInOrder(
+					"<ValueSet xmlns=\"http://hl7.org/fhir\">",
+					"<compose>" , 
+					"<include>" , 
+					"<system value=\"http://loinc.org\"/>" , 
+					"<concept>" ,
+					"<code value=\"11378-7\"/>" , 
+					"<display value=\"Systolic blood pressure at First encounter\"/>" , 
+					"</concept>"));
+			//@formatter:off
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
 		}
+		
+		/*
+		 * Filter
+		 */
+		
+		get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic");
+		response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, stringContainsInOrder(
+					"<code value=\"11378-7\"/>" ,
+					"<display value=\"Systolic blood pressure at First encounter\"/>"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+
 	}
 
 	@Test
@@ -1126,6 +1237,33 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		ourLog.info(inputStr);
 
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
+	@Test
+	public void testValidateResourceWithId() throws IOException {
+
+		Patient patient = new Patient();
+		patient.addName().addGiven("James");
+		patient.setBirthDate(new DateDt("2011-02-02"));
+
+		Parameters input = new Parameters();
+		input.addParameter().setName("resource").setResource(patient);
+
+		String inputStr = ourCtx.newXmlParser().encodeResourceToString(input);
+		ourLog.info(inputStr);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
@@ -1203,102 +1341,5 @@ public class ResourceProviderDstu2Test  extends BaseJpaTest {
 		ourHttpClient = builder.build();
 
 	}
-	
-	
-	
-	@Test
-	public void testSearchLastUpdatedParamRp() throws InterruptedException {
-		String methodName = "testSearchLastUpdatedParamRp";
-		
-		int sleep = 100;
-		Thread.sleep(sleep);
-
-		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
-		IdDt id1a;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily(methodName).addGiven("Joe");
-			id1a = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-		}
-		IdDt id1b;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily(methodName + "XXXX").addGiven("Joe");
-			id1b = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-		}
-
-		Thread.sleep(1100);
-		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
-		Thread.sleep(1100);
-		
-		IdDt id2;
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily(methodName).addGiven("John");
-			id2 = (IdDt) ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-		}
-		
-		{
-			//@formatter:off
-			Bundle found = ourClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
-					.execute();
-			//@formatter:on
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients, hasItems(id1a, id1b, id2));
-		}
-		{
-			//@formatter:off
-			Bundle found = ourClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
-					.lastUpdated(new DateRangeParam(beforeAny, null))
-					.execute();
-			//@formatter:on
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients, hasItems(id1a, id1b, id2));
-		}
-		{
-			//@formatter:off
-			Bundle found = ourClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
-					.lastUpdated(new DateRangeParam(beforeR2, null))
-					.execute();
-			//@formatter:on
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients, hasItems(id2));
-			assertThat(patients, not(hasItems(id1a, id1b)));
-		}
-		{
-			//@formatter:off
-			Bundle found = ourClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
-					.lastUpdated(new DateRangeParam(beforeAny, beforeR2))
-					.execute();
-			//@formatter:on
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients.toString(), patients, not(hasItems(id2)));
-			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
-		}
-		{
-			//@formatter:off
-			Bundle found = ourClient.search()
-					.forResource(Patient.class)
-					.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
-					.lastUpdated(new DateRangeParam(null, beforeR2))
-					.execute();
-			//@formatter:on
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
-		}
-	}
-
 
 }
