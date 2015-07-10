@@ -842,7 +842,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   // the instance validator had no issues against the base resource profile
   private void start(List<ValidationMessage> errors, WrapperElement element, StructureDefinition profile, NodeStack stack) throws Exception {
     // profile is valid, and matches the resource name
-    if (rule(errors, IssueType.STRUCTURE, element.line(), element.col(), stack.getLiteralPath(), profile.hasSnapshot(), "StructureDefinition has no snapshort - validation is against the snapshot, so it must be provided")) {
+    if (rule(errors, IssueType.STRUCTURE, element.line(), element.col(), stack.getLiteralPath(), profile.hasSnapshot(), "StructureDefinition has no snapshot - validation is against the snapshot, so it must be provided")) {
       validateElement(errors, profile, profile.getSnapshot().getElement().get(0), null, null, element, element.getName(), stack);
 
       checkDeclaredProfiles(errors, element, stack);
@@ -878,7 +878,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         if (rule(errors, IssueType.INVALID, element.line(), element.col(), p, !Utilities.noString(ref), "StructureDefinition reference invalid")) {
           StructureDefinition pr = context.getProfiles().get(ref);
           if (warning(errors, IssueType.INVALID, element.line(), element.col(), p, pr != null, "StructureDefinition reference could not be resolved")) {
-            if (rule(errors, IssueType.STRUCTURE, element.line(), element.col(), p, pr.hasSnapshot(), "StructureDefinition has no snapshort - validation is against the snapshot, so it must be provided")) {
+            if (rule(errors, IssueType.STRUCTURE, element.line(), element.col(), p, pr.hasSnapshot(), "StructureDefinition has no snapshot - validation is against the snapshot, so it must be provided")) {
               validateElement(errors, pr, pr.getSnapshot().getElement().get(0), null, null, element, element.getName(), stack);
             }
           }

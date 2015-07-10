@@ -20,6 +20,11 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.Collections;
+import java.util.List;
+
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -32,40 +37,25 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
  * @since 0.7
  */
 public class ValidationResult {
-	private IBaseOperationOutcome myOperationOutcome;
-	private boolean myIsSuccessful;
-	private FhirContext myCtx;
+	private final FhirContext myCtx;
+	private final boolean myIsSuccessful;
+	private final List<SingleValidationMessage> myMessages;
 
-	private ValidationResult(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, boolean isSuccessful) {
-		this.myCtx = theCtx;
-		this.myOperationOutcome = theOperationOutcome;
-		this.myIsSuccessful = isSuccessful;
-	}
-
-	public static ValidationResult valueOf(FhirContext theCtx, IBaseOperationOutcome myOperationOutcome) {
-		boolean noIssues = !OperationOutcomeUtil.hasIssues(theCtx, myOperationOutcome);
-		return new ValidationResult(theCtx, myOperationOutcome, noIssues);
-	}
-
-	public IBaseOperationOutcome getOperationOutcome() {
-		return myOperationOutcome;
-	}
-
-	@Override
-	public String toString() {
-		return "ValidationResult{" + "myOperationOutcome=" + myOperationOutcome + ", isSuccessful=" + myIsSuccessful + ", description='" + toDescription() + '\'' + '}';
-	}
-
-	private String toDescription() {
-		StringBuilder b = new StringBuilder(100);
-		if (myOperationOutcome != null && OperationOutcomeUtil.hasIssues(myCtx, myOperationOutcome)) {
-			b.append(OperationOutcomeUtil.getFirstIssueDetails(myCtx, myOperationOutcome));
-			b.append(" - ");
-			b.append(OperationOutcomeUtil.getFirstIssueLocation(myCtx, myOperationOutcome));
-		} else {
-			b.append("No issues");
+	public ValidationResult(FhirContext theCtx, List<SingleValidationMessage> theMessages) {
+		boolean successful = true;
+		myCtx = theCtx;
+		myMessages = theMessages;
+		for (SingleValidationMessage next : myMessages) {
+			next.getSeverity();
+			if (next.getSeverity() == null || next.getSeverity().ordinal() > ResultSeverityEnum.WARNING.ordinal()) {
+				successful = false;
+			}
 		}
-		return b.toString();
+		myIsSuccessful = successful;
+	}
+
+	public List<SingleValidationMessage> getMessages() {
+		return Collections.unmodifiableList(myMessages);
 	}
 
 	/**
@@ -75,5 +65,51 @@ public class ValidationResult {
 	 */
 	public boolean isSuccessful() {
 		return myIsSuccessful;
+	}
+
+	private String toDescription() {
+		StringBuilder b = new StringBuilder(100);
+		if (myMessages.size() > 0) {
+			b.append(myMessages.get(0).getMessage());
+			b.append(" - ");
+			b.append(myMessages.get(0).getLocationString());
+		} else {
+			b.append("No issues");
+		}
+		return b.toString();
+	}
+
+	/**
+	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view
+	 */
+	@Deprecated
+	public IBaseOperationOutcome getOperationOutcome() {
+		return toOperationOutcome();
+	}
+
+	/**
+	 * Create an OperationOutcome resource which contains all of the messages found as a result of this validation
+	 */
+	public IBaseOperationOutcome toOperationOutcome() {
+		IBaseOperationOutcome oo = (IBaseOperationOutcome) myCtx.getResourceDefinition("OperationOutcome").newInstance();
+		for (SingleValidationMessage next : myMessages) {
+			String location;
+			if (isNotBlank(next.getLocationString())) {
+				location = next.getLocationString();
+			} else if (next.getLocationRow() != null || next.getLocationCol() != null) {
+				location = "Line[" + next.getLocationRow() + "] Col[" + next.getLocationCol() + "]";
+			} else {
+				location = null;
+			}
+			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
+			OperationOutcomeUtil.addIssue(myCtx, oo, severity, next.getMessage(), location);
+		}
+
+		return oo;
+	}
+
+	@Override
+	public String toString() {
+		return "ValidationResult{" + "messageCount=" + myMessages.size() + ", isSuccessful=" + myIsSuccessful + ", description='" + toDescription() + '\'' + '}';
 	}
 }

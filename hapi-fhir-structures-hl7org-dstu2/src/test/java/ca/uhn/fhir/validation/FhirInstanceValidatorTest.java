@@ -1,18 +1,18 @@
 package ca.uhn.fhir.validation;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 
-public class StructureDefinitionValidatorTest {
+public class FhirInstanceValidatorTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	
@@ -23,8 +23,8 @@ public class StructureDefinitionValidatorTest {
 				+ "\"id\":\"123\""
 				+ "}";
 		
-		StructureDefinitionValidator val = new StructureDefinitionValidator(ourCtx);
-		List<ValidationMessage> output = val.validate(input, EncodingEnum.JSON, Patient.class);
+		FhirInstanceValidator val = new FhirInstanceValidator();
+		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.JSON, "Patient");
 		assertEquals(output.toString(), 0, output.size());
 	}
 
@@ -37,8 +37,8 @@ public class StructureDefinitionValidatorTest {
 				+ "}";
 		
 		
-		StructureDefinitionValidator val = new StructureDefinitionValidator(ourCtx);
-		List<ValidationMessage> output = val.validate(input, EncodingEnum.JSON, Patient.class);
+		FhirInstanceValidator val = new FhirInstanceValidator();
+		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.JSON, "Patient");
 		assertEquals(output.toString(), 1, output.size());
 		assertThat(output.get(0).toXML(), stringContainsInOrder("/foo", "Element is unknown"));
 	}
@@ -49,8 +49,8 @@ public class StructureDefinitionValidatorTest {
 				+ "<id value=\"123\"/>"
 				+ "</Patient>";
 		
-		StructureDefinitionValidator val = new StructureDefinitionValidator(ourCtx);
-		List<ValidationMessage> output = val.validate(input, EncodingEnum.XML, Patient.class);
+		FhirInstanceValidator val = new FhirInstanceValidator();
+		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.XML, "Patient");
 		assertEquals(output.toString(), 0, output.size());
 	}
 
@@ -62,8 +62,8 @@ public class StructureDefinitionValidatorTest {
 				+ "<foo value=\"222\"/>"
 				+ "</Patient>";
 		
-		StructureDefinitionValidator val = new StructureDefinitionValidator(ourCtx);
-		List<ValidationMessage> output = val.validate(input, EncodingEnum.XML, Patient.class);
+		FhirInstanceValidator val = new FhirInstanceValidator();
+		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.XML, "Patient");
 		assertEquals(output.toString(), 1, output.size());
 		assertThat(output.get(0).toXML(), stringContainsInOrder("/f:Patient/f:foo", "Element is unknown"));
 	}

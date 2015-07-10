@@ -84,10 +84,10 @@ public class ResourceValidatorTest {
 		assertEquals("2001-03-31", new SimpleDateFormat("yyyy-MM-dd").format(p.getBirthDate().getValue()));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(p);
-		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
+		String resultString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.getOperationOutcome()).getIssue().size());
+		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
 		assertThat(resultString, StringContains.containsString("cvc-datatype-valid.1.2.3"));
 	}
 
@@ -129,7 +129,7 @@ public class ResourceValidatorTest {
 		p.getTelecomFirstRep().setValue("123-4567");
 		validationResult = val.validateWithResult(p);
 		assertFalse(validationResult.isSuccessful());
-		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
 		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2:"));
@@ -147,7 +147,7 @@ public class ResourceValidatorTest {
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult result = val.validateWithResult(b);
-		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
+		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		
 		
@@ -170,7 +170,7 @@ public class ResourceValidatorTest {
 		p.getTelecomFirstRep().setValue("123-4567");
 		validationResult = val.validateWithResult(b);
 		assertFalse(validationResult.isSuccessful());
-		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
+		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
 		assertThat(operationOutcome.getIssueFirstRep().getDetails().getValue(), containsString("Inv-2:"));

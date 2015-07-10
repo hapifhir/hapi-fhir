@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -68,6 +69,14 @@ public class OperationServerTest {
 		ourLastMethod = "";
 	}
 
+	public static void main(String[] theValue) {
+		Parameters p = new Parameters();
+		p.addParameter().setName("start").setValue(new DateTimeDt("2001-01-02"));
+		p.addParameter().setName("end").setValue(new DateTimeDt("2015-07-10"));
+		String inParamsStr = FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
+		ourLog.info(inParamsStr.replace("\"", "\\\""));
+	}
+	
 	@Test
 	public void testOperationOnType() throws Exception {
 		Parameters p = new Parameters();

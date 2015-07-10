@@ -87,6 +87,9 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 				} else {
 					String filter = theFilter.getValue().toLowerCase();
 					if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
+						if (include == null) {
+							include = getOrAddComposeInclude(retVal, systemToCompose, source.getDefine().getSystem());
+						}
 						include.addConcept(new ComposeIncludeConcept().setCode(next.getCode()).setDisplay(next.getDisplay()));
 					}
 				}

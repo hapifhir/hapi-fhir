@@ -35,7 +35,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 import com.phloc.commons.error.IResourceError;
 import com.phloc.commons.error.IResourceErrorGroup;
@@ -56,7 +55,7 @@ public class SchematronBaseValidator implements IValidator {
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {
 
 		ISchematronResource sch = getSchematron(theCtx);
-		StreamSource source = new StreamSource(new StringReader(theCtx.getXmlEncodedResource()));
+		StreamSource source = new StreamSource(new StringReader(theCtx.getResourceAsString()));
 
 		SchematronOutputType results = SchematronHelper.applySchematron(sch, source);
 		if (results == null) {
@@ -70,16 +69,16 @@ public class SchematronBaseValidator implements IValidator {
 		}
 
 		for (IResourceError next : errors.getAllErrors().getAllResourceErrors()) {
-			String severity;
+			ResultSeverityEnum severity;
 			switch (next.getErrorLevel()) {
 			case ERROR:
-				severity = ("error");
+				severity = ResultSeverityEnum.ERROR;
 				break;
 			case FATAL_ERROR:
-				severity = ("fatal");
+				severity = ResultSeverityEnum.FATAL;
 				break;
 			case WARN:
-				severity = ("warning");
+				severity = ResultSeverityEnum.WARNING;
 				break;
 			case INFO:
 			case SUCCESS:
@@ -88,7 +87,14 @@ public class SchematronBaseValidator implements IValidator {
 			}
 
 			String details = next.getAsString(Locale.getDefault());
-			OperationOutcomeUtil.addIssue(myCtx, theCtx.getOperationOutcome(), severity, details);
+
+			SingleValidationMessage message = new SingleValidationMessage();
+			message.setMessage(details);
+			message.setLocationRow(next.getLocation().getLineNumber());
+			message.setLocationCol(next.getLocation().getColumnNumber());
+			message.setLocationString(next.getLocation().getAsString());
+			message.setSeverity(severity);
+			theCtx.addValidationMessage(message);
 		}
 
 	}
@@ -97,10 +103,10 @@ public class SchematronBaseValidator implements IValidator {
 		Class<? extends IBaseResource> resource = theCtx.getResource().getClass();
 		Class<? extends IBaseResource> baseResourceClass = theCtx.getFhirContext().getResourceDefinition(resource).getBaseDefinition().getImplementingClass();
 
-		return getSchematronAndCache(theCtx, "dstu", baseResourceClass);
+		return getSchematronAndCache(theCtx, baseResourceClass);
 	}
 
-	private ISchematronResource getSchematronAndCache(IValidationContext<IBaseResource> theCtx, String theVersion, Class<? extends IBaseResource> theClass) {
+	private ISchematronResource getSchematronAndCache(IValidationContext<IBaseResource> theCtx, Class<? extends IBaseResource> theClass) {
 		synchronized (myClassToSchematron) {
 			ISchematronResource retVal = myClassToSchematron.get(theClass);
 			if (retVal != null) {

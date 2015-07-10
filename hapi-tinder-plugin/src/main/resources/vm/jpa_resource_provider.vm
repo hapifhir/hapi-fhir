@@ -5,7 +5,11 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider${className}Dstu2;
+#else
 import ca.uhn.fhir.jpa.provider.JpaResourceProvider${versionCapitalized};
+#end 
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -20,8 +24,10 @@ import ca.uhn.fhir.model.dstu.resource.Binary;
 // import ca.uhn.fhir.model.api.Bundle;
 
 public class ${className}ResourceProvider extends 
-#if ( $version != 'dstu' && (${className} == 'Patient' || ${className} == 'Encounter') )
-	BaseJpaResourceProvider${className}${versionCapitalized}<${className}>
+## We have specialized base classes for RPs that handle certain resource types. These
+## RPs implement type specific operations 
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers'))
+	BaseJpaResourceProvider${className}${versionCapitalized}
 #else
 	JpaResourceProvider${versionCapitalized}<${className}>
 #end 

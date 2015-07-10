@@ -23,24 +23,22 @@ import com.google.gson.JsonObject;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-public class StructureDefinitionValidator {
+public class FhirInstanceValidator implements IValidator {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StructureDefinitionValidator.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 
-	private FhirContext myCtx;
 	private DocumentBuilderFactory myDocBuilderFactory;
 
-	StructureDefinitionValidator(FhirContext theContext) {
-		myCtx = theContext;
-
+	FhirInstanceValidator() {
 		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
 		myDocBuilderFactory.setNamespaceAware(true);
 	}
 
-	public List<ValidationMessage> validate(String theInput, EncodingEnum theEncoding, Class<? extends IBaseResource> theResourceType) {
+	List<ValidationMessage> validate(FhirContext theCtx, String theInput, EncodingEnum theEncoding, String theResourceName) {
 		WorkerContext workerContext = new WorkerContext();
 		org.hl7.fhir.instance.validation.InstanceValidator v;
 		try {
@@ -49,14 +47,14 @@ public class StructureDefinitionValidator {
 			throw new ConfigurationException(e);
 		}
 
-		String profileCpName = "/org/hl7/fhir/instance/model/profile/" + myCtx.getResourceDefinition(theResourceType).getName().toLowerCase() + ".profile.xml";
+		String profileCpName = "/org/hl7/fhir/instance/model/profile/" + theResourceName.toLowerCase() + ".profile.xml";
 		String profileText;
 		try {
-			profileText = IOUtils.toString(StructureDefinitionValidator.class.getResourceAsStream(profileCpName), "UTF-8");
+			profileText = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream(profileCpName), "UTF-8");
 		} catch (IOException e1) {
 			throw new ConfigurationException("Failed to load profile from classpath: " + profileCpName, e1);
 		}
-		StructureDefinition profile = myCtx.newXmlParser().parseResource(StructureDefinition.class, profileText);
+		StructureDefinition profile = theCtx.newXmlParser().parseResource(StructureDefinition.class, profileText);
 
 		if (theEncoding == EncodingEnum.XML) {
 			Document document;
@@ -89,6 +87,18 @@ public class StructureDefinitionValidator {
 			throw new IllegalArgumentException("Unknown encoding: " + theEncoding);
 		}
 
+	}
+
+	@Override
+	public void validateResource(IValidationContext<IBaseResource> theCtx) {
+		String resourceName = theCtx.getResourceName();
+		String resourceBody = theCtx.getResourceAsString();
+		validate(theCtx.getFhirContext(), resourceBody, theCtx.getResourceAsStringEncoding(), resourceName);
+	}
+
+	@Override
+	public void validateBundle(IValidationContext<Bundle> theContext) {
+		
 	}
 
 }

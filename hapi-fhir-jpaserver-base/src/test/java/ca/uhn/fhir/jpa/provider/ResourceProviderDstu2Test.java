@@ -340,8 +340,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
-		 * make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -715,7 +714,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
+				.execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1141,7 +1141,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
+				.encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1172,54 +1173,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
 		}
-	}
-
-//	@Test
-	public void testValueSetExpandOperartion() throws IOException {
-
-		ValueSet upload = ourCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
-		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
-		
-		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			//@formatter:on
-			assertThat(resp, stringContainsInOrder(
-					"<ValueSet xmlns=\"http://hl7.org/fhir\">",
-					"<compose>" , 
-					"<include>" , 
-					"<system value=\"http://loinc.org\"/>" , 
-					"<concept>" ,
-					"<code value=\"11378-7\"/>" , 
-					"<display value=\"Systolic blood pressure at First encounter\"/>" , 
-					"</concept>"));
-			//@formatter:off
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
-		
-		/*
-		 * Filter
-		 */
-		
-		get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic");
-		response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent());
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp, stringContainsInOrder(
-					"<code value=\"11378-7\"/>" ,
-					"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		} finally {
-			IOUtils.closeQuietly(response.getEntity().getContent());
-			response.close();
-		}
-
 	}
 
 	@Test
@@ -1275,6 +1228,83 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
 		}
+	}
+
+	@Test
+	public void testValueSetExpandOperation() throws IOException {
+
+		ValueSet upload = ourCtx.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu2Test.class.getResourceAsStream("/extensional-case-2.xml")));
+		IIdType vsid = ourClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			// @formatter:off
+			assertThat(
+					resp,
+					stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
+							"<compose>", 
+							"<include>", 
+							"<system value=\"http://loinc.org\"/>",
+							"<concept>", 
+							"<code value=\"11378-7\"/>",
+							"<display value=\"Systolic blood pressure at First encounter\"/>", 
+							"</concept>",
+							"<concept>",
+							"<code value=\"8450-9\"/>", 
+							"<display value=\"Systolic blood pressure--expiration\"/>", 
+							"</concept>"
+							));
+			//@formatter:on
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+
+		/*
+		 * Filter with display name
+		 */
+
+		get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic");
+		response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			//@formatter:off
+			assertThat(resp, stringContainsInOrder(
+					"<code value=\"11378-7\"/>", 
+					"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			//@formatter:on
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+
+		/*
+		 * Filter with code
+		 */
+
+		get = new HttpGet(ourServerBase + "/ValueSet/" + vsid.getIdPart() + "/$expand?filter=11378");
+		response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			//@formatter:off
+			assertThat(resp, stringContainsInOrder(
+					"<code value=\"11378-7\"/>", 
+					"<display value=\"Systolic blood pressure at First encounter\"/>"
+					));
+			//@formatter:on
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+
 	}
 
 	private List<IdDt> toIdListUnqualifiedVersionless(Bundle found) {

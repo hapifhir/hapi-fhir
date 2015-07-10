@@ -1,0 +1,4016 @@
+﻿<QuestionnaireAnswers xmlns="http://hl7.org/fhir">
+	<id value="0f431c50ddbe4fff8e0dd6b7323625fc"/>
+	<meta>
+		<versionId value="10"/>
+		<lastUpdated value="2015-07-10T00:45:28.707+00:00"/>
+	</meta>
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">!-- populated from the rendered HTML below --&gt;</div>
+	</text>
+	<contained>
+		<Questionnaire>
+			<id value="4dad1b31b7764d0581fd5b654cbfb5be"/>
+			<meta>
+				<versionId value="90"/>
+				<lastUpdated value="2015-06-24T09:46:24.027+00:00"/>
+			</meta>
+			<status value="published"/>
+			<date value="2015-06-05T04:22:14.067Z"/>
+			<group>
+				<linkId value="cfbf2ab2-f749-43eb-9771-d59564528523"/>
+				<title
+					value="Alcohol, smoking and substance involvement screening (ASSIST)"/>
+				<group>
+					<linkId value="c9279048-37a1-415d-a935-b61efcff551c"/>
+					<title value="Introduction"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="f6cfe250-e710-4ba9-b18d-17c5e5834df9"/>
+						<title value="Introduction"/>
+						<repeats value="false"/>
+						<group>
+							<linkId value="da52dcdf-a097-4675-997d-24647bb677f6"/>
+							<title value="Please read to the consumer"/>
+							<repeats value="false"/>
+						</group>
+						<group>
+							<linkId value="b8f0c723-c66d-4502-83c1-913295c38dfd"/>
+							<title value="Question Notes"/>
+							<repeats value="false"/>
+						</group>
+						<group>
+							<linkId value="eee74f69-526b-4d1f-abb1-548c87f8c2bf"/>
+							<title value="Calculate the score"/>
+							<repeats value="false"/>
+						</group>
+						<group>
+							<linkId value="741fb913-0ea5-4152-9e09-8d84a52e371b"/>
+							<title value="Interpret the Score"/>
+							<repeats value="false"/>
+						</group>
+					</group>
+				</group>
+				<group>
+					<linkId value="84184fd55bf84379970a8c9bbf8bb80d"/>
+					<title value="Tobacco"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="ce01edf8-576a-45b7-81b8-81e8f25eb803"/>
+						<title value="Tobacco"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="70592294cd954586957016730afe50fc"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#7b4df9d4-476c-4af5-a1f3-78d664ec7541"/>
+								<display value="TobaccoQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="54cfa938b0a94a46ac748dd29879b669"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used tobacco?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used tobacco?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#c3b93195-3959-4958-b5b1-408e62bccad2"/>
+								<display value="TobaccoQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="08453ec0ec69464684ff823feda8aaf4"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use tobacco?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use tobacco?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#adf39cde-6d81-4300-a393-0acc09913fb5"/>
+								<display value="TobaccoQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="be41841649bc48669c46054fde48f3e2"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of tobacco led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of tobacco led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#3e01a1d0-b7d3-4afe-83c1-f97747f24124"/>
+								<display value="TobaccoQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="307bcc0d08054dd493dab1123a66d8b0"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of tobacco?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of tobacco?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#cf4e642f-a99e-4179-99ef-15d992de3cf3"/>
+								<display value="TobaccoQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="16a4581c67ac45d5aa8d37244cc5b80c"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of tobacco?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of tobacco?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#89b76c96-5dc7-4fe1-a339-e043a571e0fb"/>
+								<display value="TobaccoQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="d40f97cdd5154b10b27de9a824ad821a"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using tobacco?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using tobacco?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#f8973a4d-3812-4c00-a0ef-099083902442"/>
+								<display value="TobaccoQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="ed5422f57bab4fcb886a9c789047f0ec"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="TobaccoTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="e48a7dfd179b4516a30f25531b8bddd2"/>
+					<title value="Alcohol"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="e38b3251-96ad-4355-b1f2-5bef3e29357f"/>
+						<title value="Alcohol"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="42bbfde6faa24b4b825a4fc7ef99fdde"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#3762a808-e45d-411f-9a73-7c4b8d434382"/>
+								<display value="AlcoholQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="7ce60a28c5ad49388fa63a526540e95f"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used alcohol?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used alcohol?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#074ecc51-5a33-4a45-926d-0dc9e5d3561b"/>
+								<display value="AlcoholQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="c59dc0c2e85a445d8a795e00d87e0451"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use alcohol?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use alcohol?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#fb428c18-df0b-4913-85c3-d7398315fd08"/>
+								<display value="AlcoholQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="07e4258068bb475e94f62e85d320deb1"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of alcohol led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of alcohol led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#3bcfcca0-fe20-4807-be6f-66927249035b"/>
+								<display value="AlcoholQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="77b466edf74942e08b96b80cb8be81a1"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of alcohol?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of alcohol?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#7208efcd-b3a4-4526-a044-631669dd2a87"/>
+								<display value="AlcoholQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="eca35b534925440eb8e3e05db86da761"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of alcohol?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of alcohol?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#a257d9ae-ad52-47d4-88c5-6805a9ddcad3"/>
+								<display value="AlcoholQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="ada0c96f56384412827d892b2eedf9b2"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using alcohol?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using alcohol?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#4065921d-11a7-4c00-9bea-d576407ec6f2"/>
+								<display value="AlcoholQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="bd3a5e41a1794da3ab35061eda848f53"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AlcoholTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="a04b660f66a141f4a4f6fdefb7df3e1e"/>
+					<title value="Cannabis"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="76ee8f1f-48f6-420f-96a8-920a43a47071"/>
+						<title value="Cannabis"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="dc2ba5c68e6b4c608c509b995d5e6b9e"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#1eab2f67-f71c-4ae6-97e6-2489b62c73bd"/>
+								<display value="CannabisQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="1dabb8a4a3dd482aac7b562b34805075"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used cannabis?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used cannabis?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#007f422d-3bbb-45b1-a9a8-395c92f4b731"/>
+								<display value="CannabisQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="19dd7f74da9449d98ab71ae6b995390c"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use cannabis?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use cannabis?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#d78e351f-71f0-401b-993f-62c10687e490"/>
+								<display value="CannabisQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="d3e8f546029f4808a8a286a5de266b44"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of cannabis led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of cannabis led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#faaa7d8b-8084-4e27-814c-f74afa50c0b2"/>
+								<display value="CannabisQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="e57c5ac1bb9e45eb8bb91b15d59018f3"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of cannabis?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of cannabis?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#bbe9f6c7-ed54-4ce6-a4b1-e71c95fe8690"/>
+								<display value="CannabisQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="346c7343540347bcbd30dc1c1bba6a24"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of cannabis?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of cannabis?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#f259d2e0-9e81-41ac-9708-00e0f51c8ef4"/>
+								<display value="CannabisQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="48ff15bda2824ded9e7bd151dfeed008"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using cannabis?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using cannabis?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#e712fbee-dedd-480e-baca-d4b937ecbf94"/>
+								<display value="CannabisQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="23cd518ef46b4dc49e08fedb36f93c33"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CannabisTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="7db33f89e69f4f34a60090f5e93ef531"/>
+					<title value="Cocaine"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="66b1cc70-1311-4393-9a02-3be08cff5fe9"/>
+						<title value="Cocaine"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="2c986c7a635048b1a38be8fb9bfde557"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#8a117478-234e-481a-b5a9-600877cca30d"/>
+								<display value="CocaineQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="cfd29e64b4e840ffa61c7b14a251fe58"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used cocaine?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used cocaine?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#69db607d-04d9-425c-b1a8-e5e0c0e27126"/>
+								<display value="CocaineQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="5cdbbbae7795418493af86e2c973a896"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use cocaine?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use cocaine?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#74429e80-a649-4a0c-aace-f54945a0c167"/>
+								<display value="CocaineQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="dddfebc6d85a4a60a4e3796674c8f6f3"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of cocaine led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of cocaine led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#353e3f40-f38f-4935-8952-3f374ea64344"/>
+								<display value="CocaineQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="8dbd16c733f04ea4867f03aa32590764"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of cocaine?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of cocaine?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#0ebccb3d-c591-4422-8e9b-62b8b4519234"/>
+								<display value="CocaineQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="3886f4a942714795acb7e832391c164a"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of cocaine?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of cocaine?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#b9016401-f982-4882-8ca9-10a26243e87f"/>
+								<display value="CocaineQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="bc8fbc34e0d54e93a65104c2a5528cd9"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using cocaine?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using cocaine?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#9fad4280-2178-4665-80c3-fee2dbb9f6aa"/>
+								<display value="CocaineQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="3f05efbead6f4972b7fb9e79f87abe35"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="CocaineTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="9195dcd8e37e40359a54af86f8865f5a"/>
+					<title value="Amphetamine Type Stimulants"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="d250d3f2-9758-48dc-820f-2f3fb8302f20"/>
+						<title value="Amphetamine Type Stimulants"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="a3f3fb3689c845dd8c344694c155b00b"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#ca244a57-8fb3-4923-8411-d29ed829a962"/>
+								<display value="AmphetaminesQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="5354869f1c374043bd86e98fa1cd0a98"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used amphetamine type stimulants?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used amphetamine type stimulants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#a19f461a-4436-4de3-8b3d-94261f4a570d"/>
+								<display value="AmphetaminesQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="7d8adc8f5e654d248f397165dad77a0d"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use amphetamine type stimulants?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use amphetamine type stimulants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#9e4d4a7c-2a49-4c21-84e6-8545632d7d1c"/>
+								<display value="AmphetaminesQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="5642831307ed4a8b82b3f58f1e371220"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of amphetamine type stimulants led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of amphetamine type stimulants led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#9ce80491-5f80-4c22-bf3f-014fab48700a"/>
+								<display value="AmphetaminesQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="4ee565c148f84108bfbd5bf7105aa7cc"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of amphetamine type stimulants?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of amphetamine type stimulants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#0d8eb84b-e7fd-4110-b5f0-040b3fb4dd6e"/>
+								<display value="AmphetaminesQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="ef97f28841014d40a7fb4f8197117b6b"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of amphetamine type stimulants?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of amphetamine type stimulants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#11f02771-14a5-4233-bfb5-d9b498991564"/>
+								<display value="AmphetaminesQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="80ea29d4cc45446eb300296857dc396b"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using amphetamine type stimulants?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using amphetamine type stimulants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#b69a368a-7e96-48fd-9cab-1f9878b30be2"/>
+								<display value="AmphetaminesQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="cccc02e5bbe54845b23299f3c95fc1c2"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="AmphetaminesTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="95f1f5cd59004f9d83e076cde747d12b"/>
+					<title value="Inhalants"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="56e2f55f-faa5-43ac-b458-50a76447d8dc"/>
+						<title value="Inhalants"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="994c81b82b6d409e9fc6a8a85f7ecb90"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#12613d67-bad0-4270-985f-3b2d48b0ca04"/>
+								<display value="InhalantsQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="6bf2faf8b82f44e1b0ae2cf7fbbb3d63"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used inhalants?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used inhalants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#c82183f1-00fe-4aef-866f-07a61c32cc1d"/>
+								<display value="InhalantsQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="c74e5e6eceb04812aa6a31ba29e9f126"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use inhalants?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use inhalants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#e45a6868-6386-4ae5-aa62-fe39c361f17f"/>
+								<display value="InhalantsQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="2321bf325f8744ac90c3a326da9497d8"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of inhalants led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of inhalants led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#e66c7dc1-a745-4f37-832b-dba88a5e1780"/>
+								<display value="InhalantsQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="8c18cfb82cf14d0887f047236e856c96"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of inhalants?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of inhalants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#9b31d8e3-2748-4e5e-82d2-08da8a796027"/>
+								<display value="InhalantsQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="3e9f5f00b6354b3888ebae307500009f"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of inhalants?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of inhalants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#84fdd89a-f7f1-4145-b81d-b60e09d102f2"/>
+								<display value="InhalantsQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="99e4afb881db45eea59d7505899b7157"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using inhalants?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using inhalants?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#a614c0c7-6dd5-4c34-8625-c99f1be1a5ca"/>
+								<display value="InhalantsQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="028933e0b3a24e2190f45cb99fc5bba9"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="InhalantsTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="90fff6138a0d4306be2a68dd6007b611"/>
+					<title value="Sedatives"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="d40c35cc-b1b8-439d-aeaa-59f0b12572bd"/>
+						<title value="Sedatives"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="8afc770daf1d4642b555157998f79f22"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#55a014f0-765c-47cf-ba8a-a635f88a52d5"/>
+								<display value="SedativesQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="4a4b888f726748988bb94c1effc83371"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used sedatives?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used sedatives?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#418141d8-7ee1-4f0c-9d87-695c9f8799a1"/>
+								<display value="SedativesQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="cda61a51d6734c5a96f75ac6236e2b0a"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use sedatives?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use sedatives?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#3dc39a1e-93ef-43e9-8351-a0c748da8e92"/>
+								<display value="SedativesQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="1588295d0e7541ccb5180f4c492b8c9b"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of sedatives led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of sedatives led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#52e2899b-6658-413e-8c16-597ad12cf401"/>
+								<display value="SedativesQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="b36b59fd3ffc46cabcd789d7a470ef13"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of sedatives?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of sedatives?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#5be2b4c6-bc0b-4c01-8c65-9f39c9ddf694"/>
+								<display value="SedativesQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="f116474b8ad34877918e1d6edd3b3c79"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of sedatives?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of sedatives?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#c7fe56d0-4072-4608-a6a4-594fc973e562"/>
+								<display value="SedativesQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="86e52ef9e7484160a96cdbc5b3802147"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using sedatives?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using sedatives?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#18f07f5b-9f3c-4e6e-b8ba-5f2af1627586"/>
+								<display value="SedativesQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="fa6b1971987e415984481004b4da3f42"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="SedativesTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="ced7dfe498334120b9b9c9da22e8ca7c"/>
+					<title value="Hallucinogens"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="8ee1af26-c077-4c22-b112-513419ce5bdb"/>
+						<title value="Hallucinogens"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="fa07cdb553af40048f65574dd18c6efe"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#ec8878b7-a979-4fa0-a781-3a47c2271758"/>
+								<display value="HallucinogensQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="121e74ffe63d4561aa16bf055d1a02ec"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used hallucinogens?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used hallucinogens?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#ccced9e7-8fb9-480c-857c-2e7906435ee7"/>
+								<display value="HallucinogensQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="7efad285afb34eac96ee29cc99181452"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use hallucinogens?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use hallucinogens?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#52a7c902-827f-4f4f-9d4f-202f2b48ab0e"/>
+								<display value="HallucinogensQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="b45937c3e3554bdfadfaf5070a2630bd"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of hallucinogens led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of hallucinogens led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#0bbff40f-486b-4269-945a-a83f64d44b7e"/>
+								<display value="HallucinogensQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="e4a5cc2bdf3349928fcd62bd7d65c870"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of hallucinogens?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of hallucinogens?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#a700f478-829a-4067-95f0-0833b59e16ae"/>
+								<display value="HallucinogensQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="2cd18832d3e047b2a317d33acb96528c"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of hallucinogens?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of hallucinogens?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#b3dfde43-49e1-466f-b3eb-f138449b5785"/>
+								<display value="HallucinogensQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="d494016c7cb146a2a6b97f744dbbaa62"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using hallucinogens?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using hallucinogens?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#691881b9-08a7-4b61-91ec-dff54974ebce"/>
+								<display value="HallucinogensQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="c782f2f775a443d8be0d096424600b4e"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="HallucinogensTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="6acc3c592f814c6f8b79b1c371adab25"/>
+					<title value="Opioids"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="54a67da7-9e45-44a4-aa77-317130e6718b"/>
+						<title value="Opioids"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="2fa9235d2e334b97bd3bbe347680f49c"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#4ed757e8-1fae-4970-b3cc-ce0492470056"/>
+								<display value="OpioidsQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="ff7f1e03e63e4007ae70515c965fe4bf"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used opioids?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used opioids?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#c555bd4a-a9ec-4003-8a96-d7be3d287f10"/>
+								<display value="OpioidsQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="239d36a34817481ab8477ac4d8203f33"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use opioids?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use opioids?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#cf605f4b-a781-4228-bcff-a33c37f33b16"/>
+								<display value="OpioidsQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="097fe1bdb95048cf812e7170979f3da5"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of opioids led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of opioids led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#584b475b-81a3-4eda-b610-0670f014b1a4"/>
+								<display value="OpioidsQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="553a1bab94e54162b30d9daa2f339b8f"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of opioids?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of opioids?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#88737ff3-db69-468d-8523-c572c6431161"/>
+								<display value="OpioidsQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="02b9a82a1c94450082ca083f5a556b3f"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of opioids?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of opioids?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#62d11f9b-f290-4be8-bd07-50a060c2d886"/>
+								<display value="OpioidsQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="bb81b53dc6f74d0482c7265f7c399056"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using opioids?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using opioids?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#a5ef609e-a711-440c-a25b-4f5796be81d6"/>
+								<display value="OpioidsQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="ad998e6772ed4d259b546150404b55dd"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OpioidsTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="a7f67207fb10424b84e899158d0dd1a4"/>
+					<title value="Other"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="93cc6e52-fce7-4846-a6c9-1167d5b2add9"/>
+						<title value="Other Substances"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="28fb2011120f4864aa139bccf7d3eb55"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ1"/>
+								<display
+									value="Q1. In your life which of the following substances have you ever used?"/>
+							</concept>
+							<text
+								value="Q1. In your life which of the following substances have you ever used?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#c2a6e2d5-90a1-40bc-8407-2b26e134c942"/>
+								<display value="OtherQ1"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="5e2780016583471f868a5cca5357af60"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ2"/>
+								<display
+									value="Q2. In the past 3 months, how often have you used other substances?"/>
+							</concept>
+							<text
+								value="Q2. In the past 3 months, how often have you used other substances?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#9bdcd39e-ad1e-4957-a362-3e7b152e6201"/>
+								<display value="OtherQ2"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="e6a6dca687d04945856ff98833e44a05"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ3"/>
+								<display
+									value="Q3. During the past 3 months, how often have you had a strong desire or urge to use other substances?"/>
+							</concept>
+							<text
+								value="Q3. During the past 3 months, how often have you had a strong desire or urge to use other substances?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#a03b9d57-8786-4216-b34e-123def44dcd8"/>
+								<display value="OtherQ3"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="19d4aef92a9441c69e399618cea34f0f"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ4"/>
+								<display
+									value="Q4. During the past three months how often has your use of other substances led to health, social, legal or financial problems?"/>
+							</concept>
+							<text
+								value="Q4. During the past three months how often has your use of other substances led to health, social, legal or financial problems?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#d9695f22-6581-4610-b22c-b0eee8b3e53e"/>
+								<display value="OtherQ4"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="0b32a64afe0745959b4a58f2b89ab450"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ5"/>
+								<display
+									value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of other substances?"/>
+							</concept>
+							<text
+								value="Q5. During the past 3 months how often have you failed to do what was normally expected of you because of your use of other substances?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#66972a5b-563c-4724-96c5-f48afe1ff7b7"/>
+								<display value="OtherQ5"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="1d9a3c1ab2a246e5b9365946f1348675"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ6"/>
+								<display
+									value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of other substances?"/>
+							</concept>
+							<text
+								value="Q6. Has a friend or relative or anyone else ever expressed concern about your use of other substances?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#9973a791-bc86-4db4-9ead-1f4c12e89d18"/>
+								<display value="OtherQ6"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="8176fb1bc8324009b80fe5efe4257b5e"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherQ7"/>
+								<display
+									value="Q7. Have you ever tried and failed to control, cut down or stop using other substances?"/>
+							</concept>
+							<text
+								value="Q7. Have you ever tried and failed to control, cut down or stop using other substances?"/>
+							<type value="choice"/>
+							<repeats value="false"/>
+							<options>
+								<reference value="#d7b1cb79-ddc7-4b33-a124-c2d87d6bb2cd"/>
+								<display value="OtherQ7"/>
+							</options>
+						</question>
+						<question>
+							<linkId value="57768329c5ea410a8a96945a10239195"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="OtherTotal"/>
+								<display value="Total"/>
+							</concept>
+							<text value="Total"/>
+							<type value="decimal"/>
+						</question>
+					</group>
+				</group>
+				<group>
+					<linkId value="9d75a9d22b884327ba0d4aacc2ccaf38"/>
+					<title value="Injecting, Risk"/>
+					<repeats value="false"/>
+					<group>
+						<linkId value="58f3056a-5421-4149-a6d1-8f15b130c1af"/>
+						<title value="Injecting"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="510b860735af4c899ca1097e3adb8725"/>
+							<concept>
+								<code value="InjectingQ8"/>
+							</concept>
+							<text
+								value="Q8. Have you ever used any drug by injection (non-medical use)?"/>
+							<type value="boolean"/>
+						</question>
+					</group>
+					<group>
+						<linkId value="a4d3d385-bbe1-42a7-983f-984dc96768e4"/>
+						<title value="Risk"/>
+						<repeats value="false"/>
+						<question>
+							<linkId value="3ca235d36b914d1984d31fc45026dba4"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="Risk"/>
+								<display value="Risk"/>
+							</concept>
+							<text value="Risk"/>
+							<type value="string"/>
+						</question>
+						<question>
+							<linkId value="985c083e8ebc45d591927ab4ad6f19c1"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="Treatment"/>
+								<display value="Treatment"/>
+							</concept>
+							<text value="Treatment"/>
+							<type value="string"/>
+						</question>
+						<question>
+							<linkId value="7a2bf2d8dba740c8bf970711f202a9a5"/>
+							<concept>
+								<system value="http://tcm7.com.au/fhir/7-12/Questionnaire"/>
+								<code value="Referral"/>
+								<display value="Referral"/>
+							</concept>
+							<text value="Referral"/>
+							<type value="string"/>
+						</question>
+					</group>
+				</group>
+			</group>
+		</Questionnaire>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="7b4df9d4-476c-4af5-a1f3-78d664ec7541"/>
+			<name value="TobaccoQ1"/>
+			<define>
+				<system value="bd2280ae-e821-476b-bed7-ea8aba2985aa"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="c3b93195-3959-4958-b5b1-408e62bccad2"/>
+			<name value="TobaccoQ2"/>
+			<define>
+				<system value="f69573b8-cb63-4d31-85a4-23ac784735ab"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="adf39cde-6d81-4300-a393-0acc09913fb5"/>
+			<name value="TobaccoQ3"/>
+			<define>
+				<system value="c03f9219-7c7f-4e43-9295-d0a8248271db"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="3e01a1d0-b7d3-4afe-83c1-f97747f24124"/>
+			<name value="TobaccoQ4"/>
+			<define>
+				<system value="954af1ba-7ebb-46ea-af66-d5622125f889"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="cf4e642f-a99e-4179-99ef-15d992de3cf3"/>
+			<name value="TobaccoQ5"/>
+			<define>
+				<system value="14ca652f-80f3-4120-9457-036a1e29add2"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="89b76c96-5dc7-4fe1-a339-e043a571e0fb"/>
+			<name value="TobaccoQ6"/>
+			<define>
+				<system value="0e3651e0-c085-4269-8730-106db014d8aa"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="f8973a4d-3812-4c00-a0ef-099083902442"/>
+			<name value="TobaccoQ7"/>
+			<define>
+				<system value="4754caf8-ac02-43cc-aa17-1a3c33fe8ad4"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="3762a808-e45d-411f-9a73-7c4b8d434382"/>
+			<name value="AlcoholQ1"/>
+			<define>
+				<system value="01e4179a-5aa4-4aa0-9a9f-1dec4573850b"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="074ecc51-5a33-4a45-926d-0dc9e5d3561b"/>
+			<name value="AlcoholQ2"/>
+			<define>
+				<system value="a4345107-c7b3-4723-aa56-d2e03153656e"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="fb428c18-df0b-4913-85c3-d7398315fd08"/>
+			<name value="AlcoholQ3"/>
+			<define>
+				<system value="7c170f23-b202-4b04-95d0-5790238961ba"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="3bcfcca0-fe20-4807-be6f-66927249035b"/>
+			<name value="AlcoholQ4"/>
+			<define>
+				<system value="4d3707a6-1edd-40f5-881f-d67ba5101bce"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="7208efcd-b3a4-4526-a044-631669dd2a87"/>
+			<name value="AlcoholQ5"/>
+			<define>
+				<system value="0d7e6ad1-8deb-4ca4-bf83-668bbef32504"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="a257d9ae-ad52-47d4-88c5-6805a9ddcad3"/>
+			<name value="AlcoholQ6"/>
+			<define>
+				<system value="c046f15f-6959-47eb-96f3-062678242c7b"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="4065921d-11a7-4c00-9bea-d576407ec6f2"/>
+			<name value="AlcoholQ7"/>
+			<define>
+				<system value="1f8f572c-4e64-4903-9f44-69732f6a8591"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="1eab2f67-f71c-4ae6-97e6-2489b62c73bd"/>
+			<name value="CannabisQ1"/>
+			<define>
+				<system value="cb20d465-6570-4359-b4a0-070361f5f6c2"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="007f422d-3bbb-45b1-a9a8-395c92f4b731"/>
+			<name value="CannabisQ2"/>
+			<define>
+				<system value="66fcf510-e198-4d94-a720-38451a40a521"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="d78e351f-71f0-401b-993f-62c10687e490"/>
+			<name value="CannabisQ3"/>
+			<define>
+				<system value="af556602-a5c4-4aa1-ae55-81c5104643a1"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="faaa7d8b-8084-4e27-814c-f74afa50c0b2"/>
+			<name value="CannabisQ4"/>
+			<define>
+				<system value="6b1f374e-dea6-4303-8217-82f090765f00"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="bbe9f6c7-ed54-4ce6-a4b1-e71c95fe8690"/>
+			<name value="CannabisQ5"/>
+			<define>
+				<system value="13ed880b-f0c9-4416-bb7b-192a761ea94e"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="f259d2e0-9e81-41ac-9708-00e0f51c8ef4"/>
+			<name value="CannabisQ6"/>
+			<define>
+				<system value="893ad941-6398-4a8e-8263-a8cc73a408fc"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="e712fbee-dedd-480e-baca-d4b937ecbf94"/>
+			<name value="CannabisQ7"/>
+			<define>
+				<system value="4a21dd4a-6e9d-4b01-a114-ada2aa213ca7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="8a117478-234e-481a-b5a9-600877cca30d"/>
+			<name value="CocaineQ1"/>
+			<define>
+				<system value="558fa07d-156d-4aa0-8612-f39bcd467faa"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="69db607d-04d9-425c-b1a8-e5e0c0e27126"/>
+			<name value="CocaineQ2"/>
+			<define>
+				<system value="c38e470a-a418-4341-89d9-e810d63c5216"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="74429e80-a649-4a0c-aace-f54945a0c167"/>
+			<name value="CocaineQ3"/>
+			<define>
+				<system value="62bc22bf-f366-4e35-86d7-47e9a3f39132"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="353e3f40-f38f-4935-8952-3f374ea64344"/>
+			<name value="CocaineQ4"/>
+			<define>
+				<system value="0f5171f1-bec3-4473-8b77-6f3f5bf951a8"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="0ebccb3d-c591-4422-8e9b-62b8b4519234"/>
+			<name value="CocaineQ5"/>
+			<define>
+				<system value="5e8ff8df-a200-4cf3-a961-836089faef4f"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="b9016401-f982-4882-8ca9-10a26243e87f"/>
+			<name value="CocaineQ6"/>
+			<define>
+				<system value="7da3903d-905d-4a85-9156-9f02cf9d47a7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="9fad4280-2178-4665-80c3-fee2dbb9f6aa"/>
+			<name value="CocaineQ7"/>
+			<define>
+				<system value="bebb3d4f-7422-4a1f-95f9-56a6f3c5d550"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="ca244a57-8fb3-4923-8411-d29ed829a962"/>
+			<name value="AmphetaminesQ1"/>
+			<define>
+				<system value="0e5fe632-1d5f-4785-8d25-eb74afe7872c"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="a19f461a-4436-4de3-8b3d-94261f4a570d"/>
+			<name value="AmphetaminesQ2"/>
+			<define>
+				<system value="51d4b3de-62fe-4eb2-8e12-1d64d9ce6f5f"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="9e4d4a7c-2a49-4c21-84e6-8545632d7d1c"/>
+			<name value="AmphetaminesQ3"/>
+			<define>
+				<system value="6e9f170c-75bb-4a4e-8ebc-8032475e2c12"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="9ce80491-5f80-4c22-bf3f-014fab48700a"/>
+			<name value="AmphetaminesQ4"/>
+			<define>
+				<system value="b1db0ed0-b306-41f9-a312-33a5911506e7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="0d8eb84b-e7fd-4110-b5f0-040b3fb4dd6e"/>
+			<name value="AmphetaminesQ5"/>
+			<define>
+				<system value="f3c2568b-03e6-4c93-a3a3-5f848ef62c73"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="11f02771-14a5-4233-bfb5-d9b498991564"/>
+			<name value="AmphetaminesQ6"/>
+			<define>
+				<system value="896a817d-fd50-448e-b983-7cbbaa9f4131"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="b69a368a-7e96-48fd-9cab-1f9878b30be2"/>
+			<name value="AmphetaminesQ7"/>
+			<define>
+				<system value="e339f26b-eb20-48d2-88e6-d57455600c9f"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="12613d67-bad0-4270-985f-3b2d48b0ca04"/>
+			<name value="InhalantsQ1"/>
+			<define>
+				<system value="e8844934-295e-402d-b6b4-554125e19382"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="c82183f1-00fe-4aef-866f-07a61c32cc1d"/>
+			<name value="InhalantsQ2"/>
+			<define>
+				<system value="f4cec4a2-5044-47ef-b479-a9bb66357827"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="e45a6868-6386-4ae5-aa62-fe39c361f17f"/>
+			<name value="InhalantsQ3"/>
+			<define>
+				<system value="6ae65f77-749f-4f13-b7c8-3e0329189fd7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="e66c7dc1-a745-4f37-832b-dba88a5e1780"/>
+			<name value="InhalantsQ4"/>
+			<define>
+				<system value="98b1a3d5-ad98-4b00-8ee4-7e3ab7642b06"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="9b31d8e3-2748-4e5e-82d2-08da8a796027"/>
+			<name value="InhalantsQ5"/>
+			<define>
+				<system value="f6813321-b840-4bd3-9639-fc665e260fce"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="84fdd89a-f7f1-4145-b81d-b60e09d102f2"/>
+			<name value="InhalantsQ6"/>
+			<define>
+				<system value="58232edd-c90a-47aa-a992-95e3ef93d4ab"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="a614c0c7-6dd5-4c34-8625-c99f1be1a5ca"/>
+			<name value="InhalantsQ7"/>
+			<define>
+				<system value="afc0846c-e09f-46ec-8aed-ff1561ff86f7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="55a014f0-765c-47cf-ba8a-a635f88a52d5"/>
+			<name value="SedativesQ1"/>
+			<define>
+				<system value="a04ab410-599a-454d-9496-59b04b5fb46a"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="418141d8-7ee1-4f0c-9d87-695c9f8799a1"/>
+			<name value="SedativesQ2"/>
+			<define>
+				<system value="0d1b7113-b7a2-41ac-92f4-0155812e42b7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="3dc39a1e-93ef-43e9-8351-a0c748da8e92"/>
+			<name value="SedativesQ3"/>
+			<define>
+				<system value="57902b6c-21e0-4d60-b2a6-7ddfe04dbc11"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="52e2899b-6658-413e-8c16-597ad12cf401"/>
+			<name value="SedativesQ4"/>
+			<define>
+				<system value="86c5ec06-b86f-416c-b313-7aa2accb4114"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="5be2b4c6-bc0b-4c01-8c65-9f39c9ddf694"/>
+			<name value="SedativesQ5"/>
+			<define>
+				<system value="7d5a48ae-9f9d-44be-945a-5552e49f5573"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="c7fe56d0-4072-4608-a6a4-594fc973e562"/>
+			<name value="SedativesQ6"/>
+			<define>
+				<system value="bace0a19-4408-424b-9721-c73bac25af1c"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="18f07f5b-9f3c-4e6e-b8ba-5f2af1627586"/>
+			<name value="SedativesQ7"/>
+			<define>
+				<system value="640a346c-6778-468e-a820-3e1dd389caed"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="ec8878b7-a979-4fa0-a781-3a47c2271758"/>
+			<name value="HallucinogensQ1"/>
+			<define>
+				<system value="bd1b5b2d-82d0-4cb1-b590-a94e15a02463"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="ccced9e7-8fb9-480c-857c-2e7906435ee7"/>
+			<name value="HallucinogensQ2"/>
+			<define>
+				<system value="874c93b1-0da4-47eb-9034-48d2a690fee7"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="52a7c902-827f-4f4f-9d4f-202f2b48ab0e"/>
+			<name value="HallucinogensQ3"/>
+			<define>
+				<system value="19b29955-dce8-4198-b98f-946868139386"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="0bbff40f-486b-4269-945a-a83f64d44b7e"/>
+			<name value="HallucinogensQ4"/>
+			<define>
+				<system value="e8d2b9c3-b6f4-4029-b124-450e726f50ff"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="a700f478-829a-4067-95f0-0833b59e16ae"/>
+			<name value="HallucinogensQ5"/>
+			<define>
+				<system value="445e64ed-a70c-4416-b1db-e75edf466aa3"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="b3dfde43-49e1-466f-b3eb-f138449b5785"/>
+			<name value="HallucinogensQ6"/>
+			<define>
+				<system value="33ea5e88-a5b4-45e1-a491-3e9c0ecd8c32"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="691881b9-08a7-4b61-91ec-dff54974ebce"/>
+			<name value="HallucinogensQ7"/>
+			<define>
+				<system value="e8adb26a-c63d-49b2-92e0-0071a378dd75"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="4ed757e8-1fae-4970-b3cc-ce0492470056"/>
+			<name value="OpioidsQ1"/>
+			<define>
+				<system value="569d8066-d9a3-44a2-bebb-27108d6ab892"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="c555bd4a-a9ec-4003-8a96-d7be3d287f10"/>
+			<name value="OpioidsQ2"/>
+			<define>
+				<system value="05c178ea-d25f-4e11-8a77-dede83d08f36"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="cf605f4b-a781-4228-bcff-a33c37f33b16"/>
+			<name value="OpioidsQ3"/>
+			<define>
+				<system value="700487f6-f1e3-4699-a078-43f9cd2ea091"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="584b475b-81a3-4eda-b610-0670f014b1a4"/>
+			<name value="OpioidsQ4"/>
+			<define>
+				<system value="c0c3fef0-a39a-40da-ae25-825f4fcc4594"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="88737ff3-db69-468d-8523-c572c6431161"/>
+			<name value="OpioidsQ5"/>
+			<define>
+				<system value="c41944c0-6bd8-4ef0-bd96-88f2eb62aad8"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="62d11f9b-f290-4be8-bd07-50a060c2d886"/>
+			<name value="OpioidsQ6"/>
+			<define>
+				<system value="1ae96004-12e7-442f-b334-2850ecb7b36c"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="a5ef609e-a711-440c-a25b-4f5796be81d6"/>
+			<name value="OpioidsQ7"/>
+			<define>
+				<system value="74afa419-e3f9-4b3b-9191-87f2ca5d14c2"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="c2a6e2d5-90a1-40bc-8407-2b26e134c942"/>
+			<name value="OtherQ1"/>
+			<define>
+				<system value="7cb1e7d6-c9ee-4243-80c3-d0ec70d9fd2a"/>
+				<concept>
+					<code value="Y"/>
+					<abstract value="false"/>
+					<display value="Yes"/>
+				</concept>
+				<concept>
+					<code value="N"/>
+					<abstract value="false"/>
+					<display value="No"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="9bdcd39e-ad1e-4957-a362-3e7b152e6201"/>
+			<name value="OtherQ2"/>
+			<define>
+				<system value="c7433954-5b72-410e-83e9-5367ac0dbe6b"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="2"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="a03b9d57-8786-4216-b34e-123def44dcd8"/>
+			<name value="OtherQ3"/>
+			<define>
+				<system value="0ec6c5f0-a037-4d07-aa4d-ba69658c92e9"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="d9695f22-6581-4610-b22c-b0eee8b3e53e"/>
+			<name value="OtherQ4"/>
+			<define>
+				<system value="f583fa95-6c87-44f8-a796-02bbb618741e"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="4"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="66972a5b-563c-4724-96c5-f48afe1ff7b7"/>
+			<name value="OtherQ5"/>
+			<define>
+				<system value="f398014d-f605-4a87-b5e9-29cf5d5b5de1"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="5"/>
+					<abstract value="false"/>
+					<display value="Once/twice"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Monthly"/>
+				</concept>
+				<concept>
+					<code value="7"/>
+					<abstract value="false"/>
+					<display value="Weekly"/>
+				</concept>
+				<concept>
+					<code value="8"/>
+					<abstract value="false"/>
+					<display value="Daily/Almost Daily"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="9973a791-bc86-4db4-9ead-1f4c12e89d18"/>
+			<name value="OtherQ6"/>
+			<define>
+				<system value="5d59f981-01cc-4873-88dd-742c958bad60"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<contained>
+		<ValueSet>
+			<id value="d7b1cb79-ddc7-4b33-a124-c2d87d6bb2cd"/>
+			<name value="OtherQ7"/>
+			<define>
+				<system value="cc5abb42-1a07-4301-80dd-2796353c639a"/>
+				<concept>
+					<code value="0"/>
+					<abstract value="false"/>
+					<display value="Never"/>
+				</concept>
+				<concept>
+					<code value="6"/>
+					<abstract value="false"/>
+					<display value="Yes, in past 3 months"/>
+				</concept>
+				<concept>
+					<code value="3"/>
+					<abstract value="false"/>
+					<display value="Yes, not in past 3 months"/>
+				</concept>
+			</define>
+		</ValueSet>
+	</contained>
+	<questionnaire>
+		<reference value="#4dad1b31b7764d0581fd5b654cbfb5be"/>
+	</questionnaire>
+	<status value="completed"/>
+	<authored value="2015-07-10T00:45:12.260Z"/>
+	<group>
+		<group>
+			<linkId value="f6cfe250-e710-4ba9-b18d-17c5e5834df9"/>
+			<group>
+				<linkId value="da52dcdf-a097-4675-997d-24647bb677f6"/>
+			</group>
+			<group>
+				<linkId value="b8f0c723-c66d-4502-83c1-913295c38dfd"/>
+			</group>
+			<group>
+				<linkId value="eee74f69-526b-4d1f-abb1-548c87f8c2bf"/>
+			</group>
+			<group>
+				<linkId value="741fb913-0ea5-4152-9e09-8d84a52e371b"/>
+			</group>
+		</group>
+		<group>
+			<linkId value="ce01edf8-576a-45b7-81b8-81e8f25eb803"/>
+			<question>
+				<linkId value="70592294cd954586957016730afe50fc"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="bd2280ae-e821-476b-bed7-ea8aba2985aa"/>
+						<code value="Y"/>
+						<display value="Yes"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="54cfa938b0a94a46ac748dd29879b669"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="f69573b8-cb63-4d31-85a4-23ac784735ab"/>
+						<code value="2"/>
+						<display value="Once/twice"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="08453ec0ec69464684ff823feda8aaf4"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="c03f9219-7c7f-4e43-9295-d0a8248271db"/>
+						<code value="3"/>
+						<display value="Once/twice"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="be41841649bc48669c46054fde48f3e2"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="954af1ba-7ebb-46ea-af66-d5622125f889"/>
+						<code value="0"/>
+						<display value="Never"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="307bcc0d08054dd493dab1123a66d8b0"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="14ca652f-80f3-4120-9457-036a1e29add2"/>
+						<code value="5"/>
+						<display value="Once/twice"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="16a4581c67ac45d5aa8d37244cc5b80c"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="0e3651e0-c085-4269-8730-106db014d8aa"/>
+						<code value="0"/>
+						<display value="Never"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="d40f97cdd5154b10b27de9a824ad821a"/>
+				<text value=""/>
+				<answer>
+					<valueCoding>
+						<system value="4754caf8-ac02-43cc-aa17-1a3c33fe8ad4"/>
+						<code value="0"/>
+						<display value="Never"/>
+					</valueCoding>
+				</answer>
+			</question>
+			<question>
+				<linkId value="ed5422f57bab4fcb886a9c789047f0ec"/>
+				<text value=""/>
+				<answer>
+					<valueString value="5"/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="e38b3251-96ad-4355-b1f2-5bef3e29357f"/>
+			<question>
+				<linkId value="42bbfde6faa24b4b825a4fc7ef99fdde"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="7ce60a28c5ad49388fa63a526540e95f"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="c59dc0c2e85a445d8a795e00d87e0451"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="07e4258068bb475e94f62e85d320deb1"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="77b466edf74942e08b96b80cb8be81a1"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="eca35b534925440eb8e3e05db86da761"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="ada0c96f56384412827d892b2eedf9b2"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="bd3a5e41a1794da3ab35061eda848f53"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="76ee8f1f-48f6-420f-96a8-920a43a47071"/>
+			<question>
+				<linkId value="dc2ba5c68e6b4c608c509b995d5e6b9e"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="1dabb8a4a3dd482aac7b562b34805075"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="19dd7f74da9449d98ab71ae6b995390c"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="d3e8f546029f4808a8a286a5de266b44"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="e57c5ac1bb9e45eb8bb91b15d59018f3"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="346c7343540347bcbd30dc1c1bba6a24"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="48ff15bda2824ded9e7bd151dfeed008"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="23cd518ef46b4dc49e08fedb36f93c33"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="66b1cc70-1311-4393-9a02-3be08cff5fe9"/>
+			<question>
+				<linkId value="2c986c7a635048b1a38be8fb9bfde557"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="cfd29e64b4e840ffa61c7b14a251fe58"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="5cdbbbae7795418493af86e2c973a896"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="dddfebc6d85a4a60a4e3796674c8f6f3"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="8dbd16c733f04ea4867f03aa32590764"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="3886f4a942714795acb7e832391c164a"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="bc8fbc34e0d54e93a65104c2a5528cd9"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="3f05efbead6f4972b7fb9e79f87abe35"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="d250d3f2-9758-48dc-820f-2f3fb8302f20"/>
+			<question>
+				<linkId value="a3f3fb3689c845dd8c344694c155b00b"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="5354869f1c374043bd86e98fa1cd0a98"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="7d8adc8f5e654d248f397165dad77a0d"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="5642831307ed4a8b82b3f58f1e371220"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="4ee565c148f84108bfbd5bf7105aa7cc"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="ef97f28841014d40a7fb4f8197117b6b"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="80ea29d4cc45446eb300296857dc396b"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="cccc02e5bbe54845b23299f3c95fc1c2"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="56e2f55f-faa5-43ac-b458-50a76447d8dc"/>
+			<question>
+				<linkId value="994c81b82b6d409e9fc6a8a85f7ecb90"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="6bf2faf8b82f44e1b0ae2cf7fbbb3d63"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="c74e5e6eceb04812aa6a31ba29e9f126"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="2321bf325f8744ac90c3a326da9497d8"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="8c18cfb82cf14d0887f047236e856c96"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="3e9f5f00b6354b3888ebae307500009f"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="99e4afb881db45eea59d7505899b7157"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="028933e0b3a24e2190f45cb99fc5bba9"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="d40c35cc-b1b8-439d-aeaa-59f0b12572bd"/>
+			<question>
+				<linkId value="8afc770daf1d4642b555157998f79f22"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="4a4b888f726748988bb94c1effc83371"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="cda61a51d6734c5a96f75ac6236e2b0a"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="1588295d0e7541ccb5180f4c492b8c9b"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="b36b59fd3ffc46cabcd789d7a470ef13"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="f116474b8ad34877918e1d6edd3b3c79"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="86e52ef9e7484160a96cdbc5b3802147"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="fa6b1971987e415984481004b4da3f42"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="8ee1af26-c077-4c22-b112-513419ce5bdb"/>
+			<question>
+				<linkId value="fa07cdb553af40048f65574dd18c6efe"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="121e74ffe63d4561aa16bf055d1a02ec"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="7efad285afb34eac96ee29cc99181452"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="b45937c3e3554bdfadfaf5070a2630bd"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="e4a5cc2bdf3349928fcd62bd7d65c870"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="2cd18832d3e047b2a317d33acb96528c"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="d494016c7cb146a2a6b97f744dbbaa62"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="c782f2f775a443d8be0d096424600b4e"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="54a67da7-9e45-44a4-aa77-317130e6718b"/>
+			<question>
+				<linkId value="2fa9235d2e334b97bd3bbe347680f49c"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="ff7f1e03e63e4007ae70515c965fe4bf"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="239d36a34817481ab8477ac4d8203f33"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="097fe1bdb95048cf812e7170979f3da5"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="553a1bab94e54162b30d9daa2f339b8f"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="02b9a82a1c94450082ca083f5a556b3f"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="bb81b53dc6f74d0482c7265f7c399056"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="ad998e6772ed4d259b546150404b55dd"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="93cc6e52-fce7-4846-a6c9-1167d5b2add9"/>
+			<question>
+				<linkId value="28fb2011120f4864aa139bccf7d3eb55"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="5e2780016583471f868a5cca5357af60"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="e6a6dca687d04945856ff98833e44a05"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="19d4aef92a9441c69e399618cea34f0f"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="0b32a64afe0745959b4a58f2b89ab450"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="1d9a3c1ab2a246e5b9365946f1348675"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="8176fb1bc8324009b80fe5efe4257b5e"/>
+				<text value=""/>
+			</question>
+			<question>
+				<linkId value="57768329c5ea410a8a96945a10239195"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="58f3056a-5421-4149-a6d1-8f15b130c1af"/>
+			<question>
+				<linkId value="510b860735af4c899ca1097e3adb8725"/>
+				<text value=""/>
+				<answer>
+					<valueBoolean value="false"/>
+				</answer>
+			</question>
+		</group>
+		<group>
+			<linkId value="a4d3d385-bbe1-42a7-983f-984dc96768e4"/>
+			<question>
+				<linkId value="3ca235d36b914d1984d31fc45026dba4"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="985c083e8ebc45d591927ab4ad6f19c1"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="7a2bf2d8dba740c8bf970711f202a9a5"/>
+				<text value=""/>
+				<answer>
+					<valueString value=""/>
+				</answer>
+			</question>
+		</group>
+	</group>
+</QuestionnaireAnswers>

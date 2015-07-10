@@ -624,7 +624,7 @@ public class ValueSet extends DomainResource {
         /**
          * If this code is not for use as a real concept.
          */
-        @Child(name = "abstract_", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="If this code is not for use as a real concept", formalDefinition="If this code is not for use as a real concept." )
         protected BooleanType abstract_;
 
@@ -1210,7 +1210,7 @@ public class ValueSet extends DomainResource {
         /**
          * Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.
          */
-        @Child(name = "import_", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "import", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Import the contents of another value set", formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri." )
         protected List<UriType> import_;
 
@@ -2757,7 +2757,7 @@ public class ValueSet extends DomainResource {
         /**
          * If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.
          */
-        @Child(name = "abstract_", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="If user cannot select this entry", formalDefinition="If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value." )
         protected BooleanType abstract_;
 

@@ -2,22 +2,26 @@ package example;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 public class ValidatorExamples {
 
+   @SuppressWarnings("unused")
    public void enableValidation() {
       // START SNIPPET: enableValidation
       FhirContext ctx = FhirContext.forDstu2();
@@ -55,13 +59,22 @@ public class ValidatorExamples {
          
       } else {
          // We failed validation!
-
          System.out.println("Validation failed");
-
-         // The result contains an OperationOutcome outlining the failures
-         String results = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
-         System.out.println(results);
       }
+      
+      // The result contains a list of "messages" 
+      List<SingleValidationMessage> messages = result.getMessages();
+      for (SingleValidationMessage next : messages) {
+         System.out.println("Message:");
+         System.out.println(" * Location: " + next.getLocationString());
+         System.out.println(" * Severity: " + next.getSeverity());
+         System.out.println(" * Message : " + next.getMessage());
+      }
+      
+      // You can also convert the results into an OperationOutcome resource
+      OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
+      String results = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(oo);
+      System.out.println(results);
       // END SNIPPET: basicValidation
 
    }

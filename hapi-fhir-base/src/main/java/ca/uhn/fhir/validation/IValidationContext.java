@@ -1,17 +1,22 @@
 package ca.uhn.fhir.validation;
 
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 interface IValidationContext<T> {
 
-	public abstract FhirContext getFhirContext();
+	FhirContext getFhirContext();
 
-	public abstract IBaseOperationOutcome getOperationOutcome();
+	T getResource();
 
-	public abstract T getResource();
+	String getResourceAsString();
 
-	public abstract String getXmlEncodedResource();
+	EncodingEnum getResourceAsStringEncoding();
+
+	String getResourceName();
+
+	void addValidationMessage(SingleValidationMessage theMessage);
+
+	ValidationResult toResult();
 
 }

@@ -29,6 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
@@ -183,6 +185,22 @@ public class ValidationMessage
   public String getHtml() {
     return html == null ? Utilities.escapeXml(message) : html;
   }
+
+  /**
+   * Returns a representation of this ValidationMessage suitable for logging. The values of
+   * most of the internal fields are included, so this may not be suitable for display to 
+   * an end user.
+   */
+  @Override
+  public String toString() {
+    ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    b.append("level", level);
+    b.append("type", type);
+    b.append("location", location);
+    b.append("message", message);
+    return b.build();
+  }
+  
   
   
 }

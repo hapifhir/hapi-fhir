@@ -17,6 +17,7 @@ import org.hl7.fhir.instance.model.Conformance;
 import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Parameters;
+import org.hl7.fhir.instance.model.Questionnaire;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.ValueSet;
@@ -28,27 +29,27 @@ import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOut
 
 /*
  *  private static Map<String, StructureDefinition> loadProfiles() throws Exception {
-    HashMap<String, StructureDefinition> result = new HashMap<String, StructureDefinition>();
-    Bundle feed = new XmlParser().parseGeneral(new FileInputStream(PROFILES)).getFeed();
-    for (AtomEntry<? extends Resource> e : feed.getEntryList()) {
-      if (e.getReference() instanceof StructureDefinition) {
-        result.put(e.getId(), (StructureDefinition) e.getReference());
-      }
-    }
-    return result;
-  }
+ HashMap<String, StructureDefinition> result = new HashMap<String, StructureDefinition>();
+ Bundle feed = new XmlParser().parseGeneral(new FileInputStream(PROFILES)).getFeed();
+ for (AtomEntry<? extends Resource> e : feed.getEntryList()) {
+ if (e.getReference() instanceof StructureDefinition) {
+ result.put(e.getId(), (StructureDefinition) e.getReference());
+ }
+ }
+ return result;
+ }
 
-  private static final String TEST_PROFILE = "C:\\work\\org.hl7.fhir\\build\\publish\\namespace.profile.xml";
-  private static final String PROFILES = "C:\\work\\org.hl7.fhir\\build\\publish\\profiles-resources.xml";
+ private static final String TEST_PROFILE = "C:\\work\\org.hl7.fhir\\build\\publish\\namespace.profile.xml";
+ private static final String PROFILES = "C:\\work\\org.hl7.fhir\\build\\publish\\profiles-resources.xml";
 
-igtodo - things to add: 
-- version
-- list of resource names
+ igtodo - things to add: 
+ - version
+ - list of resource names
 
  */
 public class WorkerContext implements NameResolver {
 
-	private ITerminologyServices terminologyServices = new NullTerminologyServices();
+  private ITerminologyServices terminologyServices = new NullTerminologyServices();
   private IFHIRClient client = new NullClient();
   private Map<String, ValueSet> codeSystems = new HashMap<String, ValueSet>();
   private Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
@@ -57,14 +58,13 @@ public class WorkerContext implements NameResolver {
   private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
   private String version;
   private List<String> resourceNames = new ArrayList<String>();
-
+  private Map<String, Questionnaire> questionnaires = new HashMap<String, Questionnaire>();
 
   public WorkerContext() {
     super();
   }
 
-  public WorkerContext(ITerminologyServices conceptLocator, IFHIRClient client, Map<String, ValueSet> codeSystems,
-      Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles) {
+  public WorkerContext(ITerminologyServices conceptLocator, IFHIRClient client, Map<String, ValueSet> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles) {
     super();
     if (conceptLocator != null)
       this.terminologyServices = conceptLocator;
@@ -85,8 +85,9 @@ public class WorkerContext implements NameResolver {
   }
 
   public boolean hasClient() {
-  	return !(client == null || client instanceof NullClient);
+    return !(client == null || client instanceof NullClient);
   }
+
   public IFHIRClient getClient() {
     return client;
   }
@@ -111,8 +112,12 @@ public class WorkerContext implements NameResolver {
     return extensionDefinitions;
   }
 
+  public Map<String, Questionnaire> getQuestionnaires() {
+    return questionnaires;
+  }
+
   public WorkerContext setTerminologyServices(ITerminologyServices terminologyServices) {
-    this.terminologyServices = terminologyServices;   
+    this.terminologyServices = terminologyServices;
     return this;
   }
 
@@ -124,181 +129,183 @@ public class WorkerContext implements NameResolver {
     return res;
   }
 
-
-
-
   public void seeExtensionDefinition(String base, StructureDefinition ed) throws Exception {
     if (extensionDefinitions.get(ed.getUrl()) != null)
-      throw new Exception("duplicate extension definition: "+ed.getUrl());
+      throw new Exception("duplicate extension definition: " + ed.getUrl());
     extensionDefinitions.put(ed.getId(), ed);
-  	extensionDefinitions.put(base+"/StructureDefinition/"+ed.getId(), ed);
+    extensionDefinitions.put(base + "/StructureDefinition/" + ed.getId(), ed);
     extensionDefinitions.put(ed.getUrl(), ed);
   }
 
+  public void seeQuestionnaire(String base, Questionnaire theQuestionnaire) throws Exception {
+    questionnaires.put(theQuestionnaire.getId(), theQuestionnaire);
+    questionnaires.put(base + "/Questionnaire/" + theQuestionnaire.getId(), theQuestionnaire);
+  }
+
   public void seeValueSet(String base, ValueSet vs) {
-  	valueSets.put(vs.getId(), vs);
-  	valueSets.put(base+"/ValueSet/"+vs.getId(), vs);
-	  valueSets.put(vs.getUrl(), vs);
-	  if (vs.hasDefine()) {
-	    codeSystems.put(vs.getDefine().getSystem().toString(), vs);
-        }
-      }
+    valueSets.put(vs.getId(), vs);
+    valueSets.put(base + "/ValueSet/" + vs.getId(), vs);
+    valueSets.put(vs.getUrl(), vs);
+    if (vs.hasDefine()) {
+      codeSystems.put(vs.getDefine().getSystem().toString(), vs);
+    }
+  }
 
   public void seeProfile(String base, StructureDefinition p) {
-	  profiles.put(p.getId(), p);
-	  profiles.put(base+"/StructureDefinition/"+p.getId(), p);
-	  profiles.put(p.getUrl(), p);
+    profiles.put(p.getId(), p);
+    profiles.put(base + "/StructureDefinition/" + p.getId(), p);
+    profiles.put(p.getUrl(), p);
   }
 
   public class NullClient implements IFHIRClient {
 
-	  @Override
-	  public VersionInfo getVersions() {
+    @Override
+    public VersionInfo getVersions() {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public IFHIRClient initialize(String baseServiceUrl) throws URISyntaxException {
+    @Override
+    public IFHIRClient initialize(String baseServiceUrl) throws URISyntaxException {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public void initialize(String baseServiceUrl, int recordCount) throws URISyntaxException {
+    @Override
+    public void initialize(String baseServiceUrl, int recordCount) throws URISyntaxException {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public void setPreferredResourceFormat(ResourceFormat resourceFormat) {
+    @Override
+    public void setPreferredResourceFormat(ResourceFormat resourceFormat) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public String getPreferredResourceFormat() {
+    @Override
+    public String getPreferredResourceFormat() {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public void setPreferredFeedFormat(FeedFormat feedFormat) {
+    @Override
+    public void setPreferredFeedFormat(FeedFormat feedFormat) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public String getPreferredFeedFormat() {
+    @Override
+    public String getPreferredFeedFormat() {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public int getMaximumRecordCount() {
+    @Override
+    public int getMaximumRecordCount() {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public void setMaximumRecordCount(int recordCount) {
+    @Override
+    public void setMaximumRecordCount(int recordCount) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public Conformance getConformanceStatement() {
+    @Override
+    public Conformance getConformanceStatement() {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public Conformance getConformanceStatement(boolean useOptionsVerb) {
+    @Override
+    public Conformance getConformanceStatement(boolean useOptionsVerb) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> T read(Class<T> resource, String id) {
+    @Override
+    public <T extends Resource> T read(Class<T> resource, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> T vread(Class<T> resource, String id, String versionid) {
+    @Override
+    public <T extends Resource> T vread(Class<T> resource, String id, String versionid) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> T update(Class<T> resourceClass, T resource, String id) {
+    @Override
+    public <T extends Resource> T update(Class<T> resourceClass, T resource, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> boolean delete(Class<T> resourceClass, String id) {
-	  	throw new Error("call to NullClient");
-	  }
-
-	  @Override
-	  public <T extends Resource> OperationOutcome create(Class<T> resourceClass, T resource) {
+    @Override
+    public <T extends Resource> boolean delete(Class<T> resourceClass, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Calendar lastUpdate, Class<T> resourceClass, String id) {
+    @Override
+    public <T extends Resource> OperationOutcome create(Class<T> resourceClass, T resource) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Date lastUpdate, Class<T> resourceClass, String id) {
+    @Override
+    public <T extends Resource> Bundle history(Calendar lastUpdate, Class<T> resourceClass, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Class<T> resource, String id) {
+    @Override
+    public <T extends Resource> Bundle history(Date lastUpdate, Class<T> resourceClass, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Calendar lastUpdate, Class<T> resourceClass) {
+    @Override
+    public <T extends Resource> Bundle history(Class<T> resource, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Date lastUpdate, Class<T> resourceClass) {
+    @Override
+    public <T extends Resource> Bundle history(Calendar lastUpdate, Class<T> resourceClass) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Class<T> resourceClass) {
+    @Override
+    public <T extends Resource> Bundle history(Date lastUpdate, Class<T> resourceClass) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Calendar lastUpdate) {
+    @Override
+    public <T extends Resource> Bundle history(Class<T> resourceClass) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history(Date lastUpdate) {
+    @Override
+    public <T extends Resource> Bundle history(Calendar lastUpdate) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle history() {
+    @Override
+    public <T extends Resource> Bundle history(Date lastUpdate) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> OperationOutcome validate(Class<T> resourceClass, T resource, String id) {
+    @Override
+    public <T extends Resource> Bundle history() {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle search(Class<T> resourceClass, Map<String, String> params) {
+    @Override
+    public <T extends Resource> OperationOutcome validate(Class<T> resourceClass, T resource, String id) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public <T extends Resource> Bundle searchPost(Class<T> resourceClass, T resource, Map<String, String> params) {
+    @Override
+    public <T extends Resource> Bundle search(Class<T> resourceClass, Map<String, String> params) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public Bundle transaction(Bundle batch) {
+    @Override
+    public <T extends Resource> Bundle searchPost(Class<T> resourceClass, T resource, Map<String, String> params) {
       throw new Error("call to NullClient");
-	  }
+    }
 
-	  @Override
-	  public Bundle fetchFeed(String url) {
+    @Override
+    public Bundle transaction(Bundle batch) {
+      throw new Error("call to NullClient");
+    }
+
+    @Override
+    public Bundle fetchFeed(String url) {
       throw new Error("call to NullClient");
     }
 
@@ -307,7 +314,7 @@ public class WorkerContext implements NameResolver {
       throw new Error("call to NullClient");
     }
 
-		@Override
+    @Override
     public <T extends Resource> Parameters operateType(Class<T> resourceClass, String name, Parameters params) {
       throw new Error("call to NullClient");
     }
@@ -325,20 +332,20 @@ public class WorkerContext implements NameResolver {
   }
 
   public StructureDefinition getExtensionStructure(StructureDefinition context, String url) throws Exception {
-	  if (url.startsWith("#")) {
+    if (url.startsWith("#")) {
       throw new Error("Contained extensions not done yet");
-	  } else {
-	    if (url.contains("#"))
-	      url = url.substring(0, url.indexOf("#"));
-		  StructureDefinition res = extensionDefinitions.get(url);
-		  if (res == null)
-		  	res = profiles.get(url);
-		  if (res == null)
-			  return null;
-		  if (res.getSnapshot() == null || res.getSnapshot().getElement().isEmpty())
-			  throw new Exception("no snapshot on extension for url "+url);
-		  return res;
-	  }
+    } else {
+      if (url.contains("#"))
+        url = url.substring(0, url.indexOf("#"));
+      StructureDefinition res = extensionDefinitions.get(url);
+      if (res == null)
+        res = profiles.get(url);
+      if (res == null)
+        return null;
+      if (res.getSnapshot() == null || res.getSnapshot().getElement().isEmpty())
+        throw new Exception("no snapshot on extension for url " + url);
+      return res;
+    }
   }
 
   public class NullTerminologyServices implements ITerminologyServices {
@@ -392,7 +399,7 @@ public class WorkerContext implements NameResolver {
   public boolean isResource(String name) {
     if (resourceNames.contains(name))
       return true;
-    StructureDefinition sd = profiles.get("http://hl7.org/fhir/StructureDefinition/"+name);
+    StructureDefinition sd = profiles.get("http://hl7.org/fhir/StructureDefinition/" + name);
     return sd != null && (sd.getBase().endsWith("Resource") || sd.getBase().endsWith("DomainResource"));
   }
 
@@ -408,5 +415,3 @@ public class WorkerContext implements NameResolver {
   }
 
 }
-
-    

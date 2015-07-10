@@ -19,6 +19,13 @@
 	<description value="an enumeration of codes defined by LOINC" />
 	<status value="draft" />
 	<experimental value="true" />
+	<define>
+		<system value="http://loinc.org" />
+		<concept>
+			<code value="8450-9" />
+			<display value="Systolic blood pressure--expiration" />
+		</concept>
+	</define>
 	<compose>
 		<include>
 			<system value="http://loinc.org" />
@@ -37,10 +44,6 @@
 			<concept>
 				<code value="8495-4" />
 				<display value="Systolic blood pressure 24 hour minimum" />
-			</concept>
-			<concept>
-				<code value="8450-9" />
-				<display value="Systolic blood pressure--expiration" />
 			</concept>
 			<concept>
 				<code value="8451-7" />
