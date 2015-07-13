@@ -57,6 +57,21 @@
 
 		<section name="Announcements">
 			<p>
+				<b>July 13, 2015 - HAPI FHIR 1.1 Released</b> - HAPI 1.1 has been released! 
+				As always, you can see the complete list of what has
+				changed by consulting the <a href="./changes-report.html">changelog</a>, and the
+				<a href="./download.html">download page</a> has information on where to get it.
+			</p>
+			<p>
+				HAPI FHIR 1.1 is the first release with support for the HL7.org "reference implementation"
+				structures. This is an exciting development for us, as it means the beginning of
+				our move to bring the two Java implementations of FHIR together into one library.
+				As a part of this harmonization, we have made a few minor API changes. Specifially,
+				a few methods that previously returned <code>IResource</code> or <code>IdDt</code>
+				will now return parent interfaces of 
+			</p>
+<!-- 
+			<p>
 				<b>May 8, 2015 - HAPI FHIR 1.0 Released</b> - HAPI 1.0 has been released! As always, 1.0 brings lots of fixes and features, and also brings the DSTU2 model classes up to the May 2015 DSTU2 ballot candidate structure definitions. Upgrading is recommended.
 			</p>
 			<p>
@@ -117,6 +132,7 @@
 			<p>
 				- <a href="mailto:jamesagnew@users.sourceforge.net">James Agnew</a>
 			</p>
+			-->
 			
 			<!-- 
 			<p>

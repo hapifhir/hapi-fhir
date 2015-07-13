@@ -54,4 +54,14 @@ public class Dstu2Examples {
    }
    // END SNIPPET: server
 
+   
+   public void upgrade() {
+      // START SNIPPET: client
+      FhirContext ctxDstu2 = FhirContext.forDstu2();
+      IGenericClient clientDstu2 = ctxDstu2.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+      
+      // END SNIPPET: client
+      
+   }
+   
 }

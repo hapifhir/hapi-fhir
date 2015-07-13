@@ -98,7 +98,7 @@ public class FhirInstanceValidator implements IValidator {
 
 	@Override
 	public void validateBundle(IValidationContext<Bundle> theContext) {
-		
+		// nothing for now
 	}
 
 }
