@@ -161,7 +161,7 @@ class SchemaBaseValidator implements IValidator {
 
 		private void addIssue(SAXParseException theException, ResultSeverityEnum theSeverity) {
 			SingleValidationMessage message = new SingleValidationMessage();
-			message.setLocationRow(theException.getLineNumber());
+			message.setLocationLine(theException.getLineNumber());
 			message.setLocationCol(theException.getColumnNumber());
 			message.setMessage(theException.getLocalizedMessage());
 			message.setSeverity(theSeverity);

@@ -267,7 +267,11 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 
 		writeOptionalTagWithTextNode(theEventWriter, "type", theBundle.getType());
-		writeOptionalTagWithTextNode(theEventWriter, "base", theBundle.getLinkBase());
+
+		if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+			writeOptionalTagWithTextNode(theEventWriter, "base", theBundle.getLinkBase());
+		}
+
 		writeOptionalTagWithNumberNode(theEventWriter, "total", theBundle.getTotalResults());
 
 		boolean linkStarted = false;
@@ -284,8 +288,14 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.writeStartObject();
 
-			writeOptionalTagWithTextNode(theEventWriter, "base", determineResourceBaseUrl(theBundle.getLinkBase().getValue(), nextEntry));
-
+			if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+				writeOptionalTagWithTextNode(theEventWriter, "base", determineResourceBaseUrl(theBundle.getLinkBase().getValue(), nextEntry));
+			} else {
+				if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+					writeOptionalTagWithTextNode(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
+				}
+			}
+			
 			boolean deleted = nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false;
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {

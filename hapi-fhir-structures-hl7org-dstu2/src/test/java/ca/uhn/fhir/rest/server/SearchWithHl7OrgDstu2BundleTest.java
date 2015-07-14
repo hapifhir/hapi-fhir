@@ -48,12 +48,12 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		//@formatter:off
 		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
 				"<type value=\"searchset\"/>", 
-				"<base value=\"http://localhost:" + ourPort + "\"/>" , 
 				"<link>" ,
 				"<relation value=\"self\"/>", 
 				"<url value=\"http://localhost:" + ourPort + "/Patient?_format=xml&amp;_pretty=true\"/>", 
 				"</link>" ,
 				"<entry>" , 
+				//"<fullUrl value=\"http://localhost:" + ourPort + "/Patient/123\"/>" , 
 				"<resource>" , 
 				"<Patient xmlns=\"http://hl7.org/fhir\">"));
 		// @formatter:off

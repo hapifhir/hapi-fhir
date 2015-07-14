@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -527,14 +527,14 @@ public class List_ extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * The entity responsible for deciding what the contents of the list were.
+     * The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.
      */
     @Child(name = "source", type = {Practitioner.class, Patient.class, Device.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="Who and/or what defined the list contents", formalDefinition="The entity responsible for deciding what the contents of the list were." )
+    @Description(shortDefinition="Who and/or what defined the list contents (aka Author)", formalDefinition="The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list." )
     protected Reference source;
 
     /**
-     * The actual object that is the target of the reference (The entity responsible for deciding what the contents of the list were.)
+     * The actual object that is the target of the reference (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
      */
     protected Resource sourceTarget;
 
@@ -770,7 +770,7 @@ public class List_ extends DomainResource {
     }
 
     /**
-     * @return {@link #source} (The entity responsible for deciding what the contents of the list were.)
+     * @return {@link #source} (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
      */
     public Reference getSource() { 
       if (this.source == null)
@@ -786,7 +786,7 @@ public class List_ extends DomainResource {
     }
 
     /**
-     * @param value {@link #source} (The entity responsible for deciding what the contents of the list were.)
+     * @param value {@link #source} (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
      */
     public List_ setSource(Reference value) { 
       this.source = value;
@@ -794,14 +794,14 @@ public class List_ extends DomainResource {
     }
 
     /**
-     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were.)
+     * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
      */
     public Resource getSourceTarget() { 
       return this.sourceTarget;
     }
 
     /**
-     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were.)
+     * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.)
      */
     public List_ setSourceTarget(Resource value) { 
       this.sourceTarget = value;
@@ -1134,7 +1134,7 @@ public class List_ extends DomainResource {
         childrenList.add(new Property("title", "string", "A label for the list assigned by the author.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("code", "CodeableConcept", "This code defines the purpose of the list - why it was created.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The common subject (or patient) of the resources that are in the list, if there is one.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("source", "Reference(Practitioner|Patient|Device)", "The entity responsible for deciding what the contents of the list were.", 0, java.lang.Integer.MAX_VALUE, source));
+        childrenList.add(new Property("source", "Reference(Practitioner|Patient|Device)", "The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.", 0, java.lang.Integer.MAX_VALUE, source));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "The encounter that is the context in which this list was created.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("status", "code", "Indicates the current state of this list.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("date", "dateTime", "The date that the list was prepared.", 0, java.lang.Integer.MAX_VALUE, date));
@@ -1228,7 +1228,7 @@ public class List_ extends DomainResource {
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="List.subject", description="If all resources have the same subject", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents", type="reference" )
+  @SearchParamDefinition(name="source", path="List.source", description="Who and/or what defined the list contents (aka Author)", type="reference" )
   public static final String SP_SOURCE = "source";
   @SearchParamDefinition(name="encounter", path="List.encounter", description="Context in which list created", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";

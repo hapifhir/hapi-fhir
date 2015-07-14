@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1413,14 +1413,14 @@ public class ImplementationGuide extends DomainResource {
     /**
      * A logical set of resources that is a section in the implementation Guide.
      */
-    @Child(name = "package_", type = {}, order=14, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "package", type = {}, order=14, min=1, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A section in the IG", formalDefinition="A logical set of resources that is a section in the implementation Guide." )
     protected List<ImplementationGuidePackageComponent> package_;
 
     /**
      * A default profile that applies to a particular resource type. Whenever a resource type is referenced in any structure definition (explicitly, or by inheritance from the base specification), and no explicit profile is applied, then this default profile applies.
      */
-    @Child(name = "default_", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "default", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Applies when no explicit profile applied", formalDefinition="A default profile that applies to a particular resource type. Whenever a resource type is referenced in any structure definition (explicitly, or by inheritance from the base specification), and no explicit profile is applied, then this default profile applies." )
     protected List<ImplementationGuideDefaultComponent> default_;
 

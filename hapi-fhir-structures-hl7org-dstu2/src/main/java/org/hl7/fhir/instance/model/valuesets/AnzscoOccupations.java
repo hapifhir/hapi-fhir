@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
 
 
 public enum AnzscoOccupations {
@@ -10799,7 +10799,7 @@ public enum AnzscoOccupations {
             case _211112: return "Dancer or Choreographer";
             case _211113: return "Entertainer or Variety Artist";
             case _211199: return "Actors, Dancers and Other Entertainers nec";
-            case _211200: return "Music Professionals nfd";
+            case _211200: return "211200";
             case _211211: return "Composer";
             case _211212: return "Music Director";
             case _211213: return "Musician (Instrumental)";
@@ -10807,7 +10807,7 @@ public enum AnzscoOccupations {
             case _211299: return "Music Professionals nec";
             case _211311: return "Photographer";
             case _211400: return "Visual Arts and Crafts Professionals nfd";
-            case _211411: return "Painter (Visual Arts)";
+            case _211411: return "211411";
             case _211412: return "Potter or Ceramic Artist";
             case _211413: return "Sculptor";
             case _211499: return "Visual Arts and Crafts Professionals nec";
@@ -10857,7 +10857,7 @@ public enum AnzscoOccupations {
             case _222199: return "Financial Brokers nec";
             case _222200: return "Financial Dealers nfd";
             case _222211: return "Financial Market Dealer";
-            case _222212: return "Futures Trader";
+            case _222212: return "222212";
             case _222213: return "Stockbroking Dealer";
             case _222299: return "Financial Dealers nec";
             case _222300: return "Financial Investment Advisers and Managers nfd";
@@ -10866,7 +10866,7 @@ public enum AnzscoOccupations {
             case _223000: return "Human Resource and Training Professionals nfd";
             case _223100: return "Human Resource Professionals nfd";
             case _223111: return "Human Resource Adviser";
-            case _223112: return "Recruitment Consultant";
+            case _223112: return "223112";
             case _223113: return "Workplace Relations Adviser";
             case _223211: return "ICT Trainer";
             case _223311: return "Training and Development Professional";
@@ -11030,7 +11030,7 @@ public enum AnzscoOccupations {
             case _249200: return "Private Tutors and Teachers nfd";
             case _249211: return "Art Teacher (Private Tuition)";
             case _249212: return "Dance Teacher (Private Tuition)";
-            case _249213: return "Drama Teacher (Private Tuition)";
+            case _249213: return "249213";
             case _249214: return "Music Teacher (Private Tuition)";
             case _249299: return "Private Tutors and Teachers nec";
             case _249311: return "Teacher of English to Speakers of Other Languages";
@@ -11069,11 +11069,11 @@ public enum AnzscoOccupations {
             case _252300: return "Dental Practitioners nfd";
             case _252311: return "Dental Specialist";
             case _252312: return "Dentist";
-            case _252411: return "Occupational Therapist";
+            case _252411: return "252411";
             case _252511: return "Physiotherapist";
             case _252611: return "Podiatrist";
             case _252700: return "Speech Professionals and Audiologists nfd";
-            case _252711: return "Audiologist";
+            case _252711: return "252711";
             case _252712: return "Speech Pathologist";
             case _253000: return "Medical Practitioners nfd";
             case _253100: return "Generalist Medical Practitioners nfd";
@@ -11084,7 +11084,7 @@ public enum AnzscoOccupations {
             case _253311: return "Specialist Physician (General Medicine)";
             case _253312: return "Cardiologist";
             case _253313: return "Clinical Haematologist";
-            case _253314: return "Clinical Oncologist";
+            case _253314: return "253314";
             case _253315: return "Endocrinologist";
             case _253316: return "Gastroenterologist";
             case _253317: return "Intensive Care Specialist";
@@ -11107,7 +11107,7 @@ public enum AnzscoOccupations {
             case _253521: return "Vascular Surgeon";
             case _253900: return "Other Medical Practitioners nfd";
             case _253911: return "Dermatologist";
-            case _253912: return "Emergency Medicine Specialist";
+            case _253912: return "253912";
             case _253913: return "Obstetrician and Gynaecologist";
             case _253914: return "Ophthalmologist";
             case _253915: return "Pathologist";
@@ -11124,7 +11124,7 @@ public enum AnzscoOccupations {
             case _254412: return "Registered Nurse (Aged Care)";
             case _254413: return "Registered Nurse (Child and Family Health)";
             case _254414: return "Registered Nurse (Community Health)";
-            case _254415: return "Registered Nurse (Critical Care and Emergency)";
+            case _254415: return "254415";
             case _254416: return "Registered Nurse (Developmental Disability)";
             case _254417: return "Registered Nurse (Disability and Rehabilitation)";
             case _254418: return "Registered Nurse (Medical)";
@@ -11243,7 +11243,7 @@ public enum AnzscoOccupations {
             case _312900: return "Other Building and Engineering Technicians nfd";
             case _312911: return "Maintenance Planner";
             case _312912: return "Metallurgical or Materials Technician";
-            case _312913: return "Mine Deputy";
+            case _312913: return "312913";
             case _312999: return "Building and Engineering Technicians nec";
             case _313000: return "ICT and Telecommunications Technicians nfd";
             case _313100: return "ICT Support Technicians nfd";
@@ -11314,7 +11314,7 @@ public enum AnzscoOccupations {
             case _331213: return "Joiner";
             case _332000: return "Floor Finishers and Painting Trades Workers nfd";
             case _332111: return "Floor Finisher";
-            case _332211: return "Painting Trades Worker";
+            case _332211: return "332211";
             case _333000: return "Glaziers, Plasterers and Tilers nfd";
             case _333111: return "Glazier";
             case _333200: return "Plasterers nfd";
@@ -11335,7 +11335,7 @@ public enum AnzscoOccupations {
             case _341113: return "Lift Mechanic";
             case _342000: return "Electronics and Telecommunications Trades Workers nfd";
             case _342111: return "Airconditioning and Refrigeration Mechanic";
-            case _342200: return "Electrical Distribution Trades Workers nfd";
+            case _342200: return "342200";
             case _342211: return "Electrical Linesworker";
             case _342212: return "Technical Cable Jointer";
             case _342300: return "Electronics Trades Workers nfd";
@@ -11639,7 +11639,7 @@ public enum AnzscoOccupations {
             case _591111: return "Order Clerk";
             case _591112: return "Production Clerk";
             case _591113: return "Purchasing Officer";
-            case _591114: return "Sales Clerk";
+            case _591114: return "591114";
             case _591115: return "Stock Clerk";
             case _591116: return "Warehouse Administrator";
             case _591200: return "Transport and Despatch Clerks nfd";
@@ -11778,7 +11778,7 @@ public enum AnzscoOccupations {
             case _712311: return "Engineering Production Systems Worker";
             case _712900: return "Other Stationary Plant Operators nfd";
             case _712911: return "Boiler or Engine Operator";
-            case _712912: return "Bulk Materials Handling Plant Operator";
+            case _712912: return "712912";
             case _712913: return "Cement Production Plant Operator";
             case _712914: return "Concrete Batching Plant Operator";
             case _712915: return "Concrete Pump Operator";
@@ -11948,19 +11948,19 @@ public enum AnzscoOccupations {
             case _841611: return "Mixed Crop and Livestock Farm Worker";
             case _841900: return "Other Farm, Forestry and Garden Workers nfd";
             case _841911: return "Hunter-Trapper";
-            case _841912: return "Pest or Weed Controller";
+            case _841912: return "841912";
             case _841999: return "Farm, Forestry and Garden Workers nec";
             case _851000: return "Food Preparation Assistants nfd";
             case _851111: return "Fast Food Cook";
             case _851200: return "Food Trades Assistants nfd";
             case _851211: return "Pastrycook's Assistant";
             case _851299: return "Food Trades Assistants nec";
-            case _851311: return "Kitchenhand";
+            case _851311: return "851311";
             case _890000: return "Other Labourers nfd";
             case _891000: return "Freight Handlers and Shelf Fillers nfd";
             case _891100: return "Freight and Furniture Handlers nfd";
             case _891111: return "Freight Handler (Rail or Road)";
-            case _891112: return "Truck Driver's Offsider";
+            case _891112: return "891112";
             case _891113: return "Waterside Worker";
             case _891211: return "Shelf Filler";
             case _899000: return "Miscellaneous Labourers nfd";

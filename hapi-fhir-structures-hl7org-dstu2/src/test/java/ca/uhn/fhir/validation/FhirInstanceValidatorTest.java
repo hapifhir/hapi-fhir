@@ -4,17 +4,23 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class FhirInstanceValidatorTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private FhirValidator val;
+	
+	@Before
+	public void before() {
+		val = ourCtx.newValidator();
+		val.setValidateAgainstStandardSchema(false);
+		val.setValidateAgainstStandardSchematron(false);
+		val.registerValidator(new FhirInstanceValidator());
+	}
 	
 	@Test
 	public void testValidateJsonResource() {
@@ -23,9 +29,8 @@ public class FhirInstanceValidatorTest {
 				+ "\"id\":\"123\""
 				+ "}";
 		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.JSON, "Patient");
-		assertEquals(output.toString(), 0, output.size());
+		ValidationResult output = val.validateWithResult(input);
+		assertEquals(output.toString(), 0, output.getMessages().size());
 	}
 
 	@Test
@@ -37,10 +42,9 @@ public class FhirInstanceValidatorTest {
 				+ "}";
 		
 		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.JSON, "Patient");
-		assertEquals(output.toString(), 1, output.size());
-		assertThat(output.get(0).toXML(), stringContainsInOrder("/foo", "Element is unknown"));
+		ValidationResult output = val.validateWithResult(input);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -49,9 +53,8 @@ public class FhirInstanceValidatorTest {
 				+ "<id value=\"123\"/>"
 				+ "</Patient>";
 		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.XML, "Patient");
-		assertEquals(output.toString(), 0, output.size());
+		ValidationResult output = val.validateWithResult(input);
+		assertEquals(output.toString(), 0, output.getMessages().size());
 	}
 
 
@@ -62,9 +65,8 @@ public class FhirInstanceValidatorTest {
 				+ "<foo value=\"222\"/>"
 				+ "</Patient>";
 		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.XML, "Patient");
-		assertEquals(output.toString(), 1, output.size());
-		assertThat(output.get(0).toXML(), stringContainsInOrder("/f:Patient/f:foo", "Element is unknown"));
+		ValidationResult output = val.validateWithResult(input);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
 	}
 }

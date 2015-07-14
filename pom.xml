@@ -12,7 +12,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>1.1</version>
+	<version>1.2-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 

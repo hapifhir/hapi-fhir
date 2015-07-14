@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0 
+  Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.5.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
@@ -669,7 +669,7 @@
   </xs:complexType>
   <xs:complexType name="Signature">
     <xs:annotation>
-      <xs:documentation xml:lang="en">An XML digital signature along with supporting context.</xs:documentation>
+      <xs:documentation xml:lang="en">A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities.</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have a value for at least one of the defined elements, an @id referenced from the Narrative, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -692,9 +692,14 @@
            <xs:element name="whoUri" type="uri"  maxOccurs="1"/>
            <xs:element name="whoReference" type="Reference"  maxOccurs="1"/>
           </xs:choice>
+          <xs:element name="contentType" type="code" minOccurs="1" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
           <xs:element name="blob" type="base64Binary" minOccurs="1" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The base64 encoding of the XML-Signature.</xs:documentation>
+              <xs:documentation xml:lang="en">The base64 encoding of the Signature content.</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -2183,11 +2188,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:sequence>
-          <xs:element name="name" type="string" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A descriptive name for this - can be useful for generating implementation artifacts.</xs:documentation>
-            </xs:annotation>
-          </xs:element>
           <xs:element name="strength" type="BindingStrength" minOccurs="1" maxOccurs="1">
             <xs:annotation>
               <xs:documentation xml:lang="en">Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.</xs:documentation>
@@ -4336,11 +4336,6 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation xml:lang="en">Indicates the purpose of this bundle- how it was intended to be used.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="base" minOccurs="0" maxOccurs="1" type="uri">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The base URL for the service that provided these resources. All relative URLs are relative to this one (equivalent to xml:base).</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="total" minOccurs="0" maxOccurs="1" type="unsignedInt">
             <xs:annotation>
               <xs:documentation xml:lang="en">If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).</xs:documentation>
@@ -4356,9 +4351,9 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation xml:lang="en">An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="signature" minOccurs="0" maxOccurs="1" type="base64Binary">
+          <xs:element name="signature" minOccurs="0" maxOccurs="1" type="Signature">
             <xs:annotation>
-              <xs:documentation xml:lang="en">XML Digital Signature - base64 encoded.</xs:documentation>
+              <xs:documentation xml:lang="en">Digital Signature - base64 encoded. XML DigSIg or a JWT.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -4393,14 +4388,14 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="base" minOccurs="0" maxOccurs="1" type="uri">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The Base URL for the resource, if different to the base URL specified for the bundle as a whole.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="link" type="Bundle.Link" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">A series of links that provide context to this entry.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="fullUrl" minOccurs="0" maxOccurs="1" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="resource" minOccurs="0" maxOccurs="1" type="ResourceContainer">
@@ -4413,12 +4408,12 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation xml:lang="en">Information about the search process that lead to the creation of this entry.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="transaction" type="Bundle.Transaction" minOccurs="0" maxOccurs="1">
+          <xs:element name="request" type="Bundle.Request" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation xml:lang="en">Additional information about how this entry should be processed as part of a transaction.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="transactionResponse" type="Bundle.TransactionResponse" minOccurs="0" maxOccurs="1">
+          <xs:element name="response" type="Bundle.Response" minOccurs="0" maxOccurs="1">
             <xs:annotation>
               <xs:documentation xml:lang="en">Additional information about how this entry should be processed as part of a transaction.</xs:documentation>
            </xs:annotation>
@@ -4448,7 +4443,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="Bundle.Transaction">
+  <xs:complexType name="Bundle.Request">
     <xs:annotation>
       <xs:documentation xml:lang="en">A container for a collection of resources.</xs:documentation>
     </xs:annotation>
@@ -4462,7 +4457,7 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           </xs:element>
           <xs:element name="url" minOccurs="1" maxOccurs="1" type="uri">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The URL for this entry, relative to the root.</xs:documentation>
+              <xs:documentation xml:lang="en">The URL for this entry, relative to the root (the address to which the request is posted).</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="ifNoneMatch" minOccurs="0" maxOccurs="1" type="string">
@@ -4482,14 +4477,14 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
           </xs:element>
           <xs:element name="ifNoneExist" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;.</xs:documentation>
+              <xs:documentation xml:lang="en">Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;. This is just the query portion of the URL - what follows the &quot;?&quot; (not including the &quot;?&quot;).</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="Bundle.TransactionResponse">
+  <xs:complexType name="Bundle.Response">
     <xs:annotation>
       <xs:documentation xml:lang="en">A container for a collection of resources.</xs:documentation>
     </xs:annotation>
@@ -4574,7 +4569,17 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
       </xs:enumeration>
       <xs:enumeration value="transaction-response">
         <xs:annotation>
-          <xs:documentation xml:lang="en">The bundle is a transaction response</xs:documentation>
+          <xs:documentation xml:lang="en">The bundle is a transaction response. Because the response is a transaction response, the transactionhas succeeded, and all responses are error free</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="batch">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The bundle is a transaction - intended to be processed by a server as a group of actions</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="batch-response">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="history">
@@ -7556,6 +7561,11 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
               <xs:documentation xml:lang="en">A specification of restful operations supported by the system.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="transactionMode" minOccurs="0" maxOccurs="1" type="TransactionMode">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A code that indicates how transactions are supported.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="operation" type="Conformance.Operation" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">Definition of an operation or a named query and with its parameters and their meaning and type.</xs:documentation>
@@ -7962,6 +7972,41 @@ P.O. Box number, delivery hints, and similar address information.</xs:documentat
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="MessageSignificanceCategory-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="TransactionMode-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="not-supported">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Neither Batch or Transaction supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="batch">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Batches supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="transaction">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Transactions Supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="both">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Both Batches and Transactions Supported</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="TransactionMode">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">A code that indicates how transactions are supported</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="TransactionMode-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -12405,7 +12450,7 @@ See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://
               <xs:documentation xml:lang="en">The Numeric identifier of this series in the study.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="modality" minOccurs="1" maxOccurs="1" type="Modality">
+          <xs:element name="modality" minOccurs="1" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">The modality of this series sequence.</xs:documentation>
            </xs:annotation>
@@ -12532,286 +12577,6 @@ See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="InstanceAvailability-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="Modality-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="AR">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="AU">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="BDUS">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="BI">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="BMD">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="CR">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="CT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="DG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="DX">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="ECG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="EPS">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="ES">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="GM">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="HC">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="HD">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="IO">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="IVOCT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="IVUS">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="KER">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="KO">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="LEN">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="LS">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="MG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="MR">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="NM">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OAM">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OCT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OP">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OPM">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OPT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OPV">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="OT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="PR">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="PT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="PX">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="REG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RF">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RTDOSE">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RTIMAGE">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RTPLAN">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RTRECORD">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="RTSTRUCT">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SEG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SM">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SMR">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SR">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="SRF">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="TG">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="US">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="VA">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="XA">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="XC">
-        <xs:annotation>
-          <xs:documentation xml:lang="en"></xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="Modality">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">Type of data in the instance</xs:documentation>
-      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="Modality-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -13473,7 +13238,7 @@ See for instance [IHE Radiology Technical Framework Volume 1 Appendix A](http://
           </xs:element>
           <xs:element name="source" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The entity responsible for deciding what the contents of the list were.</xs:documentation>
+              <xs:documentation xml:lang="en">The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="encounter" minOccurs="0" maxOccurs="1" type="Reference">
@@ -19542,9 +19307,14 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation xml:lang="en">An external specification that the content is mapped to.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="StructureDefinitionType">
+          <xs:element name="kind" minOccurs="1" maxOccurs="1" type="StructureDefinitionKind">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Defines the type of structure that this definition is describing.</xs:documentation>
+              <xs:documentation xml:lang="en">Defines the kind of structure that this definition is describing.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="constrainedType" minOccurs="0" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of type that is being constrained - a data type, a resource, including abstract ones. If this field is present, it indicates that the structure definition is a constraint. If it is not present, then the structure definition is the definition of a base structure.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="abstract" minOccurs="1" maxOccurs="1" type="boolean">
@@ -19665,6 +19435,31 @@ other observer (for example a relative or EMT), or any observation made about th
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:simpleType name="StructureDefinitionKind-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="datatype">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">A data type - either a primitive or complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="resource">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">A resource defined by the FHIR specification</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="StructureDefinitionKind">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">Defines the type of structure that a definition is describing</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="StructureDefinitionKind-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:simpleType name="ExtensionContext-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="resource">
@@ -19697,41 +19492,6 @@ other observer (for example a relative or EMT), or any observation made about th
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="ExtensionContext-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="StructureDefinitionType-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="type">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A data type - either a primitive or complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="resource">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A resource defined by the FHIR specification</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="constraint">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A set of constraints on a resource or data type that describe how it is used for a particular use</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="extension">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A definition of an extension that can be used in a FHIR resource (or a set of constraints on an exsting extension)</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="StructureDefinitionType">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">Defines the type of structure that a definition is describing</xs:documentation>
-      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="StructureDefinitionType-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -20415,14 +20175,29 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation xml:lang="en">Description of the Test Script.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="metadata" type="TestScript.Metadata" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The required capability must exist and is assumed to function correctly on the FHIR server being tested.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="multiserver" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
-              <xs:documentation xml:lang="en">If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults or missing values to false.</xs:documentation>
+              <xs:documentation xml:lang="en">If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="fixture" type="TestScript.Fixture" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Fixture in the test script - either by reference (uri) or embedded (Resource). All fixtures are required for the test script to execute.</xs:documentation>
+              <xs:documentation xml:lang="en">Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="profile" minOccurs="0" maxOccurs="unbounded" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Reference to the profile to be used for validation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="variable" type="TestScript.Variable" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Variable is set based either on element value in response body or on header field value in the response headers.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="setup" type="TestScript.Setup" minOccurs="0" maxOccurs="1">
@@ -20444,130 +20219,6 @@ other observer (for example a relative or EMT), or any observation made about th
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="TestScript.Fixture">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="uri" minOccurs="0" maxOccurs="1" type="uri">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The URI of the fixture. Each fixture shall have a &quot;uri&quot; or &quot;resource&quot; but not both. The &quot;uri&quot; shall resolve to a valid Resource. The &quot;uri&quot; may be local or remote, absolute or relative.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="resource" minOccurs="0" maxOccurs="1" type="ResourceContainer">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The fixture resource actually embedded in this TestScript. Each fixture should have a &quot;uri&quot; or &quot;resource&quot; but not both.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="autocreate" minOccurs="0" maxOccurs="1" type="boolean">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="autodelete" minOccurs="0" maxOccurs="1" type="boolean">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="TestScript.Setup">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="operation" type="TestScript.Operation" minOccurs="1" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A setup operation.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="TestScript.Operation">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="TestOperationType">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="source" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The internal id of the fixture used as the body of any operation.type that results in a PUT or POST.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="target" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The id of the fixture used as the target of any operation.type that results in a PUT or POST, or the id of the fixture used to store the results of a GET.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Which server to perform the operation on.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="string">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Arguments to an operation.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="responseId" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The fixture id (maybe new) to map to the response.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="contentType" minOccurs="0" maxOccurs="1" type="ContentType">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The content-type or mime-type to use for RESTful operation.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="TestScript.Test">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="BackboneElement">
-        <xs:sequence>
-          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The name of this test.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">A short description of the test.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="metadata" type="TestScript.Metadata" minOccurs="0" maxOccurs="1">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Metadata about this Test.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="operation" type="TestScript.Operation1" minOccurs="1" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Each test must have at least one operation. Operation and assertion elements can be mixed together.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-        </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
   <xs:complexType name="TestScript.Metadata">
     <xs:annotation>
       <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
@@ -20580,14 +20231,9 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation xml:lang="en">A link to the FHIR specification that this test is covering.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="requires" type="TestScript.Requires" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="capabilities" type="TestScript.Capabilities" minOccurs="1" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The required capability must exist and is assumed to function correctly on the FHIR server being tested.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="validates" type="TestScript.Validates" minOccurs="0" maxOccurs="unbounded">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The capability that this test verifies.</xs:documentation>
+              <xs:documentation xml:lang="en">Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -20615,78 +20261,181 @@ other observer (for example a relative or EMT), or any observation made about th
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="TestScript.Requires">
+  <xs:complexType name="TestScript.Capabilities">
     <xs:annotation>
       <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="code">
+          <xs:element name="required" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The resource type that the FHIR server must support.</xs:documentation>
+              <xs:documentation xml:lang="en">The capabilities required of the server in order for this test script to execute.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="operations" minOccurs="1" maxOccurs="1" type="string">
+          <xs:element name="validated" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The operations (comma-separated) that the FHIR server must support for the specified resource type. See TestOperationType.</xs:documentation>
+              <xs:documentation xml:lang="en">Whether or not the capabilities are primarily getting validated by this test script.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Description of the capabilities that this test script is requiring the server to support.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Which server this requirement applies to.</xs:documentation>
+              <xs:documentation xml:lang="en">Which server these requirements apply to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="link" minOccurs="0" maxOccurs="unbounded" type="uri">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Links to the FHIR specification that describes this interaction and the resources involved in more detail.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="conformance" minOccurs="1" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="TestScript.Validates">
+  <xs:complexType name="TestScript.Fixture">
     <xs:annotation>
       <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="code">
+          <xs:element name="autocreate" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The resource type that the FHIR server must support.</xs:documentation>
+              <xs:documentation xml:lang="en">Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="operations" minOccurs="1" maxOccurs="1" type="string">
+          <xs:element name="autodelete" minOccurs="0" maxOccurs="1" type="boolean">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The operations (comma-separated) that the FHIR server must support for the specified resource type. See TestOperationType.</xs:documentation>
+              <xs:documentation xml:lang="en">Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
+          <xs:element name="resource" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Which server this validation applies to.</xs:documentation>
+              <xs:documentation xml:lang="en">Reference to the resource (containing the contents of the resource needed for operations).</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="TestScript.Operation1">
+  <xs:complexType name="TestScript.Variable">
     <xs:annotation>
       <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="TestOperationType">
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.</xs:documentation>
+              <xs:documentation xml:lang="en">Variable name.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="source" minOccurs="0" maxOccurs="1" type="id">
+          <xs:element name="headerField" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The internal id of the fixture used as the body of any operation.type that results in a PUT or POST.</xs:documentation>
+              <xs:documentation xml:lang="en">Will be used to grab the header field value from the headers that sourceId is pointing to.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="target" minOccurs="0" maxOccurs="1" type="id">
+          <xs:element name="path" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The id of the fixture used as the target of any operation.type that results in a PUT or POST, or the id of the fixture used to store the results of a GET.</xs:documentation>
+              <xs:documentation xml:lang="en">XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="sourceId" minOccurs="0" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Fixture to evaluate the XPath/JSONPath expression or the headerField  against.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Setup">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="metadata" type="TestScript.Metadata" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="action" type="TestScript.Action" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Action would contain either an operation or an assertion.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Action">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="operation" type="TestScript.Operation" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An operation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="assert" type="TestScript.Assert" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Evaluates the results of previous operations to determine if the server under test behaves appropriately.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Operation">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="TestOperationType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Server interaction or operation type.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="resource" minOccurs="0" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="label" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The label would be used for tracking/logging purposes by test engines.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The description would be used by test engines for tracking and reporting purposes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="accept" minOccurs="0" maxOccurs="1" type="ContentType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The content-type or mime-type to use for RESTful operation in the 'Accept' header.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="contentType" minOccurs="0" maxOccurs="1" type="ContentType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
@@ -20694,9 +20443,14 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation xml:lang="en">Which server to perform the operation on.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="string">
+          <xs:element name="params" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Arguments to an operation.</xs:documentation>
+              <xs:documentation xml:lang="en">Path plus parameters after [type].  Used to set parts of the request URL explicitly.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="requestHeader" type="TestScript.RequestHeader" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Header elements would be used to set HTTP headers.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="responseId" minOccurs="0" maxOccurs="1" type="id">
@@ -20704,9 +20458,188 @@ other observer (for example a relative or EMT), or any observation made about th
               <xs:documentation xml:lang="en">The fixture id (maybe new) to map to the response.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="sourceId" minOccurs="0" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The id of the fixture used as the body of a PUT or POST request.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="targetId" minOccurs="0" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="url" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Complete request URL.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.RequestHeader">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="field" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The HTTP header field e.g. &quot;Accept&quot;.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="value" minOccurs="1" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The value of the header e.g. &quot;application/xml&quot;.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Assert">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="label" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The label would be used for tracking/logging purposes by test engines.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The description would be used by test engines for tracking and reporting purposes.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="compareToSourceId" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Id of fixture used to compare the &quot;sourceId/path&quot; evaluations to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="compareToSourcePath" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">XPath or JSONPath expression against fixture used to compare the &quot;sourceId/path&quot; evaluations to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="contentType" minOccurs="0" maxOccurs="1" type="ContentType">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The content-type or mime-type to use for RESTful operation.</xs:documentation>
+              <xs:documentation xml:lang="en">The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="headerField" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The header field e.g. 'Content-Location'.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="minimumId" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="navigationLinks" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Navigation Links.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="operator" minOccurs="0" maxOccurs="1" type="AssertionOperatorType">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The operator type.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="path" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="resource" minOccurs="0" maxOccurs="1" type="code">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="response" minOccurs="0" maxOccurs="1" type="AssertionResponseTypes">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="responseCode" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">HTTP Response Code.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="sourceId" minOccurs="0" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Fixture to evaluate the XPath/JSONPath expression or the headerField  against.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="validateProfileId" minOccurs="0" maxOccurs="1" type="id">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The ID of the Profile to validate against.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="value" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The value to compare to.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="warningOnly" minOccurs="0" maxOccurs="1" type="boolean">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Warning Only.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Test">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The name of this test.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">A short description of the test.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="metadata" type="TestScript.Metadata" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="action" type="TestScript.Action1" minOccurs="1" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Action would contain either an operation or an assertion.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="TestScript.Action1">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="operation" type="TestScript.Operation" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">An operation would involve a REST request to a server.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="assert" type="TestScript.Assert" minOccurs="0" maxOccurs="1">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Evaluates the results of previous operations to determine if the server under test behaves appropriately.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -20720,55 +20653,25 @@ other observer (for example a relative or EMT), or any observation made about th
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="operation" type="TestScript.Operation2" minOccurs="1" maxOccurs="unbounded">
+          <xs:element name="action" type="TestScript.Action2" minOccurs="1" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">A teardown operation.</xs:documentation>
+              <xs:documentation xml:lang="en">Action would contain either an operation or an assertion.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="TestScript.Operation2">
+  <xs:complexType name="TestScript.Action2">
     <xs:annotation>
       <xs:documentation xml:lang="en">TestScript is a resource that specifies a suite of tests against a FHIR server implementation to determine compliance against the FHIR specification.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="TestOperationType">
+          <xs:element name="operation" type="TestScript.Operation" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation xml:lang="en">read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document | assertion | assertion_false | assertion_warning.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="source" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The internal id of the fixture used as the body of any operation.type that results in a PUT or POST.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="target" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The id of the fixture used as the target of any operation.type that results in a PUT or POST, or the id of the fixture used to store the results of a GET.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="destination" minOccurs="0" maxOccurs="1" type="integer">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Which server to perform the operation on.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="string">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">Arguments to an operation.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="responseId" minOccurs="0" maxOccurs="1" type="id">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The fixture id (maybe new) to map to the response.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
-          <xs:element name="contentType" minOccurs="0" maxOccurs="1" type="ContentType">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The content-type or mime-type to use for RESTful operation.</xs:documentation>
+              <xs:documentation xml:lang="en">An operation would involve a REST request to a server.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -20797,6 +20700,146 @@ other observer (for example a relative or EMT), or any observation made about th
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="ContentType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="AssertionOperatorType-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="equals">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Default value. Equals comparison.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="notEquals">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Not equals comparison.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="in">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value within a known set of values.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="notIn">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value not within a known set of values.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="greaterThan">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value to be greater than a known value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="lessThan">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value to be less than a known value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="empty">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value is empty.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="notEmpty">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value is not empty.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="contains">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value string contains a known value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="notContains">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Compare value string does not contain a known value.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="AssertionOperatorType">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The type of operator to use for assertion.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="AssertionOperatorType-list" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="AssertionResponseTypes-list">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="okay">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 200.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="created">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 201.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="noContent">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 204.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="notModified">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 304.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="bad">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 400.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="forbidden">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 403.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="notFound">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 404.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="methodNotAllowed">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 405.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="conflict">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 409.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="gone">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 410.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="preconditionFailed">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 412.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="unprocessable">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">Response code is 422.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="AssertionResponseTypes">
+    <xs:annotation>
+      <xs:documentation xml:lang="en">The type of response code to use for assertion.</xs:documentation>
+      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="AssertionResponseTypes-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -20860,21 +20903,6 @@ other observer (for example a relative or EMT), or any observation made about th
       <xs:enumeration value="document">
         <xs:annotation>
           <xs:documentation xml:lang="en">Not currently supported test operation.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="assertion">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Make an assertion against the result of the last non-assertion operation.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="assertion_false">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Make a negative or false assertion against the result of the last non-assertion operation.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="assertion_warning">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Run an assertion function as a warning (instead of a failture) against the result of the last non-assertion operation.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>

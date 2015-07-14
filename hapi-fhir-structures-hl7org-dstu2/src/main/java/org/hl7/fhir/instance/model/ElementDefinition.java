@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1224,34 +1224,27 @@ public class ElementDefinition extends Type implements ICompositeType {
     @Block()
     public static class ElementDefinitionBindingComponent extends Element implements IBaseDatatypeElement {
         /**
-         * A descriptive name for this - can be useful for generating implementation artifacts.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Descriptive Name", formalDefinition="A descriptive name for this - can be useful for generating implementation artifacts." )
-        protected StringType name;
-
-        /**
          * Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.
          */
-        @Child(name = "strength", type = {CodeType.class}, order=2, min=1, max=1)
+        @Child(name = "strength", type = {CodeType.class}, order=1, min=1, max=1)
         @Description(shortDefinition="required | extensible | preferred | example", formalDefinition="Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances." )
         protected Enumeration<BindingStrength> strength;
 
         /**
          * Describes the intended use of this particular set of codes.
          */
-        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Human explanation of the value set", formalDefinition="Describes the intended use of this particular set of codes." )
         protected StringType description;
 
         /**
          * Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.
          */
-        @Child(name = "valueSet", type = {UriType.class, ValueSet.class}, order=4, min=0, max=1)
+        @Child(name = "valueSet", type = {UriType.class, ValueSet.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Source of value set", formalDefinition="Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used." )
         protected Type valueSet;
 
-        private static final long serialVersionUID = 325485202L;
+        private static final long serialVersionUID = 1355538460L;
 
     /*
      * Constructor
@@ -1267,55 +1260,6 @@ public class ElementDefinition extends Type implements ICompositeType {
         super();
         this.strength = strength;
       }
-
-        /**
-         * @return {@link #name} (A descriptive name for this - can be useful for generating implementation artifacts.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ElementDefinitionBindingComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (A descriptive name for this - can be useful for generating implementation artifacts.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ElementDefinitionBindingComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return A descriptive name for this - can be useful for generating implementation artifacts.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value A descriptive name for this - can be useful for generating implementation artifacts.
-         */
-        public ElementDefinitionBindingComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          }
-          return this;
-        }
 
         /**
          * @return {@link #strength} (Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.). This is the underlying object with id, value and extensions. The accessor "getStrength" gives direct access to the value
@@ -1458,7 +1402,6 @@ public class ElementDefinition extends Type implements ICompositeType {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("name", "string", "A descriptive name for this - can be useful for generating implementation artifacts.", 0, java.lang.Integer.MAX_VALUE, name));
           childrenList.add(new Property("strength", "code", "Indicates the degree of conformance expectations associated with this binding - that is, the degree to which the provided value set must be adhered to in the instances.", 0, java.lang.Integer.MAX_VALUE, strength));
           childrenList.add(new Property("description", "string", "Describes the intended use of this particular set of codes.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("valueSet[x]", "uri|Reference(ValueSet)", "Points to the value set or external definition (e.g. implicit value set) that identifies the set of codes to be used.", 0, java.lang.Integer.MAX_VALUE, valueSet));
@@ -1467,7 +1410,6 @@ public class ElementDefinition extends Type implements ICompositeType {
       public ElementDefinitionBindingComponent copy() {
         ElementDefinitionBindingComponent dst = new ElementDefinitionBindingComponent();
         copyValues(dst);
-        dst.name = name == null ? null : name.copy();
         dst.strength = strength == null ? null : strength.copy();
         dst.description = description == null ? null : description.copy();
         dst.valueSet = valueSet == null ? null : valueSet.copy();
@@ -1481,7 +1423,7 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (!(other instanceof ElementDefinitionBindingComponent))
           return false;
         ElementDefinitionBindingComponent o = (ElementDefinitionBindingComponent) other;
-        return compareDeep(name, o.name, true) && compareDeep(strength, o.strength, true) && compareDeep(description, o.description, true)
+        return compareDeep(strength, o.strength, true) && compareDeep(description, o.description, true)
            && compareDeep(valueSet, o.valueSet, true);
       }
 
@@ -1492,14 +1434,13 @@ public class ElementDefinition extends Type implements ICompositeType {
         if (!(other instanceof ElementDefinitionBindingComponent))
           return false;
         ElementDefinitionBindingComponent o = (ElementDefinitionBindingComponent) other;
-        return compareValues(name, o.name, true) && compareValues(strength, o.strength, true) && compareValues(description, o.description, true)
+        return compareValues(strength, o.strength, true) && compareValues(description, o.description, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (strength == null || strength.isEmpty())
-           && (description == null || description.isEmpty()) && (valueSet == null || valueSet.isEmpty())
-          ;
+        return super.isEmpty() && (strength == null || strength.isEmpty()) && (description == null || description.isEmpty())
+           && (valueSet == null || valueSet.isEmpty());
       }
 
   }
@@ -1774,7 +1715,7 @@ public class ElementDefinition extends Type implements ICompositeType {
     /**
      * A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification).
      */
-    @Child(name = "short_", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "short", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Concise definition for xml presentation", formalDefinition="A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification)." )
     protected StringType short_;
 

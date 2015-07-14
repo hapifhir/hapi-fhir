@@ -95,8 +95,8 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		entry.setResource(p2);
 
 		BundleEntryComponent deletedEntry = b.addEntry();
-		deletedEntry.getTransaction().setMethod(HTTPVerb.DELETE);
-		deletedEntry.getTransaction().setUrl("http://base.com/Patient/123");
+		deletedEntry.getRequest().setMethod(HTTPVerb.DELETE);
+		deletedEntry.getRequest().setUrl("http://base.com/Patient/123");
 
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
@@ -115,13 +115,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertEquals(3, bundle.getEntry().size());
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(2);
-		assertEquals("Patient/123/_history/93", entry2.getTransactionResponse().getLocation());
+		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -142,8 +142,8 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		entry.setResource(p2);
 
 		BundleEntryComponent deletedEntry = b.addEntry();
-		deletedEntry.getTransaction().setMethod(HTTPVerb.DELETE);
-		deletedEntry.getTransaction().setUrl("http://base.com/Patient/123");
+		deletedEntry.getRequest().setMethod(HTTPVerb.DELETE);
+		deletedEntry.getRequest().setUrl("http://base.com/Patient/123");
 
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
@@ -163,13 +163,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertEquals(3, bundle.getEntry().size());
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(2);
-		assertEquals("Patient/123/_history/93", entry2.getTransactionResponse().getLocation());
+		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -192,8 +192,8 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		entry.setResource(p2);
 
 		BundleEntryComponent deletedEntry = b.addEntry();
-		deletedEntry.getTransaction().setMethod(HTTPVerb.DELETE);
-		deletedEntry.getTransaction().setUrl(("Patient/3"));
+		deletedEntry.getRequest().setMethod(HTTPVerb.DELETE);
+		deletedEntry.getRequest().setUrl(("Patient/3"));
 
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
@@ -216,13 +216,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(1);
-		assertEquals("Patient/81/_history/91", entry0.getTransactionResponse().getLocation());
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(2);
-		assertEquals("Patient/82/_history/92", entry1.getTransactionResponse().getLocation());
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(3);
-		assertEquals( "Patient/3/_history/93", entry2.getTransactionResponse().getLocation());
+		assertEquals( "Patient/3/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@AfterClass
@@ -274,11 +274,11 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 			int index = 1;
 			for (BundleEntryComponent nextEntry : theResources.getEntry()) {
 				String newId = "8" + Integer.toString(index);
-				if (nextEntry.getTransaction().getMethodElement().getValue() == HTTPVerb.DELETE) {
-					newId = new IdType(nextEntry.getTransaction().getUrlElement()).getIdPart();
+				if (nextEntry.getRequest().getMethodElement().getValue() == HTTPVerb.DELETE) {
+					newId = new IdType(nextEntry.getRequest().getUrlElement()).getIdPart();
 				}
 				 String newIdDt = new IdType("Patient", newId, "9" + Integer.toString(index)).getValue();
-				retVal.addEntry().getTransactionResponse().setLocation(newIdDt);
+				retVal.addEntry().getResponse().setLocation(newIdDt);
 				index++;
 			}
 

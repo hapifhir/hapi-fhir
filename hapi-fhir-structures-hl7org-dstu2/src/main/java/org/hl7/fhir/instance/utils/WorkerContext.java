@@ -64,7 +64,8 @@ public class WorkerContext implements NameResolver {
     super();
   }
 
-  public WorkerContext(ITerminologyServices conceptLocator, IFHIRClient client, Map<String, ValueSet> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles) {
+  public WorkerContext(ITerminologyServices conceptLocator, IFHIRClient client, Map<String, ValueSet> codeSystems,
+      Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles) {
     super();
     if (conceptLocator != null)
       this.terminologyServices = conceptLocator;
@@ -129,31 +130,31 @@ public class WorkerContext implements NameResolver {
     return res;
   }
 
-  public void seeExtensionDefinition(String base, StructureDefinition ed) throws Exception {
+  public void seeExtensionDefinition(String url, StructureDefinition ed) throws Exception {
     if (extensionDefinitions.get(ed.getUrl()) != null)
       throw new Exception("duplicate extension definition: " + ed.getUrl());
     extensionDefinitions.put(ed.getId(), ed);
-    extensionDefinitions.put(base + "/StructureDefinition/" + ed.getId(), ed);
+    extensionDefinitions.put(url, ed);
     extensionDefinitions.put(ed.getUrl(), ed);
   }
 
-  public void seeQuestionnaire(String base, Questionnaire theQuestionnaire) throws Exception {
+  public void seeQuestionnaire(String url, Questionnaire theQuestionnaire) throws Exception {
     questionnaires.put(theQuestionnaire.getId(), theQuestionnaire);
-    questionnaires.put(base + "/Questionnaire/" + theQuestionnaire.getId(), theQuestionnaire);
+    questionnaires.put(url, theQuestionnaire);
   }
 
-  public void seeValueSet(String base, ValueSet vs) {
+  public void seeValueSet(String url, ValueSet vs) {
     valueSets.put(vs.getId(), vs);
-    valueSets.put(base + "/ValueSet/" + vs.getId(), vs);
+    valueSets.put(url, vs);
     valueSets.put(vs.getUrl(), vs);
     if (vs.hasDefine()) {
       codeSystems.put(vs.getDefine().getSystem().toString(), vs);
     }
   }
 
-  public void seeProfile(String base, StructureDefinition p) {
+  public void seeProfile(String url, StructureDefinition p) {
     profiles.put(p.getId(), p);
-    profiles.put(base + "/StructureDefinition/" + p.getId(), p);
+    profiles.put(url, p);
     profiles.put(p.getUrl(), p);
   }
 

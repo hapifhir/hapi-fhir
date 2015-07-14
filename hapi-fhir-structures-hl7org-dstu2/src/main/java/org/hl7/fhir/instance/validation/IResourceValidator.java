@@ -3,12 +3,28 @@ package org.hl7.fhir.instance.validation;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.StructureDefinition;
+import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.gson.JsonObject;
 
 public interface IResourceValidator {
+
+  /**
+   * whether the validator should enforce best practice guidelines
+   * as defined by various HL7 committees 
+   *  
+   *  
+   * @author Grahame Grieve
+   *
+   */
+  public enum BestPracticeWarningLevel {
+    Ignore,
+    Hint,
+    Warning,
+    Error
+  }
 
   public enum CheckDisplayOption {
     Ignore,
@@ -37,6 +53,9 @@ public interface IResourceValidator {
    */
   boolean isRequireResourceId();
   void setRequireResourceId(boolean requiresResourceId);
+  
+  BestPracticeWarningLevel getBasePracticeWarningLevel();
+  void setBestPracticeWarningLevel(BestPracticeWarningLevel value);
   
   
   /**

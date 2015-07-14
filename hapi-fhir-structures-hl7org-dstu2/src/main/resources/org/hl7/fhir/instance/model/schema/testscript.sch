@@ -29,8 +29,56 @@
       <sch:assert test="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])">txt-1: The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
       <sch:assert test="descendant::text()[normalize-space(.)!=''] or descendant::h:img[@src]">txt-2: The narrative SHALL have some non-whitespace content</sch:assert>
     </sch:rule>
-    <sch:rule context="f:TestScript/f:fixture">
-      <sch:assert test="(f:uri and not(f:resource)) or (f:resource and not(f:uri))">inv-1: SHALL contain a &quot;uri&quot; or &quot;resource&quot; but not both.</sch:assert>
+    <sch:rule context="f:TestScript">
+      <sch:assert test="not(f:operation)">inv-18: Operations SHALL be present in TestScript.setup.action, TestScript.test.action and TestScript.teardown.action only.</sch:assert>
+      <sch:assert test="not(f:assert)">inv-19: Assertions SHALL be present in TestScript.setup.action and TestScript.test.action only.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:metadata">
+      <sch:assert test="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)">inv-5: TestScript metadata capabilities SHALL contain required or validated or both.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:metadata/f:capabilities/f:conformance">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:fixture/f:resource">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:profile">
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:variable">
+      <sch:assert test="not(f:headerField and f:path)">inv-4: Variable cannot contain both headerField and path.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:setup/f:metadata">
+      <sch:assert test="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)">inv-7: Setup metadata capabilities SHALL contain required or validated or both.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:setup/f:action">
+      <sch:assert test="(f:operation or f:assert) and not(f:operation and f:assert)">inv-1: Setup action SHALL contain either an operation or assert but not both.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:setup/f:action/f:operation">
+      <sch:assert test="f:sourceId or ((f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1)) or (f:type/@value='conformance' or f:type/@value='search' or f:type/@value='transaction' or f:type/@value='history')">inv-13: Setup operation SHALL contain either sourceId or targetId or params or url.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:setup/f:action/f:assert">
+      <sch:assert test="(f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourcePath)">inv-16: Setup action assert shall contain both compareToSourceId and compareToSourcePath or neither.</sch:assert>
+      <sch:assert test="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1">inv-11: Only a single assertion SHALL be present within setup action assert element.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:test/f:metadata">
+      <sch:assert test="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)">inv-9: Test metadata capabilities SHALL contain required or validated or both.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:test/f:action">
+      <sch:assert test="(f:operation or f:assert) and not(f:operation and f:assert)">inv-2: Test action SHALL contain either an operation or assert but not both.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:test/f:action/f:operation">
+      <sch:assert test="f:sourceId or (f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/@value='conformance' or f:type/@value='search' or f:type/@value='transaction' or f:type/@value='history')">inv-14: Test operation SHALL contain either sourceId or targetId or params or url.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:test/f:action/f:assert">
+      <sch:assert test="(f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourcePath)">inv-17: Test action assert shall contain both compareToSourceId and compareToSourcePath or neither.</sch:assert>
+      <sch:assert test="count(f:contentType) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:validateProfileId)  &lt;=1">inv-12: Only a single assertion SHALL be present within test action assert element.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:teardown/f:action">
+      <sch:assert test="f:operation">inv-3: Teardown action SHALL contain an operation.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:teardown/f:action/f:operation">
+      <sch:assert test="f:sourceId or (f:targetId or f:url or (f:params and f:resource)) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/@value='conformance' or f:type/@value='search' or f:type/@value='transaction' or f:type/@value='history')">inv-15: Teardown operation SHALL contain either sourceId or targetId or params or url.</sch:assert>
     </sch:rule>
     </sch:pattern>
 </sch:schema>

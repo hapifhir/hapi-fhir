@@ -385,7 +385,9 @@ public class XmlParser extends BaseParser implements IParser {
 		String bundleBaseUrl = theBundle.getLinkBase().getValue();
 
 		writeOptionalTagWithValue(theEventWriter, "type", theBundle.getType().getValue());
-		writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
+		if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+			writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
+		}
 		writeOptionalTagWithValue(theEventWriter, "total", theBundle.getTotalResults().getValueAsString());
 
 		writeBundleResourceLink(theEventWriter, "first", theBundle.getLinkFirst());
@@ -402,10 +404,18 @@ public class XmlParser extends BaseParser implements IParser {
 				deleted = true;
 			}
 
-			writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
-
+			if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+				writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
+			}
+			
 			writeBundleResourceLink(theEventWriter, "alternate", nextEntry.getLinkAlternate());
 
+			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+				if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+					writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
+				}
+			}
+			
 			IResource resource = nextEntry.getResource();
 			if (resource != null && !resource.isEmpty() && !deleted) {
 				theEventWriter.writeStartElement("resource");

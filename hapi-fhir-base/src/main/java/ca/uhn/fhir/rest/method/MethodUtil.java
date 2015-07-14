@@ -283,7 +283,7 @@ public class MethodUtil {
 	public static EncodingEnum detectEncoding(String theBody) {
 		EncodingEnum retVal = detectEncodingNoDefault(theBody);
 		if (retVal == null) {
-		retVal = EncodingEnum.XML;
+			retVal = EncodingEnum.XML;
 		}
 		return retVal;
 	}

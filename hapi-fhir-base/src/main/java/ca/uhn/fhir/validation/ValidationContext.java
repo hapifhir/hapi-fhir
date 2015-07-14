@@ -20,48 +20,32 @@ package ca.uhn.fhir.validation;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.thymeleaf.util.Validate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class ValidationContext<T> implements IValidationContext<T> {
+class ValidationContext<T> extends BaseValidationContext<T> implements IValidationContext<T> {
 
 	private final IEncoder myEncoder;
-	private final FhirContext myFhirContext;
-	private List<SingleValidationMessage> myMessages = new ArrayList<SingleValidationMessage>();
 	private final T myResource;
 	private String myResourceAsString;
 	private final EncodingEnum myResourceAsStringEncoding;
-	private final String myResourceName;
 
-	private ValidationContext(FhirContext theContext, T theResource, String theResourceName, IEncoder theEncoder) {
-		myFhirContext = theContext;
+	private ValidationContext(FhirContext theContext, T theResource, IEncoder theEncoder) {
+		super(theContext);
 		myResource = theResource;
 		myEncoder = theEncoder;
-		myResourceName = theResourceName;
 		if (theEncoder != null) {
 			myResourceAsStringEncoding = theEncoder.getEncoding();
 		} else {
 			myResourceAsStringEncoding = null;
 		}
-	}
-
-	@Override
-	public void addValidationMessage(SingleValidationMessage theMessage) {
-		Validate.notNull(theMessage, "theMessage must not be null");
-		myMessages.add(theMessage);
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
 	}
 
 	@Override
@@ -82,19 +66,8 @@ class ValidationContext<T> implements IValidationContext<T> {
 		return myResourceAsStringEncoding;
 	}
 
-	@Override
-	public String getResourceName() {
-		return myResourceName;
-	}
-
-	@Override
-	public ValidationResult toResult() {
-		return new ValidationResult(myFhirContext, myMessages);
-	}
-
 	public static IValidationContext<Bundle> forBundle(final FhirContext theContext, final Bundle theBundle) {
-		String resourceName = "Bundle";
-		return new ValidationContext<Bundle>(theContext, theBundle, resourceName, new IEncoder() {
+		return new ValidationContext<Bundle>(theContext, theBundle, new IEncoder() {
 			@Override
 			public String encode() {
 				return theContext.newXmlParser().encodeBundleToString(theBundle);
@@ -108,8 +81,7 @@ class ValidationContext<T> implements IValidationContext<T> {
 	}
 
 	public static <T extends IBaseResource> IValidationContext<T> forResource(final FhirContext theContext, final T theResource) {
-		String resourceName = theContext.getResourceDefinition(theResource).getName();
-		return new ValidationContext<T>(theContext, theResource, resourceName, new IEncoder() {
+		return new ValidationContext<T>(theContext, theResource, new IEncoder() {
 			@Override
 			public String encode() {
 				return theContext.newXmlParser().encodeResourceToString(theResource);
@@ -151,11 +123,6 @@ class ValidationContext<T> implements IValidationContext<T> {
 			}
 
 			@Override
-			public String getResourceName() {
-				return theContext.getFhirContext().getResourceDefinition(theResource).getName();
-			}
-
-			@Override
 			public ValidationResult toResult() {
 				return theContext.toResult();
 			}
@@ -166,6 +133,41 @@ class ValidationContext<T> implements IValidationContext<T> {
 		String encode();
 
 		EncodingEnum getEncoding();
+	}
+
+	public static IValidationContext<IBaseResource> forText(final FhirContext theContext, final String theResourceBody) {
+		Validate.notNull(theContext, "theContext can not be null");
+		Validate.notEmpty(theResourceBody, "theResourceBody can not be null or empty");
+		return new BaseValidationContext<IBaseResource>(theContext) {
+
+			private EncodingEnum myEncoding;
+			private IBaseResource myParsed;
+
+			@Override
+			public IBaseResource getResource() {
+				if (myParsed == null) {
+					myParsed = getResourceAsStringEncoding().newParser(getFhirContext()).parseResource(getResourceAsString());
+				}
+				return myParsed;
+			}
+
+			@Override
+			public String getResourceAsString() {
+				return theResourceBody;
+			}
+
+			@Override
+			public EncodingEnum getResourceAsStringEncoding() {
+				if (myEncoding == null) {
+					myEncoding = MethodUtil.detectEncodingNoDefault(theResourceBody);
+					if (myEncoding == null) {
+						throw new InvalidRequestException(theContext.getLocalizer().getMessage(ValidationContext.class, "unableToDetermineEncoding"));
+					}
+				}
+				return myEncoding;
+			}
+
+		};
 	}
 
 }

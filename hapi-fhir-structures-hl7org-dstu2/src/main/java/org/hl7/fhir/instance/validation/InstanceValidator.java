@@ -32,8 +32,8 @@ import org.hl7.fhir.instance.model.SampledData;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.model.StructureDefinition.ExtensionContext;
+import org.hl7.fhir.instance.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.instance.model.StructureDefinition.StructureDefinitionSnapshotComponent;
-import org.hl7.fhir.instance.model.StructureDefinition.StructureDefinitionType;
 import org.hl7.fhir.instance.model.Timing;
 import org.hl7.fhir.instance.model.Type;
 import org.hl7.fhir.instance.model.UriType;
@@ -45,6 +45,7 @@ import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOut
 import org.hl7.fhir.instance.terminologies.ValueSetExpansionCache;
 import org.hl7.fhir.instance.utils.ProfileUtilities;
 import org.hl7.fhir.instance.utils.WorkerContext;
+import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.instance.validation.ValidationMessage.Source;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
@@ -93,6 +94,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   // configuration items
   private CheckDisplayOption checkDisplay;
+  private BestPracticeWarningLevel bpWarnings;
   @Override
   public CheckDisplayOption getCheckDisplay() {
     return checkDisplay;
@@ -101,6 +103,15 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   public void setCheckDisplay(CheckDisplayOption checkDisplay) {
     this.checkDisplay = checkDisplay;
   }
+  
+  public BestPracticeWarningLevel getBasePracticeWarningLevel() {
+    return bpWarnings;
+  }
+  
+  public void setBestPracticeWarningLevel(BestPracticeWarningLevel value) {
+    bpWarnings = value;
+  }
+  
   
 
   // used during the build process to keep the overall volume of messages down
@@ -823,8 +834,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         profile = context.getProfiles().get("http://hl7.org/fhir/StructureDefinition/"+resourceName);
           ok = rule(errors, IssueType.INVALID, element.line(), element.col(), stack.addToLiteralPath(resourceName), profile != null, "No profile found for resource type '"+resourceName+"'");
       } else {
-        String type = profile.getType() == StructureDefinitionType.RESOURCE ? profile.getSnapshot().getElement().get(0).getPath() : profile.getSnapshot().getElement().get(0).getType().get(0).getCode();
-          ok = rule(errors, IssueType.INVALID, -1, -1, stack.addToLiteralPath(resourceName), type.equals(resourceName), "Specified profile type was '"+profile.getType()+"', but resource type was '"+resourceName+"'");
+        String type = profile.hasConstrainedType() ? profile.getConstrainedType() : profile.getName();
+          ok = rule(errors, IssueType.INVALID, -1, -1, stack.addToLiteralPath(resourceName), type.equals(resourceName), "Specified profile type was '"+profile.getConstrainedType()+"', but resource type was '"+resourceName+"'");
       }
     }
 
@@ -850,6 +861,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       // specific known special validations 
       if (element.getResourceType().equals("Bundle"))
         validateBundle(errors, element, stack);
+      if (element.getResourceType().equals("Observation"))
+        validateObservation(errors, element, stack);
     }
   }
 
@@ -889,39 +902,31 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
   
   private void validateBundle(List<ValidationMessage> errors, WrapperElement bundle, NodeStack stack) {
-    String base = bundle.getNamedChildValue("base");
-    rule(errors, IssueType.INVALID, bundle.line(), bundle.col(), "Bundle", !"urn:guid:".equals(base), "The base 'urn:guid:' is not valid (use urn:uuid:)");
-    
     List<WrapperElement> entries = new ArrayList<WrapperElement>();
     bundle.getNamedChildren("entry", entries);
-    WrapperElement firstEntry = null;
-    NodeStack firstStack = null;
-    String firstBase = null;
-    int i = 0;
-    for (WrapperElement entry : entries) {
-  		NodeStack localStack = stack.push(entry, i, null, null);
-      String ebase = entry.getNamedChildValue("base");
-      rule(errors, IssueType.INVALID, entry.line(), entry.col(), localStack.getLiteralPath(), !"urn:guid:".equals(ebase), "The base 'urn:guid:' is not valid");
-      rule(errors, IssueType.INVALID, entry.line(), entry.col(), localStack.getLiteralPath(), !Utilities.noString(base) || !Utilities.noString(ebase), "entry does not have a base");
-      if (i == 0) { 
-        firstEntry = entry;
-        firstBase = ebase == null ? base : ebase;
-        firstStack = localStack;
-      }
-      i++;
-    }
-    if (bundle.getNamedChildValue("type").equals("document")) {
+    String type = bundle.getNamedChildValue("type");
+    if (entries.size() == 0) {
+      rule(errors, IssueType.INVALID, stack.getLiteralPath(), !(type.equals("document") || type.equals("message")), "Documents or Messages must contain at least one entry");
+    } else {
+      WrapperElement firstEntry = entries.get(0);
+      NodeStack firstStack = stack.push(firstEntry, 0, null, null);
+      String fullUrl = firstEntry.getNamedChildValue("fullUrl");
+
+      if (type.equals("document")) {
 	    WrapperElement res = firstEntry.getNamedChild("resource");
   		NodeStack localStack = firstStack.push(res, -1, null, null);
+        WrapperElement resource = res.getFirstChild();
+        String id = resource.getNamedChildValue("id");
 	    if (rule(errors, IssueType.INVALID, firstEntry.line(), firstEntry.col(), stack.addToLiteralPath("entry", ":0"), res != null, "No resource on first entry")) {
       	if (bundle.isXml())
-          validateDocument(errors, bundle, res.getFirstChild(), firstBase, localStack.push(res.getFirstChild(), -1, null, null));
+            validateDocument(errors, entries, resource, localStack.push(resource, -1, null, null), fullUrl, id);
       	else
-      		validateDocument(errors, bundle, res, firstBase, localStack);
+            validateDocument(errors, entries, res, localStack, fullUrl, id);
       }
     }
-    if (bundle.getNamedChildValue("type").equals("message"))
+      if (type.equals("message"))
       validateMessage(errors, bundle);
+  }
   }
   
   private void validateMessage(List<ValidationMessage> errors, WrapperElement bundle) {
@@ -930,79 +935,97 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
   
   
-  private void validateDocument(List<ValidationMessage> errors, WrapperElement bundle, WrapperElement composition, String base, NodeStack stack) {
+  private void validateDocument(List<ValidationMessage> errors, List<WrapperElement> entries, WrapperElement composition, NodeStack stack, String fullUrl, String id) {
     // first entry must be a composition
     if (rule(errors, IssueType.INVALID, composition.line(), composition.col(), stack.getLiteralPath(), composition.getResourceType().equals("Composition"), "The first entry in a document must be a composition")) {
       // the composition subject and section references must resolve in the bundle
-      validateBundleReference(errors, bundle, base, composition.getNamedChild("subject"), "Composition Subject", stack.push(composition.getNamedChild("subject"), -1, null, null));
-      validateSections(errors, base, bundle, composition, stack);      
+      validateBundleReference(errors, entries, composition.getNamedChild("subject"), "Composition Subject", stack.push(composition.getNamedChild("subject"), -1, null, null), fullUrl, "Composition", id);
+      validateSections(errors, entries, composition, stack, fullUrl, id);      
     }
   }  
+//rule(errors, IssueType.INVALID, bundle.line(), bundle.col(), "Bundle", !"urn:guid:".equals(base), "The base 'urn:guid:' is not valid (use urn:uuid:)");
+//rule(errors, IssueType.INVALID, entry.line(), entry.col(), localStack.getLiteralPath(), !"urn:guid:".equals(ebase), "The base 'urn:guid:' is not valid");
+//rule(errors, IssueType.INVALID, entry.line(), entry.col(), localStack.getLiteralPath(), !Utilities.noString(base) || !Utilities.noString(ebase), "entry does not have a base");
+//String firstBase = null;
+//firstBase = ebase == null ? base : ebase;
   
-  private void validateSections(List<ValidationMessage> errors, String base, WrapperElement bundle, WrapperElement focus, NodeStack stack) {
+  private void validateSections(List<ValidationMessage> errors, List<WrapperElement> entries, WrapperElement focus, NodeStack stack, String fullUrl, String id) {
     List<WrapperElement> sections = new ArrayList<WrapperElement>();
     focus.getNamedChildren("entry", sections);
     int i = 0;
     for (WrapperElement section : sections) {
       NodeStack localStack = stack.push(section,  1, null, null);
-			validateBundleReference(errors, bundle, base, section.getNamedChild("content"), "Section Content", localStack);    
-      validateSections(errors, base, bundle, section, localStack);
+			validateBundleReference(errors, entries, section.getNamedChild("content"), "Section Content", localStack, fullUrl, "Composition", id);    
+      validateSections(errors, entries, section, localStack, fullUrl, id);
       i++;
     }
   }
     
-  private void validateBundleReference(List<ValidationMessage> errors, WrapperElement bundle, String base, WrapperElement ref, String name, NodeStack stack) {
+  private void validateBundleReference(List<ValidationMessage> errors, List<WrapperElement> entries, WrapperElement ref, String name, NodeStack stack, String fullUrl, String type, String id) {
     if (ref != null && !Utilities.noString(ref.getNamedChildValue("reference"))) {
-      WrapperElement target = resolveInBundle(bundle, base, ref.getNamedChildValue("reference"));
+      WrapperElement target = resolveInBundle(entries, ref.getNamedChildValue("reference"), fullUrl, type, id);
       rule(errors, IssueType.INVALID, target.line(), target.col(), stack.addToLiteralPath("reference"), target != null, "Unable to resolve the target of the reference in the bundle ("+name+")");
     }
   }
   
-  private WrapperElement resolveInBundle(WrapperElement bundle, String base, String ref) {
-    String target;
-    if (ref.startsWith("http:") || ref.startsWith("https:") || ref.startsWith("urn:"))
-      target = ref;
-    else if ("urn:uuid:".equals(base) || "urn:oid:".equals(base))
-      target = base+ref;
-    else
-      target = Utilities.appendSlash(base)+ref;
-        
-    List<WrapperElement> entries = new ArrayList<WrapperElement>();
-    bundle.getNamedChildren("entry", entries);
+  private WrapperElement resolveInBundle(List<WrapperElement> entries, String ref, String fullUrl, String type, String id) {
+    if (Utilities.isAbsoluteUrl(ref)) {
+      // if the reference is absolute, then you resolve by fullUrl. No other thinking is required. 
+      for (WrapperElement entry : entries) {
+        String fu = entry.getNamedChildValue("fullUrl");
+        if (ref.equals(fu))
+          return entry;
+      }
+      return null;
+    } else {
+      // split into base, type, and id
+      String u = null;
+      if (fullUrl != null && fullUrl.endsWith(type+"/"+id))
+        // fullUrl = complex
+        u = fullUrl.substring((type+"/"+id).length())+ref;
+      String[] parts = ref.split("\\/");
+      if (parts.length >= 2) {
+        String t = parts[0];
+        String i = parts[1];
     for (WrapperElement entry : entries) {
-      String tbase = entry.getNamedChildValue("base");
-      if (Utilities.noString(base))
-        tbase = bundle.getNamedChildValue("base");
-      if (tbase == null)
-        tbase = "";
+          String fu = entry.getNamedChildValue("fullUrl");
+          if (u != null && fullUrl.equals(u))
+            return entry;
+          if (u == null) {
       WrapperElement res = entry.getNamedChild("resource");
-      if (res != null && res.isXml())
-        res = res.getFirstChild();
-      if (res != null) {
-        String turl;
-        if ("urn:uuid:".equals(base) || "urn:oid:".equals(base))
-          turl = tbase+ref;
-        else
-          turl = appendForwardSlash(tbase)+res.getResourceType()+"/"+res.getNamedChildValue("id");
-        if (turl.equals(target)) 
-          return res;
+            WrapperElement resource = res.getFirstChild();
+            String et = resource.getResourceType();
+            String eid = resource.getNamedChildValue("id");
+            if (t.equals(et) && i.equals(eid))
+              return entry;
+          }
       }
     }
     return null;
   }
-  
-  private String appendForwardSlash(String tbase) {
-    if (tbase == null)
-      return "/";
-    else if (tbase.endsWith("/"))
-      return tbase;
-    else
-      return tbase+"/";
   }
+  
   private StructureDefinition getProfileForType(String type) throws Exception {
     return context.getProfiles().get("http://hl7.org/fhir/StructureDefinition/"+type);
   }
 
+  private void validateObservation(List<ValidationMessage> errors, WrapperElement element, NodeStack stack) {
+    // all observations should have a subject, a performer, and a time
+    
+    bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("subject") != null, "All observations should have a subject");
+    bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("performer") != null, "All observations should have a performer");
+    bpCheck(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), element.getNamedChild("effectiveDateTime") != null || element.getNamedChild("effectivePeriod") != null , "All observations should have an effectiveDateTime or an effectivePeriod");
+  }
+
+  private void bpCheck(List<ValidationMessage> errors, IssueType invalid, int line, int col, String literalPath, boolean test, String message) {
+    switch (bpWarnings) {
+    case Error: rule(errors, invalid, line, col, literalPath, test, message);
+    case Warning: warning(errors, invalid, line, col, literalPath, test, message);
+    case Hint: hint(errors, invalid, line, col, literalPath, test, message);
+    default: // do nothing
+    }
+  }
+  
   private void validateElement(List<ValidationMessage> errors, StructureDefinition profile, ElementDefinition definition, StructureDefinition cprofile, ElementDefinition context, WrapperElement element, String actualType, NodeStack stack) throws Exception {
     // irrespective of what element it is, it cannot be empty
   	if (element.isXml()) {
@@ -1257,9 +1280,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   private boolean isBundleEntry(String path) {
     String[] parts = path.split("\\/");
     if (path.startsWith("/f:"))
-    return parts.length > 2 && parts[parts.length-1].startsWith("f:resource") && parts[parts.length-2].startsWith("f:entry["); 
+      return parts.length > 2 && parts[parts.length-1].startsWith("f:resource") && (parts[parts.length-2].equals("f:entry") || parts[parts.length-2].startsWith("f:entry[")); 
     else
-      return parts.length > 3 && parts[parts.length-1].equals("resource") && parts[parts.length-3].equals("entry");
+      return parts.length > 2 && parts[parts.length-1].equals("resource") && ((parts.length > 2 && parts[parts.length-3].equals("entry")) || parts[parts.length-2].equals("entry"));
   }
   
   private String describeTypes(List<TypeRefComponent> types) {
@@ -1405,7 +1428,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       StructureDefinition p = resolveProfile(profile, pr);
       if (p == null)
         return null;
-      else if (p.getType() == StructureDefinitionType.RESOURCE)
+      else if (p.getKind() == StructureDefinitionKind.RESOURCE)
         return p.getSnapshot().getElement().get(0).getPath();
       else
         return p.getSnapshot().getElement().get(0).getType().get(0).getCode();

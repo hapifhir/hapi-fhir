@@ -275,16 +275,17 @@ public abstract class BaseParser implements IParser {
 		return stringWriter.toString();
 	}
 
-
 	/**
 	 * If individual resources in the bundle have an ID that has the base set, we make sure that Bundle.entry.base gets set as needed.
 	 */
 	private void fixBaseLinksForBundle(IBaseBundle theBundle) {
+		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+			return;
+		}
+
 		/*
-		 * ATTENTION IF YOU ARE EDITING THIS:
-		 * There are two versions of this method, one for DSTU1/atom bundle and
-		 * one for DSTU2/resource bundle. If you edit one, edit both and also
-		 * update unit tests for both.
+		 * ATTENTION IF YOU ARE EDITING THIS: There are two versions of this method, one for DSTU1/atom bundle and one for DSTU2/resource bundle. If you edit one, edit both and also update unit tests
+		 * for both.
 		 */
 		FhirTerser t = myContext.newTerser();
 		IPrimitiveType<?> element = t.getSingleValueOrNull(theBundle, "base", IPrimitiveType.class);
@@ -375,11 +376,15 @@ public abstract class BaseParser implements IParser {
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
 		if ("Bundle".equals(def.getName())) {
-			List<IBase> base = def.getChildByName("base").getAccessor().getValues(retVal);
-			if (base != null && base.size() > 0) {
-				IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
-				IBaseResource res = (retVal);
-				res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getIdElement().getIdPart(), res.getIdElement().getVersionIdPart()));
+
+			List<IBase> base = null;
+			if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+				base = def.getChildByName("base").getAccessor().getValues(retVal);
+				if (base != null && base.size() > 0) {
+					IPrimitiveType<?> baseType = (IPrimitiveType<?>) base.get(0);
+					IBaseResource res = (retVal);
+					res.setId(new IdDt(baseType.getValueAsString(), def.getName(), res.getIdElement().getIdPart(), res.getIdElement().getVersionIdPart()));
+				}
 			}
 
 			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
@@ -387,35 +392,56 @@ public abstract class BaseParser implements IParser {
 			List<IBase> entries = entryChild.getAccessor().getValues(retVal);
 			if (entries != null) {
 				for (IBase nextEntry : entries) {
-					List<IBase> entryBase = entryDef.getChildByName("base").getAccessor().getValues(nextEntry);
 
-					if (entryBase == null || entryBase.isEmpty()) {
-						entryBase = base;
-					}
+					if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
+						List<IBase> entryBase = entryDef.getChildByName("base").getAccessor().getValues(nextEntry);
+						if (entryBase == null || entryBase.isEmpty()) {
+							entryBase = base;
+						}
 
-					if (entryBase != null && entryBase.size() > 0) {
-						IPrimitiveType<?> baseType = (IPrimitiveType<?>) entryBase.get(0);
+						if (entryBase != null && entryBase.size() > 0) {
+							IPrimitiveType<?> baseType = (IPrimitiveType<?>) entryBase.get(0);
 
-						List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
-						if (entryResources != null && entryResources.size() > 0) {
-							IBaseResource res = (IBaseResource) entryResources.get(0);
-							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
-							String versionIdPart = res.getIdElement().getVersionIdPart();
-							if (isBlank(versionIdPart) && res instanceof IResource) {
-								versionIdPart = ResourceMetadataKeyEnum.VERSION.get((IResource) res);
+							List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+							if (entryResources != null && entryResources.size() > 0) {
+								IBaseResource res = (IBaseResource) entryResources.get(0);
+								RuntimeResourceDefinition resDef = myContext.getResourceDefinition(res);
+								String versionIdPart = res.getIdElement().getVersionIdPart();
+								if (isBlank(versionIdPart) && res instanceof IResource) {
+									versionIdPart = ResourceMetadataKeyEnum.VERSION.get((IResource) res);
+								}
+
+								String baseUrl = baseType.getValueAsString();
+								String idPart = res.getIdElement().getIdPart();
+
+								String resourceName = resDef.getName();
+								if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
+									res.setId(new IdDt(baseUrl, resourceName, idPart, versionIdPart));
+								} else {
+									if (baseUrl.endsWith(":")) {
+										res.setId(new IdDt(baseUrl + idPart));
+									} else {
+										res.setId(new IdDt(baseUrl + ':' + idPart));
+									}
+								}
 							}
 
-							String baseUrl = baseType.getValueAsString();
-							String idPart = res.getIdElement().getIdPart();
+						}
 
-							String resourceName = resDef.getName();
-							if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
-								res.setId(new IdDt(baseUrl, resourceName, idPart, versionIdPart));
-							} else {
-								if (baseUrl.endsWith(":")) {
-									res.setId(new IdDt(baseUrl + idPart));
-								} else {
-									res.setId(new IdDt(baseUrl + ':' + idPart));
+					} else {
+						// DSTU2 after 0.5.0
+
+						/**
+						 * If Bundle.entry.fullUrl is populated, set the resource ID to that
+						 */
+						List<IBase> fullUrl = entryDef.getChildByName("fullUrl").getAccessor().getValues(nextEntry);
+						if (fullUrl != null && !fullUrl.isEmpty()) {
+							IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
+							if (value.isEmpty() == false) {
+								List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
+								if (entryResources != null && entryResources.size() > 0) {
+									IBaseResource res = (IBaseResource) entryResources.get(0);
+									res.setId(value.getValueAsString());
 								}
 							}
 						}

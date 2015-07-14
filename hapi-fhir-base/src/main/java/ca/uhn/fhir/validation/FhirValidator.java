@@ -34,22 +34,27 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
- * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, etc.)
+ * Resource validator, which checks resources for compliance against various validation schemes (schemas, schematrons, profiles, etc.)
  * 
  * <p>
  * To obtain a resource validator, call {@link FhirContext#newValidator()}
  * </p>
+ * 
+ * <p>
+ * <b>Thread safety note:</b> This class is thread safe, so you may register or unregister validator modules at any time. Individual modules are not guaranteed to be thread safe however. Reconfigure
+ * them with caution.
+ * </p>
  */
 public class FhirValidator {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
-
-	private static final String I18N_KEY_NO_PHLOC_WARNING = FhirValidator.class.getName() + ".noPhlocWarningOnStartup";
 	private static final String I18N_KEY_NO_PHLOC_ERROR = FhirValidator.class.getName() + ".noPhlocError";
 
-	private FhirContext myContext;
-	private List<IValidator> myValidators = new ArrayList<IValidator>();
+	private static final String I18N_KEY_NO_PHLOC_WARNING = FhirValidator.class.getName() + ".noPhlocWarningOnStartup";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirValidator.class);
+
 	private static volatile Boolean ourPhlocPresentOnClasspath;
+	private final FhirContext myContext;
+	private volatile List<IValidator> myValidators = new ArrayList<IValidator>();
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -73,17 +78,17 @@ public class FhirValidator {
 
 	}
 
-	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator instance) {
+	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator theInstance) {
 		if (theValidateAgainstStandardSchema) {
 			boolean found = haveValidatorOfType(type);
 			if (!found) {
-				myValidators.add(instance);
+				registerValidator(theInstance);
 			}
 		} else {
 			for (Iterator<IValidator> iter = myValidators.iterator(); iter.hasNext();) {
 				IValidator next = iter.next();
 				if (next.getClass().equals(type)) {
-					iter.remove();
+					unregisterValidator(next);
 				}
 			}
 		}
@@ -102,32 +107,69 @@ public class FhirValidator {
 	/**
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
-	public boolean isValidateAgainstStandardSchema() {
+	public synchronized boolean isValidateAgainstStandardSchema() {
 		return haveValidatorOfType(SchemaBaseValidator.class);
 	}
 
 	/**
 	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
 	 */
-	public boolean isValidateAgainstStandardSchematron() {
+	public synchronized boolean isValidateAgainstStandardSchematron() {
 		return haveValidatorOfType(SchematronBaseValidator.class);
 	}
 
 	/**
-	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
+	 * Add a new validator module to this validator. You may register as many modules as you like at any time.
+	 * 
+	 * @param theValidator
+	 *           The validator module. Must not be null.
 	 */
-	public void setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
+	public synchronized void registerValidator(IValidator theValidator) {
+		Validate.notNull(theValidator, "theValidator must not be null");
+		ArrayList<IValidator> newValidators = new ArrayList<IValidator>(myValidators.size() + 1);
+		newValidators.addAll(myValidators);
+		newValidators.add(theValidator);
+
+		myValidators = newValidators;
+	}
+
+	/**
+	 * Should the validator validate the resource against the base schema (the schema provided with the FHIR distribution itself)
+	 * 
+	 * @return Returns a referens to <code>this<code> for method chaining
+	 */
+	public synchronized  FhirValidator setValidateAgainstStandardSchema(boolean theValidateAgainstStandardSchema) {
 		addOrRemoveValidator(theValidateAgainstStandardSchema, SchemaBaseValidator.class, new SchemaBaseValidator(myContext));
+		return this;
 	}
 
 	/**
 	 * Should the validator validate the resource against the base schematron (the schematron provided with the FHIR distribution itself)
+	 * 
+	 * @return
+	 * @return Returns a referens to <code>this<code> for method chaining
 	 */
-	public void setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
+	public synchronized FhirValidator setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {
 		if (theValidateAgainstStandardSchematron && !ourPhlocPresentOnClasspath) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_KEY_NO_PHLOC_ERROR));
 		}
 		addOrRemoveValidator(theValidateAgainstStandardSchematron, SchematronBaseValidator.class, new SchematronBaseValidator(myContext));
+		return this;
+	}
+
+	/**
+	 * Removes a validator module from this validator. You may register as many modules as you like, and remove them at any time.
+	 * 
+	 * @param theValidator
+	 *           The validator module. Must not be null.
+	 */
+	public synchronized void unregisterValidator(IValidator theValidator) {
+		Validate.notNull(theValidator, "theValidator must not be null");
+		ArrayList<IValidator> newValidators = new ArrayList<IValidator>(myValidators.size() + 1);
+		newValidators.addAll(myValidators);
+		newValidators.remove(theValidator);
+
+		myValidators = newValidators;
 	}
 
 	/**
@@ -212,4 +254,25 @@ public class FhirValidator {
 
 		return ctx.toResult();
 	}
+
+	/**
+	 * Validates a resource instance returning a {@link ca.uhn.fhir.validation.ValidationResult} which contains the results.
+	 *
+	 * @param theResource
+	 *           the resource to validate
+	 * @return the results of validation
+	 * @since 1.1
+	 */
+	public ValidationResult validateWithResult(String theResource) {
+		Validate.notNull(theResource, "theResource must not be null");
+
+		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource);
+
+		for (IValidator next : myValidators) {
+			next.validateResource(ctx);
+		}
+
+		return ctx.toResult();
+	}
+
 }

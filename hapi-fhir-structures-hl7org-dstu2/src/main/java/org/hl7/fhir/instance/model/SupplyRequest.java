@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -91,10 +91,10 @@ public class SupplyRequest extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case REQUESTED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
-            case COMPLETED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
-            case FAILED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
-            case CANCELLED: return "http://hl7.org/fhir/valueset-supplyrequest-status";
+            case REQUESTED: return "http://hl7.org/fhir/supplyrequest-status";
+            case COMPLETED: return "http://hl7.org/fhir/supplyrequest-status";
+            case FAILED: return "http://hl7.org/fhir/supplyrequest-status";
+            case CANCELLED: return "http://hl7.org/fhir/supplyrequest-status";
             default: return "?";
           }
         }

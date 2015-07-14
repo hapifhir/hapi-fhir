@@ -68,6 +68,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 	private Bundle myBundle;
 	private FhirContext myContext;
+	private String myBase;
 
 	public Dstu2Hl7OrgBundleFactory(FhirContext theContext) {
 		myContext = theContext;
@@ -180,10 +181,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 			myBundle.addLink().setRelation("self").setUrl(theCompleteUrl);
 		}
 
-		if (isBlank(myBundle.getBase()) && isNotBlank(theServerBase)) {
-			myBundle.setBase(theServerBase);
-		}
-
+		myBase = theServerBase;
+		
 		if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
 			myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
 		}
@@ -307,14 +306,14 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 				nextEntry.setResource((Resource) next);
 				if (next.getIdElement().isEmpty()) {
-					nextEntry.getTransaction().setMethod(HTTPVerb.POST);
+					nextEntry.getRequest().setMethod(HTTPVerb.POST);
 				} else {
-					nextEntry.getTransaction().setMethod(HTTPVerb.PUT);
+					nextEntry.getRequest().setMethod(HTTPVerb.PUT);
 					if (next.getIdElement().isAbsolute()) {
-						nextEntry.getTransaction().setUrl(next.getIdElement().getValue());
+						nextEntry.getRequest().setUrl(next.getIdElement().getValue());
 					} else {
 						String resourceType = myContext.getResourceDefinition(next).getName();
-						nextEntry.getTransaction().setUrl(new IdType(theServerBase, resourceType, next.getIdElement().getIdPart(), next.getIdElement().getVersionIdPart()).getValue());
+						nextEntry.getRequest().setUrl(new IdType(theServerBase, resourceType, next.getIdElement().getIdPart(), next.getIdElement().getVersionIdPart()).getValue());
 					}
 				}
 			}
@@ -383,7 +382,11 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 			} while (references.isEmpty() == false);
 
-			myBundle.addEntry().setResource((Resource) next);
+			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
+			IdType nextId = (IdType) next.getIdElement();
+			if (isNotBlank(myBase) && isNotBlank(nextId.getResourceType())) {
+				entry.setFullUrlElement(nextId.withServerBase(myBase, nextId.getResourceType()));
+			}
 
 		}
 
@@ -406,8 +409,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		for (BundleEntryComponent next : myBundle.getEntry()) {
 			if (next.getResource() != null) {
 				retVal.add(next.getResource());
-			} else if (next.getTransactionResponse().getLocationElement().isEmpty() == false) {
-				IdType id = new IdType(next.getTransactionResponse().getLocation());
+			} else if (next.getResponse().getLocationElement().isEmpty() == false) {
+				IdType id = new IdType(next.getResponse().getLocation());
 				String resourceType = id.getResourceType();
 				if (isNotBlank(resourceType)) {
 					IBaseResource res = (IBaseResource) myContext.getResourceDefinition(resourceType).newInstance();

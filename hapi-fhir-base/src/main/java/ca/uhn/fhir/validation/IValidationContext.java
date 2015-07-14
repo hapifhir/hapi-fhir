@@ -33,8 +33,6 @@ interface IValidationContext<T> {
 
 	EncodingEnum getResourceAsStringEncoding();
 
-	String getResourceName();
-
 	void addValidationMessage(SingleValidationMessage theMessage);
 
 	ValidationResult toResult();

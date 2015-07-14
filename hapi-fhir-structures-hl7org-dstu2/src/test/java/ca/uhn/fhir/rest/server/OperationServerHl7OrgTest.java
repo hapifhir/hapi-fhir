@@ -137,7 +137,7 @@ public class OperationServerHl7OrgTest {
 		assertEquals("$OP_TYPE_RET_BUNDLE", ourLastMethod);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-		assertEquals("100", resp.getEntry().get(0).getTransactionResponse().getStatus());
+		assertEquals("100", resp.getEntry().get(0).getResponse().getStatus());
 	}
 
 	@Test
@@ -475,7 +475,7 @@ public class OperationServerHl7OrgTest {
 			ourLastParam2 = theParam2;
 
 			Bundle retVal = new Bundle();
-			retVal.addEntry().getTransactionResponse().setStatus("100");
+			retVal.addEntry().getResponse().setStatus("100");
 			return retVal;
 		}
 

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>1.1</version>
+		<version>1.2-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.1</version>
+			<version>1.2-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>woodstox-core-asl</artifactId>
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>1.1</version>
+			<version>1.2-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>woodstox-core-asl</artifactId>
@@ -62,7 +62,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>1.1</version>
+			<version>1.2-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>woodstox-core-asl</artifactId>

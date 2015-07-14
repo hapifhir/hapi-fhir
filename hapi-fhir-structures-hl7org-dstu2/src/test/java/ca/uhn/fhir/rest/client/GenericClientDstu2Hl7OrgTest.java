@@ -640,8 +640,8 @@ public class GenericClientDstu2Hl7OrgTest {
 	public void testTransactionWithListOfResources() throws Exception {
 
 		org.hl7.fhir.instance.model.Bundle resp = new org.hl7.fhir.instance.model.Bundle();
-		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
 		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -676,9 +676,9 @@ public class GenericClientDstu2Hl7OrgTest {
 		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
 		org.hl7.fhir.instance.model.Bundle requestBundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, requestString);
 		assertEquals(2, requestBundle.getEntry().size());
-		assertEquals("POST", requestBundle.getEntry().get(0).getTransaction().getMethod().name());
-		assertEquals("PUT", requestBundle.getEntry().get(1).getTransaction().getMethod().name());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getTransaction().getUrl());
+		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod().name());
+		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod().name());
+		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
 
 		p1 = (Patient) response.get(0);
 		assertEquals(new IdType("Patient/1/_history/1"), p1.getIdElement().toUnqualified());
@@ -693,8 +693,8 @@ public class GenericClientDstu2Hl7OrgTest {
 	public void testTransactionWithTransactionResource() throws Exception {
 
 		org.hl7.fhir.instance.model.Bundle resp = new org.hl7.fhir.instance.model.Bundle();
-		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
 		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -726,8 +726,8 @@ public class GenericClientDstu2Hl7OrgTest {
 		assertEquals("http://example.com/fhir?_format=json", capt.getValue().getURI().toString());
 		assertEquals(2, response.getEntry().size());
 
-		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getTransactionResponse().getLocation());
-		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getTransactionResponse().getLocation());
+		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getResponse().getLocation());
 	}
 
 	@Test

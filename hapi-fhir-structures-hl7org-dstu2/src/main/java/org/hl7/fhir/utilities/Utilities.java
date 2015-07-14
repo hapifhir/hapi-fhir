@@ -28,6 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.utilities;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,6 +36,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
@@ -43,20 +45,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.SourceDataLine;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.io.FileUtils;
-
 import net.sf.saxon.TransformerFactoryImpl;
+
+import org.apache.commons.io.FileUtils;
 
 public class Utilities {
 
 //	 private static final String TOKEN_REGEX = "^a-z[A-Za-z0-9]*$";
 
+
+  private static final String OID_REGEX = "[0-2](\\.(0|[1-9]([0-9])*))*";
 
   /**
      * Returns the plural form of the word in the string.
@@ -87,7 +94,7 @@ public class Utilities {
     }
     
   
-  	public static boolean IsInteger(String string) {
+  	public static boolean isInteger(String string) {
   		try {
   			int i = Integer.parseInt(string);
   			return i != i+1;
@@ -96,7 +103,7 @@ public class Utilities {
   		}
   	}
   	
-  	public static boolean IsDecimal(String string) {
+  	public static boolean isDecimal(String string) {
   		try {
   			float r = Float.parseFloat(string);
   			return r != r + 1; // just to suppress the hint
@@ -312,6 +319,17 @@ public class Utilities {
     
   }
 
+  public static String saxonTransform(String source, String xslt) throws Exception {
+    TransformerFactoryImpl f = new net.sf.saxon.TransformerFactoryImpl();
+    f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
+    StreamSource xsrc = new StreamSource(new FileInputStream(xslt));
+    Transformer t = f.newTransformer(xsrc);
+    StreamSource src = new StreamSource(new FileInputStream(source));
+    StreamResult res = new StreamResult(new ByteArrayOutputStream());
+    t.transform(src, res);
+    return res.getOutputStream().toString();   
+  }
+
   public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws Exception {
   	saxonTransform(xsltDir, source, xslt, dest, alt, null);
   }
@@ -437,7 +455,16 @@ public class Utilities {
         d = !noString(arg);
       else if (!s.toString().endsWith(File.separator))
         s.append(File.separator);
-      s.append(arg);
+      String a = arg;
+      a = a.replace("\\", File.separator);
+      if (s.length() > 0 && a.startsWith(File.separator))
+        a = a.substring(File.separator.length());
+        
+      if ("..".equals(a)) {
+        int i = s.substring(0, s.length()-1).lastIndexOf(File.separator);
+        s = new StringBuilder(s.substring(0, i+1));
+      } else
+        s.append(a);
     }
     return s.toString();
   }
@@ -499,11 +526,8 @@ public class Utilities {
 
 
   public static String getDirectoryForFile(String filepath) {
-    int i = filepath.lastIndexOf(File.separator);
-    if (i == -1)
-      return filepath;
-    else
-      return filepath.substring(0, i);
+    File f = new File(filepath);
+    return f.getParent();
   }
 
   public static String appendPeriod(String s) {
@@ -536,6 +560,12 @@ public class Utilities {
     return id.substring(id.lastIndexOf(".")+1);
   }
 
+
+  public static String oidRoot(String id) {
+    if (id == null || !id.contains("."))
+      return id;
+    return id.substring(0, id.indexOf("."));
+  }
 
   public static String escapeJava(String doco) {
     if (doco == null)
@@ -595,6 +625,24 @@ public class Utilities {
 	  	} 
 	  }
 	  return b.toString().trim();
+  }
+
+  public static String normalizeSameCase(String s) {
+    if (noString(s))
+      return null;
+    StringBuilder b = new StringBuilder();
+    boolean isWhitespace = false;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (!Character.isWhitespace(c)) { 
+        b.append(c);
+        isWhitespace = false;
+      } else if (!isWhitespace) {
+        b.append(' ');
+        isWhitespace = true;        
+      } 
+    }
+    return b.toString().trim();
   }
 
 
@@ -704,7 +752,7 @@ public class Utilities {
     StringBuilder b = new StringBuilder();
     boolean lastBreak = true;
     for (char c : code.toCharArray()) {
-      if (isAlphabetic(c)) {
+      if (Character.isLetter(c)) {
         if (lastBreak)
           b.append(Character.toUpperCase(c));
         else { 
@@ -740,6 +788,124 @@ public class Utilities {
 		if (ch == c)
 		  res++;
 	  return res;
+  }
+
+
+  // http://stackoverflow.com/questions/3780406/how-to-play-a-sound-alert-in-a-java-application
+  public static float SAMPLE_RATE = 8000f;
+  
+  public static void tone(int hz, int msecs) {
+      tone(hz, msecs, 1.0);
+   }
+
+  public static void tone(int hz, int msecs, double vol) {
+    try {
+      byte[] buf = new byte[1];
+      AudioFormat af = 
+          new AudioFormat(
+              SAMPLE_RATE, // sampleRate
+              8,           // sampleSizeInBits
+              1,           // channels
+              true,        // signed
+              false);      // bigEndian
+      SourceDataLine sdl;
+      sdl = AudioSystem.getSourceDataLine(af);
+      sdl.open(af);
+      sdl.start();
+      for (int i=0; i < msecs*8; i++) {
+        double angle = i / (SAMPLE_RATE / hz) * 2.0 * Math.PI;
+        buf[0] = (byte)(Math.sin(angle) * 127.0 * vol);
+        sdl.write(buf,0,1);
+      }
+      sdl.drain();
+      sdl.stop();
+      sdl.close();
+    } catch (Exception e) {
+    }
+  }
+
+
+  public static boolean isOid(String cc) {
+    return cc.matches(OID_REGEX) && cc.lastIndexOf('.') > 5;
+  }
+
+
+  public static boolean equals(String one, String two) {
+    if (one == null && two == null)
+      return true;
+    if (one == null || two == null)
+      return false;
+    return one.equals(two);
+  }
+
+
+  public static void deleteAllFiles(String folder, String type) {
+    File src = new File(folder);
+    String[] files = src.list();
+    for (String f : files) {
+      if (new File(folder+File.separator+f).isDirectory()) {
+        deleteAllFiles(folder+File.separator+f, type);
+      } else if (f.endsWith(type)) {
+        new File(folder+File.separator+f).delete();
+      }
+    }
+    
+  }
+
+  public static boolean compareIgnoreWhitespace(File f1, File f2) throws IOException {
+    InputStream in1 = null;
+    InputStream in2 = null;
+    try {
+      in1 = new BufferedInputStream(new FileInputStream(f1));
+      in2 = new BufferedInputStream(new FileInputStream(f2));
+
+      int expectedByte = in1.read();
+      while (expectedByte != -1) {
+        boolean w1 = isWhitespace(expectedByte);
+        if (w1)
+          while (isWhitespace(expectedByte))
+            expectedByte = in1.read();
+        int foundByte = in2.read();
+        if (w1) {
+          if (!isWhitespace(foundByte))
+            return false;
+          while (isWhitespace(foundByte))
+            foundByte = in2.read();
+        }
+        if (expectedByte != foundByte) 
+          return false;
+        expectedByte = in1.read();
+      }
+      if (in2.read() != -1) {
+        return false;
+      }
+      return true;
+    } finally {
+      if (in1 != null) {
+        try {
+          in1.close();
+        } catch (IOException e) {}
+      }
+      if (in2 != null) {
+        try {
+          in2.close();
+        } catch (IOException e) {}
+      }
+    }
+  }
+  
+  private static boolean isWhitespace(int b) {
+    return b == 9 || b == 10 || b == 13 || b == 32;
+  }
+
+
+  public static boolean compareIgnoreWhitespace(String fn1, String fn2) throws IOException {
+    return compareIgnoreWhitespace(new File(fn1), new File(fn2));
+  }
+
+
+  public static boolean isAbsoluteUrl(String ref) {
+    return ref.startsWith("http:") || ref.startsWith("https:") || ref.startsWith("urn:uuid:") || ref.startsWith("urn:oid:") ;
   }
 
 

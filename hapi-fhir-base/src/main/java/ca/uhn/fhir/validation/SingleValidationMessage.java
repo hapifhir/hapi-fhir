@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class SingleValidationMessage {
 
 	private Integer myLocationCol;
-	private Integer myLocationRow;
+	private Integer myLocationLine;
 	private String myLocationString;
 	private String myMessage;
 	private ResultSeverityEnum mySeverity;
@@ -47,7 +47,7 @@ public class SingleValidationMessage {
 		SingleValidationMessage other = (SingleValidationMessage) obj;
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(myLocationCol, other.myLocationCol);
-		b.append(myLocationRow, other.myLocationRow);
+		b.append(myLocationLine, other.myLocationLine);
 		b.append(myLocationString, other.myLocationString);
 		b.append(myMessage, other.myMessage);
 		b.append(mySeverity, other.mySeverity);
@@ -58,8 +58,8 @@ public class SingleValidationMessage {
 		return myLocationCol;
 	}
 
-	public Integer getLocationRow() {
-		return myLocationRow;
+	public Integer getLocationLine() {
+		return myLocationLine;
 	}
 
 	public String getLocationString() {
@@ -89,8 +89,8 @@ public class SingleValidationMessage {
 		myLocationCol = theLocationCol;
 	}
 
-	public void setLocationRow(Integer theLocationRow) {
-		myLocationRow = theLocationRow;
+	public void setLocationLine(Integer theLocationLine) {
+		myLocationLine = theLocationLine;
 	}
 
 	public void setLocationString(String theLocationString) {
@@ -108,9 +108,9 @@ public class SingleValidationMessage {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (myLocationCol != null || myLocationRow != null) {
+		if (myLocationCol != null || myLocationLine != null) {
 			b.append("myLocationCol", myLocationCol);
-			b.append("myLocationRow", myLocationRow);
+			b.append("myLocationRow", myLocationLine);
 		}
 		if (myLocationString != null) {
 			b.append("myLocationString", myLocationString);

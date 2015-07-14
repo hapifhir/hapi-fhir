@@ -34,6 +34,7 @@ import org.oclc.purl.dsdl.svrl.SchematronOutputType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 import com.phloc.commons.error.IResourceError;
@@ -55,7 +56,13 @@ public class SchematronBaseValidator implements IValidator {
 	public void validateResource(IValidationContext<IBaseResource> theCtx) {
 
 		ISchematronResource sch = getSchematron(theCtx);
-		StreamSource source = new StreamSource(new StringReader(theCtx.getResourceAsString()));
+		String resourceAsString;
+		if (theCtx.getResourceAsStringEncoding() == EncodingEnum.XML) {
+			resourceAsString = theCtx.getResourceAsString();
+		} else {
+			resourceAsString = theCtx.getFhirContext().newXmlParser().encodeResourceToString(theCtx.getResource());
+		}
+		StreamSource source = new StreamSource(new StringReader(resourceAsString));
 
 		SchematronOutputType results = SchematronHelper.applySchematron(sch, source);
 		if (results == null) {
@@ -90,7 +97,7 @@ public class SchematronBaseValidator implements IValidator {
 
 			SingleValidationMessage message = new SingleValidationMessage();
 			message.setMessage(details);
-			message.setLocationRow(next.getLocation().getLineNumber());
+			message.setLocationLine(next.getLocation().getLineNumber());
 			message.setLocationCol(next.getLocation().getColumnNumber());
 			message.setLocationString(next.getLocation().getAsString());
 			message.setSeverity(severity);

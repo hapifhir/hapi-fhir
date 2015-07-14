@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Wed, Jul 8, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -457,6 +457,106 @@ public class Conformance extends DomainResource implements IBaseConformance {
         return "search-system";
       if (code == SystemRestfulInteraction.HISTORYSYSTEM)
         return "history-system";
+      return "?";
+      }
+    }
+
+    public enum TransactionMode {
+        /**
+         * Neither Batch or Transaction supported
+         */
+        NOTSUPPORTED, 
+        /**
+         * Batches supported
+         */
+        BATCH, 
+        /**
+         * Transactions Supported
+         */
+        TRANSACTION, 
+        /**
+         * Both Batches and Transactions Supported
+         */
+        BOTH, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static TransactionMode fromCode(String codeString) throws Exception {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("not-supported".equals(codeString))
+          return NOTSUPPORTED;
+        if ("batch".equals(codeString))
+          return BATCH;
+        if ("transaction".equals(codeString))
+          return TRANSACTION;
+        if ("both".equals(codeString))
+          return BOTH;
+        throw new Exception("Unknown TransactionMode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case NOTSUPPORTED: return "not-supported";
+            case BATCH: return "batch";
+            case TRANSACTION: return "transaction";
+            case BOTH: return "both";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case NOTSUPPORTED: return "http://hl7.org/fhir/transaction-mode";
+            case BATCH: return "http://hl7.org/fhir/transaction-mode";
+            case TRANSACTION: return "http://hl7.org/fhir/transaction-mode";
+            case BOTH: return "http://hl7.org/fhir/transaction-mode";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case NOTSUPPORTED: return "Neither Batch or Transaction supported";
+            case BATCH: return "Batches supported";
+            case TRANSACTION: return "Transactions Supported";
+            case BOTH: return "Both Batches and Transactions Supported";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case NOTSUPPORTED: return "None";
+            case BATCH: return "Batches supported";
+            case TRANSACTION: return "Transactions Supported";
+            case BOTH: return "Batches & Transactions";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class TransactionModeEnumFactory implements EnumFactory<TransactionMode> {
+    public TransactionMode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("not-supported".equals(codeString))
+          return TransactionMode.NOTSUPPORTED;
+        if ("batch".equals(codeString))
+          return TransactionMode.BATCH;
+        if ("transaction".equals(codeString))
+          return TransactionMode.TRANSACTION;
+        if ("both".equals(codeString))
+          return TransactionMode.BOTH;
+        throw new IllegalArgumentException("Unknown TransactionMode code '"+codeString+"'");
+        }
+    public String toCode(TransactionMode code) {
+      if (code == TransactionMode.NOTSUPPORTED)
+        return "not-supported";
+      if (code == TransactionMode.BATCH)
+        return "batch";
+      if (code == TransactionMode.TRANSACTION)
+        return "transaction";
+      if (code == TransactionMode.BOTH)
+        return "both";
       return "?";
       }
     }
@@ -1284,27 +1384,34 @@ public class Conformance extends DomainResource implements IBaseConformance {
         protected List<SystemInteractionComponent> interaction;
 
         /**
+         * A code that indicates how transactions are supported.
+         */
+        @Child(name = "transactionMode", type = {CodeType.class}, order=6, min=0, max=1)
+        @Description(shortDefinition="not-supported | batch | transaction | both", formalDefinition="A code that indicates how transactions are supported." )
+        protected Enumeration<TransactionMode> transactionMode;
+
+        /**
          * Definition of an operation or a named query and with its parameters and their meaning and type.
          */
-        @Child(name = "operation", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "operation", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Definition of an operation or a custom query", formalDefinition="Definition of an operation or a named query and with its parameters and their meaning and type." )
         protected List<ConformanceRestOperationComponent> operation;
 
         /**
          * A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.
          */
-        @Child(name = "documentMailbox", type = {UriType.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "documentMailbox", type = {UriType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="How documents are accepted in /Mailbox", formalDefinition="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier 'http://hl7.org/fhir/documents/mailbox'. Other specifications can declare their own identifier for this purpose." )
         protected List<UriType> documentMailbox;
 
         /**
          * An absolute URI which is a reference to the definition of a compartment hosted by the system.
          */
-        @Child(name = "compartment", type = {UriType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "compartment", type = {UriType.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Compartments served/used by system", formalDefinition="An absolute URI which is a reference to the definition of a compartment hosted by the system." )
         protected List<UriType> compartment;
 
-        private static final long serialVersionUID = -535980615L;
+        private static final long serialVersionUID = 471286912L;
 
     /*
      * Constructor
@@ -1520,6 +1627,55 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
+         * @return {@link #transactionMode} (A code that indicates how transactions are supported.). This is the underlying object with id, value and extensions. The accessor "getTransactionMode" gives direct access to the value
+         */
+        public Enumeration<TransactionMode> getTransactionModeElement() { 
+          if (this.transactionMode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create ConformanceRestComponent.transactionMode");
+            else if (Configuration.doAutoCreate())
+              this.transactionMode = new Enumeration<TransactionMode>(new TransactionModeEnumFactory()); // bb
+          return this.transactionMode;
+        }
+
+        public boolean hasTransactionModeElement() { 
+          return this.transactionMode != null && !this.transactionMode.isEmpty();
+        }
+
+        public boolean hasTransactionMode() { 
+          return this.transactionMode != null && !this.transactionMode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #transactionMode} (A code that indicates how transactions are supported.). This is the underlying object with id, value and extensions. The accessor "getTransactionMode" gives direct access to the value
+         */
+        public ConformanceRestComponent setTransactionModeElement(Enumeration<TransactionMode> value) { 
+          this.transactionMode = value;
+          return this;
+        }
+
+        /**
+         * @return A code that indicates how transactions are supported.
+         */
+        public TransactionMode getTransactionMode() { 
+          return this.transactionMode == null ? null : this.transactionMode.getValue();
+        }
+
+        /**
+         * @param value A code that indicates how transactions are supported.
+         */
+        public ConformanceRestComponent setTransactionMode(TransactionMode value) { 
+          if (value == null)
+            this.transactionMode = null;
+          else {
+            if (this.transactionMode == null)
+              this.transactionMode = new Enumeration<TransactionMode>(new TransactionModeEnumFactory());
+            this.transactionMode.setValue(value);
+          }
+          return this;
+        }
+
+        /**
          * @return {@link #operation} (Definition of an operation or a named query and with its parameters and their meaning and type.)
          */
         public List<ConformanceRestOperationComponent> getOperation() { 
@@ -1674,6 +1830,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
           childrenList.add(new Property("security", "", "Information about security implementation from an interface perspective - what a client needs to know.", 0, java.lang.Integer.MAX_VALUE, security));
           childrenList.add(new Property("resource", "", "A specification of the restful capabilities of the solution for a specific resource type.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("interaction", "", "A specification of restful operations supported by the system.", 0, java.lang.Integer.MAX_VALUE, interaction));
+          childrenList.add(new Property("transactionMode", "code", "A code that indicates how transactions are supported.", 0, java.lang.Integer.MAX_VALUE, transactionMode));
           childrenList.add(new Property("operation", "", "Definition of an operation or a named query and with its parameters and their meaning and type.", 0, java.lang.Integer.MAX_VALUE, operation));
           childrenList.add(new Property("documentMailbox", "uri", "A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier 'http://hl7.org/fhir/documents/mailbox'. Other specifications can declare their own identifier for this purpose.", 0, java.lang.Integer.MAX_VALUE, documentMailbox));
           childrenList.add(new Property("compartment", "uri", "An absolute URI which is a reference to the definition of a compartment hosted by the system.", 0, java.lang.Integer.MAX_VALUE, compartment));
@@ -1695,6 +1852,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
           for (SystemInteractionComponent i : interaction)
             dst.interaction.add(i.copy());
         };
+        dst.transactionMode = transactionMode == null ? null : transactionMode.copy();
         if (operation != null) {
           dst.operation = new ArrayList<ConformanceRestOperationComponent>();
           for (ConformanceRestOperationComponent i : operation)
@@ -1721,9 +1879,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
           return false;
         ConformanceRestComponent o = (ConformanceRestComponent) other;
         return compareDeep(mode, o.mode, true) && compareDeep(documentation, o.documentation, true) && compareDeep(security, o.security, true)
-           && compareDeep(resource, o.resource, true) && compareDeep(interaction, o.interaction, true) && compareDeep(operation, o.operation, true)
-           && compareDeep(documentMailbox, o.documentMailbox, true) && compareDeep(compartment, o.compartment, true)
-          ;
+           && compareDeep(resource, o.resource, true) && compareDeep(interaction, o.interaction, true) && compareDeep(transactionMode, o.transactionMode, true)
+           && compareDeep(operation, o.operation, true) && compareDeep(documentMailbox, o.documentMailbox, true)
+           && compareDeep(compartment, o.compartment, true);
       }
 
       @Override
@@ -1733,15 +1891,17 @@ public class Conformance extends DomainResource implements IBaseConformance {
         if (!(other instanceof ConformanceRestComponent))
           return false;
         ConformanceRestComponent o = (ConformanceRestComponent) other;
-        return compareValues(mode, o.mode, true) && compareValues(documentation, o.documentation, true) && compareValues(documentMailbox, o.documentMailbox, true)
-           && compareValues(compartment, o.compartment, true);
+        return compareValues(mode, o.mode, true) && compareValues(documentation, o.documentation, true) && compareValues(transactionMode, o.transactionMode, true)
+           && compareValues(documentMailbox, o.documentMailbox, true) && compareValues(compartment, o.compartment, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (mode == null || mode.isEmpty()) && (documentation == null || documentation.isEmpty())
            && (security == null || security.isEmpty()) && (resource == null || resource.isEmpty()) && (interaction == null || interaction.isEmpty())
-           && (operation == null || operation.isEmpty()) && (documentMailbox == null || documentMailbox.isEmpty())
-           && (compartment == null || compartment.isEmpty());
+           && (transactionMode == null || transactionMode.isEmpty()) && (operation == null || operation.isEmpty())
+           && (documentMailbox == null || documentMailbox.isEmpty()) && (compartment == null || compartment.isEmpty())
+          ;
       }
 
   }

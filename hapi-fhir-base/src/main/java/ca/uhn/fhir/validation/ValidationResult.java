@@ -96,8 +96,8 @@ public class ValidationResult {
 			String location;
 			if (isNotBlank(next.getLocationString())) {
 				location = next.getLocationString();
-			} else if (next.getLocationRow() != null || next.getLocationCol() != null) {
-				location = "Line[" + next.getLocationRow() + "] Col[" + next.getLocationCol() + "]";
+			} else if (next.getLocationLine() != null || next.getLocationCol() != null) {
+				location = "Line[" + next.getLocationLine() + "] Col[" + next.getLocationCol() + "]";
 			} else {
 				location = null;
 			}
