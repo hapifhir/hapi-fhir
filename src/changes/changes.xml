@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="1.1" date="TBD">
+		<release version="1.1" date="2015-07-13">
 			<action type="add">
 				Add support for reference implementation structures.
 			</action>
@@ -154,7 +154,7 @@
 				Add $meta, $meta-add, and $meta-delete operations to generic client
 			</action>
 		</release>
-		<release version="1.0" date="2015-May-8">
+		<release version="1.0" date="2015-04-08">
 			<action type="add">
 				Bump the version of a few dependencies to the
 				latest versions:
@@ -365,7 +365,7 @@
 				POST request encoding. Thanks to Rene Spronk for providing a test case!
 			</action>
 		</release>
-		<release version="0.9" date="2015-Mar-14">
+		<release version="0.9" date="2015-03-14">
 			<action type="add">
 				Support for DSTU2 features introduced: New resource definitions, Bundle resource, 
 				encoding changes (ID in resource bodt, meta tag)
@@ -524,7 +524,7 @@
 				server interceptor documentation for more information. Thanks to Andy Huang for the suggestion!
 			</action>
 		</release>
-		<release version="0.8" date="2014-Dec-17">
+		<release version="0.8" date="2014-12-17">
 			<action type="add">
 				<![CDATA[<b>API CHANGE:</b>]]> The "FHIR structures" for DSTU1 (the classes which model the
 				resources and composite datatypes) have been moved out of the core JAR into their
@@ -736,7 +736,7 @@
 				of another web framework). Thanks to Harsha Kumara for the pull request!
 			</action>
 		</release>
-		<release version="0.7" date="2014-Oct-23">
+		<release version="0.7" date="2014-10-23">
 			<action type="add" issue="30">
 				<![CDATA[<b>API CHANGE:</b>]]> The TagList class previously implemented ArrayList semantics,
 				but this has been replaced with LinkedHashMap semantics. This means that the list of
@@ -858,7 +858,7 @@
 				Petro Mykhailysyn for the pull request! 
 			</action>
 		</release>
-		<release version="0.6" date="2014-Sep-08" description="This release brings a number of new features and bug fixes!">
+		<release version="0.6" date="2014-09-08" description="This release brings a number of new features and bug fixes!">
 			<!-- 
 			<action type="add">
 				Allow generic client  ... OAUTH
@@ -998,7 +998,7 @@
 				suggestion!
 			</action>
 		</release>
-		<release version="0.5" date="2014-Jul-30">
+		<release version="0.5" date="2014-07-30">
 			<action type="add">
 				HAPI has a number of RESTful method parameter types that have similar but not identical
 				purposes and confusing names. A cleanup has been undertaken to clean this up.
@@ -1075,7 +1075,7 @@
 				Thanks to David Hay of Orion for reporting this!
 			</action>
         </release>			
-		<release version="0.4" date="2014-Jul-13">
+		<release version="0.4" date="2014-07-13">
 			<action type="add">
 				<![CDATA[<b>BREAKING CHANGE:</b>]]>: IdDt has been modified so that it 
 				contains a partial or complete resource identity. Previously it contained
@@ -1148,7 +1148,7 @@
 				Support added for deleted-entry by/name, by/email, and comment from Tombstones spec
 			</action>
         </release>			
-		<release version="0.3" date="2014-May-12" description="This release corrects lots of bugs and introduces the fluent client mode">
+		<release version="0.3" date="2014-04-12" description="This release corrects lots of bugs and introduces the fluent client mode">
         </release>			
 	</body>
 </document>

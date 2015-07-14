@@ -66,9 +66,24 @@
 				HAPI FHIR 1.1 is the first release with support for the HL7.org "reference implementation"
 				structures. This is an exciting development for us, as it means the beginning of
 				our move to bring the two Java implementations of FHIR together into one library.
-				As a part of this harmonization, we have made a few minor API changes. Specifially,
-				a few methods that previously returned <code>IResource</code> or <code>IdDt</code>
-				will now return parent interfaces of 
+				As a part of this harmonization, we have made a few minor API changes. Specifically,
+				a few methods that previously returned 
+				<code><a href="./apidocs/ca/uhn/fhir/model/api/IResource.html">IResource</a></code> 
+				or 
+				<code><a href="./apidocs/ca/uhn/fhir/model/primitive/IdDt.html">IdDt</a></code>
+				will now return parent interfaces of these classes: 
+				<code><a href="./apidocs/org/hl7/fhir/instance/model/api/IBaseResource.html">IBaseResource</a></code> 
+				and
+				<code><a href="./apidocs/org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a></code>
+				respectively.
+				Existing code can simply cast to IResource and IdDt as these classes are still in use, but
+				new code may wish to take advantage of the new "RI" structures. During the next development
+				cycle we will be integrating features from the HL7.org Java FHIR packages into HAPI, such as the
+				instance/profile validator and the narrative generator.
+			</p>
+			<p> 
+				See the <a href="./doc_dstu2.html">HAPI DSTU2 documentation</a> page for
+				more information.
 			</p>
 <!-- 
 			<p>
