@@ -156,9 +156,9 @@
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 	}
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 	@Override
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> incomingServerRequestMatchesMethod(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest) {
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">boolean</strong> incomingServerRequestMatchesMethod(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest) {
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 		<strong class="jxr_keyword">if</strong> (!theRequest.getResourceName().equals(getResourceName())) {
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			ourLog.trace(<span class="jxr_string">"Method {} doesn't match because resource name {} != {}"</span>, getMethod().getName(), theRequest.getResourceName(), getResourceName());
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			ourLog.trace(<span class="jxr_string">"Method {} doesn't match because resource name {} != {}"</span>, <strong class="jxr_keyword">new</strong> Object[] { getMethod().getName(), theRequest.getResourceName(), getResourceName() } );
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 		}
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 		<strong class="jxr_keyword">if</strong> (theRequest.getId() != <strong class="jxr_keyword">null</strong> &amp;&amp; myIdParamIndex == <strong class="jxr_keyword">null</strong>) {

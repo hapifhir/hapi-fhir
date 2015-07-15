@@ -32,9 +32,9 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IRefImplResource;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IAnyResource;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -64,7 +64,7 @@
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">void</strong> sealAndInitialize(<a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  		myResourceTypeToDefinition = <strong class="jxr_keyword">new</strong> HashMap&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt;, RuntimeResourceDefinition&gt;();
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<strong class="jxr_keyword">for</strong> (Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; next : myResourceTypes) {
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  			<strong class="jxr_keyword">if</strong> (next.equals(IResource.<strong class="jxr_keyword">class</strong>) || next.equals(IRefImplResource.<strong class="jxr_keyword">class</strong>) || next.equals(IBaseResource.<strong class="jxr_keyword">class</strong>)) {
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  			<strong class="jxr_keyword">if</strong> (next.equals(IResource.<strong class="jxr_keyword">class</strong>) || next.equals(IAnyResource.<strong class="jxr_keyword">class</strong>) || next.equals(IBaseResource.<strong class="jxr_keyword">class</strong>)) {
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  				<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  			}
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  			RuntimeResourceDefinition definition = (RuntimeResourceDefinition) theClassToElementDefinitions.get(next);

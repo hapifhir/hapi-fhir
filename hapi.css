@@ -43,6 +43,14 @@
 
 */
 
+.doc_info_bubble {
+	border: 1px dashed #808080;
+	border-radius: 6px;
+	padding: 8px;
+	margin: 8px;
+	background: #EEE;
+}
+
 TABLE.pagenavlinks {
 	border: 0px;
 }
@@ -78,8 +86,13 @@ A.pagenavlinks {
 }
 */
 
-body {
+@media (min-width: 980px) {   /* 768 980 */
+  body {
     padding-top: 40px;
+  }
+}
+
+body {
     padding-bottom: 10px;
 }
 
@@ -93,6 +106,7 @@ pre {
 .page-header {
 	padding-bottom: 2px;
 	margin: 0px 0 0px;
+	border-bottom: none;
 }
 h1[id]:before,
 h2[id]:before,
@@ -105,15 +119,20 @@ a[name]:before {
     margin: auto; 
 }
 
+DIV.main-body DIV.row DIV.span8 DIV.body-content {
+	top: -8px;
+	position: relative;
+}
 
 .section h2 {
-	border-bottom-width: 2px;
-	border-bottom-style: solid;
-	border-bottom-color: #CF4711;
-	background-color: #FF5721;
+	border-bottom: 2px solid #CF4711;
+	background-color: #FF7741;
 	color: #FFA;
 	font-size: 1.5em;
 	line-height: 1.4em;
+	border-radius: 6px;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 
 .section h3 {
@@ -136,6 +155,10 @@ a[name]:before {
 .syntaxhighlighter .line.alt2 
 {
 	background-color: #F8F8F8 !important;
+}
+
+.syntaxhighlighter .code .container:before {
+	display: block;
 }
 
 .table th, .table td {

@@ -35,9 +35,9 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IRefImplResource;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IAnyResource;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBase;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -66,7 +66,7 @@
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  		
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  			IBaseResource instance = theClass.newInstance();
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">if</strong> (instance instanceof IRefImplResource) {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">if</strong> (instance instanceof IAnyResource) {
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  				myStructureVersion = FhirVersionEnum.DSTU2_HL7ORG;
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  			} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  				myStructureVersion = ((IResource)instance).getStructureFhirVersionEnum();

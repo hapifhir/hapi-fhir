@@ -58,7 +58,7 @@
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  				values.addAll(t.getValues(theResource, nextPathTrimmed));
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  			} <strong class="jxr_keyword">catch</strong> (Exception e) {
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  				ourLog.warn(<span class="jxr_string">"Failed to index values from path[{}] in resource type[{}]: "</span>, nextPathTrimmed, def.getName(), e.toString());
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  				ourLog.warn(<span class="jxr_string">"Failed to index values from path[{}] in resource type[{}]: "</span>, <strong class="jxr_keyword">new</strong> Object[] { nextPathTrimmed, def.getName(), e.toString() } );
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  			}
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  		}
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  		<strong class="jxr_keyword">return</strong> values;

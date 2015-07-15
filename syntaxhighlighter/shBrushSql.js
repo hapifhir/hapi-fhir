@@ -63,3 +63,4 @@
 	// CommonJS
 	typeof(exports) != 'undefined' ? exports.Brush = Brush : null;
 })();
+

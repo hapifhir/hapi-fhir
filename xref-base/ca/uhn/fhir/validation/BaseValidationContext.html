@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>BaseValidationContext xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../apidocs/ca/uhn/fhir/validation/BaseValidationContext.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> ca.uhn.fhir.validation;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> java.util.ArrayList;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.thymeleaf.util.Validate;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> BaseValidationContext&lt;T&gt; <strong class="jxr_keyword">implements</strong> IValidationContext&lt;T&gt; {
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> myFhirContext;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  	<strong class="jxr_keyword">private</strong> List&lt;SingleValidationMessage&gt; myMessages = <strong class="jxr_keyword">new</strong> ArrayList&lt;SingleValidationMessage&gt;();
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  	BaseValidationContext(<a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theFhirContext) {
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  		myFhirContext = theFhirContext;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  	}
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  	@Override
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addValidationMessage(<a href="../../../../ca/uhn/fhir/validation/SingleValidationMessage.html">SingleValidationMessage</a> theMessage) {
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  		Validate.notNull(theMessage, <span class="jxr_string">"theMessage must not be null"</span>);
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  		myMessages.add(theMessage);
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  	}
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  	@Override
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> getFhirContext() {
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  		<strong class="jxr_keyword">return</strong> myFhirContext;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  	}
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  	@Override
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/validation/ValidationResult.html">ValidationResult</a> toResult() {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/validation/ValidationResult.html">ValidationResult</a>(myFhirContext, myMessages);
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	}
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'auto');
+  ga('require', 'displayfeatures');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+
+</script>
+                </body >
+</html>

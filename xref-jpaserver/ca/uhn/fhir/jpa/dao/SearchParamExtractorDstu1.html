@@ -168,14 +168,14 @@
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 						<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> 					}
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 					<strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">new</strong> UriDt(BaseFhirDao.UCUM_NS).equals(nextValue.getSystem())) {
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 					<strong class="jxr_keyword">if</strong> (<strong class="jxr_keyword">new</strong> UriDt(BaseHapiFhirDao.UCUM_NS).equals(nextValue.getSystem())) {
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(nextValue.getCode().getValue())) {
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 							Unit&lt;? <strong class="jxr_keyword">extends</strong> Quantity&gt; unit = Unit.valueOf(nextValue.getCode().getValue());
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 							javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 							<strong class="jxr_keyword">double</strong> dayValue = dayConverter.convert(nextValue.getValue().getValue().doubleValue());
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 							DurationDt newValue = <strong class="jxr_keyword">new</strong> DurationDt();
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 							newValue.setSystem(BaseFhirDao.UCUM_NS);
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 							newValue.setSystem(BaseHapiFhirDao.UCUM_NS);
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 							newValue.setCode(NonSI.DAY.toString());
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 							newValue.setValue(dayValue);
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 							nextValue = newValue;
@@ -317,7 +317,7 @@
 <a class="jxr_linenumber" name="L309" href="#L309">309</a> 						searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 <a class="jxr_linenumber" name="L310" href="#L310">310</a> 					}
 <a class="jxr_linenumber" name="L311" href="#L311">311</a> 
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 					ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseFhirDao.normalizeString(searchTerm), searchTerm);
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 					ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
 <a class="jxr_linenumber" name="L313" href="#L313">313</a> 					nextEntity.setResource(theEntity);
 <a class="jxr_linenumber" name="L314" href="#L314">314</a> 					retVal.add(nextEntity);
 <a class="jxr_linenumber" name="L315" href="#L315">315</a> 				} <strong class="jxr_keyword">else</strong> {
@@ -330,7 +330,7 @@
 <a class="jxr_linenumber" name="L322" href="#L322">322</a> 							<strong class="jxr_keyword">if</strong> (nextName.isEmpty()) {
 <a class="jxr_linenumber" name="L323" href="#L323">323</a> 								<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L324" href="#L324">324</a> 							}
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 							ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 							ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseHapiFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
 <a class="jxr_linenumber" name="L326" href="#L326">326</a> 							nextEntity.setResource(theEntity);
 <a class="jxr_linenumber" name="L327" href="#L327">327</a> 							retVal.add(nextEntity);
 <a class="jxr_linenumber" name="L328" href="#L328">328</a> 						}
@@ -346,14 +346,14 @@
 <a class="jxr_linenumber" name="L338" href="#L338">338</a> 							<strong class="jxr_keyword">if</strong> (nextName.isEmpty()) {
 <a class="jxr_linenumber" name="L339" href="#L339">339</a> 								<strong class="jxr_keyword">continue</strong>;
 <a class="jxr_linenumber" name="L340" href="#L340">340</a> 							}
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 							ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 							ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseHapiFhirDao.normalizeString(nextName.getValueAsString()), nextName.getValueAsString());
 <a class="jxr_linenumber" name="L342" href="#L342">342</a> 							nextEntity.setResource(theEntity);
 <a class="jxr_linenumber" name="L343" href="#L343">343</a> 							retVal.add(nextEntity);
 <a class="jxr_linenumber" name="L344" href="#L344">344</a> 						}
 <a class="jxr_linenumber" name="L345" href="#L345">345</a> 					} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextObject instanceof ContactDt) {
 <a class="jxr_linenumber" name="L346" href="#L346">346</a> 						ContactDt nextContact = (ContactDt) nextObject;
 <a class="jxr_linenumber" name="L347" href="#L347">347</a> 						<strong class="jxr_keyword">if</strong> (nextContact.getValue().isEmpty() == false) {
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> 							ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseFhirDao.normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 							ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(resourceName, BaseHapiFhirDao.normalizeString(nextContact.getValue().getValueAsString()), nextContact.getValue().getValueAsString());
 <a class="jxr_linenumber" name="L349" href="#L349">349</a> 							nextEntity.setResource(theEntity);
 <a class="jxr_linenumber" name="L350" href="#L350">350</a> 							retVal.add(nextEntity);
 <a class="jxr_linenumber" name="L351" href="#L351">351</a> 						}
@@ -412,7 +412,7 @@
 <a class="jxr_linenumber" name="L404" href="#L404">404</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextObject instanceof CodeableConceptDt) {
 <a class="jxr_linenumber" name="L405" href="#L405">405</a> 					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
 <a class="jxr_linenumber" name="L406" href="#L406">406</a> 					<strong class="jxr_keyword">if</strong> (!nextCC.getText().isEmpty()) {
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 						ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(nextSpDef.getName(), BaseFhirDao.normalizeString(nextCC.getText().getValue()), nextCC.getText().getValue());
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 						ResourceIndexedSearchParamString nextEntity = <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/jpa/entity/ResourceIndexedSearchParamString.html">ResourceIndexedSearchParamString</a>(nextSpDef.getName(), BaseHapiFhirDao.normalizeString(nextCC.getText().getValue()), nextCC.getText().getValue());
 <a class="jxr_linenumber" name="L408" href="#L408">408</a> 						nextEntity.setResource(theEntity);
 <a class="jxr_linenumber" name="L409" href="#L409">409</a> 						retVal.add(nextEntity);
 <a class="jxr_linenumber" name="L410" href="#L410">410</a> 					}

@@ -39,9 +39,9 @@
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.FhirContext;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.IParameter;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.QualifiedParamList;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.Request;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.BaseMethodBinding;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.IParameter;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.QualifiedParamList;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.RequestDetails;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.RestSearchParameterTypeEnum;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.method.SearchMethodBinding;
@@ -137,7 +137,7 @@
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 	}
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 	@Override
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<strong class="jxr_keyword">public</strong> Object translateQueryParametersIntoServerArgument(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, Object theRequestContents) <strong class="jxr_keyword">throws</strong> InternalErrorException, InvalidRequestException {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	<strong class="jxr_keyword">public</strong> Object translateQueryParametersIntoServerArgument(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, byte[] theRequestContents, BaseMethodBinding&lt;?&gt; theMethodBinding) <strong class="jxr_keyword">throws</strong> InternalErrorException, InvalidRequestException {
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 
 <a class="jxr_linenumber" name="L134" href="#L134">134</a> 		List&lt;QualifiedParamList&gt; paramList = <strong class="jxr_keyword">new</strong> ArrayList&lt;QualifiedParamList&gt;();
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 		String name = getName();
@@ -152,7 +152,7 @@
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 		<strong class="jxr_keyword">if</strong> (paramList.isEmpty()) {
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			ourLog.debug(<span class="jxr_string">"No value for parameter '{}' - Qualified names {} and qualifier whitelist {}"</span>, getName(), qualified, getQualifierWhitelist());
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			ourLog.debug(<span class="jxr_string">"No value for parameter '{}' - Qualified names {} and qualifier whitelist {}"</span>, <strong class="jxr_keyword">new</strong> Object[] { getName(), qualified, getQualifierWhitelist() } );
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 			<strong class="jxr_keyword">if</strong> (handlesMissing()) {
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 				<strong class="jxr_keyword">return</strong> parse(theRequest.getServer().getFhirContext(), paramList);

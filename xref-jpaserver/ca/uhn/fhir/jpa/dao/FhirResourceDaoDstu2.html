@@ -41,7 +41,7 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.FhirTerser;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> FhirResourceDaoDstu2&lt;T <strong class="jxr_keyword">extends</strong> IResource&gt; <strong class="jxr_keyword">extends</strong> BaseFhirResourceDao&lt;T&gt; {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> FhirResourceDaoDstu2&lt;T <strong class="jxr_keyword">extends</strong> IResource&gt; <strong class="jxr_keyword">extends</strong> BaseHapiFhirResourceDao&lt;T&gt; {
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">protected</strong> List&lt;Object&gt; getIncludeValues(FhirTerser theTerser, Include theInclude, IBaseResource theResource, RuntimeResourceDefinition theResourceDef) {
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  		List&lt;Object&gt; values;

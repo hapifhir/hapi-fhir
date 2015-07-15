@@ -73,7 +73,7 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  	}
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  	@Override
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> Object translateQueryParametersIntoServerArgument(<a href="../../../../../ca/uhn/fhir/rest/method/Request.html">Request</a> theRequest, Object theRequestContents) <strong class="jxr_keyword">throws</strong> InternalErrorException, InvalidRequestException {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	<strong class="jxr_keyword">public</strong> Object translateQueryParametersIntoServerArgument(<a href="../../../../../ca/uhn/fhir/rest/method/RequestDetails.html">RequestDetails</a> theRequest, byte[] theRequestContents, BaseMethodBinding&lt;?&gt; theMethodBinding) <strong class="jxr_keyword">throws</strong> InternalErrorException, InvalidRequestException {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<strong class="jxr_keyword">if</strong> (!theRequest.getParameters().containsKey(Constants.PARAM_SORT)) {
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  			<strong class="jxr_keyword">if</strong> (!theRequest.getParameters().containsKey(Constants.PARAM_SORT_ASC)) {
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  				<strong class="jxr_keyword">if</strong> (!theRequest.getParameters().containsKey(Constants.PARAM_SORT_DESC)) {
