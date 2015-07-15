@@ -111,26 +111,26 @@
   <td class="src"><pre class="src">&nbsp;<span class="comment">         */</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;47</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> RuntimeChildResourceDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, List&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt; theResourceTypes) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsCovered">&nbsp;107565</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;49</td>  <td class="nbHitsCovered">&nbsp;107565</td>  <td class="src"><pre class="src">&nbsp;                myResourceTypes = theResourceTypes;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsCovered">&nbsp;30578</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;49</td>  <td class="nbHitsCovered">&nbsp;30578</td>  <td class="src"><pre class="src">&nbsp;                myResourceTypes = theResourceTypes;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;50</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsUncovered"><a title="Line 51: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">&nbsp;107565</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 51: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">                <span class="keyword">if</span> (theResourceTypes == <span class="keyword">null</span> || theResourceTypes.isEmpty()) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsCovered">&nbsp;668</td>  <td class="src"><pre class="src">&nbsp;                        myResourceTypes = <span class="keyword">new</span> ArrayList&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;53</td>  <td class="nbHitsCovered">&nbsp;668</td>  <td class="src"><pre class="src">&nbsp;                        myResourceTypes.add(IBaseResource.<span class="keyword">class</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsUncovered"><a title="Line 51: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">&nbsp;30578</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 51: Conditional coverage 75% (3/4) [each condition: 50%, 100%].">                <span class="keyword">if</span> (theResourceTypes == <span class="keyword">null</span> || theResourceTypes.isEmpty()) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsCovered">&nbsp;162</td>  <td class="src"><pre class="src">&nbsp;                        myResourceTypes = <span class="keyword">new</span> ArrayList&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;53</td>  <td class="nbHitsCovered">&nbsp;162</td>  <td class="src"><pre class="src">&nbsp;                        myResourceTypes.add(IBaseResource.<span class="keyword">class</span>);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;54</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">//                        throw new ConfigurationException("Field '" + theField.getName() + "' on type '" + theField.getDeclaringClass().getCanonicalName() + "' has no resource types noted");</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;55</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered">&nbsp;107565</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered">&nbsp;30578</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;57</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;58</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;59</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getChildNameByDatatype(Class&lt;? <span class="keyword">extends</span> IBase&gt; theDatatype) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;60</td>  <td class="nbHitsUncovered"><a title="Line 60: Conditional coverage 50% (1/2).">&nbsp;19757</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 60: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (IBaseReference.<span class="keyword">class</span>.isAssignableFrom(theDatatype)) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;61</td>  <td class="nbHitsCovered">&nbsp;19757</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> getElementName();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;60</td>  <td class="nbHitsUncovered"><a title="Line 60: Conditional coverage 50% (1/2).">&nbsp;5624</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 60: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (IBaseReference.<span class="keyword">class</span>.isAssignableFrom(theDatatype)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;61</td>  <td class="nbHitsCovered">&nbsp;5624</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> getElementName();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;62</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;63</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">return</span> <span class="keyword">null</span>;</span></pre></td></tr>
@@ -142,8 +142,8 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;67</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? <span class="keyword">extends</span> IBase&gt; theDatatype) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsUncovered"><a title="Line 68: Conditional coverage 50% (1/2).">&nbsp;92877</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 68: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (IBaseReference.<span class="keyword">class</span>.isAssignableFrom(theDatatype)) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;69</td>  <td class="nbHitsCovered">&nbsp;92877</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> myRuntimeDef;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsUncovered"><a title="Line 68: Conditional coverage 50% (1/2).">&nbsp;26491</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 68: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (IBaseReference.<span class="keyword">class</span>.isAssignableFrom(theDatatype)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;69</td>  <td class="nbHitsCovered">&nbsp;26491</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> myRuntimeDef;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;70</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;71</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">return</span> <span class="keyword">null</span>;</span></pre></td></tr>
@@ -155,7 +155,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;75</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Set&lt;String&gt; getValidChildNames() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;76</td>  <td class="nbHitsCovered">&nbsp;107936</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myValidChildNames;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;76</td>  <td class="nbHitsCovered">&nbsp;30684</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myValidChildNames;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;77</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
@@ -164,7 +164,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;80</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementDefinition&lt;?&gt; getChildByName(String theName) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;81</td>  <td class="nbHitsCovered">&nbsp;30437</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myRuntimeDef;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;81</td>  <td class="nbHitsCovered">&nbsp;8691</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myRuntimeDef;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;82</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;83</td>  <td class="nbHits">&nbsp;</td>
@@ -173,12 +173,12 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;85</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">void</span> sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myRuntimeDef = <span class="keyword">new</span> RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes, <span class="keyword">false</span>);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;87</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myRuntimeDef.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myRuntimeDef = <span class="keyword">new</span> RuntimeResourceReferenceDefinition(getElementName(), myResourceTypes, <span class="keyword">false</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;87</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myRuntimeDef.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;88</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames = <span class="keyword">new</span> HashSet&lt;String&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;90</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames.add(getElementName());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames = <span class="keyword">new</span> HashSet&lt;String&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;90</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames.add(getElementName());</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;91</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                </pre></td></tr>
 <tr>  <td class="numLine">&nbsp;92</td>  <td class="nbHits">&nbsp;</td>
@@ -189,7 +189,7 @@
   <td class="src"><pre class="src">&nbsp;<span class="comment">                 * so we'll accept it just to be nice</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;95</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;<span class="comment">                 */</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames.add(getElementName() + <span class="string">"Resource"</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames.add(getElementName() + <span class="string">"Resource"</span>);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;97</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;98</td>  <td class="nbHits">&nbsp;</td>
@@ -240,14 +240,14 @@
   <td class="src"><pre class="src">&nbsp;<span class="comment">//                }</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;121</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;122</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myResourceTypes = Collections.unmodifiableList(myResourceTypes);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames = Collections.unmodifiableSet(myValidChildNames);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsCovered">&nbsp;107537</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;122</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myResourceTypes = Collections.unmodifiableList(myResourceTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;                myValidChildNames = Collections.unmodifiableSet(myValidChildNames);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsCovered">&nbsp;30570</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;125</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;126</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> List&lt;Class&lt;? <span class="keyword">extends</span> IBaseResource&gt;&gt; getResourceTypes() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsCovered">&nbsp;154</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myResourceTypes;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsCovered">&nbsp;44</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myResourceTypes;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;128</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;129</td>  <td class="nbHits">&nbsp;</td>
@@ -263,7 +263,7 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 8:34 AM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 9:51 AM.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

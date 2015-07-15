@@ -85,7 +85,7 @@
   <td class="src"><pre class="src">&nbsp;<span class="keyword">import</span> ca.uhn.fhir.model.api.annotation.Description;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;34</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;35</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;<span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> BaseRuntimeChildDatatypeDefinition <span class="keyword">extends</span> BaseRuntimeDeclaredChildDefinition {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;35</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;<span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> BaseRuntimeChildDatatypeDefinition <span class="keyword">extends</span> BaseRuntimeDeclaredChildDefinition {</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;36</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;37</td>  <td class="nbHits">&nbsp;</td>
@@ -100,25 +100,25 @@
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;42</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeChildDatatypeDefinition(Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation, Class&lt;? <span class="keyword">extends</span> IBase&gt; theDatatype) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;43</td>  <td class="nbHitsCovered">&nbsp;808510</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;43</td>  <td class="nbHitsCovered">&nbsp;229844</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;44</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                <span class="comment">// should use RuntimeChildAny</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;45</td>  <td class="nbHitsUncovered"><a title="Line 45: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">&nbsp;808510</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 45: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">                <span class="keyword">assert</span> Modifier.isInterface(theDatatype.getModifiers()) == <span class="keyword">false</span> : <span class="string">"Type of "</span> + theDatatype + <span class="string">" shouldn't be here"</span>;</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;46</td>  <td class="nbHitsCovered">&nbsp;808510</td>  <td class="src"><pre class="src">&nbsp;                myDatatype = theDatatype;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;47</td>  <td class="nbHitsCovered">&nbsp;808510</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;45</td>  <td class="nbHitsUncovered"><a title="Line 45: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">&nbsp;229844</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 45: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">                <span class="keyword">assert</span> Modifier.isInterface(theDatatype.getModifiers()) == <span class="keyword">false</span> : <span class="string">"Type of "</span> + theDatatype + <span class="string">" shouldn't be here"</span>;</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;46</td>  <td class="nbHitsCovered">&nbsp;229844</td>  <td class="src"><pre class="src">&nbsp;                myDatatype = theDatatype;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;47</td>  <td class="nbHitsCovered">&nbsp;229844</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;48</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;49</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;50</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getChildNameByDatatype(Class&lt;? <span class="keyword">extends</span> IBase&gt; theDatatype) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsCovered">&nbsp;430569</td>  <td class="src"><pre class="src">&nbsp;                Class&lt;?&gt; nextType = theDatatype;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsUncovered"><a title="Line 52: Conditional coverage 50% (1/2).">&nbsp;430576</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 52: Conditional coverage 50% (1/2).">                <span class="keyword">while</span> (nextType.equals(Object.<span class="keyword">class</span>) == <span class="keyword">false</span>) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;53</td>  <td class="nbHitsCovered"><a title="Line 53: Conditional coverage 100% (2/2).">&nbsp;430576</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 53: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (myDatatype.equals(nextType)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;54</td>  <td class="nbHitsCovered">&nbsp;430569</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">return</span> getElementName();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsCovered">&nbsp;122876</td>  <td class="src"><pre class="src">&nbsp;                Class&lt;?&gt; nextType = theDatatype;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsUncovered"><a title="Line 52: Conditional coverage 50% (1/2).">&nbsp;122878</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 52: Conditional coverage 50% (1/2).">                <span class="keyword">while</span> (nextType.equals(Object.<span class="keyword">class</span>) == <span class="keyword">false</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;53</td>  <td class="nbHitsCovered"><a title="Line 53: Conditional coverage 100% (2/2).">&nbsp;122878</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 53: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (myDatatype.equals(nextType)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;54</td>  <td class="nbHitsCovered">&nbsp;122876</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">return</span> getElementName();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;55</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                        nextType = nextType.getSuperclass();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                        nextType = nextType.getSuperclass();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;57</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;58</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">return</span> <span class="keyword">null</span>;</span></pre></td></tr>
@@ -130,13 +130,13 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;62</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementDefinition&lt;?&gt; getChildElementDefinitionByDatatype(Class&lt;? <span class="keyword">extends</span> IBase&gt; theDatatype) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;63</td>  <td class="nbHitsCovered">&nbsp;2038546</td>  <td class="src"><pre class="src">&nbsp;                Class&lt;?&gt; nextType = theDatatype;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;64</td>  <td class="nbHitsUncovered"><a title="Line 64: Conditional coverage 50% (1/2).">&nbsp;2038560</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 64: Conditional coverage 50% (1/2).">                <span class="keyword">while</span> (nextType.equals(Object.<span class="keyword">class</span>) == <span class="keyword">false</span>) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;65</td>  <td class="nbHitsCovered"><a title="Line 65: Conditional coverage 100% (2/2).">&nbsp;2038560</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 65: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (myDatatype.equals(nextType)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;66</td>  <td class="nbHitsCovered">&nbsp;2038546</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">return</span> myElementDefinition;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;63</td>  <td class="nbHitsCovered">&nbsp;576514</td>  <td class="src"><pre class="src">&nbsp;                Class&lt;?&gt; nextType = theDatatype;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;64</td>  <td class="nbHitsUncovered"><a title="Line 64: Conditional coverage 50% (1/2).">&nbsp;576518</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 64: Conditional coverage 50% (1/2).">                <span class="keyword">while</span> (nextType.equals(Object.<span class="keyword">class</span>) == <span class="keyword">false</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;65</td>  <td class="nbHitsCovered"><a title="Line 65: Conditional coverage 100% (2/2).">&nbsp;576518</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 65: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (myDatatype.equals(nextType)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;66</td>  <td class="nbHitsCovered">&nbsp;576514</td>  <td class="src"><pre class="src">&nbsp;                                <span class="keyword">return</span> myElementDefinition;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;67</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsCovered">&nbsp;14</td>  <td class="src"><pre class="src">&nbsp;                        nextType = nextType.getSuperclass();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsCovered">&nbsp;4</td>  <td class="src"><pre class="src">&nbsp;                        nextType = nextType.getSuperclass();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;69</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;70</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">return</span> <span class="keyword">null</span>;</span></pre></td></tr>
@@ -148,8 +148,8 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;74</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementDefinition&lt;?&gt; getChildByName(String theName) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;75</td>  <td class="nbHitsUncovered"><a title="Line 75: Conditional coverage 50% (1/2).">&nbsp;688581</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 75: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (getElementName().equals(theName)) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;76</td>  <td class="nbHitsCovered">&nbsp;688581</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> myElementDefinition;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;75</td>  <td class="nbHitsUncovered"><a title="Line 75: Conditional coverage 50% (1/2).">&nbsp;191196</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 75: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (getElementName().equals(theName)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;76</td>  <td class="nbHitsCovered">&nbsp;191196</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">return</span> myElementDefinition;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;77</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;78</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                <span class="keyword">return</span> <span class="keyword">null</span>;</span></pre></td></tr>
@@ -166,7 +166,7 @@
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;85</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Class&lt;? <span class="keyword">extends</span> IBase&gt; getDatatype() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;813500</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDatatype;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;231276</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDatatype;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;88</td>  <td class="nbHits">&nbsp;</td>
@@ -175,7 +175,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;90</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Set&lt;String&gt; getValidChildNames() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsCovered">&nbsp;810575</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> Collections.singleton(getElementName());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsCovered">&nbsp;230434</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> Collections.singleton(getElementName());</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;92</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;93</td>  <td class="nbHits">&nbsp;</td>
@@ -184,9 +184,9 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;95</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">void</span> sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;808510</td>  <td class="src"><pre class="src">&nbsp;                myElementDefinition = theClassToElementDefinitions.get(getDatatype());</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;97</td>  <td class="nbHitsUncovered"><a title="Line 97: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">&nbsp;808510</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 97: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">                <span class="keyword">assert</span> myElementDefinition != <span class="keyword">null</span> : <span class="string">"Unknown type: "</span> + getDatatype();</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;98</td>  <td class="nbHitsCovered">&nbsp;808510</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;229844</td>  <td class="src"><pre class="src">&nbsp;                myElementDefinition = theClassToElementDefinitions.get(getDatatype());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;97</td>  <td class="nbHitsUncovered"><a title="Line 97: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">&nbsp;229844</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 97: Conditional coverage 50% (2/4) [each condition: 50%, 50%].">                <span class="keyword">assert</span> myElementDefinition != <span class="keyword">null</span> : <span class="string">"Unknown type: "</span> + getDatatype();</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;98</td>  <td class="nbHitsCovered">&nbsp;229844</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;99</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;100</td>  <td class="nbHits">&nbsp;</td>
@@ -212,7 +212,7 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 8:34 AM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 9:51 AM.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

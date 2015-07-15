@@ -191,62 +191,62 @@
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;87</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">static</span> {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;88</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes = <span class="keyword">new</span> HashMap&lt;Class&lt;?&gt;, RestSearchParameterTypeEnum&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers = <span class="keyword">new</span> HashMap&lt;RestSearchParameterTypeEnum, Set&lt;String&gt;&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;88</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes = <span class="keyword">new</span> HashMap&lt;Class&lt;?&gt;, RestSearchParameterTypeEnum&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers = <span class="keyword">new</span> HashMap&lt;RestSearchParameterTypeEnum, Set&lt;String&gt;&gt;();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;90</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(StringParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.STRING);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;92</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(StringOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.STRING);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;93</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(StringAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.STRING);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;94</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.STRING, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(StringParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.STRING);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;92</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(StringOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.STRING);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;93</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(StringAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.STRING);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;94</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.STRING, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;95</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(UriParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.URI);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;97</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(UriOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.URI);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;98</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(UriAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.URI);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(UriParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.URI);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;97</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(UriOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.URI);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;98</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(UriAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.URI);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;99</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                <span class="comment">// TODO: are these right for URI?</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;100</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.URI, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;100</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.URI, CollectionUtil.newSet(Constants.PARAMQUALIFIER_STRING_EXACT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;101</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;102</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(TokenParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.TOKEN);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;103</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(TokenOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.TOKEN);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;104</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(TokenAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.TOKEN);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;105</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.TOKEN, CollectionUtil.newSet(Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;102</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(TokenParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.TOKEN);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;103</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(TokenOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.TOKEN);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;104</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(TokenAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.TOKEN);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;105</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.TOKEN, CollectionUtil.newSet(Constants.PARAMQUALIFIER_TOKEN_TEXT, Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;106</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;107</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;108</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;109</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;110</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateRangeParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.DATE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;107</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;108</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;109</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;110</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(DateRangeParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.DATE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;111</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.DATE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;112</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;113</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(QuantityParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.QUANTITY);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(QuantityOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.QUANTITY);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(QuantityAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.QUANTITY);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;116</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.QUANTITY, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;113</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(QuantityParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.QUANTITY);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;114</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(QuantityOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.QUANTITY);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;115</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(QuantityAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.QUANTITY);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;116</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.QUANTITY, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;117</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;118</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(NumberParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.NUMBER);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;119</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(NumberOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.NUMBER);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;120</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(NumberAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.NUMBER);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.NUMBER, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;118</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(NumberParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.NUMBER);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;119</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(NumberOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.NUMBER);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;120</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(NumberAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.NUMBER);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;121</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.NUMBER, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;122</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(ReferenceParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.REFERENCE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(ReferenceOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.REFERENCE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;125</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(ReferenceAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.REFERENCE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;123</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(ReferenceParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.REFERENCE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;124</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(ReferenceOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.REFERENCE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;125</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(ReferenceAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.REFERENCE);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;126</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                <span class="comment">// --vvvv-- no empty because that gets added from OptionalParam#chainWhitelist</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;127</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.REFERENCE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;128</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;129</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(CompositeParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.COMPOSITE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;130</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(CompositeOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.COMPOSITE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;131</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(CompositeAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.COMPOSITE);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;132</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;133</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;129</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(CompositeParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.COMPOSITE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;130</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(CompositeOrListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.COMPOSITE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;131</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamTypes.put(CompositeAndListParam.<span class="keyword">class</span>, RestSearchParameterTypeEnum.COMPOSITE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;132</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                ourParamQualifiers.put(RestSearchParameterTypeEnum.COMPOSITE, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING, EMPTY_STRING));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;133</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;134</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        </pre></td></tr>
 <tr>  <td class="numLine">&nbsp;135</td>  <td class="nbHits">&nbsp;</td>
@@ -271,14 +271,14 @@
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> Class&lt;?&gt; myType;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;145</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;146</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> SearchParameter() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;147</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;146</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> SearchParameter() {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;147</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;148</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;149</td>  <td class="nbHitsCovered">&nbsp;105</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> SearchParameter(String theName, <span class="keyword">boolean</span> theRequired) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;150</td>  <td class="nbHitsCovered">&nbsp;105</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myName = theName;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;151</td>  <td class="nbHitsCovered">&nbsp;105</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myRequired = theRequired;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;152</td>  <td class="nbHitsCovered">&nbsp;105</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;149</td>  <td class="nbHitsCovered">&nbsp;30</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> SearchParameter(String theName, <span class="keyword">boolean</span> theRequired) {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;150</td>  <td class="nbHitsCovered">&nbsp;30</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myName = theName;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;151</td>  <td class="nbHitsCovered">&nbsp;30</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myRequired = theRequired;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;152</td>  <td class="nbHitsCovered">&nbsp;30</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;153</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;154</td>  <td class="nbHits">&nbsp;</td>
@@ -295,30 +295,30 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;160</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> List&lt;QualifiedParamList&gt; encode(FhirContext theContext, Object theObject) <span class="keyword">throws</span> InternalErrorException {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;161</td>  <td class="nbHitsCovered">&nbsp;217</td>  <td class="src"><pre class="src">&nbsp;                ArrayList&lt;QualifiedParamList&gt; retVal = <span class="keyword">new</span> ArrayList&lt;QualifiedParamList&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;161</td>  <td class="nbHitsCovered">&nbsp;62</td>  <td class="src"><pre class="src">&nbsp;                ArrayList&lt;QualifiedParamList&gt; retVal = <span class="keyword">new</span> ArrayList&lt;QualifiedParamList&gt;();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;162</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;163</td>  <td class="nbHitsCovered">&nbsp;217</td>  <td class="src"><pre class="src">&nbsp;                List&lt;IQueryParameterOr&lt;?&gt;&gt; val = myParamBinder.encode(theContext, theObject);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;164</td>  <td class="nbHitsCovered"><a title="Line 164: Conditional coverage 100% (2/2).">&nbsp;217</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 164: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (IQueryParameterOr&lt;?&gt; nextOr : val) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;165</td>  <td class="nbHitsCovered">&nbsp;224</td>  <td class="src"><pre class="src">&nbsp;                        retVal.add(<span class="keyword">new</span> QualifiedParamList(nextOr));</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;166</td>  <td class="nbHitsCovered">&nbsp;224</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;163</td>  <td class="nbHitsCovered">&nbsp;62</td>  <td class="src"><pre class="src">&nbsp;                List&lt;IQueryParameterOr&lt;?&gt;&gt; val = myParamBinder.encode(theContext, theObject);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;164</td>  <td class="nbHitsCovered"><a title="Line 164: Conditional coverage 100% (2/2).">&nbsp;62</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 164: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (IQueryParameterOr&lt;?&gt; nextOr : val) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;165</td>  <td class="nbHitsCovered">&nbsp;64</td>  <td class="src"><pre class="src">&nbsp;                        retVal.add(<span class="keyword">new</span> QualifiedParamList(nextOr));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;166</td>  <td class="nbHitsCovered">&nbsp;64</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;167</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;168</td>  <td class="nbHitsCovered">&nbsp;217</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> retVal;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;168</td>  <td class="nbHitsCovered">&nbsp;62</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> retVal;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;169</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;170</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;171</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> List&lt;Class&lt;? <span class="keyword">extends</span> IResource&gt;&gt; getDeclaredTypes() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;172</td>  <td class="nbHitsCovered">&nbsp;16275</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> Collections.unmodifiableList(myDeclaredTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;172</td>  <td class="nbHitsCovered">&nbsp;4650</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> Collections.unmodifiableList(myDeclaredTypes);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;173</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;174</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;175</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getDescription() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;176</td>  <td class="nbHitsCovered">&nbsp;16331</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDescription;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;176</td>  <td class="nbHitsCovered">&nbsp;4666</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myDescription;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;177</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;178</td>  <td class="nbHits">&nbsp;</td>
@@ -337,7 +337,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;185</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> String getName() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;186</td>  <td class="nbHitsCovered">&nbsp;153390</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myName;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;186</td>  <td class="nbHitsCovered">&nbsp;43824</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myName;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;187</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;188</td>  <td class="nbHits">&nbsp;</td>
@@ -346,7 +346,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;190</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> RestSearchParameterTypeEnum getParamType() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;191</td>  <td class="nbHitsCovered">&nbsp;23954</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myParamType;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;191</td>  <td class="nbHitsCovered">&nbsp;6844</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myParamType;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;192</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;193</td>  <td class="nbHits">&nbsp;</td>
@@ -355,7 +355,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;195</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Set&lt;String&gt; getQualifierBlacklist() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;196</td>  <td class="nbHitsCovered">&nbsp;12340</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myQualifierBlacklist;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;196</td>  <td class="nbHitsCovered">&nbsp;3530</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myQualifierBlacklist;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;197</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;198</td>  <td class="nbHits">&nbsp;</td>
@@ -364,7 +364,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;200</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Set&lt;String&gt; getQualifierWhitelist() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;201</td>  <td class="nbHitsCovered">&nbsp;22126</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myQualifierWhitelist;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;201</td>  <td class="nbHitsCovered">&nbsp;6326</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myQualifierWhitelist;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;202</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;203</td>  <td class="nbHits">&nbsp;</td>
@@ -380,7 +380,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;209</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">boolean</span> handlesMissing() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;210</td>  <td class="nbHitsCovered">&nbsp;9786</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> <span class="keyword">false</span>;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;210</td>  <td class="nbHitsCovered">&nbsp;2796</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> <span class="keyword">false</span>;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;211</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;212</td>  <td class="nbHits">&nbsp;</td>
@@ -389,7 +389,7 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;214</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">boolean</span> isRequired() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;215</td>  <td class="nbHitsCovered">&nbsp;84156</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myRequired;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;215</td>  <td class="nbHitsCovered">&nbsp;24042</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myRequired;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;216</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;217</td>  <td class="nbHits">&nbsp;</td>
@@ -408,32 +408,32 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;224</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> Object parse(FhirContext theContext, List&lt;QualifiedParamList&gt; theString) <span class="keyword">throws</span> InternalErrorException, InvalidRequestException {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;225</td>  <td class="nbHitsCovered">&nbsp;1155</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myParamBinder.parse(getName(), theString);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;225</td>  <td class="nbHitsCovered">&nbsp;330</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myParamBinder.parse(getName(), theString);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;226</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;227</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;228</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setChainlists(String[] theChainWhitelist, String[] theChainBlacklist) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;229</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                myQualifierWhitelist = <span class="keyword">new</span> HashSet&lt;String&gt;(theChainWhitelist.length);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;230</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                myQualifierWhitelist.add(QUALIFIER_ANY_TYPE);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;229</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                myQualifierWhitelist = <span class="keyword">new</span> HashSet&lt;String&gt;(theChainWhitelist.length);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;230</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                myQualifierWhitelist.add(QUALIFIER_ANY_TYPE);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;231</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;232</td>  <td class="nbHitsCovered"><a title="Line 232: Conditional coverage 100% (2/2).">&nbsp;53249</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 232: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (<span class="keyword">int</span> i = 0; i &lt; theChainWhitelist.length; i++) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;233</td>  <td class="nbHitsCovered"><a title="Line 233: Conditional coverage 100% (2/2).">&nbsp;26628</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 233: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;234</td>  <td class="nbHitsCovered">&nbsp;26600</td>  <td class="src"><pre class="src">&nbsp;                                myQualifierWhitelist.add(<span class="string">'.'</span> + OptionalParam.ALLOW_CHAIN_ANY);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;235</td>  <td class="nbHitsCovered"><a title="Line 235: Conditional coverage 100% (2/2).">&nbsp;28</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 235: Conditional coverage 100% (2/2).">                        } <span class="keyword">else</span> <span class="keyword">if</span> (theChainWhitelist[i].equals(EMPTY_STRING)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;236</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                                myQualifierWhitelist.add(<span class="string">"."</span>);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;232</td>  <td class="nbHitsCovered"><a title="Line 232: Conditional coverage 100% (2/2).">&nbsp;15214</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 232: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (<span class="keyword">int</span> i = 0; i &lt; theChainWhitelist.length; i++) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;233</td>  <td class="nbHitsCovered"><a title="Line 233: Conditional coverage 100% (2/2).">&nbsp;7608</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 233: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (theChainWhitelist[i].equals(OptionalParam.ALLOW_CHAIN_ANY)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;234</td>  <td class="nbHitsCovered">&nbsp;7600</td>  <td class="src"><pre class="src">&nbsp;                                myQualifierWhitelist.add(<span class="string">'.'</span> + OptionalParam.ALLOW_CHAIN_ANY);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;235</td>  <td class="nbHitsCovered"><a title="Line 235: Conditional coverage 100% (2/2).">&nbsp;8</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 235: Conditional coverage 100% (2/2).">                        } <span class="keyword">else</span> <span class="keyword">if</span> (theChainWhitelist[i].equals(EMPTY_STRING)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;236</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                                myQualifierWhitelist.add(<span class="string">"."</span>);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;237</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        } <span class="keyword">else</span> {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;238</td>  <td class="nbHitsCovered">&nbsp;21</td>  <td class="src"><pre class="src">&nbsp;                                myQualifierWhitelist.add(<span class="string">'.'</span> + theChainWhitelist[i]);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;238</td>  <td class="nbHitsCovered">&nbsp;6</td>  <td class="src"><pre class="src">&nbsp;                                myQualifierWhitelist.add(<span class="string">'.'</span> + theChainWhitelist[i]);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;239</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;240</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;241</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;242</td>  <td class="nbHitsUncovered"><a title="Line 242: Conditional coverage 50% (1/2).">&nbsp;26621</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 242: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (theChainBlacklist.length &gt; 0) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;242</td>  <td class="nbHitsUncovered"><a title="Line 242: Conditional coverage 50% (1/2).">&nbsp;7606</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 242: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (theChainBlacklist.length &gt; 0) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;243</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        myQualifierBlacklist = <span class="keyword">new</span> HashSet&lt;String&gt;(theChainBlacklist.length);</span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;244</td>  <td class="nbHitsUncovered"><a title="Line 244: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 244: Conditional coverage 0% (0/2).">                        <span class="keyword">for</span> (String next : theChainBlacklist) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;245</td>  <td class="nbHitsUncovered"><a title="Line 245: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 245: Conditional coverage 0% (0/2).">                                <span class="keyword">if</span> (next.equals(EMPTY_STRING)) {</a></span></pre></td></tr>
@@ -447,53 +447,53 @@
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;251</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;252</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;252</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;253</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;254</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setCompositeTypes(Class&lt;? <span class="keyword">extends</span> IQueryParameterType&gt;[] theCompositeTypes) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;255</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                myCompositeTypes = Arrays.asList(theCompositeTypes);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;256</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;255</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                myCompositeTypes = Arrays.asList(theCompositeTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;256</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;257</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;258</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setDeclaredTypes(Class&lt;? <span class="keyword">extends</span> IResource&gt;[] theTypes) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;259</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                myDeclaredTypes = Arrays.asList(theTypes);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;260</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;259</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                myDeclaredTypes = Arrays.asList(theTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;260</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;261</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;262</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setDescription(String theDescription) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;263</td>  <td class="nbHitsCovered">&nbsp;23191</td>  <td class="src"><pre class="src">&nbsp;                myDescription = theDescription;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;264</td>  <td class="nbHitsCovered">&nbsp;23191</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;263</td>  <td class="nbHitsCovered">&nbsp;6626</td>  <td class="src"><pre class="src">&nbsp;                myDescription = theDescription;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;264</td>  <td class="nbHitsCovered">&nbsp;6626</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;265</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;266</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setName(String name) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;267</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myName = name;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;268</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;267</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myName = name;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;268</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;269</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;270</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setRequired(<span class="keyword">boolean</span> required) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;271</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myRequired = required;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;272</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;271</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myRequired = required;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;272</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;273</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;274</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        @SuppressWarnings({ <span class="string">"unchecked"</span> })</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;275</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> setType(<span class="keyword">final</span> Class&lt;?&gt; type, Class&lt;? <span class="keyword">extends</span> Collection&lt;?&gt;&gt; theInnerCollectionType, Class&lt;? <span class="keyword">extends</span> Collection&lt;?&gt;&gt; theOuterCollectionType) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;276</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myType = type;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;277</td>  <td class="nbHitsCovered"><a title="Line 277: Conditional coverage 100% (2/2).">&nbsp;26621</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 277: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (IQueryParameterType.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;278</td>  <td class="nbHitsCovered">&nbsp;7315</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> QueryParameterTypeBinder((Class&lt;? <span class="keyword">extends</span> IQueryParameterType&gt;) type, myCompositeTypes);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;279</td>  <td class="nbHitsCovered"><a title="Line 279: Conditional coverage 100% (2/2).">&nbsp;19306</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 279: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (IQueryParameterOr.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;280</td>  <td class="nbHitsCovered">&nbsp;315</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> QueryParameterOrBinder((Class&lt;? <span class="keyword">extends</span> IQueryParameterOr&lt;?&gt;&gt;) type, myCompositeTypes);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;281</td>  <td class="nbHitsCovered"><a title="Line 281: Conditional coverage 100% (2/2).">&nbsp;18991</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 281: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (IQueryParameterAnd.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;282</td>  <td class="nbHitsCovered">&nbsp;18942</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> QueryParameterAndBinder((Class&lt;? <span class="keyword">extends</span> IQueryParameterAnd&lt;?&gt;&gt;) type, myCompositeTypes);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;283</td>  <td class="nbHitsUncovered"><a title="Line 283: Conditional coverage 50% (1/2).">&nbsp;49</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 283: Conditional coverage 50% (1/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (String.<span class="keyword">class</span>.equals(type)) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;284</td>  <td class="nbHitsCovered">&nbsp;49</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> StringBinder();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;285</td>  <td class="nbHitsCovered">&nbsp;49</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.STRING;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;276</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">this</span>.myType = type;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;277</td>  <td class="nbHitsCovered"><a title="Line 277: Conditional coverage 100% (2/2).">&nbsp;7606</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 277: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (IQueryParameterType.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;278</td>  <td class="nbHitsCovered">&nbsp;2090</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> QueryParameterTypeBinder((Class&lt;? <span class="keyword">extends</span> IQueryParameterType&gt;) type, myCompositeTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;279</td>  <td class="nbHitsCovered"><a title="Line 279: Conditional coverage 100% (2/2).">&nbsp;5516</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 279: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (IQueryParameterOr.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;280</td>  <td class="nbHitsCovered">&nbsp;90</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> QueryParameterOrBinder((Class&lt;? <span class="keyword">extends</span> IQueryParameterOr&lt;?&gt;&gt;) type, myCompositeTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;281</td>  <td class="nbHitsCovered"><a title="Line 281: Conditional coverage 100% (2/2).">&nbsp;5426</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 281: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (IQueryParameterAnd.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;282</td>  <td class="nbHitsCovered">&nbsp;5412</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> QueryParameterAndBinder((Class&lt;? <span class="keyword">extends</span> IQueryParameterAnd&lt;?&gt;&gt;) type, myCompositeTypes);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;283</td>  <td class="nbHitsUncovered"><a title="Line 283: Conditional coverage 50% (1/2).">&nbsp;14</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 283: Conditional coverage 50% (1/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (String.<span class="keyword">class</span>.equals(type)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;284</td>  <td class="nbHitsCovered">&nbsp;14</td>  <td class="src"><pre class="src">&nbsp;                        myParamBinder = <span class="keyword">new</span> StringBinder();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;285</td>  <td class="nbHitsCovered">&nbsp;14</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.STRING;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;286</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                } <span class="keyword">else</span> {</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;287</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException(<span class="string">"Unsupported data type for parameter: "</span> + type.getCanonicalName());</span></pre></td></tr>
@@ -501,16 +501,16 @@
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;289</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;290</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;                RestSearchParameterTypeEnum typeEnum = ourParamTypes.get(type);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;291</td>  <td class="nbHitsCovered"><a title="Line 291: Conditional coverage 100% (2/2).">&nbsp;26621</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 291: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (typeEnum != <span class="keyword">null</span>) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;292</td>  <td class="nbHitsCovered">&nbsp;26264</td>  <td class="src"><pre class="src">&nbsp;                        Set&lt;String&gt; builtInQualifiers = ourParamQualifiers.get(typeEnum);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;293</td>  <td class="nbHitsUncovered"><a title="Line 293: Conditional coverage 50% (1/2).">&nbsp;26264</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 293: Conditional coverage 50% (1/2).">                        <span class="keyword">if</span> (builtInQualifiers != <span class="keyword">null</span>) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;294</td>  <td class="nbHitsUncovered"><a title="Line 294: Conditional coverage 50% (1/2).">&nbsp;26264</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 294: Conditional coverage 50% (1/2).">                                <span class="keyword">if</span> (myQualifierWhitelist != <span class="keyword">null</span>) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;295</td>  <td class="nbHitsCovered">&nbsp;26264</td>  <td class="src"><pre class="src">&nbsp;                                        HashSet&lt;String&gt; qualifierWhitelist = <span class="keyword">new</span> HashSet&lt;String&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;296</td>  <td class="nbHitsCovered">&nbsp;26264</td>  <td class="src"><pre class="src">&nbsp;                                        qualifierWhitelist.addAll(myQualifierWhitelist);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;297</td>  <td class="nbHitsCovered">&nbsp;26264</td>  <td class="src"><pre class="src">&nbsp;                                        qualifierWhitelist.addAll(builtInQualifiers);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;298</td>  <td class="nbHitsCovered">&nbsp;26264</td>  <td class="src"><pre class="src">&nbsp;                                        myQualifierWhitelist = qualifierWhitelist;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;299</td>  <td class="nbHitsCovered">&nbsp;26264</td>  <td class="src"><pre class="src">&nbsp;                                } <span class="keyword">else</span> {</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;290</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;                RestSearchParameterTypeEnum typeEnum = ourParamTypes.get(type);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;291</td>  <td class="nbHitsCovered"><a title="Line 291: Conditional coverage 100% (2/2).">&nbsp;7606</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 291: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (typeEnum != <span class="keyword">null</span>) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;292</td>  <td class="nbHitsCovered">&nbsp;7504</td>  <td class="src"><pre class="src">&nbsp;                        Set&lt;String&gt; builtInQualifiers = ourParamQualifiers.get(typeEnum);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;293</td>  <td class="nbHitsUncovered"><a title="Line 293: Conditional coverage 50% (1/2).">&nbsp;7504</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 293: Conditional coverage 50% (1/2).">                        <span class="keyword">if</span> (builtInQualifiers != <span class="keyword">null</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;294</td>  <td class="nbHitsUncovered"><a title="Line 294: Conditional coverage 50% (1/2).">&nbsp;7504</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 294: Conditional coverage 50% (1/2).">                                <span class="keyword">if</span> (myQualifierWhitelist != <span class="keyword">null</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;295</td>  <td class="nbHitsCovered">&nbsp;7504</td>  <td class="src"><pre class="src">&nbsp;                                        HashSet&lt;String&gt; qualifierWhitelist = <span class="keyword">new</span> HashSet&lt;String&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;296</td>  <td class="nbHitsCovered">&nbsp;7504</td>  <td class="src"><pre class="src">&nbsp;                                        qualifierWhitelist.addAll(myQualifierWhitelist);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;297</td>  <td class="nbHitsCovered">&nbsp;7504</td>  <td class="src"><pre class="src">&nbsp;                                        qualifierWhitelist.addAll(builtInQualifiers);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;298</td>  <td class="nbHitsCovered">&nbsp;7504</td>  <td class="src"><pre class="src">&nbsp;                                        myQualifierWhitelist = qualifierWhitelist;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;299</td>  <td class="nbHitsCovered">&nbsp;7504</td>  <td class="src"><pre class="src">&nbsp;                                } <span class="keyword">else</span> {</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;300</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                                        myQualifierWhitelist = Collections.unmodifiableSet(builtInQualifiers);</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;301</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                }</pre></td></tr>
@@ -520,23 +520,23 @@
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;304</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;305</td>  <td class="nbHitsCovered"><a title="Line 305: Conditional coverage 100% (2/2).">&nbsp;26621</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 305: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (myParamType == <span class="keyword">null</span>) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;306</td>  <td class="nbHitsCovered">&nbsp;26572</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = typeEnum;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;305</td>  <td class="nbHitsCovered"><a title="Line 305: Conditional coverage 100% (2/2).">&nbsp;7606</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 305: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (myParamType == <span class="keyword">null</span>) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;306</td>  <td class="nbHitsCovered">&nbsp;7592</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = typeEnum;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;307</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;308</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;309</td>  <td class="nbHitsCovered"><a title="Line 309: Conditional coverage 100% (2/2).">&nbsp;26621</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 309: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (myParamType != <span class="keyword">null</span>) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;309</td>  <td class="nbHitsCovered"><a title="Line 309: Conditional coverage 100% (2/2).">&nbsp;7606</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 309: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (myParamType != <span class="keyword">null</span>) {</a></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;310</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        <span class="comment">// ok</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;311</td>  <td class="nbHitsCovered"><a title="Line 311: Conditional coverage 100% (2/2).">&nbsp;308</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 311: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (StringDt.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;312</td>  <td class="nbHitsCovered">&nbsp;189</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.STRING;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;313</td>  <td class="nbHitsUncovered"><a title="Line 313: Conditional coverage 50% (1/2).">&nbsp;119</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 313: Conditional coverage 50% (1/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (QualifiedDateParam.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;311</td>  <td class="nbHitsCovered"><a title="Line 311: Conditional coverage 100% (2/2).">&nbsp;88</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 311: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (StringDt.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;312</td>  <td class="nbHitsCovered">&nbsp;54</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.STRING;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;313</td>  <td class="nbHitsUncovered"><a title="Line 313: Conditional coverage 50% (1/2).">&nbsp;34</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 313: Conditional coverage 50% (1/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (QualifiedDateParam.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;314</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        myParamType = RestSearchParameterTypeEnum.DATE;</span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;315</td>  <td class="nbHitsCovered"><a title="Line 315: Conditional coverage 100% (2/2).">&nbsp;119</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 315: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (BaseIdentifierDt.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;316</td>  <td class="nbHitsCovered">&nbsp;112</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.TOKEN;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;317</td>  <td class="nbHitsUncovered"><a title="Line 317: Conditional coverage 50% (1/2).">&nbsp;7</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 317: Conditional coverage 50% (1/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (BaseQuantityDt.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></span></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;318</td>  <td class="nbHitsCovered">&nbsp;7</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.QUANTITY;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;315</td>  <td class="nbHitsCovered"><a title="Line 315: Conditional coverage 100% (2/2).">&nbsp;34</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 315: Conditional coverage 100% (2/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (BaseIdentifierDt.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;316</td>  <td class="nbHitsCovered">&nbsp;32</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.TOKEN;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;317</td>  <td class="nbHitsUncovered"><a title="Line 317: Conditional coverage 50% (1/2).">&nbsp;2</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 317: Conditional coverage 50% (1/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (BaseQuantityDt.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;318</td>  <td class="nbHitsCovered">&nbsp;2</td>  <td class="src"><pre class="src">&nbsp;                        myParamType = RestSearchParameterTypeEnum.QUANTITY;</pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;319</td>  <td class="nbHitsUncovered"><a title="Line 319: Conditional coverage 0% (0/2).">&nbsp;0</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 319: Conditional coverage 0% (0/2).">                } <span class="keyword">else</span> <span class="keyword">if</span> (ReferenceParam.<span class="keyword">class</span>.isAssignableFrom(type)) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;320</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        myParamType = RestSearchParameterTypeEnum.REFERENCE;</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;321</td>  <td class="nbHits">&nbsp;</td>
@@ -566,7 +566,7 @@
   <td class="src"><pre class="src">&nbsp;                <span class="comment">// }</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;334</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;335</td>  <td class="nbHitsCovered">&nbsp;26621</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;335</td>  <td class="nbHitsCovered">&nbsp;7606</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;336</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;337</td>  <td class="nbHits">&nbsp;</td>
@@ -585,7 +585,7 @@
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 8:34 AM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 9:51 AM.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -87,62 +87,62 @@
   <td class="src"><pre class="src">&nbsp;<span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> BaseRuntimeElementCompositeDefinition&lt;T <span class="keyword">extends</span> IBase&gt; <span class="keyword">extends</span> BaseRuntimeElementDefinition&lt;T&gt; {</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;35</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;36</td>  <td class="nbHitsCovered">&nbsp;154544</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> List&lt;BaseRuntimeChildDefinition&gt; myChildren = <span class="keyword">new</span> ArrayList&lt;BaseRuntimeChildDefinition&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;36</td>  <td class="nbHitsCovered">&nbsp;44002</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> List&lt;BaseRuntimeChildDefinition&gt; myChildren = <span class="keyword">new</span> ArrayList&lt;BaseRuntimeChildDefinition&gt;();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;37</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> List&lt;BaseRuntimeChildDefinition&gt; myChildrenAndExtensions;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;38</td>  <td class="nbHitsCovered">&nbsp;154544</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> Map&lt;String, BaseRuntimeChildDefinition&gt; myNameToChild = <span class="keyword">new</span> HashMap&lt;String, BaseRuntimeChildDefinition&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;38</td>  <td class="nbHitsCovered">&nbsp;44002</td>  <td class="src"><pre class="src">&nbsp;        <span class="keyword">private</span> Map&lt;String, BaseRuntimeChildDefinition&gt; myNameToChild = <span class="keyword">new</span> HashMap&lt;String, BaseRuntimeChildDefinition&gt;();</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;39</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;40</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeElementCompositeDefinition(String theName, Class&lt;? <span class="keyword">extends</span> T&gt; theImplementingClass, <span class="keyword">boolean</span> theStandardType) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;41</td>  <td class="nbHitsCovered">&nbsp;154544</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theName, theImplementingClass, theStandardType);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;42</td>  <td class="nbHitsCovered">&nbsp;154544</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;41</td>  <td class="nbHitsCovered">&nbsp;44002</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>(theName, theImplementingClass, theStandardType);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;42</td>  <td class="nbHitsCovered">&nbsp;44002</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;43</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;44</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">void</span> addChild(BaseRuntimeChildDefinition theNext) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;45</td>  <td class="nbHitsUncovered"><a title="Line 45: Conditional coverage 50% (1/2).">&nbsp;1074334</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 45: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (theNext == <span class="keyword">null</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;45</td>  <td class="nbHitsUncovered"><a title="Line 45: Conditional coverage 50% (1/2).">&nbsp;305478</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 45: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (theNext == <span class="keyword">null</span>) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;46</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;47</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsUncovered"><a title="Line 48: Conditional coverage 50% (1/2).">&nbsp;1074334</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 48: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (theNext.getExtensionUrl() != <span class="keyword">null</span>) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;48</td>  <td class="nbHitsUncovered"><a title="Line 48: Conditional coverage 50% (1/2).">&nbsp;305478</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 48: Conditional coverage 50% (1/2).">                <span class="keyword">if</span> (theNext.getExtensionUrl() != <span class="keyword">null</span>) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;49</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Shouldn't haven an extension URL, use addExtension instead"</span>);</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;50</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsCovered">&nbsp;1074334</td>  <td class="src"><pre class="src">&nbsp;                myChildren.add(theNext);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsCovered">&nbsp;1074334</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;51</td>  <td class="nbHitsCovered">&nbsp;305478</td>  <td class="src"><pre class="src">&nbsp;                myChildren.add(theNext);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;52</td>  <td class="nbHitsCovered">&nbsp;305478</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;53</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;54</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeChildDefinition getChildByNameOrThrowDataFormatException(String theName) <span class="keyword">throws</span> DataFormatException {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;55</td>  <td class="nbHitsCovered">&nbsp;944594</td>  <td class="src"><pre class="src">&nbsp;                BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered"><a title="Line 56: Conditional coverage 100% (2/2).">&nbsp;944594</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 56: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (retVal == <span class="keyword">null</span>) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;57</td>  <td class="nbHitsCovered">&nbsp;15097</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> DataFormatException(<span class="string">"Unknown child name '"</span> + theName + <span class="string">"' in element "</span> + getName() + <span class="string">" - Valid names are: "</span> + <span class="keyword">new</span> TreeSet&lt;String&gt;(myNameToChild.keySet()));</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;55</td>  <td class="nbHitsCovered">&nbsp;263509</td>  <td class="src"><pre class="src">&nbsp;                BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;56</td>  <td class="nbHitsCovered"><a title="Line 56: Conditional coverage 100% (2/2).">&nbsp;263509</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 56: Conditional coverage 100% (2/2).">                <span class="keyword">if</span> (retVal == <span class="keyword">null</span>) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;57</td>  <td class="nbHitsCovered">&nbsp;4868</td>  <td class="src"><pre class="src">&nbsp;                        <span class="keyword">throw</span> <span class="keyword">new</span> DataFormatException(<span class="string">"Unknown child name '"</span> + theName + <span class="string">"' in element "</span> + getName() + <span class="string">" - Valid names are: "</span> + <span class="keyword">new</span> TreeSet&lt;String&gt;(myNameToChild.keySet()));</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;58</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;59</td>  <td class="nbHitsCovered">&nbsp;929497</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> retVal;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;59</td>  <td class="nbHitsCovered">&nbsp;258641</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> retVal;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;60</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;61</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;62</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> BaseRuntimeChildDefinition getChildByName(String theName){</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;63</td>  <td class="nbHitsCovered">&nbsp;11811</td>  <td class="src"><pre class="src">&nbsp;                BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;64</td>  <td class="nbHitsCovered">&nbsp;11811</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> retVal;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;63</td>  <td class="nbHitsCovered">&nbsp;3307</td>  <td class="src"><pre class="src">&nbsp;                BaseRuntimeChildDefinition retVal = myNameToChild.get(theName);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;64</td>  <td class="nbHitsCovered">&nbsp;3307</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> retVal;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;65</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;66</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;67</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> List&lt;BaseRuntimeChildDefinition&gt; getChildren() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsCovered">&nbsp;236408</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myChildren;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;68</td>  <td class="nbHitsCovered">&nbsp;66887</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myChildren;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;69</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;70</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;71</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> List&lt;BaseRuntimeChildDefinition&gt; getChildrenAndExtension() {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;72</td>  <td class="nbHitsCovered">&nbsp;847354</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myChildrenAndExtensions;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;72</td>  <td class="nbHitsCovered">&nbsp;240309</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">return</span> myChildrenAndExtensions;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;73</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;74</td>  <td class="nbHits">&nbsp;</td>
@@ -151,50 +151,50 @@
   <td class="src"><pre class="src">&nbsp;        @Override</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;76</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;        <span class="keyword">public</span> <span class="keyword">void</span> sealAndInitialize(FhirContext theContext, Map&lt;Class&lt;? <span class="keyword">extends</span> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;77</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                <span class="keyword">super</span>.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;78</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;79</td>  <td class="nbHitsCovered"><a title="Line 79: Conditional coverage 100% (2/2).">&nbsp;154537</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 79: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (BaseRuntimeChildDefinition next : myChildren) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;80</td>  <td class="nbHitsCovered">&nbsp;1074334</td>  <td class="src"><pre class="src">&nbsp;                        next.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;81</td>  <td class="nbHitsCovered">&nbsp;1074334</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;79</td>  <td class="nbHitsCovered"><a title="Line 79: Conditional coverage 100% (2/2).">&nbsp;44000</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 79: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (BaseRuntimeChildDefinition next : myChildren) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;80</td>  <td class="nbHitsCovered">&nbsp;305478</td>  <td class="src"><pre class="src">&nbsp;                        next.sealAndInitialize(theContext, theClassToElementDefinitions);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;81</td>  <td class="nbHitsCovered">&nbsp;305478</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;82</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;83</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                myNameToChild = <span class="keyword">new</span> HashMap&lt;String, BaseRuntimeChildDefinition&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;84</td>  <td class="nbHitsCovered"><a title="Line 84: Conditional coverage 100% (2/2).">&nbsp;154537</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 84: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (BaseRuntimeChildDefinition next : myChildren) {        </a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;85</td>  <td class="nbHitsCovered"><a title="Line 85: Conditional coverage 100% (2/2).">&nbsp;1074334</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 85: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (next <span class="keyword">instanceof</span> RuntimeChildChoiceDefinition) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;23482</td>  <td class="src"><pre class="src">&nbsp;                                String key = ((RuntimeChildChoiceDefinition) next).getElementName()+<span class="string">"[x]"</span>;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;87</td>  <td class="nbHitsCovered">&nbsp;23482</td>  <td class="src"><pre class="src">&nbsp;                                myNameToChild.put(key, next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;83</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                myNameToChild = <span class="keyword">new</span> HashMap&lt;String, BaseRuntimeChildDefinition&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;84</td>  <td class="nbHitsCovered"><a title="Line 84: Conditional coverage 100% (2/2).">&nbsp;44000</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 84: Conditional coverage 100% (2/2).">                <span class="keyword">for</span> (BaseRuntimeChildDefinition next : myChildren) {        </a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;85</td>  <td class="nbHitsCovered"><a title="Line 85: Conditional coverage 100% (2/2).">&nbsp;305478</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 85: Conditional coverage 100% (2/2).">                        <span class="keyword">if</span> (next <span class="keyword">instanceof</span> RuntimeChildChoiceDefinition) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;86</td>  <td class="nbHitsCovered">&nbsp;6720</td>  <td class="src"><pre class="src">&nbsp;                                String key = ((RuntimeChildChoiceDefinition) next).getElementName()+<span class="string">"[x]"</span>;</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;87</td>  <td class="nbHitsCovered">&nbsp;6720</td>  <td class="src"><pre class="src">&nbsp;                                myNameToChild.put(key, next);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;88</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered"><a title="Line 89: Conditional coverage 100% (2/2).">&nbsp;1074334</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 89: Conditional coverage 100% (2/2).">                        <span class="keyword">for</span> (String nextName : next.getValidChildNames()) {</a></pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;90</td>  <td class="nbHitsUncovered"><a title="Line 90: Conditional coverage 50% (1/2).">&nbsp;1397222</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 90: Conditional coverage 50% (1/2).">                                <span class="keyword">if</span> (myNameToChild.containsKey(nextName)) {</a></span></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;89</td>  <td class="nbHitsCovered"><a title="Line 89: Conditional coverage 100% (2/2).">&nbsp;305478</a></td>  <td class="src"><pre class="src">&nbsp;<a title="Line 89: Conditional coverage 100% (2/2).">                        <span class="keyword">for</span> (String nextName : next.getValidChildNames()) {</a></pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;90</td>  <td class="nbHitsUncovered"><a title="Line 90: Conditional coverage 50% (1/2).">&nbsp;397498</a></td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;<a title="Line 90: Conditional coverage 50% (1/2).">                                <span class="keyword">if</span> (myNameToChild.containsKey(nextName)) {</a></span></pre></td></tr>
 <tr>  <td class="numLineCover">&nbsp;91</td>  <td class="nbHitsUncovered">&nbsp;0</td>  <td class="src"><pre class="src"><span class="srcUncovered">&nbsp;                                        <span class="keyword">throw</span> <span class="keyword">new</span> ConfigurationException(<span class="string">"Duplicate child name["</span> + nextName + <span class="string">"] in Element["</span> + getName() + <span class="string">"]"</span>);</span></pre></td></tr>
 <tr>  <td class="numLine">&nbsp;92</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                } <span class="keyword">else</span> {</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;93</td>  <td class="nbHitsCovered">&nbsp;1397222</td>  <td class="src"><pre class="src">&nbsp;                                        myNameToChild.put(nextName, next);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;93</td>  <td class="nbHitsCovered">&nbsp;397498</td>  <td class="src"><pre class="src">&nbsp;                                        myNameToChild.put(nextName, next);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;94</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                                }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;95</td>  <td class="nbHitsCovered">&nbsp;1397222</td>  <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;1074334</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;95</td>  <td class="nbHitsCovered">&nbsp;397498</td>  <td class="src"><pre class="src">&nbsp;                        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;96</td>  <td class="nbHitsCovered">&nbsp;305478</td>  <td class="src"><pre class="src">&nbsp;                }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;97</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;98</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                myChildren = Collections.unmodifiableList(myChildren);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;99</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                myNameToChild = Collections.unmodifiableMap(myNameToChild);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;98</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                myChildren = Collections.unmodifiableList(myChildren);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;99</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                myNameToChild = Collections.unmodifiableMap(myNameToChild);</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;100</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;                </pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;101</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                List&lt;BaseRuntimeChildDefinition&gt; children = <span class="keyword">new</span> ArrayList&lt;BaseRuntimeChildDefinition&gt;();</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;102</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                children.addAll(myChildren);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;103</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                children.addAll(getExtensionsModifier());</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;104</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                children.addAll(getExtensionsNonModifier());</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;105</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;                myChildrenAndExtensions=Collections.unmodifiableList(children);</pre></td></tr>
-<tr>  <td class="numLineCover">&nbsp;106</td>  <td class="nbHitsCovered">&nbsp;154537</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;101</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                List&lt;BaseRuntimeChildDefinition&gt; children = <span class="keyword">new</span> ArrayList&lt;BaseRuntimeChildDefinition&gt;();</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;102</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                children.addAll(myChildren);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;103</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                children.addAll(getExtensionsModifier());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;104</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                children.addAll(getExtensionsNonModifier());</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;105</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;                myChildrenAndExtensions=Collections.unmodifiableList(children);</pre></td></tr>
+<tr>  <td class="numLineCover">&nbsp;106</td>  <td class="nbHitsCovered">&nbsp;44000</td>  <td class="src"><pre class="src">&nbsp;        }</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;107</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;</pre></td></tr>
 <tr>  <td class="numLine">&nbsp;108</td>  <td class="nbHits">&nbsp;</td>
   <td class="src"><pre class="src">&nbsp;}</pre></td></tr>
 </table>
 
-<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 8:34 AM.</div>
+<div class="footer">Report generated by <a href="http://cobertura.sourceforge.net/" target="_top">Cobertura</a> 2.1.1 on 15/07/15 9:51 AM.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

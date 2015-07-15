@@ -154,7 +154,7 @@
  <div class="page-header">
   <h2 id="Checkstyle_Results">Checkstyle Results</h2>
  </div> 
- <p>The following document contains the results of <a class="externalLink" href="http://checkstyle.sourceforge.net/">Checkstyle</a> 6.1.1 with file:///Users/james/workspace/hapi-fhir/hapi-fhir-base/../src/checkstyle/checkstyle.xml ruleset.&nbsp;<a href="checkstyle.rss"><img alt="rss feed" src="images/rss.png" /></a></p> 
+ <p>The following document contains the results of <a class="externalLink" href="http://checkstyle.sourceforge.net/">Checkstyle</a> 6.1.1 with file:///Users/t3903uhn/git/hapi-fhir/hapi-fhir-base/../src/checkstyle/checkstyle.xml ruleset.&nbsp;<a href="checkstyle.rss"><img alt="rss feed" src="images/rss.png" /></a></p> 
 </div> 
 <div class="section"> 
  <h2 id="Summary">Summary</h2> 
@@ -1501,20 +1501,24 @@
    </tr> 
    <tr class="a"> 
     <td>javadoc</td> 
-    <td><a class="externalLink" href="http://checkstyle.sourceforge.net/config_javadoc.html#JavadocTagContinuationIndentation">JavadocTagContinuationIndentation</a></td> 
-    <td>20</td> 
+    <td><a class="externalLink" href="http://checkstyle.sourceforge.net/config_javadoc.html#AtclauseOrder">AtclauseOrder</a> 
+     <ul> 
+      <li>tagOrder: <tt>&quot;@param, @return, @throws, @deprecated&quot;</tt></li> 
+      <li>target: <tt>&quot;CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF&quot;</tt></li> 
+     </ul></td> 
+    <td>7</td> 
     <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
    </tr> 
    <tr class="b"> 
     <td></td> 
-    <td><a class="externalLink" href="http://checkstyle.sourceforge.net/config_javadoc.html#NonEmptyAtclauseDescription">NonEmptyAtclauseDescription</a></td> 
-    <td>17</td> 
+    <td><a class="externalLink" href="http://checkstyle.sourceforge.net/config_javadoc.html#JavadocTagContinuationIndentation">JavadocTagContinuationIndentation</a></td> 
+    <td>20</td> 
     <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
    </tr> 
    <tr class="a"> 
     <td></td> 
-    <td><a class="externalLink" href="http://checkstyle.sourceforge.net/config_javadoc.html#SingleLineJavadoc">SingleLineJavadoc</a></td> 
-    <td>7</td> 
+    <td><a class="externalLink" href="http://checkstyle.sourceforge.net/config_javadoc.html#NonEmptyAtclauseDescription">NonEmptyAtclauseDescription</a></td> 
+    <td>17</td> 
     <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
    </tr> 
    <tr class="b"> 
@@ -4781,14 +4785,14 @@
     <tr class="b"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 54 has parse error. Missed HTML close tag 'code'. Sometimes it means that close tag missed for one of previous tags.</td> 
      <td>195</td> 
     </tr> 
     <tr class="a"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 54 has parse error. Missed HTML close tag 'code'. Sometimes it means that close tag missed for one of previous tags.</td> 
      <td>208</td> 
     </tr> 
@@ -4987,7 +4991,7 @@
     <tr class="a"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 69 has parse error. Missed HTML close tag 'ca.uhn.fhir.model.api.ExtensionDt'. Sometimes it means that close tag missed for one of previous tags.</td> 
      <td>676</td> 
     </tr> 
@@ -5024,7 +5028,7 @@
     <tr class="a"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 34 has parse error. Missed HTML close tag 'code'. Sometimes it means that close tag missed for one of previous tags.</td> 
      <td>84</td> 
     </tr> 
@@ -10355,7 +10359,7 @@
     <tr class="a"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 41 has parse error. Details: no viable alternative at input '&lt;Enumeration&lt;' while parsing HTML_ELEMENT</td> 
      <td>35</td> 
     </tr> 
@@ -10489,14 +10493,14 @@
     <tr class="a"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 45 has parse error. Missed HTML close tag 'code'. Sometimes it means that close tag missed for one of previous tags.</td> 
      <td>139</td> 
     </tr> 
     <tr class="b"> 
      <td><i class="icon-warning-sign"></i>&nbsp;Warning</td> 
      <td>javadoc</td> 
-     <td>SingleLineJavadoc</td> 
+     <td>AtclauseOrder</td> 
      <td>Javadoc comment at column 45 has parse error. Missed HTML close tag 'code'. Sometimes it means that close tag missed for one of previous tags.</td> 
      <td>149</td> 
     </tr> 
@@ -11210,32 +11214,6 @@
 	<script src="./js/reflow-skin.js"></script>
 
 	<script type="text/javascript">
-	var elements = document.getElementsByClassName("source");
-	for (var i=0; i < elements.length; i++) {
-		var pres = elements[i].getElementsByTagName("pre");
-		for (var j = 0; j < pres.length; j++) {
-			var pre = pres[j];
-			if (pre.innerHTML.match(/^\s*\&lt\;/)) {
-				pre.className = 'brush: xml';
-			} else if (pre.innerHTML.match(/\/\*/)) {
-				pre.className = 'brush: java';
-			} else if (pre.innerHTML.match(/^\/\//)) {
-				pre.className = 'brush: java';
-			} else if (pre.innerHTML.match(/^\{/)) {
-				pre.className = 'brush: jscript';
-			} else if (pre.innerHTML.match(/^\#/)) {
-				pre.className = 'brush: bash';
-			} else if (pre.innerHTML.match(/\&lt\;\//)) {
-				pre.className = 'brush: xml';
-			} else {
-				pre.className = 'brush: java';
-			}
-		}
-	}
-
-	SyntaxHighlighter.all();
-</script>
-<script type="text/javascript">
 	var elements = document.getElementsByClassName("source");
 	for (var i=0; i < elements.length; i++) {
 		var pres = elements[i].getElementsByTagName("pre");

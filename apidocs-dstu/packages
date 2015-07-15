@@ -1,0 +1,9 @@
+ca.uhn.fhir.model.dstu.api
+ca.uhn.fhir.model.dstu.composite
+ca.uhn.fhir.model.dstu
+ca.uhn.fhir.model.dstu.resource
+ca.uhn.fhir.model.primitive
+ca.uhn.fhir.rest.server.audit
+ca.uhn.fhir.rest.server.interceptor
+ca.uhn.fhir.rest.server.provider
+ca.uhn.fhir.model.dstu.valueset

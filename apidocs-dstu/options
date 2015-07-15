@@ -1,0 +1,31 @@
+-classpath
+'/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-commons/5.0.1/asm-commons-5.0.1.jar:/Users/t3903uhn/.m2/repository/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar:/Users/t3903uhn/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar:/Users/t3903uhn/.m2/repository/ca/uhn/hapi/fhir/hapi-fhir-base/1.2-SNAPSHOT/hapi-fhir-base-1.2-SNAPSHOT.jar:/Users/t3903uhn/.m2/repository/org/apache/ant/ant-launcher/1.8.3/ant-launcher-1.8.3.jar:/Users/t3903uhn/.m2/repository/org/codehaus/woodstox/woodstox-core-asl/4.4.1/woodstox-core-asl-4.4.1.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-tree/5.0.1/asm-tree-5.0.1.jar:/Users/t3903uhn/.m2/repository/org/apache/httpcomponents/httpcore/4.4/httpcore-4.4.jar:/Users/t3903uhn/.m2/repository/org/apache/httpcomponents/httpclient/4.4/httpclient-4.4.jar:/Users/t3903uhn/.m2/repository/org/slf4j/slf4j-api/1.7.10/slf4j-api-1.7.10.jar:/Users/t3903uhn/.m2/repository/oro/oro/2.0.8/oro-2.0.8.jar:/Users/t3903uhn/.m2/repository/jaxen/jaxen/1.1.4/jaxen-1.1.4.jar:/Users/t3903uhn/.m2/repository/org/mortbay/jetty/servlet-api-2.5/6.1.14/servlet-api-2.5-6.1.14.jar:/Users/t3903uhn/.m2/repository/org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar:/Users/t3903uhn/.m2/repository/javax/json/javax.json-api/1.0/javax.json-api-1.0.jar:/Users/t3903uhn/.m2/repository/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm/5.0.1/asm-5.0.1.jar:/Users/t3903uhn/.m2/repository/commons-codec/commons-codec/1.10/commons-codec-1.10.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-analysis/5.0.1/asm-analysis-5.0.1.jar:/Users/t3903uhn/.m2/repository/net/sourceforge/cobertura/cobertura/2.1.1/cobertura-2.1.1.jar:/Users/t3903uhn/.m2/repository/org/apache/ant/ant/1.8.3/ant-1.8.3.jar:/Users/t3903uhn/.m2/repository/org/mortbay/jetty/jetty-util/6.1.14/jetty-util-6.1.14.jar:/Users/t3903uhn/.m2/repository/org/slf4j/jcl-over-slf4j/1.7.10/jcl-over-slf4j-1.7.10.jar:/Users/t3903uhn/.m2/repository/org/ow2/asm/asm-util/5.0.1/asm-util-5.0.1.jar:/Users/t3903uhn/.m2/repository/org/codehaus/woodstox/stax2-api/3.1.4/stax2-api-3.1.4.jar:/Users/t3903uhn/.m2/repository/org/apache/ant/ant-junit/1.8.3/ant-junit-1.8.3.jar:/Users/t3903uhn/.m2/repository/org/mortbay/jetty/jetty/6.1.14/jetty-6.1.14.jar:/Users/t3903uhn/.m2/repository/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk/Contents/Home/jre/../lib/tools.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/Users/t3903uhn/git/hapi-fhir/hapi-fhir-structures-dstu/src/main/java:/Users/t3903uhn/git/hapi-fhir/hapi-fhir-structures-dstu/target/generated-sources/tinder'
+-Xdoclint:none
+-author
+-bottom
+'Copyright &#169; 2014&#x2013;2015 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/t3903uhn/git/hapi-fhir/hapi-fhir-structures-dstu/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'HAPI FHIR Structures - DSTU1 (FHIR v0.80) 1.2-SNAPSHOT API'
+-link
+'http://jamesagnew.github.io/hapi-fhir/apidocs'
+-link
+'https://docs.oracle.com/javaee/7/api'
+-linkoffline
+'http://docs.oracle.com/javase/6/docs/api' '/Users/t3903uhn/git/hapi-fhir/hapi-fhir-structures-dstu/target/javadoc-bundle-options'
+-linkoffline
+'http://jamesagnew.github.io/hapi-fhir/apidocs' '/Users/t3903uhn/git/hapi-fhir/hapi-fhir-base/target/site/apidocs'
+-use
+-version
+-windowtitle
+'HAPI FHIR Structures - DSTU1 (FHIR v0.80) 1.2-SNAPSHOT API'

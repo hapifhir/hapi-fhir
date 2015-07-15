@@ -242,54 +242,20 @@ public Patient readOrVread(@IdParam IdDt theId) {
  <p> The following snippet shows how to define an update method on a server: </p> 
  <div class="source"> 
   <pre>@Update
-public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+public MethodOutcome updatePatientConditional(
+      @ResourceParam Patient thePatient, 
+      @IdParam IdDt theId, 
+      @ConditionalUrlParam String theConditional) {
 
-  /* 
-   * First we might want to do business validation. The UnprocessableEntityException
-   * results in an HTTP 422, which is appropriate for business rule failure
-   */
-  if (thePatient.getIdentifierFirstRep().isEmpty()) {
-    /* It is also possible to pass an OperationOutcome resource
-     * to the UnprocessableEntityException if you want to return
-     * a custom populated OperationOutcome. Otherwise, a simple one
-     * is created using the string supplied below. 
-     */
-    throw new UnprocessableEntityException(&quot;No identifier supplied&quot;);
-  }
-
-  String versionId = theId.getVersionIdPart();
-  if (versionId != null) {
-    // If the client passed in a version number in an If-Match header, they are
-    // doing a version-aware update. You may wish to throw an exception if the supplied
-    // version is not the latest version. Note that as of DSTU2 the FHIR specification uses
-    // ETags and If-Match to handle version aware updates, so PreconditionFailedException (HTTP 412)
-    // is used instead of ResourceVersionConflictException (HTTP 409)
-    if (detectedVersionConflict) {
-      throw new PreconditionFailedException(&quot;Unexpected version&quot;);
-    }
-  }
-  
-  // Save this patient to the database...
-  savePatientToDatabase(theId, thePatient);
-
-  // This method returns a MethodOutcome object which contains
-  // the ID and Version ID for the newly saved resource
-  MethodOutcome retVal = new MethodOutcome();
-  String newVersion = &quot;2&quot;; // may be null if the server is not version aware
-  retVal.setId(theId.withVersion(newVersion));
-  
-  // You can also add an OperationOutcome resource to return
-  // This part is optional though:
-  OperationOutcome outcome = new OperationOutcome();
-  outcome.addIssue().setDetails(&quot;One minor issue detected&quot;);
-  retVal.setOperationOutcome(outcome);
-  
-  // If your server supports creating resources during an update if they don't already exist
-  // (this is not mandatory and may not be desirable anyhow) you can flag in the response
-  // that this was a creation as follows:
- // retVal.setCreated(true);
-  
-  return retVal;
+   // Only one of theId or theConditional will have a value and the other will be null,
+   // depending on the URL passed into the server. 
+   if (theConditional != null) {
+      // Do a conditional update. theConditional will have a value like &quot;Patient?identifier=system%7C00001&quot;
+   } else {
+      // Do a normal update. theId will have the identity of the resource to update
+   }
+   
+   return new MethodOutcome(); // populate this
 }
 </pre> 
  </div> 
@@ -1793,32 +1759,6 @@ public ConceptMap closureOperation(
 	<script src="./js/reflow-skin.js"></script>
 
 	<script type="text/javascript">
-	var elements = document.getElementsByClassName("source");
-	for (var i=0; i < elements.length; i++) {
-		var pres = elements[i].getElementsByTagName("pre");
-		for (var j = 0; j < pres.length; j++) {
-			var pre = pres[j];
-			if (pre.innerHTML.match(/^\s*\&lt\;/)) {
-				pre.className = 'brush: xml';
-			} else if (pre.innerHTML.match(/\/\*/)) {
-				pre.className = 'brush: java';
-			} else if (pre.innerHTML.match(/^\/\//)) {
-				pre.className = 'brush: java';
-			} else if (pre.innerHTML.match(/^\{/)) {
-				pre.className = 'brush: jscript';
-			} else if (pre.innerHTML.match(/^\#/)) {
-				pre.className = 'brush: bash';
-			} else if (pre.innerHTML.match(/\&lt\;\//)) {
-				pre.className = 'brush: xml';
-			} else {
-				pre.className = 'brush: java';
-			}
-		}
-	}
-
-	SyntaxHighlighter.all();
-</script>
-<script type="text/javascript">
 	var elements = document.getElementsByClassName("source");
 	for (var i=0; i < elements.length; i++) {
 		var pres = elements[i].getElementsByTagName("pre");

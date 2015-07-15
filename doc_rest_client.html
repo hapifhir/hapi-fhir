@@ -559,18 +559,8 @@ Parameters outParams = client
    .onInstance(new IdDt(&quot;Patient&quot;, &quot;1&quot;))
    .named(&quot;$everything&quot;)
    .withParameters(inParams)
+   .useHttpGet() // Use HTTP GET instead of POST
    .execute();
-
-/*
- * Note that the $everything operation returns a Bundle instead 
- * of a Parameters resource. The client operation methods return a
- * Parameters instance however, so HAPI creates a Parameters object
- * with a single parameter containing the value.
- */
-Bundle responseBundle = (Bundle) outParams.getParameter().get(0).getResource();
-
-// Print the response bundle
-System.out.println(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(responseBundle));
 </pre> 
  </div> 
  <p> Note that if the operation does not require any input parameters, you may also invoke the operation using the following form. Note that the <tt>withNoParameters</tt> still requires you to provide the type of the Parameters resource so that it can return the correct type in the response. </p> 
@@ -828,32 +818,6 @@ for (Issue nextIssue : oo.getIssue()) {
 	<script src="./js/reflow-skin.js"></script>
 
 	<script type="text/javascript">
-	var elements = document.getElementsByClassName("source");
-	for (var i=0; i < elements.length; i++) {
-		var pres = elements[i].getElementsByTagName("pre");
-		for (var j = 0; j < pres.length; j++) {
-			var pre = pres[j];
-			if (pre.innerHTML.match(/^\s*\&lt\;/)) {
-				pre.className = 'brush: xml';
-			} else if (pre.innerHTML.match(/\/\*/)) {
-				pre.className = 'brush: java';
-			} else if (pre.innerHTML.match(/^\/\//)) {
-				pre.className = 'brush: java';
-			} else if (pre.innerHTML.match(/^\{/)) {
-				pre.className = 'brush: jscript';
-			} else if (pre.innerHTML.match(/^\#/)) {
-				pre.className = 'brush: bash';
-			} else if (pre.innerHTML.match(/\&lt\;\//)) {
-				pre.className = 'brush: xml';
-			} else {
-				pre.className = 'brush: java';
-			}
-		}
-	}
-
-	SyntaxHighlighter.all();
-</script>
-<script type="text/javascript">
 	var elements = document.getElementsByClassName("source");
 	for (var i=0; i < elements.length; i++) {
 		var pres = elements[i].getElementsByTagName("pre");

@@ -176,7 +176,7 @@
   <tbody> 
    <tr class="b"> 
     <td>693</td> 
-    <td>59</td> 
+    <td>61</td> 
     <td>0</td> 
     <td>79</td> 
    </tr> 
@@ -259,7 +259,7 @@
    </tr> 
    <tr class="b"> 
     <td><a href="#ca.uhn.fhir.parser.JsonParser">ca.uhn.fhir.parser.JsonParser</a></td> 
-    <td>1</td> 
+    <td>3</td> 
    </tr> 
    <tr class="a"> 
     <td><a href="#ca.uhn.fhir.parser.JsonParser$HeldExtension">ca.uhn.fhir.parser.JsonParser$HeldExtension</a></td> 
@@ -780,6 +780,20 @@
     <td>STYLE</td> 
     <td><a class="externalLink" href="http://findbugs.sourceforge.net/bugDescriptions.html#RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE">RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE</a></td> 
     <td>844</td> 
+    <td>Medium</td> 
+   </tr> 
+   <tr class="a"> 
+    <td>Repeated conditional test in ca.uhn.fhir.parser.JsonParser.extractDeclaredExtensions(IBase, BaseRuntimeElementDefinition, List, List)</td> 
+    <td>CORRECTNESS</td> 
+    <td><a class="externalLink" href="http://findbugs.sourceforge.net/bugDescriptions.html#RpC_REPEATED_CONDITIONAL_TEST">RpC_REPEATED_CONDITIONAL_TEST</a></td> 
+    <td>843</td> 
+    <td>Medium</td> 
+   </tr> 
+   <tr class="b"> 
+    <td>Repeated conditional test in ca.uhn.fhir.parser.JsonParser.extractDeclaredExtensions(IBase, BaseRuntimeElementDefinition, List, List)</td> 
+    <td>CORRECTNESS</td> 
+    <td><a class="externalLink" href="http://findbugs.sourceforge.net/bugDescriptions.html#RpC_REPEATED_CONDITIONAL_TEST">RpC_REPEATED_CONDITIONAL_TEST</a></td> 
+    <td>853</td> 
     <td>Medium</td> 
    </tr> 
   </tbody> 
@@ -1658,5 +1672,17 @@
 
 	SyntaxHighlighter.all();
 </script>
-</body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1395874-5', 'auto');
+  ga('require', 'displayfeatures');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+
+</script>
+                </body >
 </html>
