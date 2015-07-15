@@ -218,7 +218,6 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<fork>true</fork>
-					<verbose>true</verbose>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -14,7 +14,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.StructureDefinition;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.utils.WorkerContext;
 import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.w3c.dom.Document;
@@ -24,7 +23,6 @@ import org.xml.sax.InputSource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -32,9 +30,9 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class FhirInstanceValidator implements IValidator {
+public class FhirInstanceValidator extends BaseValidatorBridge implements IValidator {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
+	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 
 	private DocumentBuilderFactory myDocBuilderFactory;
 
@@ -43,7 +41,39 @@ public class FhirInstanceValidator implements IValidator {
 		myDocBuilderFactory.setNamespaceAware(true);
 	}
 
-	List<ValidationMessage> validate(FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
+	private String determineResourceName(Document theDocument) {
+		Element root = null;
+
+		NodeList list = theDocument.getChildNodes();
+		for (int i = 0; i < list.getLength(); i++) {
+			if (list.item(i) instanceof Element) {
+				root = (Element) list.item(i);
+				break;
+			}
+		}
+		root = theDocument.getDocumentElement();
+		return root.getLocalName();
+	}
+
+	private StructureDefinition loadProfileOrReturnNull(List<ValidationMessage> theMessages, FhirContext theCtx, String theResourceName) {
+		if (isBlank(theResourceName)) {
+			theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("Could not determine resource type from request. Content appears invalid."));
+			return null;
+		}
+
+		String profileCpName = "/org/hl7/fhir/instance/model/profile/" + theResourceName.toLowerCase() + ".profile.xml";
+		String profileText;
+		try {
+			profileText = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream(profileCpName), "UTF-8");
+		} catch (IOException e1) {
+			theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("No profile found for resource type " + theResourceName));
+			return null;
+		}
+		StructureDefinition profile = theCtx.newXmlParser().parseResource(StructureDefinition.class, profileText);
+		return profile;
+	}
+
+	protected List<ValidationMessage> validate(FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
 		WorkerContext workerContext = new WorkerContext();
 		org.hl7.fhir.instance.validation.InstanceValidator v;
 		try {
@@ -97,61 +127,9 @@ public class FhirInstanceValidator implements IValidator {
 		return messages;
 	}
 
-	private StructureDefinition loadProfileOrReturnNull(List<ValidationMessage> theMessages, FhirContext theCtx, String theResourceName) {
-		if (isBlank(theResourceName)) {
-			theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("Could not determine resource type from request. Content appears invalid."));
-			return null;
-		}
-
-		String profileCpName = "/org/hl7/fhir/instance/model/profile/" + theResourceName.toLowerCase() + ".profile.xml";
-		String profileText;
-		try {
-			profileText = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream(profileCpName), "UTF-8");
-		} catch (IOException e1) {
-			theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL).setMessage("No profile found for resource type " + theResourceName));
-			return null;
-		}
-		StructureDefinition profile = theCtx.newXmlParser().parseResource(StructureDefinition.class, profileText);
-		return profile;
-	}
-
-	private String determineResourceName(Document theDocument) {
-		Element root = null;
-
-		NodeList list = theDocument.getChildNodes();
-		for (int i = 0; i < list.getLength(); i++) {
-			if (list.item(i) instanceof Element) {
-				root = (Element) list.item(i);
-				break;
-			}
-		}
-		root = theDocument.getDocumentElement();
-		return root.getLocalName();
-	}
-
 	@Override
-	public void validateResource(IValidationContext<IBaseResource> theCtx) {
-		List<ValidationMessage> messages = validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
-		for (ValidationMessage riMessage : messages) {
-			SingleValidationMessage hapiMessage = new SingleValidationMessage();
-			if (riMessage.getCol() != -1) {
-				hapiMessage.setLocationCol(riMessage.getCol());
-			}
-			if (riMessage.getLine() != -1) {
-				hapiMessage.setLocationLine(riMessage.getLine());
-			}
-			hapiMessage.setLocationString(riMessage.getLocation());
-			hapiMessage.setMessage(riMessage.getMessage());
-			if (riMessage.getLevel() != null) {
-				hapiMessage.setSeverity(ResultSeverityEnum.fromCode(riMessage.getLevel().toCode()));
-			}
-			theCtx.addValidationMessage(hapiMessage);
-		}
-	}
-
-	@Override
-	public void validateBundle(IValidationContext<Bundle> theContext) {
-		// nothing for now
+	protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
+		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
 	}
 
 }
