@@ -146,7 +146,6 @@ public class FhirValidator {
 	/**
 	 * Should the validator validate the resource against the base schematron (the schematron provided with the FHIR distribution itself)
 	 * 
-	 * @return
 	 * @return Returns a referens to <code>this<code> for method chaining
 	 */
 	public synchronized FhirValidator setValidateAgainstStandardSchematron(boolean theValidateAgainstStandardSchematron) {

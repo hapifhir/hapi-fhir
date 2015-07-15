@@ -142,9 +142,7 @@
 				to try and harmonize the two libraries.
 			</p>
 			<p>
-				HAPI FHIR 1.1 begins the availability of a harmonized library. Note that 
-				this version has not yet been formally released, but is currently available in 
-				"snapshot" development builds. 
+				HAPI FHIR 1.1 begins the availability of a harmonized library.
 			</p>
 			<p>
 				<b>For HAPI FHIR users:</b> This integration will bring the ability to use powerful features
@@ -221,6 +219,12 @@
 			<p>
 				For these methods, you may cast the <code>IBaseResource</code> to
 				<code>IResource</code>. 
+			</p>
+			
+			<p>
+				Please post any problems you might encounter trying to upgrade on the
+				<a href="https://groups.google.com/d/forum/hapi-fhir">Google Group</a>. Chances are
+				if it's happening to you, it's happening to others. We're happy to help.
 			</p>
 			
 		</section>

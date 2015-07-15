@@ -163,7 +163,7 @@
 		<!-- This property is used in some of the site documentation where the 
 			version is shown, so that we can deploy the site even if the project is on 
 			a snapshot version. -->
-		<hapi_stable_version>1.0</hapi_stable_version>
+		<hapi_stable_version>1.1</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -640,7 +640,7 @@
 					</execution>
 					<execution>
 						<id>addAnalytics</id>
-						<phase>post-site</phase>
+						<phase>site</phase>
 						<configuration>
 							<target>
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>

@@ -7,8 +7,38 @@
 
 	<body>
 
-		<section name="Downloading HAPI FHIR">
+		<section name="FHIR Versions">
+			
+			<table>
+				<thead>
+					<tr>
+						<td>HAPI Structure Library</td>
+						<td>HAPI Version</td>
+						<td>FHIR Specification Version</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>hapi-fhir-structures-dstu</td>
+						<td>1.1</td>
+						<td><a href="http://www.hl7.org/fhir/DSTU1/index.html">DSTU1 0.0.82</a></td>
+					</tr>
+					<tr>
+						<td>hapi-fhir-structures-dstu2</td>
+						<td>1.1</td>
+						<td><a href="http://www.hl7.org/fhir/2015May/index.html">DSTU2 0.5.0</a></td>
+					</tr>
+					<tr>
+						<td>hapi-fhir-structures-hl7org-dstu2</td>
+						<td>1.1</td>
+						<td><a href="http://hl7-fhir.github.io/">DSTU2 Latest Dev</a> (SVN 5843)</td>
+					</tr>
+				</tbody>
+			</table>
+		
+		</section>
 
+		<section name="Downloading HAPI FHIR">
 			<p>
 				If you are developing applications in Java, the easiest way to use HAPI is
 				to use a build system which handles dependency management automatically. The
