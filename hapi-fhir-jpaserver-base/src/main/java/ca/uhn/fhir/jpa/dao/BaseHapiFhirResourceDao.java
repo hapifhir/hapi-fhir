@@ -293,6 +293,36 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return new HashSet<Long>(q.getResultList());
 	}
 
+	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
+		boolean missingFalse = false;
+		if (nextOr.getMissing() != null) {
+			if (nextOr.getMissing().booleanValue() == true) {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
+			}
+			Predicate singleCode = from.get("myId").isNotNull();
+			Predicate name = theBuilder.equal(from.get("myParamName"), theParamName);
+			codePredicates.add(theBuilder.and(name, singleCode));
+			missingFalse = true;
+		}
+		return missingFalse;
+	}
+
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
+			IQueryParameterType nextOr) {
+		boolean missingFalse = false;
+		if (nextOr.getMissing() != null) {
+			if (nextOr.getMissing().booleanValue() == true) {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
+			}
+			Predicate singleCode = from.get("mySourceResource").isNotNull();
+			Predicate name = createResourceLinkPathPredicate(theParamName, theBuilder, from);
+			codePredicates.add(theBuilder.and(name, singleCode));
+			missingFalse = true;
+		}
+		return missingFalse;
+	}
+
 	private Set<Long> addPredicateNumber(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
@@ -680,13 +710,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Predicate createResourceLinkPathPredicate(String theParamName, CriteriaBuilder builder, Root<? extends ResourceLink> from) {
-		RuntimeSearchParam param = getContext().getResourceDefinition(getResourceType()).getSearchParam(theParamName);
-		List<String> path = param.getPathsSplit();
-		Predicate type = from.get("mySourcePath").in(path);
-		return type;
-	}
-
 	private Set<Long> addPredicateString(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
 		if (theList == null || theList.isEmpty()) {
 			return thePids;
@@ -725,36 +748,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		TypedQuery<Long> q = myEntityManager.createQuery(cq);
 		return new HashSet<Long>(q.getResultList());
-	}
-
-	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
-			IQueryParameterType nextOr) {
-		boolean missingFalse = false;
-		if (nextOr.getMissing() != null) {
-			if (nextOr.getMissing().booleanValue() == true) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
-			}
-			Predicate singleCode = from.get("myId").isNotNull();
-			Predicate name = theBuilder.equal(from.get("myParamName"), theParamName);
-			codePredicates.add(theBuilder.and(name, singleCode));
-			missingFalse = true;
-		}
-		return missingFalse;
-	}
-
-	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
-			IQueryParameterType nextOr) {
-		boolean missingFalse = false;
-		if (nextOr.getMissing() != null) {
-			if (nextOr.getMissing().booleanValue() == true) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "multipleParamsWithSameNameOneIsMissingTrue", theParamName));
-			}
-			Predicate singleCode = from.get("mySourceResource").isNotNull();
-			Predicate name = createResourceLinkPathPredicate(theParamName, theBuilder, from);
-			codePredicates.add(theBuilder.and(name, singleCode));
-			missingFalse = true;
-		}
-		return missingFalse;
 	}
 
 	private Set<Long> addPredicateToken(String theParamName, Set<Long> thePids, List<? extends IQueryParameterType> theList) {
@@ -871,12 +864,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing);
 	}
 
-	private IBaseOperationOutcome createErrorOperationOutcome(String theMessage) {
-		return createOperationOutcome("error", theMessage);
-	}
-	
-	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage);
-
 	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
 		Predicate retVal = null;
 		switch (left.getParamType()) {
@@ -903,6 +890,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		return retVal;
 	}
+
+	protected IBaseOperationOutcome createErrorOperationOutcome(String theMessage) {
+		return createOperationOutcome(IssueSeverityEnum.ERROR.getCode(), theMessage);
+	}
+	
+	protected IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
+		return createOperationOutcome(IssueSeverityEnum.INFORMATION.getCode(), theMessage);
+	}
+
+	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage);
 
 	private Predicate createPredicateDate(CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamDate, ResourceIndexedSearchParamDate> theFrom, IQueryParameterType theParam) {
 		Predicate p;
@@ -1046,6 +1043,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return singleCode;
 	}
 
+	private Predicate createResourceLinkPathPredicate(String theParamName, CriteriaBuilder builder, Root<? extends ResourceLink> from) {
+		RuntimeSearchParam param = getContext().getResourceDefinition(getResourceType()).getSearchParam(theParamName);
+		List<String> path = param.getPathsSplit();
+		Predicate type = from.get("mySourcePath").in(path);
+		return type;
+	}
+
 	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
@@ -1186,18 +1190,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
 
 		notifyWriteCompleted();
-		ourLog.info("Processed create on {} in {}ms", myResourceName, w.getMillisAndRestart());
-		return outcome;
-	}
+		
+		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
-	/**
-	 * May
-	 * 
-	 * @param theResource
-	 *           The resource that is about to be stored
-	 */
-	protected void preProcessResourceForStorage(T theResource) {
-		// nothing by default
+		ourLog.info(msg);
+		return outcome;
 	}
 
 	@Override
@@ -1535,6 +1533,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			}
 		}
 
+	}
+
+	/**
+	 * May be implemented by subclasses to validate resources prior to storage
+	 * 
+	 * @param theResource
+	 *           The resource that is about to be stored
+	 */
+	protected void preProcessResourceForStorage(T theResource) {
+		// nothing by default
 	}
 
 	@Override
@@ -2121,8 +2129,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		ResourceTable savedEntity = updateEntity(theResource, entity, true, null, thePerformIndexing, true);
 
 		notifyWriteCompleted();
-		ourLog.info("Processed update on {} in {}ms", resourceId, w.getMillisAndRestart());
-		return toMethodOutcome(savedEntity, theResource).setCreated(false);
+		
+		DaoMethodOutcome outcome = toMethodOutcome(savedEntity, theResource).setCreated(false);
+
+		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+
+		ourLog.info(msg);
+		return outcome;
 	}
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {

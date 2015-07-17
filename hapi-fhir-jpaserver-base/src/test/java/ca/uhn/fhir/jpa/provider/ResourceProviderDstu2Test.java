@@ -294,12 +294,35 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent());
 			ourLog.info(respString);
+			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
+			assertThat(respString, containsString("Can not create resource with ID[2], ID must not be supplied on a create (POST) operation"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
 		}
 	}
 
+	@Test
+	public void testCreateResourceReturnsOperationOutcomeByDefault() throws IOException {
+		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(response.toString());
+			ourLog.info(respString);
+			assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
+		} finally {
+			response.getEntity().getContent().close();
+			response.close();
+		}
+	}
+
+	
 	@Test
 	public void testDeepChaining() {
 		delete("Location", Location.SP_NAME, "testDeepChainingL1");

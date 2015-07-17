@@ -77,6 +77,22 @@ public class ExceptionTest {
 	}
 
 	@Test
+	public void testResourceNotFound() throws Exception {
+		ourExceptionType = ResourceNotFoundException.class;
+		ourGenerateOperationOutcome = false;
+		{
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
+			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Resource Patient/123 is not known"));
+		}
+	}
+
+	@Test
 	public void testInternalErrorFormatted() throws Exception {
 		{
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa&_format=true");
