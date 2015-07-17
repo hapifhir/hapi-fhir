@@ -19,6 +19,15 @@
 				actually point to any codes (e.g. Observation.interpretation). Thanks
 				to GitHub user @steve1medix for reporting!
 			</action>
+			<action type="add">
+				Server now exports operations as separate resources instead of as contained resources
+				within Conformance
+			</action>
+			<action type="add">
+				Add new operation $get-resource-counts which will replace the resource
+				count extensions exported in the Conformance statement by the JPA
+				server.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

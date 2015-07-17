@@ -22,6 +22,7 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.Rest;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
@@ -86,6 +87,29 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
+		assertEquals(1, conformance.getRest().get(0).getOperation().size());
+		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+	}
+
+	@Test
+	public void testExtendedOperationReturningBundleOperation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/everything"));
+				
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
+		ourLog.info(conf);
+
+		assertEquals("$everything", opDef.getCode());
+		assertEquals(true, opDef.getIdempotent().booleanValue());
 	}
 
 	@Test

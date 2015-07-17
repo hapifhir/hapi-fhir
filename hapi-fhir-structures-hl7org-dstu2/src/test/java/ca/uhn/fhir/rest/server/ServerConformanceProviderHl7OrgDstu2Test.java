@@ -18,6 +18,7 @@ import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.instance.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.instance.model.DiagnosticReport;
+import org.hl7.fhir.instance.model.OperationDefinition;
 import org.hl7.fhir.instance.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
@@ -86,6 +87,29 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
+		assertEquals(1, conformance.getRest().get(0).getOperation().size());
+		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference());
+	}
+
+	@Test
+	public void testExtendedOperationReturningBundleOperation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/everything"));
+				
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
+		ourLog.info(conf);
+
+		assertEquals("$everything", opDef.getCode());
+		assertEquals(true, opDef.getIdempotent());
 	}
 
 	@Test

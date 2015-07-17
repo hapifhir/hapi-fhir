@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -32,6 +31,9 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestOperation;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -42,6 +44,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -312,6 +315,20 @@ public class OperationServerTest {
 		assertEquals("instance $everything", ourLastMethod);
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
+		
+	}
+
+	@Test
+	public void testConformance() throws Exception {
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
+		Conformance p = client.fetchConformance().ofType(Conformance.class).execute();
+		List<RestOperation> ops = p.getRest().get(0).getOperation();
+		assertThat(ops.size(), greaterThan(1));
+		assertNull(ops.get(0).getDefinition().getReference().getBaseUrl());
+		assertThat(ops.get(0).getDefinition().getReference().getValue(), startsWith("OperationDefinition/"));
+		
+		OperationDefinition def = client.read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
+		assertThat(def.getCode(), not(blankOrNullString()));
 	}
 
 	@Test

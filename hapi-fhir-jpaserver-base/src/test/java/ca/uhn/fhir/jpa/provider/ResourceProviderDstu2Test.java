@@ -213,6 +213,27 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
+	public void testGetResourceCountsOperation() throws Exception {
+		String methodName = "testMetaOperations";
+
+		Patient pt = new Patient();
+		pt.addName().addFamily(methodName);
+		ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet get = new HttpGet(ourServerBase + "/$get-resource-counts");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent());
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			ourLog.info(output);
+			assertThat(output, containsString("<parameter><name value=\"Patient\"/><valueInteger value=\""));
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
 

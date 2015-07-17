@@ -403,6 +403,10 @@
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
+							<excludeResourceNames>
+								<excludeResourceName>Conformance</excludeResourceName>
+								<excludeResourceName>OperationDefinition</excludeResourceName>
+							</excludeResourceNames>
 						</configuration>
 					</execution>
 					<execution>

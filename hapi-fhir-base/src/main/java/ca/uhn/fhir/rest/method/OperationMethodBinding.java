@@ -128,6 +128,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myDescription;
 	}
 
+	/**
+	 * Returns the name of the operation, starting with "$"
+	 */
 	public String getName() {
 		return myName;
 	}
