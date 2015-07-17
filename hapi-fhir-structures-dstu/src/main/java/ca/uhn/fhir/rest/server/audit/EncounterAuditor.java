@@ -23,9 +23,9 @@ package ca.uhn.fhir.rest.server.audit;
 import java.util.HashMap;
 import java.util.Map;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Encounter;
-import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
 public class EncounterAuditor implements IResourceAuditor<Encounter> {
@@ -96,7 +96,7 @@ public class EncounterAuditor implements IResourceAuditor<Encounter> {
 	}
 
 	@Override
-	public SecurityEventObjectSensitivityEnum getSensitivity() {
+	public BaseCodingDt getSensitivity() {
 		//override this method to provide sensitivity information about the visit
 		return null;
 	}

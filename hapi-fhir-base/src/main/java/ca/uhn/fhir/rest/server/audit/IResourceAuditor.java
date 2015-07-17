@@ -23,8 +23,8 @@ package ca.uhn.fhir.rest.server.audit;
 import java.util.Map;
 
 import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
 
@@ -75,7 +75,7 @@ public interface IResourceAuditor<T extends IResource> {
 	 * Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics
 	 * @return the sensitivity of this resource
 	 */
-	public SecurityEventObjectSensitivityEnum getSensitivity();
+	public BaseCodingDt getSensitivity();
 	
 
 }

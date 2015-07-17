@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -108,6 +109,18 @@ public class ValueSetGenerator {
 				}
 			}
 		}
+		
+		/*
+		 *	Purge empty valuesets 
+		 */
+		for (Iterator<java.util.Map.Entry<String, ValueSetTm>> iter = myValueSets.entrySet().iterator(); iter.hasNext(); ) {
+			java.util.Map.Entry<String, ValueSetTm> next = iter.next();
+			if (next.getValue().getCodes().isEmpty()) {
+				iter.remove();
+				continue;
+			}
+		}
+		
 
 		// File[] files = new
 		// File(myResourceValueSetFiles).listFiles((FilenameFilter) new

@@ -23,10 +23,10 @@ package ca.uhn.fhir.rest.server.audit;
 import java.util.HashMap;
 import java.util.Map;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Procedure;
-import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
 public class ProcedureAuditor implements IResourceAuditor<Procedure> {
@@ -79,7 +79,7 @@ public class ProcedureAuditor implements IResourceAuditor<Procedure> {
 	}
 
 	@Override
-	public SecurityEventObjectSensitivityEnum getSensitivity() {
+	public BaseCodingDt getSensitivity() {
 		return null;
 	}
 

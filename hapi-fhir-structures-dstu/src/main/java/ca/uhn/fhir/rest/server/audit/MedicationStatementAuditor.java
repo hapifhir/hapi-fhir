@@ -22,10 +22,10 @@ package ca.uhn.fhir.rest.server.audit;
 
 import java.util.Map;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Medication;
 import ca.uhn.fhir.model.dstu.resource.MedicationStatement;
-import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
 public class MedicationStatementAuditor implements IResourceAuditor<MedicationStatement> {
@@ -83,7 +83,7 @@ public class MedicationStatementAuditor implements IResourceAuditor<MedicationSt
 	}
 
 	@Override
-	public SecurityEventObjectSensitivityEnum getSensitivity() {		
+	public BaseCodingDt getSensitivity() {		
 		return null; //no sensitivity indicated in MedicationStatement
 	}
 

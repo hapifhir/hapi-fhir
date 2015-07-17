@@ -14,6 +14,11 @@
 			<action type="add">
 				SyntaxHighlightingInterceptor now also highlights OperationOutcome responses for errors/exceptions.
 			</action>
+			<action type="fix" issue="126">
+				Model classes do not use BoundCodeableConcept for example bindings that do not
+				actually point to any codes (e.g. Observation.interpretation). Thanks
+				to GitHub user @steve1medix for reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

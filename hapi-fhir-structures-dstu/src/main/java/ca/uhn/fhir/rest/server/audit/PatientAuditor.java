@@ -24,9 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
 import ca.uhn.fhir.model.dstu.resource.Patient;
-import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectSensitivityEnum;
 import ca.uhn.fhir.model.dstu.valueset.SecurityEventObjectTypeEnum;
 
 public class PatientAuditor implements IResourceAuditor<Patient> {
@@ -93,7 +93,7 @@ public class PatientAuditor implements IResourceAuditor<Patient> {
 	}
 
 	@Override
-	public SecurityEventObjectSensitivityEnum getSensitivity() {		
+	public BaseCodingDt getSensitivity() {		
 		return null; //override to include things like locked patient records
 	}
 
