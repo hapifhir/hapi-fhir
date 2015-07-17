@@ -30,7 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
-public class FhirInstanceValidator extends BaseValidatorBridge implements IValidator {
+public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 

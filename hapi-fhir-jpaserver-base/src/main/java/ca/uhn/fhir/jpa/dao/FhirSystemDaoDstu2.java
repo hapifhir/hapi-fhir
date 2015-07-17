@@ -132,7 +132,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionInvalidUrl", theAction, theUrl);
 			throw new InvalidRequestException(msg);
 		}
-		IFhirResourceDao<? extends IResource> dao = null;
+		IFhirResourceDao<? extends IBaseResource> dao = null;
 		if (resType != null) {
 			dao = getDao(resType.getImplementingClass());
 		}
@@ -268,9 +268,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 						if (isNotBlank(ifNoneMatch)) {
 							throw new InvalidRequestException("Unable to perform vread on '" + url + "' with ifNoneMatch also set. Do not include a version in the URL to perform a conditional read.");
 						}
-						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
+						found = (IResource) resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId(), parts.getVersionId()));
 					} else {
-						found = resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
+						found = (IResource) resourceDao.read(new IdDt(parts.getResourceType(), parts.getResourceId()));
 						if (isNotBlank(ifNoneMatch) && ifNoneMatch.equals(found.getId().getVersionIdPart())) {
 							notChanged = true;
 						}
@@ -392,13 +392,13 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 	}
 
 	private static class UrlParts {
-		private IFhirResourceDao<? extends IResource> myDao;
+		private IFhirResourceDao<? extends IBaseResource> myDao;
 		private String myParams;
 		private String myResourceId;
 		private String myResourceType;
 		private String myVersionId;
 
-		public IFhirResourceDao<? extends IResource> getDao() {
+		public IFhirResourceDao<? extends IBaseResource> getDao() {
 			return myDao;
 		}
 
@@ -418,7 +418,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			return myVersionId;
 		}
 
-		public void setDao(IFhirResourceDao<? extends IResource> theDao) {
+		public void setDao(IFhirResourceDao<? extends IBaseResource> theDao) {
 			myDao = theDao;
 		}
 

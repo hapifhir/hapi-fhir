@@ -80,7 +80,9 @@ public class ValidationResult {
 	}
 
 	/**
-	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view
+	 * @deprecated Use {@link #toOperationOutcome()} instead since this method returns a view.
+	 *             {@link #toOperationOutcome()} is identical to this method, but has a more suitable name so this method
+	 *             will be removed at some point.
 	 */
 	@Deprecated
 	public IBaseOperationOutcome getOperationOutcome() {

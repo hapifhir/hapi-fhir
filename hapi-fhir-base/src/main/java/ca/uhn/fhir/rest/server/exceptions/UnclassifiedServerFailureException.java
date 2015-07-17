@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import net.sourceforge.cobertura.CoverageIgnore;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /*
  * #%L
@@ -51,7 +52,7 @@ public class UnclassifiedServerFailureException extends BaseServerResponseExcept
 	 *            The message to add to the status line
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public UnclassifiedServerFailureException(int theStatusCode, String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(theStatusCode, theMessage, theOperationOutcome);
 	}
 

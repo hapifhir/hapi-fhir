@@ -28,7 +28,7 @@ import ca.uhn.fhir.model.api.Bundle;
 /**
  * Registers 
  */
-public interface IValidator {
+public interface IValidatorModule {
 
 	void validateResource(IValidationContext<IBaseResource> theCtx);
 

@@ -24,12 +24,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResourceDao<T> {
@@ -45,6 +51,19 @@ public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResou
 			values = Collections.emptyList();
 		}
 		return values;
+	}
+
+	@Override
+	public MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage) {
+		OperationOutcome oo = new OperationOutcome();
+		oo.getIssueFirstRep().getSeverityElement().setValue(theSeverity);
+		oo.getIssueFirstRep().getDetailsElement().setValue(theMessage);
+		return oo;
 	}
 
 	

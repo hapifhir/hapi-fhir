@@ -90,7 +90,7 @@ public class FhirDstu2 implements IFhirVersion {
 			str = FhirDstu2.class.getResourceAsStream("ca/uhn/fhir/model/dstu2/fhirversion.properties");
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2/model.properties");
+			throw new ConfigurationException("Can not find model property file on classpath: " + "/ca/uhn/fhir/model/dstu2/fhirversion.properties");
 		}
 		return str;
 	}

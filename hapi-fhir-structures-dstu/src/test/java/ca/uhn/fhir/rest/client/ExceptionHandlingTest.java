@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -122,7 +123,6 @@ public class ExceptionHandlingTest {
 			assertThat(e.getResponseBody(), StringContains.containsString("value=\"foo\""));
 		}
 
-
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class ExceptionHandlingTest {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 			assertNotNull(e.getOperationOutcome());
-			assertEquals("Help I'm a bug",e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());			
+			assertEquals("Help I'm a bug", ((BaseOperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		}
 
 	}
@@ -164,7 +164,7 @@ public class ExceptionHandlingTest {
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", contentType + "; charset=UTF-8"));
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 
-		IMyClient client = ourCtx.newRestfulClient(IMyClient.class,"http://example.com/fhir");
+		IMyClient client = ourCtx.newRestfulClient(IMyClient.class, "http://example.com/fhir");
 		try {
 			client.read(new IdDt("Patient/1234"));
 			fail();
@@ -172,15 +172,14 @@ public class ExceptionHandlingTest {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
 			assertNotNull(e.getOperationOutcome());
-			assertEquals("Help I'm a bug",e.getOperationOutcome().getIssueFirstRep().getDetailsElement().getValue());			
+			assertEquals("Help I'm a bug", ((BaseOperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDetailsElement().getValue());
 		}
 
 	}
-	
-	public interface IMyClient extends IRestfulClient
-	{
+
+	public interface IMyClient extends IRestfulClient {
 		@Read
 		Patient read(@IdParam IdDt theId);
 	}
-	
+
 }

@@ -19,7 +19,7 @@ public class FhirInstanceValidatorTest {
 		val = ourCtx.newValidator();
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
-		val.registerValidator(new FhirInstanceValidator());
+		val.registerValidatorModule(new FhirInstanceValidator());
 	}
 	
 	@Test

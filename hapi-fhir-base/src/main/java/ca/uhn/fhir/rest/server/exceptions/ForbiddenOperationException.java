@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
 import net.sourceforge.cobertura.CoverageIgnore;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.server.Constants;
 
 /*
@@ -54,7 +56,7 @@ public class ForbiddenOperationException extends BaseServerResponseException {
 	 * @param theOperationOutcome
 	 *            The OperationOutcome resource to return to the client
 	 */
-	public ForbiddenOperationException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public ForbiddenOperationException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

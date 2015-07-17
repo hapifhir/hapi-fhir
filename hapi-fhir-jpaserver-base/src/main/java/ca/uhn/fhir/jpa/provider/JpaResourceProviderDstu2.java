@@ -165,38 +165,7 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	@Validate
 	public MethodOutcome validate(@ResourceParam T theResource, @IdParam IdDt theId, @ResourceParam String theRawResource, @ResourceParam EncodingEnum theEncoding, @Validate.Mode ValidationModeEnum theMode,
 			@Validate.Profile String theProfile) {
-
-		final OperationOutcome oo = new OperationOutcome();
-
-		IParser parser = theEncoding.newParser(getContext());
-		parser.setParserErrorHandler(new IParserErrorHandler() {
-
-			@Override
-			public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Unknown attribute found: " + theAttributeName);
-			}
-
-			@Override
-			public void unknownElement(IParseLocation theLocation, String theElementName) {
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Unknown element found: " + theElementName);
-			}
-		});
-
-		FhirValidator validator = getContext().newValidator();
-		validator.setValidateAgainstStandardSchema(true);
-		validator.setValidateAgainstStandardSchematron(true);
-		ValidationResult result = validator.validateWithResult(theResource);
-		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
-		for (BaseIssue next : operationOutcome.getIssue()) {
-			oo.getIssue().add((Issue) next);
-		}
-
-		// This method returns a MethodOutcome object
-		MethodOutcome retVal = new MethodOutcome();
-		oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Validation succeeded");
-		retVal.setOperationOutcome(oo);
-
-		return retVal;
+		return getDao().validate(theResource, theId, theRawResource, theEncoding, theMode, theProfile);
 	}
 
 }

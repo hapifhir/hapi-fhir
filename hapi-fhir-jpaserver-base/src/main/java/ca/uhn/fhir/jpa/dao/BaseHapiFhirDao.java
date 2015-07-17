@@ -276,7 +276,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 				values.addAll(t.getValues(theResource, nextPathTrimmed));
 			} catch (Exception e) {
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
-				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() } );
+				ourLog.warn("Failed to index values from path[{}] in resource type[{}]: ", new Object[] { nextPathTrimmed, def.getName(), e.toString() });
 			}
 		}
 		return values;
@@ -325,7 +325,8 @@ public abstract class BaseHapiFhirDao implements IDao {
 		}
 	}
 
-	protected IFhirResourceDao<? extends IResource> getDao(Class<? extends IBaseResource> theType) {
+	@SuppressWarnings("unchecked")
+	protected <T extends IBaseResource> IFhirResourceDao<T> getDao(Class<T> theType) {
 		if (myResourceTypeToDao == null) {
 			myResourceTypeToDao = new HashMap<Class<? extends IBaseResource>, IFhirResourceDao<?>>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
@@ -339,7 +340,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 
 		}
 
-		return myResourceTypeToDao.get(theType);
+		return (IFhirResourceDao<T>) myResourceTypeToDao.get(theType);
 	}
 
 	protected TagDefinition getTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -625,12 +626,12 @@ public abstract class BaseHapiFhirDao implements IDao {
 
 	}
 
-	protected Set<Long> processMatchUrl(String theMatchUrl, Class<? extends IBaseResource> theResourceType) {
+	protected <T extends IResource> Set<Long> processMatchUrl(String theMatchUrl, Class<T> theResourceType) {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
 
-		IFhirResourceDao<? extends IResource> dao = getDao(theResourceType);
+		IFhirResourceDao<T> dao = getDao(theResourceType);
 		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
 
 		return ids;
@@ -1019,8 +1020,10 @@ public abstract class BaseHapiFhirDao implements IDao {
 		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true);
 	}
 
-	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-			boolean theUpdateVersion) {
+	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
+
+		validateResourceForStorage(theResource);
+
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
 		}
@@ -1028,8 +1031,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 		if (theResource != null) {
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
-				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with ["
-						+ resourceType + "]");
+				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");
 			}
 		}
 
@@ -1193,6 +1195,16 @@ public abstract class BaseHapiFhirDao implements IDao {
 		}
 
 		return entity;
+	}
+
+	/**
+	 * Subclasses may override to provide specific behaviour
+	 * 
+	 * @param theResource
+	 *           The resource that is about to be persisted
+	 */
+	protected void validateResourceForStorage(IResource theResource) {
+		// nothing
 	}
 
 	protected static String normalizeString(String theString) {

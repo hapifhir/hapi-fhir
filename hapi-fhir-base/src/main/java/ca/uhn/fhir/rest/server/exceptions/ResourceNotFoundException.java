@@ -22,11 +22,11 @@ package ca.uhn.fhir.rest.server.exceptions;
 
 import net.sourceforge.cobertura.CoverageIgnore;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -44,7 +44,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theClass, theId));
 	}
 
-	public ResourceNotFoundException(Class<? extends IResource> theClass, IdDt theId, BaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(Class<? extends IResource> theClass, IdDt theId, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theClass, theId), theOperationOutcome);
 	}
 
@@ -52,7 +52,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theClass, theId));
 	}
 
-	public ResourceNotFoundException(Class<? extends IResource> theClass, IIdType theId, BaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(Class<? extends IResource> theClass, IIdType theId, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theClass, theId), theOperationOutcome);
 	}
 
@@ -63,7 +63,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceNotFoundException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 
@@ -83,7 +83,7 @@ public class ResourceNotFoundException extends BaseServerResponseException {
 		super(STATUS_CODE, createErrorMessage(theId));
 	}
 
-	public ResourceNotFoundException(IdDt theId, BaseOperationOutcome theOperationOutcome) {
+	public ResourceNotFoundException(IdDt theId, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, createErrorMessage(theId), theOperationOutcome);
 	}
 

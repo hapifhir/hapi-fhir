@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 /*
  * #%L
@@ -54,7 +54,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	private List<String> myAdditionalMessages = null;
-	private BaseOperationOutcome myBaseOperationOutcome;
+	private IBaseOperationOutcome myBaseOperationOutcome;
 	private String myResponseBody;
 	private String myResponseMimeType;
 	private int myStatusCode;
@@ -100,7 +100,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theBaseOperationOutcome
 	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage, BaseOperationOutcome theBaseOperationOutcome) {
+	public BaseServerResponseException(int theStatusCode, String theMessage, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
@@ -134,7 +134,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theBaseOperationOutcome
 	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause, BaseOperationOutcome theBaseOperationOutcome) {
+	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage, theCause);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
@@ -164,7 +164,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theBaseOperationOutcome
 	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
-	public BaseServerResponseException(int theStatusCode, Throwable theCause, BaseOperationOutcome theBaseOperationOutcome) {
+	public BaseServerResponseException(int theStatusCode, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theCause.toString(), theCause);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = theBaseOperationOutcome;
@@ -182,9 +182,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
-	 * Returns the {@link BaseOperationOutcome} resource if any which was supplied in the response, or <code>null</code>
+	 * Returns the {@link IBaseOperationOutcome} resource if any which was supplied in the response, or <code>null</code>
 	 */
-	public BaseOperationOutcome getOperationOutcome() {
+	public IBaseOperationOutcome getOperationOutcome() {
 		return myBaseOperationOutcome;
 	}
 
@@ -223,7 +223,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 *            The BaseOperationOutcome resource Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include
 	 *            with the HTTP response. In client implementations you should not call this method.
 	 */
-	public void setOperationOutcome(BaseOperationOutcome theBaseOperationOutcome) {
+	public void setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
 		myBaseOperationOutcome = theBaseOperationOutcome;
 	}
 

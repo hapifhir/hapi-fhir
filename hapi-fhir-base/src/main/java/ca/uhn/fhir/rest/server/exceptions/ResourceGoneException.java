@@ -21,9 +21,11 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 import net.sourceforge.cobertura.CoverageIgnore;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -55,7 +57,7 @@ public class ResourceGoneException extends BaseServerResponseException {
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceGoneException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public ResourceGoneException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

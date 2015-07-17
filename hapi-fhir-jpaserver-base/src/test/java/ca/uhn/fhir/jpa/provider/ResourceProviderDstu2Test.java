@@ -50,6 +50,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu.resource.Device;
 import ca.uhn.fhir.model.dstu.resource.Practitioner;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -65,7 +66,10 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.dstu2.valueset.AnswerFormatEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.EncounterStateEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -188,27 +192,26 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	@Test
 	public void testMetaOperations() throws Exception {
 		String methodName = "testMetaOperations";
-		
+
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		IIdType id = ourClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
-		
+
 		MetaDt meta = ourClient.meta().get(MetaDt.class).fromResource(id).execute();
 		assertEquals(0, meta.getTag().size());
-		
+
 		MetaDt inMeta = new MetaDt();
 		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 		meta = ourClient.meta().add().onResource(id).meta(inMeta).execute();
 		assertEquals(1, meta.getTag().size());
-		
+
 		inMeta = new MetaDt();
 		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 		meta = ourClient.meta().delete().onResource(id).meta(inMeta).execute();
 		assertEquals(0, meta.getTag().size());
-		
+
 	}
 
-	
 	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
@@ -246,6 +249,40 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
+	public void testCreateQuestionnaireAnswersWithValidation() throws IOException {
+		String methodName = "testCreateQuestionnaireAnswersWithValidation";
+
+		ValueSet options = new ValueSet();
+		options.getDefine().setSystem("urn:system").addConcept().setCode("code0");
+		IIdType optId = ourClient.create().resource(options).execute().getId();
+		
+		Questionnaire q = new Questionnaire();
+		q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormatEnum.CHOICE).setOptions(new ResourceReferenceDt(optId));
+		IIdType qId = ourClient.create().resource(q).execute().getId();
+
+		QuestionnaireAnswers qa;
+
+		// Good code
+
+		qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
+		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new CodingDt().setSystem("urn:system").setCode("code0"));
+		ourClient.create().resource(qa).execute();
+
+		// Bad code
+
+		qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference(qId.toUnqualifiedVersionless().getValue());
+		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new CodingDt().setSystem("urn:system").setCode("code1"));
+		try {
+			ourClient.create().resource(qa).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
+		}
+	}
+
+	@Test
 	public void testCreateResourceWithNumericId() throws IOException {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
@@ -255,7 +292,10 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			assertEquals(400, response.getStatusLine().getStatusCode());
+			String respString = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(respString);
 		} finally {
+			response.getEntity().getContent().close();
 			response.close();
 		}
 	}
@@ -365,7 +405,8 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 
 		/*
-		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to make sure that works too..
+		 * Try it with a raw socket call. The Apache client won't let us use the unescaped "|" in the URL but we want to
+		 * make sure that works too..
 		 */
 		Socket sock = new Socket();
 		sock.setSoTimeout(3000);
@@ -739,8 +780,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		p1.addIdentifier().setValue("testSearchByIdentifierWithoutSystem01");
 		IdDt p1Id = (IdDt) ourClient.create().resource(p1).execute().getId();
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint()
-				.execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode(null, "testSearchByIdentifierWithoutSystem01")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 
@@ -1166,8 +1206,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
 
-		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
-				.encodedJson().prettyPrint().execute();
+		Bundle actual = ourClient.search().forResource(Patient.class).where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2")).encodedJson().prettyPrint().execute();
 		assertEquals(1, actual.size());
 		assertEquals(p1Id.getIdPart(), actual.getEntries().get(0).getResource().getId().getIdPart());
 

@@ -244,10 +244,10 @@ class ModelScanner {
 	 * annotations if the HL7.org ones are found instead.
 	 */
 	@SuppressWarnings("unchecked")
-	private <T extends Annotation> T pullAnnotation(AnnotatedElement theTarget, Class<T> theAnnotationType) {
+	private <T extends Annotation> T pullAnnotation(Class<?> theContainer, AnnotatedElement theTarget, Class<T> theAnnotationType) {
 
 		T retVal = theTarget.getAnnotation(theAnnotationType);
-		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG) == false) {
+		if (myContext.getVersion().getVersion() != FhirVersionEnum.DSTU2_HL7ORG) {
 			return retVal;
 		}
 
@@ -307,7 +307,7 @@ class ModelScanner {
 			return;
 		}
 
-		ResourceDef resourceDefinition = pullAnnotation(theClass, ResourceDef.class);
+		ResourceDef resourceDefinition = pullAnnotation(theClass, theClass, ResourceDef.class);
 		if (resourceDefinition != null) {
 			if (!IBaseResource.class.isAssignableFrom(theClass)) {
 				throw new ConfigurationException("Resource type contains a @" + ResourceDef.class.getSimpleName() + " annotation but does not implement " + IResource.class.getCanonicalName() + ": " + theClass.getCanonicalName());
@@ -317,7 +317,7 @@ class ModelScanner {
 			scanResource(resClass, resourceDefinition);
 		}
 
-		DatatypeDef datatypeDefinition = pullAnnotation(theClass, DatatypeDef.class);
+		DatatypeDef datatypeDefinition = pullAnnotation(theClass, theClass, DatatypeDef.class);
 		if (datatypeDefinition != null) {
 			if (ICompositeType.class.isAssignableFrom(theClass)) {
 				@SuppressWarnings("unchecked")
@@ -332,7 +332,7 @@ class ModelScanner {
 			}
 		}
 
-		Block blockDefinition = pullAnnotation(theClass, Block.class);
+		Block blockDefinition = pullAnnotation(theClass, theClass, Block.class);
 
 		if (blockDefinition != null) {
 			if (IResourceBlock.class.isAssignableFrom(theClass) || IBaseBackboneElement.class.isAssignableFrom(theClass) || IBaseDatatypeElement.class.isAssignableFrom(theClass)) {
@@ -440,16 +440,16 @@ class ModelScanner {
 				continue;
 			}
 
-			Child childAnnotation = pullAnnotation(next, Child.class);
+			Child childAnnotation = pullAnnotation(theClass, next, Child.class);
 			if (childAnnotation == null) {
 				ourLog.trace("Ignoring non @Child field {} on target type {}", next.getName(), theClass);
 				continue;
 			}
 
-			Description descriptionAnnotation = pullAnnotation(next, Description.class);
+			Description descriptionAnnotation = pullAnnotation(theClass, next, Description.class);
 
 			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderMap = theOrderToElementDef;
-			Extension extensionAttr = pullAnnotation(next, Extension.class);
+			Extension extensionAttr = pullAnnotation(theClass, next, Extension.class);
 			if (extensionAttr != null) {
 				orderMap = theOrderToExtensionDef;
 			}
@@ -649,7 +649,7 @@ class ModelScanner {
 					}
 				}
 
-				CodeableConceptElement concept = pullAnnotation(next, CodeableConceptElement.class);
+				CodeableConceptElement concept = pullAnnotation(theClass, next, CodeableConceptElement.class);
 				if (concept != null) {
 					if (!ICodedDatatype.class.isAssignableFrom(nextDatatype)) {
 						throw new ConfigurationException("Field '" + elementName + "' in type '" + theClass.getCanonicalName() + "' is marked as @" + CodeableConceptElement.class.getCanonicalName() + " but type is not a subtype of " + ICodedDatatype.class.getName());
@@ -709,7 +709,7 @@ class ModelScanner {
 			Class<?> parent = theClass.getSuperclass();
 			primaryNameProvider = false;
 			while (parent.equals(Object.class) == false && isBlank(resourceName)) {
-				ResourceDef nextDef = pullAnnotation(parent, ResourceDef.class);
+				ResourceDef nextDef = pullAnnotation(theClass, parent, ResourceDef.class);
 				if (nextDef != null) {
 					resourceName = nextDef.name();
 				}
@@ -749,7 +749,7 @@ class ModelScanner {
 		Map<Field, SearchParamDefinition> compositeFields = new LinkedHashMap<Field, SearchParamDefinition>();
 
 		for (Field nextField : theClass.getFields()) {
-			SearchParamDefinition searchParam = pullAnnotation(nextField, SearchParamDefinition.class);
+			SearchParamDefinition searchParam = pullAnnotation(theClass, nextField, SearchParamDefinition.class);
 			if (searchParam != null) {
 				RestSearchParameterTypeEnum paramType = RestSearchParameterTypeEnum.valueOf(searchParam.type().toUpperCase());
 				if (paramType == null) {

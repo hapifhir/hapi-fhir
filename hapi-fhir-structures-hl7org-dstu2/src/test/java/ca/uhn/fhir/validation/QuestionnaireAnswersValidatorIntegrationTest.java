@@ -47,7 +47,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 		myVal = ourCtx.newValidator();
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
-		myVal.registerValidator(qaVal);
+		myVal.registerValidatorModule(qaVal);
 	}
 	
 	@Test
@@ -73,7 +73,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 		Questionnaire q = new Questionnaire();
 		q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormat.CHOICE).setOptions(new Reference("http://somevalueset/ValueSet/123"));
 		when(myResourceLoaderMock.load(Mockito.eq(Questionnaire.class), Mockito.eq(new IdType("http://example.com/Questionnaire/q1")))).thenReturn(q);
-				
+
 		ValueSet options = new ValueSet();
 		options.getDefine().setSystem("urn:system").addConcept().setCode("code0");
 		when(myResourceLoaderMock.load(Mockito.eq(ValueSet.class), Mockito.eq(new IdType("http://somevalueset/ValueSet/123")))).thenReturn(options);
@@ -97,6 +97,8 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 		ourLog.info(result.getMessages().toString());
 		assertThat(result.getMessages().toString(), containsString("myLocationString=QuestionnaireAnswers.group(0).question(0).answer(0)"));
 		assertThat(result.getMessages().toString(), containsString("myMessage=Question with linkId[link0] has answer with system[urn:system] and code[code1] but this is not a valid answer for ValueSet[http://somevalueset/ValueSet/123]"));
+		
+		result.toOperationOutcome();
 	}
 
 

@@ -25,7 +25,7 @@ import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-public class FhirBundleResourceDaoDstu2 extends FhirResourceDaoDstu2<Bundle> {
+public class FhirResourceDaoBundleDstu2 extends FhirResourceDaoDstu2<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {

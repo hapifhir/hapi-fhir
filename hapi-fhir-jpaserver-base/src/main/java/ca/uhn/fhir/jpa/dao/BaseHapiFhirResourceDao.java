@@ -56,8 +56,10 @@ import javax.persistence.criteria.Subquery;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.omg.PortableInterceptor.InterceptorOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -857,15 +859,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		if (isNotBlank(theResource.getId().getIdPart())) {
 			if (getContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU1)) {
 				if (theResource.getId().isIdPartValidLong()) {
-					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
+					String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart());
+					throw new InvalidRequestException(message, createErrorOperationOutcome(message));
 				}
 			} else {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getId().getIdPart()));
+				String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getId().getIdPart());
+				throw new InvalidRequestException(message, createErrorOperationOutcome(message));
 			}
 		}
 
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing);
 	}
+
+	private IBaseOperationOutcome createErrorOperationOutcome(String theMessage) {
+		return createOperationOutcome("error", theMessage);
+	}
+	
+	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage);
 
 	private Predicate createCompositeParamPart(CriteriaBuilder builder, Root<ResourceTable> from, RuntimeSearchParam left, IQueryParameterType leftValue) {
 		Predicate retVal = null;

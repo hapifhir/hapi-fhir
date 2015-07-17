@@ -52,7 +52,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
-class SchemaBaseValidator implements IValidator {
+class SchemaBaseValidator implements IValidatorModule {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
 	private static final Set<String> SCHEMA_NAMES;
 

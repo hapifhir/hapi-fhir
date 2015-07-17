@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import java.io.IOException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,11 +34,18 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+/**
+ * This interceptor detects when a request is coming from a browser, and automatically
+ * returns a response with syntax highlighted (coloured) HTML for the response instead
+ * of just returning raw XML/JSON.
+ * 
+ * @since 1.0
+ */
 public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 	private String format(String theResultBody, EncodingEnum theEncodingEnum) {
@@ -178,11 +186,14 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 		
+		streamResponse(theRequestDetails, theServletRequest, theServletResponse, theResponseObject);
+		
+		return false;
+	}
+
+	private void streamResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse, IBaseResource resource) {
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
-
-		// Narrative mode
-		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequestDetails);
 
 		// Determine response encoding
 		EncodingEnum responseEncoding = null;
@@ -198,7 +209,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		IParser p = responseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
 		p.setPrettyPrint(prettyPrint);
 
-		String encoded = p.encodeResourceToString(theResponseObject);
+		String encoded = p.encodeResourceToString(resource);
 		
 		theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
 		
@@ -239,6 +250,43 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}
+	}
+
+	@Override
+	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
+		/*
+		 * It's not a browser...
+		 */
+		String accept = theServletRequest.getHeader(Constants.HEADER_ACCEPT);
+		if (accept == null || !accept.toLowerCase().contains("html")) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+		
+		/*
+		 * It's an AJAX request, so no HTML 
+		 */
+		String requestedWith = theServletRequest.getHeader("X-Requested-With");
+		if (requestedWith != null) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+
+		/*
+		 * Not a GET
+		 */
+		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+		
+		if (!(theException instanceof BaseServerResponseException)) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		}
+		
+		BaseServerResponseException bsre = (BaseServerResponseException)theException;
+		if (bsre.getOperationOutcome() == null) {
+			
+		}
+		
+		streamResponse(theRequestDetails, theServletRequest, theServletResponse, bsre.getOperationOutcome());
 		
 		return false;
 	}

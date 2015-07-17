@@ -24,18 +24,22 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public interface IFhirResourceDao<T extends IResource> extends IDao {
+public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
@@ -44,8 +48,9 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	DaoMethodOutcome create(T theResource, String theIfNoneExist);
 
 	/**
-	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources
-	 *                           won't be indexed and searches won't work.
+	 * @param thePerformIndexing
+	 *           Use with caution! If you set this to false, you need to manually perform indexing or your resources
+	 *           won't be indexed and searches won't work.
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing);
 
@@ -66,19 +71,40 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 	IBundleProvider history(Long theId, Date theSince);
 
 	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaAddOperation(IIdType theId1, MetaDt theMetaAdd);
+
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaDeleteOperation(IIdType theId1, MetaDt theMetaDel);
+
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaGetOperation();
+
+	/**
+	 * Not supported in DSTU1!
+	 */
+	MetaDt metaGetOperation(IIdType theId);
+
+	/**
 	 * 
 	 * @param theId
 	 * @return
 	 * @throws ResourceNotFoundException
-	 *             If the ID is not known to the server
+	 *            If the ID is not known to the server
 	 */
 	T read(IIdType theId);
 
 	BaseHasResource readEntity(IIdType theId);
 
 	/**
-	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
-	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
+	 * @param theCheckForForcedId
+	 *           If true, this method should fail if the requested ID contains a numeric PID which exists, but is
+	 *           obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
 	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId);
 
@@ -102,28 +128,14 @@ public interface IFhirResourceDao<T extends IResource> extends IDao {
 
 	/**
 	 * @param thePerformIndexing
-	 *            Use with caution! If you set this to false, you need to manually perform indexing or your resources
-	 *            won't be indexed and searches won't work.
+	 *           Use with caution! If you set this to false, you need to manually perform indexing or your resources
+	 *           won't be indexed and searches won't work.
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing);
 
 	/**
 	 * Not supported in DSTU1!
 	 */
-	MetaDt metaGetOperation();
+	MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile);
 
-	/**
-	 * Not supported in DSTU1!
-	 */
-	MetaDt metaGetOperation(IIdType theId);
-
-	/**
-	 * Not supported in DSTU1!
-	 */
-	MetaDt metaDeleteOperation(IIdType theId1, MetaDt theMetaDel);
-
-	/**
-	 * Not supported in DSTU1!
-	 */
-	MetaDt metaAddOperation(IIdType theId1, MetaDt theMetaAdd);
 }

@@ -28,8 +28,8 @@
 
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
-#if ( ${res.name} == 'Bundle' )
-		class="ca.uhn.fhir.jpa.dao.Fhir${res.name}ResourceDao${versionCapitalized}">
+#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'QuestionnaireAnswers' ))
+		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">
 #end

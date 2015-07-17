@@ -5,7 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 
@@ -53,7 +54,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * @param theAllowedMethods
 	 *            A list of allowed methods (see {@link #setAllowedMethods(RequestTypeEnum...)} )
 	 */
-	public MethodNotAllowedException(String theMessage, BaseOperationOutcome theOperationOutcome, RequestTypeEnum... theAllowedMethods) {
+	public MethodNotAllowedException(String theMessage, IBaseOperationOutcome theOperationOutcome, RequestTypeEnum... theAllowedMethods) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 		setAllowedMethods(theAllowedMethods);
 	}
@@ -79,7 +80,7 @@ public class MethodNotAllowedException extends BaseServerResponseException {
 	 * @param theOperationOutcome
 	 *            The OperationOutcome resource to return to the client
 	 */
-	public MethodNotAllowedException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public MethodNotAllowedException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

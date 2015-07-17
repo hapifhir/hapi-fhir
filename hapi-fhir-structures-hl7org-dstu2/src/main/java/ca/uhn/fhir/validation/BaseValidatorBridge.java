@@ -10,7 +10,7 @@ import ca.uhn.fhir.model.api.Bundle;
 /**
  * Base class for a bridge between the RI validation tools and HAPI
  */
-abstract class BaseValidatorBridge implements IValidator {
+abstract class BaseValidatorBridge implements IValidatorModule {
 
 	public BaseValidatorBridge() {
 		super();

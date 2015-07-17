@@ -21,14 +21,16 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 import net.sourceforge.cobertura.CoverageIgnore;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.server.Constants;
 
 /**
  * Represents an <b>HTTP 422 Unprocessable Entity</b> response, which means that a resource was rejected by the server because it "violated applicable FHIR profiles or server business rules".
  * 
  * <p>
- * This exception will generally contain an {@link BaseOperationOutcome} instance which details the failure.
+ * This exception will generally contain an {@link IBaseOperationOutcome} instance which details the failure.
  * </p>
  * 
  * @see InvalidRequestException Which corresponds to an <b>HTTP 400 Bad Request</b> failure
@@ -45,29 +47,29 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	 * 
 	 * @param theMessage
 	 *            The message to add to the status line
-	 *  @param theOperationOutcome The BaseOperationOutcome resource to return to the client
+	 *  @param theOperationOutcome The {@link IBaseOperationOutcome} resource to return to the client
 	 */
-	public UnprocessableEntityException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public UnprocessableEntityException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 
 	
 	/**
-	 * Constructor which accepts an {@link BaseOperationOutcome} resource which will be supplied in the response
+	 * Constructor which accepts an {@link IBaseOperationOutcome} resource which will be supplied in the response
 	 */
-	public UnprocessableEntityException(BaseOperationOutcome theOperationOutcome) {
+	public UnprocessableEntityException(IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, DEFAULT_MESSAGE, theOperationOutcome);
 	}
 
 	/**
-	 * Constructor which accepts a String describing the issue. This string will be translated into an {@link BaseOperationOutcome} resource which will be supplied in the response.
+	 * Constructor which accepts a String describing the issue. This string will be translated into an {@link IBaseOperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
 
 	/**
-	 * Constructor which accepts an array of Strings describing the issue. This strings will be translated into an {@link BaseOperationOutcome} resource which will be supplied in the response.
+	 * Constructor which accepts an array of Strings describing the issue. This strings will be translated into an {@link IBaseOperationOutcome} resource which will be supplied in the response.
 	 */
 	public UnprocessableEntityException(String... theMessage) {
 		super(STATUS_CODE, theMessage);

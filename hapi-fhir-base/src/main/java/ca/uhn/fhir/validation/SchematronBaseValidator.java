@@ -43,7 +43,7 @@ import com.phloc.schematron.ISchematronResource;
 import com.phloc.schematron.SchematronHelper;
 import com.phloc.schematron.xslt.SchematronResourceSCH;
 
-public class SchematronBaseValidator implements IValidator {
+public class SchematronBaseValidator implements IValidatorModule {
 
 	private Map<Class<? extends IBaseResource>, ISchematronResource> myClassToSchematron = new HashMap<Class<? extends IBaseResource>, ISchematronResource>();
 	private FhirContext myCtx;

@@ -1,12 +1,9 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.Test;
-
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
@@ -48,9 +45,9 @@ public class ExceptionPropertiesTest {
 			}
 			
 			try {
-				next.getConstructor(String.class, BaseOperationOutcome.class);
+				next.getConstructor(String.class, IBaseOperationOutcome.class);
 			} catch (NoSuchMethodException e) {
-				fail(classInfo.getName() + " has no constructor with params: (String, OperationOutcome)");
+				fail(classInfo.getName() + " has no constructor with params: (String, IBaseOperationOutcome)");
 			}
 		}
 

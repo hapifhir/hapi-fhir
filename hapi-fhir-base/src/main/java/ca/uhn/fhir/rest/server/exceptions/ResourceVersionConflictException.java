@@ -21,7 +21,9 @@ package ca.uhn.fhir.rest.server.exceptions;
  */
 
 import net.sourceforge.cobertura.CoverageIgnore;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
+
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.server.Constants;
@@ -47,7 +49,7 @@ public class ResourceVersionConflictException extends BaseServerResponseExceptio
 	 *            The message
 	 *  @param theOperationOutcome The OperationOutcome resource to return to the client
 	 */
-	public ResourceVersionConflictException(String theMessage, BaseOperationOutcome theOperationOutcome) {
+	public ResourceVersionConflictException(String theMessage, IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, theMessage, theOperationOutcome);
 	}
 

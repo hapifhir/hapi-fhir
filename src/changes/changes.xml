@@ -6,6 +6,15 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="1.2" date="2015-07-13">
+			<action type="add">
+				JPA server now validates QuestionnaireAnswers for conformance to their respective Questionnaire
+				if one is declared.
+			</action>
+			<action type="add">
+				SyntaxHighlightingInterceptor now also highlights OperationOutcome responses for errors/exceptions.
+			</action>
+		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
 				Add support for reference implementation structures.

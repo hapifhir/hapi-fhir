@@ -54,7 +54,7 @@ public class FhirValidator {
 
 	private static volatile Boolean ourPhlocPresentOnClasspath;
 	private final FhirContext myContext;
-	private volatile List<IValidator> myValidators = new ArrayList<IValidator>();
+	private volatile List<IValidatorModule> myValidators = new ArrayList<IValidatorModule>();
 
 	/**
 	 * Constructor (this should not be called directly, but rather {@link FhirContext#newValidator()} should be called to obtain an instance of {@link FhirValidator})
@@ -78,25 +78,25 @@ public class FhirValidator {
 
 	}
 
-	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidator> type, IValidator theInstance) {
+	private void addOrRemoveValidator(boolean theValidateAgainstStandardSchema, Class<? extends IValidatorModule> type, IValidatorModule theInstance) {
 		if (theValidateAgainstStandardSchema) {
 			boolean found = haveValidatorOfType(type);
 			if (!found) {
-				registerValidator(theInstance);
+				registerValidatorModule(theInstance);
 			}
 		} else {
-			for (Iterator<IValidator> iter = myValidators.iterator(); iter.hasNext();) {
-				IValidator next = iter.next();
+			for (Iterator<IValidatorModule> iter = myValidators.iterator(); iter.hasNext();) {
+				IValidatorModule next = iter.next();
 				if (next.getClass().equals(type)) {
-					unregisterValidator(next);
+					unregisterValidatorModule(next);
 				}
 			}
 		}
 	}
 
-	private boolean haveValidatorOfType(Class<? extends IValidator> type) {
+	private boolean haveValidatorOfType(Class<? extends IValidatorModule> type) {
 		boolean found = false;
-		for (IValidator next : myValidators) {
+		for (IValidatorModule next : myValidators) {
 			if (next.getClass().equals(type)) {
 				found = true;
 			}
@@ -124,9 +124,9 @@ public class FhirValidator {
 	 * @param theValidator
 	 *           The validator module. Must not be null.
 	 */
-	public synchronized void registerValidator(IValidator theValidator) {
+	public synchronized void registerValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidator> newValidators = new ArrayList<IValidator>(myValidators.size() + 1);
+		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.add(theValidator);
 
@@ -162,9 +162,9 @@ public class FhirValidator {
 	 * @param theValidator
 	 *           The validator module. Must not be null.
 	 */
-	public synchronized void unregisterValidator(IValidator theValidator) {
+	public synchronized void unregisterValidatorModule(IValidatorModule theValidator) {
 		Validate.notNull(theValidator, "theValidator must not be null");
-		ArrayList<IValidator> newValidators = new ArrayList<IValidator>(myValidators.size() + 1);
+		ArrayList<IValidatorModule> newValidators = new ArrayList<IValidatorModule>(myValidators.size() + 1);
 		newValidators.addAll(myValidators);
 		newValidators.remove(theValidator);
 
@@ -186,7 +186,7 @@ public class FhirValidator {
 
 		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
-		for (IValidator next : myValidators) {
+		for (IValidatorModule next : myValidators) {
 			next.validateBundle(ctx);
 		}
 
@@ -227,7 +227,7 @@ public class FhirValidator {
 
 		IValidationContext<Bundle> ctx = ValidationContext.forBundle(myContext, theBundle);
 
-		for (IValidator next : myValidators) {
+		for (IValidatorModule next : myValidators) {
 			next.validateBundle(ctx);
 		}
 
@@ -247,7 +247,7 @@ public class FhirValidator {
 
 		IValidationContext<IBaseResource> ctx = ValidationContext.forResource(myContext, theResource);
 
-		for (IValidator next : myValidators) {
+		for (IValidatorModule next : myValidators) {
 			next.validateResource(ctx);
 		}
 
@@ -267,7 +267,7 @@ public class FhirValidator {
 
 		IValidationContext<IBaseResource> ctx = ValidationContext.forText(myContext, theResource);
 
-		for (IValidator next : myValidators) {
+		for (IValidatorModule next : myValidators) {
 			next.validateResource(ctx);
 		}
 
