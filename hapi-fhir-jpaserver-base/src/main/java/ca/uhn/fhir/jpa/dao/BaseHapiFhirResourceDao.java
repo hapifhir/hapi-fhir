@@ -1050,7 +1050,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return type;
 	}
 
-	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders) {
+	private void createSort(CriteriaBuilder theBuilder, Root<ResourceTable> theFrom, SortSpec theSort, List<Order> theOrders, List<Predicate> thePredicates) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
@@ -1065,7 +1065,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				theOrders.add(theBuilder.desc(theFrom.get("myId")));
 			}
 
-			createSort(theBuilder, theFrom, theSort.getChain(), theOrders);
+			createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 			return;
 		}
 
@@ -1096,6 +1096,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.INNER);
+		thePredicates.add(theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName()));
+		
 		// Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
 		// Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));
 		// thePredicates.add(theBuilder.or(p, pn));
@@ -1106,7 +1108,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			theOrders.add(theBuilder.desc(stringJoin.get(sortAttrName)));
 		}
 
-		createSort(theBuilder, theFrom, theSort.getChain(), theOrders);
+		createSort(theBuilder, theFrom, theSort.getChain(), theOrders, thePredicates);
 	}
 
 	@Override
@@ -1715,7 +1717,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
 			Root<ResourceTable> from = cq.from(ResourceTable.class);
 			predicates.add(from.get("myId").in(loadPids));
-			createSort(builder, from, theParams.getSort(), orders);
+			createSort(builder, from, theParams.getSort(), orders, predicates);
 			if (orders.size() > 0) {
 				Set<Long> originalPids = loadPids;
 				loadPids = new LinkedHashSet<Long>();

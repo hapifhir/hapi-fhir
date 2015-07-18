@@ -283,7 +283,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		
 		BaseServerResponseException bsre = (BaseServerResponseException)theException;
 		if (bsre.getOperationOutcome() == null) {
-			
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 		
 		streamResponse(theRequestDetails, theServletRequest, theServletResponse, bsre.getOperationOutcome());

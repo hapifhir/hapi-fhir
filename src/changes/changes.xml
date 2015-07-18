@@ -28,6 +28,10 @@
 				count extensions exported in the Conformance statement by the JPA
 				server.
 			</action>
+			<action type="fix" issue="198">
+				JPA server sorting often returned unexpected orders when multiple
+				indexes of the same type were found on the same resource (e.g. multiple string indexed fields). Thanks to Travis Cummings for reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
