@@ -72,6 +72,29 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
+	public void testConditionalOperations() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new ConditionalProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		RestResource res = conformance.getRest().get(0).getResource().get(1);
+		assertEquals("Patient", res.getType());
+
+		assertTrue(res.getConditionalCreate());
+		assertTrue(res.getConditionalDelete());
+		assertTrue(res.getConditionalUpdate());
+	}
+
+	@Test
 	public void testExtendedOperationReturningBundle() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -98,13 +121,14 @@ public class ServerConformanceProviderDstu2Test {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new ProviderWithExtendedOperationReturningBundle());
 
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
+		};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/everything"));
-				
+
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
@@ -165,6 +189,29 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
+	public void testNonConditionalOperations() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new NonConditionalProvider());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		RestResource res = conformance.getRest().get(0).getResource().get(1);
+		assertEquals("Patient", res.getType());
+
+		assertNull(res.getConditionalCreate());
+		assertNull(res.getConditionalDelete());
+		assertNull(res.getConditionalUpdate());
+	}
+
+	@Test
 	public void testOperationDocumentation() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -195,6 +242,33 @@ public class ServerConformanceProviderDstu2Test {
 		assertThat(conf, containsString("<documentation value=\"The patient's identifier (MRN or other card number)\"/>"));
 		assertThat(conf, containsString("<type value=\"token\"/>"));
 
+	}
+
+	@Test
+	public void testOperationOnNoTypes() throws Exception {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
+			@Override
+			public Conformance getServerConformance(HttpServletRequest theRequest) {
+				return super.getServerConformance(theRequest);
+			}
+		};
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
+		assertEquals("OperationDefinition/plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+
+		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/plain"));
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
+		ourLog.info(conf);
+
+		assertEquals("$plain", opDef.getCode());
+		assertEquals(true, opDef.getIdempotent().booleanValue());
 	}
 
 	@Test
@@ -265,52 +339,6 @@ public class ServerConformanceProviderDstu2Test {
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
 		assertThat(conf, not(containsString("<interaction><code value=\"vread\"/></interaction>")));
 		assertThat(conf, containsString("<interaction><code value=\"read\"/></interaction>"));
-	}
-
-	@Test
-	public void testConditionalOperations() throws Exception {
-
-		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new ConditionalProvider());
-
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
-		ourLog.info(conf);
-
-		RestResource res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
-		
-		assertTrue(res.getConditionalCreate());
-		assertTrue(res.getConditionalDelete());
-		assertTrue(res.getConditionalUpdate());
-	}
-
-	@Test
-	public void testNonConditionalOperations() throws Exception {
-
-		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new NonConditionalProvider());
-
-		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
-		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
-		ourLog.info(conf);
-
-		RestResource res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
-		
-		assertNull(res.getConditionalCreate());
-		assertNull(res.getConditionalDelete());
-		assertNull(res.getConditionalUpdate());
 	}
 
 	@Test
@@ -400,6 +428,30 @@ public class ServerConformanceProviderDstu2Test {
 		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
 	}
 
+	public static class ConditionalProvider implements IResourceProvider {
+
+		@Create
+		public MethodOutcome create(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+			return null;
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Update
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
+			return null;
+		}
+
+	}
+
 	public static class InstanceHistoryProvider implements IResourceProvider {
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -420,6 +472,39 @@ public class ServerConformanceProviderDstu2Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) IdentifierDt theIdentifier, @Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringDt theName) {
+			return null;
+		}
+
+	}
+
+	public static class NonConditionalProvider implements IResourceProvider {
+
+		@Create
+		public MethodOutcome create(@ResourceParam Patient thePatient) {
+			return null;
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IdDt theId) {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Update
+		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
+			return null;
+		}
+
+	}
+
+	public static class PlainProviderWithExtendedOperationOnNoType {
+
+		@Operation(name = "plain", idempotent = true)
+		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}
 
@@ -497,54 +582,6 @@ public class ServerConformanceProviderDstu2Test {
 
 		@History
 		public List<IBaseResource> history() {
-			return null;
-		}
-
-	}
-
-	public static class ConditionalProvider implements IResourceProvider {
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Create
-		public MethodOutcome create(@ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
-			return null;
-		}
-
-		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient, @ConditionalUrlParam String theConditionalUrl) {
-			return null;
-		}
-
-		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl) {
-			return null;
-		}
-
-	}
-
-	public static class NonConditionalProvider implements IResourceProvider {
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Patient.class;
-		}
-
-		@Create
-		public MethodOutcome create(@ResourceParam Patient thePatient) {
-			return null;
-		}
-
-		@Update
-		public MethodOutcome update(@IdParam IdDt theId, @ResourceParam Patient thePatient) {
-			return null;
-		}
-
-		@Delete
-		public MethodOutcome delete(@IdParam IdDt theId) {
 			return null;
 		}
 

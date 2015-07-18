@@ -98,8 +98,15 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 				}
 			}
 		}
-		
+
+		for (int i = 0; i < baseResourceNames.size(); i++) {
+			baseResourceNames.set(i, baseResourceNames.get(i).toLowerCase());
+		}
+
 		if (excludeResourceNames != null) {
+			for (int i = 0; i < excludeResourceNames.size(); i++) {
+				excludeResourceNames.set(i, excludeResourceNames.get(i).toLowerCase());
+			}
 			baseResourceNames.removeAll(excludeResourceNames);
 		}
 		

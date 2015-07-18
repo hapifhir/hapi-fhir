@@ -293,6 +293,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			} else {
 				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
+					if (nextMethodBinding instanceof OperationMethodBinding) {
+						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+						String opName = myOperationBindingToName.get(methodBinding);
+						rest.addOperation().setName(methodBinding.getName()).getDefinition().setReference("OperationDefinition/" + opName);
+					}
 				}
 			}
 		}
