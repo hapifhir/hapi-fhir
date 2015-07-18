@@ -34,9 +34,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -50,61 +48,25 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 	private Class<?>[] myReturnStackTracesForExceptionTypes;
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
-		IBaseOperationOutcome oo = null;
-		int statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
-		if (theException instanceof BaseServerResponseException) {
-			oo = ((BaseServerResponseException) theException).getOperationOutcome();
-			statusCode = ((BaseServerResponseException) theException).getStatusCode();
-		}
-
-		/*
-		 * Generate an OperationOutcome to return, unless the exception throw by the resource provider had one
-		 */
+		IBaseOperationOutcome oo = theException.getOperationOutcome();
 		if (oo == null) {
-			try {
-				RuntimeResourceDefinition ooDef = ctx.getResourceDefinition("OperationOutcome");
-				oo = (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
-
-				if (theException instanceof InternalErrorException) {
-					ourLog.error("Failure during REST processing", theException);
-					populateDetails(ctx, theException, oo);
-				} else if (theException instanceof BaseServerResponseException) {
-					ourLog.warn("Failure during REST processing: {}", theException);
-					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;
-					statusCode = baseServerResponseException.getStatusCode();
-					populateDetails(ctx, theException, oo);
-					if (baseServerResponseException.getAdditionalMessages() != null) {
-						for (String next : baseServerResponseException.getAdditionalMessages()) {
-							OperationOutcomeUtil.addIssue(ctx, oo, "error", next);
-						}
-					}
-				} else {
-					ourLog.error("Failure during REST processing: " + theException.toString(), theException);
-					populateDetails(ctx, theException, oo);
-					statusCode = Constants.STATUS_HTTP_500_INTERNAL_ERROR;
-				}
-			} catch (Exception e1) {
-				ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
-				throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
-			}
-		} else {
-			ourLog.error("Unknown error during processing", theException);
+			oo = createOperationOutcome(theException, ctx);
 		}
+
+		int statusCode = theException.getStatusCode();
 
 		// Add headers associated with the specific error code
-		if (theException instanceof BaseServerResponseException) {
-			Map<String, String[]> additional = ((BaseServerResponseException) theException).getAssociatedHeaders();
-			if (additional != null) {
-				for (Entry<String, String[]> next : additional.entrySet()) {
-					if (isNotBlank(next.getKey()) && next.getValue() != null) {
-						String nextKey = next.getKey();
-						for (String nextValue : next.getValue()) {
-							theResponse.addHeader(nextKey, nextValue);
-						}
+		Map<String, String[]> additional = theException.getAssociatedHeaders();
+		if (additional != null) {
+			for (Entry<String, String[]> next : additional.entrySet()) {
+				if (isNotBlank(next.getKey()) && next.getValue() != null) {
+					String nextKey = next.getKey();
+					for (String nextValue : next.getValue()) {
+						theResponse.addHeader(nextKey, nextValue);
 					}
 				}
 			}
@@ -122,6 +84,61 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		// theResponse.getWriter().close();
 
 		return false;
+	}
+
+	@Override
+	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
+		BaseServerResponseException retVal;
+		if (!(theException instanceof BaseServerResponseException)) {
+			retVal = new InternalErrorException(theException);
+		} else {
+			retVal = (BaseServerResponseException) theException;
+		}
+		
+		if (retVal.getOperationOutcome() == null) {
+			retVal.setOperationOutcome(createOperationOutcome(theException, theRequestDetails.getServer().getFhirContext()));
+		}
+
+		return retVal;
+	}
+
+	private IBaseOperationOutcome createOperationOutcome(Throwable theException, FhirContext ctx) throws ServletException {
+		IBaseOperationOutcome oo = null;
+		if (theException instanceof BaseServerResponseException) {
+			oo = ((BaseServerResponseException) theException).getOperationOutcome();
+		}
+
+		/*
+		 * Generate an OperationOutcome to return, unless the exception throw by the resource provider had one
+		 */
+		if (oo == null) {
+			try {
+				oo = OperationOutcomeUtil.newInstance(ctx);
+
+				if (theException instanceof InternalErrorException) {
+					ourLog.error("Failure during REST processing", theException);
+					populateDetails(ctx, theException, oo);
+				} else if (theException instanceof BaseServerResponseException) {
+					ourLog.warn("Failure during REST processing: {}", theException);
+					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;
+					populateDetails(ctx, theException, oo);
+					if (baseServerResponseException.getAdditionalMessages() != null) {
+						for (String next : baseServerResponseException.getAdditionalMessages()) {
+							OperationOutcomeUtil.addIssue(ctx, oo, "error", next);
+						}
+					}
+				} else {
+					ourLog.error("Failure during REST processing: " + theException.toString(), theException);
+					populateDetails(ctx, theException, oo);
+				}
+			} catch (Exception e1) {
+				ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
+				throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
+			}
+		} else {
+			ourLog.error("Unknown error during processing", theException);
+		}
+		return oo;
 	}
 
 	private void populateDetails(FhirContext theCtx, Throwable theException, IBaseOperationOutcome theOo) {
@@ -151,5 +168,5 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		myReturnStackTracesForExceptionTypes = theExceptionTypes;
 		return this;
 	}
-	
+
 }

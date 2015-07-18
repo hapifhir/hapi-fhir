@@ -34,6 +34,8 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+
 /**
  * Utilities for dealing with OperationOutcome resources across various model versions
  */
@@ -42,10 +44,14 @@ public class OperationOutcomeUtil {
 	/**
 	 * Add an issue to an OperationOutcome
 	 * 
-	 * @param theCtx The fhir context
-	 * @param theOperationOutcome The OO resource to add to
-	 * @param theSeverity The severity (e.g. "error")
-	 * @param theDetails The details string
+	 * @param theCtx
+	 *           The fhir context
+	 * @param theOperationOutcome
+	 *           The OO resource to add to
+	 * @param theSeverity
+	 *           The severity (e.g. "error")
+	 * @param theDetails
+	 *           The details string
 	 */
 	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
@@ -55,10 +61,14 @@ public class OperationOutcomeUtil {
 	/**
 	 * Add an issue to an OperationOutcome
 	 * 
-	 * @param theCtx The fhir context
-	 * @param theOperationOutcome The OO resource to add to
-	 * @param theSeverity The severity (e.g. "error")
-	 * @param theDetails The details string
+	 * @param theCtx
+	 *           The fhir context
+	 * @param theOperationOutcome
+	 *           The OO resource to add to
+	 * @param theSeverity
+	 *           The severity (e.g. "error")
+	 * @param theDetails
+	 *           The details string
 	 */
 	public static void addIssue(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome, String theSeverity, String theDetails, String theLocation) {
 		IBase issue = createIssue(theCtx, theOperationOutcome);
@@ -75,26 +85,36 @@ public class OperationOutcomeUtil {
 		return issue;
 	}
 
-	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation) {
-		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName("details");
-		BaseRuntimeElementDefinition<?> stringDef = theCtx.getElementDefinition("string");
-		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
-		BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");
+	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getFirstIssueStringPart(theCtx, theOutcome, "details");
+	}
 
-		IPrimitiveType<?> severityElem = (IPrimitiveType<?>) severityChild.getChildByName("severity").newInstance(severityChild.getInstanceConstructorArguments());
-		severityElem.setValueAsString(theSeverity);
-		severityChild.getMutator().addValue(theIssue, severityElem);
+	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
+		return getFirstIssueStringPart(theCtx, theOutcome, "location");
+	}
 
-		IPrimitiveType<?> string = (IPrimitiveType<?>) stringDef.newInstance();
-		string.setValueAsString(theDetails);
-		detailsChild.getMutator().setValue(theIssue, string);
-		
-		if (isNotBlank(theLocation)) {
-			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild.getChildByName("location").newInstance(locationChild.getInstanceConstructorArguments());
-			locationElem.setValueAsString(theLocation);
-			locationChild.getMutator().addValue(theIssue, locationElem);
+	private static String getFirstIssueStringPart(FhirContext theCtx, IBaseOperationOutcome theOutcome, String name) {
+		if (theOutcome == null) {
+			return null;
 		}
+
+		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
+		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
+
+		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
+		if (issues.isEmpty()) {
+			return null;
+		}
+
+		IBase issue = issues.get(0);
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
+		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
+
+		List<IBase> details = detailsChild.getAccessor().getValues(issue);
+		if (details.isEmpty()) {
+			return null;
+		}
+		return ((IPrimitiveType<?>) details.get(0)).getValueAsString();
 	}
 
 	/**
@@ -109,36 +129,37 @@ public class OperationOutcomeUtil {
 		return issueChild.getAccessor().getValues(theOutcome).size() > 0;
 	}
 
-	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "details");
+	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
+		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition("OperationOutcome");
+		try {
+			return (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
+		} catch (InstantiationException e) {
+			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+		} catch (IllegalAccessException e) {
+			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+		}
 	}
 
-	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "location");
-	}
+	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation) {
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
+		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName("details");
+		BaseRuntimeElementDefinition<?> stringDef = theCtx.getElementDefinition("string");
+		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
+		BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");
 
-	private static String getFirstIssueStringPart(FhirContext theCtx, IBaseOperationOutcome theOutcome, String name) {
-		if (theOutcome == null) {
-			return null;
+		IPrimitiveType<?> severityElem = (IPrimitiveType<?>) severityChild.getChildByName("severity").newInstance(severityChild.getInstanceConstructorArguments());
+		severityElem.setValueAsString(theSeverity);
+		severityChild.getMutator().addValue(theIssue, severityElem);
+
+		IPrimitiveType<?> string = (IPrimitiveType<?>) stringDef.newInstance();
+		string.setValueAsString(theDetails);
+		detailsChild.getMutator().setValue(theIssue, string);
+
+		if (isNotBlank(theLocation)) {
+			IPrimitiveType<?> locationElem = (IPrimitiveType<?>) locationChild.getChildByName("location").newInstance(locationChild.getInstanceConstructorArguments());
+			locationElem.setValueAsString(theLocation);
+			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
-		
-		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
-		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
-		
-		List<IBase> issues = issueChild.getAccessor().getValues(theOutcome);
-		if (issues.isEmpty()) {
-			return null;
-		}
-		
-		IBase issue = issues.get(0);
-		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(issue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName(name);
-		
-		List<IBase> details = detailsChild.getAccessor().getValues(issue);
-		if (details.isEmpty()) {
-			return null;
-		}
-		return ((IPrimitiveType<?>)details.get(0)).getValueAsString();
 	}
 
 }

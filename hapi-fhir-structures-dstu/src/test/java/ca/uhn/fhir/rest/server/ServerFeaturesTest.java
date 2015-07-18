@@ -53,7 +53,7 @@ public class ServerFeaturesTest {
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
-	
+
 	@Test
 	public void testPrettyPrint() throws Exception {
 		/*
@@ -129,9 +129,6 @@ public class ServerFeaturesTest {
 
 	}
 
-
-
-	
 	@Test
 	public void testAcceptHeaderWithMultiple() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
@@ -150,10 +147,10 @@ public class ServerFeaturesTest {
 
 		assertThat(responseContent, StringContains.containsString("<identifier><use"));
 	}
-	
+
 	@Test
 	public void testAcceptHeaderWithMultipleJson() throws Exception {
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/plain, " + Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -227,7 +224,7 @@ public class ServerFeaturesTest {
 		assertThat(responseContent, StringContains.containsString("\"identifier\":"));
 
 	}
-	
+
 	@Test
 	public void testInternalErrorIfNoId() throws Exception {
 
@@ -252,17 +249,17 @@ public class ServerFeaturesTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		
+
 		Bundle bundle = servlet.getFhirContext().newXmlParser().parseBundle(responseContent);
-		assertEquals(2,bundle.size());
-		
+		assertEquals(2, bundle.size());
+
 		assertEquals("http://absolute.com/Patient/123", bundle.getEntries().get(0).getId().getValue());
 		assertEquals("http://absolute.com/Patient/123/_history/22", bundle.getEntries().get(0).getLinkSelf().getValue());
 
-		assertEquals("http://foo.com/Organization/222",bundle.getEntries().get(1).getId().getValue());
-		assertEquals("http://foo.com/Organization/222/_history/333",bundle.getEntries().get(1).getLinkSelf().getValue());
+		assertEquals("http://foo.com/Organization/222", bundle.getEntries().get(1).getId().getValue());
+		assertEquals("http://foo.com/Organization/222/_history/333", bundle.getEntries().get(1).getLinkSelf().getValue());
 	}
-	
+
 	@Test
 	public void testSearchWithWildcardRetVal() throws Exception {
 
@@ -277,7 +274,6 @@ public class ServerFeaturesTest {
 
 	}
 
-	
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -288,7 +284,6 @@ public class ServerFeaturesTest {
 		servlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());
 	}
 
-	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
@@ -299,7 +294,7 @@ public class ServerFeaturesTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		servlet = new RestfulServer(ourCtx);
 		servlet.setResourceProviders(patientProvider);
-        servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
+		servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -343,7 +338,7 @@ public class ServerFeaturesTest {
 		 * Retrieve the resource by its identifier
 		 * 
 		 * @param theId
-		 *            The resource identity
+		 *           The resource identity
 		 * @return The resource
 		 */
 		@Read()
@@ -353,20 +348,19 @@ public class ServerFeaturesTest {
 			return retVal;
 		}
 
-		
-		@Search(queryName="searchWithWildcardRetVal")
+		@Search(queryName = "searchWithWildcardRetVal")
 		public List<? extends IResource> searchWithWildcardRetVal() {
 			Patient p = new Patient();
 			p.setId("1234");
 			p.addName().addFamily("searchWithWildcardRetVal");
 			return Collections.singletonList(p);
 		}
-		
+
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
 		 * @param theId
-		 *            The resource identity
+		 *           The resource identity
 		 * @return The resource
 		 */
 		@Search()
@@ -391,15 +385,14 @@ public class ServerFeaturesTest {
 			Patient p = new Patient();
 			p.addIdentifier().setSystem("foo");
 			p.setId("http://absolute.com/Patient/123/_history/22");
-			
+
 			Organization o = new Organization();
 			o.setId("http://foo.com/Organization/222/_history/333");
 			p.getManagingOrganization().setResource(o);
-			
+
 			return Collections.singletonList(p);
 		}
 
-		
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;

@@ -32,6 +32,11 @@
 				JPA server sorting often returned unexpected orders when multiple
 				indexes of the same type were found on the same resource (e.g. multiple string indexed fields). Thanks to Travis Cummings for reporting!
 			</action>
+			<action type="add">
+				Add another method to IServerInterceptor which converts an exception generated on the server
+				into a BaseServerResponseException. This is useful so that servers using ResponseHighlighterInterceptor
+				will highlight exceptions even if they aren't created with an OperationOutcome.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

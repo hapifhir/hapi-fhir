@@ -32,6 +32,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 /**
  * Base class for {@link IServerInterceptor} implementations. Provides a No-op implementation
@@ -70,7 +71,12 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
+	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
+		return null;
+	}
+	
+	@Override
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
 			IOException {
 		return true;
 	}

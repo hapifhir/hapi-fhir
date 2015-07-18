@@ -253,7 +253,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
 		/*
 		 * It's not a browser...
 		 */

@@ -275,38 +275,6 @@ public class RestfulServer extends HttpServlet {
 		return count;
 	}
 
-	private void findSystemMethods(Object theSystemProvider) {
-		Class<?> clazz = theSystemProvider.getClass();
-
-		findSystemMethods(theSystemProvider, clazz);
-
-	}
-
-	private void findSystemMethods(Object theSystemProvider, Class<?> clazz) {
-		Class<?> supertype = clazz.getSuperclass();
-		if (!Object.class.equals(supertype)) {
-			findSystemMethods(theSystemProvider, supertype);
-		}
-
-		for (Method m : ReflectionUtil.getDeclaredMethods(clazz)) {
-			if (Modifier.isPublic(m.getModifiers())) {
-				ourLog.debug("Scanning public method: {}#{}", theSystemProvider.getClass(), m.getName());
-
-				BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theSystemProvider);
-				if (foundMethodBinding != null) {
-					if (foundMethodBinding instanceof ConformanceMethodBinding) {
-						myServerConformanceMethod = foundMethodBinding;
-					} else {
-						myServerBinding.addMethod(foundMethodBinding);
-					}
-					ourLog.debug(" * Method: {}#{} is a handler", theSystemProvider.getClass(), m.getName());
-				} else {
-					ourLog.debug(" * Method: {}#{} is not a handler", theSystemProvider.getClass(), m.getName());
-				}
-			}
-		}
-	}
-
 	/**
 	 * Returns the setting for automatically adding profile tags
 	 *
@@ -547,6 +515,9 @@ public class RestfulServer extends HttpServlet {
 		boolean requestIsBrowser = requestIsBrowser(theRequest);
 		RequestDetails requestDetails = new RequestDetails();
 		requestDetails.setServer(this);
+		requestDetails.setRequestType(theRequestType);
+		requestDetails.setServletRequest(theRequest);
+		requestDetails.setServletResponse(theResponse);
 
 		try {
 
@@ -676,13 +647,9 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 			requestDetails.setRespondGzip(respondGzip);
-
-			requestDetails.setRequestType(theRequestType);
+			requestDetails.setRequestPath(requestPath);
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
-			requestDetails.setServletRequest(theRequest);
-			requestDetails.setServletResponse(theResponse);
-			requestDetails.setRequestPath(requestPath);
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
@@ -705,16 +672,13 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 			if (resourceMethod == null) {
-				StringBuilder b = new StringBuilder();
-				b.append("No resource method available for ");
-				b.append(theRequestType.name());
-				b.append(" operation[");
-				b.append(requestPath);
-				b.append("]");
-				b.append(" with parameters ");
-				b.append(params.keySet());
-				throw new InvalidRequestException(b.toString());
+				if (isBlank(requestPath)) {
+					throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
+				} else {
+					throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, params.keySet()));
+				}
 			}
+			
 			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
 			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
 			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());
@@ -758,18 +722,32 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
+			BaseServerResponseException exception = null;
+			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
+				IServerInterceptor next = getInterceptors().get(i);
+				exception = next.preProcessOutgoingException(requestDetails, exception, theRequest);
+				if (exception != null) {
+					ourLog.debug("Interceptor {} returned false, not continuing processing");
+					break;
+				}
+			}
+
+			if (exception == null) {
+				exception = new ExceptionHandlingInterceptor().preProcessOutgoingException(requestDetails, e, theRequest);
+			}
+			
 			/*
 			 * We have caught an exception while handling an incoming server request. Start by notifying the interceptors..
 			 */
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				if (!next.handleException(requestDetails, e, theRequest, theResponse)) {
+				if (!next.handleException(requestDetails, exception, theRequest, theResponse)) {
 					ourLog.debug("Interceptor {} returned false, not continuing processing");
 					return;
 				}
 			}
 
-			new ExceptionHandlingInterceptor().handleException(requestDetails, e, theRequest, theResponse);
+			new ExceptionHandlingInterceptor().handleException(requestDetails, exception, theRequest, theResponse);
 
 		}
 	}
