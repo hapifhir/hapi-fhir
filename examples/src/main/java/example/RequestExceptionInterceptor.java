@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 
@@ -16,16 +15,11 @@ public class RequestExceptionInterceptor extends InterceptorAdapter
 {
 
    @Override
-   public boolean handleException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest,
+   public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest,
          HttpServletResponse theServletResponse) throws ServletException, IOException {
       
-      // If the exception is a built-in type, it defines the correct status
-      // code to return. Otherwise default to 500.
-      if (theException instanceof BaseServerResponseException) {
-         theServletResponse.setStatus(((BaseServerResponseException) theException).getStatusCode());
-      } else {
-         theServletResponse.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
-      }
+      // HAPI's server exceptions know what the appropriate HTTP status code is
+      theServletResponse.setStatus(theException.getStatusCode());
       
       // Provide a response ourself
       theServletResponse.setContentType("text/plain");

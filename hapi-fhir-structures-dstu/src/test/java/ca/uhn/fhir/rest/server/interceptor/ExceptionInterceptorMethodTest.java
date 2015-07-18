@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
 
@@ -51,7 +52,7 @@ public class ExceptionInterceptorMethodTest {
 
 		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
-		when(myInterceptor.handleException(any(RequestDetails.class), any(Throwable.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -59,7 +60,7 @@ public class ExceptionInterceptorMethodTest {
 		assertEquals(422, status.getStatusLine().getStatusCode());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		ArgumentCaptor<Throwable> captor = ArgumentCaptor.forClass(Throwable.class);
+		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
 		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
 
 		assertEquals(UnprocessableEntityException.class, captor.getValue().getClass());
@@ -72,7 +73,7 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		
-		when(myInterceptor.handleException(any(RequestDetails.class), any(Throwable.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenAnswer(new Answer<Boolean>() {
+		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
 				HttpServletResponse resp = (HttpServletResponse) theInvocation.getArguments()[3];

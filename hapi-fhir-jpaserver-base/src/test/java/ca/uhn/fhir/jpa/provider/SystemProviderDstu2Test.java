@@ -8,7 +8,6 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -40,7 +40,6 @@ public class SystemProviderDstu2Test  extends BaseJpaTest {
 
 	@Test
 	public void testTransactionFromBundle() throws Exception {
-
 		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes);
 		String response = ourClient.transaction().withBundle(bundle).prettyPrint().execute();
@@ -59,6 +58,12 @@ public class SystemProviderDstu2Test  extends BaseJpaTest {
 		ourLog.info(response);
 	}
 
+	@Test
+	public void testGetOperationDefinition() {
+		OperationDefinition op = ourClient.read(OperationDefinition.class, "get-resource-counts");
+		assertEquals("$get-resource-counts", op.getCode());
+	}
+	
 	@Test
 	public void testTransactionFromBundle2() throws Exception {
 
