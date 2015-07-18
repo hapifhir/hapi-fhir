@@ -820,6 +820,9 @@ public class XmlParser extends BaseParser implements IParser {
 					}
 					if (tags != null) {
 						for (Tag tag : tags) {
+							if (tag.isEmpty()) {
+								continue;
+							}
 							theEventWriter.writeStartElement("tag");
 							writeOptionalTagWithValue(theEventWriter, "system", tag.getScheme());
 							writeOptionalTagWithValue(theEventWriter, "code", tag.getTerm());

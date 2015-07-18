@@ -59,6 +59,8 @@ import org.xml.sax.SAXException;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseNarrativeDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserHl7OrgTest.MyPatientWithOneDeclaredAddressExtension;
@@ -598,6 +600,27 @@ public class XmlParserHl7OrgDstu2Test {
 
 	}
 
+	/**
+	 * #158
+	 */
+	@Test
+	public void testEncodeEmptyTag() {
+		Patient p = new Patient();
+		p.getMeta().addTag();
+		
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(encoded, not(containsString("tag")));
+
+		// With tag
+		
+		p = new Patient();
+		p.getMeta().addTag().setSystem("sys").setCode("code");
+		
+		encoded = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(encoded, (containsString("tag")));
+	}
+
+	
 	/**
 	 * Thanks to Alexander Kley!
 	 */

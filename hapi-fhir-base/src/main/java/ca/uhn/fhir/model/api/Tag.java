@@ -138,9 +138,12 @@ public class Tag extends BaseElement implements IElement {
 		return result;
 	}
 
+	/**
+	 * Returns <code>true</code> if either scheme or term is populated.
+	 */
 	@Override
 	public boolean isEmpty() {
-		return StringUtils.isBlank(myLabel) && StringUtils.isBlank(myScheme) && StringUtils.isBlank(myTerm);
+		return StringUtils.isBlank(myScheme) && StringUtils.isBlank(myTerm);
 	}
 
 	/**

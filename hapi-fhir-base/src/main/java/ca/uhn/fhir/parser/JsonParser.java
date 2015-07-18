@@ -754,6 +754,9 @@ public class JsonParser extends BaseParser implements IParser {
 				if (tags != null && tags.isEmpty() == false) {
 					theEventWriter.writeStartArray("tag");
 					for (Tag tag : tags) {
+						if (tag.isEmpty()) {
+							continue;
+						}
 						theEventWriter.writeStartObject();
 						writeOptionalTagWithTextNode(theEventWriter, "system", tag.getScheme());
 						writeOptionalTagWithTextNode(theEventWriter, "code", tag.getTerm());

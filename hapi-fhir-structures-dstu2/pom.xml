@@ -36,6 +36,12 @@
 			<artifactId>junit</artifactId>
 			<version>${junit_version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>hamcrest-core</artifactId>
+					<groupId>org.hamcrest</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>xmlunit</groupId>

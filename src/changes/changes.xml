@@ -37,6 +37,10 @@
 				into a BaseServerResponseException. This is useful so that servers using ResponseHighlighterInterceptor
 				will highlight exceptions even if they aren't created with an OperationOutcome.
 			</action>
+			<action type="fix" issue="158">
+				XmlParser and JsonParser in DSTU2 mode should not encode empty
+				tags in resource. Thanks to Bill De Beaubien for reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

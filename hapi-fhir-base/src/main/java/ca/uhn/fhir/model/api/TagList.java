@@ -191,7 +191,12 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 
 	@Override
 	public boolean isEmpty() {
-		return myTagSet.isEmpty();
+		for (Tag next : myTagSet) {
+			if (next.isEmpty() == false) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

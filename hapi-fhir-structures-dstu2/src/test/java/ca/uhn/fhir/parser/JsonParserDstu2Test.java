@@ -55,430 +55,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 
 public class JsonParserDstu2Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
-
-	@Test
-	public void testOmitResourceId() {
-		Patient p = new Patient();
-		p.setId("123");
-		p.addName().addFamily("ABC");
-		
-		assertThat(ourCtx.newJsonParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
-		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
-		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
-	}
-
-	@Test
-	public void testParseAndEncodeBundleWithUuidBase() {
-		//@formatter:off
-		String input = 
-				"{\n" + 
-				"    \"resourceType\":\"Bundle\",\n" + 
-				"    \"type\":\"document\",\n" + 
-				"    \"entry\":[\n" + 
-				"        {\n" + 
-				"            \"base\":\"urn:uuid:\",\n" + 
-				"            \"resource\":{\n" + 
-				"                \"resourceType\":\"Composition\",\n" + 
-				"                \"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\",\n" + 
-				"                \"meta\":{\n" + 
-				"                    \"lastUpdated\":\"2013-05-28T22:12:21Z\"\n" + 
-				"                },\n" + 
-				"                \"text\":{\n" + 
-				"                    \"status\":\"generated\",\n" + 
-				"                    \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 180f219f-97a8-486d-99d9-ed631fe4fc57</p><p><b>meta</b>: </p><p><b>date</b>: Feb 1, 2013 12:30:02 PM</p><p><b>type</b>: Discharge Summary from Responsible Clinician <span>(Details : {LOINC code '28655-9' = 'Physician attending Discharge summary)</span></p><p><b>status</b>: final</p><p><b>confidentiality</b>: N</p><p><b>author</b>: <a>Doctor Dave. Generated Summary: 23; Adam Careful </a></p><p><b>encounter</b>: <a>http://fhir.healthintersections.com.au/open/Encounter/doc-example</a></p></div>\"\n" + 
-				"                },\n" + 
-				"                \"date\":\"2013-02-01T12:30:02Z\",\n" + 
-				"                \"type\":{\n" + 
-				"                    \"coding\":[\n" + 
-				"                        {\n" + 
-				"                            \"system\":\"http://loinc.org\",\n" + 
-				"                            \"code\":\"28655-9\"\n" + 
-				"                        }\n" + 
-				"                    ],\n" + 
-				"                    \"text\":\"Discharge Summary from Responsible Clinician\"\n" + 
-				"                },\n" + 
-				"                \"status\":\"final\",\n" + 
-				"                \"confidentiality\":\"N\",\n" + 
-				"                \"subject\":{\n" + 
-				"                    \"reference\":\"http://fhir.healthintersections.com.au/open/Patient/d1\",\n" + 
-				"                    \"display\":\"Eve Everywoman\"\n" + 
-				"                },\n" + 
-				"                \"author\":[\n" + 
-				"                    {\n" + 
-				"                        \"reference\":\"Practitioner/example\",\n" + 
-				"                        \"display\":\"Doctor Dave\"\n" + 
-				"                    }\n" + 
-				"                ],\n" + 
-				"                \"encounter\":{\n" + 
-				"                    \"reference\":\"http://fhir.healthintersections.com.au/open/Encounter/doc-example\"\n" + 
-				"                },\n" + 
-				"                \"section\":[\n" + 
-				"                    {\n" + 
-				"                        \"title\":\"Reason for admission\",\n" + 
-				"                        \"content\":{\n" + 
-				"                            \"reference\":\"urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a\"\n" + 
-				"                        }\n" + 
-				"                    },\n" + 
-				"                    {\n" + 
-				"                        \"title\":\"Medications on Discharge\",\n" + 
-				"                        \"content\":{\n" + 
-				"                            \"reference\":\"urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1\"\n" + 
-				"                        }\n" + 
-				"                    },\n" + 
-				"                    {\n" + 
-				"                        \"title\":\"Known allergies\",\n" + 
-				"                        \"content\":{\n" + 
-				"                            \"reference\":\"urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b\"\n" + 
-				"                        }\n" + 
-				"                    }\n" + 
-				"                ]\n" + 
-				"            }\n" + 
-				"        }" +
-				"    ]" +
-				"}";
-		//@formatter:on
-		
-		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
-		
-		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
-		ourLog.info(encoded);
-		
-		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
-		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
-		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
-		assertThat(encoded, containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\""));
-	}
-
-	
-	@Test
-	public void testParseBundleWithBinary() {
-		Binary patient = new Binary();
-		patient.setId(new IdDt("http://base/Binary/11/_history/22"));
-		patient.setContentType("foo");
-		patient.setContent(new byte[] { 1, 2, 3, 4 });
-
-		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
-	}
-
-	
-	@Test
-	public void testEncodingNullExtension() {
-		Patient p = new Patient();
-		ExtensionDt extension = new ExtensionDt(false, "http://foo#bar");
-		p.addUndeclaredExtension(extension);
-		String str = ourCtx.newJsonParser().encodeResourceToString(p);
-
-		assertEquals("{\"resourceType\":\"Patient\"}", str);
-
-		extension.setValue(new StringDt());
-
-		str = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertEquals("{\"resourceType\":\"Patient\"}", str);
-
-		extension.setValue(new StringDt(""));
-
-		str = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertEquals("{\"resourceType\":\"Patient\"}", str);
-
-	}
-
-	/**
-	 * See #163
-	 */
-	@Test
-	public void testParseResourceType() {
-		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
-
-		// Patient
-		Patient patient = new Patient();
-		String patientId = UUID.randomUUID().toString();
-		patient.setId(new IdDt("Patient", patientId));
-		patient.addName().addGiven("John").addFamily("Smith");
-		patient.setGender(AdministrativeGenderEnum.MALE);
-		patient.setBirthDate(new DateDt("1987-04-16"));
-
-		// Bundle
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		bundle.setType(BundleTypeEnum.COLLECTION);
-		bundle.addEntry().setResource(patient);
-
-		String bundleText = jsonParser.encodeResourceToString(bundle);
-		ourLog.info(bundleText);
-		
-		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = jsonParser.parseResource (ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
-		Patient reincarnatedPatient = (Patient) reincarnatedBundle.getEntry().get(0).getResource(); 
-		
-		assertEquals("Patient", patient.getId().getResourceType());
-		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());
-	}
-
-	/**
-	 * See #144 and #146
-	 */
-	@Test
-	public void testReportSerialize() {
-
-		ReportObservation obsv = new ReportObservation();
-		obsv.getCode().addCoding().setCode("name");
-		obsv.setValue(new StringDt("value test"));
-		obsv.setStatus(ObservationStatusEnum.FINAL);
-		obsv.setReliability(ObservationReliabilityEnum.OK);
-		obsv.addIdentifier().setSystem("System").setValue("id value");
-
-		DiagnosticReport report = new DiagnosticReport();
-		report.getContained().getContainedResources().add(obsv);
-		report.addResult().setResource(obsv);
-
-		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
-		String message = parser.encodeResourceToString(report);
-		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
-	}
-
-	@Test
-	public void testEncodeBundleOldBundleNoText() {
-
-		Bundle b = new Bundle();
-
-		BundleEntry e = b.addEntry();
-		e.setResource(new Patient());
-		b.addCategory("scheme", "term", "label");
-
-		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
-		ourLog.info(val);
-
-		assertThat(val, not(containsString("text")));
-
-		b = ourCtx.newJsonParser().parseBundle(val);
-		assertEquals(1, b.getEntries().size());
-
-	}
-
-	@Test
-	public void testEncodeBundleNewBundleNoText() {
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		b.getText().setDiv("");
-		b.getText().getStatus().setValueAsString("");
-		;
-
-		Entry e = b.addEntry();
-		e.setResource(new Patient());
-
-		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
-		ourLog.info(val);
-		assertThat(val, not(containsString("text")));
-
-		val = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
-		ourLog.info(val);
-		assertThat(val, not(containsString("text")));
-
-	}
-
-	/**
-	 * See #144 and #146
-	 */
-	@Test
-	public void testReportSerializeWithMatchingId() {
-
-		ReportObservation obsv = new ReportObservation();
-		obsv.getCode().addCoding().setCode("name");
-		obsv.setValue(new StringDt("value test"));
-		obsv.setStatus(ObservationStatusEnum.FINAL);
-		obsv.setReliability(ObservationReliabilityEnum.OK);
-		obsv.addIdentifier().setSystem("System").setValue("id value");
-
-		DiagnosticReport report = new DiagnosticReport();
-		report.getContained().getContainedResources().add(obsv);
-
-		obsv.setId("#123");
-		report.addResult().setReference("#123");
-
-		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
-		String message = parser.encodeResourceToString(report);
-		ourLog.info(message);
-		Assert.assertThat(message, containsString("contained"));
-	}
-
-	/**
-	 * see #144 and #146
-	 */
-	@Test
-	public void testParseContained() {
-
-		FhirContext c = FhirContext.forDstu2();
-		IParser parser = c.newJsonParser().setPrettyPrint(true);
-
-		Observation o = new Observation();
-		o.getCode().setText("obs text");
-
-		Patient p = new Patient();
-		p.addName().addFamily("patient family");
-		o.getSubject().setResource(p);
-
-		String enc = parser.encodeResourceToString(o);
-		ourLog.info(enc);
-
-		//@formatter:off
-		assertThat(enc, stringContainsInOrder(
-			"\"resourceType\":\"Observation\"",
-			"\"contained\":[",
-			"\"resourceType\":\"Patient\",",
-			"\"id\":\"1\"",
-			"\"reference\":\"#1\""
-			));
-		//@formatter:on
-
-		o = parser.parseResource(Observation.class, enc);
-		assertEquals("obs text", o.getCode().getText());
-
-		assertNotNull(o.getSubject().getResource());
-		p = (Patient) o.getSubject().getResource();
-		assertEquals("patient family", p.getNameFirstRep().getFamilyAsSingleString());
-	}
-
-	@Test
-	public void testEncodeAndParseMetaProfileAndTags() {
-		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
-
-		List<IdDt> profiles = new ArrayList<IdDt>();
-		profiles.add(new IdDt("http://foo/Profile1"));
-		profiles.add(new IdDt("http://foo/Profile2"));
-		ResourceMetadataKeyEnum.PROFILES.put(p, profiles);
-
-		TagList tagList = new TagList();
-		tagList.addTag("scheme1", "term1", "label1");
-		tagList.addTag("scheme2", "term2", "label2");
-		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
-
-		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(enc);
-
-		//@formatter:off
-		assertThat(enc, stringContainsInOrder("\"meta\":{", 
-				"\"profile\":[", 
-				"\"http://foo/Profile1\",", 
-				"\"http://foo/Profile2\"", 
-				"],", 
-				"\"tag\":[", 
-				"{", 
-				"\"system\":\"scheme1\",", 
-				"\"code\":\"term1\",", 
-				"\"display\":\"label1\"", 
-				"},", 
-				"{", 
-				"\"system\":\"scheme2\",", 
-				"\"code\":\"term2\",", 
-				"\"display\":\"label2\"", 
-				"}", 
-				"]", 
-				"},"));
-		//@formatter:on
-
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
-		List<IdDt> gotLabels = ResourceMetadataKeyEnum.PROFILES.get(parsed);
-
-		assertEquals(2, gotLabels.size());
-
-		IdDt label = (IdDt) gotLabels.get(0);
-		assertEquals("http://foo/Profile1", label.getValue());
-		label = (IdDt) gotLabels.get(1);
-		assertEquals("http://foo/Profile2", label.getValue());
-
-		tagList = ResourceMetadataKeyEnum.TAG_LIST.get(parsed);
-		assertEquals(2, tagList.size());
-
-		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
-		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
-	}
-
-	@Test
-	public void testEncodeAndParseSecurityLabels() {
-		Patient p = new Patient();
-		p.addName().addFamily("FAMILY");
-
-		List<BaseCodingDt> labels = new ArrayList<BaseCodingDt>();
-		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1"));
-		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2"));
-
-		ResourceMetadataKeyEnum.SECURITY_LABELS.put(p, labels);
-
-		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
-		ourLog.info(enc);
-
-		//@formatter:off
-		assertEquals("{\n" + 
-			"    \"resourceType\":\"Patient\",\n" + 
-			"    \"meta\":{\n" + 
-			"        \"security\":[\n" + 
-			"            {\n" + 
-			"                \"system\":\"SYSTEM1\",\n" + 
-			"                \"version\":\"VERSION1\",\n" + 
-			"                \"code\":\"CODE1\",\n" + 
-			"                \"display\":\"DISPLAY1\",\n" + 
-			"                \"primary\":true\n" + 
-			"            },\n" + 
-			"            {\n" + 
-			"                \"system\":\"SYSTEM2\",\n" + 
-			"                \"version\":\"VERSION2\",\n" + 
-			"                \"code\":\"CODE2\",\n" + 
-			"                \"display\":\"DISPLAY2\",\n" + 
-			"                \"primary\":false\n" + 
-			"            }\n" + 
-			"        ]\n" + 
-			"    },\n" + 
-			"    \"name\":[\n" + 
-			"        {\n" + 
-			"            \"family\":[\n" + 
-			"                \"FAMILY\"\n" + 
-			"            ]\n" + 
-			"        }\n" + 
-			"    ]\n" + 
-			"}", enc.trim());
-		//@formatter:on
-
-		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
-		List<BaseCodingDt> gotLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(parsed);
-
-		assertEquals(2, gotLabels.size());
-
-		CodingDt label = (CodingDt) gotLabels.get(0);
-		assertEquals("SYSTEM1", label.getSystem());
-		assertEquals("CODE1", label.getCode());
-		assertEquals("DISPLAY1", label.getDisplay());
-		assertEquals(true, label.getPrimary());
-		assertEquals("VERSION1", label.getVersion());
-
-		label = (CodingDt) gotLabels.get(1);
-		assertEquals("SYSTEM2", label.getSystem());
-		assertEquals("CODE2", label.getCode());
-		assertEquals("DISPLAY2", label.getDisplay());
-		assertEquals(false, label.getPrimary());
-		assertEquals("VERSION2", label.getVersion());
-	}
-
-	/**
-	 * Fixing #89
-	 */
-	@Test
-	public void testEncodeBundleWithDeletedEntry() throws ConfigurationException, DataFormatException, IOException {
-		Bundle b = ourCtx.newXmlParser().parseBundle(IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/xml-bundle.xml")));
-		String val = ourCtx.newJsonParser().encodeBundleToString(b);
-
-		ourLog.info(val);
-
-		//@formatter:off
-		assertThat(val, containsString("\"deleted\":{" + 
-				"\"type\":\"Patient\"," + 
-				"\"resourceId\":\"4384\"," + 
-				"\"instant\":\"2015-01-15T11:04:43.054-05:00\"" + 
-				"}"));
-		//@formatter:on
-	}
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JsonParserDstu2Test.class);
 
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
@@ -565,6 +143,243 @@ public class JsonParserDstu2Test {
 
 	}
 
+	@Test
+	public void testEncodeAndParseMetaProfileAndTags() {
+		Patient p = new Patient();
+		p.addName().addFamily("FAMILY");
+
+		List<IdDt> profiles = new ArrayList<IdDt>();
+		profiles.add(new IdDt("http://foo/Profile1"));
+		profiles.add(new IdDt("http://foo/Profile2"));
+		ResourceMetadataKeyEnum.PROFILES.put(p, profiles);
+
+		TagList tagList = new TagList();
+		tagList.addTag("scheme1", "term1", "label1");
+		tagList.addTag("scheme2", "term2", "label2");
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+
+		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder("\"meta\":{", 
+				"\"profile\":[", 
+				"\"http://foo/Profile1\",", 
+				"\"http://foo/Profile2\"", 
+				"],", 
+				"\"tag\":[", 
+				"{", 
+				"\"system\":\"scheme1\",", 
+				"\"code\":\"term1\",", 
+				"\"display\":\"label1\"", 
+				"},", 
+				"{", 
+				"\"system\":\"scheme2\",", 
+				"\"code\":\"term2\",", 
+				"\"display\":\"label2\"", 
+				"}", 
+				"]", 
+				"},"));
+		//@formatter:on
+
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
+		List<IdDt> gotLabels = ResourceMetadataKeyEnum.PROFILES.get(parsed);
+
+		assertEquals(2, gotLabels.size());
+
+		IdDt label = (IdDt) gotLabels.get(0);
+		assertEquals("http://foo/Profile1", label.getValue());
+		label = (IdDt) gotLabels.get(1);
+		assertEquals("http://foo/Profile2", label.getValue());
+
+		tagList = ResourceMetadataKeyEnum.TAG_LIST.get(parsed);
+		assertEquals(2, tagList.size());
+
+		assertEquals(new Tag("scheme1", "term1", "label1"), tagList.get(0));
+		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
+	}
+
+	/**
+	 * #158
+	 */
+	@Test
+	public void testEncodeEmptyTag2() {
+		TagList tagList = new TagList();
+		tagList.addTag("scheme", "code", null);
+		tagList.addTag(null, null, "Label");
+		
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertThat(encoded, containsString("tag"));
+		assertThat(encoded, containsString("scheme"));
+		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeAndParseSecurityLabels() {
+		Patient p = new Patient();
+		p.addName().addFamily("FAMILY");
+
+		List<BaseCodingDt> labels = new ArrayList<BaseCodingDt>();
+		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1"));
+		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2"));
+
+		ResourceMetadataKeyEnum.SECURITY_LABELS.put(p, labels);
+
+		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+		ourLog.info(enc);
+
+		//@formatter:off
+		assertEquals("{\n" + 
+			"    \"resourceType\":\"Patient\",\n" + 
+			"    \"meta\":{\n" + 
+			"        \"security\":[\n" + 
+			"            {\n" + 
+			"                \"system\":\"SYSTEM1\",\n" + 
+			"                \"version\":\"VERSION1\",\n" + 
+			"                \"code\":\"CODE1\",\n" + 
+			"                \"display\":\"DISPLAY1\",\n" + 
+			"                \"primary\":true\n" + 
+			"            },\n" + 
+			"            {\n" + 
+			"                \"system\":\"SYSTEM2\",\n" + 
+			"                \"version\":\"VERSION2\",\n" + 
+			"                \"code\":\"CODE2\",\n" + 
+			"                \"display\":\"DISPLAY2\",\n" + 
+			"                \"primary\":false\n" + 
+			"            }\n" + 
+			"        ]\n" + 
+			"    },\n" + 
+			"    \"name\":[\n" + 
+			"        {\n" + 
+			"            \"family\":[\n" + 
+			"                \"FAMILY\"\n" + 
+			"            ]\n" + 
+			"        }\n" + 
+			"    ]\n" + 
+			"}", enc.trim());
+		//@formatter:on
+
+		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
+		List<BaseCodingDt> gotLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(parsed);
+
+		assertEquals(2, gotLabels.size());
+
+		CodingDt label = (CodingDt) gotLabels.get(0);
+		assertEquals("SYSTEM1", label.getSystem());
+		assertEquals("CODE1", label.getCode());
+		assertEquals("DISPLAY1", label.getDisplay());
+		assertEquals(true, label.getPrimary());
+		assertEquals("VERSION1", label.getVersion());
+
+		label = (CodingDt) gotLabels.get(1);
+		assertEquals("SYSTEM2", label.getSystem());
+		assertEquals("CODE2", label.getCode());
+		assertEquals("DISPLAY2", label.getDisplay());
+		assertEquals(false, label.getPrimary());
+		assertEquals("VERSION2", label.getVersion());
+	}
+
+	
+	@Test
+	public void testEncodeBundleNewBundleNoText() {
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		b.getText().setDiv("");
+		b.getText().getStatus().setValueAsString("");
+		;
+
+		Entry e = b.addEntry();
+		e.setResource(new Patient());
+
+		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(b);
+		ourLog.info(val);
+		assertThat(val, not(containsString("text")));
+
+		val = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(b);
+		ourLog.info(val);
+		assertThat(val, not(containsString("text")));
+
+	}
+
+	
+	@Test
+	public void testEncodeBundleOldBundleNoText() {
+
+		Bundle b = new Bundle();
+
+		BundleEntry e = b.addEntry();
+		e.setResource(new Patient());
+		b.addCategory("scheme", "term", "label");
+
+		String val = ourCtx.newJsonParser().setPrettyPrint(false).encodeBundleToString(b);
+		ourLog.info(val);
+
+		assertThat(val, not(containsString("text")));
+
+		b = ourCtx.newJsonParser().parseBundle(val);
+		assertEquals(1, b.getEntries().size());
+
+	}
+
+	/**
+	 * Fixing #89
+	 */
+	@Test
+	public void testEncodeBundleWithDeletedEntry() throws ConfigurationException, DataFormatException, IOException {
+		Bundle b = ourCtx.newXmlParser().parseBundle(IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/xml-bundle.xml")));
+		String val = ourCtx.newJsonParser().encodeBundleToString(b);
+
+		ourLog.info(val);
+
+		//@formatter:off
+		assertThat(val, containsString("\"deleted\":{" + 
+				"\"type\":\"Patient\"," + 
+				"\"resourceId\":\"4384\"," + 
+				"\"instant\":\"2015-01-15T11:04:43.054-05:00\"" + 
+				"}"));
+		//@formatter:on
+	}
+
+	/**
+	 * #158
+	 */
+	@Test
+	public void testEncodeEmptyTag() {
+		TagList tagList = new TagList();
+		tagList.addTag(null, null, null);
+		tagList.addTag(null, null, "Label");
+		
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertThat(encoded, not(containsString("tag")));
+	}
+
+	@Test
+	public void testEncodingNullExtension() {
+		Patient p = new Patient();
+		ExtensionDt extension = new ExtensionDt(false, "http://foo#bar");
+		p.addUndeclaredExtension(extension);
+		String str = ourCtx.newJsonParser().encodeResourceToString(p);
+
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+
+		extension.setValue(new StringDt());
+
+		str = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+
+		extension.setValue(new StringDt(""));
+
+		str = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
+
+	}
+
 	/**
 	 * #65
 	 */
@@ -579,6 +394,323 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("{\"linkId\":\"value123\",\"_linkId\":{\"extension\":[{\"url\":\"http://123\",\"valueString\":\"HELLO\"}]}}"));
 
+	}
+
+	@Test
+	public void testOmitResourceId() {
+		Patient p = new Patient();
+		p.setId("123");
+		p.addName().addFamily("ABC");
+		
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
+		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
+	}
+
+	@Test
+	public void testParseAndEncodeBundle() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
+
+		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
+		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
+		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
+		assertEquals("1", parsed.getId().getVersionIdPart());
+		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("searchset", parsed.getType().getValue());
+		assertEquals(3, parsed.getTotalResults().getValue().intValue());
+		assertEquals("http://example.com/base", parsed.getLinkBase().getValue());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
+
+		assertEquals(2, parsed.getEntries().size());
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
+		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+
+		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertSame(p.getMedication().getResource(), m);
+
+		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
+		ourLog.info(reencoded);
+
+		JsonConfig cfg = new JsonConfig();
+
+		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
+		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
+
+		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
+		String act = actual.toString().replace("\\r\\n", "\\n");
+
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+
+		assertEquals(exp, act);
+
+	}
+
+	/**
+	 * Test for #146
+	 */
+	@Test
+	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml"));
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		assertEquals("#med", p.getMedication().getReference().getValue());
+
+		Medication m = (Medication) p.getMedication().getResource();
+		assertNotNull(m);
+		assertEquals("#med", m.getId().getValue());
+		assertEquals(1, p.getContained().getContainedResources().size());
+		assertSame(m, p.getContained().getContainedResources().get(0));
+
+		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+		assertThat(reencoded, containsString("contained"));
+
+		reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+		assertThat(reencoded, containsString("contained"));
+	}
+
+	@Test
+	public void testParseAndEncodeBundleNewStyle() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
+		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
+		assertEquals("1", parsed.getId().getVersionIdPart());
+		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("searchset", parsed.getType());
+		assertEquals(3, parsed.getTotal().intValue());
+		assertEquals("http://example.com/base", parsed.getBaseElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
+
+		assertEquals(2, parsed.getEntry().size());
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
+		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+
+		Medication m = (Medication) parsed.getEntry().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertEquals("Medication/example", p.getMedication().getReference().getValue());
+		assertSame(p.getMedication().getResource(), m);
+
+		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(reencoded);
+
+		JsonConfig cfg = new JsonConfig();
+
+		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
+		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
+
+		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
+		String act = actual.toString().replace("\\r\\n", "\\n");
+
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+
+		assertEquals(exp, act);
+
+	}
+
+	@Test
+	public void testParseAndEncodeBundleOldStyle() throws Exception {
+		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
+
+		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
+
+		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
+		assertEquals("searchset", parsed.getType().getValue());
+		assertEquals(3, parsed.getTotalResults().getValue().intValue());
+
+		assertEquals(2, parsed.getEntries().size());
+
+		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
+		assertEquals("Patient/347", p.getPatient().getReference().getValue());
+		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
+		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
+
+		Medication m = (Medication) parsed.getEntries().get(1).getResource();
+		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
+		assertEquals("Medication/example", p.getMedication().getReference().getValue());
+		assertSame(p.getMedication().getResource(), m);
+
+		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
+		ourLog.info(reencoded);
+
+		JsonConfig cfg = new JsonConfig();
+
+		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
+		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
+
+		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
+		String act = actual.toString().replace("\\r\\n", "\\n");
+
+		exp = exp.replace(",\"ifNoneExist\":\"Patient?identifier=234234\"", "");
+
+		ourLog.info("Expected: {}", exp);
+		ourLog.info("Actual  : {}", act);
+
+		assertEquals(exp, act);
+
+	}
+
+	@Test
+	public void testParseAndEncodeBundleWithDeletedEntry() {
+
+		Patient res = new Patient();
+		res.setId(new IdDt("Patient", "111", "222"));
+		ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt("2011-01-01T12:12:22Z"));
+
+		Bundle bundle = new Bundle();
+		bundle.addResource(res, ourCtx, "http://foo/base");
+
+		String actual = ourCtx.newJsonParser().encodeBundleToString(bundle);
+		ourLog.info(actual);
+
+		String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]}";
+		assertEquals(expected, actual);
+
+	}
+
+	@Test
+	public void testParseAndEncodeBundleWithUuidBase() {
+		//@formatter:off
+		String input = 
+				"{\n" + 
+				"    \"resourceType\":\"Bundle\",\n" + 
+				"    \"type\":\"document\",\n" + 
+				"    \"entry\":[\n" + 
+				"        {\n" + 
+				"            \"base\":\"urn:uuid:\",\n" + 
+				"            \"resource\":{\n" + 
+				"                \"resourceType\":\"Composition\",\n" + 
+				"                \"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\",\n" + 
+				"                \"meta\":{\n" + 
+				"                    \"lastUpdated\":\"2013-05-28T22:12:21Z\"\n" + 
+				"                },\n" + 
+				"                \"text\":{\n" + 
+				"                    \"status\":\"generated\",\n" + 
+				"                    \"div\":\"<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: 180f219f-97a8-486d-99d9-ed631fe4fc57</p><p><b>meta</b>: </p><p><b>date</b>: Feb 1, 2013 12:30:02 PM</p><p><b>type</b>: Discharge Summary from Responsible Clinician <span>(Details : {LOINC code '28655-9' = 'Physician attending Discharge summary)</span></p><p><b>status</b>: final</p><p><b>confidentiality</b>: N</p><p><b>author</b>: <a>Doctor Dave. Generated Summary: 23; Adam Careful </a></p><p><b>encounter</b>: <a>http://fhir.healthintersections.com.au/open/Encounter/doc-example</a></p></div>\"\n" + 
+				"                },\n" + 
+				"                \"date\":\"2013-02-01T12:30:02Z\",\n" + 
+				"                \"type\":{\n" + 
+				"                    \"coding\":[\n" + 
+				"                        {\n" + 
+				"                            \"system\":\"http://loinc.org\",\n" + 
+				"                            \"code\":\"28655-9\"\n" + 
+				"                        }\n" + 
+				"                    ],\n" + 
+				"                    \"text\":\"Discharge Summary from Responsible Clinician\"\n" + 
+				"                },\n" + 
+				"                \"status\":\"final\",\n" + 
+				"                \"confidentiality\":\"N\",\n" + 
+				"                \"subject\":{\n" + 
+				"                    \"reference\":\"http://fhir.healthintersections.com.au/open/Patient/d1\",\n" + 
+				"                    \"display\":\"Eve Everywoman\"\n" + 
+				"                },\n" + 
+				"                \"author\":[\n" + 
+				"                    {\n" + 
+				"                        \"reference\":\"Practitioner/example\",\n" + 
+				"                        \"display\":\"Doctor Dave\"\n" + 
+				"                    }\n" + 
+				"                ],\n" + 
+				"                \"encounter\":{\n" + 
+				"                    \"reference\":\"http://fhir.healthintersections.com.au/open/Encounter/doc-example\"\n" + 
+				"                },\n" + 
+				"                \"section\":[\n" + 
+				"                    {\n" + 
+				"                        \"title\":\"Reason for admission\",\n" + 
+				"                        \"content\":{\n" + 
+				"                            \"reference\":\"urn:uuid:d0dd51d3-3ab2-4c84-b697-a630c3e40e7a\"\n" + 
+				"                        }\n" + 
+				"                    },\n" + 
+				"                    {\n" + 
+				"                        \"title\":\"Medications on Discharge\",\n" + 
+				"                        \"content\":{\n" + 
+				"                            \"reference\":\"urn:uuid:673f8db5-0ffd-4395-9657-6da00420bbc1\"\n" + 
+				"                        }\n" + 
+				"                    },\n" + 
+				"                    {\n" + 
+				"                        \"title\":\"Known allergies\",\n" + 
+				"                        \"content\":{\n" + 
+				"                            \"reference\":\"urn:uuid:68f86194-e6e1-4f65-b64a-5314256f8d7b\"\n" + 
+				"                        }\n" + 
+				"                    }\n" + 
+				"                ]\n" + 
+				"            }\n" + 
+				"        }" +
+				"    ]" +
+				"}";
+		//@formatter:on
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
+		
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
+		ourLog.info(encoded);
+		
+		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
+		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
+		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
+		assertThat(encoded, containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\""));
+	}
+
+	@Test
+	public void testParseBundleWithBinary() {
+		Binary patient = new Binary();
+		patient.setId(new IdDt("http://base/Binary/11/_history/22"));
+		patient.setContentType("foo");
+		patient.setContent(new byte[] { 1, 2, 3, 4 });
+
+		String val = ourCtx.newJsonParser().encodeResourceToString(patient);
+		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"11\",\"meta\":{\"versionId\":\"22\"},\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
+	}
+
+	/**
+	 * see #144 and #146
+	 */
+	@Test
+	public void testParseContained() {
+
+		FhirContext c = FhirContext.forDstu2();
+		IParser parser = c.newJsonParser().setPrettyPrint(true);
+
+		Observation o = new Observation();
+		o.getCode().setText("obs text");
+
+		Patient p = new Patient();
+		p.addName().addFamily("patient family");
+		o.getSubject().setResource(p);
+
+		String enc = parser.encodeResourceToString(o);
+		ourLog.info(enc);
+
+		//@formatter:off
+		assertThat(enc, stringContainsInOrder(
+			"\"resourceType\":\"Observation\"",
+			"\"contained\":[",
+			"\"resourceType\":\"Patient\",",
+			"\"id\":\"1\"",
+			"\"reference\":\"#1\""
+			));
+		//@formatter:on
+
+		o = parser.parseResource(Observation.class, enc);
+		assertEquals("obs text", o.getCode().getText());
+
+		assertNotNull(o.getSubject().getResource());
+		p = (Patient) o.getSubject().getResource();
+		assertEquals("patient family", p.getNameFirstRep().getFamilyAsSingleString());
 	}
 
 	@Test
@@ -665,179 +797,81 @@ public class JsonParserDstu2Test {
 	}
 
 	/**
-	 * Test for #146
+	 * See #163
 	 */
 	@Test
-	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example2.xml"));
+	public void testParseResourceType() {
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 
-		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
+		// Patient
+		Patient patient = new Patient();
+		String patientId = UUID.randomUUID().toString();
+		patient.setId(new IdDt("Patient", patientId));
+		patient.addName().addGiven("John").addFamily("Smith");
+		patient.setGender(AdministrativeGenderEnum.MALE);
+		patient.setBirthDate(new DateDt("1987-04-16"));
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
-		assertEquals("#med", p.getMedication().getReference().getValue());
+		// Bundle
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = new ca.uhn.fhir.model.dstu2.resource.Bundle();
+		bundle.setType(BundleTypeEnum.COLLECTION);
+		bundle.addEntry().setResource(patient);
 
-		Medication m = (Medication) p.getMedication().getResource();
-		assertNotNull(m);
-		assertEquals("#med", m.getId().getValue());
-		assertEquals(1, p.getContained().getContainedResources().size());
-		assertSame(m, p.getContained().getContainedResources().get(0));
-
-		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
-		ourLog.info(reencoded);
-		assertThat(reencoded, containsString("contained"));
-
-		reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
-		ourLog.info(reencoded);
-		assertThat(reencoded, containsString("contained"));
+		String bundleText = jsonParser.encodeResourceToString(bundle);
+		ourLog.info(bundleText);
+		
+		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = jsonParser.parseResource (ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
+		Patient reincarnatedPatient = (Patient) reincarnatedBundle.getEntry().get(0).getResource(); 
+		
+		assertEquals("Patient", patient.getId().getResourceType());
+		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());
 	}
 
+	/**
+	 * See #144 and #146
+	 */
 	@Test
-	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
+	public void testReportSerialize() {
 
-		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
-		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
-		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
-		assertEquals("1", parsed.getId().getVersionIdPart());
-		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("searchset", parsed.getType().getValue());
-		assertEquals(3, parsed.getTotalResults().getValue().intValue());
-		assertEquals("http://example.com/base", parsed.getLinkBase().getValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
+		ReportObservation obsv = new ReportObservation();
+		obsv.getCode().addCoding().setCode("name");
+		obsv.setValue(new StringDt("value test"));
+		obsv.setStatus(ObservationStatusEnum.FINAL);
+		obsv.setReliability(ObservationReliabilityEnum.OK);
+		obsv.addIdentifier().setSystem("System").setValue("id value");
 
-		assertEquals(2, parsed.getEntries().size());
+		DiagnosticReport report = new DiagnosticReport();
+		report.getContained().getContainedResources().add(obsv);
+		report.addResult().setResource(obsv);
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
-		assertEquals("Patient/347", p.getPatient().getReference().getValue());
-		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
-
-		Medication m = (Medication) parsed.getEntries().get(1).getResource();
-		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertSame(p.getMedication().getResource(), m);
-
-		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
-		ourLog.info(reencoded);
-
-		JsonConfig cfg = new JsonConfig();
-
-		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
-		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
-
-		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
-		String act = actual.toString().replace("\\r\\n", "\\n");
-
-		ourLog.info("Expected: {}", exp);
-		ourLog.info("Actual  : {}", act);
-
-		assertEquals(exp, act);
-
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		String message = parser.encodeResourceToString(report);
+		ourLog.info(message);
+		Assert.assertThat(message, containsString("contained"));
 	}
 
+	/**
+	 * See #144 and #146
+	 */
 	@Test
-	public void testParseAndEncodeBundleOldStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
+	public void testReportSerializeWithMatchingId() {
 
-		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
+		ReportObservation obsv = new ReportObservation();
+		obsv.getCode().addCoding().setCode("name");
+		obsv.setValue(new StringDt("value test"));
+		obsv.setStatus(ObservationStatusEnum.FINAL);
+		obsv.setReliability(ObservationReliabilityEnum.OK);
+		obsv.addIdentifier().setSystem("System").setValue("id value");
 
-		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("searchset", parsed.getType().getValue());
-		assertEquals(3, parsed.getTotalResults().getValue().intValue());
+		DiagnosticReport report = new DiagnosticReport();
+		report.getContained().getContainedResources().add(obsv);
 
-		assertEquals(2, parsed.getEntries().size());
+		obsv.setId("#123");
+		report.addResult().setReference("#123");
 
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntries().get(0).getResource();
-		assertEquals("Patient/347", p.getPatient().getReference().getValue());
-		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
-
-		Medication m = (Medication) parsed.getEntries().get(1).getResource();
-		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertEquals("Medication/example", p.getMedication().getReference().getValue());
-		assertSame(p.getMedication().getResource(), m);
-
-		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
-		ourLog.info(reencoded);
-
-		JsonConfig cfg = new JsonConfig();
-
-		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
-		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
-
-		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
-		String act = actual.toString().replace("\\r\\n", "\\n");
-
-		exp = exp.replace(",\"ifNoneExist\":\"Patient?identifier=234234\"", "");
-
-		ourLog.info("Expected: {}", exp);
-		ourLog.info("Actual  : {}", act);
-
-		assertEquals(exp, act);
-
-	}
-
-	@Test
-	public void testParseAndEncodeBundleNewStyle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
-		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
-		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
-		assertEquals("1", parsed.getId().getVersionIdPart());
-		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
-		assertEquals("searchset", parsed.getType());
-		assertEquals(3, parsed.getTotal().intValue());
-		assertEquals("http://example.com/base", parsed.getBaseElement().getValueAsString());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
-		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
-
-		assertEquals(2, parsed.getEntry().size());
-
-		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
-		assertEquals("Patient/347", p.getPatient().getReference().getValue());
-		assertEquals("2014-08-16T05:31:17Z", ResourceMetadataKeyEnum.UPDATED.get(p).getValueAsString());
-		assertEquals("http://example.com/base/MedicationPrescription/3123/_history/1", p.getId().getValue());
-
-		Medication m = (Medication) parsed.getEntry().get(1).getResource();
-		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertEquals("Medication/example", p.getMedication().getReference().getValue());
-		assertSame(p.getMedication().getResource(), m);
-
-		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
-		ourLog.info(reencoded);
-
-		JsonConfig cfg = new JsonConfig();
-
-		JSON expected = JSONSerializer.toJSON(content.trim(), cfg);
-		JSON actual = JSONSerializer.toJSON(reencoded.trim(), cfg);
-
-		String exp = expected.toString().replace("\\r\\n", "\\n"); // .replace("&sect;", "§");
-		String act = actual.toString().replace("\\r\\n", "\\n");
-
-		ourLog.info("Expected: {}", exp);
-		ourLog.info("Actual  : {}", act);
-
-		assertEquals(exp, act);
-
-	}
-
-	@Test
-	public void testParseAndEncodeBundleWithDeletedEntry() {
-
-		Patient res = new Patient();
-		res.setId(new IdDt("Patient", "111", "222"));
-		ResourceMetadataKeyEnum.DELETED_AT.put(res, new InstantDt("2011-01-01T12:12:22Z"));
-
-		Bundle bundle = new Bundle();
-		bundle.addResource(res, ourCtx, "http://foo/base");
-
-		String actual = ourCtx.newJsonParser().encodeBundleToString(bundle);
-		ourLog.info(actual);
-
-		String expected = "{\"resourceType\":\"Bundle\",\"entry\":[{\"deleted\":{\"type\":\"Patient\",\"resourceId\":\"111\",\"versionId\":\"222\",\"instant\":\"2011-01-01T12:12:22Z\"}}]}";
-		assertEquals(expected, actual);
-
+		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
+		String message = parser.encodeResourceToString(report);
+		ourLog.info(message);
+		Assert.assertThat(message, containsString("contained"));
 	}
 
 }
