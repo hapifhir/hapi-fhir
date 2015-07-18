@@ -220,8 +220,14 @@ public class RestfulServer extends HttpServlet {
 			if (foundMethodBinding == null) {
 				continue;
 			}
-
+			
 			count++;
+			
+			if (foundMethodBinding instanceof ConformanceMethodBinding) {
+				myServerConformanceMethod = foundMethodBinding;
+				continue;
+			}
+
 
 			if (!Modifier.isPublic(m.getModifiers())) {
 				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
@@ -822,7 +828,7 @@ public class RestfulServer extends HttpServlet {
 			if (confProvider == null) {
 				confProvider = getFhirContext().getVersion().createServerConformanceProvider(this);
 			}
-			findSystemMethods(confProvider);
+//			findSystemMethods(confProvider);
 			findResourceMethods(confProvider);
 
 		} catch (Exception ex) {

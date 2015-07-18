@@ -282,7 +282,7 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		RestResource res = conformance.getRestFirstRep().getResourceFirstRep();
+		RestResource res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 		
 		assertTrue(res.getConditionalCreate());
@@ -305,7 +305,7 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		RestResource res = conformance.getRestFirstRep().getResourceFirstRep();
+		RestResource res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 		
 		assertNull(res.getConditionalCreate());

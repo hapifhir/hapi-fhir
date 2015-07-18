@@ -47,9 +47,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.util.PortUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class OperationServerTest {
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx;
