@@ -1096,7 +1096,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		From<?, ?> stringJoin = theFrom.join(joinAttrName, JoinType.INNER);
-		thePredicates.add(theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName()));
+		
+		if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+			thePredicates.add(stringJoin.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
+		} else {
+			thePredicates.add(theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName()));
+		}
 		
 		// Predicate p = theBuilder.equal(stringJoin.get("myParamName"), theSort.getParamName());
 		// Predicate pn = theBuilder.isNull(stringJoin.get("myParamName"));

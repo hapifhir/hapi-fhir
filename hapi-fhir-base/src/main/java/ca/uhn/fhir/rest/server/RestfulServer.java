@@ -725,7 +725,7 @@ public class RestfulServer extends HttpServlet {
 			BaseServerResponseException exception = null;
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
-				exception = next.preProcessOutgoingException(requestDetails, exception, theRequest);
+				exception = next.preProcessOutgoingException(requestDetails, e, theRequest);
 				if (exception != null) {
 					ourLog.debug("Interceptor {} returned false, not continuing processing");
 					break;
