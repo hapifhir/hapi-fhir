@@ -57,11 +57,13 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.annotation.Metadata;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.DynamicSearchMethodBinding;
 import ca.uhn.fhir.rest.method.IParameter;
 import ca.uhn.fhir.rest.method.OperationMethodBinding;
+import ca.uhn.fhir.rest.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.method.OperationParameter;
 import ca.uhn.fhir.rest.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.method.SearchParameter;
@@ -159,12 +161,23 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				OperationDefinitionParameterComponent param = op.addParameter();
 				param.setUse(OperationParameterUse.IN);
 				if (nextParam.getParamType() != null) {
-					param.setType(nextParam.getParamType().getCode());
+					param.setType(nextParam.getParamType());
 				}
 				param.setMin(nextParam.getMin());
 				param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
 				param.setName(nextParam.getName());
 			}
+		}
+		
+		for (ReturnType nextParam : methodBinding.getReturnParams()) {
+			OperationDefinitionParameterComponent param = op.addParameter();
+			param.setUse(OperationParameterUse.OUT);
+			if (nextParam.getType() != null) {
+				param.setType(nextParam.getType());
+			}
+			param.setMin(nextParam.getMin());
+			param.setMax(nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax()));
+			param.setName(nextParam.getName());
 		}
 
 		return op;

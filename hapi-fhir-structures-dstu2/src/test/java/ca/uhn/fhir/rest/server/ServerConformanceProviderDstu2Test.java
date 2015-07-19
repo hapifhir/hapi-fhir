@@ -269,7 +269,18 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertEquals("$plain", opDef.getCode());
 		assertEquals(true, opDef.getIdempotent().booleanValue());
-	}
+		assertEquals(3, opDef.getParameter().size());
+		assertEquals("start", opDef.getParameter().get(0).getName());
+		assertEquals("in", opDef.getParameter().get(0).getUse());
+		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
+		assertEquals("date", opDef.getParameter().get(0).getTypeElement().getValueAsString());
+
+		assertEquals("out1", opDef.getParameter().get(2).getName());
+		assertEquals("out", opDef.getParameter().get(2).getUse());
+		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
+		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
+		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
+}
 
 	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
@@ -503,7 +514,9 @@ public class ServerConformanceProviderDstu2Test {
 
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(name = "plain", idempotent = true)
+		@Operation(name = "plain", idempotent = true, returnParameters= {
+				@OperationParam(min=1, max=2, name="out1", type=StringDt.class)
+		})
 		public ca.uhn.fhir.rest.server.IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam ca.uhn.fhir.model.primitive.IdDt theId, @OperationParam(name = "start") DateDt theStart, @OperationParam(name = "end") DateDt theEnd) {
 			return null;
 		}

@@ -27,6 +27,9 @@ import java.lang.annotation.Target;
 
 import org.hl7.fhir.instance.model.api.IBase;
 
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.param.StringParam;
+
 /**
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -45,7 +48,13 @@ public @interface OperationParam {
 	
 	/**
 	 * The type of the parameter. This will only have effect on <code>@OperationParam</code>
-	 * annotations specified as values for {@link Operation#returnParameters()}
+	 * annotations specified as values for {@link Operation#returnParameters()}, otherwise the
+	 * value will be ignored. Value should be one of:
+	 * <ul>
+	 * <li>A resource type, e.g. <code>Patient.class</code></li>
+	 * <li>A datatype, e.g. <code>{@link StringDt}.class</code> or </code>CodeableConceptDt.class</code>
+	 * <li>A RESTful search parameter type, e.g. <code>{@link StringParam}.class</code>
+	 * </ul>
 	 */
 	Class<? extends IBase> type() default IBase.class;
 	

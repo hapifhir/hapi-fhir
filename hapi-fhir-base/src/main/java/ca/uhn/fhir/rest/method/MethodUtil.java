@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -457,12 +456,12 @@ public class MethodUtil {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
-						param = new OperationParameter(op.name(), ((OperationParam) nextAnnotation));
+						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
 							throw new ConfigurationException("Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Mode.class.getSimpleName() + " must be of type " + ValidationModeEnum.class.getName());
 						}
-						param = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IConverter() {
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_MODE, 0, 1).setConverter(new IConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
 								return ValidationModeEnum.valueOf(theObject.toString().toUpperCase());
@@ -477,7 +476,7 @@ public class MethodUtil {
 						if (parameterType.equals(String.class) == false) {
 							throw new ConfigurationException("Parameter annotated with @" + Validate.class.getSimpleName() + "." + Validate.Profile.class.getSimpleName() + " must be of type " + String.class.getName());
 						}
-						param = new OperationParameter(Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IConverter() {
+						param = new OperationParameter(theContext, Constants.EXTOP_VALIDATE, Constants.EXTOP_VALIDATE_PROFILE, 0, 1).setConverter(new IConverter() {
 							@Override
 							public Object incomingServer(Object theObject) {
 								return theObject.toString();
