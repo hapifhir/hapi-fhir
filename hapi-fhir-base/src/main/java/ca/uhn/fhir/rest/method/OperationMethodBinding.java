@@ -58,6 +58,8 @@ import ca.uhn.fhir.util.FhirTerser;
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationMethodBinding.class);
+	private boolean myCanOperateAtInstanceLevel;
+	private boolean myCanOperateAtServerLevel;
 	private String myDescription;
 	private final boolean myIdempotent;
 	private final Integer myIdParamIndex;
@@ -66,7 +68,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
 
-	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
+	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
 			OperationParam[] theReturnParams) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
@@ -139,6 +141,14 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				myReturnParams.add(type);
 			}
 		}
+
+		if (myIdParamIndex != null) {
+			myCanOperateAtInstanceLevel = true;
+		}
+		if (getResourceName() == null) {
+			myCanOperateAtServerLevel = true;
+		}
+
 	}
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider, Operation theAnnotation) {
@@ -250,12 +260,20 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
+	public boolean isCanOperateAtInstanceLevel() {
+		return this.myCanOperateAtInstanceLevel;
+	}
+
+	public boolean isCanOperateAtServerLevel() {
+		return this.myCanOperateAtServerLevel;
+	}
+
 	public boolean isIdempotent() {
 		return myIdempotent;
 	}
 
-	public boolean isInstanceLevel() {
-		return myIdParamIndex != null;
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
 	}
 
 	public static BaseHttpClientInvocation createOperationInvocation(FhirContext theContext, String theResourceName, String theId, String theOperationName, IBaseParameters theInput, boolean theUseHttpGet) {
@@ -309,9 +327,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public static class ReturnType {
 		private int myMax;
-
 		private int myMin;
-
 		private String myName;
 		/**
 		 * http://hl7-fhir.github.io/valueset-operation-parameter-type.html

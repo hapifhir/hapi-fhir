@@ -42,6 +42,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.param.CollectionBinder;
 import ca.uhn.fhir.rest.param.ResourceParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -102,11 +103,20 @@ public class OperationParameter implements IParameter {
 			myMax = 1;
 		}
 		
-		if (!myParameterType.equals(IBase.class)) {
-			if (!IBase.class.isAssignableFrom(myParameterType) || myParameterType.isInterface() || Modifier.isAbstract(myParameterType.getModifiers())) {
+		/*
+		 * The parameter can be of type string for validation methods - This is a bit
+		 * weird. See ValidateDstu2Test. We should probably clean this up..
+		 */
+		if (!myParameterType.equals(IBase.class) && !myParameterType.equals(String.class)) {
+			if (IBaseResource.class.isAssignableFrom(myParameterType) && myParameterType.isInterface()) {
+				myParamType = "Resource";
+			} else if (!IBase.class.isAssignableFrom(myParameterType) || myParameterType.isInterface() || Modifier.isAbstract(myParameterType.getModifiers())) {
 				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
+			} else if (myParameterType.equals(ValidationModeEnum.class)) {
+				myParamType = "code";
+			} else {
+				myParamType = myContext.getElementDefinition((Class<? extends IBase>) myParameterType).getName();
 			}
-			myParamType = myContext.getElementDefinition((Class<? extends IBase>) myParameterType).getName();
 		}
 
 	}
