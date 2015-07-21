@@ -90,6 +90,11 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 			public void unknownElement(IParseLocation theLocation, String theElementName) {
 				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Unknown element found: " + theElementName);
 			}
+
+			@Override
+			public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setCode(IssueTypeEnum.INVALID_CONTENT).setDetails("Multiple repetitions of non-repeatable element found: " + theElementName);
+			}
 		});
 
 		FhirValidator validator = getContext().newValidator();

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,6 +27,7 @@ package ca.uhn.fhir.parser;
  * issue is found while parsing.
  * 
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
+ * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  */
 public class StrictErrorHandler implements IParserErrorHandler {
 
@@ -37,5 +40,11 @@ public class StrictErrorHandler implements IParserErrorHandler {
 	public void unknownAttribute(IParseLocation theLocation, String theAttributeName) {
 		throw new DataFormatException("Unknown attribute '" + theAttributeName + "' found during parse");
 	}
+
+	@Override
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+		throw new DataFormatException("Multiple repetitions of non-repeatable element '" + theElementName + "' found during parse");
+	}
+
 
 }

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
+import javax.servlet.ServletException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -12,6 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -19,25 +22,56 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
+@SuppressWarnings("serial")
 public class ValidatorExamples {
+
+   // START SNIPPET: serverValidation
+   public class MyRestfulServer extends RestfulServer {
+
+      @Override
+      protected void initialize() throws ServletException {
+         // ...Configure resource providers, etc... 
+         
+         // Create a context, set the error handler and instruct
+         // the server to use it
+         FhirContext ctx = FhirContext.forDstu2();
+         ctx.setParserErrorHandler(new StrictErrorHandler());
+         setFhirContext(ctx);
+      }
+      
+   }
+   // END SNIPPET: serverValidation
 
    @SuppressWarnings("unused")
    public void enableValidation() {
-      // START SNIPPET: enableValidation
+      // START SNIPPET: clientValidation
       FhirContext ctx = FhirContext.forDstu2();
       
       ctx.setParserErrorHandler(new StrictErrorHandler());
       
       // This client will have strict parser validation enabled
       IGenericClient client = ctx.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
+      // END SNIPPET: clientValidation
       
-      // This server will have strict parser validation enabled
-      RestfulServer server = new RestfulServer();
-      server.setFhirContext(ctx);
-      
-      // END SNIPPET: enableValidation
    }
    
+   @SuppressWarnings("unused")
+   public void parserValidation() {
+      // START SNIPPET: parserValidation
+      FhirContext ctx = FhirContext.forDstu2();
+      
+      // Create a parser and configure it to use the strict error handler
+      IParser parser = ctx.newXmlParser();
+      parser.setParserErrorHandler(new StrictErrorHandler());
+
+      // This example resource is invalid, as Patient.active can not repeat
+      String input = "<Patient><active value=\"true\"/><active value=\"false\"/></Patient>";
+
+      // The following will throw a DataFormatException because of the StrictErrorHandler
+      parser.parseResource(Patient.class, input);
+      // END SNIPPET: parserValidation
+   }
+
    public void validateResource() {
       // START SNIPPET: basicValidation
       // As always, you need a context

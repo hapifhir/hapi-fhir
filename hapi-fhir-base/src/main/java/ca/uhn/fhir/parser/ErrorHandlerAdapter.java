@@ -35,4 +35,9 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 		// NOP
 	}
 
+	@Override
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+		// NOP
+	}
+
 }

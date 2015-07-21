@@ -1720,6 +1720,20 @@ public class XmlParserTest {
 	}
 
 	@Test
+	public void testParseErrorHandlerDuplicateElement() {
+		String input = "<Patient><active value=\"true\"/><active value=\"false\"/></Patient>";
+		try {
+			ourCtx.newXmlParser().setParserErrorHandler(new StrictErrorHandler()).parseResource(Patient.class, input);
+			fail();
+		} catch (DataFormatException e) {
+			assertThat(e.getMessage(), containsString("Multiple repetitions"));
+		}
+
+		Patient p = ourCtx.newXmlParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(Patient.class, input);
+		assertEquals("true", p.getActive().getValueAsString());
+	}
+
+	@Test
 	public void testParseFeedWithListResource() throws ConfigurationException, DataFormatException, IOException {
 
 		IParser p = FhirContext.forDstu1().newXmlParser(); // Use new context here

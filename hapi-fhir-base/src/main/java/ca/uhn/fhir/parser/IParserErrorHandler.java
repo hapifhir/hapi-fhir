@@ -26,6 +26,16 @@ package ca.uhn.fhir.parser;
 public interface IParserErrorHandler {
 
 	/**
+	 * Invoked when an element repetition (e.g. a second repetition of something) is found for a field
+	 * which is non-repeating.
+	 * 
+	 * @param theLocation The location in the document. WILL ALWAYS BE NULL currently, as this is not yet implemented, but this parameter is included so that locations can be added in the future without changing the API.
+	 * @param theElementName The name of the element that was found.
+	 * @since 1.2
+	 */
+	void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName);
+
+	/**
 	 * Invoked when an unknown element is found in the document. 
 	 * 
 	 * @param theLocation The location in the document. WILL ALWAYS BE NULL currently, as this is not yet implemented, but this parameter is included so that locations can be added in the future without changing the API.

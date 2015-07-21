@@ -24,8 +24,10 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
@@ -1506,6 +1508,7 @@ class ParserState<T> {
 
 		private BaseRuntimeElementCompositeDefinition<?> myDefinition;
 		private IBase myInstance;
+		private Set<String> myParsedNonRepeatableNames = new HashSet<String>();
 
 		public ElementCompositeState(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
@@ -1550,6 +1553,13 @@ class ParserState<T> {
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 				return;
 			}
+			
+			if (child.getMax() < 2 && !myParsedNonRepeatableNames.add(theChildName)) {
+				myErrorHandler.unexpectedRepeatingElement(null, theChildName);
+				push(new SwallowChildrenWholeState(getPreResourceState()));
+				return;
+			}
+			
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
 				// This is a bug with the structures and shouldn't happen..

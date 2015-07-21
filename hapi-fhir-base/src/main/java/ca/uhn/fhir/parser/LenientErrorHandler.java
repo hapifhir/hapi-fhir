@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.context.FhirContext;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -24,19 +26,49 @@ package ca.uhn.fhir.parser;
  * The default error handler, which logs issues but does not abort parsing
  * 
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
+ * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  */
 public class LenientErrorHandler implements IParserErrorHandler {
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LenientErrorHandler.class);
-	
+	private boolean myLogErrors;
+
+	/**
+	 * Constructor which configures this handler to log all errors
+	 */
+	public LenientErrorHandler() {
+		myLogErrors = true;
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param theLogErrors Should errors be logged?
+	 * @since 1.2
+	 */
+	public LenientErrorHandler(boolean theLogErrors) {
+		myLogErrors = theLogErrors;
+	}
+
 	@Override
 	public void unknownElement(IParseLocation theLocation, String theElementName) {
-		ourLog.warn("Unknown element '{}' found while parsing", theElementName);
+		if (myLogErrors) {
+			ourLog.warn("Unknown element '{}' found while parsing", theElementName);
+		}
 	}
 
 	@Override
 	public void unknownAttribute(IParseLocation theLocation, String theElementName) {
-		ourLog.warn("Unknown attribute '{}' found while parsing", theElementName);
+		if (myLogErrors) {
+			ourLog.warn("Unknown attribute '{}' found while parsing", theElementName);
+		}
+	}
+
+	@Override
+	public void unexpectedRepeatingElement(IParseLocation theLocation, String theElementName) {
+		if (myLogErrors) {
+			ourLog.warn("Multiple repetitions of non-repeatable element '{}' found while parsing", theElementName);
+		}
 	}
 
 }

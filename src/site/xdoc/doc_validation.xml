@@ -37,20 +37,15 @@
 				either the FhirContext or on individual parser instances. This method
 				takes an <code>IParserErrorHandler</code>, which is a callback that
 				will be invoked any time a parse issue is detected.
-			</p>
-			<macro name="snippet">
-				<param name="id" value="basicValidation" />
-				<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
-			</macro>
-			
+			</p>			
 			<p>
 				There are two implementations of <code>IParserErrorHandler</code> worth 
-				mentioning:
+				mentioning.
 			</p>
 			<ul>
 				<ul>
 					<a href="./apidocs/ca/uhn/fhir/parser/LenientErrorHandler.html">LenientErrorHandler</a>
-					logs any errors but does not abort parsing.
+					logs any errors but does not abort parsing. This is the default.
 				</ul>
 				<ul>
 					<a href="./apidocs/ca/uhn/fhir/parser/StrictErrorHandler.html">StrictErrorHandler</a>
@@ -58,9 +53,35 @@
 				</ul>
 			</ul>
 			
+			<p>
+				The following example shows how to configure a parser to use strict validation. 
+			</p>
+			<macro name="snippet">
+				<param name="id" value="parserValidation" />
+				<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
+			</macro>
+			
+			<p>
+				You can also configure the error handler at the FhirContext level, which is useful
+				for clients. 
+			</p>
+			<macro name="snippet">
+				<param name="id" value="clientValidation" />
+				<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
+			</macro>
+			
+			<p>
+				FhirContext level validators can also be useful on servers. 
+			</p>
+			<macro name="snippet">
+				<param name="id" value="serverValidation" />
+				<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
+			</macro>
+
 		</section>
 
-		<!-- The body of the document contains a number of sections -->
+		<!-- RESOURCE VALIDATION -->
+
 		<section name="Resource Validation">
 
 			<p>
