@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="AuditEvent"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -792,19 +792,19 @@
   <publisher value="Health Level Seven International (Security)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/secure/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for AuditEvent Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="dicom"/>
     <uri value="http://nema.org/dicom"/>
@@ -816,13 +816,12 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="AuditEvent"/>
-      <short value="Event record kept for security purposes"/>
+      <short value="A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage."/>
       <definition value="A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage."/>
-      <comments value="Based on ATNA (RFC 3881)."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -839,9 +838,8 @@
     </element>
     <element>
       <path value="AuditEvent.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -850,7 +848,7 @@
     </element>
     <element>
       <path value="AuditEvent.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -860,9 +858,8 @@
     </element>
     <element>
       <path value="AuditEvent.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -872,11 +869,8 @@
     </element>
     <element>
       <path value="AuditEvent.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -890,9 +884,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -910,9 +903,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -928,9 +920,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -945,9 +936,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -963,7 +953,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event"/>
-      <short value="What was done"/>
+      <short value="Identifies the name, action type, time, and disposition of the audited event."/>
       <definition value="Identifies the name, action type, time, and disposition of the audited event."/>
       <requirements value="The event must be identified."/>
       <min value="1"/>
@@ -983,7 +973,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="AuditEvent.event.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -997,9 +987,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1014,9 +1003,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1033,9 +1021,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.type"/>
-      <short value="Type/identifier of event"/>
+      <short value="Identifier for a family of the event."/>
       <definition value="Identifier for a family of the event."/>
-      <comments value="e.g., a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function."/>
       <requirements value="This identifies the performed function. For &quot;Execute&quot; Event Action Code audit records, this identifies the application function performed."/>
       <min value="1"/>
       <max value="1"/>
@@ -1060,7 +1047,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.subtype"/>
-      <short value="More specific type/id for the event"/>
+      <short value="Identifier for the category of event."/>
       <definition value="Identifier for the category of event."/>
       <requirements value="This field enables queries of messages by implementation-defined event categories."/>
       <min value="0"/>
@@ -1086,7 +1073,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.action"/>
-      <short value="Type of action performed during the event"/>
+      <short value="Indicator for type of action performed during the event that generated the audit."/>
       <definition value="Indicator for type of action performed during the event that generated the audit."/>
       <requirements value="This broadly indicates what kind of action was done on the Participant Object."/>
       <min value="0"/>
@@ -1112,9 +1099,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.dateTime"/>
-      <short value="Time when the event occurred on source"/>
+      <short value="The time when the event occurred on the source."/>
       <definition value="The time when the event occurred on the source."/>
-      <comments value="In a distributed system, some sort of common time base, e.g., an NTP [RFC1305] server, is a good implementation tactic."/>
       <requirements value="This ties an event to a specific date and time. Security audits typically require a consistent time base, e.g., UTC, to eliminate time-zone issues arising from geographical distribution."/>
       <min value="1"/>
       <max value="1"/>
@@ -1132,9 +1118,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.outcome"/>
-      <short value="Whether the event succeeded or failed"/>
+      <short value="Indicates whether the event succeeded or failed."/>
       <definition value="Indicates whether the event succeeded or failed."/>
-      <comments value="In some cases a &quot;success&quot; may be partial, for example, an incomplete or interrupted transfer of a radiological study. For the purpose of establishing accountability, these distinctions are not relevant."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1158,7 +1143,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.outcomeDesc"/>
-      <short value="Description of the event outcome"/>
+      <short value="A free text description of the outcome of the event."/>
       <definition value="A free text description of the outcome of the event."/>
       <min value="0"/>
       <max value="1"/>
@@ -1176,9 +1161,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.event.purposeOfEvent"/>
-      <short value="The purposeOfUse of the event"/>
+      <short value="The purposeOfUse (reason) that was used during the event being recorded."/>
       <definition value="The purposeOfUse (reason) that was used during the event being recorded."/>
-      <comments value="Use participant.purposeOfUse when you know that is specific to the participant, otherwise use event.purposeOfEvent. (e.g. during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1187,9 +1171,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant"/>
-      <short value="A person, a hardware device or software process"/>
+      <short value="A person, a hardware device or software process."/>
       <definition value="A person, a hardware device or software process."/>
-      <comments value="There may be more than one user per event, for example, in cases of actions initiated by one user for other users, or in events that involve more than one user, hardware device, or system process. However, only one user may be the initiator/requestor for the event."/>
       <requirements value="The event has one or more active participants."/>
       <min value="1"/>
       <max value="*"/>
@@ -1214,7 +1197,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="AuditEvent.participant.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1228,9 +1211,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1245,9 +1227,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1264,7 +1245,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.role"/>
-      <short value="User roles (e.g. local RBAC codes)"/>
+      <short value="Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context."/>
       <definition value="Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context."/>
       <requirements value="This value ties an audited event to a user&#39;s role(s). It is an optional value that might be used to group events for analysis by user functional role categories."/>
       <min value="0"/>
@@ -1290,7 +1271,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.reference"/>
-      <short value="Direct reference to resource"/>
+      <short value="Direct reference to a resource that identifies the participant."/>
       <definition value="Direct reference to a resource that identifies the participant."/>
       <requirements value="This field ties an audit event to a specific resource."/>
       <min value="0"/>
@@ -1323,9 +1304,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.userId"/>
-      <short value="Unique identifier for the user"/>
+      <short value="Unique identifier for the user actively participating in the event."/>
       <definition value="Unique identifier for the user actively participating in the event."/>
-      <comments value="a unique value within the Audit Source ID. For node-based authentication -- where only the system hardware or process, but not a human user, is identified -- User ID would be the node name."/>
       <requirements value="This field ties an audit event to a specific user."/>
       <min value="0"/>
       <max value="1"/>
@@ -1344,7 +1324,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.altId"/>
-      <short value="Alternative User id e.g. authentication"/>
+      <short value="Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available."/>
       <definition value="Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available."/>
       <requirements value="In some situations a human user may authenticate with one identity but, to access a specific application system, may use a synonymous identify. For example, some &quot;single sign on&quot; implementations will do this. The alternative identifier would then be the original identify  used for authentication, and the User ID is the one known to and used by the application."/>
       <min value="0"/>
@@ -1363,7 +1343,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.name"/>
-      <short value="Human-meaningful name for the user"/>
+      <short value="Human-meaningful name for the user."/>
       <definition value="Human-meaningful name for the user."/>
       <requirements value="The User ID and Authorization User ID may be internal or otherwise obscure values. This field assists the auditor in identifying the actual user."/>
       <min value="0"/>
@@ -1382,9 +1362,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.requestor"/>
-      <short value="Whether user is initiator"/>
+      <short value="Indicator that the user is or is not the requestor, or initiator, for the event being audited."/>
       <definition value="Indicator that the user is or is not the requestor, or initiator, for the event being audited."/>
-      <comments value="There can only be one initiator. If the initiator is not clear, then do not choose any one participant as the initiator."/>
       <requirements value="This value is used to distinguish between requestor-users and recipient-users. For example, one person may initiate a report-output to be sent to another user."/>
       <min value="1"/>
       <max value="1"/>
@@ -1402,7 +1381,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.location"/>
-      <short value="Where"/>
+      <short value="Where the event occurred."/>
       <definition value="Where the event occurred."/>
       <min value="0"/>
       <max value="1"/>
@@ -1413,9 +1392,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.policy"/>
-      <short value="Policy that authorized event"/>
+      <short value="The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used."/>
       <definition value="The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used."/>
-      <comments value="For example: Where an OAuth token authorizes, the unique identifier from the OAuth token is placed into the policy element Where a policy engine (e.g. XACML) holds policy logic, the unique policy identifier is placed into the policy element."/>
       <requirements value="This value is used retrospectively to determine the authorization policies."/>
       <min value="0"/>
       <max value="*"/>
@@ -1425,7 +1403,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.media"/>
-      <short value="Type of media"/>
+      <short value="Type of media involved. Used when the event is about exporting/importing onto media."/>
       <definition value="Type of media involved. Used when the event is about exporting/importing onto media."/>
       <requirements value="Usually, this is used instead of specifying a network address. This field is not used for Media Id (i.e. the serial number of a CD)."/>
       <min value="0"/>
@@ -1444,7 +1422,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.network"/>
-      <short value="Logical network location for application activity"/>
+      <short value="Logical network location for application activity, if the activity has a network location."/>
       <definition value="Logical network location for application activity, if the activity has a network location."/>
       <min value="0"/>
       <max value="1"/>
@@ -1459,7 +1437,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="AuditEvent.participant.network.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1473,9 +1451,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.network.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1490,9 +1467,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.network.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1509,9 +1485,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.network.identifier"/>
-      <short value="Identifier for the network access point of the user device"/>
+      <short value="An identifier for the network access point of the user device for the audit event."/>
       <definition value="An identifier for the network access point of the user device for the audit event."/>
-      <comments value="This could be a device id, IP address or some other identifier associated with a device."/>
       <requirements value="This datum identifies the user&#39;s network access point, which may be distinct from the server that performed the action. It is an optional value that may be used to group events recorded on separate servers for analysis of a specific network access point&#39;s data access across all servers."/>
       <min value="0"/>
       <max value="1"/>
@@ -1529,7 +1504,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.network.type"/>
-      <short value="The type of network access point"/>
+      <short value="An identifier for the type of network access point that originated the audit event."/>
       <definition value="An identifier for the type of network access point that originated the audit event."/>
       <requirements value="This datum identifies the type of network access point identifier of the user device for the audit event. It is an optional value that may be used to group events recorded on separate servers for analysis of access according to a network access point&#39;s type."/>
       <min value="0"/>
@@ -1555,9 +1530,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.participant.purposeOfUse"/>
-      <short value="Participant purposeOfUse"/>
+      <short value="The purposeOfUse (reason) specific to this participant that was used during the event being recorded."/>
       <definition value="The purposeOfUse (reason) specific to this participant that was used during the event being recorded."/>
-      <comments value="Use participant.purposeOfUse when you know that is specific to the participant, otherwise use event.purposeOfEvent. (e.g. during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1566,9 +1540,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.source"/>
-      <short value="Application systems and processes"/>
+      <short value="Application systems and processes."/>
       <definition value="Application systems and processes."/>
-      <comments value="Since multi-tier, distributed, or composite applications make source identification ambiguous, this collection of fields may repeat for each application or process actively involved in the event. For example, multiple value-sets can identify participating web servers, application processes, and database server threads in an n-tier distributed application. Passive event participants, e.g., low-level network transports, need not be identified."/>
       <requirements value="The event is reported by one source."/>
       <min value="1"/>
       <max value="1"/>
@@ -1587,7 +1560,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="AuditEvent.source.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1601,9 +1574,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.source.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1618,9 +1590,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.source.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1637,9 +1608,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.source.site"/>
-      <short value="Logical source location within the enterprise"/>
+      <short value="Logical source location within the healthcare enterprise network."/>
       <definition value="Logical source location within the healthcare enterprise network."/>
-      <comments value="a hospital or other provider location within a multi-entity provider group."/>
       <requirements value="This value differentiates among the sites in a multi-site enterprise health information system."/>
       <min value="0"/>
       <max value="1"/>
@@ -1657,7 +1627,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.source.identifier"/>
-      <short value="The id of source where event originated"/>
+      <short value="Identifier of the source where the event originated."/>
       <definition value="Identifier of the source where the event originated."/>
       <requirements value="This field ties the event to a specific source system. It may be used to group events for analysis according to where the event occurred."/>
       <min value="1"/>
@@ -1676,7 +1646,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.source.type"/>
-      <short value="The type of source where event originated"/>
+      <short value="Code specifying the type of source where event originated."/>
       <definition value="Code specifying the type of source where event originated."/>
       <requirements value="This field indicates which type of source is identified by the Audit Source ID. It is an optional value that may be used to group events for analysis according to the type of source where the event occurred."/>
       <min value="0"/>
@@ -1702,9 +1672,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="AuditEvent.object"/>
-      <short value="Specific instances of data or objects that have been accessed"/>
+      <short value="Specific instances of data or objects that have been accessed."/>
       <definition value="Specific instances of data or objects that have been accessed."/>
-      <comments value="required unless the values for Event Identification, Active Participant Identification, and Audit Source Identification are sufficient to document the entire auditable event. Because events may have more than one participant object, this group can be a repeating set of values."/>
       <requirements value="The event may have other objects involved."/>
       <min value="0"/>
       <max value="*"/>
@@ -1739,7 +1708,7 @@ or
     <element>
       <path value="AuditEvent.object.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1753,9 +1722,8 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1770,9 +1738,8 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1789,9 +1756,8 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.identifier"/>
-      <short value="Specific instance of object (e.g. versioned)"/>
+      <short value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
       <definition value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
-      <comments value="Identifier details depends on object type."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1809,7 +1775,7 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.reference"/>
-      <short value="Specific instance of resource (e.g. versioned)"/>
+      <short value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
       <definition value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
       <min value="0"/>
       <max value="1"/>
@@ -1829,9 +1795,8 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.type"/>
-      <short value="Type of object involved"/>
+      <short value="The type of the object that was involved in this audit event."/>
       <definition value="The type of the object that was involved in this audit event."/>
-      <comments value="This value is distinct from the user&#39;s role or any user relationship to the participant object."/>
       <requirements value="To describe the object being acted upon. In addition to queries on the subject of the action in an auditable event, it is also important to be able to query on the object type for the action."/>
       <min value="0"/>
       <max value="1"/>
@@ -1858,9 +1823,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.role"/>
-      <short value="What role the Object played"/>
+      <short value="Code representing the functional application role of Participant Object being audited."/>
       <definition value="Code representing the functional application role of Participant Object being audited."/>
-      <comments value="See RFC 3881 for rules concerning matches between role and type."/>
       <requirements value="For some detailed audit analysis it may be necessary to indicate a more granular type of participant, based on the application role it serves."/>
       <min value="0"/>
       <max value="1"/>
@@ -1886,9 +1850,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.lifecycle"/>
-      <short value="Life-cycle stage for the object"/>
+      <short value="Identifier for the data life-cycle stage for the participant object."/>
       <definition value="Identifier for the data life-cycle stage for the participant object."/>
-      <comments value="This can be used to provide an audit trail for data, over time, as it passes through the system."/>
       <requirements value="Institutional policies for privacy and security may optionally fall under different accountability rules based on data life cycle. This provides a differentiating value for those cases."/>
       <min value="0"/>
       <max value="1"/>
@@ -1913,9 +1876,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.sensitivity"/>
-      <short value="Policy-defined sensitivity for the object"/>
+      <short value="Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics."/>
       <definition value="Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics."/>
-      <comments value="Values from ATNA are institution- and implementation-defined text strings (in sensitivity.text). HL7 defines confidentiality codes for records, documents etc. that can also be used here."/>
       <requirements value="This field identifies a specific instance of an object, such as a patient, to detect/track privacy and security issues."/>
       <min value="0"/>
       <max value="1"/>
@@ -1940,9 +1902,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.name"/>
-      <short value="Instance-specific descriptor for Object"/>
+      <short value="An instance-specific descriptor of the Participant Object ID audited, such as a person&#39;s name."/>
       <definition value="An instance-specific descriptor of the Participant Object ID audited, such as a person&#39;s name."/>
-      <comments value="This field may be used in a query/report to identify audit events for a specific person, e.g., where multiple synonymous Participant Object IDs (patient number, medical record number, encounter number, etc.) have been used."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1960,7 +1921,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.description"/>
-      <short value="Descriptive text"/>
+      <short value="Text that describes the object in more detail."/>
       <definition value="Text that describes the object in more detail."/>
       <min value="0"/>
       <max value="1"/>
@@ -1978,7 +1939,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.query"/>
-      <short value="Actual query for object"/>
+      <short value="The actual query for a query-type participant object."/>
       <definition value="The actual query for a query-type participant object."/>
       <requirements value="For query events it may be necessary to capture the actual query input to the query process in order to identify the specific event. Because of differences among query implementations and data encoding for them, this is a base 64 encoded data blob. It may be subsequently decoded or interpreted by downstream audit analysis processing."/>
       <min value="0"/>
@@ -1998,7 +1959,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail"/>
-      <short value="Additional Information about the Object"/>
+      <short value="Additional Information about the Object."/>
       <definition value="Additional Information about the Object."/>
       <min value="0"/>
       <max value="*"/>
@@ -2017,7 +1978,7 @@ role.player.code"/>
     <element>
       <path value="AuditEvent.object.detail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2031,9 +1992,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2048,9 +2008,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2067,7 +2026,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail.type"/>
-      <short value="Name of the property"/>
+      <short value="Name of the property."/>
       <definition value="Name of the property."/>
       <min value="1"/>
       <max value="1"/>
@@ -2085,7 +2044,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail.value"/>
-      <short value="Property value"/>
+      <short value="Property value."/>
       <definition value="Property value."/>
       <min value="1"/>
       <max value="1"/>
@@ -2105,9 +2064,8 @@ role.player.code"/>
   <differential>
     <element>
       <path value="AuditEvent"/>
-      <short value="Event record kept for security purposes"/>
+      <short value="A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage."/>
       <definition value="A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage."/>
-      <comments value="Based on ATNA (RFC 3881)."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -2124,7 +2082,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event"/>
-      <short value="What was done"/>
+      <short value="Identifies the name, action type, time, and disposition of the audited event."/>
       <definition value="Identifies the name, action type, time, and disposition of the audited event."/>
       <requirements value="The event must be identified."/>
       <min value="1"/>
@@ -2140,9 +2098,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.type"/>
-      <short value="Type/identifier of event"/>
+      <short value="Identifier for a family of the event."/>
       <definition value="Identifier for a family of the event."/>
-      <comments value="e.g., a menu item, program, rule, policy, function code, application name or URL. It identifies the performed function."/>
       <requirements value="This identifies the performed function. For &quot;Execute&quot; Event Action Code audit records, this identifies the application function performed."/>
       <min value="1"/>
       <max value="1"/>
@@ -2167,7 +2124,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.subtype"/>
-      <short value="More specific type/id for the event"/>
+      <short value="Identifier for the category of event."/>
       <definition value="Identifier for the category of event."/>
       <requirements value="This field enables queries of messages by implementation-defined event categories."/>
       <min value="0"/>
@@ -2193,7 +2150,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.action"/>
-      <short value="Type of action performed during the event"/>
+      <short value="Indicator for type of action performed during the event that generated the audit."/>
       <definition value="Indicator for type of action performed during the event that generated the audit."/>
       <requirements value="This broadly indicates what kind of action was done on the Participant Object."/>
       <min value="0"/>
@@ -2219,9 +2176,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.dateTime"/>
-      <short value="Time when the event occurred on source"/>
+      <short value="The time when the event occurred on the source."/>
       <definition value="The time when the event occurred on the source."/>
-      <comments value="In a distributed system, some sort of common time base, e.g., an NTP [RFC1305] server, is a good implementation tactic."/>
       <requirements value="This ties an event to a specific date and time. Security audits typically require a consistent time base, e.g., UTC, to eliminate time-zone issues arising from geographical distribution."/>
       <min value="1"/>
       <max value="1"/>
@@ -2239,9 +2195,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.outcome"/>
-      <short value="Whether the event succeeded or failed"/>
+      <short value="Indicates whether the event succeeded or failed."/>
       <definition value="Indicates whether the event succeeded or failed."/>
-      <comments value="In some cases a &quot;success&quot; may be partial, for example, an incomplete or interrupted transfer of a radiological study. For the purpose of establishing accountability, these distinctions are not relevant."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2265,7 +2220,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.outcomeDesc"/>
-      <short value="Description of the event outcome"/>
+      <short value="A free text description of the outcome of the event."/>
       <definition value="A free text description of the outcome of the event."/>
       <min value="0"/>
       <max value="1"/>
@@ -2283,9 +2238,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.event.purposeOfEvent"/>
-      <short value="The purposeOfUse of the event"/>
+      <short value="The purposeOfUse (reason) that was used during the event being recorded."/>
       <definition value="The purposeOfUse (reason) that was used during the event being recorded."/>
-      <comments value="Use participant.purposeOfUse when you know that is specific to the participant, otherwise use event.purposeOfEvent. (e.g. during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2294,9 +2248,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant"/>
-      <short value="A person, a hardware device or software process"/>
+      <short value="A person, a hardware device or software process."/>
       <definition value="A person, a hardware device or software process."/>
-      <comments value="There may be more than one user per event, for example, in cases of actions initiated by one user for other users, or in events that involve more than one user, hardware device, or system process. However, only one user may be the initiator/requestor for the event."/>
       <requirements value="The event has one or more active participants."/>
       <min value="1"/>
       <max value="*"/>
@@ -2317,7 +2270,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.role"/>
-      <short value="User roles (e.g. local RBAC codes)"/>
+      <short value="Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context."/>
       <definition value="Specification of the role(s) the user plays when performing the event. Usually the codes used in this element are local codes defined by the role-based access control security system used in the local context."/>
       <requirements value="This value ties an audited event to a user&#39;s role(s). It is an optional value that might be used to group events for analysis by user functional role categories."/>
       <min value="0"/>
@@ -2343,7 +2296,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.reference"/>
-      <short value="Direct reference to resource"/>
+      <short value="Direct reference to a resource that identifies the participant."/>
       <definition value="Direct reference to a resource that identifies the participant."/>
       <requirements value="This field ties an audit event to a specific resource."/>
       <min value="0"/>
@@ -2376,9 +2329,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.userId"/>
-      <short value="Unique identifier for the user"/>
+      <short value="Unique identifier for the user actively participating in the event."/>
       <definition value="Unique identifier for the user actively participating in the event."/>
-      <comments value="a unique value within the Audit Source ID. For node-based authentication -- where only the system hardware or process, but not a human user, is identified -- User ID would be the node name."/>
       <requirements value="This field ties an audit event to a specific user."/>
       <min value="0"/>
       <max value="1"/>
@@ -2397,7 +2349,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.altId"/>
-      <short value="Alternative User id e.g. authentication"/>
+      <short value="Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available."/>
       <definition value="Alternative Participant Identifier. For a human, this should be a user identifier text string from authentication system. This identifier would be one known to a common authentication system (e.g., single sign-on), if available."/>
       <requirements value="In some situations a human user may authenticate with one identity but, to access a specific application system, may use a synonymous identify. For example, some &quot;single sign on&quot; implementations will do this. The alternative identifier would then be the original identify  used for authentication, and the User ID is the one known to and used by the application."/>
       <min value="0"/>
@@ -2416,7 +2368,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.name"/>
-      <short value="Human-meaningful name for the user"/>
+      <short value="Human-meaningful name for the user."/>
       <definition value="Human-meaningful name for the user."/>
       <requirements value="The User ID and Authorization User ID may be internal or otherwise obscure values. This field assists the auditor in identifying the actual user."/>
       <min value="0"/>
@@ -2435,9 +2387,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.requestor"/>
-      <short value="Whether user is initiator"/>
+      <short value="Indicator that the user is or is not the requestor, or initiator, for the event being audited."/>
       <definition value="Indicator that the user is or is not the requestor, or initiator, for the event being audited."/>
-      <comments value="There can only be one initiator. If the initiator is not clear, then do not choose any one participant as the initiator."/>
       <requirements value="This value is used to distinguish between requestor-users and recipient-users. For example, one person may initiate a report-output to be sent to another user."/>
       <min value="1"/>
       <max value="1"/>
@@ -2455,7 +2406,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.location"/>
-      <short value="Where"/>
+      <short value="Where the event occurred."/>
       <definition value="Where the event occurred."/>
       <min value="0"/>
       <max value="1"/>
@@ -2466,9 +2417,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.policy"/>
-      <short value="Policy that authorized event"/>
+      <short value="The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used."/>
       <definition value="The policy or plan that authorized the activity being recorded. Typically, a single activity may have multiple applicable policies, such as patient consent, guarantor funding, etc. The policy would also indicate the security token used."/>
-      <comments value="For example: Where an OAuth token authorizes, the unique identifier from the OAuth token is placed into the policy element Where a policy engine (e.g. XACML) holds policy logic, the unique policy identifier is placed into the policy element."/>
       <requirements value="This value is used retrospectively to determine the authorization policies."/>
       <min value="0"/>
       <max value="*"/>
@@ -2478,7 +2428,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.media"/>
-      <short value="Type of media"/>
+      <short value="Type of media involved. Used when the event is about exporting/importing onto media."/>
       <definition value="Type of media involved. Used when the event is about exporting/importing onto media."/>
       <requirements value="Usually, this is used instead of specifying a network address. This field is not used for Media Id (i.e. the serial number of a CD)."/>
       <min value="0"/>
@@ -2497,7 +2447,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.network"/>
-      <short value="Logical network location for application activity"/>
+      <short value="Logical network location for application activity, if the activity has a network location."/>
       <definition value="Logical network location for application activity, if the activity has a network location."/>
       <min value="0"/>
       <max value="1"/>
@@ -2508,9 +2458,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.network.identifier"/>
-      <short value="Identifier for the network access point of the user device"/>
+      <short value="An identifier for the network access point of the user device for the audit event."/>
       <definition value="An identifier for the network access point of the user device for the audit event."/>
-      <comments value="This could be a device id, IP address or some other identifier associated with a device."/>
       <requirements value="This datum identifies the user&#39;s network access point, which may be distinct from the server that performed the action. It is an optional value that may be used to group events recorded on separate servers for analysis of a specific network access point&#39;s data access across all servers."/>
       <min value="0"/>
       <max value="1"/>
@@ -2528,7 +2477,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.network.type"/>
-      <short value="The type of network access point"/>
+      <short value="An identifier for the type of network access point that originated the audit event."/>
       <definition value="An identifier for the type of network access point that originated the audit event."/>
       <requirements value="This datum identifies the type of network access point identifier of the user device for the audit event. It is an optional value that may be used to group events recorded on separate servers for analysis of access according to a network access point&#39;s type."/>
       <min value="0"/>
@@ -2554,9 +2503,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.participant.purposeOfUse"/>
-      <short value="Participant purposeOfUse"/>
+      <short value="The purposeOfUse (reason) specific to this participant that was used during the event being recorded."/>
       <definition value="The purposeOfUse (reason) specific to this participant that was used during the event being recorded."/>
-      <comments value="Use participant.purposeOfUse when you know that is specific to the participant, otherwise use event.purposeOfEvent. (e.g. during a machine-to-machine transfer it might not be obvious to the audit system who caused the event, but it does know why)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2565,9 +2513,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.source"/>
-      <short value="Application systems and processes"/>
+      <short value="Application systems and processes."/>
       <definition value="Application systems and processes."/>
-      <comments value="Since multi-tier, distributed, or composite applications make source identification ambiguous, this collection of fields may repeat for each application or process actively involved in the event. For example, multiple value-sets can identify participating web servers, application processes, and database server threads in an n-tier distributed application. Passive event participants, e.g., low-level network transports, need not be identified."/>
       <requirements value="The event is reported by one source."/>
       <min value="1"/>
       <max value="1"/>
@@ -2582,9 +2529,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.source.site"/>
-      <short value="Logical source location within the enterprise"/>
+      <short value="Logical source location within the healthcare enterprise network."/>
       <definition value="Logical source location within the healthcare enterprise network."/>
-      <comments value="a hospital or other provider location within a multi-entity provider group."/>
       <requirements value="This value differentiates among the sites in a multi-site enterprise health information system."/>
       <min value="0"/>
       <max value="1"/>
@@ -2602,7 +2548,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.source.identifier"/>
-      <short value="The id of source where event originated"/>
+      <short value="Identifier of the source where the event originated."/>
       <definition value="Identifier of the source where the event originated."/>
       <requirements value="This field ties the event to a specific source system. It may be used to group events for analysis according to where the event occurred."/>
       <min value="1"/>
@@ -2621,7 +2567,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.source.type"/>
-      <short value="The type of source where event originated"/>
+      <short value="Code specifying the type of source where event originated."/>
       <definition value="Code specifying the type of source where event originated."/>
       <requirements value="This field indicates which type of source is identified by the Audit Source ID. It is an optional value that may be used to group events for analysis according to the type of source where the event occurred."/>
       <min value="0"/>
@@ -2647,9 +2593,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object"/>
-      <short value="Specific instances of data or objects that have been accessed"/>
+      <short value="Specific instances of data or objects that have been accessed."/>
       <definition value="Specific instances of data or objects that have been accessed."/>
-      <comments value="required unless the values for Event Identification, Active Participant Identification, and Audit Source Identification are sufficient to document the entire auditable event. Because events may have more than one participant object, this group can be a repeating set of values."/>
       <requirements value="The event may have other objects involved."/>
       <min value="0"/>
       <max value="*"/>
@@ -2680,9 +2625,8 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.identifier"/>
-      <short value="Specific instance of object (e.g. versioned)"/>
+      <short value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
       <definition value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
-      <comments value="Identifier details depends on object type."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2700,7 +2644,7 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.reference"/>
-      <short value="Specific instance of resource (e.g. versioned)"/>
+      <short value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
       <definition value="Identifies a specific instance of the participant object. The reference should always be version specific."/>
       <min value="0"/>
       <max value="1"/>
@@ -2720,9 +2664,8 @@ or
     </element>
     <element>
       <path value="AuditEvent.object.type"/>
-      <short value="Type of object involved"/>
+      <short value="The type of the object that was involved in this audit event."/>
       <definition value="The type of the object that was involved in this audit event."/>
-      <comments value="This value is distinct from the user&#39;s role or any user relationship to the participant object."/>
       <requirements value="To describe the object being acted upon. In addition to queries on the subject of the action in an auditable event, it is also important to be able to query on the object type for the action."/>
       <min value="0"/>
       <max value="1"/>
@@ -2749,9 +2692,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.role"/>
-      <short value="What role the Object played"/>
+      <short value="Code representing the functional application role of Participant Object being audited."/>
       <definition value="Code representing the functional application role of Participant Object being audited."/>
-      <comments value="See RFC 3881 for rules concerning matches between role and type."/>
       <requirements value="For some detailed audit analysis it may be necessary to indicate a more granular type of participant, based on the application role it serves."/>
       <min value="0"/>
       <max value="1"/>
@@ -2777,9 +2719,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.lifecycle"/>
-      <short value="Life-cycle stage for the object"/>
+      <short value="Identifier for the data life-cycle stage for the participant object."/>
       <definition value="Identifier for the data life-cycle stage for the participant object."/>
-      <comments value="This can be used to provide an audit trail for data, over time, as it passes through the system."/>
       <requirements value="Institutional policies for privacy and security may optionally fall under different accountability rules based on data life cycle. This provides a differentiating value for those cases."/>
       <min value="0"/>
       <max value="1"/>
@@ -2804,9 +2745,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.sensitivity"/>
-      <short value="Policy-defined sensitivity for the object"/>
+      <short value="Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics."/>
       <definition value="Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics."/>
-      <comments value="Values from ATNA are institution- and implementation-defined text strings (in sensitivity.text). HL7 defines confidentiality codes for records, documents etc. that can also be used here."/>
       <requirements value="This field identifies a specific instance of an object, such as a patient, to detect/track privacy and security issues."/>
       <min value="0"/>
       <max value="1"/>
@@ -2831,9 +2771,8 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.name"/>
-      <short value="Instance-specific descriptor for Object"/>
+      <short value="An instance-specific descriptor of the Participant Object ID audited, such as a person&#39;s name."/>
       <definition value="An instance-specific descriptor of the Participant Object ID audited, such as a person&#39;s name."/>
-      <comments value="This field may be used in a query/report to identify audit events for a specific person, e.g., where multiple synonymous Participant Object IDs (patient number, medical record number, encounter number, etc.) have been used."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2851,7 +2790,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.description"/>
-      <short value="Descriptive text"/>
+      <short value="Text that describes the object in more detail."/>
       <definition value="Text that describes the object in more detail."/>
       <min value="0"/>
       <max value="1"/>
@@ -2869,7 +2808,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.query"/>
-      <short value="Actual query for object"/>
+      <short value="The actual query for a query-type participant object."/>
       <definition value="The actual query for a query-type participant object."/>
       <requirements value="For query events it may be necessary to capture the actual query input to the query process in order to identify the specific event. Because of differences among query implementations and data encoding for them, this is a base 64 encoded data blob. It may be subsequently decoded or interpreted by downstream audit analysis processing."/>
       <min value="0"/>
@@ -2889,7 +2828,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail"/>
-      <short value="Additional Information about the Object"/>
+      <short value="Additional Information about the Object."/>
       <definition value="Additional Information about the Object."/>
       <min value="0"/>
       <max value="*"/>
@@ -2904,7 +2843,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail.type"/>
-      <short value="Name of the property"/>
+      <short value="Name of the property."/>
       <definition value="Name of the property."/>
       <min value="1"/>
       <max value="1"/>
@@ -2922,7 +2861,7 @@ role.player.code"/>
     </element>
     <element>
       <path value="AuditEvent.object.detail.value"/>
-      <short value="Property value"/>
+      <short value="Property value."/>
       <definition value="Property value."/>
       <min value="1"/>
       <max value="1"/>

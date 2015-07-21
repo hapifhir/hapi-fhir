@@ -42,6 +42,16 @@ public class RuntimeChildContainedResources extends BaseRuntimeDeclaredChildDefi
 	}
 
 	@Override
+	public int getMax() {
+		return Child.MAX_UNLIMITED;
+	}
+
+	@Override
+	public int getMin() {
+		return 0;
+	}
+
+	@Override
 	public BaseRuntimeElementDefinition<?> getChildByName(String theName) {
 		assert theName.equals(getElementName());
 		return myElem;

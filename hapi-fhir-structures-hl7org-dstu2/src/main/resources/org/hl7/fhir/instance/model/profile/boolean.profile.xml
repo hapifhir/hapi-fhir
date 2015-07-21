@@ -11,16 +11,15 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <description value="Base StructureDefinition for boolean Resource: Value of &quot;true&quot; or &quot;false&quot;"/>
+  <description value="Base StructureDefinition for boolean Type: Value of &quot;true&quot; or &quot;false&quot;"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="boolean"/>
@@ -29,7 +28,7 @@
       <min value="0"/>
       <max value="*"/>
       <type>
-        <code value="boolean"/>
+        <code value="Element"/>
       </type>
     </element>
     <element>
@@ -52,6 +51,11 @@
       <alias value="user content"/>
       <min value="0"/>
       <max value="*"/>
+      <base>
+        <path value="boolean.extension"/>
+        <min value="0"/>
+        <max value="*"/>
+      </base>
       <type>
         <code value="Extension"/>
       </type>

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.hl7.fhir.instance.conf.ServerConformanceProvider;
 import org.hl7.fhir.instance.model.Conformance;
+import org.hl7.fhir.instance.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
@@ -90,7 +91,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		assertEquals("Patient", res.getType());
 		
 		assertTrue(res.getConditionalCreate());
-		assertTrue(res.getConditionalDelete());
+		assertEquals(ConditionalDeleteStatus.SINGLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
 	}
 	

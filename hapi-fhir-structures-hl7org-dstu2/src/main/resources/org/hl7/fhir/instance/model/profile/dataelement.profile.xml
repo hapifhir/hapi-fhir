@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="DataElement"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -403,12 +403,17 @@
             <span title="DataElement.element : Defines the structure, type, allowed values and other constraining characteristics of the data element.">element</span>
             <a name="DataElement.element"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element has or is affected by some invariants">I</span>
+          </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">1..*</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="elementdefinition.html#ElementDefinition">ElementDefinition</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Definition of element</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Definition of element
+            <br/>
+            <span style="font-style: italic" title="dae-1">No base allowed</span>
+          </td>
         </tr>
 
       </table>
@@ -422,19 +427,19 @@
   <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for DataElement Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="dex"/>
     <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"/>
@@ -461,13 +466,12 @@
     <name value="LOINC"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="DataElement"/>
-      <short value="Resource data element"/>
+      <short value="The formal description of a single piece of information that can be gathered and reported."/>
       <definition value="The formal description of a single piece of information that can be gathered and reported."/>
-      <comments value="Often called a clinical template."/>
       <alias value="Master Observation"/>
       <alias value="Data Element"/>
       <alias value="CDE"/>
@@ -495,9 +499,8 @@
     </element>
     <element>
       <path value="DataElement.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -506,7 +509,7 @@
     </element>
     <element>
       <path value="DataElement.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -516,9 +519,8 @@
     </element>
     <element>
       <path value="DataElement.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -528,11 +530,8 @@
     </element>
     <element>
       <path value="DataElement.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -546,9 +545,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DataElement.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -566,9 +564,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DataElement.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -584,9 +581,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DataElement.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -601,9 +597,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DataElement.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -619,7 +614,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DataElement.url"/>
-      <short value="Globally unique logical id for data element"/>
+      <short value="An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <definition value="An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <min value="0"/>
       <max value="1"/>
@@ -634,9 +629,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DataElement.identifier"/>
-      <short value="Logical id to reference this data element"/>
+      <short value="Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance."/>
       <definition value="Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance."/>
-      <comments value="Typically, this is used for values that can go in a v3 II data type."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -661,16 +655,13 @@ Not all the content has to be in the base language. The Resource.language should
       </mapping>
       <mapping>
         <identity value="iso11179"/>
-        <map value="(Identified_Item).identifier
-
-As assigned by registering authority"/>
+        <map value="(Identified_Item).identifier  As assigned by registering authority"/>
       </mapping>
     </element>
     <element>
       <path value="DataElement.version"/>
-      <short value="Logical id for this version of the data element"/>
+      <short value="The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually."/>
       <definition value="The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually."/>
-      <comments value="N/A."/>
       <requirements value="There may be multiple resource versions of the data element that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author&#39;s control."/>
       <min value="0"/>
       <max value="1"/>
@@ -701,9 +692,8 @@ As assigned by registering authority"/>
     </element>
     <element>
       <path value="DataElement.name"/>
-      <short value="Descriptive label for this element definition"/>
+      <short value="The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used."/>
       <definition value="The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used."/>
-      <comments value="This may be similar to the question used to prompt someone for a data element value, but the purpose is communicating about the data element, not asking the question.  (Refer to the &#39;question&#39; element for the latter.)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -728,14 +718,12 @@ As assigned by registering authority"/>
       </mapping>
       <mapping>
         <identity value="iso11179"/>
-        <map value="(Designatable_Item).designation.sign
-
-acceptability=preferred in default context"/>
+        <map value="(Designatable_Item).designation.sign  acceptability=preferred in default context"/>
       </mapping>
     </element>
     <element>
       <path value="DataElement.useContext"/>
-      <short value="Content intends to support these contexts"/>
+      <short value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of data element definitions."/>
       <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of data element definitions."/>
       <min value="0"/>
       <max value="*"/>
@@ -769,9 +757,8 @@ acceptability=preferred in default context"/>
     </element>
     <element>
       <path value="DataElement.experimental"/>
-      <short value="If for testing purposes, not real usage"/>
+      <short value="A flag to indicate that this search data elemnt definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
       <definition value="A flag to indicate that this search data elemnt definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
-      <comments value="Allows filtering of search data element definitions that are appropriate for use vs. not."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -785,7 +772,7 @@ acceptability=preferred in default context"/>
     </element>
     <element>
       <path value="DataElement.status"/>
-      <short value="draft | active | retired"/>
+      <short value="The status of the data element."/>
       <definition value="The status of the data element."/>
       <requirements value="Allows filtering of data elements that are appropriate for use vs. not."/>
       <min value="1"/>
@@ -808,10 +795,7 @@ acceptability=preferred in default context"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="./status
-(draft = new
- active = active
- retired = aborted)"/>
+        <map value="./status (draft = new  active = active  retired = aborted)"/>
       </mapping>
       <mapping>
         <identity value="loinc"/>
@@ -819,20 +803,13 @@ acceptability=preferred in default context"/>
       </mapping>
       <mapping>
         <identity value="iso11179"/>
-        <map value="(Administered_item).registration.state
-
-new = Incomplete, Candidate, Recorded, Qualified
-
-active = Standard, Preferred Standard, Application
-
-retired = Retired, Superseded, Historical"/>
+        <map value="(Administered_item).registration.state  new = Incomplete, Candidate, Recorded, Qualified  active = Standard, Preferred Standard, Application  retired = Retired, Superseded, Historical"/>
       </mapping>
     </element>
     <element>
       <path value="DataElement.date"/>
-      <short value="Date for this version of the data element"/>
+      <short value="The date that the status for this business version of the data element became effective.  (I.e. Date the draft was created, date element became active or date element became retired)."/>
       <definition value="The date that the status for this business version of the data element became effective.  (I.e. Date the draft was created, date element became active or date element became retired)."/>
-      <comments value="This refers to the &quot;business&quot; version - the DataElement.version which changes based on business processes.  It does not refer to the date of the RESTful version which is part of the resource metadata."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -862,9 +839,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.copyright"/>
-      <short value="Use and/or Publishing restrictions"/>
+      <short value="A copyright statement relating to the definition of the data element. Copyright statements are generally legal restrictions on the use and publishing of the details of the definition of the data element."/>
       <definition value="A copyright statement relating to the definition of the data element. Copyright statements are generally legal restrictions on the use and publishing of the details of the definition of the data element."/>
-      <comments value="The copyright statement does not apply to values for the data element, only to its definition."/>
       <alias value="License"/>
       <alias value="Restrictions"/>
       <min value="0"/>
@@ -879,9 +855,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.publisher"/>
-      <short value="Name of the publisher (Organization or individual)"/>
+      <short value="The name of the individual or organization that published the data element."/>
       <definition value="The name of the individual or organization that published the data element."/>
-      <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
       <requirements value="Helps establish the &quot;authority/credibility&quot; of the data element.  May also allow for contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -912,9 +887,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact"/>
-      <short value="Contact details of the publisher"/>
+      <short value="Contacts to assist a user in finding and communicating with the publisher."/>
       <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
-      <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -941,7 +915,7 @@ retired = Retired, Superseded, Historical"/>
     <element>
       <path value="DataElement.contact.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -955,9 +929,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -972,9 +945,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -991,9 +963,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact.name"/>
-      <short value="Name of a individual to contact"/>
+      <short value="The name of an individual to contact regarding the data element."/>
       <definition value="The name of an individual to contact regarding the data element."/>
-      <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1007,7 +978,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact.telecom"/>
-      <short value="Contact details for individual or publisher"/>
+      <short value="Contact details for individual (if a name was provided) or the publisher."/>
       <definition value="Contact details for individual (if a name was provided) or the publisher."/>
       <min value="0"/>
       <max value="*"/>
@@ -1022,7 +993,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.specificity"/>
-      <short value="comparable | fully-specified | equivalent | convertable | scaleable | flexible"/>
+      <short value="Identifies how precise the data element is in its definition."/>
       <definition value="Identifies how precise the data element is in its definition."/>
       <requirements value="Allows determining whether the degree of comparability of data element instances - less granular data elements result in data that is less comparable (or at least requires more work to compare)."/>
       <min value="0"/>
@@ -1049,7 +1020,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping"/>
-      <short value="External specification mapped to"/>
+      <short value="Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with."/>
       <definition value="Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with."/>
       <min value="0"/>
       <max value="*"/>
@@ -1068,7 +1039,7 @@ retired = Retired, Superseded, Historical"/>
     <element>
       <path value="DataElement.mapping.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1082,9 +1053,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1099,9 +1069,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1118,9 +1087,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.identity"/>
-      <short value="Internal id when this mapping is used"/>
+      <short value="An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis."/>
       <definition value="An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis."/>
-      <comments value="The specification is described once, with general comments, and then specific mappings are made that reference this declaration."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1133,9 +1101,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.uri"/>
-      <short value="Identifies what this mapping refers to"/>
+      <short value="An absolute URI that identifies the specification that this mapping is expressed to."/>
       <definition value="An absolute URI that identifies the specification that this mapping is expressed to."/>
-      <comments value="A formal identity for the specification being mapped to helps with identifying maps consistently."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1148,7 +1115,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.name"/>
-      <short value="Names what this mapping refers to"/>
+      <short value="A name for the specification that is being mapped to."/>
       <definition value="A name for the specification that is being mapped to."/>
       <min value="0"/>
       <max value="1"/>
@@ -1162,7 +1129,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.comments"/>
-      <short value="Versions, Issues, Scope limitations etc"/>
+      <short value="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage."/>
       <definition value="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage."/>
       <min value="0"/>
       <max value="1"/>
@@ -1176,14 +1143,20 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.element"/>
-      <short value="Definition of element"/>
+      <short value="Defines the structure, type, allowed values and other constraining characteristics of the data element."/>
       <definition value="Defines the structure, type, allowed values and other constraining characteristics of the data element."/>
-      <comments value="For simple data types there will only be one repetition.  For complex data types, multiple repetitions will be present defining a nested structure using the &quot;path&quot; element."/>
+      <requirements value="1."/>
       <min value="1"/>
       <max value="*"/>
       <type>
         <code value="ElementDefinition"/>
       </type>
+      <constraint>
+        <key value="dae-1"/>
+        <severity value="error"/>
+        <human value="No base allowed"/>
+        <xpath value="not(exists(f:base))"/>
+      </constraint>
       <mapping>
         <identity value="rim"/>
         <map value="N/A (MIF)"/>
@@ -1193,9 +1166,8 @@ retired = Retired, Superseded, Historical"/>
   <differential>
     <element>
       <path value="DataElement"/>
-      <short value="Resource data element"/>
+      <short value="The formal description of a single piece of information that can be gathered and reported."/>
       <definition value="The formal description of a single piece of information that can be gathered and reported."/>
-      <comments value="Often called a clinical template."/>
       <alias value="Master Observation"/>
       <alias value="Data Element"/>
       <alias value="CDE"/>
@@ -1223,7 +1195,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.url"/>
-      <short value="Globally unique logical id for data element"/>
+      <short value="An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <definition value="An absolute uri that is used to identify this element when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1238,9 +1210,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.identifier"/>
-      <short value="Logical id to reference this data element"/>
+      <short value="Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance."/>
       <definition value="Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance."/>
-      <comments value="Typically, this is used for values that can go in a v3 II data type."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1265,16 +1236,13 @@ retired = Retired, Superseded, Historical"/>
       </mapping>
       <mapping>
         <identity value="iso11179"/>
-        <map value="(Identified_Item).identifier
-
-As assigned by registering authority"/>
+        <map value="(Identified_Item).identifier  As assigned by registering authority"/>
       </mapping>
     </element>
     <element>
       <path value="DataElement.version"/>
-      <short value="Logical id for this version of the data element"/>
+      <short value="The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually."/>
       <definition value="The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually."/>
-      <comments value="N/A."/>
       <requirements value="There may be multiple resource versions of the data element that have this same identifier. The resource version id will change for technical reasons, whereas the stated version number needs to be under the author&#39;s control."/>
       <min value="0"/>
       <max value="1"/>
@@ -1305,9 +1273,8 @@ As assigned by registering authority"/>
     </element>
     <element>
       <path value="DataElement.name"/>
-      <short value="Descriptive label for this element definition"/>
+      <short value="The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used."/>
       <definition value="The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used."/>
-      <comments value="This may be similar to the question used to prompt someone for a data element value, but the purpose is communicating about the data element, not asking the question.  (Refer to the &#39;question&#39; element for the latter.)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1332,14 +1299,12 @@ As assigned by registering authority"/>
       </mapping>
       <mapping>
         <identity value="iso11179"/>
-        <map value="(Designatable_Item).designation.sign
-
-acceptability=preferred in default context"/>
+        <map value="(Designatable_Item).designation.sign  acceptability=preferred in default context"/>
       </mapping>
     </element>
     <element>
       <path value="DataElement.useContext"/>
-      <short value="Content intends to support these contexts"/>
+      <short value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of data element definitions."/>
       <definition value="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of data element definitions."/>
       <min value="0"/>
       <max value="*"/>
@@ -1373,9 +1338,8 @@ acceptability=preferred in default context"/>
     </element>
     <element>
       <path value="DataElement.experimental"/>
-      <short value="If for testing purposes, not real usage"/>
+      <short value="A flag to indicate that this search data elemnt definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
       <definition value="A flag to indicate that this search data elemnt definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
-      <comments value="Allows filtering of search data element definitions that are appropriate for use vs. not."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1389,7 +1353,7 @@ acceptability=preferred in default context"/>
     </element>
     <element>
       <path value="DataElement.status"/>
-      <short value="draft | active | retired"/>
+      <short value="The status of the data element."/>
       <definition value="The status of the data element."/>
       <requirements value="Allows filtering of data elements that are appropriate for use vs. not."/>
       <min value="1"/>
@@ -1412,10 +1376,7 @@ acceptability=preferred in default context"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value="./status
-(draft = new
- active = active
- retired = aborted)"/>
+        <map value="./status (draft = new  active = active  retired = aborted)"/>
       </mapping>
       <mapping>
         <identity value="loinc"/>
@@ -1423,20 +1384,13 @@ acceptability=preferred in default context"/>
       </mapping>
       <mapping>
         <identity value="iso11179"/>
-        <map value="(Administered_item).registration.state
-
-new = Incomplete, Candidate, Recorded, Qualified
-
-active = Standard, Preferred Standard, Application
-
-retired = Retired, Superseded, Historical"/>
+        <map value="(Administered_item).registration.state  new = Incomplete, Candidate, Recorded, Qualified  active = Standard, Preferred Standard, Application  retired = Retired, Superseded, Historical"/>
       </mapping>
     </element>
     <element>
       <path value="DataElement.date"/>
-      <short value="Date for this version of the data element"/>
+      <short value="The date that the status for this business version of the data element became effective.  (I.e. Date the draft was created, date element became active or date element became retired)."/>
       <definition value="The date that the status for this business version of the data element became effective.  (I.e. Date the draft was created, date element became active or date element became retired)."/>
-      <comments value="This refers to the &quot;business&quot; version - the DataElement.version which changes based on business processes.  It does not refer to the date of the RESTful version which is part of the resource metadata."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1466,9 +1420,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.copyright"/>
-      <short value="Use and/or Publishing restrictions"/>
+      <short value="A copyright statement relating to the definition of the data element. Copyright statements are generally legal restrictions on the use and publishing of the details of the definition of the data element."/>
       <definition value="A copyright statement relating to the definition of the data element. Copyright statements are generally legal restrictions on the use and publishing of the details of the definition of the data element."/>
-      <comments value="The copyright statement does not apply to values for the data element, only to its definition."/>
       <alias value="License"/>
       <alias value="Restrictions"/>
       <min value="0"/>
@@ -1483,9 +1436,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.publisher"/>
-      <short value="Name of the publisher (Organization or individual)"/>
+      <short value="The name of the individual or organization that published the data element."/>
       <definition value="The name of the individual or organization that published the data element."/>
-      <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
       <requirements value="Helps establish the &quot;authority/credibility&quot; of the data element.  May also allow for contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -1516,9 +1468,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact"/>
-      <short value="Contact details of the publisher"/>
+      <short value="Contacts to assist a user in finding and communicating with the publisher."/>
       <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
-      <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
       <min value="0"/>
       <max value="*"/>
       <isSummary value="true"/>
@@ -1541,9 +1492,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact.name"/>
-      <short value="Name of a individual to contact"/>
+      <short value="The name of an individual to contact regarding the data element."/>
       <definition value="The name of an individual to contact regarding the data element."/>
-      <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1557,7 +1507,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.contact.telecom"/>
-      <short value="Contact details for individual or publisher"/>
+      <short value="Contact details for individual (if a name was provided) or the publisher."/>
       <definition value="Contact details for individual (if a name was provided) or the publisher."/>
       <min value="0"/>
       <max value="*"/>
@@ -1572,7 +1522,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.specificity"/>
-      <short value="comparable | fully-specified | equivalent | convertable | scaleable | flexible"/>
+      <short value="Identifies how precise the data element is in its definition."/>
       <definition value="Identifies how precise the data element is in its definition."/>
       <requirements value="Allows determining whether the degree of comparability of data element instances - less granular data elements result in data that is less comparable (or at least requires more work to compare)."/>
       <min value="0"/>
@@ -1599,7 +1549,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping"/>
-      <short value="External specification mapped to"/>
+      <short value="Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with."/>
       <definition value="Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with."/>
       <min value="0"/>
       <max value="*"/>
@@ -1614,9 +1564,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.identity"/>
-      <short value="Internal id when this mapping is used"/>
+      <short value="An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis."/>
       <definition value="An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis."/>
-      <comments value="The specification is described once, with general comments, and then specific mappings are made that reference this declaration."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1629,9 +1578,8 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.uri"/>
-      <short value="Identifies what this mapping refers to"/>
+      <short value="An absolute URI that identifies the specification that this mapping is expressed to."/>
       <definition value="An absolute URI that identifies the specification that this mapping is expressed to."/>
-      <comments value="A formal identity for the specification being mapped to helps with identifying maps consistently."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1644,7 +1592,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.name"/>
-      <short value="Names what this mapping refers to"/>
+      <short value="A name for the specification that is being mapped to."/>
       <definition value="A name for the specification that is being mapped to."/>
       <min value="0"/>
       <max value="1"/>
@@ -1658,7 +1606,7 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.mapping.comments"/>
-      <short value="Versions, Issues, Scope limitations etc"/>
+      <short value="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage."/>
       <definition value="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage."/>
       <min value="0"/>
       <max value="1"/>
@@ -1672,14 +1620,20 @@ retired = Retired, Superseded, Historical"/>
     </element>
     <element>
       <path value="DataElement.element"/>
-      <short value="Definition of element"/>
+      <short value="Defines the structure, type, allowed values and other constraining characteristics of the data element."/>
       <definition value="Defines the structure, type, allowed values and other constraining characteristics of the data element."/>
-      <comments value="For simple data types there will only be one repetition.  For complex data types, multiple repetitions will be present defining a nested structure using the &quot;path&quot; element."/>
+      <requirements value="1."/>
       <min value="1"/>
       <max value="*"/>
       <type>
         <code value="ElementDefinition"/>
       </type>
+      <constraint>
+        <key value="dae-1"/>
+        <severity value="error"/>
+        <human value="No base allowed"/>
+        <xpath value="not(exists(f:base))"/>
+      </constraint>
       <mapping>
         <identity value="rim"/>
         <map value="N/A (MIF)"/>

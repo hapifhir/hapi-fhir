@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -46,218 +46,6 @@ import org.hl7.fhir.instance.model.api.*;
  */
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
 public class TestScript extends DomainResource {
-
-    public enum TestOperationType {
-        /**
-         * Read the current state of the resource.
-         */
-        READ, 
-        /**
-         * Read the state of a specific version of the resource.
-         */
-        VREAD, 
-        /**
-         * Update an existing resource by its id (or create it if it is new).
-         */
-        UPDATE, 
-        /**
-         * Delete a resource.
-         */
-        DELETE, 
-        /**
-         * Retrieve the update history for a particular resource or resource type.
-         */
-        HISTORY, 
-        /**
-         * Create a new resource with a server assigned id.
-         */
-        CREATE, 
-        /**
-         * Search based on some filter criteria.
-         */
-        SEARCH, 
-        /**
-         * Update, create or delete a set of resources as a single transaction.
-         */
-        TRANSACTION, 
-        /**
-         * Get a conformance statement for the system.
-         */
-        CONFORMANCE, 
-        /**
-         * Tag operations.
-         */
-        TAGS, 
-        /**
-         * Not currently supported test operation.
-         */
-        MAILBOX, 
-        /**
-         * Not currently supported test operation.
-         */
-        DOCUMENT, 
-        /**
-         * added to help the parsers
-         */
-        NULL;
-        public static TestOperationType fromCode(String codeString) throws Exception {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("read".equals(codeString))
-          return READ;
-        if ("vread".equals(codeString))
-          return VREAD;
-        if ("update".equals(codeString))
-          return UPDATE;
-        if ("delete".equals(codeString))
-          return DELETE;
-        if ("history".equals(codeString))
-          return HISTORY;
-        if ("create".equals(codeString))
-          return CREATE;
-        if ("search".equals(codeString))
-          return SEARCH;
-        if ("transaction".equals(codeString))
-          return TRANSACTION;
-        if ("conformance".equals(codeString))
-          return CONFORMANCE;
-        if ("tags".equals(codeString))
-          return TAGS;
-        if ("mailbox".equals(codeString))
-          return MAILBOX;
-        if ("document".equals(codeString))
-          return DOCUMENT;
-        throw new Exception("Unknown TestOperationType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case READ: return "read";
-            case VREAD: return "vread";
-            case UPDATE: return "update";
-            case DELETE: return "delete";
-            case HISTORY: return "history";
-            case CREATE: return "create";
-            case SEARCH: return "search";
-            case TRANSACTION: return "transaction";
-            case CONFORMANCE: return "conformance";
-            case TAGS: return "tags";
-            case MAILBOX: return "mailbox";
-            case DOCUMENT: return "document";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case READ: return "http://hl7.org/fhir/test-operation-codes";
-            case VREAD: return "http://hl7.org/fhir/test-operation-codes";
-            case UPDATE: return "http://hl7.org/fhir/test-operation-codes";
-            case DELETE: return "http://hl7.org/fhir/test-operation-codes";
-            case HISTORY: return "http://hl7.org/fhir/test-operation-codes";
-            case CREATE: return "http://hl7.org/fhir/test-operation-codes";
-            case SEARCH: return "http://hl7.org/fhir/test-operation-codes";
-            case TRANSACTION: return "http://hl7.org/fhir/test-operation-codes";
-            case CONFORMANCE: return "http://hl7.org/fhir/test-operation-codes";
-            case TAGS: return "http://hl7.org/fhir/test-operation-codes";
-            case MAILBOX: return "http://hl7.org/fhir/test-operation-codes";
-            case DOCUMENT: return "http://hl7.org/fhir/test-operation-codes";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case READ: return "Read the current state of the resource.";
-            case VREAD: return "Read the state of a specific version of the resource.";
-            case UPDATE: return "Update an existing resource by its id (or create it if it is new).";
-            case DELETE: return "Delete a resource.";
-            case HISTORY: return "Retrieve the update history for a particular resource or resource type.";
-            case CREATE: return "Create a new resource with a server assigned id.";
-            case SEARCH: return "Search based on some filter criteria.";
-            case TRANSACTION: return "Update, create or delete a set of resources as a single transaction.";
-            case CONFORMANCE: return "Get a conformance statement for the system.";
-            case TAGS: return "Tag operations.";
-            case MAILBOX: return "Not currently supported test operation.";
-            case DOCUMENT: return "Not currently supported test operation.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case READ: return "read";
-            case VREAD: return "vread";
-            case UPDATE: return "update";
-            case DELETE: return "delete";
-            case HISTORY: return "history";
-            case CREATE: return "create";
-            case SEARCH: return "search";
-            case TRANSACTION: return "transaction";
-            case CONFORMANCE: return "conformance";
-            case TAGS: return "tags";
-            case MAILBOX: return "mailbox";
-            case DOCUMENT: return "document";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class TestOperationTypeEnumFactory implements EnumFactory<TestOperationType> {
-    public TestOperationType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("read".equals(codeString))
-          return TestOperationType.READ;
-        if ("vread".equals(codeString))
-          return TestOperationType.VREAD;
-        if ("update".equals(codeString))
-          return TestOperationType.UPDATE;
-        if ("delete".equals(codeString))
-          return TestOperationType.DELETE;
-        if ("history".equals(codeString))
-          return TestOperationType.HISTORY;
-        if ("create".equals(codeString))
-          return TestOperationType.CREATE;
-        if ("search".equals(codeString))
-          return TestOperationType.SEARCH;
-        if ("transaction".equals(codeString))
-          return TestOperationType.TRANSACTION;
-        if ("conformance".equals(codeString))
-          return TestOperationType.CONFORMANCE;
-        if ("tags".equals(codeString))
-          return TestOperationType.TAGS;
-        if ("mailbox".equals(codeString))
-          return TestOperationType.MAILBOX;
-        if ("document".equals(codeString))
-          return TestOperationType.DOCUMENT;
-        throw new IllegalArgumentException("Unknown TestOperationType code '"+codeString+"'");
-        }
-    public String toCode(TestOperationType code) {
-      if (code == TestOperationType.READ)
-        return "read";
-      if (code == TestOperationType.VREAD)
-        return "vread";
-      if (code == TestOperationType.UPDATE)
-        return "update";
-      if (code == TestOperationType.DELETE)
-        return "delete";
-      if (code == TestOperationType.HISTORY)
-        return "history";
-      if (code == TestOperationType.CREATE)
-        return "create";
-      if (code == TestOperationType.SEARCH)
-        return "search";
-      if (code == TestOperationType.TRANSACTION)
-        return "transaction";
-      if (code == TestOperationType.CONFORMANCE)
-        return "conformance";
-      if (code == TestOperationType.TAGS)
-        return "tags";
-      if (code == TestOperationType.MAILBOX)
-        return "mailbox";
-      if (code == TestOperationType.DOCUMENT)
-        return "document";
-      return "?";
-      }
-    }
 
     public enum ContentType {
         /**
@@ -327,6 +115,78 @@ public class TestScript extends DomainResource {
         return "xml";
       if (code == ContentType.JSON)
         return "json";
+      return "?";
+      }
+    }
+
+    public enum AssertionDirectionType {
+        /**
+         * Default value. Assertion is evaluated on the response.
+         */
+        RESPONSE, 
+        /**
+         * Not equals comparison.
+         */
+        REQUEST, 
+        /**
+         * added to help the parsers
+         */
+        NULL;
+        public static AssertionDirectionType fromCode(String codeString) throws Exception {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("response".equals(codeString))
+          return RESPONSE;
+        if ("request".equals(codeString))
+          return REQUEST;
+        throw new Exception("Unknown AssertionDirectionType code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case RESPONSE: return "response";
+            case REQUEST: return "request";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case RESPONSE: return "http://hl7.org/fhir/assert-direction-codes";
+            case REQUEST: return "http://hl7.org/fhir/assert-direction-codes";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case RESPONSE: return "Default value. Assertion is evaluated on the response.";
+            case REQUEST: return "Not equals comparison.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case RESPONSE: return "response";
+            case REQUEST: return "request";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class AssertionDirectionTypeEnumFactory implements EnumFactory<AssertionDirectionType> {
+    public AssertionDirectionType fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("response".equals(codeString))
+          return AssertionDirectionType.RESPONSE;
+        if ("request".equals(codeString))
+          return AssertionDirectionType.REQUEST;
+        throw new IllegalArgumentException("Unknown AssertionDirectionType code '"+codeString+"'");
+        }
+    public String toCode(AssertionDirectionType code) {
+      if (code == AssertionDirectionType.RESPONSE)
+        return "response";
+      if (code == AssertionDirectionType.REQUEST)
+        return "request";
       return "?";
       }
     }
@@ -2184,9 +2044,9 @@ public class TestScript extends DomainResource {
         /**
          * Server interaction or operation type.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="read | vread | update | delete | history | create | search | transaction | conformance | tags | mailbox | document", formalDefinition="Server interaction or operation type." )
-        protected Enumeration<TestOperationType> type;
+        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="The operation type that will be executed", formalDefinition="Server interaction or operation type." )
+        protected Coding type;
 
         /**
          * The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
@@ -2272,7 +2132,7 @@ public class TestScript extends DomainResource {
         @Description(shortDefinition="Request URL", formalDefinition="Complete request URL." )
         protected StringType url;
 
-        private static final long serialVersionUID = -731696218L;
+        private static final long serialVersionUID = 276957824L;
 
     /*
      * Constructor
@@ -2282,19 +2142,15 @@ public class TestScript extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Server interaction or operation type.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #type} (Server interaction or operation type.)
          */
-        public Enumeration<TestOperationType> getTypeElement() { 
+        public Coding getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.type");
             else if (Configuration.doAutoCreate())
-              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory()); // bb
+              this.type = new Coding(); // cc
           return this.type;
-        }
-
-        public boolean hasTypeElement() { 
-          return this.type != null && !this.type.isEmpty();
         }
 
         public boolean hasType() { 
@@ -2302,31 +2158,10 @@ public class TestScript extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Server interaction or operation type.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (Server interaction or operation type.)
          */
-        public TestScriptSetupActionOperationComponent setTypeElement(Enumeration<TestOperationType> value) { 
+        public TestScriptSetupActionOperationComponent setType(Coding value) { 
           this.type = value;
-          return this;
-        }
-
-        /**
-         * @return Server interaction or operation type.
-         */
-        public TestOperationType getType() { 
-          return this.type == null ? null : this.type.getValue();
-        }
-
-        /**
-         * @param value Server interaction or operation type.
-         */
-        public TestScriptSetupActionOperationComponent setType(TestOperationType value) { 
-          if (value == null)
-            this.type = null;
-          else {
-            if (this.type == null)
-              this.type = new Enumeration<TestOperationType>(new TestOperationTypeEnumFactory());
-            this.type.setValue(value);
-          }
           return this;
         }
 
@@ -2907,7 +2742,7 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("type", "code", "Server interaction or operation type.", 0, java.lang.Integer.MAX_VALUE, type));
+          childrenList.add(new Property("type", "Coding", "Server interaction or operation type.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("resource", "code", "The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, label));
           childrenList.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
@@ -2966,11 +2801,10 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptSetupActionOperationComponent))
           return false;
         TestScriptSetupActionOperationComponent o = (TestScriptSetupActionOperationComponent) other;
-        return compareValues(type, o.type, true) && compareValues(resource, o.resource, true) && compareValues(label, o.label, true)
-           && compareValues(description, o.description, true) && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true)
-           && compareValues(destination, o.destination, true) && compareValues(params, o.params, true) && compareValues(responseId, o.responseId, true)
-           && compareValues(sourceId, o.sourceId, true) && compareValues(targetId, o.targetId, true) && compareValues(url, o.url, true)
-          ;
+        return compareValues(resource, o.resource, true) && compareValues(label, o.label, true) && compareValues(description, o.description, true)
+           && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true) && compareValues(destination, o.destination, true)
+           && compareValues(params, o.params, true) && compareValues(responseId, o.responseId, true) && compareValues(sourceId, o.sourceId, true)
+           && compareValues(targetId, o.targetId, true) && compareValues(url, o.url, true);
       }
 
       public boolean isEmpty() {
@@ -3166,111 +3000,118 @@ public class TestScript extends DomainResource {
         protected StringType description;
 
         /**
+         * The direction to use for the assertion.
+         */
+        @Child(name = "direction", type = {CodeType.class}, order=3, min=0, max=1)
+        @Description(shortDefinition="response | request", formalDefinition="The direction to use for the assertion." )
+        protected Enumeration<AssertionDirectionType> direction;
+
+        /**
          * Id of fixture used to compare the "sourceId/path" evaluations to.
          */
-        @Child(name = "compareToSourceId", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "compareToSourceId", type = {StringType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Id of fixture used to compare the 'sourceId/path' evaluations to", formalDefinition="Id of fixture used to compare the 'sourceId/path' evaluations to." )
         protected StringType compareToSourceId;
 
         /**
          * XPath or JSONPath expression against fixture used to compare the "sourceId/path" evaluations to.
          */
-        @Child(name = "compareToSourcePath", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "compareToSourcePath", type = {StringType.class}, order=5, min=0, max=1)
         @Description(shortDefinition="XPath or JSONPath expression against fixture used to compare the 'sourceId/path' evaluations to", formalDefinition="XPath or JSONPath expression against fixture used to compare the 'sourceId/path' evaluations to." )
         protected StringType compareToSourcePath;
 
         /**
          * The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        @Child(name = "contentType", type = {CodeType.class}, order=5, min=0, max=1)
+        @Child(name = "contentType", type = {CodeType.class}, order=6, min=0, max=1)
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header." )
         protected Enumeration<ContentType> contentType;
 
         /**
          * The header field e.g. 'Content-Location'.
          */
-        @Child(name = "headerField", type = {StringType.class}, order=6, min=0, max=1)
+        @Child(name = "headerField", type = {StringType.class}, order=7, min=0, max=1)
         @Description(shortDefinition="The header field", formalDefinition="The header field e.g. 'Content-Location'." )
         protected StringType headerField;
 
         /**
          * The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
          */
-        @Child(name = "minimumId", type = {StringType.class}, order=7, min=0, max=1)
+        @Child(name = "minimumId", type = {StringType.class}, order=8, min=0, max=1)
         @Description(shortDefinition="MinimumId", formalDefinition="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId." )
         protected StringType minimumId;
 
         /**
          * Navigation Links.
          */
-        @Child(name = "navigationLinks", type = {BooleanType.class}, order=8, min=0, max=1)
+        @Child(name = "navigationLinks", type = {BooleanType.class}, order=9, min=0, max=1)
         @Description(shortDefinition="Navigation Links", formalDefinition="Navigation Links." )
         protected BooleanType navigationLinks;
 
         /**
          * The operator type.
          */
-        @Child(name = "operator", type = {CodeType.class}, order=9, min=0, max=1)
+        @Child(name = "operator", type = {CodeType.class}, order=10, min=0, max=1)
         @Description(shortDefinition="equals | notEquals | in | notIn | greaterThan | lessThan | empty | notEmpty | contains | notContains", formalDefinition="The operator type." )
         protected Enumeration<AssertionOperatorType> operator;
 
         /**
          * The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.
          */
-        @Child(name = "path", type = {StringType.class}, order=10, min=0, max=1)
+        @Child(name = "path", type = {StringType.class}, order=11, min=0, max=1)
         @Description(shortDefinition="XPath or JSONPath expression", formalDefinition="The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server." )
         protected StringType path;
 
         /**
          * The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
          */
-        @Child(name = "resource", type = {CodeType.class}, order=11, min=0, max=1)
+        @Child(name = "resource", type = {CodeType.class}, order=12, min=0, max=1)
         @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html." )
         protected CodeType resource;
 
         /**
          * okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.
          */
-        @Child(name = "response", type = {CodeType.class}, order=12, min=0, max=1)
+        @Child(name = "response", type = {CodeType.class}, order=13, min=0, max=1)
         @Description(shortDefinition="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable", formalDefinition="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable." )
         protected Enumeration<AssertionResponseTypes> response;
 
         /**
          * HTTP Response Code.
          */
-        @Child(name = "responseCode", type = {StringType.class}, order=13, min=0, max=1)
+        @Child(name = "responseCode", type = {StringType.class}, order=14, min=0, max=1)
         @Description(shortDefinition="Response Code", formalDefinition="HTTP Response Code." )
         protected StringType responseCode;
 
         /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=14, min=0, max=1)
+        @Child(name = "sourceId", type = {IdType.class}, order=15, min=0, max=1)
         @Description(shortDefinition="Fixture Id", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
         protected IdType sourceId;
 
         /**
          * The ID of the Profile to validate against.
          */
-        @Child(name = "validateProfileId", type = {IdType.class}, order=15, min=0, max=1)
+        @Child(name = "validateProfileId", type = {IdType.class}, order=16, min=0, max=1)
         @Description(shortDefinition="Validate Profile Id", formalDefinition="The ID of the Profile to validate against." )
         protected IdType validateProfileId;
 
         /**
          * The value to compare to.
          */
-        @Child(name = "value", type = {StringType.class}, order=16, min=0, max=1)
+        @Child(name = "value", type = {StringType.class}, order=17, min=0, max=1)
         @Description(shortDefinition="The value to compare to", formalDefinition="The value to compare to." )
         protected StringType value;
 
         /**
          * Warning Only.
          */
-        @Child(name = "warningOnly", type = {BooleanType.class}, order=17, min=0, max=1)
+        @Child(name = "warningOnly", type = {BooleanType.class}, order=18, min=0, max=1)
         @Description(shortDefinition="Warning Only", formalDefinition="Warning Only." )
         protected BooleanType warningOnly;
 
-        private static final long serialVersionUID = -1173819305L;
+        private static final long serialVersionUID = -607939856L;
 
     /*
      * Constructor
@@ -3373,6 +3214,55 @@ public class TestScript extends DomainResource {
             if (this.description == null)
               this.description = new StringType();
             this.description.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #direction} (The direction to use for the assertion.). This is the underlying object with id, value and extensions. The accessor "getDirection" gives direct access to the value
+         */
+        public Enumeration<AssertionDirectionType> getDirectionElement() { 
+          if (this.direction == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptSetupActionAssertComponent.direction");
+            else if (Configuration.doAutoCreate())
+              this.direction = new Enumeration<AssertionDirectionType>(new AssertionDirectionTypeEnumFactory()); // bb
+          return this.direction;
+        }
+
+        public boolean hasDirectionElement() { 
+          return this.direction != null && !this.direction.isEmpty();
+        }
+
+        public boolean hasDirection() { 
+          return this.direction != null && !this.direction.isEmpty();
+        }
+
+        /**
+         * @param value {@link #direction} (The direction to use for the assertion.). This is the underlying object with id, value and extensions. The accessor "getDirection" gives direct access to the value
+         */
+        public TestScriptSetupActionAssertComponent setDirectionElement(Enumeration<AssertionDirectionType> value) { 
+          this.direction = value;
+          return this;
+        }
+
+        /**
+         * @return The direction to use for the assertion.
+         */
+        public AssertionDirectionType getDirection() { 
+          return this.direction == null ? null : this.direction.getValue();
+        }
+
+        /**
+         * @param value The direction to use for the assertion.
+         */
+        public TestScriptSetupActionAssertComponent setDirection(AssertionDirectionType value) { 
+          if (value == null)
+            this.direction = null;
+          else {
+            if (this.direction == null)
+              this.direction = new Enumeration<AssertionDirectionType>(new AssertionDirectionTypeEnumFactory());
+            this.direction.setValue(value);
           }
           return this;
         }
@@ -4108,6 +3998,7 @@ public class TestScript extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, label));
           childrenList.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
+          childrenList.add(new Property("direction", "code", "The direction to use for the assertion.", 0, java.lang.Integer.MAX_VALUE, direction));
           childrenList.add(new Property("compareToSourceId", "string", "Id of fixture used to compare the 'sourceId/path' evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourceId));
           childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression against fixture used to compare the 'sourceId/path' evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
           childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
@@ -4130,6 +4021,7 @@ public class TestScript extends DomainResource {
         copyValues(dst);
         dst.label = label == null ? null : label.copy();
         dst.description = description == null ? null : description.copy();
+        dst.direction = direction == null ? null : direction.copy();
         dst.compareToSourceId = compareToSourceId == null ? null : compareToSourceId.copy();
         dst.compareToSourcePath = compareToSourcePath == null ? null : compareToSourcePath.copy();
         dst.contentType = contentType == null ? null : contentType.copy();
@@ -4155,9 +4047,10 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptSetupActionAssertComponent))
           return false;
         TestScriptSetupActionAssertComponent o = (TestScriptSetupActionAssertComponent) other;
-        return compareDeep(label, o.label, true) && compareDeep(description, o.description, true) && compareDeep(compareToSourceId, o.compareToSourceId, true)
-           && compareDeep(compareToSourcePath, o.compareToSourcePath, true) && compareDeep(contentType, o.contentType, true)
-           && compareDeep(headerField, o.headerField, true) && compareDeep(minimumId, o.minimumId, true) && compareDeep(navigationLinks, o.navigationLinks, true)
+        return compareDeep(label, o.label, true) && compareDeep(description, o.description, true) && compareDeep(direction, o.direction, true)
+           && compareDeep(compareToSourceId, o.compareToSourceId, true) && compareDeep(compareToSourcePath, o.compareToSourcePath, true)
+           && compareDeep(contentType, o.contentType, true) && compareDeep(headerField, o.headerField, true)
+           && compareDeep(minimumId, o.minimumId, true) && compareDeep(navigationLinks, o.navigationLinks, true)
            && compareDeep(operator, o.operator, true) && compareDeep(path, o.path, true) && compareDeep(resource, o.resource, true)
            && compareDeep(response, o.response, true) && compareDeep(responseCode, o.responseCode, true) && compareDeep(sourceId, o.sourceId, true)
            && compareDeep(validateProfileId, o.validateProfileId, true) && compareDeep(value, o.value, true)
@@ -4171,9 +4064,10 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScriptSetupActionAssertComponent))
           return false;
         TestScriptSetupActionAssertComponent o = (TestScriptSetupActionAssertComponent) other;
-        return compareValues(label, o.label, true) && compareValues(description, o.description, true) && compareValues(compareToSourceId, o.compareToSourceId, true)
-           && compareValues(compareToSourcePath, o.compareToSourcePath, true) && compareValues(contentType, o.contentType, true)
-           && compareValues(headerField, o.headerField, true) && compareValues(minimumId, o.minimumId, true) && compareValues(navigationLinks, o.navigationLinks, true)
+        return compareValues(label, o.label, true) && compareValues(description, o.description, true) && compareValues(direction, o.direction, true)
+           && compareValues(compareToSourceId, o.compareToSourceId, true) && compareValues(compareToSourcePath, o.compareToSourcePath, true)
+           && compareValues(contentType, o.contentType, true) && compareValues(headerField, o.headerField, true)
+           && compareValues(minimumId, o.minimumId, true) && compareValues(navigationLinks, o.navigationLinks, true)
            && compareValues(operator, o.operator, true) && compareValues(path, o.path, true) && compareValues(resource, o.resource, true)
            && compareValues(response, o.response, true) && compareValues(responseCode, o.responseCode, true) && compareValues(sourceId, o.sourceId, true)
            && compareValues(validateProfileId, o.validateProfileId, true) && compareValues(value, o.value, true)
@@ -4182,13 +4076,14 @@ public class TestScript extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (label == null || label.isEmpty()) && (description == null || description.isEmpty())
-           && (compareToSourceId == null || compareToSourceId.isEmpty()) && (compareToSourcePath == null || compareToSourcePath.isEmpty())
-           && (contentType == null || contentType.isEmpty()) && (headerField == null || headerField.isEmpty())
-           && (minimumId == null || minimumId.isEmpty()) && (navigationLinks == null || navigationLinks.isEmpty())
-           && (operator == null || operator.isEmpty()) && (path == null || path.isEmpty()) && (resource == null || resource.isEmpty())
-           && (response == null || response.isEmpty()) && (responseCode == null || responseCode.isEmpty())
-           && (sourceId == null || sourceId.isEmpty()) && (validateProfileId == null || validateProfileId.isEmpty())
-           && (value == null || value.isEmpty()) && (warningOnly == null || warningOnly.isEmpty());
+           && (direction == null || direction.isEmpty()) && (compareToSourceId == null || compareToSourceId.isEmpty())
+           && (compareToSourcePath == null || compareToSourcePath.isEmpty()) && (contentType == null || contentType.isEmpty())
+           && (headerField == null || headerField.isEmpty()) && (minimumId == null || minimumId.isEmpty())
+           && (navigationLinks == null || navigationLinks.isEmpty()) && (operator == null || operator.isEmpty())
+           && (path == null || path.isEmpty()) && (resource == null || resource.isEmpty()) && (response == null || response.isEmpty())
+           && (responseCode == null || responseCode.isEmpty()) && (sourceId == null || sourceId.isEmpty())
+           && (validateProfileId == null || validateProfileId.isEmpty()) && (value == null || value.isEmpty())
+           && (warningOnly == null || warningOnly.isEmpty());
       }
 
   }

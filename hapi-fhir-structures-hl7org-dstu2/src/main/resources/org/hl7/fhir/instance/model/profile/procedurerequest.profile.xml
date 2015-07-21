@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ProcedureRequest"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -194,7 +194,9 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
-            <span title="A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  Dates SHALL be valid dates.">timingDateTime</span>
+            <span title="A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  
+						
+							Dates SHALL be valid dates.">timingDateTime</span>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"></td>
@@ -420,19 +422,19 @@
   <publisher value="Health Level Seven International (Patient Care)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for ProcedureRequest Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="quick"/>
     <uri value="http://wiki.siframework.org/CQF"/>
@@ -444,11 +446,11 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="ProcedureRequest"/>
-      <short value="A request for a procedure to be performed"/>
+      <short value="A request for a procedure to be performed. May be a proposal or an order."/>
       <definition value="A request for a procedure to be performed. May be a proposal or an order."/>
       <min value="1"/>
       <max value="1"/>
@@ -458,9 +460,8 @@
     </element>
     <element>
       <path value="ProcedureRequest.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -469,7 +470,7 @@
     </element>
     <element>
       <path value="ProcedureRequest.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -479,9 +480,8 @@
     </element>
     <element>
       <path value="ProcedureRequest.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -491,11 +491,8 @@
     </element>
     <element>
       <path value="ProcedureRequest.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -509,9 +506,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -529,9 +525,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -547,9 +542,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -564,9 +558,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -582,7 +575,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.identifier"/>
-      <short value="Identifier"/>
+      <short value="Identifiers assigned to this order by the order or by the receiver."/>
       <definition value="Identifiers assigned to this order by the order or by the receiver."/>
       <min value="0"/>
       <max value="*"/>
@@ -596,7 +589,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.subject"/>
-      <short value="Subject"/>
+      <short value="The patient who will receive the procedure."/>
       <definition value="The patient who will receive the procedure."/>
       <min value="1"/>
       <max value="1"/>
@@ -611,7 +604,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.type"/>
-      <short value="Procedure Type"/>
+      <short value="The specific procedure that is ordered. Use text if the exact nature of the procedure can&#39;t be coded."/>
       <definition value="The specific procedure that is ordered. Use text if the exact nature of the procedure can&#39;t be coded."/>
       <min value="1"/>
       <max value="1"/>
@@ -625,9 +618,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.bodySite"/>
-      <short value="Target body sites"/>
+      <short value="Indicates the sites on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
       <definition value="Indicates the sites on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
-      <comments value="Only used if not implicit in code found in ProcedureRequest.type."/>
       <requirements value="Knowing where the procedure is made is important for tracking if multiple sites are possible."/>
       <min value="0"/>
       <max value="*"/>
@@ -646,7 +638,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ProcedureRequest.bodySite.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -660,9 +652,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.bodySite.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -677,9 +668,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.bodySite.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -696,9 +686,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.bodySite.site[x]"/>
-      <short value="Target body site"/>
+      <short value="Indicates the site on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
       <definition value="Indicates the site on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
-      <comments value="Only used if not implicit in code found in ProcedureRequest.type."/>
       <requirements value="Knowing where the procedure is made is important for tracking if multiple site are possible."/>
       <min value="1"/>
       <max value="1"/>
@@ -712,7 +701,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.indication"/>
-      <short value="Indication"/>
+      <short value="The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance."/>
       <definition value="The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance."/>
       <min value="0"/>
       <max value="*"/>
@@ -726,7 +715,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.timing[x]"/>
-      <short value="Procedure timing schedule"/>
+      <short value="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. &quot;Every 8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;; &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <definition value="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. &quot;Every 8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;; &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -746,7 +735,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.encounter"/>
-      <short value="Encounter"/>
+      <short value="The encounter within which the procedure proposal or request was created."/>
       <definition value="The encounter within which the procedure proposal or request was created."/>
       <min value="0"/>
       <max value="1"/>
@@ -761,7 +750,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.performer"/>
-      <short value="Performer"/>
+      <short value="E.g. surgeon, anaethetist, endoscopist."/>
       <definition value="E.g. surgeon, anaethetist, endoscopist."/>
       <min value="0"/>
       <max value="1"/>
@@ -784,7 +773,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.status"/>
-      <short value="proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted"/>
+      <short value="The status of the order."/>
       <definition value="The status of the order."/>
       <min value="0"/>
       <max value="1"/>
@@ -806,7 +795,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.notes"/>
-      <short value="Notes"/>
+      <short value="Any other notes associated with this proposal or order - e.g., provider instructions."/>
       <definition value="Any other notes associated with this proposal or order - e.g., provider instructions."/>
       <min value="0"/>
       <max value="*"/>
@@ -820,7 +809,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.asNeeded[x]"/>
-      <short value="PRN"/>
+      <short value="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure."/>
       <definition value="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure."/>
       <min value="0"/>
       <max value="1"/>
@@ -837,7 +826,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.orderedOn"/>
-      <short value="When Requested"/>
+      <short value="The time when the request was made."/>
       <definition value="The time when the request was made."/>
       <min value="0"/>
       <max value="1"/>
@@ -851,7 +840,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.orderer"/>
-      <short value="Ordering Party"/>
+      <short value="The healthcare professional responsible for proposing or ordering the procedure."/>
       <definition value="The healthcare professional responsible for proposing or ordering the procedure."/>
       <min value="0"/>
       <max value="1"/>
@@ -878,7 +867,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.priority"/>
-      <short value="routine | urgent | stat | asap"/>
+      <short value="The clinical priority associated with this order."/>
       <definition value="The clinical priority associated with this order."/>
       <min value="0"/>
       <max value="1"/>
@@ -901,7 +890,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="ProcedureRequest"/>
-      <short value="A request for a procedure to be performed"/>
+      <short value="A request for a procedure to be performed. May be a proposal or an order."/>
       <definition value="A request for a procedure to be performed. May be a proposal or an order."/>
       <min value="1"/>
       <max value="1"/>
@@ -911,7 +900,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.identifier"/>
-      <short value="Identifier"/>
+      <short value="Identifiers assigned to this order by the order or by the receiver."/>
       <definition value="Identifiers assigned to this order by the order or by the receiver."/>
       <min value="0"/>
       <max value="*"/>
@@ -925,7 +914,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.subject"/>
-      <short value="Subject"/>
+      <short value="The patient who will receive the procedure."/>
       <definition value="The patient who will receive the procedure."/>
       <min value="1"/>
       <max value="1"/>
@@ -940,7 +929,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.type"/>
-      <short value="Procedure Type"/>
+      <short value="The specific procedure that is ordered. Use text if the exact nature of the procedure can&#39;t be coded."/>
       <definition value="The specific procedure that is ordered. Use text if the exact nature of the procedure can&#39;t be coded."/>
       <min value="1"/>
       <max value="1"/>
@@ -954,9 +943,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.bodySite"/>
-      <short value="Target body sites"/>
+      <short value="Indicates the sites on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
       <definition value="Indicates the sites on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
-      <comments value="Only used if not implicit in code found in ProcedureRequest.type."/>
       <requirements value="Knowing where the procedure is made is important for tracking if multiple sites are possible."/>
       <min value="0"/>
       <max value="*"/>
@@ -971,9 +959,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.bodySite.site[x]"/>
-      <short value="Target body site"/>
+      <short value="Indicates the site on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
       <definition value="Indicates the site on the subject&#39;s body where the procedure should be performed ( i.e. the target sites)."/>
-      <comments value="Only used if not implicit in code found in ProcedureRequest.type."/>
       <requirements value="Knowing where the procedure is made is important for tracking if multiple site are possible."/>
       <min value="1"/>
       <max value="1"/>
@@ -987,7 +974,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.indication"/>
-      <short value="Indication"/>
+      <short value="The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance."/>
       <definition value="The reason why the procedure is proposed or ordered. This procedure request may be motivated by a Condition for instance."/>
       <min value="0"/>
       <max value="*"/>
@@ -1001,7 +988,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.timing[x]"/>
-      <short value="Procedure timing schedule"/>
+      <short value="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. &quot;Every 8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;; &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <definition value="The timing schedule for the proposed or ordered procedure. The Schedule data type allows many different expressions, for example. &quot;Every 8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;; &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1021,7 +1008,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.encounter"/>
-      <short value="Encounter"/>
+      <short value="The encounter within which the procedure proposal or request was created."/>
       <definition value="The encounter within which the procedure proposal or request was created."/>
       <min value="0"/>
       <max value="1"/>
@@ -1036,7 +1023,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.performer"/>
-      <short value="Performer"/>
+      <short value="E.g. surgeon, anaethetist, endoscopist."/>
       <definition value="E.g. surgeon, anaethetist, endoscopist."/>
       <min value="0"/>
       <max value="1"/>
@@ -1059,7 +1046,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.status"/>
-      <short value="proposed | draft | requested | received | accepted | in-progress | completed | suspended | rejected | aborted"/>
+      <short value="The status of the order."/>
       <definition value="The status of the order."/>
       <min value="0"/>
       <max value="1"/>
@@ -1081,7 +1068,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.notes"/>
-      <short value="Notes"/>
+      <short value="Any other notes associated with this proposal or order - e.g., provider instructions."/>
       <definition value="Any other notes associated with this proposal or order - e.g., provider instructions."/>
       <min value="0"/>
       <max value="*"/>
@@ -1095,7 +1082,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.asNeeded[x]"/>
-      <short value="PRN"/>
+      <short value="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure."/>
       <definition value="If a CodeableConcept is present, it indicates the pre-condition for performing the procedure."/>
       <min value="0"/>
       <max value="1"/>
@@ -1112,7 +1099,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.orderedOn"/>
-      <short value="When Requested"/>
+      <short value="The time when the request was made."/>
       <definition value="The time when the request was made."/>
       <min value="0"/>
       <max value="1"/>
@@ -1126,7 +1113,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.orderer"/>
-      <short value="Ordering Party"/>
+      <short value="The healthcare professional responsible for proposing or ordering the procedure."/>
       <definition value="The healthcare professional responsible for proposing or ordering the procedure."/>
       <min value="0"/>
       <max value="1"/>
@@ -1153,7 +1140,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ProcedureRequest.priority"/>
-      <short value="routine | urgent | stat | asap"/>
+      <short value="The clinical priority associated with this order."/>
       <definition value="The clinical priority associated with this order."/>
       <min value="0"/>
       <max value="1"/>

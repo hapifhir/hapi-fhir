@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -335,19 +335,19 @@ public class ValueSet extends DomainResource {
   }
 
     @Block()
-    public static class ValueSetDefineComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ValueSetCodeSystemComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
          */
         @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="URI to identify the code system", formalDefinition="An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system." )
+        @Description(shortDefinition="URI to identify the code system (e.g. in Coding.system)", formalDefinition="An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system." )
         protected UriType system;
 
         /**
          * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.
          */
         @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Version of this system", formalDefinition="The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked." )
+        @Description(shortDefinition="Version (for use in Coding.version)", formalDefinition="The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked." )
         protected StringType version;
 
         /**
@@ -358,10 +358,10 @@ public class ValueSet extends DomainResource {
         protected BooleanType caseSensitive;
 
         /**
-         * Concepts in the code system.
+         * Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are.
          */
         @Child(name = "concept", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts in the code system." )
+        @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are." )
         protected List<ConceptDefinitionComponent> concept;
 
         private static final long serialVersionUID = -1109401192L;
@@ -369,14 +369,14 @@ public class ValueSet extends DomainResource {
     /*
      * Constructor
      */
-      public ValueSetDefineComponent() {
+      public ValueSetCodeSystemComponent() {
         super();
       }
 
     /*
      * Constructor
      */
-      public ValueSetDefineComponent(UriType system) {
+      public ValueSetCodeSystemComponent(UriType system) {
         super();
         this.system = system;
       }
@@ -387,7 +387,7 @@ public class ValueSet extends DomainResource {
         public UriType getSystemElement() { 
           if (this.system == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetDefineComponent.system");
+              throw new Error("Attempt to auto-create ValueSetCodeSystemComponent.system");
             else if (Configuration.doAutoCreate())
               this.system = new UriType(); // bb
           return this.system;
@@ -404,7 +404,7 @@ public class ValueSet extends DomainResource {
         /**
          * @param value {@link #system} (An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.). This is the underlying object with id, value and extensions. The accessor "getSystem" gives direct access to the value
          */
-        public ValueSetDefineComponent setSystemElement(UriType value) { 
+        public ValueSetCodeSystemComponent setSystemElement(UriType value) { 
           this.system = value;
           return this;
         }
@@ -419,7 +419,7 @@ public class ValueSet extends DomainResource {
         /**
          * @param value An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
          */
-        public ValueSetDefineComponent setSystem(String value) { 
+        public ValueSetCodeSystemComponent setSystem(String value) { 
             if (this.system == null)
               this.system = new UriType();
             this.system.setValue(value);
@@ -432,7 +432,7 @@ public class ValueSet extends DomainResource {
         public StringType getVersionElement() { 
           if (this.version == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetDefineComponent.version");
+              throw new Error("Attempt to auto-create ValueSetCodeSystemComponent.version");
             else if (Configuration.doAutoCreate())
               this.version = new StringType(); // bb
           return this.version;
@@ -449,7 +449,7 @@ public class ValueSet extends DomainResource {
         /**
          * @param value {@link #version} (The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
          */
-        public ValueSetDefineComponent setVersionElement(StringType value) { 
+        public ValueSetCodeSystemComponent setVersionElement(StringType value) { 
           this.version = value;
           return this;
         }
@@ -464,7 +464,7 @@ public class ValueSet extends DomainResource {
         /**
          * @param value The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.
          */
-        public ValueSetDefineComponent setVersion(String value) { 
+        public ValueSetCodeSystemComponent setVersion(String value) { 
           if (Utilities.noString(value))
             this.version = null;
           else {
@@ -481,7 +481,7 @@ public class ValueSet extends DomainResource {
         public BooleanType getCaseSensitiveElement() { 
           if (this.caseSensitive == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetDefineComponent.caseSensitive");
+              throw new Error("Attempt to auto-create ValueSetCodeSystemComponent.caseSensitive");
             else if (Configuration.doAutoCreate())
               this.caseSensitive = new BooleanType(); // bb
           return this.caseSensitive;
@@ -498,7 +498,7 @@ public class ValueSet extends DomainResource {
         /**
          * @param value {@link #caseSensitive} (If code comparison is case sensitive when codes within this system are compared to each other.). This is the underlying object with id, value and extensions. The accessor "getCaseSensitive" gives direct access to the value
          */
-        public ValueSetDefineComponent setCaseSensitiveElement(BooleanType value) { 
+        public ValueSetCodeSystemComponent setCaseSensitiveElement(BooleanType value) { 
           this.caseSensitive = value;
           return this;
         }
@@ -513,7 +513,7 @@ public class ValueSet extends DomainResource {
         /**
          * @param value If code comparison is case sensitive when codes within this system are compared to each other.
          */
-        public ValueSetDefineComponent setCaseSensitive(boolean value) { 
+        public ValueSetCodeSystemComponent setCaseSensitive(boolean value) { 
             if (this.caseSensitive == null)
               this.caseSensitive = new BooleanType();
             this.caseSensitive.setValue(value);
@@ -521,7 +521,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #concept} (Concepts in the code system.)
+         * @return {@link #concept} (Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are.)
          */
         public List<ConceptDefinitionComponent> getConcept() { 
           if (this.concept == null)
@@ -539,7 +539,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #concept} (Concepts in the code system.)
+         * @return {@link #concept} (Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are.)
          */
     // syntactic sugar
         public ConceptDefinitionComponent addConcept() { //3
@@ -551,7 +551,7 @@ public class ValueSet extends DomainResource {
         }
 
     // syntactic sugar
-        public ValueSetDefineComponent addConcept(ConceptDefinitionComponent t) { //3
+        public ValueSetCodeSystemComponent addConcept(ConceptDefinitionComponent t) { //3
           if (t == null)
             return this;
           if (this.concept == null)
@@ -565,11 +565,11 @@ public class ValueSet extends DomainResource {
           childrenList.add(new Property("system", "uri", "An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.", 0, java.lang.Integer.MAX_VALUE, system));
           childrenList.add(new Property("version", "string", "The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.", 0, java.lang.Integer.MAX_VALUE, version));
           childrenList.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, java.lang.Integer.MAX_VALUE, caseSensitive));
-          childrenList.add(new Property("concept", "", "Concepts in the code system.", 0, java.lang.Integer.MAX_VALUE, concept));
+          childrenList.add(new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept));
         }
 
-      public ValueSetDefineComponent copy() {
-        ValueSetDefineComponent dst = new ValueSetDefineComponent();
+      public ValueSetCodeSystemComponent copy() {
+        ValueSetCodeSystemComponent dst = new ValueSetCodeSystemComponent();
         copyValues(dst);
         dst.system = system == null ? null : system.copy();
         dst.version = version == null ? null : version.copy();
@@ -586,9 +586,9 @@ public class ValueSet extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof ValueSetDefineComponent))
+        if (!(other instanceof ValueSetCodeSystemComponent))
           return false;
-        ValueSetDefineComponent o = (ValueSetDefineComponent) other;
+        ValueSetCodeSystemComponent o = (ValueSetCodeSystemComponent) other;
         return compareDeep(system, o.system, true) && compareDeep(version, o.version, true) && compareDeep(caseSensitive, o.caseSensitive, true)
            && compareDeep(concept, o.concept, true);
       }
@@ -597,9 +597,9 @@ public class ValueSet extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof ValueSetDefineComponent))
+        if (!(other instanceof ValueSetCodeSystemComponent))
           return false;
-        ValueSetDefineComponent o = (ValueSetDefineComponent) other;
+        ValueSetCodeSystemComponent o = (ValueSetCodeSystemComponent) other;
         return compareValues(system, o.system, true) && compareValues(version, o.version, true) && compareValues(caseSensitive, o.caseSensitive, true)
           ;
       }
@@ -615,10 +615,10 @@ public class ValueSet extends DomainResource {
     @Block()
     public static class ConceptDefinitionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code that identifies concept.
+         * A code - a text symbol - that uniquely identifies the concept within the code system.
          */
         @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="Code that identifies concept", formalDefinition="Code that identifies concept." )
+        @Description(shortDefinition="Code that identifies concept", formalDefinition="A code - a text symbol - that uniquely identifies the concept within the code system." )
         protected CodeType code;
 
         /**
@@ -629,17 +629,17 @@ public class ValueSet extends DomainResource {
         protected BooleanType abstract_;
 
         /**
-         * Text to Display to the user.
+         * A human readable string that is the recommended default way to present this concept to a user.
          */
         @Child(name = "display", type = {StringType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Text to Display to the user", formalDefinition="Text to Display to the user." )
+        @Description(shortDefinition="Text to Display to the user", formalDefinition="A human readable string that is the recommended default way to present this concept to a user." )
         protected StringType display;
 
         /**
-         * The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.
+         * The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.
          */
         @Child(name = "definition", type = {StringType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Formal Definition", formalDefinition="The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept." )
+        @Description(shortDefinition="Formal Definition", formalDefinition="The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept." )
         protected StringType definition;
 
         /**
@@ -650,10 +650,10 @@ public class ValueSet extends DomainResource {
         protected List<ConceptDefinitionDesignationComponent> designation;
 
         /**
-         * Child Concepts (is-a / contains).
+         * Child Concepts (is-a / contains / categorises).
          */
         @Child(name = "concept", type = {ConceptDefinitionComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Child Concepts (is-a / contains)", formalDefinition="Child Concepts (is-a / contains)." )
+        @Description(shortDefinition="Child Concepts (is-a / contains / categorises)", formalDefinition="Child Concepts (is-a / contains / categorises)." )
         protected List<ConceptDefinitionComponent> concept;
 
         private static final long serialVersionUID = -318560292L;
@@ -674,7 +674,7 @@ public class ValueSet extends DomainResource {
       }
 
         /**
-         * @return {@link #code} (Code that identifies concept.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @return {@link #code} (A code - a text symbol - that uniquely identifies the concept within the code system.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public CodeType getCodeElement() { 
           if (this.code == null)
@@ -694,7 +694,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (Code that identifies concept.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @param value {@link #code} (A code - a text symbol - that uniquely identifies the concept within the code system.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public ConceptDefinitionComponent setCodeElement(CodeType value) { 
           this.code = value;
@@ -702,14 +702,14 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return Code that identifies concept.
+         * @return A code - a text symbol - that uniquely identifies the concept within the code system.
          */
         public String getCode() { 
           return this.code == null ? null : this.code.getValue();
         }
 
         /**
-         * @param value Code that identifies concept.
+         * @param value A code - a text symbol - that uniquely identifies the concept within the code system.
          */
         public ConceptDefinitionComponent setCode(String value) { 
             if (this.code == null)
@@ -764,7 +764,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #display} (Text to Display to the user.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         * @return {@link #display} (A human readable string that is the recommended default way to present this concept to a user.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
          */
         public StringType getDisplayElement() { 
           if (this.display == null)
@@ -784,7 +784,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @param value {@link #display} (Text to Display to the user.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
+         * @param value {@link #display} (A human readable string that is the recommended default way to present this concept to a user.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
          */
         public ConceptDefinitionComponent setDisplayElement(StringType value) { 
           this.display = value;
@@ -792,14 +792,14 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return Text to Display to the user.
+         * @return A human readable string that is the recommended default way to present this concept to a user.
          */
         public String getDisplay() { 
           return this.display == null ? null : this.display.getValue();
         }
 
         /**
-         * @param value Text to Display to the user.
+         * @param value A human readable string that is the recommended default way to present this concept to a user.
          */
         public ConceptDefinitionComponent setDisplay(String value) { 
           if (Utilities.noString(value))
@@ -813,7 +813,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #definition} (The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         * @return {@link #definition} (The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
         public StringType getDefinitionElement() { 
           if (this.definition == null)
@@ -833,7 +833,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @param value {@link #definition} (The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         * @param value {@link #definition} (The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
         public ConceptDefinitionComponent setDefinitionElement(StringType value) { 
           this.definition = value;
@@ -841,14 +841,14 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.
+         * @return The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.
          */
         public String getDefinition() { 
           return this.definition == null ? null : this.definition.getValue();
         }
 
         /**
-         * @param value The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.
+         * @param value The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.
          */
         public ConceptDefinitionComponent setDefinition(String value) { 
           if (Utilities.noString(value))
@@ -902,7 +902,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #concept} (Child Concepts (is-a / contains).)
+         * @return {@link #concept} (Child Concepts (is-a / contains / categorises).)
          */
         public List<ConceptDefinitionComponent> getConcept() { 
           if (this.concept == null)
@@ -920,7 +920,7 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #concept} (Child Concepts (is-a / contains).)
+         * @return {@link #concept} (Child Concepts (is-a / contains / categorises).)
          */
     // syntactic sugar
         public ConceptDefinitionComponent addConcept() { //3
@@ -943,12 +943,12 @@ public class ValueSet extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("code", "code", "Code that identifies concept.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "code", "A code - a text symbol - that uniquely identifies the concept within the code system.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("abstract", "boolean", "If this code is not for use as a real concept.", 0, java.lang.Integer.MAX_VALUE, abstract_));
-          childrenList.add(new Property("display", "string", "Text to Display to the user.", 0, java.lang.Integer.MAX_VALUE, display));
-          childrenList.add(new Property("definition", "string", "The formal definition of the concept. Formal definitions are not required, because of the prevalence of legacy systems without them, but they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, java.lang.Integer.MAX_VALUE, definition));
+          childrenList.add(new Property("display", "string", "A human readable string that is the recommended default way to present this concept to a user.", 0, java.lang.Integer.MAX_VALUE, display));
+          childrenList.add(new Property("definition", "string", "The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.", 0, java.lang.Integer.MAX_VALUE, definition));
           childrenList.add(new Property("designation", "", "Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
-          childrenList.add(new Property("concept", "@ValueSet.define.concept", "Child Concepts (is-a / contains).", 0, java.lang.Integer.MAX_VALUE, concept));
+          childrenList.add(new Property("concept", "@ValueSet.codeSystem.concept", "Child Concepts (is-a / contains / categorises).", 0, java.lang.Integer.MAX_VALUE, concept));
         }
 
       public ConceptDefinitionComponent copy() {
@@ -1880,7 +1880,7 @@ public class ValueSet extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "code", "Specifies a code for the concept to be included or excluded.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("display", "string", "The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system.", 0, java.lang.Integer.MAX_VALUE, display));
-          childrenList.add(new Property("designation", "@ValueSet.define.concept.designation", "Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
+          childrenList.add(new Property("designation", "@ValueSet.codeSystem.concept.designation", "Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.", 0, java.lang.Integer.MAX_VALUE, designation));
         }
 
       public ConceptReferenceComponent copy() {
@@ -2172,9 +2172,9 @@ public class ValueSet extends DomainResource {
         /**
          * If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
          */
-        @Child(name = "count", type = {IntegerType.class}, order=4, min=0, max=1)
+        @Child(name = "offset", type = {IntegerType.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Offset at which this resource starts", formalDefinition="If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present." )
-        protected IntegerType count;
+        protected IntegerType offset;
 
         /**
          * A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.
@@ -2190,7 +2190,7 @@ public class ValueSet extends DomainResource {
         @Description(shortDefinition="Codes in the value set", formalDefinition="The codes that are contained in the value set expansion." )
         protected List<ValueSetExpansionContainsComponent> contains;
 
-        private static final long serialVersionUID = -831777781L;
+        private static final long serialVersionUID = -43471993L;
 
     /*
      * Constructor
@@ -2344,47 +2344,47 @@ public class ValueSet extends DomainResource {
         }
 
         /**
-         * @return {@link #count} (If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         * @return {@link #offset} (If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.). This is the underlying object with id, value and extensions. The accessor "getOffset" gives direct access to the value
          */
-        public IntegerType getCountElement() { 
-          if (this.count == null)
+        public IntegerType getOffsetElement() { 
+          if (this.offset == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ValueSetExpansionComponent.count");
+              throw new Error("Attempt to auto-create ValueSetExpansionComponent.offset");
             else if (Configuration.doAutoCreate())
-              this.count = new IntegerType(); // bb
-          return this.count;
+              this.offset = new IntegerType(); // bb
+          return this.offset;
         }
 
-        public boolean hasCountElement() { 
-          return this.count != null && !this.count.isEmpty();
+        public boolean hasOffsetElement() { 
+          return this.offset != null && !this.offset.isEmpty();
         }
 
-        public boolean hasCount() { 
-          return this.count != null && !this.count.isEmpty();
+        public boolean hasOffset() { 
+          return this.offset != null && !this.offset.isEmpty();
         }
 
         /**
-         * @param value {@link #count} (If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         * @param value {@link #offset} (If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.). This is the underlying object with id, value and extensions. The accessor "getOffset" gives direct access to the value
          */
-        public ValueSetExpansionComponent setCountElement(IntegerType value) { 
-          this.count = value;
+        public ValueSetExpansionComponent setOffsetElement(IntegerType value) { 
+          this.offset = value;
           return this;
         }
 
         /**
          * @return If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
          */
-        public int getCount() { 
-          return this.count == null || this.count.isEmpty() ? 0 : this.count.getValue();
+        public int getOffset() { 
+          return this.offset == null || this.offset.isEmpty() ? 0 : this.offset.getValue();
         }
 
         /**
          * @param value If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
          */
-        public ValueSetExpansionComponent setCount(int value) { 
-            if (this.count == null)
-              this.count = new IntegerType();
-            this.count.setValue(value);
+        public ValueSetExpansionComponent setOffset(int value) { 
+            if (this.offset == null)
+              this.offset = new IntegerType();
+            this.offset.setValue(value);
           return this;
         }
 
@@ -2473,7 +2473,7 @@ public class ValueSet extends DomainResource {
           childrenList.add(new Property("identifier", "uri", "An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("timestamp", "dateTime", "The time at which the expansion was produced by the expanding system.", 0, java.lang.Integer.MAX_VALUE, timestamp));
           childrenList.add(new Property("total", "integer", "The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.", 0, java.lang.Integer.MAX_VALUE, total));
-          childrenList.add(new Property("count", "integer", "If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.", 0, java.lang.Integer.MAX_VALUE, count));
+          childrenList.add(new Property("offset", "integer", "If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.", 0, java.lang.Integer.MAX_VALUE, offset));
           childrenList.add(new Property("parameter", "", "A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.", 0, java.lang.Integer.MAX_VALUE, parameter));
           childrenList.add(new Property("contains", "", "The codes that are contained in the value set expansion.", 0, java.lang.Integer.MAX_VALUE, contains));
         }
@@ -2484,7 +2484,7 @@ public class ValueSet extends DomainResource {
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.timestamp = timestamp == null ? null : timestamp.copy();
         dst.total = total == null ? null : total.copy();
-        dst.count = count == null ? null : count.copy();
+        dst.offset = offset == null ? null : offset.copy();
         if (parameter != null) {
           dst.parameter = new ArrayList<ValueSetExpansionParameterComponent>();
           for (ValueSetExpansionParameterComponent i : parameter)
@@ -2506,7 +2506,7 @@ public class ValueSet extends DomainResource {
           return false;
         ValueSetExpansionComponent o = (ValueSetExpansionComponent) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(timestamp, o.timestamp, true)
-           && compareDeep(total, o.total, true) && compareDeep(count, o.count, true) && compareDeep(parameter, o.parameter, true)
+           && compareDeep(total, o.total, true) && compareDeep(offset, o.offset, true) && compareDeep(parameter, o.parameter, true)
            && compareDeep(contains, o.contains, true);
       }
 
@@ -2518,12 +2518,12 @@ public class ValueSet extends DomainResource {
           return false;
         ValueSetExpansionComponent o = (ValueSetExpansionComponent) other;
         return compareValues(identifier, o.identifier, true) && compareValues(timestamp, o.timestamp, true)
-           && compareValues(total, o.total, true) && compareValues(count, o.count, true);
+           && compareValues(total, o.total, true) && compareValues(offset, o.offset, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (timestamp == null || timestamp.isEmpty())
-           && (total == null || total.isEmpty()) && (count == null || count.isEmpty()) && (parameter == null || parameter.isEmpty())
+           && (total == null || total.isEmpty()) && (offset == null || offset.isEmpty()) && (parameter == null || parameter.isEmpty())
            && (contains == null || contains.isEmpty());
       }
 
@@ -3249,11 +3249,11 @@ public class ValueSet extends DomainResource {
     protected DateType lockedDate;
 
     /**
-     * A definition of an code system, inlined into the value set.
+     * A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly.
      */
-    @Child(name = "define", type = {}, order=16, min=0, max=1)
-    @Description(shortDefinition="When value set defines its own codes", formalDefinition="A definition of an code system, inlined into the value set." )
-    protected ValueSetDefineComponent define;
+    @Child(name = "codeSystem", type = {}, order=16, min=0, max=1)
+    @Description(shortDefinition="An inline code system - part of this value set", formalDefinition="A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly." )
+    protected ValueSetCodeSystemComponent codeSystem;
 
     /**
      * When value set includes codes from elsewhere.
@@ -3269,7 +3269,7 @@ public class ValueSet extends DomainResource {
     @Description(shortDefinition="Used when the value set is 'expanded'", formalDefinition="A value set can also be 'expanded', where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
     protected ValueSetExpansionComponent expansion;
 
-    private static final long serialVersionUID = 121117080L;
+    private static final long serialVersionUID = 434117334L;
 
   /*
    * Constructor
@@ -4012,26 +4012,26 @@ public class ValueSet extends DomainResource {
     }
 
     /**
-     * @return {@link #define} (A definition of an code system, inlined into the value set.)
+     * @return {@link #codeSystem} (A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly.)
      */
-    public ValueSetDefineComponent getDefine() { 
-      if (this.define == null)
+    public ValueSetCodeSystemComponent getCodeSystem() { 
+      if (this.codeSystem == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ValueSet.define");
+          throw new Error("Attempt to auto-create ValueSet.codeSystem");
         else if (Configuration.doAutoCreate())
-          this.define = new ValueSetDefineComponent(); // cc
-      return this.define;
+          this.codeSystem = new ValueSetCodeSystemComponent(); // cc
+      return this.codeSystem;
     }
 
-    public boolean hasDefine() { 
-      return this.define != null && !this.define.isEmpty();
+    public boolean hasCodeSystem() { 
+      return this.codeSystem != null && !this.codeSystem.isEmpty();
     }
 
     /**
-     * @param value {@link #define} (A definition of an code system, inlined into the value set.)
+     * @param value {@link #codeSystem} (A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly.)
      */
-    public ValueSet setDefine(ValueSetDefineComponent value) { 
-      this.define = value;
+    public ValueSet setCodeSystem(ValueSetCodeSystemComponent value) { 
+      this.codeSystem = value;
       return this;
     }
 
@@ -4101,7 +4101,7 @@ public class ValueSet extends DomainResource {
         childrenList.add(new Property("extensible", "boolean", "Whether this is intended to be used with an extensible binding or not.", 0, java.lang.Integer.MAX_VALUE, extensible));
         childrenList.add(new Property("date", "dateTime", "The date that the value set status was last changed.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("lockedDate", "date", "If a Locked Date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value sets as of the Locked Date.", 0, java.lang.Integer.MAX_VALUE, lockedDate));
-        childrenList.add(new Property("define", "", "A definition of an code system, inlined into the value set.", 0, java.lang.Integer.MAX_VALUE, define));
+        childrenList.add(new Property("codeSystem", "", "A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
         childrenList.add(new Property("compose", "", "When value set includes codes from elsewhere.", 0, java.lang.Integer.MAX_VALUE, compose));
         childrenList.add(new Property("expansion", "", "A value set can also be 'expanded', where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.", 0, java.lang.Integer.MAX_VALUE, expansion));
       }
@@ -4133,7 +4133,7 @@ public class ValueSet extends DomainResource {
         dst.extensible = extensible == null ? null : extensible.copy();
         dst.date = date == null ? null : date.copy();
         dst.lockedDate = lockedDate == null ? null : lockedDate.copy();
-        dst.define = define == null ? null : define.copy();
+        dst.codeSystem = codeSystem == null ? null : codeSystem.copy();
         dst.compose = compose == null ? null : compose.copy();
         dst.expansion = expansion == null ? null : expansion.copy();
         return dst;
@@ -4155,7 +4155,7 @@ public class ValueSet extends DomainResource {
            && compareDeep(publisher, o.publisher, true) && compareDeep(contact, o.contact, true) && compareDeep(description, o.description, true)
            && compareDeep(requirements, o.requirements, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true) && compareDeep(extensible, o.extensible, true)
-           && compareDeep(date, o.date, true) && compareDeep(lockedDate, o.lockedDate, true) && compareDeep(define, o.define, true)
+           && compareDeep(date, o.date, true) && compareDeep(lockedDate, o.lockedDate, true) && compareDeep(codeSystem, o.codeSystem, true)
            && compareDeep(compose, o.compose, true) && compareDeep(expansion, o.expansion, true);
       }
 
@@ -4181,8 +4181,8 @@ public class ValueSet extends DomainResource {
            && (requirements == null || requirements.isEmpty()) && (copyright == null || copyright.isEmpty())
            && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
            && (extensible == null || extensible.isEmpty()) && (date == null || date.isEmpty()) && (lockedDate == null || lockedDate.isEmpty())
-           && (define == null || define.isEmpty()) && (compose == null || compose.isEmpty()) && (expansion == null || expansion.isEmpty())
-          ;
+           && (codeSystem == null || codeSystem.isEmpty()) && (compose == null || compose.isEmpty())
+           && (expansion == null || expansion.isEmpty());
       }
 
   @Override
@@ -4194,7 +4194,7 @@ public class ValueSet extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="ValueSet.identifier", description="The identifier for the value set", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="code", path="ValueSet.define.concept.code", description="A code defined in the value set", type="token" )
+  @SearchParamDefinition(name="code", path="ValueSet.codeSystem.concept.code", description="A code defined in the value set", type="token" )
   public static final String SP_CODE = "code";
   @SearchParamDefinition(name="description", path="ValueSet.description", description="Text search in the description of the value set", type="string" )
   public static final String SP_DESCRIPTION = "description";
@@ -4206,7 +4206,7 @@ public class ValueSet extends DomainResource {
   public static final String SP_EXPANSION = "expansion";
   @SearchParamDefinition(name="reference", path="ValueSet.compose.include.system", description="A code system included or excluded in the value set or an imported value set", type="uri" )
   public static final String SP_REFERENCE = "reference";
-  @SearchParamDefinition(name="system", path="ValueSet.define.system", description="The system for any codes defined by this value set", type="uri" )
+  @SearchParamDefinition(name="system", path="ValueSet.codeSystem.system", description="The system for any codes defined by this value set", type="uri" )
   public static final String SP_SYSTEM = "system";
   @SearchParamDefinition(name="name", path="ValueSet.name", description="The name of the value set", type="string" )
   public static final String SP_NAME = "name";

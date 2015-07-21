@@ -29,33 +29,33 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum Additionalmaterials {
 
         /**
-         * null
+         * XRay
          */
         XRAY, 
         /**
-         * null
+         * Image
          */
         IMAGE, 
         /**
-         * null
+         * EMail
          */
         EMAIL, 
         /**
-         * null
+         * Model
          */
         MODEL, 
         /**
-         * null
+         * Document
          */
         DOCUMENT, 
         /**
-         * null
+         * Other
          */
         OTHER, 
         /**
@@ -95,23 +95,23 @@ public enum Additionalmaterials {
         }
         public String getDefinition() {
           switch (this) {
-            case XRAY: return "";
-            case IMAGE: return "";
-            case EMAIL: return "";
-            case MODEL: return "";
-            case DOCUMENT: return "";
-            case OTHER: return "";
+            case XRAY: return "XRay";
+            case IMAGE: return "Image";
+            case EMAIL: return "EMail";
+            case MODEL: return "Model";
+            case DOCUMENT: return "Document";
+            case OTHER: return "Other";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case XRAY: return "xray";
-            case IMAGE: return "image";
-            case EMAIL: return "email";
-            case MODEL: return "model";
-            case DOCUMENT: return "document";
-            case OTHER: return "other";
+            case XRAY: return "XRay";
+            case IMAGE: return "Image";
+            case EMAIL: return "Email";
+            case MODEL: return "Model";
+            case DOCUMENT: return "Document";
+            case OTHER: return "Other";
             default: return "?";
           }
     }

@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Parameters"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -158,19 +158,19 @@
   <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Parameters Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -182,13 +182,12 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Parameters"/>
-      <short value="Operation Request or Response"/>
+      <short value="This special resource type is used to represent [operation](operations.html] request and response. It has no other use, and there is no RESTful end=point associated with it."/>
       <definition value="This special resource type is used to represent [operation](operations.html] request and response. It has no other use, and there is no RESTful end=point associated with it."/>
-      <comments value="The parameters that may be used are defined by the OperationDefinition resource."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -205,9 +204,8 @@
     </element>
     <element>
       <path value="Parameters.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -216,7 +214,7 @@
     </element>
     <element>
       <path value="Parameters.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -226,9 +224,8 @@
     </element>
     <element>
       <path value="Parameters.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -238,11 +235,8 @@
     </element>
     <element>
       <path value="Parameters.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -257,7 +251,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Parameters.parameter"/>
       <name value="parameter"/>
-      <short value="Operation Parameter"/>
+      <short value="A parameter passed to or received from the operation."/>
       <definition value="A parameter passed to or received from the operation."/>
       <min value="0"/>
       <max value="*"/>
@@ -274,7 +268,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Parameters.parameter.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -288,9 +282,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -305,9 +298,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -324,7 +316,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.name"/>
-      <short value="Name from the definition"/>
+      <short value="The name of the parameter (reference to the operation definition)."/>
       <definition value="The name of the parameter (reference to the operation definition)."/>
       <min value="1"/>
       <max value="1"/>
@@ -334,7 +326,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.value[x]"/>
-      <short value="If parameter is a data type"/>
+      <short value="If the parameter is a data type."/>
       <definition value="If the parameter is a data type."/>
       <min value="0"/>
       <max value="1"/>
@@ -345,7 +337,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.resource"/>
-      <short value="If parameter is a whole resource"/>
+      <short value="If the parameter is a whole resource."/>
       <definition value="If the parameter is a whole resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -356,9 +348,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.part"/>
-      <short value="Named part of a parameter (e.g. Tuple)"/>
+      <short value="A named part of a parameter. In many implementation context, a set of named parts is known as a &quot;Tuple&quot;."/>
       <definition value="A named part of a parameter. In many implementation context, a set of named parts is known as a &quot;Tuple&quot;."/>
-      <comments value="Only one level of tuples is allowed."/>
       <min value="0"/>
       <max value="*"/>
       <nameReference value="parameter"/>
@@ -373,9 +364,8 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="Parameters"/>
-      <short value="Operation Request or Response"/>
+      <short value="This special resource type is used to represent [operation](operations.html] request and response. It has no other use, and there is no RESTful end=point associated with it."/>
       <definition value="This special resource type is used to represent [operation](operations.html] request and response. It has no other use, and there is no RESTful end=point associated with it."/>
-      <comments value="The parameters that may be used are defined by the OperationDefinition resource."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -393,7 +383,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Parameters.parameter"/>
       <name value="parameter"/>
-      <short value="Operation Parameter"/>
+      <short value="A parameter passed to or received from the operation."/>
       <definition value="A parameter passed to or received from the operation."/>
       <min value="0"/>
       <max value="*"/>
@@ -406,7 +396,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.name"/>
-      <short value="Name from the definition"/>
+      <short value="The name of the parameter (reference to the operation definition)."/>
       <definition value="The name of the parameter (reference to the operation definition)."/>
       <min value="1"/>
       <max value="1"/>
@@ -416,7 +406,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.value[x]"/>
-      <short value="If parameter is a data type"/>
+      <short value="If the parameter is a data type."/>
       <definition value="If the parameter is a data type."/>
       <min value="0"/>
       <max value="1"/>
@@ -427,7 +417,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.resource"/>
-      <short value="If parameter is a whole resource"/>
+      <short value="If the parameter is a whole resource."/>
       <definition value="If the parameter is a whole resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -438,9 +428,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Parameters.parameter.part"/>
-      <short value="Named part of a parameter (e.g. Tuple)"/>
+      <short value="A named part of a parameter. In many implementation context, a set of named parts is known as a &quot;Tuple&quot;."/>
       <definition value="A named part of a parameter. In many implementation context, a set of named parts is known as a &quot;Tuple&quot;."/>
-      <comments value="Only one level of tuples is allowed."/>
       <min value="0"/>
       <max value="*"/>
       <nameReference value="parameter"/>

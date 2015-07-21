@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.api.*;
@@ -684,7 +684,7 @@ public class Enumerations {
           return ASKED;
         if ("temp".equals(codeString))
           return TEMP;
-        if ("notasked".equals(codeString))
+        if ("not-asked".equals(codeString))
           return NOTASKED;
         if ("masked".equals(codeString))
           return MASKED;
@@ -701,7 +701,7 @@ public class Enumerations {
             case UNKNOWN: return "unknown";
             case ASKED: return "asked";
             case TEMP: return "temp";
-            case NOTASKED: return "notasked";
+            case NOTASKED: return "not-asked";
             case MASKED: return "masked";
             case UNSUPPORTED: return "unsupported";
             case ASTEXT: return "astext";
@@ -740,10 +740,10 @@ public class Enumerations {
             case UNKNOWN: return "Unknown";
             case ASKED: return "Asked";
             case TEMP: return "Temp";
-            case NOTASKED: return "Notasked";
+            case NOTASKED: return "Not Asked";
             case MASKED: return "Masked";
             case UNSUPPORTED: return "Unsupported";
-            case ASTEXT: return "Astext";
+            case ASTEXT: return "As Text";
             case ERROR: return "Error";
             default: return "?";
           }
@@ -761,7 +761,7 @@ public class Enumerations {
           return DataAbsentReason.ASKED;
         if ("temp".equals(codeString))
           return DataAbsentReason.TEMP;
-        if ("notasked".equals(codeString))
+        if ("not-asked".equals(codeString))
           return DataAbsentReason.NOTASKED;
         if ("masked".equals(codeString))
           return DataAbsentReason.MASKED;
@@ -781,7 +781,7 @@ public class Enumerations {
       if (code == DataAbsentReason.TEMP)
         return "temp";
       if (code == DataAbsentReason.NOTASKED)
-        return "notasked";
+        return "not-asked";
       if (code == DataAbsentReason.MASKED)
         return "masked";
       if (code == DataAbsentReason.UNSUPPORTED)
@@ -894,7 +894,7 @@ public class Enumerations {
           switch (this) {
             case CURRENT: return "Current";
             case SUPERSEDED: return "Superseded";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -1067,8 +1067,8 @@ public class Enumerations {
         public String getDisplay() {
           switch (this) {
             case DISPLAY: return "Display";
-            case PRINT: return "Print";
-            case PRINTOPER: return "Printoper";
+            case PRINT: return "Print (Form)";
+            case PRINTOPER: return "Print (Operator)";
             default: return "?";
           }
         }

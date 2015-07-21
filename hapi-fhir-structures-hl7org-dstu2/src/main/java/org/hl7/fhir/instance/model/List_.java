@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -186,9 +186,9 @@ public class List_ extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case WORKING: return "Working";
-            case SNAPSHOT: return "Snapshot";
-            case CHANGES: return "Changes";
+            case WORKING: return "Working List";
+            case SNAPSHOT: return "Snapshot List";
+            case CHANGES: return "Change List";
             default: return "?";
           }
         }

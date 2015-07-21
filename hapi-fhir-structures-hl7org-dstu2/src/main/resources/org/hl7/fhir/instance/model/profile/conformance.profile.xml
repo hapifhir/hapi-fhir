@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Conformance"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -925,15 +925,19 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
-            <span title="Conformance.rest.resource.conditionalDelete : A flag that indicates that the server supports conditional delete.">conditionalDelete</span>
+            <span title="Conformance.rest.resource.conditionalDelete : A code that indicates how the server supports conditional delete.">conditionalDelete</span>
             <a name="Conformance.rest.resource.conditionalDelete"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#boolean">boolean</a>
+            <a href="datatypes.html#code">code</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">If allows/uses conditional delete</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">not-supported | single | multiple - how conditional delete is supported
+            <br/>
+            <a href="valueset-conditional-delete-status.html" title="A code that indicates how the server supports conditional delete">ConditionalDeleteStatus</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
+          </td>
         </tr>
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
@@ -1071,6 +1075,29 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Types of resource (if a resource reference)
             <br/>
             <a href="valueset-resource-types.html" title="One of the resource types defined as part of FHIR">ResourceType</a> (
+            <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAM0lEQVR42u3QwQkAIAwDwO6a/WdQVyiKPrzAPUMglaQ6Vka3c7K/6/U+AAD8zAkAAMA1E1bRQCwtE1WUAAAAAElFTkSuQmCC)" class="heirarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII=" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
+            <span title="Conformance.rest.resource.searchParam.modifier : A modifier supported for the search parameter.">modifier</span>
+            <a name="Conformance.rest.resource.searchParam.modifier"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="datatypes.html#code">code</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">missing | exact | contains | not | text | in | not-in | below | above | type
+            <br/>
+            <a href="valueset-search-modifier-code.html" title="A supported modifier for a search parameter">SearchModifierCode</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -1600,30 +1627,30 @@
   <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Conformance Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Conformance"/>
-      <short value="A conformance statement"/>
+      <short value="A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation."/>
       <definition value="A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation."/>
       <min value="1"/>
       <max value="1"/>
@@ -1669,9 +1696,8 @@
     </element>
     <element>
       <path value="Conformance.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1680,7 +1706,7 @@
     </element>
     <element>
       <path value="Conformance.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -1690,9 +1716,8 @@
     </element>
     <element>
       <path value="Conformance.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1702,11 +1727,8 @@
     </element>
     <element>
       <path value="Conformance.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1720,9 +1742,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -1740,9 +1761,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -1758,9 +1778,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1775,9 +1794,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1793,7 +1811,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.url"/>
-      <short value="Logical uri to reference this statement"/>
+      <short value="An absolute uri that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <definition value="An absolute uri that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1804,9 +1822,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.version"/>
-      <short value="Logical id for this version of the statement"/>
+      <short value="The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp."/>
       <definition value="The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp."/>
-      <comments value="There may be multiple different instances of a conformance statement that have the same identifier but different versions."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1816,9 +1833,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.name"/>
-      <short value="Informal name for this conformance statement"/>
+      <short value="A free text natural language name identifying the conformance statement."/>
       <definition value="A free text natural language name identifying the conformance statement."/>
-      <comments value="The name is not expected to be globally unique."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1828,9 +1844,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.publisher"/>
-      <short value="Name of the publisher (Organization or individual)"/>
+      <short value="The name of the individual or organization that published the conformance."/>
       <definition value="The name of the individual or organization that published the conformance."/>
-      <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
       <requirements value="Helps establish the &quot;authority/credibility&quot; of the conformance.  May also allow for contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -1841,9 +1856,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.contact"/>
-      <short value="Contact details of the publisher"/>
+      <short value="Contacts to assist a user in finding and communicating with the publisher."/>
       <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
-      <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1854,7 +1868,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Conformance.contact.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1868,9 +1882,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.contact.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1885,9 +1898,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.contact.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1904,9 +1916,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.contact.name"/>
-      <short value="Name of a individual to contact"/>
+      <short value="The name of an individual to contact regarding the conformance."/>
       <definition value="The name of an individual to contact regarding the conformance."/>
-      <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1916,7 +1927,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.contact.telecom"/>
-      <short value="Contact details for individual or publisher"/>
+      <short value="Contact details for individual (if a name was provided) or the publisher."/>
       <definition value="Contact details for individual (if a name was provided) or the publisher."/>
       <min value="0"/>
       <max value="*"/>
@@ -1927,9 +1938,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.description"/>
-      <short value="Human description of the conformance statement"/>
+      <short value="A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP."/>
       <definition value="A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP."/>
-      <comments value="This field cmay include the purpose of this conformance statement, comments about its context etc. This does not need to be populated if the description is adequately implied by the software or implementation details."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1940,9 +1950,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.requirements"/>
-      <short value="Why is this needed?"/>
+      <short value="Explains why this conformance statement is needed and why it&#39;s been constrained as it has."/>
       <definition value="Explains why this conformance statement is needed and why it&#39;s been constrained as it has."/>
-      <comments value="This element does not describe the usage of the conformance statement (that&#39;s done in comments), rather it&#39;s for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1951,7 +1960,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.copyright"/>
-      <short value="Use and/or Publishing restrictions"/>
+      <short value="A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement."/>
       <definition value="A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement."/>
       <alias value="License"/>
       <alias value="Restrictions"/>
@@ -1963,9 +1972,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.status"/>
-      <short value="draft | active | retired"/>
+      <short value="The status of this conformance statement."/>
       <definition value="The status of this conformance statement."/>
-      <comments value="This is not intended for use with actual conformance statements, but where conformance statements are used to describe possible or desired systems."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1983,9 +1991,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.experimental"/>
-      <short value="If for testing purposes, not real usage"/>
+      <short value="A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
       <definition value="A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
-      <comments value="Allows filtering of conformance statements that are appropriate for use vs. not."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1995,7 +2002,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.date"/>
-      <short value="Publication Date(/time)"/>
+      <short value="The date  (and optionally time) when the conformance statement was published."/>
       <definition value="The date  (and optionally time) when the conformance statement was published."/>
       <min value="1"/>
       <max value="1"/>
@@ -2006,7 +2013,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.software"/>
-      <short value="Software that is covered by this conformance statement"/>
+      <short value="Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation."/>
       <definition value="Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation."/>
       <min value="0"/>
       <max value="1"/>
@@ -2019,7 +2026,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Conformance.software.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2033,9 +2040,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.software.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2050,9 +2056,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.software.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2069,7 +2074,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.software.name"/>
-      <short value="A name the software is known by"/>
+      <short value="Name software is known by."/>
       <definition value="Name software is known by."/>
       <min value="1"/>
       <max value="1"/>
@@ -2080,9 +2085,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.software.version"/>
-      <short value="Version covered by this statement"/>
+      <short value="The version identifier for the software covered by this statement."/>
       <definition value="The version identifier for the software covered by this statement."/>
-      <comments value="If possible, version should be specified, as statements are likely to be different for different versions of software."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2092,7 +2096,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.software.releaseDate"/>
-      <short value="Date this version released"/>
+      <short value="Date this version of the software released."/>
       <definition value="Date this version of the software released."/>
       <min value="0"/>
       <max value="1"/>
@@ -2103,7 +2107,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.implementation"/>
-      <short value="If this describes a specific instance"/>
+      <short value="Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program."/>
       <definition value="Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program."/>
       <min value="0"/>
       <max value="1"/>
@@ -2116,7 +2120,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Conformance.implementation.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2130,9 +2134,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.implementation.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2147,9 +2150,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.implementation.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2166,7 +2168,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.implementation.description"/>
-      <short value="Describes this specific instance"/>
+      <short value="Information about the specific installation that this conformance statement relates to."/>
       <definition value="Information about the specific installation that this conformance statement relates to."/>
       <min value="1"/>
       <max value="1"/>
@@ -2177,7 +2179,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.implementation.url"/>
-      <short value="Base URL for the installation"/>
+      <short value="An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces."/>
       <definition value="An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces."/>
       <min value="0"/>
       <max value="1"/>
@@ -2188,7 +2190,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.fhirVersion"/>
-      <short value="FHIR Version"/>
+      <short value="The version of the FHIR specification on which this conformance statement is based."/>
       <definition value="The version of the FHIR specification on which this conformance statement is based."/>
       <min value="1"/>
       <max value="1"/>
@@ -2199,9 +2201,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.acceptUnknown"/>
-      <short value="True if application accepts unknown elements"/>
+      <short value="A flag that indicates whether the application accepts unknown elements as part of a resource."/>
       <definition value="A flag that indicates whether the application accepts unknown elements as part of a resource."/>
-      <comments value="This is not about extensions, but about unknown elements in a resource - these can only arise as later versions of the specification are published, because this is the only place where such elements can be defined. Hence this element is about inter-version compatibility."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -2211,9 +2212,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.format"/>
-      <short value="formats supported (xml | json | mime type)"/>
+      <short value="A list of the formats supported by this implementation using their content types."/>
       <definition value="A list of the formats supported by this implementation using their content types."/>
-      <comments value="&quot;xml&quot; or &quot;json&quot; are allowed, which describe the simple encodings described in the specification (and imply appropriate bundle support). Otherwise, mime types are legal here."/>
       <min value="1"/>
       <max value="*"/>
       <type>
@@ -2227,11 +2227,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Conformance.profile"/>
-      <short value="Profiles supported by the system"/>
+      <short value="A list of profiles supported by the system. For a server, &quot;supported by the system&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}."/>
       <definition value="A list of profiles supported by the system. For a server, &quot;supported by the system&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}."/>
-      <comments value="Supported profiles are different to the profiles that apply to a particular resource in rest.resource.profile. The resource profile is a general statement of what features of the resource are supported overall by the system - the sum total of the facilities it supports. A supported profile is a deeper statement about the functionality of the data and services provided by the server (or used by the client). A typical case is a laboratory system that produces a set of different reports- this is the list of types of data that it publishes. A key aspect of declaring profiles here is the question of how the client converts knowledge that the server publishes this data into working with the data; the client can inspect individual resources to determine whether they conform to a particular profile, but how does it find the ones that does? It does so by searching using the _profile parameter, so any resources listed here must be valid values for the _profile resource (using the identifier in the target profile).
-
-Typical supported profiles cross resource types to describe a network of related resources, so they are listed here rather than by resource. However they do not need to describe more than one resource."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2241,9 +2238,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest"/>
-      <short value="If the endpoint is a RESTful one"/>
+      <short value="A definition of the restful capabilities of the solution, if any."/>
       <definition value="A definition of the restful capabilities of the solution, if any."/>
-      <comments value="Multiple repetitions allow definition of both client and / or server behaviors or possibly behaviors under different configuration settings (for software or requirements statements)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2266,7 +2262,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2280,9 +2276,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2297,9 +2292,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2316,7 +2310,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.mode"/>
-      <short value="client | server"/>
+      <short value="Identifies whether this portion of the statement is describing ability to initiate or receive restful operations."/>
       <definition value="Identifies whether this portion of the statement is describing ability to initiate or receive restful operations."/>
       <min value="1"/>
       <max value="1"/>
@@ -2333,7 +2327,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.documentation"/>
-      <short value="General description of implementation"/>
+      <short value="Information about the system&#39;s restful capabilities that apply across all applications, such as security."/>
       <definition value="Information about the system&#39;s restful capabilities that apply across all applications, such as security."/>
       <min value="0"/>
       <max value="1"/>
@@ -2343,7 +2337,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security"/>
-      <short value="Information about security of implementation"/>
+      <short value="Information about security implementation from an interface perspective - what a client needs to know."/>
       <definition value="Information about security implementation from an interface perspective - what a client needs to know."/>
       <min value="0"/>
       <max value="1"/>
@@ -2354,7 +2348,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.security.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2368,9 +2362,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2385,9 +2378,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2404,9 +2396,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.cors"/>
-      <short value="Adds CORS Headers (http://enable-cors.org/)"/>
+      <short value="Server adds CORS headers when responding to requests - this enables javascript applications to use the server."/>
       <definition value="Server adds CORS headers when responding to requests - this enables javascript applications to use the server."/>
-      <comments value="The easiest CORS headers to add are Access-Control-Allow-Origin: * &amp; Access-Control-Request-Method: GET, POST, PUT, DELETE. All servers SHOULD support CORS."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2415,7 +2406,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.service"/>
-      <short value="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates"/>
+      <short value="Types of security services are supported/required by the system."/>
       <definition value="Types of security services are supported/required by the system."/>
       <min value="0"/>
       <max value="*"/>
@@ -2432,7 +2423,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.description"/>
-      <short value="General description of how security works"/>
+      <short value="General description of how security works."/>
       <definition value="General description of how security works."/>
       <min value="0"/>
       <max value="1"/>
@@ -2442,7 +2433,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate"/>
-      <short value="Certificates associated with security profiles"/>
+      <short value="Certificates associated with security profiles."/>
       <definition value="Certificates associated with security profiles."/>
       <min value="0"/>
       <max value="*"/>
@@ -2453,7 +2444,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.security.certificate.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2467,9 +2458,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2484,9 +2474,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2503,7 +2492,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate.type"/>
-      <short value="Mime type for certificate"/>
+      <short value="Mime type for certificate."/>
       <definition value="Mime type for certificate."/>
       <min value="0"/>
       <max value="1"/>
@@ -2518,7 +2507,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate.blob"/>
-      <short value="Actual certificate"/>
+      <short value="Actual certificate."/>
       <definition value="Actual certificate."/>
       <min value="0"/>
       <max value="1"/>
@@ -2528,9 +2517,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource"/>
-      <short value="Resource served on the REST interface"/>
+      <short value="A specification of the restful capabilities of the solution for a specific resource type."/>
       <definition value="A specification of the restful capabilities of the solution for a specific resource type."/>
-      <comments value="Max of one repetition per resource type."/>
       <min value="1"/>
       <max value="*"/>
       <type>
@@ -2552,7 +2540,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.resource.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2566,9 +2554,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2583,9 +2570,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2602,7 +2588,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.type"/>
-      <short value="A resource type that is supported"/>
+      <short value="A type of resource exposed via the restful interface."/>
       <definition value="A type of resource exposed via the restful interface."/>
       <min value="1"/>
       <max value="1"/>
@@ -2619,9 +2605,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.profile"/>
-      <short value="What structural features are supported"/>
+      <short value="A specification of the profile that describes the solution&#39;s support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses."/>
       <definition value="A specification of the profile that describes the solution&#39;s support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses."/>
-      <comments value="The profile applies to all  resources of this type - i.e. it is the superset of what is supported by the system."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2631,7 +2616,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction"/>
-      <short value="What operations are supported?"/>
+      <short value="Identifies a restful operation supported by the solution."/>
       <definition value="Identifies a restful operation supported by the solution."/>
       <min value="1"/>
       <max value="*"/>
@@ -2642,7 +2627,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.resource.interaction.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2656,9 +2641,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2673,9 +2657,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2692,7 +2675,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction.code"/>
-      <short value="read | vread | update | delete | history-instance | validate | history-type | create | search-type"/>
+      <short value="Coded identifier of the operation, supported by the system resource."/>
       <definition value="Coded identifier of the operation, supported by the system resource."/>
       <min value="1"/>
       <max value="1"/>
@@ -2709,7 +2692,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction.documentation"/>
-      <short value="Anything special about operation behavior"/>
+      <short value="Guidance specific to the implementation of this operation, such as &#39;delete is a logical delete&#39; or &#39;updates are only allowed with version id&#39; or &#39;creates permitted from pre-authorized certificates only&#39;."/>
       <definition value="Guidance specific to the implementation of this operation, such as &#39;delete is a logical delete&#39; or &#39;updates are only allowed with version id&#39; or &#39;creates permitted from pre-authorized certificates only&#39;."/>
       <requirements value="REST allows a degree of variability in the implementation of RESTful solutions that is useful for exchange partners to be aware of."/>
       <min value="0"/>
@@ -2720,9 +2703,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.versioning"/>
-      <short value="no-version | versioned | versioned-update"/>
+      <short value="Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources."/>
       <definition value="Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources."/>
-      <comments value="If a server supports versionIds correctly, it should support vread too, but is not required to do so."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2738,9 +2720,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.readHistory"/>
-      <short value="Whether vRead can return past versions"/>
+      <short value="A flag for whether the server is able to return past versions as part of the vRead operation."/>
       <definition value="A flag for whether the server is able to return past versions as part of the vRead operation."/>
-      <comments value="It is useful to support the vRead operation for current operations, even if past versions aren&#39;t available."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2749,9 +2730,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.updateCreate"/>
-      <short value="If update can commit to a new identity"/>
+      <short value="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server."/>
       <definition value="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server."/>
-      <comments value="Allowing the clients to create new identities on the server means that the system administrator needs to have confidence that the clients do not create clashing identities between them. Obviously, if there is only one client, this won&#39;t happen. While creating identities on the client means that the clients need to be managed, it&#39;s much more convenient for many scenarios if such management can be put in place."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2760,9 +2740,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.conditionalCreate"/>
-      <short value="If allows/uses conditional create"/>
+      <short value="A flag that indicates that the server supports conditional create."/>
       <definition value="A flag that indicates that the server supports conditional create."/>
-      <comments value="Conditional Create is mainly appropriate for interface engine scripts converting from other formats, such as v2."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2771,9 +2750,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.conditionalUpdate"/>
-      <short value="If allows/uses conditional update"/>
+      <short value="A flag that indicates that the server supports conditional update."/>
       <definition value="A flag that indicates that the server supports conditional update."/>
-      <comments value="Conditional Update is mainly appropriate for interface engine scripts converting from other formats, such as v2."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2782,20 +2760,25 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.conditionalDelete"/>
-      <short value="If allows/uses conditional delete"/>
-      <definition value="A flag that indicates that the server supports conditional delete."/>
-      <comments value="Conditional Delete is mainly appropriate for interface engine scripts converting from other formats, such as v2."/>
+      <short value="A code that indicates how the server supports conditional delete."/>
+      <definition value="A code that indicates how the server supports conditional delete."/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="boolean"/>
+        <code value="code"/>
       </type>
+      <binding>
+        <strength value="required"/>
+        <description value="A code that indicates how the server supports conditional delete"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/conditional-delete-status"/>
+        </valueSetReference>
+      </binding>
     </element>
     <element>
       <path value="Conformance.rest.resource.searchInclude"/>
-      <short value="_include values supported by the server"/>
+      <short value="A list of _include values supported by the server."/>
       <definition value="A list of _include values supported by the server."/>
-      <comments value="If this list is empty, the server does not support includes."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2804,7 +2787,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam"/>
-      <short value="Search params supported by implementation"/>
+      <short value="Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation."/>
       <definition value="Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation."/>
       <min value="0"/>
       <max value="*"/>
@@ -2815,7 +2798,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.resource.searchParam.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2829,9 +2812,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2846,9 +2828,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2865,9 +2846,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.name"/>
-      <short value="Name of search parameter"/>
+      <short value="The name of the search parameter used in the interface."/>
       <definition value="The name of the search parameter used in the interface."/>
-      <comments value="Parameter names cannot overlap with standard parameter names, and standard parameters cannot be redefined."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -2876,9 +2856,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.definition"/>
-      <short value="Source of definition for parameter"/>
+      <short value="An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]])."/>
       <definition value="An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]])."/>
-      <comments value="This SHOULD be present, and matches SearchParameter.url."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2887,9 +2866,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.type"/>
-      <short value="number | date | string | token | reference | composite | quantity | uri"/>
+      <short value="The type of value a search parameter refers to, and how the content is interpreted."/>
       <definition value="The type of value a search parameter refers to, and how the content is interpreted."/>
-      <comments value="While this can be looked up from the definition, it is included here as a convenience for systems that auto-generate a query interface based on the server conformance statement.  It SHALL be the same as the type in the search parameter definition."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -2905,7 +2883,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.documentation"/>
-      <short value="Server-specific usage"/>
+      <short value="This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms."/>
       <definition value="This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms."/>
       <min value="0"/>
       <max value="1"/>
@@ -2915,9 +2893,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.target"/>
-      <short value="Types of resource (if a resource reference)"/>
+      <short value="Types of resource (if a resource is referenced)."/>
       <definition value="Types of resource (if a resource is referenced)."/>
-      <comments value="This SHALL be the same as or a proper subset of the resources listed in the search parameter definition."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2932,8 +2909,25 @@ Typical supported profiles cross resource types to describe a network of related
       </binding>
     </element>
     <element>
+      <path value="Conformance.rest.resource.searchParam.modifier"/>
+      <short value="A modifier supported for the search parameter."/>
+      <definition value="A modifier supported for the search parameter."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <strength value="required"/>
+        <description value="A supported modifier for a search parameter"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/search-modifier-code"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
       <path value="Conformance.rest.resource.searchParam.chain"/>
-      <short value="Chained names supported"/>
+      <short value="Chained names supported."/>
       <definition value="Chained names supported."/>
       <min value="0"/>
       <max value="*"/>
@@ -2943,7 +2937,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction"/>
-      <short value="What operations are supported?"/>
+      <short value="A specification of restful operations supported by the system."/>
       <definition value="A specification of restful operations supported by the system."/>
       <min value="0"/>
       <max value="*"/>
@@ -2954,7 +2948,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.interaction.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2968,9 +2962,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2985,9 +2978,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3004,7 +2996,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction.code"/>
-      <short value="transaction | search-system | history-system"/>
+      <short value="A coded identifier of the operation, supported by the system."/>
       <definition value="A coded identifier of the operation, supported by the system."/>
       <min value="1"/>
       <max value="1"/>
@@ -3021,7 +3013,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction.documentation"/>
-      <short value="Anything special about operation behavior"/>
+      <short value="Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented."/>
       <definition value="Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented."/>
       <min value="0"/>
       <max value="1"/>
@@ -3031,7 +3023,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.transactionMode"/>
-      <short value="not-supported | batch | transaction | both"/>
+      <short value="A code that indicates how transactions are supported."/>
       <definition value="A code that indicates how transactions are supported."/>
       <min value="0"/>
       <max value="1"/>
@@ -3049,7 +3041,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation"/>
-      <short value="Definition of an operation or a custom query"/>
+      <short value="Definition of an operation or a named query and with its parameters and their meaning and type."/>
       <definition value="Definition of an operation or a named query and with its parameters and their meaning and type."/>
       <min value="0"/>
       <max value="*"/>
@@ -3060,7 +3052,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.rest.operation.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3074,9 +3066,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3091,9 +3082,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3110,9 +3100,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation.name"/>
-      <short value="Name by which the operation/query is invoked"/>
+      <short value="The name of a query, which is used in the _query parameter when the query is called."/>
       <definition value="The name of a query, which is used in the _query parameter when the query is called."/>
-      <comments value="The name here SHOULD be the same as the name in the definition, unless there is a name clash and the name cannot be used."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3121,9 +3110,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation.definition"/>
-      <short value="The defined operation/query"/>
+      <short value="Where the formal definition can be found."/>
       <definition value="Where the formal definition can be found."/>
-      <comments value="This can be used to build ah HTML form to invoke the operation, for instance."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3133,9 +3121,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.documentMailbox"/>
-      <short value="How documents are accepted in /Mailbox"/>
+      <short value="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier &quot;http://hl7.org/fhir/documents/mailbox&quot;. Other specifications can declare their own identifier for this purpose."/>
       <definition value="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier &quot;http://hl7.org/fhir/documents/mailbox&quot;. Other specifications can declare their own identifier for this purpose."/>
-      <comments value="If a server accepts messages on the /Mailbox end-point, it declares this in the messaging elements."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -3144,9 +3131,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.compartment"/>
-      <short value="Compartments served/used by system"/>
+      <short value="An absolute URI which is a reference to the definition of a compartment hosted by the system."/>
       <definition value="An absolute URI which is a reference to the definition of a compartment hosted by the system."/>
-      <comments value="At present, the only defined compartments are at [[compartments.html]]."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -3155,9 +3141,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging"/>
-      <short value="If messaging is supported"/>
+      <short value="A description of the messaging capabilities of the solution."/>
       <definition value="A description of the messaging capabilities of the solution."/>
-      <comments value="Multiple repetitions allow the documentation of multiple endpoints per solution."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -3180,7 +3165,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.messaging.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3194,9 +3179,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3211,9 +3195,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3230,9 +3213,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.endpoint"/>
-      <short value="Actual endpoint being described"/>
+      <short value="An address to which messages and/or replies are to be sent."/>
       <definition value="An address to which messages and/or replies are to be sent."/>
-      <comments value="For solutions that do not use network addresses for routing, it can be just an identifier."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3242,9 +3224,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.reliableCache"/>
-      <short value="Reliable Message Cache Length (min)"/>
+      <short value="Length if the receiver&#39;s reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender)."/>
       <definition value="Length if the receiver&#39;s reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender)."/>
-      <comments value="If this value is missing then the application does not implement (receiver) or depend on (sender) reliable messaging."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3253,7 +3234,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.documentation"/>
-      <short value="Messaging interface behavior details"/>
+      <short value="Documentation about the system&#39;s messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner."/>
       <definition value="Documentation about the system&#39;s messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner."/>
       <min value="0"/>
       <max value="1"/>
@@ -3263,9 +3244,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event"/>
-      <short value="Declare support for this event"/>
+      <short value="A description of the solution&#39;s support for an event at this end point."/>
       <definition value="A description of the solution&#39;s support for an event at this end point."/>
-      <comments value="The same event may be listed up to two times - once as sender and once as receiver."/>
       <min value="1"/>
       <max value="*"/>
       <type>
@@ -3275,7 +3255,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.messaging.event.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3289,9 +3269,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3306,9 +3285,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3325,7 +3303,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.code"/>
-      <short value="Event type"/>
+      <short value="A coded identifier of a supported messaging event."/>
       <definition value="A coded identifier of a supported messaging event."/>
       <min value="1"/>
       <max value="1"/>
@@ -3342,7 +3320,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.category"/>
-      <short value="Consequence | Currency | Notification"/>
+      <short value="The impact of the content of the message."/>
       <definition value="The impact of the content of the message."/>
       <min value="0"/>
       <max value="1"/>
@@ -3359,7 +3337,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.mode"/>
-      <short value="sender | receiver"/>
+      <short value="The mode of this event declaration - whether application is sender or receiver."/>
       <definition value="The mode of this event declaration - whether application is sender or receiver."/>
       <min value="1"/>
       <max value="1"/>
@@ -3376,7 +3354,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.protocol"/>
-      <short value="http | ftp | mllp +"/>
+      <short value="A list of the messaging transport protocol(s) identifiers, supported by this endpoint."/>
       <definition value="A list of the messaging transport protocol(s) identifiers, supported by this endpoint."/>
       <min value="0"/>
       <max value="*"/>
@@ -3393,9 +3371,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.focus"/>
-      <short value="Resource that&#39;s focus of message"/>
+      <short value="A resource associated with the event.  This is the resource that defines the event."/>
       <definition value="A resource associated with the event.  This is the resource that defines the event."/>
-      <comments value="This SHALL be provided if the event type supports multiple different resource types."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3411,7 +3388,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.request"/>
-      <short value="Profile that describes the request"/>
+      <short value="Information about the request for this event."/>
       <definition value="Information about the request for this event."/>
       <min value="1"/>
       <max value="1"/>
@@ -3422,7 +3399,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.response"/>
-      <short value="Profile that describes the response"/>
+      <short value="Information about the response for this event."/>
       <definition value="Information about the response for this event."/>
       <min value="1"/>
       <max value="1"/>
@@ -3433,7 +3410,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.documentation"/>
-      <short value="Endpoint-specific event documentation"/>
+      <short value="Guidance on how this event is handled, such as internal system trigger points, business rules, etc."/>
       <definition value="Guidance on how this event is handled, such as internal system trigger points, business rules, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -3443,7 +3420,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document"/>
-      <short value="Document definition"/>
+      <short value="A document definition."/>
       <definition value="A document definition."/>
       <min value="0"/>
       <max value="*"/>
@@ -3455,7 +3432,7 @@ Typical supported profiles cross resource types to describe a network of related
     <element>
       <path value="Conformance.document.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3469,9 +3446,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3486,9 +3462,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3505,7 +3480,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.mode"/>
-      <short value="producer | consumer"/>
+      <short value="Mode of this document declaration - whether application is producer or consumer."/>
       <definition value="Mode of this document declaration - whether application is producer or consumer."/>
       <min value="1"/>
       <max value="1"/>
@@ -3522,7 +3497,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.documentation"/>
-      <short value="Description of document support"/>
+      <short value="A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc."/>
       <definition value="A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -3532,9 +3507,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.profile"/>
-      <short value="Constraint on a resource used in the document"/>
+      <short value="A constraint on a resource used in the document."/>
       <definition value="A constraint on a resource used in the document."/>
-      <comments value="The first resource is the document resource."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3546,7 +3520,7 @@ Typical supported profiles cross resource types to describe a network of related
   <differential>
     <element>
       <path value="Conformance"/>
-      <short value="A conformance statement"/>
+      <short value="A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation."/>
       <definition value="A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation."/>
       <min value="1"/>
       <max value="1"/>
@@ -3592,7 +3566,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.url"/>
-      <short value="Logical uri to reference this statement"/>
+      <short value="An absolute uri that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <definition value="An absolute uri that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance (should be globally unique URI, and can be urn:uuid: or urn:oid:)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3603,9 +3577,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.version"/>
-      <short value="Logical id for this version of the statement"/>
+      <short value="The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp."/>
       <definition value="The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp."/>
-      <comments value="There may be multiple different instances of a conformance statement that have the same identifier but different versions."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3615,9 +3588,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.name"/>
-      <short value="Informal name for this conformance statement"/>
+      <short value="A free text natural language name identifying the conformance statement."/>
       <definition value="A free text natural language name identifying the conformance statement."/>
-      <comments value="The name is not expected to be globally unique."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3627,9 +3599,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.publisher"/>
-      <short value="Name of the publisher (Organization or individual)"/>
+      <short value="The name of the individual or organization that published the conformance."/>
       <definition value="The name of the individual or organization that published the conformance."/>
-      <comments value="Usually an organization, but may be an individual. This item SHOULD be populated unless the information is available from context."/>
       <requirements value="Helps establish the &quot;authority/credibility&quot; of the conformance.  May also allow for contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -3640,18 +3611,16 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.contact"/>
-      <short value="Contact details of the publisher"/>
+      <short value="Contacts to assist a user in finding and communicating with the publisher."/>
       <definition value="Contacts to assist a user in finding and communicating with the publisher."/>
-      <comments value="May be a web site, an email address, a telephone number (tel:), etc."/>
       <min value="0"/>
       <max value="*"/>
       <isSummary value="true"/>
     </element>
     <element>
       <path value="Conformance.contact.name"/>
-      <short value="Name of a individual to contact"/>
+      <short value="The name of an individual to contact regarding the conformance."/>
       <definition value="The name of an individual to contact regarding the conformance."/>
-      <comments value="If there is no named individual, the telecom is for the organization as a whole."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3661,7 +3630,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.contact.telecom"/>
-      <short value="Contact details for individual or publisher"/>
+      <short value="Contact details for individual (if a name was provided) or the publisher."/>
       <definition value="Contact details for individual (if a name was provided) or the publisher."/>
       <min value="0"/>
       <max value="*"/>
@@ -3672,9 +3641,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.description"/>
-      <short value="Human description of the conformance statement"/>
+      <short value="A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP."/>
       <definition value="A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP."/>
-      <comments value="This field cmay include the purpose of this conformance statement, comments about its context etc. This does not need to be populated if the description is adequately implied by the software or implementation details."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3685,9 +3653,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.requirements"/>
-      <short value="Why is this needed?"/>
+      <short value="Explains why this conformance statement is needed and why it&#39;s been constrained as it has."/>
       <definition value="Explains why this conformance statement is needed and why it&#39;s been constrained as it has."/>
-      <comments value="This element does not describe the usage of the conformance statement (that&#39;s done in comments), rather it&#39;s for traceability of *why* the element is either needed or why the constraints exist as they do.  This may be used to point to source materials or specifications that drove the structure of this data element."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3696,7 +3663,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.copyright"/>
-      <short value="Use and/or Publishing restrictions"/>
+      <short value="A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement."/>
       <definition value="A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement."/>
       <alias value="License"/>
       <alias value="Restrictions"/>
@@ -3708,9 +3675,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.status"/>
-      <short value="draft | active | retired"/>
+      <short value="The status of this conformance statement."/>
       <definition value="The status of this conformance statement."/>
-      <comments value="This is not intended for use with actual conformance statements, but where conformance statements are used to describe possible or desired systems."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3728,9 +3694,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.experimental"/>
-      <short value="If for testing purposes, not real usage"/>
+      <short value="A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
       <definition value="A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage."/>
-      <comments value="Allows filtering of conformance statements that are appropriate for use vs. not."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3740,7 +3705,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.date"/>
-      <short value="Publication Date(/time)"/>
+      <short value="The date  (and optionally time) when the conformance statement was published."/>
       <definition value="The date  (and optionally time) when the conformance statement was published."/>
       <min value="1"/>
       <max value="1"/>
@@ -3751,7 +3716,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.software"/>
-      <short value="Software that is covered by this conformance statement"/>
+      <short value="Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation."/>
       <definition value="Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation."/>
       <min value="0"/>
       <max value="1"/>
@@ -3760,7 +3725,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.software.name"/>
-      <short value="A name the software is known by"/>
+      <short value="Name software is known by."/>
       <definition value="Name software is known by."/>
       <min value="1"/>
       <max value="1"/>
@@ -3771,9 +3736,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.software.version"/>
-      <short value="Version covered by this statement"/>
+      <short value="The version identifier for the software covered by this statement."/>
       <definition value="The version identifier for the software covered by this statement."/>
-      <comments value="If possible, version should be specified, as statements are likely to be different for different versions of software."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3783,7 +3747,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.software.releaseDate"/>
-      <short value="Date this version released"/>
+      <short value="Date this version of the software released."/>
       <definition value="Date this version of the software released."/>
       <min value="0"/>
       <max value="1"/>
@@ -3794,7 +3758,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.implementation"/>
-      <short value="If this describes a specific instance"/>
+      <short value="Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program."/>
       <definition value="Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program."/>
       <min value="0"/>
       <max value="1"/>
@@ -3803,7 +3767,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.implementation.description"/>
-      <short value="Describes this specific instance"/>
+      <short value="Information about the specific installation that this conformance statement relates to."/>
       <definition value="Information about the specific installation that this conformance statement relates to."/>
       <min value="1"/>
       <max value="1"/>
@@ -3814,7 +3778,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.implementation.url"/>
-      <short value="Base URL for the installation"/>
+      <short value="An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces."/>
       <definition value="An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces."/>
       <min value="0"/>
       <max value="1"/>
@@ -3825,7 +3789,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.fhirVersion"/>
-      <short value="FHIR Version"/>
+      <short value="The version of the FHIR specification on which this conformance statement is based."/>
       <definition value="The version of the FHIR specification on which this conformance statement is based."/>
       <min value="1"/>
       <max value="1"/>
@@ -3836,9 +3800,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.acceptUnknown"/>
-      <short value="True if application accepts unknown elements"/>
+      <short value="A flag that indicates whether the application accepts unknown elements as part of a resource."/>
       <definition value="A flag that indicates whether the application accepts unknown elements as part of a resource."/>
-      <comments value="This is not about extensions, but about unknown elements in a resource - these can only arise as later versions of the specification are published, because this is the only place where such elements can be defined. Hence this element is about inter-version compatibility."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3848,9 +3811,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.format"/>
-      <short value="formats supported (xml | json | mime type)"/>
+      <short value="A list of the formats supported by this implementation using their content types."/>
       <definition value="A list of the formats supported by this implementation using their content types."/>
-      <comments value="&quot;xml&quot; or &quot;json&quot; are allowed, which describe the simple encodings described in the specification (and imply appropriate bundle support). Otherwise, mime types are legal here."/>
       <min value="1"/>
       <max value="*"/>
       <type>
@@ -3864,11 +3826,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.profile"/>
-      <short value="Profiles supported by the system"/>
+      <short value="A list of profiles supported by the system. For a server, &quot;supported by the system&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}."/>
       <definition value="A list of profiles supported by the system. For a server, &quot;supported by the system&quot; means the system hosts/produces a set of resources, conformant to a particular profile, and allows its clients to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}."/>
-      <comments value="Supported profiles are different to the profiles that apply to a particular resource in rest.resource.profile. The resource profile is a general statement of what features of the resource are supported overall by the system - the sum total of the facilities it supports. A supported profile is a deeper statement about the functionality of the data and services provided by the server (or used by the client). A typical case is a laboratory system that produces a set of different reports- this is the list of types of data that it publishes. A key aspect of declaring profiles here is the question of how the client converts knowledge that the server publishes this data into working with the data; the client can inspect individual resources to determine whether they conform to a particular profile, but how does it find the ones that does? It does so by searching using the _profile parameter, so any resources listed here must be valid values for the _profile resource (using the identifier in the target profile).
-
-Typical supported profiles cross resource types to describe a network of related resources, so they are listed here rather than by resource. However they do not need to describe more than one resource."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -3878,9 +3837,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest"/>
-      <short value="If the endpoint is a RESTful one"/>
+      <short value="A definition of the restful capabilities of the solution, if any."/>
       <definition value="A definition of the restful capabilities of the solution, if any."/>
-      <comments value="Multiple repetitions allow definition of both client and / or server behaviors or possibly behaviors under different configuration settings (for software or requirements statements)."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="cnf-1"/>
@@ -3899,7 +3857,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.mode"/>
-      <short value="client | server"/>
+      <short value="Identifies whether this portion of the statement is describing ability to initiate or receive restful operations."/>
       <definition value="Identifies whether this portion of the statement is describing ability to initiate or receive restful operations."/>
       <min value="1"/>
       <max value="1"/>
@@ -3916,7 +3874,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.documentation"/>
-      <short value="General description of implementation"/>
+      <short value="Information about the system&#39;s restful capabilities that apply across all applications, such as security."/>
       <definition value="Information about the system&#39;s restful capabilities that apply across all applications, such as security."/>
       <min value="0"/>
       <max value="1"/>
@@ -3926,16 +3884,15 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security"/>
-      <short value="Information about security of implementation"/>
+      <short value="Information about security implementation from an interface perspective - what a client needs to know."/>
       <definition value="Information about security implementation from an interface perspective - what a client needs to know."/>
       <min value="0"/>
       <max value="1"/>
     </element>
     <element>
       <path value="Conformance.rest.security.cors"/>
-      <short value="Adds CORS Headers (http://enable-cors.org/)"/>
+      <short value="Server adds CORS headers when responding to requests - this enables javascript applications to use the server."/>
       <definition value="Server adds CORS headers when responding to requests - this enables javascript applications to use the server."/>
-      <comments value="The easiest CORS headers to add are Access-Control-Allow-Origin: * &amp; Access-Control-Request-Method: GET, POST, PUT, DELETE. All servers SHOULD support CORS."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -3944,7 +3901,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.service"/>
-      <short value="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates"/>
+      <short value="Types of security services are supported/required by the system."/>
       <definition value="Types of security services are supported/required by the system."/>
       <min value="0"/>
       <max value="*"/>
@@ -3961,7 +3918,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.description"/>
-      <short value="General description of how security works"/>
+      <short value="General description of how security works."/>
       <definition value="General description of how security works."/>
       <min value="0"/>
       <max value="1"/>
@@ -3971,14 +3928,14 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate"/>
-      <short value="Certificates associated with security profiles"/>
+      <short value="Certificates associated with security profiles."/>
       <definition value="Certificates associated with security profiles."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Conformance.rest.security.certificate.type"/>
-      <short value="Mime type for certificate"/>
+      <short value="Mime type for certificate."/>
       <definition value="Mime type for certificate."/>
       <min value="0"/>
       <max value="1"/>
@@ -3993,7 +3950,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.security.certificate.blob"/>
-      <short value="Actual certificate"/>
+      <short value="Actual certificate."/>
       <definition value="Actual certificate."/>
       <min value="0"/>
       <max value="1"/>
@@ -4003,9 +3960,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource"/>
-      <short value="Resource served on the REST interface"/>
+      <short value="A specification of the restful capabilities of the solution for a specific resource type."/>
       <definition value="A specification of the restful capabilities of the solution for a specific resource type."/>
-      <comments value="Max of one repetition per resource type."/>
       <min value="1"/>
       <max value="*"/>
       <constraint>
@@ -4023,7 +3979,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.type"/>
-      <short value="A resource type that is supported"/>
+      <short value="A type of resource exposed via the restful interface."/>
       <definition value="A type of resource exposed via the restful interface."/>
       <min value="1"/>
       <max value="1"/>
@@ -4040,9 +3996,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.profile"/>
-      <short value="What structural features are supported"/>
+      <short value="A specification of the profile that describes the solution&#39;s support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses."/>
       <definition value="A specification of the profile that describes the solution&#39;s support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses."/>
-      <comments value="The profile applies to all  resources of this type - i.e. it is the superset of what is supported by the system."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4052,14 +4007,14 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction"/>
-      <short value="What operations are supported?"/>
+      <short value="Identifies a restful operation supported by the solution."/>
       <definition value="Identifies a restful operation supported by the solution."/>
       <min value="1"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction.code"/>
-      <short value="read | vread | update | delete | history-instance | validate | history-type | create | search-type"/>
+      <short value="Coded identifier of the operation, supported by the system resource."/>
       <definition value="Coded identifier of the operation, supported by the system resource."/>
       <min value="1"/>
       <max value="1"/>
@@ -4076,7 +4031,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.interaction.documentation"/>
-      <short value="Anything special about operation behavior"/>
+      <short value="Guidance specific to the implementation of this operation, such as &#39;delete is a logical delete&#39; or &#39;updates are only allowed with version id&#39; or &#39;creates permitted from pre-authorized certificates only&#39;."/>
       <definition value="Guidance specific to the implementation of this operation, such as &#39;delete is a logical delete&#39; or &#39;updates are only allowed with version id&#39; or &#39;creates permitted from pre-authorized certificates only&#39;."/>
       <requirements value="REST allows a degree of variability in the implementation of RESTful solutions that is useful for exchange partners to be aware of."/>
       <min value="0"/>
@@ -4087,9 +4042,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.versioning"/>
-      <short value="no-version | versioned | versioned-update"/>
+      <short value="Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources."/>
       <definition value="Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources."/>
-      <comments value="If a server supports versionIds correctly, it should support vread too, but is not required to do so."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4105,9 +4059,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.readHistory"/>
-      <short value="Whether vRead can return past versions"/>
+      <short value="A flag for whether the server is able to return past versions as part of the vRead operation."/>
       <definition value="A flag for whether the server is able to return past versions as part of the vRead operation."/>
-      <comments value="It is useful to support the vRead operation for current operations, even if past versions aren&#39;t available."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4116,9 +4069,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.updateCreate"/>
-      <short value="If update can commit to a new identity"/>
+      <short value="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server."/>
       <definition value="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server."/>
-      <comments value="Allowing the clients to create new identities on the server means that the system administrator needs to have confidence that the clients do not create clashing identities between them. Obviously, if there is only one client, this won&#39;t happen. While creating identities on the client means that the clients need to be managed, it&#39;s much more convenient for many scenarios if such management can be put in place."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4127,9 +4079,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.conditionalCreate"/>
-      <short value="If allows/uses conditional create"/>
+      <short value="A flag that indicates that the server supports conditional create."/>
       <definition value="A flag that indicates that the server supports conditional create."/>
-      <comments value="Conditional Create is mainly appropriate for interface engine scripts converting from other formats, such as v2."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4138,9 +4089,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.conditionalUpdate"/>
-      <short value="If allows/uses conditional update"/>
+      <short value="A flag that indicates that the server supports conditional update."/>
       <definition value="A flag that indicates that the server supports conditional update."/>
-      <comments value="Conditional Update is mainly appropriate for interface engine scripts converting from other formats, such as v2."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4149,20 +4099,25 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.conditionalDelete"/>
-      <short value="If allows/uses conditional delete"/>
-      <definition value="A flag that indicates that the server supports conditional delete."/>
-      <comments value="Conditional Delete is mainly appropriate for interface engine scripts converting from other formats, such as v2."/>
+      <short value="A code that indicates how the server supports conditional delete."/>
+      <definition value="A code that indicates how the server supports conditional delete."/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="boolean"/>
+        <code value="code"/>
       </type>
+      <binding>
+        <strength value="required"/>
+        <description value="A code that indicates how the server supports conditional delete"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/conditional-delete-status"/>
+        </valueSetReference>
+      </binding>
     </element>
     <element>
       <path value="Conformance.rest.resource.searchInclude"/>
-      <short value="_include values supported by the server"/>
+      <short value="A list of _include values supported by the server."/>
       <definition value="A list of _include values supported by the server."/>
-      <comments value="If this list is empty, the server does not support includes."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -4171,16 +4126,15 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam"/>
-      <short value="Search params supported by implementation"/>
+      <short value="Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation."/>
       <definition value="Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.name"/>
-      <short value="Name of search parameter"/>
+      <short value="The name of the search parameter used in the interface."/>
       <definition value="The name of the search parameter used in the interface."/>
-      <comments value="Parameter names cannot overlap with standard parameter names, and standard parameters cannot be redefined."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -4189,9 +4143,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.definition"/>
-      <short value="Source of definition for parameter"/>
+      <short value="An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]])."/>
       <definition value="An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]])."/>
-      <comments value="This SHOULD be present, and matches SearchParameter.url."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4200,9 +4153,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.type"/>
-      <short value="number | date | string | token | reference | composite | quantity | uri"/>
+      <short value="The type of value a search parameter refers to, and how the content is interpreted."/>
       <definition value="The type of value a search parameter refers to, and how the content is interpreted."/>
-      <comments value="While this can be looked up from the definition, it is included here as a convenience for systems that auto-generate a query interface based on the server conformance statement.  It SHALL be the same as the type in the search parameter definition."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -4218,7 +4170,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.documentation"/>
-      <short value="Server-specific usage"/>
+      <short value="This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms."/>
       <definition value="This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms."/>
       <min value="0"/>
       <max value="1"/>
@@ -4228,9 +4180,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.resource.searchParam.target"/>
-      <short value="Types of resource (if a resource reference)"/>
+      <short value="Types of resource (if a resource is referenced)."/>
       <definition value="Types of resource (if a resource is referenced)."/>
-      <comments value="This SHALL be the same as or a proper subset of the resources listed in the search parameter definition."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -4245,8 +4196,25 @@ Typical supported profiles cross resource types to describe a network of related
       </binding>
     </element>
     <element>
+      <path value="Conformance.rest.resource.searchParam.modifier"/>
+      <short value="A modifier supported for the search parameter."/>
+      <definition value="A modifier supported for the search parameter."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="code"/>
+      </type>
+      <binding>
+        <strength value="required"/>
+        <description value="A supported modifier for a search parameter"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/search-modifier-code"/>
+        </valueSetReference>
+      </binding>
+    </element>
+    <element>
       <path value="Conformance.rest.resource.searchParam.chain"/>
-      <short value="Chained names supported"/>
+      <short value="Chained names supported."/>
       <definition value="Chained names supported."/>
       <min value="0"/>
       <max value="*"/>
@@ -4256,14 +4224,14 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction"/>
-      <short value="What operations are supported?"/>
+      <short value="A specification of restful operations supported by the system."/>
       <definition value="A specification of restful operations supported by the system."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Conformance.rest.interaction.code"/>
-      <short value="transaction | search-system | history-system"/>
+      <short value="A coded identifier of the operation, supported by the system."/>
       <definition value="A coded identifier of the operation, supported by the system."/>
       <min value="1"/>
       <max value="1"/>
@@ -4280,7 +4248,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.interaction.documentation"/>
-      <short value="Anything special about operation behavior"/>
+      <short value="Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented."/>
       <definition value="Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented."/>
       <min value="0"/>
       <max value="1"/>
@@ -4290,7 +4258,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.transactionMode"/>
-      <short value="not-supported | batch | transaction | both"/>
+      <short value="A code that indicates how transactions are supported."/>
       <definition value="A code that indicates how transactions are supported."/>
       <min value="0"/>
       <max value="1"/>
@@ -4308,16 +4276,15 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation"/>
-      <short value="Definition of an operation or a custom query"/>
+      <short value="Definition of an operation or a named query and with its parameters and their meaning and type."/>
       <definition value="Definition of an operation or a named query and with its parameters and their meaning and type."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Conformance.rest.operation.name"/>
-      <short value="Name by which the operation/query is invoked"/>
+      <short value="The name of a query, which is used in the _query parameter when the query is called."/>
       <definition value="The name of a query, which is used in the _query parameter when the query is called."/>
-      <comments value="The name here SHOULD be the same as the name in the definition, unless there is a name clash and the name cannot be used."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -4326,9 +4293,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.operation.definition"/>
-      <short value="The defined operation/query"/>
+      <short value="Where the formal definition can be found."/>
       <definition value="Where the formal definition can be found."/>
-      <comments value="This can be used to build ah HTML form to invoke the operation, for instance."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -4338,9 +4304,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.documentMailbox"/>
-      <short value="How documents are accepted in /Mailbox"/>
+      <short value="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier &quot;http://hl7.org/fhir/documents/mailbox&quot;. Other specifications can declare their own identifier for this purpose."/>
       <definition value="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier &quot;http://hl7.org/fhir/documents/mailbox&quot;. Other specifications can declare their own identifier for this purpose."/>
-      <comments value="If a server accepts messages on the /Mailbox end-point, it declares this in the messaging elements."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -4349,9 +4314,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.rest.compartment"/>
-      <short value="Compartments served/used by system"/>
+      <short value="An absolute URI which is a reference to the definition of a compartment hosted by the system."/>
       <definition value="An absolute URI which is a reference to the definition of a compartment hosted by the system."/>
-      <comments value="At present, the only defined compartments are at [[compartments.html]]."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -4360,9 +4324,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging"/>
-      <short value="If messaging is supported"/>
+      <short value="A description of the messaging capabilities of the solution."/>
       <definition value="A description of the messaging capabilities of the solution."/>
-      <comments value="Multiple repetitions allow the documentation of multiple endpoints per solution."/>
       <min value="0"/>
       <max value="*"/>
       <condition value="cnf-1"/>
@@ -4381,9 +4344,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.endpoint"/>
-      <short value="Actual endpoint being described"/>
+      <short value="An address to which messages and/or replies are to be sent."/>
       <definition value="An address to which messages and/or replies are to be sent."/>
-      <comments value="For solutions that do not use network addresses for routing, it can be just an identifier."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4393,9 +4355,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.reliableCache"/>
-      <short value="Reliable Message Cache Length (min)"/>
+      <short value="Length if the receiver&#39;s reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender)."/>
       <definition value="Length if the receiver&#39;s reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender)."/>
-      <comments value="If this value is missing then the application does not implement (receiver) or depend on (sender) reliable messaging."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -4404,7 +4365,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.documentation"/>
-      <short value="Messaging interface behavior details"/>
+      <short value="Documentation about the system&#39;s messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner."/>
       <definition value="Documentation about the system&#39;s messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner."/>
       <min value="0"/>
       <max value="1"/>
@@ -4414,15 +4375,14 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event"/>
-      <short value="Declare support for this event"/>
+      <short value="A description of the solution&#39;s support for an event at this end point."/>
       <definition value="A description of the solution&#39;s support for an event at this end point."/>
-      <comments value="The same event may be listed up to two times - once as sender and once as receiver."/>
       <min value="1"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Conformance.messaging.event.code"/>
-      <short value="Event type"/>
+      <short value="A coded identifier of a supported messaging event."/>
       <definition value="A coded identifier of a supported messaging event."/>
       <min value="1"/>
       <max value="1"/>
@@ -4439,7 +4399,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.category"/>
-      <short value="Consequence | Currency | Notification"/>
+      <short value="The impact of the content of the message."/>
       <definition value="The impact of the content of the message."/>
       <min value="0"/>
       <max value="1"/>
@@ -4456,7 +4416,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.mode"/>
-      <short value="sender | receiver"/>
+      <short value="The mode of this event declaration - whether application is sender or receiver."/>
       <definition value="The mode of this event declaration - whether application is sender or receiver."/>
       <min value="1"/>
       <max value="1"/>
@@ -4473,7 +4433,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.protocol"/>
-      <short value="http | ftp | mllp +"/>
+      <short value="A list of the messaging transport protocol(s) identifiers, supported by this endpoint."/>
       <definition value="A list of the messaging transport protocol(s) identifiers, supported by this endpoint."/>
       <min value="0"/>
       <max value="*"/>
@@ -4490,9 +4450,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.focus"/>
-      <short value="Resource that&#39;s focus of message"/>
+      <short value="A resource associated with the event.  This is the resource that defines the event."/>
       <definition value="A resource associated with the event.  This is the resource that defines the event."/>
-      <comments value="This SHALL be provided if the event type supports multiple different resource types."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -4508,7 +4467,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.request"/>
-      <short value="Profile that describes the request"/>
+      <short value="Information about the request for this event."/>
       <definition value="Information about the request for this event."/>
       <min value="1"/>
       <max value="1"/>
@@ -4519,7 +4478,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.response"/>
-      <short value="Profile that describes the response"/>
+      <short value="Information about the response for this event."/>
       <definition value="Information about the response for this event."/>
       <min value="1"/>
       <max value="1"/>
@@ -4530,7 +4489,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.messaging.event.documentation"/>
-      <short value="Endpoint-specific event documentation"/>
+      <short value="Guidance on how this event is handled, such as internal system trigger points, business rules, etc."/>
       <definition value="Guidance on how this event is handled, such as internal system trigger points, business rules, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -4540,7 +4499,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document"/>
-      <short value="Document definition"/>
+      <short value="A document definition."/>
       <definition value="A document definition."/>
       <min value="0"/>
       <max value="*"/>
@@ -4548,7 +4507,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.mode"/>
-      <short value="producer | consumer"/>
+      <short value="Mode of this document declaration - whether application is producer or consumer."/>
       <definition value="Mode of this document declaration - whether application is producer or consumer."/>
       <min value="1"/>
       <max value="1"/>
@@ -4565,7 +4524,7 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.documentation"/>
-      <short value="Description of document support"/>
+      <short value="A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc."/>
       <definition value="A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -4575,9 +4534,8 @@ Typical supported profiles cross resource types to describe a network of related
     </element>
     <element>
       <path value="Conformance.document.profile"/>
-      <short value="Constraint on a resource used in the document"/>
+      <short value="A constraint on a resource used in the document."/>
       <definition value="A constraint on a resource used in the document."/>
-      <comments value="The first resource is the document resource."/>
       <min value="1"/>
       <max value="1"/>
       <type>

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -39,82 +39,82 @@ public class BasicResourceTypeEnumFactory implements EnumFactory<BasicResourceTy
   public BasicResourceType fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("CONSENT".equals(codeString))
+    if ("consent".equals(codeString))
       return BasicResourceType.CONSENT;
-    if ("REFERRAL".equals(codeString))
+    if ("referral".equals(codeString))
       return BasicResourceType.REFERRAL;
-    if ("SLOT".equals(codeString))
+    if ("slot".equals(codeString))
       return BasicResourceType.SLOT;
-    if ("ADVEVENT".equals(codeString))
+    if ("advevent".equals(codeString))
       return BasicResourceType.ADVEVENT;
-    if ("APTMTREQ".equals(codeString))
+    if ("aptmtreq".equals(codeString))
       return BasicResourceType.APTMTREQ;
-    if ("TRANSFER".equals(codeString))
+    if ("transfer".equals(codeString))
       return BasicResourceType.TRANSFER;
-    if ("DIET".equals(codeString))
+    if ("diet".equals(codeString))
       return BasicResourceType.DIET;
-    if ("ADMINACT".equals(codeString))
+    if ("adminact".equals(codeString))
       return BasicResourceType.ADMINACT;
-    if ("EXPOSURE".equals(codeString))
+    if ("exposure".equals(codeString))
       return BasicResourceType.EXPOSURE;
-    if ("INVESTIGATION".equals(codeString))
+    if ("investigation".equals(codeString))
       return BasicResourceType.INVESTIGATION;
-    if ("ACCOUNT".equals(codeString))
+    if ("account".equals(codeString))
       return BasicResourceType.ACCOUNT;
-    if ("INVOICE".equals(codeString))
+    if ("invoice".equals(codeString))
       return BasicResourceType.INVOICE;
-    if ("ADJUDICAT".equals(codeString))
+    if ("adjudicat".equals(codeString))
       return BasicResourceType.ADJUDICAT;
-    if ("PAYMENT".equals(codeString))
+    if ("payment".equals(codeString))
       return BasicResourceType.PAYMENT;
-    if ("PREDETREQ".equals(codeString))
+    if ("predetreq".equals(codeString))
       return BasicResourceType.PREDETREQ;
-    if ("PREDETERMINE".equals(codeString))
+    if ("predetermine".equals(codeString))
       return BasicResourceType.PREDETERMINE;
-    if ("STUDY".equals(codeString))
+    if ("study".equals(codeString))
       return BasicResourceType.STUDY;
-    if ("PROTOCOL".equals(codeString))
+    if ("protocol".equals(codeString))
       return BasicResourceType.PROTOCOL;
     throw new IllegalArgumentException("Unknown BasicResourceType code '"+codeString+"'");
   }
 
   public String toCode(BasicResourceType code) {
     if (code == BasicResourceType.CONSENT)
-      return "CONSENT";
+      return "consent";
     if (code == BasicResourceType.REFERRAL)
-      return "REFERRAL";
+      return "referral";
     if (code == BasicResourceType.SLOT)
-      return "SLOT";
+      return "slot";
     if (code == BasicResourceType.ADVEVENT)
-      return "ADVEVENT";
+      return "advevent";
     if (code == BasicResourceType.APTMTREQ)
-      return "APTMTREQ";
+      return "aptmtreq";
     if (code == BasicResourceType.TRANSFER)
-      return "TRANSFER";
+      return "transfer";
     if (code == BasicResourceType.DIET)
-      return "DIET";
+      return "diet";
     if (code == BasicResourceType.ADMINACT)
-      return "ADMINACT";
+      return "adminact";
     if (code == BasicResourceType.EXPOSURE)
-      return "EXPOSURE";
+      return "exposure";
     if (code == BasicResourceType.INVESTIGATION)
-      return "INVESTIGATION";
+      return "investigation";
     if (code == BasicResourceType.ACCOUNT)
-      return "ACCOUNT";
+      return "account";
     if (code == BasicResourceType.INVOICE)
-      return "INVOICE";
+      return "invoice";
     if (code == BasicResourceType.ADJUDICAT)
-      return "ADJUDICAT";
+      return "adjudicat";
     if (code == BasicResourceType.PAYMENT)
-      return "PAYMENT";
+      return "payment";
     if (code == BasicResourceType.PREDETREQ)
-      return "PREDETREQ";
+      return "predetreq";
     if (code == BasicResourceType.PREDETERMINE)
-      return "PREDETERMINE";
+      return "predetermine";
     if (code == BasicResourceType.STUDY)
-      return "STUDY";
+      return "study";
     if (code == BasicResourceType.PROTOCOL)
-      return "PROTOCOL";
+      return "protocol";
     return "?";
   }
 

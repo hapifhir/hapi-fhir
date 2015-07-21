@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum ServicePharmacy {
 
         /**
-         * null
+         * Smoking cessation
          */
         SMOKECESS, 
         /**
-         * null
+         * Flu Shot
          */
         FLUSHOT, 
         /**
@@ -67,15 +67,15 @@ public enum ServicePharmacy {
         }
         public String getDefinition() {
           switch (this) {
-            case SMOKECESS: return "";
-            case FLUSHOT: return "";
+            case SMOKECESS: return "Smoking cessation";
+            case FLUSHOT: return "Flu Shot";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case SMOKECESS: return "smokecess";
-            case FLUSHOT: return "flushot";
+            case SMOKECESS: return "Smoking cessation";
+            case FLUSHOT: return "Flu Shot";
             default: return "?";
           }
     }

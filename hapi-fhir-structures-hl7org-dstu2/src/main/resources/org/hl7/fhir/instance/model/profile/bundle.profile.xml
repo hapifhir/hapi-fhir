@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Bundle"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -531,19 +531,19 @@
   <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Bundle Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -555,11 +555,11 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Bundle"/>
-      <short value="Contains a collection of resources"/>
+      <short value="A container for a collection of resources."/>
       <definition value="A container for a collection of resources."/>
       <min value="1"/>
       <max value="1"/>
@@ -607,9 +607,8 @@
     </element>
     <element>
       <path value="Bundle.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -618,7 +617,7 @@
     </element>
     <element>
       <path value="Bundle.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -628,9 +627,8 @@
     </element>
     <element>
       <path value="Bundle.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -640,11 +638,8 @@
     </element>
     <element>
       <path value="Bundle.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -658,9 +653,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.type"/>
-      <short value="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection"/>
+      <short value="Indicates the purpose of this bundle- how it was intended to be used."/>
       <definition value="Indicates the purpose of this bundle- how it was intended to be used."/>
-      <comments value="It&#39;s possible to use a bundle for other purposes (e.g. a document can be accepted as a transaction). This is primarily defined so that there can be specific rules for some of the bundle types."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -676,9 +670,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.total"/>
-      <short value="If search, the total number of matches"/>
+      <short value="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)."/>
       <definition value="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)."/>
-      <comments value="Only used if the bundle is a search result set."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -689,7 +682,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Bundle.link"/>
       <name value="link"/>
-      <short value="Links related to this Bundle"/>
+      <short value="A series of links that provide context to this bundle."/>
       <definition value="A series of links that provide context to this bundle."/>
       <min value="0"/>
       <max value="*"/>
@@ -700,7 +693,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Bundle.link.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -714,9 +707,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.link.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -731,9 +723,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.link.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -750,7 +741,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.link.relation"/>
-      <short value="http://www.iana.org/assignments/link-relations/link-relations.xhtml"/>
+      <short value="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]."/>
       <definition value="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]."/>
       <min value="1"/>
       <max value="1"/>
@@ -760,7 +751,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.link.url"/>
-      <short value="Reference details for the link"/>
+      <short value="The reference details for the link."/>
       <definition value="The reference details for the link."/>
       <min value="1"/>
       <max value="1"/>
@@ -770,7 +761,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry"/>
-      <short value="Entry in the bundle - will have a resource, or information"/>
+      <short value="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)."/>
       <definition value="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)."/>
       <min value="0"/>
       <max value="*"/>
@@ -793,7 +784,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Bundle.entry.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -807,9 +798,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -824,9 +814,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -843,7 +832,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.link"/>
-      <short value="Links related to this entry"/>
+      <short value="A series of links that provide context to this entry."/>
       <definition value="A series of links that provide context to this entry."/>
       <min value="0"/>
       <max value="*"/>
@@ -851,9 +840,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.fullUrl"/>
-      <short value="Absolute URL for resource (server address, or UUID/OID)"/>
+      <short value="The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource."/>
       <definition value="The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource."/>
-      <comments value="fullUrl may not be (unique in the context of a resource](bundle.html#bundle-unique). Note that since [FHIR resources do not need to be served through the FHIR API](references.html), the absolute URL may not end with the logical id of the resource (Resource.id), but if the fullUrl does look like a RESTful server URL (e.g. meets the [regex](references.html#regex), then it SHALL end with the Resource.id."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -862,7 +850,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.resource"/>
-      <short value="A resource in the bundle"/>
+      <short value="The Resources for the entry."/>
       <definition value="The Resources for the entry."/>
       <min value="0"/>
       <max value="1"/>
@@ -872,7 +860,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.search"/>
-      <short value="Search related information"/>
+      <short value="Information about the search process that lead to the creation of this entry."/>
       <definition value="Information about the search process that lead to the creation of this entry."/>
       <min value="0"/>
       <max value="1"/>
@@ -884,7 +872,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Bundle.entry.search.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -898,9 +886,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.search.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -915,9 +902,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.search.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -934,7 +920,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.search.mode"/>
-      <short value="match | include | outcome - why this is in the result set"/>
+      <short value="Why this entry is in the result set - whether it&#39;s included as a match or because of an _include requirement."/>
       <definition value="Why this entry is in the result set - whether it&#39;s included as a match or because of an _include requirement."/>
       <min value="0"/>
       <max value="1"/>
@@ -951,9 +937,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.search.score"/>
-      <short value="Search ranking (between 0 and 1)"/>
+      <short value="When searching, the server&#39;s search ranking score for the entry."/>
       <definition value="When searching, the server&#39;s search ranking score for the entry."/>
-      <comments value="Servers are not required to return a ranking score. 1 is most relevant, and 0 is least relevant. Often, search results are sorted by score, but the client may specify a different sort order."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -962,7 +947,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request"/>
-      <short value="Transaction Related Information"/>
+      <short value="Additional information about how this entry should be processed as part of a transaction."/>
       <definition value="Additional information about how this entry should be processed as part of a transaction."/>
       <min value="0"/>
       <max value="1"/>
@@ -974,7 +959,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Bundle.entry.request.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -988,9 +973,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1005,9 +989,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1024,7 +1007,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.method"/>
-      <short value="GET | POST | PUT | DELETE"/>
+      <short value="The HTTP verb for this entry in either a update history, or a transaction/ transaction response."/>
       <definition value="The HTTP verb for this entry in either a update history, or a transaction/ transaction response."/>
       <min value="1"/>
       <max value="1"/>
@@ -1041,9 +1024,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.url"/>
-      <short value="URL for HTTP equivalent of this entry"/>
+      <short value="The URL for this entry, relative to the root (the address to which the request is posted)."/>
       <definition value="The URL for this entry, relative to the root (the address to which the request is posted)."/>
-      <comments value="E.g. for a Patient Create, the method would be &quot;POST&quot; and the url would be &quot;Patient&quot;. For a Patient Update, the method would be PUT, and the url would be &quot;Patient/[id]&quot;."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1052,7 +1034,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.ifNoneMatch"/>
-      <short value="For managing cache currency"/>
+      <short value="If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation."/>
       <definition value="If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation."/>
       <min value="0"/>
       <max value="1"/>
@@ -1062,7 +1044,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.ifMatch"/>
-      <short value="For managing update contention"/>
+      <short value="Only perform the operation if the Etag value matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <definition value="Only perform the operation if the Etag value matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1072,7 +1054,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.ifModifiedSince"/>
-      <short value="For managing update contention"/>
+      <short value="Only perform the operation if the last updated date matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <definition value="Only perform the operation if the last updated date matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1082,7 +1064,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.request.ifNoneExist"/>
-      <short value="For conditional creates"/>
+      <short value="Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;. This is just the query portion of the URL - what follows the &quot;?&quot; (not including the &quot;?&quot;)."/>
       <definition value="Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;. This is just the query portion of the URL - what follows the &quot;?&quot; (not including the &quot;?&quot;)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1092,7 +1074,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response"/>
-      <short value="Transaction Related Information"/>
+      <short value="Additional information about how this entry should be processed as part of a transaction."/>
       <definition value="Additional information about how this entry should be processed as part of a transaction."/>
       <min value="0"/>
       <max value="1"/>
@@ -1104,7 +1086,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Bundle.entry.response.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1118,9 +1100,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1135,9 +1116,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1154,7 +1134,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response.status"/>
-      <short value="Status return code for entry"/>
+      <short value="The status code returned by processing this entry."/>
       <definition value="The status code returned by processing this entry."/>
       <min value="1"/>
       <max value="1"/>
@@ -1164,7 +1144,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response.location"/>
-      <short value="The location, if the operation returns a location"/>
+      <short value="The location header created by processing this operation."/>
       <definition value="The location header created by processing this operation."/>
       <min value="0"/>
       <max value="1"/>
@@ -1174,9 +1154,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response.etag"/>
-      <short value="The etag for the resource (if relevant)"/>
+      <short value="The etag for the resource, it the operation for the entry produced a versioned resource."/>
       <definition value="The etag for the resource, it the operation for the entry produced a versioned resource."/>
-      <comments value="This has to match the version id in the header if a resource is included."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1185,9 +1164,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.entry.response.lastModified"/>
-      <short value="Server&#39;s date time modified"/>
+      <short value="The date/time that the resource was modified on the server."/>
       <definition value="The date/time that the resource was modified on the server."/>
-      <comments value="This has to match the same time in the meta header if a resource is included."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1196,11 +1174,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Bundle.signature"/>
-      <short value="Digital Signature"/>
+      <short value="Digital Signature - base64 encoded. XML DigSIg or a JWT."/>
       <definition value="Digital Signature - base64 encoded. XML DigSIg or a JWT."/>
-      <comments value="The signature could be created by the &quot;author&quot; of the bundle or by the originating device. 
-
-Requirements around inclusion of a signature, verification of signatures and treatment of signed/non-signed bundles is implementation-environment specific."/>
       <requirements value="This element allows capturing signatures on documents. It also allows signatures on messages, transactions or even query responses. It may support content-authentication, non-repudiation or other business cases. This is primarily relevant where the bundle may travel through multiple hops or via other mechanisms where HTTPS non-repudiation is insufficient."/>
       <min value="0"/>
       <max value="1"/>
@@ -1212,7 +1187,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
   <differential>
     <element>
       <path value="Bundle"/>
-      <short value="Contains a collection of resources"/>
+      <short value="A container for a collection of resources."/>
       <definition value="A container for a collection of resources."/>
       <min value="1"/>
       <max value="1"/>
@@ -1260,9 +1235,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.type"/>
-      <short value="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection"/>
+      <short value="Indicates the purpose of this bundle- how it was intended to be used."/>
       <definition value="Indicates the purpose of this bundle- how it was intended to be used."/>
-      <comments value="It&#39;s possible to use a bundle for other purposes (e.g. a document can be accepted as a transaction). This is primarily defined so that there can be specific rules for some of the bundle types."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1278,9 +1252,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.total"/>
-      <short value="If search, the total number of matches"/>
+      <short value="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)."/>
       <definition value="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)."/>
-      <comments value="Only used if the bundle is a search result set."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1291,14 +1264,14 @@ Requirements around inclusion of a signature, verification of signatures and tre
     <element>
       <path value="Bundle.link"/>
       <name value="link"/>
-      <short value="Links related to this Bundle"/>
+      <short value="A series of links that provide context to this bundle."/>
       <definition value="A series of links that provide context to this bundle."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Bundle.link.relation"/>
-      <short value="http://www.iana.org/assignments/link-relations/link-relations.xhtml"/>
+      <short value="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]."/>
       <definition value="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]."/>
       <min value="1"/>
       <max value="1"/>
@@ -1308,7 +1281,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.link.url"/>
-      <short value="Reference details for the link"/>
+      <short value="The reference details for the link."/>
       <definition value="The reference details for the link."/>
       <min value="1"/>
       <max value="1"/>
@@ -1318,7 +1291,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry"/>
-      <short value="Entry in the bundle - will have a resource, or information"/>
+      <short value="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)."/>
       <definition value="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)."/>
       <min value="0"/>
       <max value="*"/>
@@ -1337,7 +1310,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.link"/>
-      <short value="Links related to this entry"/>
+      <short value="A series of links that provide context to this entry."/>
       <definition value="A series of links that provide context to this entry."/>
       <min value="0"/>
       <max value="*"/>
@@ -1345,9 +1318,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.fullUrl"/>
-      <short value="Absolute URL for resource (server address, or UUID/OID)"/>
+      <short value="The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource."/>
       <definition value="The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource."/>
-      <comments value="fullUrl may not be (unique in the context of a resource](bundle.html#bundle-unique). Note that since [FHIR resources do not need to be served through the FHIR API](references.html), the absolute URL may not end with the logical id of the resource (Resource.id), but if the fullUrl does look like a RESTful server URL (e.g. meets the [regex](references.html#regex), then it SHALL end with the Resource.id."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1356,7 +1328,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.resource"/>
-      <short value="A resource in the bundle"/>
+      <short value="The Resources for the entry."/>
       <definition value="The Resources for the entry."/>
       <min value="0"/>
       <max value="1"/>
@@ -1366,7 +1338,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.search"/>
-      <short value="Search related information"/>
+      <short value="Information about the search process that lead to the creation of this entry."/>
       <definition value="Information about the search process that lead to the creation of this entry."/>
       <min value="0"/>
       <max value="1"/>
@@ -1374,7 +1346,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.search.mode"/>
-      <short value="match | include | outcome - why this is in the result set"/>
+      <short value="Why this entry is in the result set - whether it&#39;s included as a match or because of an _include requirement."/>
       <definition value="Why this entry is in the result set - whether it&#39;s included as a match or because of an _include requirement."/>
       <min value="0"/>
       <max value="1"/>
@@ -1391,9 +1363,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.search.score"/>
-      <short value="Search ranking (between 0 and 1)"/>
+      <short value="When searching, the server&#39;s search ranking score for the entry."/>
       <definition value="When searching, the server&#39;s search ranking score for the entry."/>
-      <comments value="Servers are not required to return a ranking score. 1 is most relevant, and 0 is least relevant. Often, search results are sorted by score, but the client may specify a different sort order."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1402,7 +1373,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request"/>
-      <short value="Transaction Related Information"/>
+      <short value="Additional information about how this entry should be processed as part of a transaction."/>
       <definition value="Additional information about how this entry should be processed as part of a transaction."/>
       <min value="0"/>
       <max value="1"/>
@@ -1410,7 +1381,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request.method"/>
-      <short value="GET | POST | PUT | DELETE"/>
+      <short value="The HTTP verb for this entry in either a update history, or a transaction/ transaction response."/>
       <definition value="The HTTP verb for this entry in either a update history, or a transaction/ transaction response."/>
       <min value="1"/>
       <max value="1"/>
@@ -1427,9 +1398,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request.url"/>
-      <short value="URL for HTTP equivalent of this entry"/>
+      <short value="The URL for this entry, relative to the root (the address to which the request is posted)."/>
       <definition value="The URL for this entry, relative to the root (the address to which the request is posted)."/>
-      <comments value="E.g. for a Patient Create, the method would be &quot;POST&quot; and the url would be &quot;Patient&quot;. For a Patient Update, the method would be PUT, and the url would be &quot;Patient/[id]&quot;."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1438,7 +1408,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request.ifNoneMatch"/>
-      <short value="For managing cache currency"/>
+      <short value="If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation."/>
       <definition value="If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation."/>
       <min value="0"/>
       <max value="1"/>
@@ -1448,7 +1418,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request.ifMatch"/>
-      <short value="For managing update contention"/>
+      <short value="Only perform the operation if the Etag value matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <definition value="Only perform the operation if the Etag value matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1458,7 +1428,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request.ifModifiedSince"/>
-      <short value="For managing update contention"/>
+      <short value="Only perform the operation if the last updated date matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <definition value="Only perform the operation if the last updated date matches. For more information, see the API section &quot;Managing Resource Contention&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1468,7 +1438,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.request.ifNoneExist"/>
-      <short value="For conditional creates"/>
+      <short value="Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;. This is just the query portion of the URL - what follows the &quot;?&quot; (not including the &quot;?&quot;)."/>
       <definition value="Instruct the server not to perform the create if a specified resource already exists. For further information, see &quot;Conditional Create&quot;. This is just the query portion of the URL - what follows the &quot;?&quot; (not including the &quot;?&quot;)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1478,7 +1448,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.response"/>
-      <short value="Transaction Related Information"/>
+      <short value="Additional information about how this entry should be processed as part of a transaction."/>
       <definition value="Additional information about how this entry should be processed as part of a transaction."/>
       <min value="0"/>
       <max value="1"/>
@@ -1486,7 +1456,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.response.status"/>
-      <short value="Status return code for entry"/>
+      <short value="The status code returned by processing this entry."/>
       <definition value="The status code returned by processing this entry."/>
       <min value="1"/>
       <max value="1"/>
@@ -1496,7 +1466,7 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.response.location"/>
-      <short value="The location, if the operation returns a location"/>
+      <short value="The location header created by processing this operation."/>
       <definition value="The location header created by processing this operation."/>
       <min value="0"/>
       <max value="1"/>
@@ -1506,9 +1476,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.response.etag"/>
-      <short value="The etag for the resource (if relevant)"/>
+      <short value="The etag for the resource, it the operation for the entry produced a versioned resource."/>
       <definition value="The etag for the resource, it the operation for the entry produced a versioned resource."/>
-      <comments value="This has to match the version id in the header if a resource is included."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1517,9 +1486,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.entry.response.lastModified"/>
-      <short value="Server&#39;s date time modified"/>
+      <short value="The date/time that the resource was modified on the server."/>
       <definition value="The date/time that the resource was modified on the server."/>
-      <comments value="This has to match the same time in the meta header if a resource is included."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1528,11 +1496,8 @@ Requirements around inclusion of a signature, verification of signatures and tre
     </element>
     <element>
       <path value="Bundle.signature"/>
-      <short value="Digital Signature"/>
+      <short value="Digital Signature - base64 encoded. XML DigSIg or a JWT."/>
       <definition value="Digital Signature - base64 encoded. XML DigSIg or a JWT."/>
-      <comments value="The signature could be created by the &quot;author&quot; of the bundle or by the originating device. 
-
-Requirements around inclusion of a signature, verification of signatures and treatment of signed/non-signed bundles is implementation-environment specific."/>
       <requirements value="This element allows capturing signatures on documents. It also allows signatures on messages, transactions or even query responses. It may support content-authentication, non-repudiation or other business cases. This is primarily relevant where the bundle may travel through multiple hops or via other mechanisms where HTTPS non-repudiation is insufficient."/>
       <min value="0"/>
       <max value="1"/>

@@ -157,14 +157,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Identifier Resource"/>
   <requirements value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -182,11 +182,10 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Identifier"/>
-      <short value="An identifier intended for computation"/>
+      <short value="A technical identifier - identifies some entity uniquely and unambiguously."/>
       <definition value="A technical identifier - identifies some entity uniquely and unambiguously."/>
       <requirements value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
       <min value="1"/>
@@ -210,7 +209,7 @@
     <element>
       <path value="Identifier.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -224,9 +223,8 @@
     </element>
     <element>
       <path value="Identifier.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -241,9 +239,8 @@
     </element>
     <element>
       <path value="Identifier.use"/>
-      <short value="usual | official | temp | secondary (If known)"/>
+      <short value="The purpose of this identifier."/>
       <definition value="The purpose of this identifier."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary id for a permanent one. Applications can assume that an identifier is permanent unless it explicitly says that it is temporary."/>
       <requirements value="Allows the appropriate identifier for a particular context of use to be selected from among a set of identifiers."/>
       <min value="0"/>
       <max value="1"/>
@@ -269,9 +266,8 @@
     </element>
     <element>
       <path value="Identifier.type"/>
-      <short value="Description of identifier"/>
+      <short value="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose."/>
       <definition value="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose."/>
-      <comments value="Where the system is known, a type is unnecessary because the type is always part of the system definition. However systems often need to handle identifiers where the system is not known. There is not a 1:1 relationship between type and system, since many different systems have the same type."/>
       <requirements value="Allows users to make use of identifiers when the identifier system is not known."/>
       <min value="0"/>
       <max value="1"/>
@@ -296,7 +292,7 @@
     </element>
     <element>
       <path value="Identifier.system"/>
-      <short value="The namespace for the identifier"/>
+      <short value="Establishes the namespace in which set of possible id values is unique."/>
       <definition value="Establishes the namespace in which set of possible id values is unique."/>
       <requirements value="There are many sequences of identifiers.  To perform matching, we need to know what sequence we&#39;re dealing with. The system identifies a particular sequence or set of unique identifiers."/>
       <min value="0"/>
@@ -320,9 +316,8 @@
     </element>
     <element>
       <path value="Identifier.value"/>
-      <short value="The value that is unique"/>
+      <short value="The portion of the identifier typically displayed to the user and which is unique within the context of the system."/>
       <definition value="The portion of the identifier typically displayed to the user and which is unique within the context of the system."/>
-      <comments value="If the value is a full URI, then the system SHALL be urn:ietf:rfc:3986."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -344,7 +339,7 @@
     </element>
     <element>
       <path value="Identifier.period"/>
-      <short value="Time period when id is/was valid for use"/>
+      <short value="Time period during which identifier is/was valid for use."/>
       <definition value="Time period during which identifier is/was valid for use."/>
       <min value="0"/>
       <max value="1"/>
@@ -366,9 +361,8 @@
     </element>
     <element>
       <path value="Identifier.assigner"/>
-      <short value="Organization that issued id (may be just text)"/>
+      <short value="Organization that issued/manages the identifier."/>
       <definition value="Organization that issued/manages the identifier."/>
-      <comments value="The reference may be just a text description of the assigner."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -392,7 +386,7 @@
   <differential>
     <element>
       <path value="Identifier"/>
-      <short value="An identifier intended for computation"/>
+      <short value="A technical identifier - identifies some entity uniquely and unambiguously."/>
       <definition value="A technical identifier - identifies some entity uniquely and unambiguously."/>
       <requirements value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
       <min value="1"/>
@@ -415,9 +409,8 @@
     </element>
     <element>
       <path value="Identifier.use"/>
-      <short value="usual | official | temp | secondary (If known)"/>
+      <short value="The purpose of this identifier."/>
       <definition value="The purpose of this identifier."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary id for a permanent one. Applications can assume that an identifier is permanent unless it explicitly says that it is temporary."/>
       <requirements value="Allows the appropriate identifier for a particular context of use to be selected from among a set of identifiers."/>
       <min value="0"/>
       <max value="1"/>
@@ -443,9 +436,8 @@
     </element>
     <element>
       <path value="Identifier.type"/>
-      <short value="Description of identifier"/>
+      <short value="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose."/>
       <definition value="A coded type for the identifier that can be used to determine which identifier to use for a specific purpose."/>
-      <comments value="Where the system is known, a type is unnecessary because the type is always part of the system definition. However systems often need to handle identifiers where the system is not known. There is not a 1:1 relationship between type and system, since many different systems have the same type."/>
       <requirements value="Allows users to make use of identifiers when the identifier system is not known."/>
       <min value="0"/>
       <max value="1"/>
@@ -470,7 +462,7 @@
     </element>
     <element>
       <path value="Identifier.system"/>
-      <short value="The namespace for the identifier"/>
+      <short value="Establishes the namespace in which set of possible id values is unique."/>
       <definition value="Establishes the namespace in which set of possible id values is unique."/>
       <requirements value="There are many sequences of identifiers.  To perform matching, we need to know what sequence we&#39;re dealing with. The system identifies a particular sequence or set of unique identifiers."/>
       <min value="0"/>
@@ -494,9 +486,8 @@
     </element>
     <element>
       <path value="Identifier.value"/>
-      <short value="The value that is unique"/>
+      <short value="The portion of the identifier typically displayed to the user and which is unique within the context of the system."/>
       <definition value="The portion of the identifier typically displayed to the user and which is unique within the context of the system."/>
-      <comments value="If the value is a full URI, then the system SHALL be urn:ietf:rfc:3986."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -518,7 +509,7 @@
     </element>
     <element>
       <path value="Identifier.period"/>
-      <short value="Time period when id is/was valid for use"/>
+      <short value="Time period during which identifier is/was valid for use."/>
       <definition value="Time period during which identifier is/was valid for use."/>
       <min value="0"/>
       <max value="1"/>
@@ -540,9 +531,8 @@
     </element>
     <element>
       <path value="Identifier.assigner"/>
-      <short value="Organization that issued id (may be just text)"/>
+      <short value="Organization that issued/manages the identifier."/>
       <definition value="Organization that issued/manages the identifier."/>
-      <comments value="The reference may be just a text description of the assigner."/>
       <min value="0"/>
       <max value="1"/>
       <type>

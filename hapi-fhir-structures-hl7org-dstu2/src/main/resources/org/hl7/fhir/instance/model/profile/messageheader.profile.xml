@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="MessageHeader"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -456,19 +456,19 @@
   <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for MessageHeader Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -480,11 +480,11 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="MessageHeader"/>
-      <short value="A resource that describes a message that is exchanged between systems"/>
+      <short value="The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle."/>
       <definition value="The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle."/>
       <requirements value="Many implementations are not prepared to use REST and need a messaging based infrastructure."/>
       <min value="1"/>
@@ -503,9 +503,8 @@
     </element>
     <element>
       <path value="MessageHeader.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -514,7 +513,7 @@
     </element>
     <element>
       <path value="MessageHeader.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -524,9 +523,8 @@
     </element>
     <element>
       <path value="MessageHeader.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -536,11 +534,8 @@
     </element>
     <element>
       <path value="MessageHeader.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -554,9 +549,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -574,9 +568,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -592,9 +585,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -609,9 +601,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -627,9 +618,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.identifier"/>
-      <short value="Id of this message"/>
+      <short value="The identifier of this message."/>
       <definition value="The identifier of this message."/>
-      <comments value="This SHALL be unique within the scope of this stream of messages."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -646,7 +636,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.timestamp"/>
-      <short value="Time that the message was sent"/>
+      <short value="The time that the message was sent."/>
       <definition value="The time that the message was sent."/>
       <requirements value="Allows limited detection of out-of-order and delayed transmission.  Also supports audit."/>
       <min value="1"/>
@@ -665,7 +655,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.event"/>
-      <short value="Code for the event this message represents"/>
+      <short value="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value &quot;http://hl7.org/fhir/message-events&quot;."/>
       <definition value="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value &quot;http://hl7.org/fhir/message-events&quot;."/>
       <requirements value="Drives the behavior associated with this message."/>
       <min value="1"/>
@@ -692,7 +682,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.response"/>
-      <short value="If this is a reply to prior message"/>
+      <short value="Information about the message that this message is a response to.  Only present if this message is a response."/>
       <definition value="Information about the message that this message is a response to.  Only present if this message is a response."/>
       <min value="0"/>
       <max value="1"/>
@@ -712,7 +702,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="MessageHeader.response.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -726,9 +716,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.response.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -743,9 +732,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.response.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -762,7 +750,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.response.identifier"/>
-      <short value="Id of original message"/>
+      <short value="The id of the message that this message is a response to."/>
       <definition value="The id of the message that this message is a response to."/>
       <requirements value="Allows receiver to know what message is being responded to."/>
       <min value="1"/>
@@ -781,9 +769,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.response.code"/>
-      <short value="ok | transient-error | fatal-error"/>
+      <short value="Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not."/>
       <definition value="Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not."/>
-      <comments value="This is a generic response to the request message. Specific data for the response will be found in MessageHeader.data."/>
       <requirements value="Allows the sender of the acknowledge message to know if the request was successful or if action is needed."/>
       <min value="1"/>
       <max value="1"/>
@@ -809,9 +796,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.response.details"/>
-      <short value="Specific list of hints/warnings/errors"/>
+      <short value="Full details of any issues found in the message."/>
       <definition value="Full details of any issues found in the message."/>
-      <comments value="This SHALL be contained in the bundle. If any of the issues are errors, the response code SHALL be an error."/>
       <requirements value="Allows the sender of the message to determine what the specific issues are."/>
       <min value="0"/>
       <max value="1"/>
@@ -830,7 +816,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source"/>
-      <short value="Message Source Application"/>
+      <short value="The source application from which this message originated."/>
       <definition value="The source application from which this message originated."/>
       <requirements value="Allows replies, supports audit."/>
       <min value="1"/>
@@ -846,7 +832,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="MessageHeader.source.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -860,9 +846,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -877,9 +862,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -896,7 +880,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.name"/>
-      <short value="Name of system"/>
+      <short value="Human-readable name for the source system."/>
       <definition value="Human-readable name for the source system."/>
       <requirements value="May be used to support audit."/>
       <min value="0"/>
@@ -915,7 +899,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.software"/>
-      <short value="Name of software running the system"/>
+      <short value="May include configuration or other information useful in debugging."/>
       <definition value="May include configuration or other information useful in debugging."/>
       <requirements value="Supports audit and possibly interface engine behavior."/>
       <min value="0"/>
@@ -934,7 +918,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.version"/>
-      <short value="Version of software running"/>
+      <short value="Can convey versions of multiple systems in situations where a message passes through multiple hands."/>
       <definition value="Can convey versions of multiple systems in situations where a message passes through multiple hands."/>
       <requirements value="Supports audit and possibly interface engine behavior."/>
       <min value="0"/>
@@ -953,7 +937,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.contact"/>
-      <short value="Human contact for problems"/>
+      <short value="An e-mail, phone, website or other contact point to use to resolve issues with message communications."/>
       <definition value="An e-mail, phone, website or other contact point to use to resolve issues with message communications."/>
       <requirements value="Allows escalation of technical issues."/>
       <min value="0"/>
@@ -972,9 +956,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.source.endpoint"/>
-      <short value="Actual message source address or id"/>
+      <short value="Identifies the routing target to send acknowledgements to."/>
       <definition value="Identifies the routing target to send acknowledgements to."/>
-      <comments value="The id may be a non-resolvable URI for systems that do not use standard network-based addresses."/>
       <requirements value="Identifies where to send responses, may influence security permissions."/>
       <min value="1"/>
       <max value="1"/>
@@ -992,9 +975,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.destination"/>
-      <short value="Message Destination Application(s)"/>
+      <short value="The destination application which the message is intended for."/>
       <definition value="The destination application which the message is intended for."/>
-      <comments value="there SHOULD be at least one destination, but in some circumstances, the source system is unaware of any particular destination system."/>
       <requirements value="Indicates where message is to be sent to for routing purposes.  Allows verification of &quot;am I the intended recipient&quot;."/>
       <min value="0"/>
       <max value="*"/>
@@ -1009,7 +991,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="MessageHeader.destination.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1023,9 +1005,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.destination.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1040,9 +1021,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.destination.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1059,7 +1039,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.destination.name"/>
-      <short value="Name of system"/>
+      <short value="Human-readable name for the target system."/>
       <definition value="Human-readable name for the target system."/>
       <requirements value="May be used for routing of response and/or to support audit."/>
       <min value="0"/>
@@ -1078,7 +1058,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.destination.target"/>
-      <short value="Particular delivery destination within the destination"/>
+      <short value="Identifies the target end system in situations where the initial message transmission is to an intermediary system."/>
       <definition value="Identifies the target end system in situations where the initial message transmission is to an intermediary system."/>
       <requirements value="Supports multi-hop routing."/>
       <min value="0"/>
@@ -1094,9 +1074,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.destination.endpoint"/>
-      <short value="Actual destination address or id"/>
+      <short value="Indicates where the message should be routed to."/>
       <definition value="Indicates where the message should be routed to."/>
-      <comments value="The id may be a non-resolvable URI for systems that do not use standard network-based addresses."/>
       <requirements value="Identifies where to route the message."/>
       <min value="1"/>
       <max value="1"/>
@@ -1114,9 +1093,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.enterer"/>
-      <short value="The source of the data entry"/>
+      <short value="The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions."/>
       <definition value="The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions."/>
-      <comments value="Usually only for the request, but can be used in a response."/>
       <requirements value="Need to know for audit/traceback requirements and possibly for authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1135,9 +1113,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.author"/>
-      <short value="The source of the decision"/>
+      <short value="The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions."/>
       <definition value="The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions."/>
-      <comments value="Usually only for the request, but can be used in a response."/>
       <requirements value="Need to know for audit/traceback requirements and possibly for authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1156,7 +1133,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.receiver"/>
-      <short value="Intended &quot;real-world&quot; recipient for the data"/>
+      <short value="Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn&#39;t sufficient."/>
       <definition value="Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn&#39;t sufficient."/>
       <requirements value="Allows routing beyond just the application level."/>
       <min value="0"/>
@@ -1180,9 +1157,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MessageHeader.responsible"/>
-      <short value="Final responsibility for event"/>
+      <short value="The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party."/>
       <definition value="The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party."/>
-      <comments value="Usually only for the request, but can be used in a response."/>
       <requirements value="Need to know for audit/traceback requirements and possibly for authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1208,7 +1184,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.reason"/>
-      <short value="Cause of event"/>
+      <short value="Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message."/>
       <definition value="Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message."/>
       <requirements value="Need to be able to track why resources are being changed and report in the audit log/history of the resource.  May affect authorization."/>
       <min value="0"/>
@@ -1234,9 +1210,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.data"/>
-      <short value="The actual content of the message"/>
+      <short value="The actual data of the message - a reference to the root/focus class of the event."/>
       <definition value="The actual data of the message - a reference to the root/focus class of the event."/>
-      <comments value="The data is defined where the transaction type is defined. The transaction data is always included in the bundle that is the full message.  Only the root resource is specified.  The resources it references should be contained in the bundle but are not also listed here.  Multiple repetitions are allowed to cater for merges and other situations with multiple focal targets."/>
       <requirements value="Every message event is about actual data, a single resource, that is identified in the definition of the event, and perhaps some or all linked resources."/>
       <min value="0"/>
       <max value="*"/>
@@ -1253,7 +1228,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
   <differential>
     <element>
       <path value="MessageHeader"/>
-      <short value="A resource that describes a message that is exchanged between systems"/>
+      <short value="The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle."/>
       <definition value="The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle."/>
       <requirements value="Many implementations are not prepared to use REST and need a messaging based infrastructure."/>
       <min value="1"/>
@@ -1272,9 +1247,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.identifier"/>
-      <short value="Id of this message"/>
+      <short value="The identifier of this message."/>
       <definition value="The identifier of this message."/>
-      <comments value="This SHALL be unique within the scope of this stream of messages."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1291,7 +1265,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.timestamp"/>
-      <short value="Time that the message was sent"/>
+      <short value="The time that the message was sent."/>
       <definition value="The time that the message was sent."/>
       <requirements value="Allows limited detection of out-of-order and delayed transmission.  Also supports audit."/>
       <min value="1"/>
@@ -1310,7 +1284,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.event"/>
-      <short value="Code for the event this message represents"/>
+      <short value="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value &quot;http://hl7.org/fhir/message-events&quot;."/>
       <definition value="Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value &quot;http://hl7.org/fhir/message-events&quot;."/>
       <requirements value="Drives the behavior associated with this message."/>
       <min value="1"/>
@@ -1337,7 +1311,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.response"/>
-      <short value="If this is a reply to prior message"/>
+      <short value="Information about the message that this message is a response to.  Only present if this message is a response."/>
       <definition value="Information about the message that this message is a response to.  Only present if this message is a response."/>
       <min value="0"/>
       <max value="1"/>
@@ -1353,7 +1327,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.response.identifier"/>
-      <short value="Id of original message"/>
+      <short value="The id of the message that this message is a response to."/>
       <definition value="The id of the message that this message is a response to."/>
       <requirements value="Allows receiver to know what message is being responded to."/>
       <min value="1"/>
@@ -1372,9 +1346,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.response.code"/>
-      <short value="ok | transient-error | fatal-error"/>
+      <short value="Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not."/>
       <definition value="Code that identifies the type of response to the message - whether it was successful or not, and whether it should be resent or not."/>
-      <comments value="This is a generic response to the request message. Specific data for the response will be found in MessageHeader.data."/>
       <requirements value="Allows the sender of the acknowledge message to know if the request was successful or if action is needed."/>
       <min value="1"/>
       <max value="1"/>
@@ -1400,9 +1373,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.response.details"/>
-      <short value="Specific list of hints/warnings/errors"/>
+      <short value="Full details of any issues found in the message."/>
       <definition value="Full details of any issues found in the message."/>
-      <comments value="This SHALL be contained in the bundle. If any of the issues are errors, the response code SHALL be an error."/>
       <requirements value="Allows the sender of the message to determine what the specific issues are."/>
       <min value="0"/>
       <max value="1"/>
@@ -1421,7 +1393,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.source"/>
-      <short value="Message Source Application"/>
+      <short value="The source application from which this message originated."/>
       <definition value="The source application from which this message originated."/>
       <requirements value="Allows replies, supports audit."/>
       <min value="1"/>
@@ -1433,7 +1405,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.source.name"/>
-      <short value="Name of system"/>
+      <short value="Human-readable name for the source system."/>
       <definition value="Human-readable name for the source system."/>
       <requirements value="May be used to support audit."/>
       <min value="0"/>
@@ -1452,7 +1424,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.source.software"/>
-      <short value="Name of software running the system"/>
+      <short value="May include configuration or other information useful in debugging."/>
       <definition value="May include configuration or other information useful in debugging."/>
       <requirements value="Supports audit and possibly interface engine behavior."/>
       <min value="0"/>
@@ -1471,7 +1443,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.source.version"/>
-      <short value="Version of software running"/>
+      <short value="Can convey versions of multiple systems in situations where a message passes through multiple hands."/>
       <definition value="Can convey versions of multiple systems in situations where a message passes through multiple hands."/>
       <requirements value="Supports audit and possibly interface engine behavior."/>
       <min value="0"/>
@@ -1490,7 +1462,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.source.contact"/>
-      <short value="Human contact for problems"/>
+      <short value="An e-mail, phone, website or other contact point to use to resolve issues with message communications."/>
       <definition value="An e-mail, phone, website or other contact point to use to resolve issues with message communications."/>
       <requirements value="Allows escalation of technical issues."/>
       <min value="0"/>
@@ -1509,9 +1481,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.source.endpoint"/>
-      <short value="Actual message source address or id"/>
+      <short value="Identifies the routing target to send acknowledgements to."/>
       <definition value="Identifies the routing target to send acknowledgements to."/>
-      <comments value="The id may be a non-resolvable URI for systems that do not use standard network-based addresses."/>
       <requirements value="Identifies where to send responses, may influence security permissions."/>
       <min value="1"/>
       <max value="1"/>
@@ -1529,9 +1500,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.destination"/>
-      <short value="Message Destination Application(s)"/>
+      <short value="The destination application which the message is intended for."/>
       <definition value="The destination application which the message is intended for."/>
-      <comments value="there SHOULD be at least one destination, but in some circumstances, the source system is unaware of any particular destination system."/>
       <requirements value="Indicates where message is to be sent to for routing purposes.  Allows verification of &quot;am I the intended recipient&quot;."/>
       <min value="0"/>
       <max value="*"/>
@@ -1542,7 +1512,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.destination.name"/>
-      <short value="Name of system"/>
+      <short value="Human-readable name for the target system."/>
       <definition value="Human-readable name for the target system."/>
       <requirements value="May be used for routing of response and/or to support audit."/>
       <min value="0"/>
@@ -1561,7 +1531,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.destination.target"/>
-      <short value="Particular delivery destination within the destination"/>
+      <short value="Identifies the target end system in situations where the initial message transmission is to an intermediary system."/>
       <definition value="Identifies the target end system in situations where the initial message transmission is to an intermediary system."/>
       <requirements value="Supports multi-hop routing."/>
       <min value="0"/>
@@ -1577,9 +1547,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.destination.endpoint"/>
-      <short value="Actual destination address or id"/>
+      <short value="Indicates where the message should be routed to."/>
       <definition value="Indicates where the message should be routed to."/>
-      <comments value="The id may be a non-resolvable URI for systems that do not use standard network-based addresses."/>
       <requirements value="Identifies where to route the message."/>
       <min value="1"/>
       <max value="1"/>
@@ -1597,9 +1566,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.enterer"/>
-      <short value="The source of the data entry"/>
+      <short value="The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions."/>
       <definition value="The person or device that performed the data entry leading to this message. Where there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions."/>
-      <comments value="Usually only for the request, but can be used in a response."/>
       <requirements value="Need to know for audit/traceback requirements and possibly for authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1618,9 +1586,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.author"/>
-      <short value="The source of the decision"/>
+      <short value="The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions."/>
       <definition value="The logical author of the message - the person or device that decided the described event should happen. Where there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions."/>
-      <comments value="Usually only for the request, but can be used in a response."/>
       <requirements value="Need to know for audit/traceback requirements and possibly for authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1639,7 +1606,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.receiver"/>
-      <short value="Intended &quot;real-world&quot; recipient for the data"/>
+      <short value="Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn&#39;t sufficient."/>
       <definition value="Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn&#39;t sufficient."/>
       <requirements value="Allows routing beyond just the application level."/>
       <min value="0"/>
@@ -1663,9 +1630,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.responsible"/>
-      <short value="Final responsibility for event"/>
+      <short value="The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party."/>
       <definition value="The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party."/>
-      <comments value="Usually only for the request, but can be used in a response."/>
       <requirements value="Need to know for audit/traceback requirements and possibly for authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1691,7 +1657,7 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.reason"/>
-      <short value="Cause of event"/>
+      <short value="Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message."/>
       <definition value="Coded indication of the cause for the event - indicates  a reason for the occurance of the event that is a focus of this message."/>
       <requirements value="Need to be able to track why resources are being changed and report in the audit log/history of the resource.  May affect authorization."/>
       <min value="0"/>
@@ -1717,9 +1683,8 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
     </element>
     <element>
       <path value="MessageHeader.data"/>
-      <short value="The actual content of the message"/>
+      <short value="The actual data of the message - a reference to the root/focus class of the event."/>
       <definition value="The actual data of the message - a reference to the root/focus class of the event."/>
-      <comments value="The data is defined where the transaction type is defined. The transaction data is always included in the bundle that is the full message.  Only the root resource is specified.  The resources it references should be contained in the bundle but are not also listed here.  Multiple repetitions are allowed to cater for merges and other situations with multiple focal targets."/>
       <requirements value="Every message event is about actual data, a single resource, that is identified in the definition of the event, and perhaps some or all linked resources."/>
       <min value="0"/>
       <max value="*"/>

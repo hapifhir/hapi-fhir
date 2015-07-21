@@ -64,7 +64,7 @@ public class QuestionnaireAnswersValidatorTest {
 		myWorkerCtx.getQuestionnaires().put(questionnaireRef, q);
 				
 		ValueSet options = new ValueSet();
-		options.getDefine().setSystem("urn:system").addConcept().setCode("code0");
+		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
 		myWorkerCtx.getValueSets().put("http://somevalueset", options);
 		
 		QuestionnaireAnswers qa;

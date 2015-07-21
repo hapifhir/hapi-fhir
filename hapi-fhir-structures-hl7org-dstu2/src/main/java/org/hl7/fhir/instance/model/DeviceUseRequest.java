@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -296,7 +296,7 @@ public class DeviceUseRequest extends DomainResource {
             case ROUTINE: return "Routine";
             case URGENT: return "Urgent";
             case STAT: return "Stat";
-            case ASAP: return "Asap";
+            case ASAP: return "ASAP";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -100,11 +100,11 @@ public class Claim extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case INSTITUTIONAL: return "http://hl7.org/fhir/type-link";
-            case ORAL: return "http://hl7.org/fhir/type-link";
-            case PHARMACY: return "http://hl7.org/fhir/type-link";
-            case PROFESSIONAL: return "http://hl7.org/fhir/type-link";
-            case VISION: return "http://hl7.org/fhir/type-link";
+            case INSTITUTIONAL: return "http://hl7.org/fhir/claim-type-link";
+            case ORAL: return "http://hl7.org/fhir/claim-type-link";
+            case PHARMACY: return "http://hl7.org/fhir/claim-type-link";
+            case PROFESSIONAL: return "http://hl7.org/fhir/claim-type-link";
+            case VISION: return "http://hl7.org/fhir/claim-type-link";
             default: return "?";
           }
         }
@@ -207,10 +207,10 @@ public class Claim extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case COMPLETE: return "http://hl7.org/fhir/use-link";
-            case PROPOSED: return "http://hl7.org/fhir/use-link";
-            case EXPLORATORY: return "http://hl7.org/fhir/use-link";
-            case OTHER: return "http://hl7.org/fhir/use-link";
+            case COMPLETE: return "http://hl7.org/fhir/claim-use-link";
+            case PROPOSED: return "http://hl7.org/fhir/claim-use-link";
+            case EXPLORATORY: return "http://hl7.org/fhir/claim-use-link";
+            case OTHER: return "http://hl7.org/fhir/claim-use-link";
             default: return "?";
           }
         }

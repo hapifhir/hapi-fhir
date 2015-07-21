@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Location"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -140,7 +140,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Indicates the type of function performed at the location
             <br/>
-            <a href="v3/vs/ServiceDeliveryLocationRoleType/index.html" title="Indicates the type of function performed at the location">ServiceDeliveryLocationRoleType</a> (
+            <a href="v3/ServiceDeliveryLocationRoleType/index.html" title="Indicates the type of function performed at the location">ServiceDeliveryLocationRoleType</a> (
             <a href="terminologies.html#extensible" title="To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.">Extensible</a>)
           </td>
         </tr>
@@ -334,30 +334,30 @@
   <publisher value="Health Level Seven International (Patient Administration)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Location Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Location"/>
-      <short value="Details and position information for a physical place"/>
+      <short value="Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated."/>
       <definition value="Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated."/>
       <min value="1"/>
       <max value="1"/>
@@ -371,9 +371,8 @@
     </element>
     <element>
       <path value="Location.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -382,7 +381,7 @@
     </element>
     <element>
       <path value="Location.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -392,9 +391,8 @@
     </element>
     <element>
       <path value="Location.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -404,11 +402,8 @@
     </element>
     <element>
       <path value="Location.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -422,9 +417,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -442,9 +436,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -460,9 +453,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -477,9 +469,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -495,7 +486,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.identifier"/>
-      <short value="Unique code or number identifying the location to its users"/>
+      <short value="Unique code or number identifying the location to its users."/>
       <definition value="Unique code or number identifying the location to its users."/>
       <requirements value="Organization label locations in registries, need to keep track of those."/>
       <min value="0"/>
@@ -511,7 +502,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.name"/>
-      <short value="Name of the location as used by humans"/>
+      <short value="Name of the location as used by humans. Does not need to be unique."/>
       <definition value="Name of the location as used by humans. Does not need to be unique."/>
       <min value="0"/>
       <max value="1"/>
@@ -526,7 +517,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.description"/>
-      <short value="Description of the Location, which helps in finding or referencing the place"/>
+      <short value="Description of the Location, which helps in finding or referencing the place."/>
       <definition value="Description of the Location, which helps in finding or referencing the place."/>
       <requirements value="Humans need additional information to verify a correct location has been identified."/>
       <min value="0"/>
@@ -542,7 +533,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.mode"/>
-      <short value="instance | kind"/>
+      <short value="Indicates whether a resource instance represents a specific location or a class of locations."/>
       <definition value="Indicates whether a resource instance represents a specific location or a class of locations."/>
       <requirements value="When using a Location resource for scheduling or orders, we need to be able to refer to a class of Locations instead of a specific Location."/>
       <min value="0"/>
@@ -566,7 +557,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.type"/>
-      <short value="Indicates the type of function performed at the location"/>
+      <short value="Indicates the type of function performed at the location."/>
       <definition value="Indicates the type of function performed at the location."/>
       <min value="0"/>
       <max value="1"/>
@@ -588,7 +579,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.telecom"/>
-      <short value="Contact details of the location"/>
+      <short value="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites."/>
       <definition value="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites."/>
       <min value="0"/>
       <max value="*"/>
@@ -602,9 +593,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.address"/>
-      <short value="Physical location"/>
+      <short value="Physical location."/>
       <definition value="Physical location."/>
-      <comments value="This was kept as 0..1 as there is no use property on the address, so wouldn&#39;t be able to identify different address types."/>
       <requirements value="If locations can be visited, we need to keep track of their address."/>
       <min value="0"/>
       <max value="1"/>
@@ -618,7 +608,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.physicalType"/>
-      <short value="Physical form of the location"/>
+      <short value="Physical form of the location, e.g. building, room, vehicle, road."/>
       <definition value="Physical form of the location, e.g. building, room, vehicle, road."/>
       <requirements value="For purposes of showing relevant locations in queries, we need to categorize locations."/>
       <min value="0"/>
@@ -641,7 +631,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position"/>
-      <short value="The absolute geographic location"/>
+      <short value="The absolute geographic location of the Location, expressed in with the WGS84 datum (This is the same co-ordinate system used in KML)."/>
       <definition value="The absolute geographic location of the Location, expressed in with the WGS84 datum (This is the same co-ordinate system used in KML)."/>
       <requirements value="For mobile applications and automated route-finding knowing the exact location of the Location is required."/>
       <min value="0"/>
@@ -657,7 +647,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Location.position.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -671,9 +661,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -688,9 +677,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -707,7 +695,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.longitude"/>
-      <short value="Longitude with WGS84 datum"/>
+      <short value="Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)."/>
       <definition value="Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)."/>
       <min value="1"/>
       <max value="1"/>
@@ -721,7 +709,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.latitude"/>
-      <short value="Latitude with WGS84 datum"/>
+      <short value="Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)."/>
       <definition value="Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)."/>
       <min value="1"/>
       <max value="1"/>
@@ -735,7 +723,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.altitude"/>
-      <short value="Altitude with WGS84 datum"/>
+      <short value="Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)."/>
       <definition value="Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)."/>
       <min value="0"/>
       <max value="1"/>
@@ -749,9 +737,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.managingOrganization"/>
-      <short value="The organization that is responsible for the provisioning and upkeep of the location"/>
+      <short value="The organization that is responsible for the provisioning and upkeep of the location."/>
       <definition value="The organization that is responsible for the provisioning and upkeep of the location."/>
-      <comments value="This can also be used as the part of the organization hierarchy where this location provides services. These services can be defined through the HealthcareService resource."/>
       <requirements value="Need to know who manages the location."/>
       <min value="0"/>
       <max value="1"/>
@@ -767,7 +754,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.partOf"/>
-      <short value="Another Location which this Location is physically part of"/>
+      <short value="Another Location which this Location is physically part of."/>
       <definition value="Another Location which this Location is physically part of."/>
       <requirements value="For purposes of location, display and identification, knowing which locations are located within other locations is important."/>
       <min value="0"/>
@@ -783,7 +770,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.status"/>
-      <short value="active | suspended | inactive"/>
+      <short value="active | suspended | inactive."/>
       <definition value="active | suspended | inactive."/>
       <min value="0"/>
       <max value="1"/>
@@ -808,7 +795,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="Location"/>
-      <short value="Details and position information for a physical place"/>
+      <short value="Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated."/>
       <definition value="Details and position information for a physical place where services are provided  and resources and participants may be stored, found, contained or accommodated."/>
       <min value="1"/>
       <max value="1"/>
@@ -822,7 +809,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.identifier"/>
-      <short value="Unique code or number identifying the location to its users"/>
+      <short value="Unique code or number identifying the location to its users."/>
       <definition value="Unique code or number identifying the location to its users."/>
       <requirements value="Organization label locations in registries, need to keep track of those."/>
       <min value="0"/>
@@ -838,7 +825,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.name"/>
-      <short value="Name of the location as used by humans"/>
+      <short value="Name of the location as used by humans. Does not need to be unique."/>
       <definition value="Name of the location as used by humans. Does not need to be unique."/>
       <min value="0"/>
       <max value="1"/>
@@ -853,7 +840,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.description"/>
-      <short value="Description of the Location, which helps in finding or referencing the place"/>
+      <short value="Description of the Location, which helps in finding or referencing the place."/>
       <definition value="Description of the Location, which helps in finding or referencing the place."/>
       <requirements value="Humans need additional information to verify a correct location has been identified."/>
       <min value="0"/>
@@ -869,7 +856,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.mode"/>
-      <short value="instance | kind"/>
+      <short value="Indicates whether a resource instance represents a specific location or a class of locations."/>
       <definition value="Indicates whether a resource instance represents a specific location or a class of locations."/>
       <requirements value="When using a Location resource for scheduling or orders, we need to be able to refer to a class of Locations instead of a specific Location."/>
       <min value="0"/>
@@ -893,7 +880,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.type"/>
-      <short value="Indicates the type of function performed at the location"/>
+      <short value="Indicates the type of function performed at the location."/>
       <definition value="Indicates the type of function performed at the location."/>
       <min value="0"/>
       <max value="1"/>
@@ -915,7 +902,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.telecom"/>
-      <short value="Contact details of the location"/>
+      <short value="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites."/>
       <definition value="The contact details of communication devices available at the location. This can include phone numbers, fax numbers, mobile numbers, email addresses and web sites."/>
       <min value="0"/>
       <max value="*"/>
@@ -929,9 +916,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.address"/>
-      <short value="Physical location"/>
+      <short value="Physical location."/>
       <definition value="Physical location."/>
-      <comments value="This was kept as 0..1 as there is no use property on the address, so wouldn&#39;t be able to identify different address types."/>
       <requirements value="If locations can be visited, we need to keep track of their address."/>
       <min value="0"/>
       <max value="1"/>
@@ -945,7 +931,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.physicalType"/>
-      <short value="Physical form of the location"/>
+      <short value="Physical form of the location, e.g. building, room, vehicle, road."/>
       <definition value="Physical form of the location, e.g. building, room, vehicle, road."/>
       <requirements value="For purposes of showing relevant locations in queries, we need to categorize locations."/>
       <min value="0"/>
@@ -968,7 +954,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position"/>
-      <short value="The absolute geographic location"/>
+      <short value="The absolute geographic location of the Location, expressed in with the WGS84 datum (This is the same co-ordinate system used in KML)."/>
       <definition value="The absolute geographic location of the Location, expressed in with the WGS84 datum (This is the same co-ordinate system used in KML)."/>
       <requirements value="For mobile applications and automated route-finding knowing the exact location of the Location is required."/>
       <min value="0"/>
@@ -980,7 +966,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.longitude"/>
-      <short value="Longitude with WGS84 datum"/>
+      <short value="Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)."/>
       <definition value="Longitude. The value domain and the interpretation are the same as for the text of the longitude element in KML (see notes below)."/>
       <min value="1"/>
       <max value="1"/>
@@ -994,7 +980,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.latitude"/>
-      <short value="Latitude with WGS84 datum"/>
+      <short value="Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)."/>
       <definition value="Latitude. The value domain and the interpretation are the same as for the text of the latitude element in KML (see notes below)."/>
       <min value="1"/>
       <max value="1"/>
@@ -1008,7 +994,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.position.altitude"/>
-      <short value="Altitude with WGS84 datum"/>
+      <short value="Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)."/>
       <definition value="Altitude. The value domain and the interpretation are the same as for the text of the altitude element in KML (see notes below)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1022,9 +1008,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.managingOrganization"/>
-      <short value="The organization that is responsible for the provisioning and upkeep of the location"/>
+      <short value="The organization that is responsible for the provisioning and upkeep of the location."/>
       <definition value="The organization that is responsible for the provisioning and upkeep of the location."/>
-      <comments value="This can also be used as the part of the organization hierarchy where this location provides services. These services can be defined through the HealthcareService resource."/>
       <requirements value="Need to know who manages the location."/>
       <min value="0"/>
       <max value="1"/>
@@ -1040,7 +1025,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.partOf"/>
-      <short value="Another Location which this Location is physically part of"/>
+      <short value="Another Location which this Location is physically part of."/>
       <definition value="Another Location which this Location is physically part of."/>
       <requirements value="For purposes of location, display and identification, knowing which locations are located within other locations is important."/>
       <min value="0"/>
@@ -1056,7 +1041,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Location.status"/>
-      <short value="active | suspended | inactive"/>
+      <short value="active | suspended | inactive."/>
       <definition value="active | suspended | inactive."/>
       <min value="0"/>
       <max value="1"/>

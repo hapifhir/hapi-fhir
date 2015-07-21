@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -221,7 +221,7 @@ public class Subscription extends DomainResource {
             case RESTHOOK: return "Rest Hook";
             case WEBSOCKET: return "Websocket";
             case EMAIL: return "Email";
-            case SMS: return "Sms";
+            case SMS: return "SMS";
             case MESSAGE: return "Message";
             default: return "?";
           }

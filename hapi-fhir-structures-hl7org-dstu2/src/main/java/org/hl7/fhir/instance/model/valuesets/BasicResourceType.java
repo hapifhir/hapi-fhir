@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum BasicResourceType {
@@ -113,64 +113,64 @@ public enum BasicResourceType {
         public static BasicResourceType fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("CONSENT".equals(codeString))
+        if ("consent".equals(codeString))
           return CONSENT;
-        if ("REFERRAL".equals(codeString))
+        if ("referral".equals(codeString))
           return REFERRAL;
-        if ("SLOT".equals(codeString))
+        if ("slot".equals(codeString))
           return SLOT;
-        if ("ADVEVENT".equals(codeString))
+        if ("advevent".equals(codeString))
           return ADVEVENT;
-        if ("APTMTREQ".equals(codeString))
+        if ("aptmtreq".equals(codeString))
           return APTMTREQ;
-        if ("TRANSFER".equals(codeString))
+        if ("transfer".equals(codeString))
           return TRANSFER;
-        if ("DIET".equals(codeString))
+        if ("diet".equals(codeString))
           return DIET;
-        if ("ADMINACT".equals(codeString))
+        if ("adminact".equals(codeString))
           return ADMINACT;
-        if ("EXPOSURE".equals(codeString))
+        if ("exposure".equals(codeString))
           return EXPOSURE;
-        if ("INVESTIGATION".equals(codeString))
+        if ("investigation".equals(codeString))
           return INVESTIGATION;
-        if ("ACCOUNT".equals(codeString))
+        if ("account".equals(codeString))
           return ACCOUNT;
-        if ("INVOICE".equals(codeString))
+        if ("invoice".equals(codeString))
           return INVOICE;
-        if ("ADJUDICAT".equals(codeString))
+        if ("adjudicat".equals(codeString))
           return ADJUDICAT;
-        if ("PAYMENT".equals(codeString))
+        if ("payment".equals(codeString))
           return PAYMENT;
-        if ("PREDETREQ".equals(codeString))
+        if ("predetreq".equals(codeString))
           return PREDETREQ;
-        if ("PREDETERMINE".equals(codeString))
+        if ("predetermine".equals(codeString))
           return PREDETERMINE;
-        if ("STUDY".equals(codeString))
+        if ("study".equals(codeString))
           return STUDY;
-        if ("PROTOCOL".equals(codeString))
+        if ("protocol".equals(codeString))
           return PROTOCOL;
         throw new Exception("Unknown BasicResourceType code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case CONSENT: return "CONSENT";
-            case REFERRAL: return "REFERRAL";
-            case SLOT: return "SLOT";
-            case ADVEVENT: return "ADVEVENT";
-            case APTMTREQ: return "APTMTREQ";
-            case TRANSFER: return "TRANSFER";
-            case DIET: return "DIET";
-            case ADMINACT: return "ADMINACT";
-            case EXPOSURE: return "EXPOSURE";
-            case INVESTIGATION: return "INVESTIGATION";
-            case ACCOUNT: return "ACCOUNT";
-            case INVOICE: return "INVOICE";
-            case ADJUDICAT: return "ADJUDICAT";
-            case PAYMENT: return "PAYMENT";
-            case PREDETREQ: return "PREDETREQ";
-            case PREDETERMINE: return "PREDETERMINE";
-            case STUDY: return "STUDY";
-            case PROTOCOL: return "PROTOCOL";
+            case CONSENT: return "consent";
+            case REFERRAL: return "referral";
+            case SLOT: return "slot";
+            case ADVEVENT: return "advevent";
+            case APTMTREQ: return "aptmtreq";
+            case TRANSFER: return "transfer";
+            case DIET: return "diet";
+            case ADMINACT: return "adminact";
+            case EXPOSURE: return "exposure";
+            case INVESTIGATION: return "investigation";
+            case ACCOUNT: return "account";
+            case INVOICE: return "invoice";
+            case ADJUDICAT: return "adjudicat";
+            case PAYMENT: return "payment";
+            case PREDETREQ: return "predetreq";
+            case PREDETERMINE: return "predetermine";
+            case STUDY: return "study";
+            case PROTOCOL: return "protocol";
             default: return "?";
           }
         }
@@ -202,24 +202,24 @@ public enum BasicResourceType {
         }
         public String getDisplay() {
           switch (this) {
-            case CONSENT: return "consent";
-            case REFERRAL: return "referral";
-            case SLOT: return "resource slot";
-            case ADVEVENT: return "adverse event";
-            case APTMTREQ: return "appointment request";
-            case TRANSFER: return "transfer";
-            case DIET: return "diet";
-            case ADMINACT: return "administrative activity";
-            case EXPOSURE: return "exposure";
-            case INVESTIGATION: return "investigation";
-            case ACCOUNT: return "account";
-            case INVOICE: return "invoice";
-            case ADJUDICAT: return "invoice adjudication";
-            case PAYMENT: return "payment";
-            case PREDETREQ: return "predetermination request";
-            case PREDETERMINE: return "predetermination";
-            case STUDY: return "study";
-            case PROTOCOL: return "protocol";
+            case CONSENT: return "Consent";
+            case REFERRAL: return "Referral";
+            case SLOT: return "Resource Slot";
+            case ADVEVENT: return "Adverse Event";
+            case APTMTREQ: return "Appointment Request";
+            case TRANSFER: return "Transfer";
+            case DIET: return "Diet";
+            case ADMINACT: return "Administrative Activity";
+            case EXPOSURE: return "Exposure";
+            case INVESTIGATION: return "Investigation";
+            case ACCOUNT: return "Account";
+            case INVOICE: return "Invoice";
+            case ADJUDICAT: return "Invoice Adjudication";
+            case PAYMENT: return "Payment";
+            case PREDETREQ: return "Predetermination Request";
+            case PREDETERMINE: return "Predetermination";
+            case STUDY: return "Study";
+            case PROTOCOL: return "Protocol";
             default: return "?";
           }
     }

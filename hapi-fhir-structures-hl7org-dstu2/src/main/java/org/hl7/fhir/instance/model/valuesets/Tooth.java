@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum Tooth {
@@ -39,167 +39,163 @@ public enum Tooth {
          */
         _0, 
         /**
-         * null
+         * Permanent teeth Maxillary right
          */
         _1, 
         /**
-         * null
+         * Permanent teeth Maxillary Left
          */
         _2, 
         /**
-         * null
+         * Permanent teeth Mandibular right
          */
         _3, 
         /**
-         * null
+         * Permanent teeth Mandibular left
          */
         _4, 
         /**
-         * null
+         * Deciduous teeth Maxillary right
          */
         _5, 
         /**
-         * null
+         * Deciduous teeth Maxillary Left
          */
-        _10, 
+        _6, 
         /**
-         * null
+         * Deciduous teeth Mandibular right
          */
-        _20, 
+        _7, 
         /**
-         * null
+         * Deciduous teeth Mandibular left
          */
-        _30, 
+        _8, 
         /**
-         * null
-         */
-        _40, 
-        /**
-         * null
+         * Upper Right Tooth 1 from the central axis, permanent dentition
          */
         _11, 
         /**
-         * null
+         * Upper Right Tooth 2 from the central axis, permanent dentition
          */
         _12, 
         /**
-         * null
+         * Upper Right Tooth 3 from the central axis, permanent dentition
          */
         _13, 
         /**
-         * null
+         * Upper Right Tooth 4 from the central axis, permanent dentition
          */
         _14, 
         /**
-         * null
+         * Upper Right Tooth 5 from the central axis, permanent dentition
          */
         _15, 
         /**
-         * null
+         * Upper Right Tooth 6 from the central axis, permanent dentition
          */
         _16, 
         /**
-         * null
+         * Upper Right Tooth 7 from the central axis, permanent dentition
          */
         _17, 
         /**
-         * null
+         * Upper Right Tooth 1 from the central axis, permanent dentition
          */
         _18, 
         /**
-         * null
+         * Upper Left Tooth 1 from the central axis, permanent dentition
          */
         _21, 
         /**
-         * null
+         * Upper Left Tooth 2 from the central axis, permanent dentition
          */
         _22, 
         /**
-         * null
+         * Upper Left Tooth 3 from the central axis, permanent dentition
          */
         _23, 
         /**
-         * null
+         * Upper Left Tooth 4 from the central axis, permanent dentition
          */
         _24, 
         /**
-         * null
+         * Upper Left Tooth 5 from the central axis, permanent dentition
          */
         _25, 
         /**
-         * null
+         * Upper Left Tooth 6 from the central axis, permanent dentition
          */
         _26, 
         /**
-         * null
+         * Upper Left Tooth 7 from the central axis, permanent dentition
          */
         _27, 
         /**
-         * null
+         * Upper Left Tooth 8 from the central axis, permanent dentition
          */
         _28, 
         /**
-         * null
+         * Lower Left Tooth 1 from the central axis, permanent dentition
          */
         _31, 
         /**
-         * null
+         * Lower Left Tooth 2 from the central axis, permanent dentition
          */
         _32, 
         /**
-         * null
+         * Lower Left Tooth 3 from the central axis, permanent dentition
          */
         _33, 
         /**
-         * null
+         * Lower Left Tooth 4 from the central axis, permanent dentition
          */
         _34, 
         /**
-         * null
+         * Lower Left Tooth 5 from the central axis, permanent dentition
          */
         _35, 
         /**
-         * null
+         * Lower Left Tooth 6 from the central axis, permanent dentition
          */
         _36, 
         /**
-         * null
+         * Lower Left Tooth 7 from the central axis, permanent dentition
          */
         _37, 
         /**
-         * null
+         * Lower Left Tooth 8 from the central axis, permanent dentition
          */
         _38, 
         /**
-         * null
+         * Lower Right Tooth 1 from the central axis, permanent dentition
          */
         _41, 
         /**
-         * null
+         * Lower Right Tooth 2 from the central axis, permanent dentition
          */
         _42, 
         /**
-         * null
+         * Lower Right Tooth 3 from the central axis, permanent dentition
          */
         _43, 
         /**
-         * null
+         * Lower Right Tooth 4 from the central axis, permanent dentition
          */
         _44, 
         /**
-         * null
+         * Lower Right Tooth 5 from the central axis, permanent dentition
          */
         _45, 
         /**
-         * null
+         * Lower Right Tooth 6 from the central axis, permanent dentition
          */
         _46, 
         /**
-         * null
+         * Lower Right Tooth 7 from the central axis, permanent dentition
          */
         _47, 
         /**
-         * null
+         * Lower Right Tooth 8 from the central axis, permanent dentition
          */
         _48, 
         /**
@@ -221,14 +217,12 @@ public enum Tooth {
           return _4;
         if ("5".equals(codeString))
           return _5;
-        if ("10".equals(codeString))
-          return _10;
-        if ("20".equals(codeString))
-          return _20;
-        if ("30".equals(codeString))
-          return _30;
-        if ("40".equals(codeString))
-          return _40;
+        if ("6".equals(codeString))
+          return _6;
+        if ("7".equals(codeString))
+          return _7;
+        if ("8".equals(codeString))
+          return _8;
         if ("11".equals(codeString))
           return _11;
         if ("12".equals(codeString))
@@ -303,10 +297,9 @@ public enum Tooth {
             case _3: return "3";
             case _4: return "4";
             case _5: return "5";
-            case _10: return "10";
-            case _20: return "20";
-            case _30: return "30";
-            case _40: return "40";
+            case _6: return "6";
+            case _7: return "7";
+            case _8: return "8";
             case _11: return "11";
             case _12: return "12";
             case _13: return "13";
@@ -348,47 +341,46 @@ public enum Tooth {
         public String getDefinition() {
           switch (this) {
             case _0: return "";
-            case _1: return "";
-            case _2: return "";
-            case _3: return "";
-            case _4: return "";
-            case _5: return "";
-            case _10: return "";
-            case _20: return "";
-            case _30: return "";
-            case _40: return "";
-            case _11: return "";
-            case _12: return "";
-            case _13: return "";
-            case _14: return "";
-            case _15: return "";
-            case _16: return "";
-            case _17: return "";
-            case _18: return "";
-            case _21: return "";
-            case _22: return "";
-            case _23: return "";
-            case _24: return "";
-            case _25: return "";
-            case _26: return "";
-            case _27: return "";
-            case _28: return "";
-            case _31: return "";
-            case _32: return "";
-            case _33: return "";
-            case _34: return "";
-            case _35: return "";
-            case _36: return "";
-            case _37: return "";
-            case _38: return "";
-            case _41: return "";
-            case _42: return "";
-            case _43: return "";
-            case _44: return "";
-            case _45: return "";
-            case _46: return "";
-            case _47: return "";
-            case _48: return "";
+            case _1: return "Permanent teeth Maxillary right";
+            case _2: return "Permanent teeth Maxillary Left";
+            case _3: return "Permanent teeth Mandibular right";
+            case _4: return "Permanent teeth Mandibular left";
+            case _5: return "Deciduous teeth Maxillary right";
+            case _6: return "Deciduous teeth Maxillary Left";
+            case _7: return "Deciduous teeth Mandibular right";
+            case _8: return "Deciduous teeth Mandibular left";
+            case _11: return "Upper Right Tooth 1 from the central axis, permanent dentition";
+            case _12: return "Upper Right Tooth 2 from the central axis, permanent dentition";
+            case _13: return "Upper Right Tooth 3 from the central axis, permanent dentition";
+            case _14: return "Upper Right Tooth 4 from the central axis, permanent dentition";
+            case _15: return "Upper Right Tooth 5 from the central axis, permanent dentition";
+            case _16: return "Upper Right Tooth 6 from the central axis, permanent dentition";
+            case _17: return "Upper Right Tooth 7 from the central axis, permanent dentition";
+            case _18: return "Upper Right Tooth 1 from the central axis, permanent dentition";
+            case _21: return "Upper Left Tooth 1 from the central axis, permanent dentition";
+            case _22: return "Upper Left Tooth 2 from the central axis, permanent dentition";
+            case _23: return "Upper Left Tooth 3 from the central axis, permanent dentition";
+            case _24: return "Upper Left Tooth 4 from the central axis, permanent dentition";
+            case _25: return "Upper Left Tooth 5 from the central axis, permanent dentition";
+            case _26: return "Upper Left Tooth 6 from the central axis, permanent dentition";
+            case _27: return "Upper Left Tooth 7 from the central axis, permanent dentition";
+            case _28: return "Upper Left Tooth 8 from the central axis, permanent dentition";
+            case _31: return "Lower Left Tooth 1 from the central axis, permanent dentition";
+            case _32: return "Lower Left Tooth 2 from the central axis, permanent dentition";
+            case _33: return "Lower Left Tooth 3 from the central axis, permanent dentition";
+            case _34: return "Lower Left Tooth 4 from the central axis, permanent dentition";
+            case _35: return "Lower Left Tooth 5 from the central axis, permanent dentition";
+            case _36: return "Lower Left Tooth 6 from the central axis, permanent dentition";
+            case _37: return "Lower Left Tooth 7 from the central axis, permanent dentition";
+            case _38: return "Lower Left Tooth 8 from the central axis, permanent dentition";
+            case _41: return "Lower Right Tooth 1 from the central axis, permanent dentition";
+            case _42: return "Lower Right Tooth 2 from the central axis, permanent dentition";
+            case _43: return "Lower Right Tooth 3 from the central axis, permanent dentition";
+            case _44: return "Lower Right Tooth 4 from the central axis, permanent dentition";
+            case _45: return "Lower Right Tooth 5 from the central axis, permanent dentition";
+            case _46: return "Lower Right Tooth 6 from the central axis, permanent dentition";
+            case _47: return "Lower Right Tooth 7 from the central axis, permanent dentition";
+            case _48: return "Lower Right Tooth 8 from the central axis, permanent dentition";
             default: return "?";
           }
         }
@@ -400,10 +392,9 @@ public enum Tooth {
             case _3: return "3";
             case _4: return "4";
             case _5: return "5";
-            case _10: return "10";
-            case _20: return "20";
-            case _30: return "30";
-            case _40: return "40";
+            case _6: return "6";
+            case _7: return "7";
+            case _8: return "8";
             case _11: return "11";
             case _12: return "12";
             case _13: return "13";

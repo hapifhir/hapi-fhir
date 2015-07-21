@@ -625,7 +625,7 @@ public class ProfileUtilities {
         if (derived.getComments().startsWith("..."))
           base.setComments(base.getComments()+"\r\n"+derived.getComments().substring(3));
         else if (!Base.compareDeep(derived.getCommentsElement(), base.getCommentsElement(), false))
-          derived.setCommentsElement(null);
+          base.setCommentsElement(derived.getCommentsElement().copy());
         else if (trimDifferential)
           base.setCommentsElement(derived.getCommentsElement().copy());
         else if (derived.hasCommentsElement()) 
@@ -636,7 +636,7 @@ public class ProfileUtilities {
         if (derived.getRequirements().startsWith("..."))
           base.setRequirements(base.getRequirements()+"\r\n"+derived.getRequirements().substring(3));
         else if (!Base.compareDeep(derived.getRequirementsElement(), base.getRequirementsElement(), false))
-          derived.setRequirementsElement(null);
+          base.setRequirementsElement(derived.getRequirementsElement().copy());
         else if (trimDifferential)
           base.setRequirementsElement(derived.getRequirementsElement().copy());
         else if (derived.hasRequirementsElement()) 

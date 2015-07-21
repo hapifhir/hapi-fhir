@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -70,22 +70,22 @@ public class Slot extends DomainResource {
         public static SlotStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("BUSY".equals(codeString))
+        if ("busy".equals(codeString))
           return BUSY;
-        if ("FREE".equals(codeString))
+        if ("free".equals(codeString))
           return FREE;
-        if ("BUSY-UNAVAILABLE".equals(codeString))
+        if ("busy-unavailable".equals(codeString))
           return BUSYUNAVAILABLE;
-        if ("BUSY-TENTATIVE".equals(codeString))
+        if ("busy-tentative".equals(codeString))
           return BUSYTENTATIVE;
         throw new Exception("Unknown SlotStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case BUSY: return "BUSY";
-            case FREE: return "FREE";
-            case BUSYUNAVAILABLE: return "BUSY-UNAVAILABLE";
-            case BUSYTENTATIVE: return "BUSY-TENTATIVE";
+            case BUSY: return "busy";
+            case FREE: return "free";
+            case BUSYUNAVAILABLE: return "busy-unavailable";
+            case BUSYTENTATIVE: return "busy-tentative";
             default: return "?";
           }
         }
@@ -109,10 +109,10 @@ public class Slot extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case BUSY: return "B U S Y";
-            case FREE: return "F R E E";
-            case BUSYUNAVAILABLE: return "B U S Y U N A V A I L A B L E";
-            case BUSYTENTATIVE: return "B U S Y T E N T A T I V E";
+            case BUSY: return "Busy";
+            case FREE: return "Free";
+            case BUSYUNAVAILABLE: return "Busy (Unavailable)";
+            case BUSYTENTATIVE: return "Busy (Tentative)";
             default: return "?";
           }
         }
@@ -123,25 +123,25 @@ public class Slot extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("BUSY".equals(codeString))
+        if ("busy".equals(codeString))
           return SlotStatus.BUSY;
-        if ("FREE".equals(codeString))
+        if ("free".equals(codeString))
           return SlotStatus.FREE;
-        if ("BUSY-UNAVAILABLE".equals(codeString))
+        if ("busy-unavailable".equals(codeString))
           return SlotStatus.BUSYUNAVAILABLE;
-        if ("BUSY-TENTATIVE".equals(codeString))
+        if ("busy-tentative".equals(codeString))
           return SlotStatus.BUSYTENTATIVE;
         throw new IllegalArgumentException("Unknown SlotStatus code '"+codeString+"'");
         }
     public String toCode(SlotStatus code) {
       if (code == SlotStatus.BUSY)
-        return "BUSY";
+        return "busy";
       if (code == SlotStatus.FREE)
-        return "FREE";
+        return "free";
       if (code == SlotStatus.BUSYUNAVAILABLE)
-        return "BUSY-UNAVAILABLE";
+        return "busy-unavailable";
       if (code == SlotStatus.BUSYTENTATIVE)
-        return "BUSY-TENTATIVE";
+        return "busy-tentative";
       return "?";
       }
     }
@@ -173,10 +173,10 @@ public class Slot extends DomainResource {
     protected Schedule scheduleTarget;
 
     /**
-     * BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.
+     * busy | free | busy-unavailable | busy-tentative.
      */
     @Child(name = "freeBusyType", type = {CodeType.class}, order=3, min=1, max=1)
-    @Description(shortDefinition="BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE", formalDefinition="BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE." )
+    @Description(shortDefinition="busy | free | busy-unavailable | busy-tentative", formalDefinition="busy | free | busy-unavailable | busy-tentative." )
     protected Enumeration<SlotStatus> freeBusyType;
 
     /**
@@ -336,7 +336,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return {@link #freeBusyType} (BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.). This is the underlying object with id, value and extensions. The accessor "getFreeBusyType" gives direct access to the value
+     * @return {@link #freeBusyType} (busy | free | busy-unavailable | busy-tentative.). This is the underlying object with id, value and extensions. The accessor "getFreeBusyType" gives direct access to the value
      */
     public Enumeration<SlotStatus> getFreeBusyTypeElement() { 
       if (this.freeBusyType == null)
@@ -356,7 +356,7 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @param value {@link #freeBusyType} (BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.). This is the underlying object with id, value and extensions. The accessor "getFreeBusyType" gives direct access to the value
+     * @param value {@link #freeBusyType} (busy | free | busy-unavailable | busy-tentative.). This is the underlying object with id, value and extensions. The accessor "getFreeBusyType" gives direct access to the value
      */
     public Slot setFreeBusyTypeElement(Enumeration<SlotStatus> value) { 
       this.freeBusyType = value;
@@ -364,14 +364,14 @@ public class Slot extends DomainResource {
     }
 
     /**
-     * @return BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.
+     * @return busy | free | busy-unavailable | busy-tentative.
      */
     public SlotStatus getFreeBusyType() { 
       return this.freeBusyType == null ? null : this.freeBusyType.getValue();
     }
 
     /**
-     * @param value BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.
+     * @param value busy | free | busy-unavailable | busy-tentative.
      */
     public Slot setFreeBusyType(SlotStatus value) { 
         if (this.freeBusyType == null)
@@ -569,7 +569,7 @@ public class Slot extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "External Ids for this item.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "CodeableConcept", "The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("schedule", "Reference(Schedule)", "The schedule resource that this slot defines an interval of status information.", 0, java.lang.Integer.MAX_VALUE, schedule));
-        childrenList.add(new Property("freeBusyType", "code", "BUSY | FREE | BUSY-UNAVAILABLE | BUSY-TENTATIVE.", 0, java.lang.Integer.MAX_VALUE, freeBusyType));
+        childrenList.add(new Property("freeBusyType", "code", "busy | free | busy-unavailable | busy-tentative.", 0, java.lang.Integer.MAX_VALUE, freeBusyType));
         childrenList.add(new Property("start", "instant", "Date/Time that the slot is to begin.", 0, java.lang.Integer.MAX_VALUE, start));
         childrenList.add(new Property("end", "instant", "Date/Time that the slot is to conclude.", 0, java.lang.Integer.MAX_VALUE, end));
         childrenList.add(new Property("overbooked", "boolean", "This slot has already been overbooked, appointments are unlikely to be accepted for this time.", 0, java.lang.Integer.MAX_VALUE, overbooked));

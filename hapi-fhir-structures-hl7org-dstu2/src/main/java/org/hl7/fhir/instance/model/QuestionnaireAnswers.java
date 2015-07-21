@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -100,9 +100,9 @@ public class QuestionnaireAnswers extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case INPROGRESS: return "in-progress";
-            case COMPLETED: return "completed";
-            case AMENDED: return "amended";
+            case INPROGRESS: return "In Progress";
+            case COMPLETED: return "Completed";
+            case AMENDED: return "Amended";
             default: return "?";
           }
         }

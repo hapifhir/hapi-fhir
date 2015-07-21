@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Goal"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -314,19 +314,19 @@
   <publisher value="Health Level Seven International (Patient Care)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Goal Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -338,13 +338,12 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Goal"/>
-      <short value="Describes the intended objective(s) of patient care"/>
+      <short value="Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc."/>
       <definition value="Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc."/>
-      <comments value="Goal can be achieving a particular change or merely maintaining a current state or even slowing a decline."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -361,9 +360,8 @@
     </element>
     <element>
       <path value="Goal.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -372,7 +370,7 @@
     </element>
     <element>
       <path value="Goal.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -382,9 +380,8 @@
     </element>
     <element>
       <path value="Goal.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -394,11 +391,8 @@
     </element>
     <element>
       <path value="Goal.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -412,9 +406,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -432,9 +425,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -450,9 +442,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -467,9 +458,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -485,7 +475,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.identifier"/>
-      <short value="External Ids for this goal"/>
+      <short value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <definition value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <requirements value="Need to allow connection to a wider workflow."/>
       <min value="0"/>
@@ -500,7 +490,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.patient"/>
-      <short value="The patient for whom this goal is intended for"/>
+      <short value="Identifies the patient/subject whose intended care is described by the plan."/>
       <definition value="Identifies the patient/subject whose intended care is described by the plan."/>
       <requirements value="Goals are associated with a patient."/>
       <min value="0"/>
@@ -521,7 +511,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.targetDate"/>
-      <short value="Reach goal on or before"/>
+      <short value="Indicates when the goal is intended to be reached."/>
       <definition value="Indicates when the goal is intended to be reached."/>
       <requirements value="Identifies when the goal should be evaluated."/>
       <min value="0"/>
@@ -533,7 +523,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.description"/>
-      <short value="What&#39;s the desired outcome?"/>
+      <short value="Human-readable description of a specific desired objective of care."/>
       <definition value="Human-readable description of a specific desired objective of care."/>
       <requirements value="Without a description of what&#39;s trying to be achieved, element has no purpose."/>
       <min value="1"/>
@@ -553,7 +543,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.status"/>
-      <short value="proposed | planned | in-progress | achieved | sustaining | cancelled | accepted | rejected"/>
+      <short value="Indicates whether the goal has been reached and is still considered relevant."/>
       <definition value="Indicates whether the goal has been reached and is still considered relevant."/>
       <requirements value="Allows measuring outcome and whether goal needs to be further tracked."/>
       <min value="1"/>
@@ -576,14 +566,17 @@ Not all the content has to be in the base language. The Resource.language should
       </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value=".statusCodein-progress = active (classCode = OBJ)achieved = completesustaining = active (classCode=OBJC)cancelled = aborted"/>
+        <map value=".statusCode
+in-progress = active (classCode = OBJ)
+achieved = complete
+sustaining = active (classCode=OBJC)
+cancelled = aborted"/>
       </mapping>
     </element>
     <element>
       <path value="Goal.statusDate"/>
-      <short value="When goal status took effect"/>
+      <short value="Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc."/>
       <definition value="Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc."/>
-      <comments value="To see the date for past statuses, query history."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -593,7 +586,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.author"/>
-      <short value="Who&#39;s responsible for creating Goal?"/>
+      <short value="Indicates whose goal this is - patient goal, practitioner goal, etc."/>
       <definition value="Indicates whose goal this is - patient goal, practitioner goal, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -613,7 +606,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.priority"/>
-      <short value="high | medium |low"/>
+      <short value="Identifies the level of importance associated with reaching/sustaining the goal."/>
       <definition value="Identifies the level of importance associated with reaching/sustaining the goal."/>
       <min value="0"/>
       <max value="1"/>
@@ -635,7 +628,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.concern"/>
-      <short value="Health issues this goal addresses"/>
+      <short value="The identified conditions and other health record elements that are intended to be addressed by the goal."/>
       <definition value="The identified conditions and other health record elements that are intended to be addressed by the goal."/>
       <requirements value="Allows specific goals to explicitly linked to the concerns they&#39;re dealing with - makes the goal more understandable."/>
       <min value="0"/>
@@ -671,9 +664,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.notes"/>
-      <short value="Comments about the goal"/>
+      <short value="Any comments related to the goal."/>
       <definition value="Any comments related to the goal."/>
-      <comments value="May be used for progress notes, concerns or other related information that doesn&#39;t actually describe the goal itself."/>
       <requirements value="There&#39;s a need to capture information about the goal that doesn&#39;t actually describe the goal."/>
       <min value="0"/>
       <max value="1"/>
@@ -691,9 +683,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.outcome"/>
-      <short value="What was end result of goal?"/>
+      <short value="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved."/>
       <definition value="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved."/>
-      <comments value="Note that this should not duplicate the goal status."/>
       <requirements value="Outcome tracking is a key aspect of care planning."/>
       <min value="0"/>
       <max value="*"/>
@@ -704,7 +695,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Goal.outcome.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -718,9 +709,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.outcome.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -735,9 +725,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.outcome.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -754,7 +743,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.outcome.result[x]"/>
-      <short value="Code or observation that resulted from gual"/>
+      <short value="Details of what&#39;s changed (or not changed)."/>
       <definition value="Details of what&#39;s changed (or not changed)."/>
       <min value="0"/>
       <max value="1"/>
@@ -774,9 +763,8 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="Goal"/>
-      <short value="Describes the intended objective(s) of patient care"/>
+      <short value="Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc."/>
       <definition value="Describes the intended objective(s) of patient care, for example, weight loss, restoring an activity of daily living, etc."/>
-      <comments value="Goal can be achieving a particular change or merely maintaining a current state or even slowing a decline."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -793,7 +781,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.identifier"/>
-      <short value="External Ids for this goal"/>
+      <short value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <definition value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <requirements value="Need to allow connection to a wider workflow."/>
       <min value="0"/>
@@ -808,7 +796,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.patient"/>
-      <short value="The patient for whom this goal is intended for"/>
+      <short value="Identifies the patient/subject whose intended care is described by the plan."/>
       <definition value="Identifies the patient/subject whose intended care is described by the plan."/>
       <requirements value="Goals are associated with a patient."/>
       <min value="0"/>
@@ -829,7 +817,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.targetDate"/>
-      <short value="Reach goal on or before"/>
+      <short value="Indicates when the goal is intended to be reached."/>
       <definition value="Indicates when the goal is intended to be reached."/>
       <requirements value="Identifies when the goal should be evaluated."/>
       <min value="0"/>
@@ -841,7 +829,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.description"/>
-      <short value="What&#39;s the desired outcome?"/>
+      <short value="Human-readable description of a specific desired objective of care."/>
       <definition value="Human-readable description of a specific desired objective of care."/>
       <requirements value="Without a description of what&#39;s trying to be achieved, element has no purpose."/>
       <min value="1"/>
@@ -861,7 +849,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.status"/>
-      <short value="proposed | planned | in-progress | achieved | sustaining | cancelled | accepted | rejected"/>
+      <short value="Indicates whether the goal has been reached and is still considered relevant."/>
       <definition value="Indicates whether the goal has been reached and is still considered relevant."/>
       <requirements value="Allows measuring outcome and whether goal needs to be further tracked."/>
       <min value="1"/>
@@ -884,14 +872,17 @@ Not all the content has to be in the base language. The Resource.language should
       </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value=".statusCodein-progress = active (classCode = OBJ)achieved = completesustaining = active (classCode=OBJC)cancelled = aborted"/>
+        <map value=".statusCode
+in-progress = active (classCode = OBJ)
+achieved = complete
+sustaining = active (classCode=OBJC)
+cancelled = aborted"/>
       </mapping>
     </element>
     <element>
       <path value="Goal.statusDate"/>
-      <short value="When goal status took effect"/>
+      <short value="Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc."/>
       <definition value="Identifies when the current status.  I.e. When initially created, when achieved, when cancelled, etc."/>
-      <comments value="To see the date for past statuses, query history."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -901,7 +892,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.author"/>
-      <short value="Who&#39;s responsible for creating Goal?"/>
+      <short value="Indicates whose goal this is - patient goal, practitioner goal, etc."/>
       <definition value="Indicates whose goal this is - patient goal, practitioner goal, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -921,7 +912,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.priority"/>
-      <short value="high | medium |low"/>
+      <short value="Identifies the level of importance associated with reaching/sustaining the goal."/>
       <definition value="Identifies the level of importance associated with reaching/sustaining the goal."/>
       <min value="0"/>
       <max value="1"/>
@@ -943,7 +934,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.concern"/>
-      <short value="Health issues this goal addresses"/>
+      <short value="The identified conditions and other health record elements that are intended to be addressed by the goal."/>
       <definition value="The identified conditions and other health record elements that are intended to be addressed by the goal."/>
       <requirements value="Allows specific goals to explicitly linked to the concerns they&#39;re dealing with - makes the goal more understandable."/>
       <min value="0"/>
@@ -979,9 +970,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.notes"/>
-      <short value="Comments about the goal"/>
+      <short value="Any comments related to the goal."/>
       <definition value="Any comments related to the goal."/>
-      <comments value="May be used for progress notes, concerns or other related information that doesn&#39;t actually describe the goal itself."/>
       <requirements value="There&#39;s a need to capture information about the goal that doesn&#39;t actually describe the goal."/>
       <min value="0"/>
       <max value="1"/>
@@ -999,16 +989,15 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Goal.outcome"/>
-      <short value="What was end result of goal?"/>
+      <short value="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved."/>
       <definition value="Identifies the change (or lack of change) at the point where the goal was deepmed to be cancelled or achieved."/>
-      <comments value="Note that this should not duplicate the goal status."/>
       <requirements value="Outcome tracking is a key aspect of care planning."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Goal.outcome.result[x]"/>
-      <short value="Code or observation that resulted from gual"/>
+      <short value="Details of what&#39;s changed (or not changed)."/>
       <definition value="Details of what&#39;s changed (or not changed)."/>
       <min value="0"/>
       <max value="1"/>

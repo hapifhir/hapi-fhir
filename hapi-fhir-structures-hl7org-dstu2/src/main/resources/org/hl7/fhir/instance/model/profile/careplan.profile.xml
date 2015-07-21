@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="CarePlan"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -772,19 +772,19 @@
   <publisher value="Health Level Seven International (Patient Care)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for CarePlan Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -796,11 +796,11 @@
     <name value="HL7 v2"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="CarePlan"/>
-      <short value="Healthcare plan for patient"/>
+      <short value="Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions."/>
       <definition value="Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions."/>
       <alias value="Care Team"/>
       <min value="1"/>
@@ -815,9 +815,8 @@
     </element>
     <element>
       <path value="CarePlan.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -826,7 +825,7 @@
     </element>
     <element>
       <path value="CarePlan.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -836,9 +835,8 @@
     </element>
     <element>
       <path value="CarePlan.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -848,11 +846,8 @@
     </element>
     <element>
       <path value="CarePlan.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -866,9 +861,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -886,9 +880,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -904,9 +897,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -921,9 +913,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -939,7 +930,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.identifier"/>
-      <short value="External Ids for this plan"/>
+      <short value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <definition value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <requirements value="Need to allow connection to a wider workflow."/>
       <min value="0"/>
@@ -955,7 +946,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.patient"/>
-      <short value="Who care plan is for"/>
+      <short value="Identifies the patient/subject whose intended care is described by the plan."/>
       <definition value="Identifies the patient/subject whose intended care is described by the plan."/>
       <requirements value="Care plans are associated with the patient the plan is for."/>
       <min value="0"/>
@@ -976,7 +967,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="CarePlan.status"/>
-      <short value="planned | active | completed"/>
+      <short value="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record."/>
       <definition value="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record."/>
       <requirements value="Allows clinicians to determine whether the plan is actionable or not."/>
       <min value="1"/>
@@ -1007,9 +998,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.period"/>
-      <short value="Time period plan covers"/>
+      <short value="Indicates when the plan did (or is intended to) come into effect and end."/>
       <definition value="Indicates when the plan did (or is intended to) come into effect and end."/>
-      <comments value="Any activities scheduled as part of the plan should be constrained to the specified period."/>
       <requirements value="Allows tracking what plan(s) are in effect at a particular time."/>
       <min value="0"/>
       <max value="1"/>
@@ -1028,9 +1018,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.author"/>
-      <short value="Who is responsible for plan"/>
+      <short value="Identifies the individual(s) or ogranization who is responsible for the content of the care plan."/>
       <definition value="Identifies the individual(s) or ogranization who is responsible for the content of the care plan."/>
-      <comments value="Collaborative care plans may have multiple authors."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1053,7 +1042,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.modified"/>
-      <short value="When last updated"/>
+      <short value="Identifies the most recent date on which the plan has been revised."/>
       <definition value="Identifies the most recent date on which the plan has been revised."/>
       <requirements value="Indicates how current the plan is."/>
       <min value="0"/>
@@ -1073,9 +1062,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.category"/>
-      <short value="Type of plan"/>
+      <short value="Identifies what &quot;kind&quot; of plan this is to support differentiation between multiple co-existing plans.  E.g. &quot;Home health&quot;, &quot;psychiatric&quot;, &quot;asthma&quot;, &quot;disease management&quot;, etc."/>
       <definition value="Identifies what &quot;kind&quot; of plan this is to support differentiation between multiple co-existing plans.  E.g. &quot;Home health&quot;, &quot;psychiatric&quot;, &quot;asthma&quot;, &quot;disease management&quot;, etc."/>
-      <comments value="There may be multiple axis of categorization and one plan may serve multiple purposes.  In some cases, this may be redundant with references to CarePlan.concern."/>
       <requirements value="Used for filtering what plan(s) are retrieved and displayed to different types of users."/>
       <min value="0"/>
       <max value="*"/>
@@ -1090,7 +1078,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.concern"/>
-      <short value="Health issues this plan addresses"/>
+      <short value="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan."/>
       <definition value="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan."/>
       <requirements value="Links plan to the conditions it manages.  Also scopes plans - multiple plans may exist addressing different concerns."/>
       <min value="0"/>
@@ -1111,9 +1099,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.support"/>
-      <short value="Information considered as part of plan"/>
+      <short value="Identifies portions of the patient&#39;s record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc."/>
       <definition value="Identifies portions of the patient&#39;s record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc."/>
-      <comments value="Use &quot;concern&quot; to identify specific conditions addressed by the care plan."/>
       <requirements value="Identifies barriers and other considerations associated with the care plan."/>
       <min value="0"/>
       <max value="*"/>
@@ -1124,7 +1111,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant"/>
-      <short value="Who&#39;s involved in plan?"/>
+      <short value="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan."/>
       <definition value="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan."/>
       <requirements value="Allows representation of care teams, helps scope care plan.  In some cases may be a determiner of access permissions."/>
       <alias value="Care Team"/>
@@ -1145,7 +1132,7 @@ completed = completed"/>
     <element>
       <path value="CarePlan.participant.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1159,9 +1146,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1176,9 +1162,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1195,9 +1180,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant.role"/>
-      <short value="Type of involvement"/>
+      <short value="Indicates specific responsibility of an individual within the care plan.  E.g. &quot;Primary physician&quot;, &quot;Team coordinator&quot;, &quot;Caregiver&quot;, etc."/>
       <definition value="Indicates specific responsibility of an individual within the care plan.  E.g. &quot;Primary physician&quot;, &quot;Team coordinator&quot;, &quot;Caregiver&quot;, etc."/>
-      <comments value="Roles may sometimes be inferred by type of Practitioner.  These are relationships that hold only within the context of the care plan.  General relationships should be handled as properties of the Patient resource directly."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1218,9 +1202,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant.member"/>
-      <short value="Who is involved"/>
+      <short value="The specific person or organization who is participating/expected to participate in the care plan."/>
       <definition value="The specific person or organization who is participating/expected to participate in the care plan."/>
-      <comments value="Patient only needs to be listed if they have a role other than &quot;subject of care&quot;."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1250,9 +1233,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.goal"/>
-      <short value="Desired outcome of plan"/>
+      <short value="Describes the intended objective(s) of carrying out the Care Plan."/>
       <definition value="Describes the intended objective(s) of carrying out the Care Plan."/>
-      <comments value="Goal can be achieving a particular change or merely maintaining a current state or even slowing a decline."/>
       <requirements value="Provides context for plan.  Allows plan effectiveness to be evaluated by clinicians."/>
       <min value="0"/>
       <max value="*"/>
@@ -1271,7 +1253,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity"/>
-      <short value="Action to occur as part of plan"/>
+      <short value="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc."/>
       <definition value="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc."/>
       <requirements value="Allows systems to prompt for performance of planned activities, validate plans against best practice."/>
       <min value="0"/>
@@ -1287,7 +1269,7 @@ completed = completed"/>
     <element>
       <path value="CarePlan.activity.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1301,9 +1283,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1318,9 +1299,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1337,7 +1317,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.actionResulting"/>
-      <short value="Appointments, orders, etc."/>
+      <short value="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc."/>
       <definition value="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc."/>
       <requirements value="Links plan to resulting actions."/>
       <min value="0"/>
@@ -1353,9 +1333,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.notes"/>
-      <short value="Comments about the activity"/>
+      <short value="Notes about the execution of the activity."/>
       <definition value="Notes about the execution of the activity."/>
-      <comments value="Doesn&#39;t describe the activity - that goes in details."/>
       <requirements value="Can be used to capture information about adherence, progress, concerns, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -1373,7 +1352,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.reference"/>
-      <short value="Activity details defined in specific resource"/>
+      <short value="The details of the proposed activity represented in a specific resource."/>
       <definition value="The details of the proposed activity represented in a specific resource."/>
       <requirements value="Details in a form consistent with other applications and contexts of use."/>
       <min value="0"/>
@@ -1434,7 +1413,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail"/>
-      <short value="In-line definition of activity"/>
+      <short value="A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn&#39;t know about specific resources such as procedure etc."/>
       <definition value="A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn&#39;t know about specific resources such as procedure etc."/>
       <requirements value="Details in a simple form for generic care plan systems."/>
       <min value="0"/>
@@ -1469,7 +1448,7 @@ completed = completed"/>
     <element>
       <path value="CarePlan.activity.detail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1483,9 +1462,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1500,9 +1478,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1519,7 +1496,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.category"/>
-      <short value="diet | drug | encounter | observation | procedure | supply | other"/>
+      <short value="High-level categorization of the type of activity in a care plan."/>
       <definition value="High-level categorization of the type of activity in a care plan."/>
       <requirements value="May determine what types of extensions are permitted."/>
       <min value="1"/>
@@ -1541,9 +1518,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.code"/>
-      <short value="Detail type of activity"/>
+      <short value="Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter."/>
       <definition value="Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter."/>
-      <comments value="Tends to be less relevant for activities involving particular products.  Codes should not convey negation - use &quot;prohibited&quot; instead."/>
       <requirements value="Allows matching performed to planned as well as validation against protocols."/>
       <min value="0"/>
       <max value="1"/>
@@ -1565,9 +1541,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.reason[x]"/>
-      <short value="Why activity should be done"/>
+      <short value="Provides the health condition(s) or other rationale that drove the inclusion of this particular activity as part of the plan."/>
       <definition value="Provides the health condition(s) or other rationale that drove the inclusion of this particular activity as part of the plan."/>
-      <comments value="Conditions can be identified at the activity level that are not identified as reasons for the overall plan."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1584,7 +1559,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.goal"/>
-      <short value="Goals this activity relates to"/>
+      <short value="Internal reference that identifies the goals that this activity is intended to contribute towards meeting."/>
       <definition value="Internal reference that identifies the goals that this activity is intended to contribute towards meeting."/>
       <requirements value="So that participants know the link explicitly."/>
       <min value="0"/>
@@ -1600,9 +1575,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.status"/>
-      <short value="not-started | scheduled | in-progress | on-hold | completed | cancelled"/>
+      <short value="Identifies what progress is being made for the specific activity."/>
       <definition value="Identifies what progress is being made for the specific activity."/>
-      <comments value="Some aspects of Status can be inferred based on the resources linked in actionTaken.  Note that &quot;status&quot; is only as current as the plan was most recently updated."/>
       <requirements value="Indicates progress against the plan, whether the activity is still relevant for the plan."/>
       <min value="0"/>
       <max value="1"/>
@@ -1634,9 +1608,8 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.statusReason"/>
-      <short value="Reason for current status"/>
+      <short value="Provides reason why the activity isn&#39;t yet started, is on hold, was cancelled, etc."/>
       <definition value="Provides reason why the activity isn&#39;t yet started, is on hold, was cancelled, etc."/>
-      <comments value="Will generally not be present it status is &quot;complete&quot;.  Be sure to prompt to update this (or at least remove the existing value) if the status is changed."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1649,7 +1622,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.prohibited"/>
-      <short value="Do NOT do"/>
+      <short value="If true, indicates that the described activity is one that must NOT be engaged in when following the plan."/>
       <definition value="If true, indicates that the described activity is one that must NOT be engaged in when following the plan."/>
       <requirements value="Captures intention to not do something that may have been previously typical."/>
       <min value="1"/>
@@ -1665,7 +1638,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.scheduled[x]"/>
-      <short value="When activity is to occur"/>
+      <short value="The period, timing or frequency upon which the described activity is to occur."/>
       <definition value="The period, timing or frequency upon which the described activity is to occur."/>
       <requirements value="Allows prompting for activities and detection of missed planned activities."/>
       <min value="0"/>
@@ -1690,9 +1663,8 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.location"/>
-      <short value="Where it should happen"/>
+      <short value="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc."/>
       <definition value="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc."/>
-      <comments value="May reference a specific clinical location or may just identify a type of location."/>
       <requirements value="Helps in planning of activity."/>
       <min value="0"/>
       <max value="1"/>
@@ -1711,9 +1683,8 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.performer"/>
-      <short value="Who will be responsible?"/>
+      <short value="Identifies who&#39;s expected to be involved in the activity."/>
       <definition value="Identifies who&#39;s expected to be involved in the activity."/>
-      <comments value="A performer MAY also be a participant in the care plan."/>
       <requirements value="Helps in planning of activity."/>
       <min value="0"/>
       <max value="*"/>
@@ -1744,7 +1715,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.product"/>
-      <short value="What is to be administered/supplied"/>
+      <short value="Identifies the food, drug or other product to be consumed or supplied in the activity."/>
       <definition value="Identifies the food, drug or other product to be consumed or supplied in the activity."/>
       <min value="0"/>
       <max value="1"/>
@@ -1767,7 +1738,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.dailyAmount"/>
-      <short value="How to consume/day?"/>
+      <short value="Identifies the quantity expected to be consumed in a given day."/>
       <definition value="Identifies the quantity expected to be consumed in a given day."/>
       <requirements value="Allows rough dose checking."/>
       <alias value="daily dose"/>
@@ -1788,7 +1759,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.quantity"/>
-      <short value="How much to administer/supply/consume"/>
+      <short value="Identifies the quantity expected to be supplied, addministered or consumed by the subject."/>
       <definition value="Identifies the quantity expected to be supplied, addministered or consumed by the subject."/>
       <min value="0"/>
       <max value="1"/>
@@ -1807,7 +1778,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.note"/>
-      <short value="Extra info on activity occurrence"/>
+      <short value="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc."/>
       <definition value="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -1825,7 +1796,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.notes"/>
-      <short value="Comments about the plan"/>
+      <short value="General notes about the care plan not covered elsewhere."/>
       <definition value="General notes about the care plan not covered elsewhere."/>
       <requirements value="Used to capture information that applies to the plan as a whole that doesn&#39;t fit into discrete elements."/>
       <min value="0"/>
@@ -1846,7 +1817,7 @@ cancelled = aborted"/>
   <differential>
     <element>
       <path value="CarePlan"/>
-      <short value="Healthcare plan for patient"/>
+      <short value="Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions."/>
       <definition value="Describes the intention of how one or more practitioners intend to deliver care for a particular patient for a period of time, possibly limited to care for a specific condition or set of conditions."/>
       <alias value="Care Team"/>
       <min value="1"/>
@@ -1861,7 +1832,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.identifier"/>
-      <short value="External Ids for this plan"/>
+      <short value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <definition value="This records identifiers associated with this care plan that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)."/>
       <requirements value="Need to allow connection to a wider workflow."/>
       <min value="0"/>
@@ -1877,7 +1848,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.patient"/>
-      <short value="Who care plan is for"/>
+      <short value="Identifies the patient/subject whose intended care is described by the plan."/>
       <definition value="Identifies the patient/subject whose intended care is described by the plan."/>
       <requirements value="Care plans are associated with the patient the plan is for."/>
       <min value="0"/>
@@ -1898,7 +1869,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.status"/>
-      <short value="planned | active | completed"/>
+      <short value="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record."/>
       <definition value="Indicates whether the plan is currently being acted upon, represents future intentions or is now just historical record."/>
       <requirements value="Allows clinicians to determine whether the plan is actionable or not."/>
       <min value="1"/>
@@ -1929,9 +1900,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.period"/>
-      <short value="Time period plan covers"/>
+      <short value="Indicates when the plan did (or is intended to) come into effect and end."/>
       <definition value="Indicates when the plan did (or is intended to) come into effect and end."/>
-      <comments value="Any activities scheduled as part of the plan should be constrained to the specified period."/>
       <requirements value="Allows tracking what plan(s) are in effect at a particular time."/>
       <min value="0"/>
       <max value="1"/>
@@ -1950,9 +1920,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.author"/>
-      <short value="Who is responsible for plan"/>
+      <short value="Identifies the individual(s) or ogranization who is responsible for the content of the care plan."/>
       <definition value="Identifies the individual(s) or ogranization who is responsible for the content of the care plan."/>
-      <comments value="Collaborative care plans may have multiple authors."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1975,7 +1944,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.modified"/>
-      <short value="When last updated"/>
+      <short value="Identifies the most recent date on which the plan has been revised."/>
       <definition value="Identifies the most recent date on which the plan has been revised."/>
       <requirements value="Indicates how current the plan is."/>
       <min value="0"/>
@@ -1995,9 +1964,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.category"/>
-      <short value="Type of plan"/>
+      <short value="Identifies what &quot;kind&quot; of plan this is to support differentiation between multiple co-existing plans.  E.g. &quot;Home health&quot;, &quot;psychiatric&quot;, &quot;asthma&quot;, &quot;disease management&quot;, etc."/>
       <definition value="Identifies what &quot;kind&quot; of plan this is to support differentiation between multiple co-existing plans.  E.g. &quot;Home health&quot;, &quot;psychiatric&quot;, &quot;asthma&quot;, &quot;disease management&quot;, etc."/>
-      <comments value="There may be multiple axis of categorization and one plan may serve multiple purposes.  In some cases, this may be redundant with references to CarePlan.concern."/>
       <requirements value="Used for filtering what plan(s) are retrieved and displayed to different types of users."/>
       <min value="0"/>
       <max value="*"/>
@@ -2012,7 +1980,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.concern"/>
-      <short value="Health issues this plan addresses"/>
+      <short value="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan."/>
       <definition value="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan."/>
       <requirements value="Links plan to the conditions it manages.  Also scopes plans - multiple plans may exist addressing different concerns."/>
       <min value="0"/>
@@ -2033,9 +2001,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.support"/>
-      <short value="Information considered as part of plan"/>
+      <short value="Identifies portions of the patient&#39;s record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc."/>
       <definition value="Identifies portions of the patient&#39;s record that specifically influenced the formation of the plan.  These might include co-morbidities, recent procedures, limitations, recent assessments, etc."/>
-      <comments value="Use &quot;concern&quot; to identify specific conditions addressed by the care plan."/>
       <requirements value="Identifies barriers and other considerations associated with the care plan."/>
       <min value="0"/>
       <max value="*"/>
@@ -2046,7 +2013,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant"/>
-      <short value="Who&#39;s involved in plan?"/>
+      <short value="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan."/>
       <definition value="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan."/>
       <requirements value="Allows representation of care teams, helps scope care plan.  In some cases may be a determiner of access permissions."/>
       <alias value="Care Team"/>
@@ -2063,9 +2030,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant.role"/>
-      <short value="Type of involvement"/>
+      <short value="Indicates specific responsibility of an individual within the care plan.  E.g. &quot;Primary physician&quot;, &quot;Team coordinator&quot;, &quot;Caregiver&quot;, etc."/>
       <definition value="Indicates specific responsibility of an individual within the care plan.  E.g. &quot;Primary physician&quot;, &quot;Team coordinator&quot;, &quot;Caregiver&quot;, etc."/>
-      <comments value="Roles may sometimes be inferred by type of Practitioner.  These are relationships that hold only within the context of the care plan.  General relationships should be handled as properties of the Patient resource directly."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2086,9 +2052,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.participant.member"/>
-      <short value="Who is involved"/>
+      <short value="The specific person or organization who is participating/expected to participate in the care plan."/>
       <definition value="The specific person or organization who is participating/expected to participate in the care plan."/>
-      <comments value="Patient only needs to be listed if they have a role other than &quot;subject of care&quot;."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -2118,9 +2083,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.goal"/>
-      <short value="Desired outcome of plan"/>
+      <short value="Describes the intended objective(s) of carrying out the Care Plan."/>
       <definition value="Describes the intended objective(s) of carrying out the Care Plan."/>
-      <comments value="Goal can be achieving a particular change or merely maintaining a current state or even slowing a decline."/>
       <requirements value="Provides context for plan.  Allows plan effectiveness to be evaluated by clinicians."/>
       <min value="0"/>
       <max value="*"/>
@@ -2139,7 +2103,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity"/>
-      <short value="Action to occur as part of plan"/>
+      <short value="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc."/>
       <definition value="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc."/>
       <requirements value="Allows systems to prompt for performance of planned activities, validate plans against best practice."/>
       <min value="0"/>
@@ -2151,7 +2115,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.actionResulting"/>
-      <short value="Appointments, orders, etc."/>
+      <short value="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc."/>
       <definition value="Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc."/>
       <requirements value="Links plan to resulting actions."/>
       <min value="0"/>
@@ -2167,9 +2131,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.notes"/>
-      <short value="Comments about the activity"/>
+      <short value="Notes about the execution of the activity."/>
       <definition value="Notes about the execution of the activity."/>
-      <comments value="Doesn&#39;t describe the activity - that goes in details."/>
       <requirements value="Can be used to capture information about adherence, progress, concerns, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -2187,7 +2150,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.reference"/>
-      <short value="Activity details defined in specific resource"/>
+      <short value="The details of the proposed activity represented in a specific resource."/>
       <definition value="The details of the proposed activity represented in a specific resource."/>
       <requirements value="Details in a form consistent with other applications and contexts of use."/>
       <min value="0"/>
@@ -2248,7 +2211,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail"/>
-      <short value="In-line definition of activity"/>
+      <short value="A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn&#39;t know about specific resources such as procedure etc."/>
       <definition value="A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn&#39;t know about specific resources such as procedure etc."/>
       <requirements value="Details in a simple form for generic care plan systems."/>
       <min value="0"/>
@@ -2279,7 +2242,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.category"/>
-      <short value="diet | drug | encounter | observation | procedure | supply | other"/>
+      <short value="High-level categorization of the type of activity in a care plan."/>
       <definition value="High-level categorization of the type of activity in a care plan."/>
       <requirements value="May determine what types of extensions are permitted."/>
       <min value="1"/>
@@ -2301,9 +2264,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.code"/>
-      <short value="Detail type of activity"/>
+      <short value="Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter."/>
       <definition value="Detailed description of the type of planned activity.  E.g. What lab test, what procedure, what kind of encounter."/>
-      <comments value="Tends to be less relevant for activities involving particular products.  Codes should not convey negation - use &quot;prohibited&quot; instead."/>
       <requirements value="Allows matching performed to planned as well as validation against protocols."/>
       <min value="0"/>
       <max value="1"/>
@@ -2325,9 +2287,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.reason[x]"/>
-      <short value="Why activity should be done"/>
+      <short value="Provides the health condition(s) or other rationale that drove the inclusion of this particular activity as part of the plan."/>
       <definition value="Provides the health condition(s) or other rationale that drove the inclusion of this particular activity as part of the plan."/>
-      <comments value="Conditions can be identified at the activity level that are not identified as reasons for the overall plan."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2344,7 +2305,7 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.goal"/>
-      <short value="Goals this activity relates to"/>
+      <short value="Internal reference that identifies the goals that this activity is intended to contribute towards meeting."/>
       <definition value="Internal reference that identifies the goals that this activity is intended to contribute towards meeting."/>
       <requirements value="So that participants know the link explicitly."/>
       <min value="0"/>
@@ -2360,9 +2321,8 @@ completed = completed"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.status"/>
-      <short value="not-started | scheduled | in-progress | on-hold | completed | cancelled"/>
+      <short value="Identifies what progress is being made for the specific activity."/>
       <definition value="Identifies what progress is being made for the specific activity."/>
-      <comments value="Some aspects of Status can be inferred based on the resources linked in actionTaken.  Note that &quot;status&quot; is only as current as the plan was most recently updated."/>
       <requirements value="Indicates progress against the plan, whether the activity is still relevant for the plan."/>
       <min value="0"/>
       <max value="1"/>
@@ -2394,9 +2354,8 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.statusReason"/>
-      <short value="Reason for current status"/>
+      <short value="Provides reason why the activity isn&#39;t yet started, is on hold, was cancelled, etc."/>
       <definition value="Provides reason why the activity isn&#39;t yet started, is on hold, was cancelled, etc."/>
-      <comments value="Will generally not be present it status is &quot;complete&quot;.  Be sure to prompt to update this (or at least remove the existing value) if the status is changed."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2409,7 +2368,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.prohibited"/>
-      <short value="Do NOT do"/>
+      <short value="If true, indicates that the described activity is one that must NOT be engaged in when following the plan."/>
       <definition value="If true, indicates that the described activity is one that must NOT be engaged in when following the plan."/>
       <requirements value="Captures intention to not do something that may have been previously typical."/>
       <min value="1"/>
@@ -2425,7 +2384,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.scheduled[x]"/>
-      <short value="When activity is to occur"/>
+      <short value="The period, timing or frequency upon which the described activity is to occur."/>
       <definition value="The period, timing or frequency upon which the described activity is to occur."/>
       <requirements value="Allows prompting for activities and detection of missed planned activities."/>
       <min value="0"/>
@@ -2450,9 +2409,8 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.location"/>
-      <short value="Where it should happen"/>
+      <short value="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc."/>
       <definition value="Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc."/>
-      <comments value="May reference a specific clinical location or may just identify a type of location."/>
       <requirements value="Helps in planning of activity."/>
       <min value="0"/>
       <max value="1"/>
@@ -2471,9 +2429,8 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.performer"/>
-      <short value="Who will be responsible?"/>
+      <short value="Identifies who&#39;s expected to be involved in the activity."/>
       <definition value="Identifies who&#39;s expected to be involved in the activity."/>
-      <comments value="A performer MAY also be a participant in the care plan."/>
       <requirements value="Helps in planning of activity."/>
       <min value="0"/>
       <max value="*"/>
@@ -2504,7 +2461,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.product"/>
-      <short value="What is to be administered/supplied"/>
+      <short value="Identifies the food, drug or other product to be consumed or supplied in the activity."/>
       <definition value="Identifies the food, drug or other product to be consumed or supplied in the activity."/>
       <min value="0"/>
       <max value="1"/>
@@ -2527,7 +2484,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.dailyAmount"/>
-      <short value="How to consume/day?"/>
+      <short value="Identifies the quantity expected to be consumed in a given day."/>
       <definition value="Identifies the quantity expected to be consumed in a given day."/>
       <requirements value="Allows rough dose checking."/>
       <alias value="daily dose"/>
@@ -2548,7 +2505,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.quantity"/>
-      <short value="How much to administer/supply/consume"/>
+      <short value="Identifies the quantity expected to be supplied, addministered or consumed by the subject."/>
       <definition value="Identifies the quantity expected to be supplied, addministered or consumed by the subject."/>
       <min value="0"/>
       <max value="1"/>
@@ -2567,7 +2524,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.activity.detail.note"/>
-      <short value="Extra info on activity occurrence"/>
+      <short value="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc."/>
       <definition value="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -2585,7 +2542,7 @@ cancelled = aborted"/>
     </element>
     <element>
       <path value="CarePlan.notes"/>
-      <short value="Comments about the plan"/>
+      <short value="General notes about the care plan not covered elsewhere."/>
       <definition value="General notes about the care plan not covered elsewhere."/>
       <requirements value="Used to capture information that applies to the plan as a whole that doesn&#39;t fit into discrete elements."/>
       <min value="0"/>

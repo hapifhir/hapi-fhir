@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -158,7 +158,7 @@ public class Provenance extends DomainResource {
         /**
          * The individual, device or organization that participated in the event.
          */
-        @Child(name = "actor", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class}, order=2, min=0, max=1)
+        @Child(name = "actor", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Individual, device or organization playing role", formalDefinition="The individual, device or organization that participated in the event." )
         protected Reference actor;
 
@@ -281,7 +281,7 @@ public class Provenance extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("role", "Coding", "The function of the agent with respect to the activity.", 0, java.lang.Integer.MAX_VALUE, role));
-          childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
+          childrenList.add(new Property("actor", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "The individual, device or organization that participated in the event.", 0, java.lang.Integer.MAX_VALUE, actor));
           childrenList.add(new Property("userId", "Identifier", "The identify of the agent as known by the authorization system.", 0, java.lang.Integer.MAX_VALUE, userId));
         }
 
@@ -644,14 +644,21 @@ public class Provenance extends DomainResource {
     /**
      * The reason that the activity was taking place.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Reason the activity is occurring", formalDefinition="The reason that the activity was taking place." )
-    protected CodeableConcept reason;
+    protected List<CodeableConcept> reason;
+
+    /**
+     * An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.
+     */
+    @Child(name = "activity", type = {CodeableConcept.class}, order=4, min=0, max=1)
+    @Description(shortDefinition="Activity that occurred", formalDefinition="An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities." )
+    protected CodeableConcept activity;
 
     /**
      * Where the activity occurred, if relevant.
      */
-    @Child(name = "location", type = {Location.class}, order=4, min=0, max=1)
+    @Child(name = "location", type = {Location.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Where the activity occurred, if relevant", formalDefinition="Where the activity occurred, if relevant." )
     protected Reference location;
 
@@ -663,32 +670,32 @@ public class Provenance extends DomainResource {
     /**
      * Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.
      */
-    @Child(name = "policy", type = {UriType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "policy", type = {UriType.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Policy or plan the activity was defined by", formalDefinition="Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc." )
     protected List<UriType> policy;
 
     /**
      * An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.
      */
-    @Child(name = "agent", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "agent", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Agents involved in creating resource", formalDefinition="An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility." )
     protected List<ProvenanceAgentComponent> agent;
 
     /**
      * An entity used in this activity.
      */
-    @Child(name = "entity", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "entity", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="An entity used in this activity", formalDefinition="An entity used in this activity." )
     protected List<ProvenanceEntityComponent> entity;
 
     /**
      * A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated.
      */
-    @Child(name = "signature", type = {Signature.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "signature", type = {Signature.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Signature on target", formalDefinition="A digital signature on the target Reference(s). The signer should match a Provenance.agent. The purpose of the signature is indicated." )
     protected List<Signature> signature;
 
-    private static final long serialVersionUID = 800452939L;
+    private static final long serialVersionUID = -1053458671L;
 
   /*
    * Constructor
@@ -826,24 +833,64 @@ public class Provenance extends DomainResource {
     /**
      * @return {@link #reason} (The reason that the activity was taking place.)
      */
-    public CodeableConcept getReason() { 
+    public List<CodeableConcept> getReason() { 
       if (this.reason == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Provenance.reason");
-        else if (Configuration.doAutoCreate())
-          this.reason = new CodeableConcept(); // cc
+        this.reason = new ArrayList<CodeableConcept>();
       return this.reason;
     }
 
     public boolean hasReason() { 
-      return this.reason != null && !this.reason.isEmpty();
+      if (this.reason == null)
+        return false;
+      for (CodeableConcept item : this.reason)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #reason} (The reason that the activity was taking place.)
+     * @return {@link #reason} (The reason that the activity was taking place.)
      */
-    public Provenance setReason(CodeableConcept value) { 
-      this.reason = value;
+    // syntactic sugar
+    public CodeableConcept addReason() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.reason == null)
+        this.reason = new ArrayList<CodeableConcept>();
+      this.reason.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Provenance addReason(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.reason == null)
+        this.reason = new ArrayList<CodeableConcept>();
+      this.reason.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #activity} (An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.)
+     */
+    public CodeableConcept getActivity() { 
+      if (this.activity == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Provenance.activity");
+        else if (Configuration.doAutoCreate())
+          this.activity = new CodeableConcept(); // cc
+      return this.activity;
+    }
+
+    public boolean hasActivity() { 
+      return this.activity != null && !this.activity.isEmpty();
+    }
+
+    /**
+     * @param value {@link #activity} (An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.)
+     */
+    public Provenance setActivity(CodeableConcept value) { 
+      this.activity = value;
       return this;
     }
 
@@ -1071,6 +1118,7 @@ public class Provenance extends DomainResource {
         childrenList.add(new Property("period", "Period", "The period during which the activity occurred.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("recorded", "instant", "The instant of time at which the activity was recorded.", 0, java.lang.Integer.MAX_VALUE, recorded));
         childrenList.add(new Property("reason", "CodeableConcept", "The reason that the activity was taking place.", 0, java.lang.Integer.MAX_VALUE, reason));
+        childrenList.add(new Property("activity", "CodeableConcept", "An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.", 0, java.lang.Integer.MAX_VALUE, activity));
         childrenList.add(new Property("location", "Reference(Location)", "Where the activity occurred, if relevant.", 0, java.lang.Integer.MAX_VALUE, location));
         childrenList.add(new Property("policy", "uri", "Policy or plan the activity was defined by. Typically, a single activity may have multiple applicable policy documents, such as patient consent, guarantor funding, etc.", 0, java.lang.Integer.MAX_VALUE, policy));
         childrenList.add(new Property("agent", "", "An agent takes a role in an activity such that the agent can be assigned some degree of responsibility for the activity taking place. An agent can be a person, an organization, software, or other entities that may be ascribed responsibility.", 0, java.lang.Integer.MAX_VALUE, agent));
@@ -1088,7 +1136,12 @@ public class Provenance extends DomainResource {
         };
         dst.period = period == null ? null : period.copy();
         dst.recorded = recorded == null ? null : recorded.copy();
-        dst.reason = reason == null ? null : reason.copy();
+        if (reason != null) {
+          dst.reason = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reason)
+            dst.reason.add(i.copy());
+        };
+        dst.activity = activity == null ? null : activity.copy();
         dst.location = location == null ? null : location.copy();
         if (policy != null) {
           dst.policy = new ArrayList<UriType>();
@@ -1125,9 +1178,9 @@ public class Provenance extends DomainResource {
           return false;
         Provenance o = (Provenance) other;
         return compareDeep(target, o.target, true) && compareDeep(period, o.period, true) && compareDeep(recorded, o.recorded, true)
-           && compareDeep(reason, o.reason, true) && compareDeep(location, o.location, true) && compareDeep(policy, o.policy, true)
-           && compareDeep(agent, o.agent, true) && compareDeep(entity, o.entity, true) && compareDeep(signature, o.signature, true)
-          ;
+           && compareDeep(reason, o.reason, true) && compareDeep(activity, o.activity, true) && compareDeep(location, o.location, true)
+           && compareDeep(policy, o.policy, true) && compareDeep(agent, o.agent, true) && compareDeep(entity, o.entity, true)
+           && compareDeep(signature, o.signature, true);
       }
 
       @Override
@@ -1142,9 +1195,9 @@ public class Provenance extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (target == null || target.isEmpty()) && (period == null || period.isEmpty())
-           && (recorded == null || recorded.isEmpty()) && (reason == null || reason.isEmpty()) && (location == null || location.isEmpty())
-           && (policy == null || policy.isEmpty()) && (agent == null || agent.isEmpty()) && (entity == null || entity.isEmpty())
-           && (signature == null || signature.isEmpty());
+           && (recorded == null || recorded.isEmpty()) && (reason == null || reason.isEmpty()) && (activity == null || activity.isEmpty())
+           && (location == null || location.isEmpty()) && (policy == null || policy.isEmpty()) && (agent == null || agent.isEmpty())
+           && (entity == null || entity.isEmpty()) && (signature == null || signature.isEmpty());
       }
 
   @Override

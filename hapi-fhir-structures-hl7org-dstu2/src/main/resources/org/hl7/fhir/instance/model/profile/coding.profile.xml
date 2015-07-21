@@ -131,14 +131,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Coding Resource"/>
   <requirements value="References to codes are very common in healthcare models."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="orim"/>
     <uri value="http://hl7.org/orim"/>
@@ -156,13 +156,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Coding"/>
-      <short value="A reference to a code defined by a terminology system"/>
+      <short value="A reference to a code defined by a terminology system."/>
       <definition value="A reference to a code defined by a terminology system."/>
-      <comments value="Codes may be defined very casually in enumerations or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information."/>
       <requirements value="References to codes are very common in healthcare models."/>
       <min value="1"/>
       <max value="1"/>
@@ -185,7 +183,7 @@
     <element>
       <path value="Coding.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -199,9 +197,8 @@
     </element>
     <element>
       <path value="Coding.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -216,9 +213,8 @@
     </element>
     <element>
       <path value="Coding.system"/>
-      <short value="Identity of the terminology system"/>
+      <short value="The identification of the code system that defines the meaning of the symbol in the code."/>
       <definition value="The identification of the code system that defines the meaning of the symbol in the code."/>
-      <comments value="The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7&#39;s list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously."/>
       <requirements value="Need to be unambiguous about the source of the definition of the symbol."/>
       <min value="0"/>
       <max value="1"/>
@@ -240,9 +236,8 @@
     </element>
     <element>
       <path value="Coding.version"/>
-      <short value="Version of the system - if relevant"/>
+      <short value="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged."/>
       <definition value="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged."/>
-      <comments value="Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -263,7 +258,7 @@
     </element>
     <element>
       <path value="Coding.code"/>
-      <short value="Symbol in syntax defined by the system"/>
+      <short value="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)."/>
       <definition value="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)."/>
       <requirements value="Need to refer to a particular code in the system."/>
       <min value="0"/>
@@ -286,7 +281,7 @@
     </element>
     <element>
       <path value="Coding.display"/>
-      <short value="Representation defined by the system"/>
+      <short value="A representation of the meaning of the code in the system, following the rules of the system."/>
       <definition value="A representation of the meaning of the code in the system, following the rules of the system."/>
       <requirements value="Need to be able to carry a human-readable meaning of the code for readers that do not know  the system."/>
       <min value="0"/>
@@ -309,9 +304,8 @@
     </element>
     <element>
       <path value="Coding.userSelected"/>
-      <short value="If this coding was chosen directly by the user"/>
+      <short value="Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays)."/>
       <definition value="Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays)."/>
-      <comments value="Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly &#39;directly chosen&#39; implies, and trading partner agreement may be needed to clarify the use of this element and it&#39;s consequences more completely."/>
       <requirements value="This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing."/>
       <min value="0"/>
       <max value="1"/>
@@ -342,9 +336,8 @@ fhir:Coding.userSelected\#true a [
   <differential>
     <element>
       <path value="Coding"/>
-      <short value="A reference to a code defined by a terminology system"/>
+      <short value="A reference to a code defined by a terminology system."/>
       <definition value="A reference to a code defined by a terminology system."/>
-      <comments value="Codes may be defined very casually in enumerations or code lists, up to very formal definitions such as SNOMED CT - see the V3 Core Principles for more information."/>
       <requirements value="References to codes are very common in healthcare models."/>
       <min value="1"/>
       <max value="1"/>
@@ -366,9 +359,8 @@ fhir:Coding.userSelected\#true a [
     </element>
     <element>
       <path value="Coding.system"/>
-      <short value="Identity of the terminology system"/>
+      <short value="The identification of the code system that defines the meaning of the symbol in the code."/>
       <definition value="The identification of the code system that defines the meaning of the symbol in the code."/>
-      <comments value="The URI may be an OID (urn:oid:...) or a UUID (urn:uuid:...).  OIDs and UUIDs SHALL be references to the HL7 OID registry. Otherwise, the URI should come from HL7&#39;s list of FHIR defined special URIs or it should de-reference to some definition that establish the system clearly and unambiguously."/>
       <requirements value="Need to be unambiguous about the source of the definition of the symbol."/>
       <min value="0"/>
       <max value="1"/>
@@ -390,9 +382,8 @@ fhir:Coding.userSelected\#true a [
     </element>
     <element>
       <path value="Coding.version"/>
-      <short value="Version of the system - if relevant"/>
+      <short value="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged."/>
       <definition value="The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured. and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged."/>
-      <comments value="Where the terminology does not clearly define what string should be used to identify code system versions, the recommendation is to use the date (expressed in FHIR date format) on which that version was officially published as the version date."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -413,7 +404,7 @@ fhir:Coding.userSelected\#true a [
     </element>
     <element>
       <path value="Coding.code"/>
-      <short value="Symbol in syntax defined by the system"/>
+      <short value="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)."/>
       <definition value="A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)."/>
       <requirements value="Need to refer to a particular code in the system."/>
       <min value="0"/>
@@ -436,7 +427,7 @@ fhir:Coding.userSelected\#true a [
     </element>
     <element>
       <path value="Coding.display"/>
-      <short value="Representation defined by the system"/>
+      <short value="A representation of the meaning of the code in the system, following the rules of the system."/>
       <definition value="A representation of the meaning of the code in the system, following the rules of the system."/>
       <requirements value="Need to be able to carry a human-readable meaning of the code for readers that do not know  the system."/>
       <min value="0"/>
@@ -459,9 +450,8 @@ fhir:Coding.userSelected\#true a [
     </element>
     <element>
       <path value="Coding.userSelected"/>
-      <short value="If this coding was chosen directly by the user"/>
+      <short value="Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays)."/>
       <definition value="Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays)."/>
-      <comments value="Amongst a set of alternatives, a directly chosen code is the most appropriate starting point for new translations. There is some ambiguity about what exactly &#39;directly chosen&#39; implies, and trading partner agreement may be needed to clarify the use of this element and it&#39;s consequences more completely."/>
       <requirements value="This has been identified as a clinical safety criterium - that this exact system/code pair was chosen explicitly, rather than inferred by the system based on some rules or language processing."/>
       <min value="0"/>
       <max value="1"/>

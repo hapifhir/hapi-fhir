@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum ServiceProduct {
 
         /**
-         * null
+         * Ex
          */
         EXAM, 
         /**
-         * null
+         * Flu shot
          */
         FLUSHOT, 
         /**
@@ -67,15 +67,15 @@ public enum ServiceProduct {
         }
         public String getDefinition() {
           switch (this) {
-            case EXAM: return "";
-            case FLUSHOT: return "";
+            case EXAM: return "Ex";
+            case FLUSHOT: return "Flu shot";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case EXAM: return "exam";
-            case FLUSHOT: return "flushot";
+            case EXAM: return "Exam";
+            case FLUSHOT: return "Flu shot";
             default: return "?";
           }
     }

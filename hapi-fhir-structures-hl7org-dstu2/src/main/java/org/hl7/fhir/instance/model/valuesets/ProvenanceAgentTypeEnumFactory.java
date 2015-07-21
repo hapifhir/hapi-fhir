@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -51,7 +51,7 @@ public class ProvenanceAgentTypeEnumFactory implements EnumFactory<ProvenanceAge
       return ProvenanceAgentType.PATIENT;
     if ("device".equals(codeString))
       return ProvenanceAgentType.DEVICE;
-    if ("relatedPerson".equals(codeString))
+    if ("related-person".equals(codeString))
       return ProvenanceAgentType.RELATEDPERSON;
     throw new IllegalArgumentException("Unknown ProvenanceAgentType code '"+codeString+"'");
   }
@@ -70,7 +70,7 @@ public class ProvenanceAgentTypeEnumFactory implements EnumFactory<ProvenanceAge
     if (code == ProvenanceAgentType.DEVICE)
       return "device";
     if (code == ProvenanceAgentType.RELATEDPERSON)
-      return "relatedPerson";
+      return "related-person";
     return "?";
   }
 

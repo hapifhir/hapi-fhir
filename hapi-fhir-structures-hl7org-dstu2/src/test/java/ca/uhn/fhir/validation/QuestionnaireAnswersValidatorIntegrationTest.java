@@ -98,7 +98,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 			ValidationResult result = myVal.validateWithResult(qa);
 			ourLog.info(result.getMessages().toString());
-			assertThat(result.getMessages(), empty());
+			assertThat(result.getMessages().toString(), containsString("myMessage=Missing required group with linkId[link1],mySeverity=information"));
 		}
 
 		// Not populated, partial status
@@ -109,7 +109,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 			ValidationResult result = myVal.validateWithResult(qa);
 			ourLog.info(result.getMessages().toString());
-			assertThat(result.getMessages(), empty());
+			assertThat(result.getMessages().toString(), containsString("myMessage=Missing required group with linkId[link1],mySeverity=information"));
 		}
 
 		// Not populated, finished status
@@ -120,7 +120,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 			ValidationResult result = myVal.validateWithResult(qa);
 			ourLog.info(result.getMessages().toString());
-			assertThat(result.getMessages().toString(), containsString("Missing answer to required question with linkId[link0]"));
+			assertThat(result.getMessages().toString(), containsString("Missing answer to required question with linkId[link0],mySeverity=error"));
 		}
 }
 
@@ -133,7 +133,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 		when(myResourceLoaderMock.load(Mockito.eq(Questionnaire.class), Mockito.eq(new IdType("http://example.com/Questionnaire/q1")))).thenReturn(q);
 
 		ValueSet options = new ValueSet();
-		options.getDefine().setSystem("urn:system").addConcept().setCode("code0");
+		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
 		when(myResourceLoaderMock.load(Mockito.eq(ValueSet.class), Mockito.eq(new IdType("http://somevalueset/ValueSet/123")))).thenReturn(options);
 
 		QuestionnaireAnswers qa;

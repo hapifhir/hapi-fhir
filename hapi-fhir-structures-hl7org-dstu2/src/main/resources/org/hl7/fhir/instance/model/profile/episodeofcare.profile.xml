@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="EpisodeOfCare"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -341,30 +341,30 @@
   <publisher value="Health Level Seven International (Patient Administration)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for EpisodeOfCare Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="EpisodeOfCare"/>
-      <short value="An association of a Patient with an Organization and  Healthcare Provider(s) for a period of time that the Organization assumes some level of responsibility"/>
+      <short value="An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time."/>
       <definition value="An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time."/>
       <alias value="Case Program Problem"/>
       <min value="1"/>
@@ -375,9 +375,8 @@
     </element>
     <element>
       <path value="EpisodeOfCare.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -386,7 +385,7 @@
     </element>
     <element>
       <path value="EpisodeOfCare.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -396,9 +395,8 @@
     </element>
     <element>
       <path value="EpisodeOfCare.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -408,11 +406,8 @@
     </element>
     <element>
       <path value="EpisodeOfCare.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -426,9 +421,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -446,9 +440,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -464,9 +457,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -481,9 +473,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -499,7 +490,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.identifier"/>
-      <short value="Identifier(s) by which this EpisodeOfCare is known"/>
+      <short value="Identifier(s) by which this EpisodeOfCare is known."/>
       <definition value="Identifier(s) by which this EpisodeOfCare is known."/>
       <min value="0"/>
       <max value="*"/>
@@ -509,7 +500,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.status"/>
-      <short value="planned | waitlist | active | onhold | finished | cancelled"/>
+      <short value="planned | waitlist | active | onhold | finished | cancelled."/>
       <definition value="planned | waitlist | active | onhold | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -528,7 +519,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory"/>
-      <short value="The status history for the EpisodeOfCare"/>
+      <short value="The status history for the EpisodeOfCare."/>
       <definition value="The status history for the EpisodeOfCare."/>
       <min value="0"/>
       <max value="*"/>
@@ -539,7 +530,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="EpisodeOfCare.statusHistory.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -553,9 +544,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -570,9 +560,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -589,7 +578,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory.status"/>
-      <short value="planned | waitlist | active | onhold | finished | cancelled"/>
+      <short value="planned | waitlist | active | onhold | finished | cancelled."/>
       <definition value="planned | waitlist | active | onhold | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -606,7 +595,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory.period"/>
-      <short value="The period during this EpisodeOfCare that the specific status applied"/>
+      <short value="The period during this EpisodeOfCare that the specific status applied."/>
       <definition value="The period during this EpisodeOfCare that the specific status applied."/>
       <min value="1"/>
       <max value="1"/>
@@ -616,7 +605,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.type"/>
-      <short value="Specific type of EpisodeOfCare"/>
+      <short value="The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications."/>
       <definition value="The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications."/>
       <min value="0"/>
       <max value="*"/>
@@ -627,7 +616,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.patient"/>
-      <short value="The patient that this EpisodeOfCare applies to"/>
+      <short value="The patient that this EpisodeOfCare applies to."/>
       <definition value="The patient that this EpisodeOfCare applies to."/>
       <min value="1"/>
       <max value="1"/>
@@ -639,7 +628,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.managingOrganization"/>
-      <short value="The organization that has assumed the specific responsibilities for the specified duration"/>
+      <short value="The organization that has assumed the specific responsibilities for the specified duration."/>
       <definition value="The organization that has assumed the specific responsibilities for the specified duration."/>
       <min value="0"/>
       <max value="1"/>
@@ -651,7 +640,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.period"/>
-      <short value="The interval during which the managing organization assumes the defined responsibility"/>
+      <short value="The interval during which the managing organization assumes the defined responsibility."/>
       <definition value="The interval during which the managing organization assumes the defined responsibility."/>
       <min value="0"/>
       <max value="1"/>
@@ -662,7 +651,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.condition"/>
-      <short value="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for"/>
+      <short value="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for."/>
       <definition value="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for."/>
       <min value="0"/>
       <max value="*"/>
@@ -673,7 +662,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.referralRequest"/>
-      <short value="Referral Request(s) that this EpisodeOfCare manages activities within"/>
+      <short value="Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals."/>
       <definition value="Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals."/>
       <min value="0"/>
       <max value="*"/>
@@ -684,7 +673,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careManager"/>
-      <short value="The practitioner that is the care manager/care co-ordinator for this patient"/>
+      <short value="The practitioner that is the care manager/care co-ordinator for this patient."/>
       <definition value="The practitioner that is the care manager/care co-ordinator for this patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -695,7 +684,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam"/>
-      <short value="The list of practitioners that may be facilitating this episode of care for specific purposes"/>
+      <short value="The list of practitioners that may be facilitating this episode of care for specific purposes."/>
       <definition value="The list of practitioners that may be facilitating this episode of care for specific purposes."/>
       <min value="0"/>
       <max value="*"/>
@@ -706,7 +695,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="EpisodeOfCare.careTeam.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -720,9 +709,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -737,9 +725,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -756,9 +743,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.member"/>
-      <short value="The practitioner (or Organization) within the team"/>
+      <short value="The practitioner (or Organization) within the team."/>
       <definition value="The practitioner (or Organization) within the team."/>
-      <comments value="Where an Organization is included in the CareTeam, it is really providing some form of services to the EpisodeOfCare (e.g. Jim&#39;s Mowing Services) the details of the services would be included on a CarePlan."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -772,7 +758,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.role"/>
-      <short value="The role that this team member is taking within this episode of care"/>
+      <short value="The role that this team member is taking within this episode of care."/>
       <definition value="The role that this team member is taking within this episode of care."/>
       <min value="0"/>
       <max value="*"/>
@@ -782,7 +768,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.period"/>
-      <short value="The period of time that this practitioner is performing some role within the episode of care"/>
+      <short value="The period of time that this practitioner is performing some role within the episode of care."/>
       <definition value="The period of time that this practitioner is performing some role within the episode of care."/>
       <min value="0"/>
       <max value="1"/>
@@ -794,7 +780,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="EpisodeOfCare"/>
-      <short value="An association of a Patient with an Organization and  Healthcare Provider(s) for a period of time that the Organization assumes some level of responsibility"/>
+      <short value="An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time."/>
       <definition value="An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time."/>
       <alias value="Case Program Problem"/>
       <min value="1"/>
@@ -805,7 +791,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.identifier"/>
-      <short value="Identifier(s) by which this EpisodeOfCare is known"/>
+      <short value="Identifier(s) by which this EpisodeOfCare is known."/>
       <definition value="Identifier(s) by which this EpisodeOfCare is known."/>
       <min value="0"/>
       <max value="*"/>
@@ -815,7 +801,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.status"/>
-      <short value="planned | waitlist | active | onhold | finished | cancelled"/>
+      <short value="planned | waitlist | active | onhold | finished | cancelled."/>
       <definition value="planned | waitlist | active | onhold | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -834,14 +820,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory"/>
-      <short value="The status history for the EpisodeOfCare"/>
+      <short value="The status history for the EpisodeOfCare."/>
       <definition value="The status history for the EpisodeOfCare."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory.status"/>
-      <short value="planned | waitlist | active | onhold | finished | cancelled"/>
+      <short value="planned | waitlist | active | onhold | finished | cancelled."/>
       <definition value="planned | waitlist | active | onhold | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -858,7 +844,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.statusHistory.period"/>
-      <short value="The period during this EpisodeOfCare that the specific status applied"/>
+      <short value="The period during this EpisodeOfCare that the specific status applied."/>
       <definition value="The period during this EpisodeOfCare that the specific status applied."/>
       <min value="1"/>
       <max value="1"/>
@@ -868,7 +854,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.type"/>
-      <short value="Specific type of EpisodeOfCare"/>
+      <short value="The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications."/>
       <definition value="The type can be very important in processing as this could be used in determining if the EpisodeOfCare is relevant to specific government reporting, or other types of classifications."/>
       <min value="0"/>
       <max value="*"/>
@@ -879,7 +865,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.patient"/>
-      <short value="The patient that this EpisodeOfCare applies to"/>
+      <short value="The patient that this EpisodeOfCare applies to."/>
       <definition value="The patient that this EpisodeOfCare applies to."/>
       <min value="1"/>
       <max value="1"/>
@@ -891,7 +877,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.managingOrganization"/>
-      <short value="The organization that has assumed the specific responsibilities for the specified duration"/>
+      <short value="The organization that has assumed the specific responsibilities for the specified duration."/>
       <definition value="The organization that has assumed the specific responsibilities for the specified duration."/>
       <min value="0"/>
       <max value="1"/>
@@ -903,7 +889,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.period"/>
-      <short value="The interval during which the managing organization assumes the defined responsibility"/>
+      <short value="The interval during which the managing organization assumes the defined responsibility."/>
       <definition value="The interval during which the managing organization assumes the defined responsibility."/>
       <min value="0"/>
       <max value="1"/>
@@ -914,7 +900,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.condition"/>
-      <short value="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for"/>
+      <short value="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for."/>
       <definition value="A list of conditions/problems/diagnoses that this episode of care is intended to be providing care for."/>
       <min value="0"/>
       <max value="*"/>
@@ -925,7 +911,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.referralRequest"/>
-      <short value="Referral Request(s) that this EpisodeOfCare manages activities within"/>
+      <short value="Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals."/>
       <definition value="Referral Request(s) that are fulfilled by this EpisodeOfCare, incoming referrals."/>
       <min value="0"/>
       <max value="*"/>
@@ -936,7 +922,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careManager"/>
-      <short value="The practitioner that is the care manager/care co-ordinator for this patient"/>
+      <short value="The practitioner that is the care manager/care co-ordinator for this patient."/>
       <definition value="The practitioner that is the care manager/care co-ordinator for this patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -947,16 +933,15 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam"/>
-      <short value="The list of practitioners that may be facilitating this episode of care for specific purposes"/>
+      <short value="The list of practitioners that may be facilitating this episode of care for specific purposes."/>
       <definition value="The list of practitioners that may be facilitating this episode of care for specific purposes."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.member"/>
-      <short value="The practitioner (or Organization) within the team"/>
+      <short value="The practitioner (or Organization) within the team."/>
       <definition value="The practitioner (or Organization) within the team."/>
-      <comments value="Where an Organization is included in the CareTeam, it is really providing some form of services to the EpisodeOfCare (e.g. Jim&#39;s Mowing Services) the details of the services would be included on a CarePlan."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -970,7 +955,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.role"/>
-      <short value="The role that this team member is taking within this episode of care"/>
+      <short value="The role that this team member is taking within this episode of care."/>
       <definition value="The role that this team member is taking within this episode of care."/>
       <min value="0"/>
       <max value="*"/>
@@ -980,7 +965,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="EpisodeOfCare.careTeam.period"/>
-      <short value="The period of time that this practitioner is performing some role within the episode of care"/>
+      <short value="The period of time that this practitioner is performing some role within the episode of care."/>
       <definition value="The period of time that this practitioner is performing some role within the episode of care."/>
       <min value="0"/>
       <max value="1"/>

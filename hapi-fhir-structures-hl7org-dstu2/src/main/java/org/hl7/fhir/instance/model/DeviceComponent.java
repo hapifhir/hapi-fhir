@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -172,17 +172,17 @@ public class DeviceComponent extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case OTHER: return "msp-other";
-            case CHEMICAL: return "msp-chemical";
-            case ELECTRICAL: return "msp-electrical";
-            case IMPEDANCE: return "msp-impedance";
-            case NUCLEAR: return "msp-nuclear";
-            case OPTICAL: return "msp-optical";
-            case THERMAL: return "msp-thermal";
-            case BIOLOGICAL: return "msp-biological";
-            case MECHANICAL: return "msp-mechanical";
-            case ACOUSTICAL: return "msp-acoustical";
-            case MANUAL: return "msp-manual";
+            case OTHER: return "MSP Other";
+            case CHEMICAL: return "MSP Chemical";
+            case ELECTRICAL: return "MSP Electrical";
+            case IMPEDANCE: return "MSP Impedance";
+            case NUCLEAR: return "MSP Nuclear";
+            case OPTICAL: return "MSP Optical";
+            case THERMAL: return "MSP Thermal";
+            case BIOLOGICAL: return "MSP Biological";
+            case MECHANICAL: return "MSP Mechanical";
+            case ACOUSTICAL: return "MSP Acoustical";
+            case MANUAL: return "MSP Manual";
             default: return "?";
           }
         }

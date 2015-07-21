@@ -163,14 +163,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for SampledData Resource"/>
   <requirements value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -183,13 +183,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="SampledData"/>
-      <short value="A series of measurements taken by a device"/>
+      <short value="A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."/>
       <definition value="A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."/>
-      <comments value="The data is not interpretable without at least origin, period, and dimensions, but these are optional to allow a separation between the template of measurement and the actual measurement, such as between DeviceCapabilities and DeviceLog.  When providing a summary view (for example with Observation.value[x]) SampledData should be represented with a brief display text such as &quot;Sampled Data&quot;."/>
       <requirements value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
       <min value="1"/>
       <max value="1"/>
@@ -208,7 +206,7 @@
     <element>
       <path value="SampledData.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -222,9 +220,8 @@
     </element>
     <element>
       <path value="SampledData.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -239,7 +236,7 @@
     </element>
     <element>
       <path value="SampledData.origin"/>
-      <short value="Zero value and units"/>
+      <short value="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series."/>
       <definition value="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series."/>
       <min value="1"/>
       <max value="1"/>
@@ -253,9 +250,8 @@
     </element>
     <element>
       <path value="SampledData.period"/>
-      <short value="Number of milliseconds between samples"/>
+      <short value="The length of time between sampling times, measured in milliseconds."/>
       <definition value="The length of time between sampling times, measured in milliseconds."/>
-      <comments value="This is usually a whole number."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -268,7 +264,7 @@
     </element>
     <element>
       <path value="SampledData.factor"/>
-      <short value="Multiply data by this before adding to origin"/>
+      <short value="A correction factor that is applied to the sampled data points before they are added to the origin."/>
       <definition value="A correction factor that is applied to the sampled data points before they are added to the origin."/>
       <min value="0"/>
       <max value="1"/>
@@ -283,7 +279,7 @@
     </element>
     <element>
       <path value="SampledData.lowerLimit"/>
-      <short value="Lower limit of detection"/>
+      <short value="The lower limit of detection of the measured points. This is needed if any of the data points have the value &quot;L&quot; (lower than detection limit)."/>
       <definition value="The lower limit of detection of the measured points. This is needed if any of the data points have the value &quot;L&quot; (lower than detection limit)."/>
       <min value="0"/>
       <max value="1"/>
@@ -297,7 +293,7 @@
     </element>
     <element>
       <path value="SampledData.upperLimit"/>
-      <short value="Upper limit of detection"/>
+      <short value="The upper limit of detection of the measured points. This is needed if any of the data points have the value &quot;U&quot; (higher than detection limit)."/>
       <definition value="The upper limit of detection of the measured points. This is needed if any of the data points have the value &quot;U&quot; (higher than detection limit)."/>
       <min value="0"/>
       <max value="1"/>
@@ -311,9 +307,8 @@
     </element>
     <element>
       <path value="SampledData.dimensions"/>
-      <short value="Number of sample points at each time point"/>
+      <short value="The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once."/>
       <definition value="The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once."/>
-      <comments value="If there is more than one dimension, the code for the type of data will define the meaning of the dimensions (typically ECG data)."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -326,7 +321,7 @@
     </element>
     <element>
       <path value="SampledData.data"/>
-      <short value="Decimal values with spaces, or &quot;E&quot; | &quot;U&quot; | &quot;L&quot;"/>
+      <short value="A series of data points which are decimal values separated by a single space (character u20). The special values &quot;E&quot; (error), &quot;L&quot; (below detection limit) and &quot;U&quot; (above detection limit) can also be used in place of a decimal value."/>
       <definition value="A series of data points which are decimal values separated by a single space (character u20). The special values &quot;E&quot; (error), &quot;L&quot; (below detection limit) and &quot;U&quot; (above detection limit) can also be used in place of a decimal value."/>
       <min value="1"/>
       <max value="1"/>
@@ -342,9 +337,8 @@
   <differential>
     <element>
       <path value="SampledData"/>
-      <short value="A series of measurements taken by a device"/>
+      <short value="A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."/>
       <definition value="A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."/>
-      <comments value="The data is not interpretable without at least origin, period, and dimensions, but these are optional to allow a separation between the template of measurement and the actual measurement, such as between DeviceCapabilities and DeviceLog.  When providing a summary view (for example with Observation.value[x]) SampledData should be represented with a brief display text such as &quot;Sampled Data&quot;."/>
       <requirements value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
       <min value="1"/>
       <max value="1"/>
@@ -362,7 +356,7 @@
     </element>
     <element>
       <path value="SampledData.origin"/>
-      <short value="Zero value and units"/>
+      <short value="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series."/>
       <definition value="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series."/>
       <min value="1"/>
       <max value="1"/>
@@ -376,9 +370,8 @@
     </element>
     <element>
       <path value="SampledData.period"/>
-      <short value="Number of milliseconds between samples"/>
+      <short value="The length of time between sampling times, measured in milliseconds."/>
       <definition value="The length of time between sampling times, measured in milliseconds."/>
-      <comments value="This is usually a whole number."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -391,7 +384,7 @@
     </element>
     <element>
       <path value="SampledData.factor"/>
-      <short value="Multiply data by this before adding to origin"/>
+      <short value="A correction factor that is applied to the sampled data points before they are added to the origin."/>
       <definition value="A correction factor that is applied to the sampled data points before they are added to the origin."/>
       <min value="0"/>
       <max value="1"/>
@@ -406,7 +399,7 @@
     </element>
     <element>
       <path value="SampledData.lowerLimit"/>
-      <short value="Lower limit of detection"/>
+      <short value="The lower limit of detection of the measured points. This is needed if any of the data points have the value &quot;L&quot; (lower than detection limit)."/>
       <definition value="The lower limit of detection of the measured points. This is needed if any of the data points have the value &quot;L&quot; (lower than detection limit)."/>
       <min value="0"/>
       <max value="1"/>
@@ -420,7 +413,7 @@
     </element>
     <element>
       <path value="SampledData.upperLimit"/>
-      <short value="Upper limit of detection"/>
+      <short value="The upper limit of detection of the measured points. This is needed if any of the data points have the value &quot;U&quot; (higher than detection limit)."/>
       <definition value="The upper limit of detection of the measured points. This is needed if any of the data points have the value &quot;U&quot; (higher than detection limit)."/>
       <min value="0"/>
       <max value="1"/>
@@ -434,9 +427,8 @@
     </element>
     <element>
       <path value="SampledData.dimensions"/>
-      <short value="Number of sample points at each time point"/>
+      <short value="The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once."/>
       <definition value="The number of sample points at each time point. If this value is greater than one, then the dimensions will be interlaced - all the sample points for a point in time will be recorded at once."/>
-      <comments value="If there is more than one dimension, the code for the type of data will define the meaning of the dimensions (typically ECG data)."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -449,7 +441,7 @@
     </element>
     <element>
       <path value="SampledData.data"/>
-      <short value="Decimal values with spaces, or &quot;E&quot; | &quot;U&quot; | &quot;L&quot;"/>
+      <short value="A series of data points which are decimal values separated by a single space (character u20). The special values &quot;E&quot; (error), &quot;L&quot; (below detection limit) and &quot;U&quot; (above detection limit) can also be used in place of a decimal value."/>
       <definition value="A series of data points which are decimal values separated by a single space (character u20). The special values &quot;E&quot; (error), &quot;L&quot; (below detection limit) and &quot;U&quot; (above detection limit) can also be used in place of a decimal value."/>
       <min value="1"/>
       <max value="1"/>

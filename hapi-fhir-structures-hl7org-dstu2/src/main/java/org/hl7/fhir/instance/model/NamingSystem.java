@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -101,7 +101,7 @@ public class NamingSystem extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case CODESYSTEM: return "Codesystem";
+            case CODESYSTEM: return "Code System";
             case IDENTIFIER: return "Identifier";
             case ROOT: return "Root";
             default: return "?";
@@ -196,9 +196,9 @@ public class NamingSystem extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case OID: return "Oid";
-            case UUID: return "Uuid";
-            case URI: return "Uri";
+            case OID: return "OID";
+            case UUID: return "UUID";
+            case URI: return "URI";
             case OTHER: return "Other";
             default: return "?";
           }

@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Organization"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -289,19 +289,19 @@
   <publisher value="Health Level Seven International (Patient Administration)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Organization Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -318,11 +318,11 @@
     <name value="ServD"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Organization"/>
-      <short value="A grouping of people or organizations with a common purpose"/>
+      <short value="A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc."/>
       <definition value="A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -350,9 +350,8 @@
     </element>
     <element>
       <path value="Organization.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -361,7 +360,7 @@
     </element>
     <element>
       <path value="Organization.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -371,9 +370,8 @@
     </element>
     <element>
       <path value="Organization.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -383,11 +381,8 @@
     </element>
     <element>
       <path value="Organization.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -401,9 +396,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -421,9 +415,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -439,9 +432,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -456,9 +448,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -474,7 +465,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.identifier"/>
-      <short value="Identifies this organization  across multiple systems"/>
+      <short value="Identifier for the organization that is used to identify the organization across multiple disparate systems."/>
       <definition value="Identifier for the organization that is used to identify the organization across multiple disparate systems."/>
       <requirements value="Organizations are known by a variety of ids. Some institutions maintain several, and most collect identifiers for exchange with other organizations concerning the organization."/>
       <min value="0"/>
@@ -499,7 +490,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.name"/>
-      <short value="Name used for the organization"/>
+      <short value="A name associated with the organization."/>
       <definition value="A name associated with the organization."/>
       <requirements value="Need to use the name as the label of the organization."/>
       <min value="0"/>
@@ -524,9 +515,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.type"/>
-      <short value="Kind of organization"/>
+      <short value="The kind of organization that this is."/>
       <definition value="The kind of organization that this is."/>
-      <comments value="Organizations can be corporations, wards, sections, clinical teams, government departments, etc. Note that code is generally a classifier of the type of organization; in many applications, codes are used to identity a particular organization (say, ward) as opposed to another of the same type - these are identifiers, not codes."/>
       <requirements value="Need to be able to track the kind of organization that this is - different organization types have different uses."/>
       <min value="0"/>
       <max value="1"/>
@@ -556,9 +546,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.telecom"/>
-      <short value="A contact detail for the organization"/>
+      <short value="A contact detail for the organization."/>
       <definition value="A contact detail for the organization."/>
-      <comments value="The use code home is not to be used. Note that these contacts are not the contact details of people who are employed by or represent the organization, but official contacts for the organization itself."/>
       <requirements value="Human contact for the organization."/>
       <min value="0"/>
       <max value="*"/>
@@ -587,9 +576,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.address"/>
-      <short value="An address for the organization"/>
+      <short value="An address for the organization."/>
       <definition value="An address for the organization."/>
-      <comments value="Organization may have multiple addresses with different uses or applicable periods. The use code home is not to be used."/>
       <requirements value="May need to keep track of the organization&#39;s addresses for contacting, billing or reporting requirements."/>
       <min value="0"/>
       <max value="*"/>
@@ -618,7 +606,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.partOf"/>
-      <short value="The organization of which this organization forms a part"/>
+      <short value="The organization of which this organization forms a part."/>
       <definition value="The organization of which this organization forms a part."/>
       <requirements value="Need to be able to track the hierarchy of organizations within an organization."/>
       <min value="0"/>
@@ -643,7 +631,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact"/>
-      <short value="Contact for the organization for a certain purpose"/>
+      <short value="Contact for the organization for a certain purpose."/>
       <definition value="Contact for the organization for a certain purpose."/>
       <requirements value="Need to keep track of assigned contact points within bigger organization."/>
       <min value="0"/>
@@ -659,7 +647,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Organization.contact.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -673,9 +661,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -690,9 +677,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -709,7 +695,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.purpose"/>
-      <short value="The type of contact"/>
+      <short value="Indicates a purpose for which the contact can be reached."/>
       <definition value="Indicates a purpose for which the contact can be reached."/>
       <requirements value="Need to distinguish between multiple contact persons."/>
       <min value="0"/>
@@ -731,7 +717,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.name"/>
-      <short value="A name associated with the contact"/>
+      <short value="A name associated with the contact."/>
       <definition value="A name associated with the contact."/>
       <requirements value="Need to be able to track the person by name."/>
       <min value="0"/>
@@ -750,7 +736,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.telecom"/>
-      <short value="Contact details (telephone, email, etc)  for a contact"/>
+      <short value="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted."/>
       <definition value="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted."/>
       <requirements value="People have (primary) ways to contact them in some way such as phone, email."/>
       <min value="0"/>
@@ -769,7 +755,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.address"/>
-      <short value="Visiting or postal addresses for the contact"/>
+      <short value="Visiting or postal addresses for the contact."/>
       <definition value="Visiting or postal addresses for the contact."/>
       <requirements value="May need to keep track of a contact party&#39;s address for contacting, billing or reporting requirements."/>
       <min value="0"/>
@@ -788,9 +774,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.active"/>
-      <short value="Whether the organization&#39;s record is still in active use"/>
+      <short value="Whether the organization&#39;s record is still in active use."/>
       <definition value="Whether the organization&#39;s record is still in active use."/>
-      <comments value="Default is true."/>
       <requirements value="Need a flag to indicate a record is no longer to be used and should generally be hidden for the user in the UI."/>
       <min value="0"/>
       <max value="1"/>
@@ -817,7 +802,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="Organization"/>
-      <short value="A grouping of people or organizations with a common purpose"/>
+      <short value="A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc."/>
       <definition value="A formally or informally recognized grouping of people or organizations formed for the purpose of achieving some form of collective action.  Includes companies, institutions, corporations, departments, community groups, healthcare practice groups, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -845,7 +830,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.identifier"/>
-      <short value="Identifies this organization  across multiple systems"/>
+      <short value="Identifier for the organization that is used to identify the organization across multiple disparate systems."/>
       <definition value="Identifier for the organization that is used to identify the organization across multiple disparate systems."/>
       <requirements value="Organizations are known by a variety of ids. Some institutions maintain several, and most collect identifiers for exchange with other organizations concerning the organization."/>
       <min value="0"/>
@@ -870,7 +855,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.name"/>
-      <short value="Name used for the organization"/>
+      <short value="A name associated with the organization."/>
       <definition value="A name associated with the organization."/>
       <requirements value="Need to use the name as the label of the organization."/>
       <min value="0"/>
@@ -895,9 +880,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.type"/>
-      <short value="Kind of organization"/>
+      <short value="The kind of organization that this is."/>
       <definition value="The kind of organization that this is."/>
-      <comments value="Organizations can be corporations, wards, sections, clinical teams, government departments, etc. Note that code is generally a classifier of the type of organization; in many applications, codes are used to identity a particular organization (say, ward) as opposed to another of the same type - these are identifiers, not codes."/>
       <requirements value="Need to be able to track the kind of organization that this is - different organization types have different uses."/>
       <min value="0"/>
       <max value="1"/>
@@ -927,9 +911,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.telecom"/>
-      <short value="A contact detail for the organization"/>
+      <short value="A contact detail for the organization."/>
       <definition value="A contact detail for the organization."/>
-      <comments value="The use code home is not to be used. Note that these contacts are not the contact details of people who are employed by or represent the organization, but official contacts for the organization itself."/>
       <requirements value="Human contact for the organization."/>
       <min value="0"/>
       <max value="*"/>
@@ -958,9 +941,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.address"/>
-      <short value="An address for the organization"/>
+      <short value="An address for the organization."/>
       <definition value="An address for the organization."/>
-      <comments value="Organization may have multiple addresses with different uses or applicable periods. The use code home is not to be used."/>
       <requirements value="May need to keep track of the organization&#39;s addresses for contacting, billing or reporting requirements."/>
       <min value="0"/>
       <max value="*"/>
@@ -989,7 +971,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.partOf"/>
-      <short value="The organization of which this organization forms a part"/>
+      <short value="The organization of which this organization forms a part."/>
       <definition value="The organization of which this organization forms a part."/>
       <requirements value="Need to be able to track the hierarchy of organizations within an organization."/>
       <min value="0"/>
@@ -1014,7 +996,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact"/>
-      <short value="Contact for the organization for a certain purpose"/>
+      <short value="Contact for the organization for a certain purpose."/>
       <definition value="Contact for the organization for a certain purpose."/>
       <requirements value="Need to keep track of assigned contact points within bigger organization."/>
       <min value="0"/>
@@ -1026,7 +1008,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.purpose"/>
-      <short value="The type of contact"/>
+      <short value="Indicates a purpose for which the contact can be reached."/>
       <definition value="Indicates a purpose for which the contact can be reached."/>
       <requirements value="Need to distinguish between multiple contact persons."/>
       <min value="0"/>
@@ -1048,7 +1030,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.name"/>
-      <short value="A name associated with the contact"/>
+      <short value="A name associated with the contact."/>
       <definition value="A name associated with the contact."/>
       <requirements value="Need to be able to track the person by name."/>
       <min value="0"/>
@@ -1067,7 +1049,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.telecom"/>
-      <short value="Contact details (telephone, email, etc)  for a contact"/>
+      <short value="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted."/>
       <definition value="A contact detail (e.g. a telephone number or an email address) by which the party may be contacted."/>
       <requirements value="People have (primary) ways to contact them in some way such as phone, email."/>
       <min value="0"/>
@@ -1086,7 +1068,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.contact.address"/>
-      <short value="Visiting or postal addresses for the contact"/>
+      <short value="Visiting or postal addresses for the contact."/>
       <definition value="Visiting or postal addresses for the contact."/>
       <requirements value="May need to keep track of a contact party&#39;s address for contacting, billing or reporting requirements."/>
       <min value="0"/>
@@ -1105,9 +1087,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Organization.active"/>
-      <short value="Whether the organization&#39;s record is still in active use"/>
+      <short value="Whether the organization&#39;s record is still in active use."/>
       <definition value="Whether the organization&#39;s record is still in active use."/>
-      <comments value="Default is true."/>
       <requirements value="Need a flag to indicate a record is no longer to be used and should generally be hidden for the user in the UI."/>
       <min value="0"/>
       <max value="1"/>

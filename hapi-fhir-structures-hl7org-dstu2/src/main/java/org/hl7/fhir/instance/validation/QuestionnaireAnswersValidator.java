@@ -49,7 +49,8 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 	 * Note to anyone working on this class -
 	 * 
 	 * This class has unit tests which run within the HAPI project build. Please sync any changes here to HAPI and ensure that unit tests are run.
-	 * *****************************************************************/
+	 * ****************************************************************
+	 */
 
 	private WorkerContext myWorkerCtx;
 
@@ -107,10 +108,8 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 		boolean validateRequired = false;
 		if (status == QuestionnaireAnswersStatus.COMPLETED || status == QuestionnaireAnswersStatus.AMENDED) {
 			validateRequired = true;
-		} else {
-			hint(theErrors, null, null, false, "Questionnaire has status {0} so ");
 		}
-		
+
 		pathStack.removeLast();
 		pathStack.add("group(0)");
 		validateGroup(theErrors, questionnaire.getGroup(), theAnswers.getGroup(), pathStack, theAnswers, validateRequired);
@@ -201,7 +200,11 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !theQuestion.getRequired(), "Multiple answers repetitions found with linkId[{0}]", linkId);
 		}
 		if (answers.size() == 0) {
-			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(theQuestion.getRequired() && theValidateRequired), "Missing answer to required question with linkId[{0}]", linkId);
+			if (theValidateRequired) {
+				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !theQuestion.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
+			} else {
+				hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !theQuestion.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
+			}
 			return;
 		}
 
@@ -234,8 +237,12 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 
 			List<org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent> answerGroups = findGroupByLinkId(theAnswerGroups, linkId);
 			if (answerGroups.isEmpty()) {
-				if (nextQuestionGroup.getRequired() && theValidateRequired) {
-					rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]", linkId);
+				if (nextQuestionGroup.getRequired()) {
+					if (theValidateRequired) {
+						rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]", linkId);
+					} else {
+						hint(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required group with linkId[{0}]", linkId);
+					}
 				}
 				continue;
 			}
@@ -261,7 +268,8 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 			idx++;
 			if (!allowedGroups.contains(next.getLinkId())) {
 				thePathStack.add("group(" + idx + ")");
-				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Group with linkId[{0}] found at this position, but this group does not exist at this position in Questionnaire", next.getLinkId());
+				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Group with linkId[{0}] found at this position, but this group does not exist at this position in Questionnaire",
+						next.getLinkId());
 				thePathStack.removeLast();
 			}
 		}
@@ -274,10 +282,14 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 		Set<Class<? extends Type>> allowedAnswerTypes = determineAllowedAnswerTypes(type);
 		if (allowedAnswerTypes.isEmpty()) {
 			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, answerQuestion.isEmpty(), "Question with linkId[{0}] has no answer type but an answer was provided", linkId);
-		} else if (theValidateRequired) {
+		} else {
 			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(answerQuestion.getAnswer().size() > 1 && !theQuestion.getRepeats()), "Multiple answers to non repeating question with linkId[{0}]",
 					linkId);
-			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()), "Missing answer to required question with linkId[{0}]", linkId);
+			if (theValidateRequired) {
+				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()), "Missing answer to required question with linkId[{0}]", linkId);
+			} else {
+				hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !(theQuestion.getRequired() && answerQuestion.getAnswer().isEmpty()), "Missing answer to required question with linkId[{0}]", linkId);
+			}
 		}
 
 		int answerIdx = -1;
@@ -320,8 +332,8 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 						}
 
 						boolean found = false;
-						if (coding.getSystem().equals(valueSet.getDefine().getSystem())) {
-							for (ConceptDefinitionComponent next : valueSet.getDefine().getConcept()) {
+						if (coding.getSystem().equals(valueSet.getCodeSystem().getSystem())) {
+							for (ConceptDefinitionComponent next : valueSet.getCodeSystem().getConcept()) {
 								if (coding.getCode().equals(next.getCode())) {
 									found = true;
 									break;

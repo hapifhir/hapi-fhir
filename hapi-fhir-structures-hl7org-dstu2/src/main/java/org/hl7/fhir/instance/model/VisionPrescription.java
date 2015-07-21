@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,11 +49,11 @@ public class VisionPrescription extends DomainResource {
 
     public enum VisionEyes {
         /**
-         * right eye
+         * Right Eye
          */
         RIGHT, 
         /**
-         * left eye
+         * Left Eye
          */
         LEFT, 
         /**
@@ -78,22 +78,22 @@ public class VisionPrescription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case RIGHT: return "http://hl7.org/fhir/eye-codes";
-            case LEFT: return "http://hl7.org/fhir/eye-codes";
+            case RIGHT: return "http://hl7.org/fhir/vision-eye-codes";
+            case LEFT: return "http://hl7.org/fhir/vision-eye-codes";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case RIGHT: return "right eye";
-            case LEFT: return "left eye";
+            case RIGHT: return "Right Eye";
+            case LEFT: return "Left Eye";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case RIGHT: return "Right";
-            case LEFT: return "Left";
+            case RIGHT: return "Right Eye";
+            case LEFT: return "Left Eye";
             default: return "?";
           }
         }
@@ -164,10 +164,10 @@ public class VisionPrescription extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case UP: return "http://hl7.org/fhir/base-codes";
-            case DOWN: return "http://hl7.org/fhir/base-codes";
-            case IN: return "http://hl7.org/fhir/base-codes";
-            case OUT: return "http://hl7.org/fhir/base-codes";
+            case UP: return "http://hl7.org/fhir/vision-base-codes";
+            case DOWN: return "http://hl7.org/fhir/vision-base-codes";
+            case IN: return "http://hl7.org/fhir/vision-base-codes";
+            case OUT: return "http://hl7.org/fhir/vision-base-codes";
             default: return "?";
           }
         }

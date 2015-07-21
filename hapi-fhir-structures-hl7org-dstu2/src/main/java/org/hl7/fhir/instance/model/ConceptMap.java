@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -828,10 +828,10 @@ public class ConceptMap extends DomainResource {
         protected UriType element;
 
         /**
-         * An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems).
+         * An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).
          */
         @Child(name = "codeSystem", type = {UriType.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="Code System (if necessary)", formalDefinition="An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems)." )
+        @Description(shortDefinition="Code System (if necessary)", formalDefinition="An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems)." )
         protected UriType codeSystem;
 
         /**
@@ -906,7 +906,7 @@ public class ConceptMap extends DomainResource {
         }
 
         /**
-         * @return {@link #codeSystem} (An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
+         * @return {@link #codeSystem} (An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
          */
         public UriType getCodeSystemElement() { 
           if (this.codeSystem == null)
@@ -926,7 +926,7 @@ public class ConceptMap extends DomainResource {
         }
 
         /**
-         * @param value {@link #codeSystem} (An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
+         * @param value {@link #codeSystem} (An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).). This is the underlying object with id, value and extensions. The accessor "getCodeSystem" gives direct access to the value
          */
         public OtherElementComponent setCodeSystemElement(UriType value) { 
           this.codeSystem = value;
@@ -934,14 +934,14 @@ public class ConceptMap extends DomainResource {
         }
 
         /**
-         * @return An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems).
+         * @return An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).
          */
         public String getCodeSystem() { 
           return this.codeSystem == null ? null : this.codeSystem.getValue();
         }
 
         /**
-         * @param value An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems).
+         * @param value An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).
          */
         public OtherElementComponent setCodeSystem(String value) { 
             if (this.codeSystem == null)
@@ -998,7 +998,7 @@ public class ConceptMap extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("element", "uri", "A reference to a specific concept that holds a coded value. This can be an element in a FHIR resource, or a specific reference to a data element in a different specification (e.g. v2) or a general reference to a kind of data field, or a reference to a value set with an appropriately narrow definition.", 0, java.lang.Integer.MAX_VALUE, element));
-          childrenList.add(new Property("codeSystem", "uri", "An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that cross code systems).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
+          childrenList.add(new Property("codeSystem", "uri", "An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).", 0, java.lang.Integer.MAX_VALUE, codeSystem));
           childrenList.add(new Property("code", "string", "Identity (code or path) or the element/item that the map depends on / refers to.", 0, java.lang.Integer.MAX_VALUE, code));
         }
 

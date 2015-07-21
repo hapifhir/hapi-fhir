@@ -253,7 +253,8 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
-            <a href="datatypes-definitions.html#Timing.repeat.frequencyMax" title="Timing.repeat.frequencyMax : If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.">frequencyMax</a>
+            <a href="datatypes-definitions.html#Timing.repeat.frequencyMax" title="Timing.repeat.frequencyMax : If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
+						or period range.">frequencyMax</a>
             <a name="Timing.repeat.frequencyMax"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
@@ -373,14 +374,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Timing Resource"/>
   <requirements value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -393,13 +394,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Timing"/>
-      <short value="A timing schedule that specifies an event that may occur multiple times"/>
+      <short value="Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds."/>
       <definition value="Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds."/>
-      <comments value="A timing schedule can be either a list of events - intervals on which the event occurs, or a single event with repeating criteria or just repeating criteria with no actual event.  When both event and a repeating specification are provided, the list of events should be understood as an interpretation of the information in the repeat structure."/>
       <requirements value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
       <min value="1"/>
       <max value="1"/>
@@ -418,7 +417,7 @@
     <element>
       <path value="Timing.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -432,9 +431,8 @@
     </element>
     <element>
       <path value="Timing.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -449,7 +447,7 @@
     </element>
     <element>
       <path value="Timing.event"/>
-      <short value="When the event occurs"/>
+      <short value="Identifies specific times when the event occurs."/>
       <definition value="Identifies specific times when the event occurs."/>
       <requirements value="In an MAR, for instance, you need to take a general specification, and turn it into a precise specification."/>
       <min value="0"/>
@@ -464,7 +462,7 @@
     </element>
     <element>
       <path value="Timing.repeat"/>
-      <short value="When the event is to occur"/>
+      <short value="A set of rules that describe when the event should occur."/>
       <definition value="A set of rules that describe when the event should occur."/>
       <requirements value="Many timing schedules are determined by regular repetitions."/>
       <min value="0"/>
@@ -510,7 +508,7 @@
     <element>
       <path value="Timing.repeat.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -524,9 +522,8 @@
     </element>
     <element>
       <path value="Timing.repeat.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -541,7 +538,7 @@
     </element>
     <element>
       <path value="Timing.repeat.bounds[x]"/>
-      <short value="Length/Range of lengths, or (Start and/or end) limits"/>
+      <short value="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule."/>
       <definition value="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule."/>
       <min value="0"/>
       <max value="1"/>
@@ -561,9 +558,8 @@
     </element>
     <element>
       <path value="Timing.repeat.count"/>
-      <short value="Number of times to repeat"/>
+      <short value="A total count of the desired number of repetitions."/>
       <definition value="A total count of the desired number of repetitions."/>
-      <comments value="If you have both bounds and count, then this should be understand as within the bounds period, until count times happens."/>
       <requirements value="Repetitions may be limited by end time or total occurrences."/>
       <min value="0"/>
       <max value="1"/>
@@ -577,9 +573,8 @@
     </element>
     <element>
       <path value="Timing.repeat.duration"/>
-      <short value="How long when it happens"/>
+      <short value="How long this thing happens for when it happens."/>
       <definition value="How long this thing happens for when it happens."/>
-      <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions). For others, it&#39;s part of the timing specification (e.g. exercise)."/>
       <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
       <min value="0"/>
       <max value="1"/>
@@ -599,9 +594,8 @@
     </element>
     <element>
       <path value="Timing.repeat.durationMax"/>
-      <short value="How long when it happens (Max)"/>
+      <short value="The upper limit of how long this thing happens for when it happens."/>
       <definition value="The upper limit of how long this thing happens for when it happens."/>
-      <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions). For others, it&#39;s part of the timing specification (e.g. exercise)."/>
       <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
       <min value="0"/>
       <max value="1"/>
@@ -615,7 +609,7 @@
     </element>
     <element>
       <path value="Timing.repeat.durationUnits"/>
-      <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+      <short value="The units of time for the duration, in UCUM units."/>
       <definition value="The units of time for the duration, in UCUM units."/>
       <min value="0"/>
       <max value="1"/>
@@ -636,7 +630,7 @@
     </element>
     <element>
       <path value="Timing.repeat.frequency"/>
-      <short value="Event occurs frequency times per duration"/>
+      <short value="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)."/>
       <definition value="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)."/>
       <min value="0"/>
       <max value="1"/>
@@ -651,8 +645,10 @@
     </element>
     <element>
       <path value="Timing.repeat.frequencyMax"/>
-      <short value="Event occurs frequency times per duration"/>
-      <definition value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range."/>
+      <short value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
+						or period range."/>
+      <definition value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
+						or period range."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -665,7 +661,7 @@
     </element>
     <element>
       <path value="Timing.repeat.period"/>
-      <short value="Event occurs frequency times per period"/>
+      <short value="Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period."/>
       <definition value="Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period."/>
       <min value="0"/>
       <max value="1"/>
@@ -685,7 +681,7 @@
     </element>
     <element>
       <path value="Timing.repeat.periodMax"/>
-      <short value="Upper limit of period (3-4 hours)"/>
+      <short value="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days."/>
       <definition value="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days."/>
       <min value="0"/>
       <max value="1"/>
@@ -699,7 +695,7 @@
     </element>
     <element>
       <path value="Timing.repeat.periodUnits"/>
-      <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+      <short value="The units of time for the period in UCUM units."/>
       <definition value="The units of time for the period in UCUM units."/>
       <min value="0"/>
       <max value="1"/>
@@ -720,7 +716,7 @@
     </element>
     <element>
       <path value="Timing.repeat.when"/>
-      <short value="Regular life events the event is tied to"/>
+      <short value="A real world event that the occurrence of the event should be tied to."/>
       <definition value="A real world event that the occurrence of the event should be tied to."/>
       <requirements value="Timings are frequently determined by occurrences such as waking, eating and sleep."/>
       <min value="0"/>
@@ -742,9 +738,8 @@
     </element>
     <element>
       <path value="Timing.code"/>
-      <short value="BID | TID | QID | AM | PM +"/>
+      <short value="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes."/>
       <definition value="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes."/>
-      <comments value="A repeat should always be defined except for the common codes BID, TID, QID, AM and PM, which all systems are required to understand."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -766,9 +761,8 @@
   <differential>
     <element>
       <path value="Timing"/>
-      <short value="A timing schedule that specifies an event that may occur multiple times"/>
+      <short value="Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds."/>
       <definition value="Specifies an event that may occur multiple times. Timing schedules are used to record when things are expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds."/>
-      <comments value="A timing schedule can be either a list of events - intervals on which the event occurs, or a single event with repeating criteria or just repeating criteria with no actual event.  When both event and a repeating specification are provided, the list of events should be understood as an interpretation of the information in the repeat structure."/>
       <requirements value="Need to able to track proposed timing schedules. There are several different ways to do this: one or more specified times, a simple rules like three times a day, or  before/after meals."/>
       <min value="1"/>
       <max value="1"/>
@@ -786,7 +780,7 @@
     </element>
     <element>
       <path value="Timing.event"/>
-      <short value="When the event occurs"/>
+      <short value="Identifies specific times when the event occurs."/>
       <definition value="Identifies specific times when the event occurs."/>
       <requirements value="In an MAR, for instance, you need to take a general specification, and turn it into a precise specification."/>
       <min value="0"/>
@@ -801,7 +795,7 @@
     </element>
     <element>
       <path value="Timing.repeat"/>
-      <short value="When the event is to occur"/>
+      <short value="A set of rules that describe when the event should occur."/>
       <definition value="A set of rules that describe when the event should occur."/>
       <requirements value="Many timing schedules are determined by regular repetitions."/>
       <min value="0"/>
@@ -843,7 +837,7 @@
     </element>
     <element>
       <path value="Timing.repeat.bounds[x]"/>
-      <short value="Length/Range of lengths, or (Start and/or end) limits"/>
+      <short value="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule."/>
       <definition value="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule."/>
       <min value="0"/>
       <max value="1"/>
@@ -863,9 +857,8 @@
     </element>
     <element>
       <path value="Timing.repeat.count"/>
-      <short value="Number of times to repeat"/>
+      <short value="A total count of the desired number of repetitions."/>
       <definition value="A total count of the desired number of repetitions."/>
-      <comments value="If you have both bounds and count, then this should be understand as within the bounds period, until count times happens."/>
       <requirements value="Repetitions may be limited by end time or total occurrences."/>
       <min value="0"/>
       <max value="1"/>
@@ -879,9 +872,8 @@
     </element>
     <element>
       <path value="Timing.repeat.duration"/>
-      <short value="How long when it happens"/>
+      <short value="How long this thing happens for when it happens."/>
       <definition value="How long this thing happens for when it happens."/>
-      <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions). For others, it&#39;s part of the timing specification (e.g. exercise)."/>
       <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
       <min value="0"/>
       <max value="1"/>
@@ -901,9 +893,8 @@
     </element>
     <element>
       <path value="Timing.repeat.durationMax"/>
-      <short value="How long when it happens (Max)"/>
+      <short value="The upper limit of how long this thing happens for when it happens."/>
       <definition value="The upper limit of how long this thing happens for when it happens."/>
-      <comments value="For some events the duration is part of the definition of the event (e.g. IV infusions). For others, it&#39;s part of the timing specification (e.g. exercise)."/>
       <requirements value="Some activities are not instantaneous and need to be maintained for a period of time."/>
       <min value="0"/>
       <max value="1"/>
@@ -917,7 +908,7 @@
     </element>
     <element>
       <path value="Timing.repeat.durationUnits"/>
-      <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+      <short value="The units of time for the duration, in UCUM units."/>
       <definition value="The units of time for the duration, in UCUM units."/>
       <min value="0"/>
       <max value="1"/>
@@ -938,7 +929,7 @@
     </element>
     <element>
       <path value="Timing.repeat.frequency"/>
-      <short value="Event occurs frequency times per duration"/>
+      <short value="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)."/>
       <definition value="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)."/>
       <min value="0"/>
       <max value="1"/>
@@ -953,8 +944,10 @@
     </element>
     <element>
       <path value="Timing.repeat.frequencyMax"/>
-      <short value="Event occurs frequency times per duration"/>
-      <definition value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range."/>
+      <short value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
+						or period range."/>
+      <definition value="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
+						or period range."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -967,7 +960,7 @@
     </element>
     <element>
       <path value="Timing.repeat.period"/>
-      <short value="Event occurs frequency times per period"/>
+      <short value="Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period."/>
       <definition value="Indicates the duration of time over which repetitions are to occur.  E.g. to express &quot;3 times per day&quot;, 3 would be the frequency and &quot;1 day&quot; would be the period."/>
       <min value="0"/>
       <max value="1"/>
@@ -987,7 +980,7 @@
     </element>
     <element>
       <path value="Timing.repeat.periodMax"/>
-      <short value="Upper limit of period (3-4 hours)"/>
+      <short value="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days."/>
       <definition value="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as &quot;do this once every 3-5 days."/>
       <min value="0"/>
       <max value="1"/>
@@ -1001,7 +994,7 @@
     </element>
     <element>
       <path value="Timing.repeat.periodUnits"/>
-      <short value="s | min | h | d | wk | mo | a - unit of time (UCUM)"/>
+      <short value="The units of time for the period in UCUM units."/>
       <definition value="The units of time for the period in UCUM units."/>
       <min value="0"/>
       <max value="1"/>
@@ -1022,7 +1015,7 @@
     </element>
     <element>
       <path value="Timing.repeat.when"/>
-      <short value="Regular life events the event is tied to"/>
+      <short value="A real world event that the occurrence of the event should be tied to."/>
       <definition value="A real world event that the occurrence of the event should be tied to."/>
       <requirements value="Timings are frequently determined by occurrences such as waking, eating and sleep."/>
       <min value="0"/>
@@ -1044,9 +1037,8 @@
     </element>
     <element>
       <path value="Timing.code"/>
-      <short value="BID | TID | QID | AM | PM +"/>
+      <short value="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes."/>
       <definition value="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes."/>
-      <comments value="A repeat should always be defined except for the common codes BID, TID, QID, AM and PM, which all systems are required to understand."/>
       <min value="0"/>
       <max value="1"/>
       <type>

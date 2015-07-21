@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Claim"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -61,7 +61,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">institutional | oral | pharmacy | professional | vision
             <br/>
-            <a href="valueset-type-link.html" title="The type or discipline-style of the claim">ClaimType</a> (
+            <a href="valueset-claim-type-link.html" title="The type or discipline-style of the claim">ClaimType</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -201,7 +201,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">complete | proposed | exploratory | other
             <br/>
-            <a href="valueset-use-link.html" title="Complete, proposed, exploratory, other">Use</a> (
+            <a href="valueset-claim-use-link.html" title="Complete, proposed, exploratory, other">Use</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -680,7 +680,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Eligibility exceptions
             <br/>
-            <a href="valueset-exception.html" title="The eligibility exception codes.">Exception Codes</a> (
+            <a href="valueset-claim-exception.html" title="The eligibility exception codes.">Exception Codes</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -732,7 +732,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Accident Type
             <br/>
-            <a href="v3/vs/ActIncidentCode/index.html" title="Type of accident: work place, auto, etc.">ActIncidentCode</a> (
+            <a href="v3/ActIncidentCode/index.html" title="Type of accident: work place, auto, etc.">ActIncidentCode</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -806,7 +806,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Group or type of product or service
             <br/>
-            <a href="v3/vs/ActInvoiceGroupCode/index.html" title="Service, Product, Rx Dispense, Rx Compound etc.">ActInvoiceGroupCode</a> (
+            <a href="v3/ActInvoiceGroupCode/index.html" title="Service, Product, Rx Dispense, Rx Compound etc.">ActInvoiceGroupCode</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -1047,7 +1047,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Service/Product billing modifiers
             <br/>
-            <a href="valueset-modifiers.html" title="Item type or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.">Modifier type Codes</a> (
+            <a href="valueset-claim-modifiers.html" title="Item type or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen.">Modifier type Codes</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -1104,7 +1104,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Group or type of product or service
             <br/>
-            <a href="v3/vs/ActInvoiceGroupCode/index.html" title="Service, Product, Rx Dispense, Rx Compound etc.">ActInvoiceGroupCode</a> (
+            <a href="v3/ActInvoiceGroupCode/index.html" title="Service, Product, Rx Dispense, Rx Compound etc.">ActInvoiceGroupCode</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -1298,7 +1298,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Type of product or service
             <br/>
-            <a href="v3/vs/ActInvoiceGroupCode/index.html" title="Service, Product, Rx Dispense, Rx Compound etc.">ActInvoiceGroupCode</a> (
+            <a href="v3/ActInvoiceGroupCode/index.html" title="Service, Product, Rx Dispense, Rx Compound etc.">ActInvoiceGroupCode</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
           </td>
         </tr>
@@ -1625,30 +1625,30 @@
   <publisher value="Health Level Seven International (Financial Management)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Claim Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Claim"/>
-      <short value="Claim, Pre-determination or Pre-authorization"/>
+      <short value="A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery."/>
       <definition value="A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery."/>
       <min value="1"/>
       <max value="1"/>
@@ -1658,9 +1658,8 @@
     </element>
     <element>
       <path value="Claim.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1669,7 +1668,7 @@
     </element>
     <element>
       <path value="Claim.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -1679,9 +1678,8 @@
     </element>
     <element>
       <path value="Claim.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1691,11 +1689,8 @@
     </element>
     <element>
       <path value="Claim.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1709,9 +1704,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -1729,9 +1723,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -1747,9 +1740,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1764,9 +1756,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1782,9 +1773,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.type"/>
-      <short value="institutional | oral | pharmacy | professional | vision"/>
+      <short value="The category of claim this is."/>
       <definition value="The category of claim this is."/>
-      <comments value="Affects which fields and value sets are used."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1794,13 +1784,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="required"/>
         <description value="The type or discipline-style of the claim"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/type-link"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-type-link"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.identifier"/>
-      <short value="Claim number"/>
+      <short value="The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number."/>
       <definition value="The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number."/>
       <min value="0"/>
       <max value="*"/>
@@ -1810,7 +1800,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.ruleset"/>
-      <short value="Current specification followed"/>
+      <short value="The version of the specification on which this instance relies."/>
       <definition value="The version of the specification on which this instance relies."/>
       <alias value="BusinessVersion"/>
       <min value="0"/>
@@ -1828,7 +1818,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.originalRuleset"/>
-      <short value="Original specification followed"/>
+      <short value="The version of the specification from which the original instance was created."/>
       <definition value="The version of the specification from which the original instance was created."/>
       <alias value="OriginalBusinessVersion"/>
       <min value="0"/>
@@ -1846,7 +1836,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.created"/>
-      <short value="Creation date"/>
+      <short value="The date when the enclosed suite of services were performed or completed."/>
       <definition value="The date when the enclosed suite of services were performed or completed."/>
       <min value="0"/>
       <max value="1"/>
@@ -1856,7 +1846,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.target"/>
-      <short value="Insurer"/>
+      <short value="Insurer Identifier, typical BIN number (6 digit)."/>
       <definition value="Insurer Identifier, typical BIN number (6 digit)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1867,7 +1857,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.provider"/>
-      <short value="Responsible provider"/>
+      <short value="The provider which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <definition value="The provider which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1878,7 +1868,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.organization"/>
-      <short value="Responsible organization"/>
+      <short value="The organization which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <definition value="The organization which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1889,7 +1879,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.use"/>
-      <short value="complete | proposed | exploratory | other"/>
+      <short value="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)."/>
       <definition value="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1900,13 +1890,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="required"/>
         <description value="Complete, proposed, exploratory, other"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/use-link"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-use-link"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.priority"/>
-      <short value="Desired processing priority"/>
+      <short value="Immediate (STAT), best effort (NORMAL), deferred (DEFER)."/>
       <definition value="Immediate (STAT), best effort (NORMAL), deferred (DEFER)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1923,7 +1913,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.fundsReserve"/>
-      <short value="Funds requested to be reserved"/>
+      <short value="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved (&#39;Patient&#39; or &#39;Provider&#39;) to pay for the Benefits determined on the subsequent claim(s). &#39;None&#39; explicitly indicates no funds reserving is requested."/>
       <definition value="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved (&#39;Patient&#39; or &#39;Provider&#39;) to pay for the Benefits determined on the subsequent claim(s). &#39;None&#39; explicitly indicates no funds reserving is requested."/>
       <min value="0"/>
       <max value="1"/>
@@ -1940,7 +1930,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.enterer"/>
-      <short value="Author"/>
+      <short value="Person who created the invoice/claim/pre-determination or pre-authorization."/>
       <definition value="Person who created the invoice/claim/pre-determination or pre-authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1951,7 +1941,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.facility"/>
-      <short value="Servicing Facility"/>
+      <short value="Facility where the services were provided."/>
       <definition value="Facility where the services were provided."/>
       <min value="0"/>
       <max value="1"/>
@@ -1962,7 +1952,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.prescription"/>
-      <short value="Prescription"/>
+      <short value="Prescription to support the dispensing of Pharmacy or Vision products."/>
       <definition value="Prescription to support the dispensing of Pharmacy or Vision products."/>
       <requirements value="For type=Pharmacy and Vision only."/>
       <min value="0"/>
@@ -1978,7 +1968,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.originalPrescription"/>
-      <short value="Original Prescription"/>
+      <short value="Original prescription to support the dispensing of pharmacy services, medications or products."/>
       <definition value="Original prescription to support the dispensing of pharmacy services, medications or products."/>
       <min value="0"/>
       <max value="1"/>
@@ -1989,7 +1979,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee"/>
-      <short value="Payee"/>
+      <short value="The party to be reimbursed for the services."/>
       <definition value="The party to be reimbursed for the services."/>
       <min value="0"/>
       <max value="1"/>
@@ -2000,7 +1990,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.payee.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2014,9 +2004,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2031,9 +2020,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2050,7 +2038,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.type"/>
-      <short value="Party to be paid any benefits payable"/>
+      <short value="Party to be reimbursed: Subscriber, provider, other."/>
       <definition value="Party to be reimbursed: Subscriber, provider, other."/>
       <min value="0"/>
       <max value="1"/>
@@ -2067,7 +2055,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.provider"/>
-      <short value="Provider who is the payee"/>
+      <short value="The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <definition value="The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2078,7 +2066,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.organization"/>
-      <short value="Organization who is the payee"/>
+      <short value="The organization who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <definition value="The organization who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2089,7 +2077,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.person"/>
-      <short value="Other person who is the payee"/>
+      <short value="The person other than the subscriber who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <definition value="The person other than the subscriber who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2100,7 +2088,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.referral"/>
-      <short value="Treatment Referral"/>
+      <short value="The referral resource which lists the date, practitioner, reason and other supporting information."/>
       <definition value="The referral resource which lists the date, practitioner, reason and other supporting information."/>
       <min value="0"/>
       <max value="1"/>
@@ -2111,7 +2099,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis"/>
-      <short value="Diagnosis"/>
+      <short value="Ordered list of patient diagnosis for which care is sought."/>
       <definition value="Ordered list of patient diagnosis for which care is sought."/>
       <min value="0"/>
       <max value="*"/>
@@ -2122,7 +2110,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.diagnosis.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2136,9 +2124,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2153,9 +2140,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2172,7 +2158,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis.sequence"/>
-      <short value="Sequence of diagnosis"/>
+      <short value="Sequence of diagnosis which serves to order and provide a link."/>
       <definition value="Sequence of diagnosis which serves to order and provide a link."/>
       <requirements value="Required to maintain order of the diagnoses."/>
       <min value="1"/>
@@ -2183,7 +2169,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis.diagnosis"/>
-      <short value="Patient&#39;s list of diagnosis"/>
+      <short value="The diagnosis."/>
       <definition value="The diagnosis."/>
       <requirements value="Required to adjudicate services rendered to condition presented."/>
       <min value="1"/>
@@ -2201,7 +2187,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.condition"/>
-      <short value="List of presenting Conditions"/>
+      <short value="List of patient conditions for which care is sought."/>
       <definition value="List of patient conditions for which care is sought."/>
       <min value="0"/>
       <max value="*"/>
@@ -2218,7 +2204,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.patient"/>
-      <short value="The subject of the Products and Services"/>
+      <short value="Patient Resource."/>
       <definition value="Patient Resource."/>
       <min value="1"/>
       <max value="1"/>
@@ -2229,7 +2215,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage"/>
-      <short value="Insurance or medical plan"/>
+      <short value="Financial instrument by which payment information for health care."/>
       <definition value="Financial instrument by which payment information for health care."/>
       <requirements value="Health care programs and insurers are significant payors of health service costs."/>
       <min value="0"/>
@@ -2245,7 +2231,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.coverage.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2259,9 +2245,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2276,9 +2261,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2295,7 +2279,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.sequence"/>
-      <short value="Service instance identifier"/>
+      <short value="A service line item."/>
       <definition value="A service line item."/>
       <requirements value="To maintain order of the coverages."/>
       <min value="1"/>
@@ -2306,7 +2290,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.focal"/>
-      <short value="Is the focal Coverage"/>
+      <short value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <definition value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <requirements value="To identify which coverage is being adjudicated."/>
       <min value="1"/>
@@ -2317,7 +2301,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.coverage"/>
-      <short value="Insurance information"/>
+      <short value="Reference to the program or plan identification, underwriter or payor."/>
       <definition value="Reference to the program or plan identification, underwriter or payor."/>
       <requirements value="Need to identify the issuer to target for processing and for coordination of benefit processing."/>
       <min value="1"/>
@@ -2329,7 +2313,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.businessArrangement"/>
-      <short value="Business agreement"/>
+      <short value="The contract number of a business agreement which describes the terms and conditions."/>
       <definition value="The contract number of a business agreement which describes the terms and conditions."/>
       <min value="0"/>
       <max value="1"/>
@@ -2339,7 +2323,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.relationship"/>
-      <short value="Patient relationship to subscriber"/>
+      <short value="The relationship of the patient to the subscriber."/>
       <definition value="The relationship of the patient to the subscriber."/>
       <requirements value="To determine relationship between the patient and the subscriber."/>
       <min value="1"/>
@@ -2357,7 +2341,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.preAuthRef"/>
-      <short value="Pre-Authorization/Determination Reference"/>
+      <short value="A list of references from the Insurer to which these services pertain."/>
       <definition value="A list of references from the Insurer to which these services pertain."/>
       <requirements value="To provide any pre=determination or prior authorization reference."/>
       <min value="0"/>
@@ -2368,7 +2352,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.claimResponse"/>
-      <short value="Adjudication results"/>
+      <short value="The Coverages adjudication details."/>
       <definition value="The Coverages adjudication details."/>
       <requirements value="Used by downstream payers to determine what balance remains and the net payable."/>
       <min value="0"/>
@@ -2380,7 +2364,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.originalRuleset"/>
-      <short value="Original version"/>
+      <short value="The style (standard) and version of the original material which was converted into this resource."/>
       <definition value="The style (standard) and version of the original material which was converted into this resource."/>
       <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
       <min value="0"/>
@@ -2398,7 +2382,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.exception"/>
-      <short value="Eligibility exceptions"/>
+      <short value="Factors which may influence the applicability of coverage."/>
       <definition value="Factors which may influence the applicability of coverage."/>
       <requirements value="To determine extenuating circumstances for coverage."/>
       <min value="0"/>
@@ -2410,13 +2394,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="example"/>
         <description value="The eligibility exception codes."/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/exception"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-exception"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.school"/>
-      <short value="Name of School"/>
+      <short value="Name of school for over-aged dependants."/>
       <definition value="Name of school for over-aged dependants."/>
       <requirements value="Often required for over-age dependents."/>
       <min value="0"/>
@@ -2427,7 +2411,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.accident"/>
-      <short value="Accident Date"/>
+      <short value="Date of an accident which these services are addressing."/>
       <definition value="Date of an accident which these services are addressing."/>
       <requirements value="Coverage may be dependant on accidents."/>
       <min value="0"/>
@@ -2438,7 +2422,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.accidentType"/>
-      <short value="Accident Type"/>
+      <short value="Type of accident: work, auto, etc."/>
       <definition value="Type of accident: work, auto, etc."/>
       <requirements value="Coverage may be dependant on the type of accident."/>
       <min value="0"/>
@@ -2456,7 +2440,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.interventionException"/>
-      <short value="Intervention and exception code (Pharma)"/>
+      <short value="A list of intervention and exception codes which may influence the adjudication of the claim."/>
       <definition value="A list of intervention and exception codes which may influence the adjudication of the claim."/>
       <requirements value="Coverage may be modified based on exception information provided."/>
       <min value="0"/>
@@ -2474,7 +2458,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item"/>
-      <short value="Goods and Services"/>
+      <short value="First tier of goods and services."/>
       <definition value="First tier of goods and services."/>
       <min value="0"/>
       <max value="*"/>
@@ -2485,7 +2469,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.item.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2499,9 +2483,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2516,9 +2499,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2535,7 +2517,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.sequence"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -2545,7 +2527,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.type"/>
-      <short value="Group or type of product or service"/>
+      <short value="The type of product or service."/>
       <definition value="The type of product or service."/>
       <min value="1"/>
       <max value="1"/>
@@ -2562,7 +2544,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.provider"/>
-      <short value="Responsible practitioner"/>
+      <short value="The practitioner who is responsible for the services rendered to the patient."/>
       <definition value="The practitioner who is responsible for the services rendered to the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -2573,7 +2555,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.diagnosisLinkId"/>
-      <short value="Diagnosis Link"/>
+      <short value="Diagnosis applicable for this service or product line."/>
       <definition value="Diagnosis applicable for this service or product line."/>
       <min value="0"/>
       <max value="*"/>
@@ -2583,7 +2565,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.service"/>
-      <short value="Item Code"/>
+      <short value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <definition value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -2600,7 +2582,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.serviceDate"/>
-      <short value="Date of Service"/>
+      <short value="The date when the enclosed suite of services were performed or completed."/>
       <definition value="The date when the enclosed suite of services were performed or completed."/>
       <min value="0"/>
       <max value="1"/>
@@ -2610,7 +2592,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.quantity"/>
-      <short value="Count of Products or Services"/>
+      <short value="The number of repetitions of a service or product."/>
       <definition value="The number of repetitions of a service or product."/>
       <min value="0"/>
       <max value="1"/>
@@ -2620,7 +2602,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.unitPrice"/>
-      <short value="Fee, charge or cost per point"/>
+      <short value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <definition value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <min value="0"/>
       <max value="1"/>
@@ -2630,7 +2612,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.factor"/>
-      <short value="Price scaling factor"/>
+      <short value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <definition value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2641,7 +2623,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.points"/>
-      <short value="Difficulty scaling factor"/>
+      <short value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2652,7 +2634,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.net"/>
-      <short value="Total item cost"/>
+      <short value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <definition value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2663,7 +2645,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.udi"/>
-      <short value="Unique Device Identifier"/>
+      <short value="List of Unique Device Identifiers associated with this line item."/>
       <definition value="List of Unique Device Identifiers associated with this line item."/>
       <requirements value="The UDI code and issuer if applicable for the supplied product."/>
       <min value="0"/>
@@ -2681,7 +2663,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.bodySite"/>
-      <short value="Service Location"/>
+      <short value="Physical service site on the patient (limb, tooth, etc)."/>
       <definition value="Physical service site on the patient (limb, tooth, etc)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2698,7 +2680,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.subSite"/>
-      <short value="Service Sub-location"/>
+      <short value="A region or surface of the site, eg. limb region or tooth surface(s)."/>
       <definition value="A region or surface of the site, eg. limb region or tooth surface(s)."/>
       <min value="0"/>
       <max value="*"/>
@@ -2715,7 +2697,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.modifier"/>
-      <short value="Service/Product billing modifiers"/>
+      <short value="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen."/>
       <definition value="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -2727,13 +2709,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="example"/>
         <description value="Item type or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen."/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/modifiers"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-modifiers"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.item.detail"/>
-      <short value="Additional items"/>
+      <short value="Second tier of goods and services."/>
       <definition value="Second tier of goods and services."/>
       <min value="0"/>
       <max value="*"/>
@@ -2744,7 +2726,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.item.detail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2758,9 +2740,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2775,9 +2756,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2794,7 +2774,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.sequence"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -2804,7 +2784,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.type"/>
-      <short value="Group or type of product or service"/>
+      <short value="The type of product or service."/>
       <definition value="The type of product or service."/>
       <min value="1"/>
       <max value="1"/>
@@ -2821,7 +2801,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.service"/>
-      <short value="Additional item codes"/>
+      <short value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <definition value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -2838,7 +2818,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.quantity"/>
-      <short value="Count of Products or Services"/>
+      <short value="The number of repetitions of a service or product."/>
       <definition value="The number of repetitions of a service or product."/>
       <min value="0"/>
       <max value="1"/>
@@ -2848,7 +2828,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.unitPrice"/>
-      <short value="Fee, charge or cost per point"/>
+      <short value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <definition value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2859,7 +2839,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.factor"/>
-      <short value="Price scaling factor"/>
+      <short value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <definition value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2870,7 +2850,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.points"/>
-      <short value="Difficulty scaling factor"/>
+      <short value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2881,7 +2861,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.net"/>
-      <short value="Total additional item cost"/>
+      <short value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <definition value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -2892,7 +2872,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.udi"/>
-      <short value="Unique Device Identifier"/>
+      <short value="List of Unique Device Identifiers associated with this line item."/>
       <definition value="List of Unique Device Identifiers associated with this line item."/>
       <requirements value="The UDI code and issuer if applicable for the supplied product."/>
       <min value="0"/>
@@ -2910,7 +2890,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail"/>
-      <short value="Additional items"/>
+      <short value="Third tier of goods and services."/>
       <definition value="Third tier of goods and services."/>
       <min value="0"/>
       <max value="*"/>
@@ -2921,7 +2901,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.item.detail.subDetail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2935,9 +2915,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2952,9 +2931,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2971,7 +2949,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.sequence"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -2981,7 +2959,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.type"/>
-      <short value="Type of product or service"/>
+      <short value="The type of product or service."/>
       <definition value="The type of product or service."/>
       <min value="1"/>
       <max value="1"/>
@@ -2998,7 +2976,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.service"/>
-      <short value="Additional item codes"/>
+      <short value="The fee for an addittional service or product or charge."/>
       <definition value="The fee for an addittional service or product or charge."/>
       <min value="1"/>
       <max value="1"/>
@@ -3015,7 +2993,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.quantity"/>
-      <short value="Count of Products or Services"/>
+      <short value="The number of repetitions of a service or product."/>
       <definition value="The number of repetitions of a service or product."/>
       <min value="0"/>
       <max value="1"/>
@@ -3025,7 +3003,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.unitPrice"/>
-      <short value="Fee, charge or cost per point"/>
+      <short value="The fee for an addittional service or product or charge."/>
       <definition value="The fee for an addittional service or product or charge."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3036,7 +3014,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.factor"/>
-      <short value="Price scaling factor"/>
+      <short value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <definition value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3047,7 +3025,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.points"/>
-      <short value="Difficulty scaling factor"/>
+      <short value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3058,7 +3036,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.net"/>
-      <short value="Net additional item cost"/>
+      <short value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <definition value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3069,7 +3047,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.udi"/>
-      <short value="Unique Device Identifier"/>
+      <short value="List of Unique Device Identifiers associated with this line item."/>
       <definition value="List of Unique Device Identifiers associated with this line item."/>
       <requirements value="The UDI code and issuer if applicable for the supplied product."/>
       <min value="0"/>
@@ -3087,7 +3065,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis"/>
-      <short value="Prosthetic details"/>
+      <short value="The materials and placement date of prior fixed prosthesis."/>
       <definition value="The materials and placement date of prior fixed prosthesis."/>
       <min value="0"/>
       <max value="1"/>
@@ -3098,7 +3076,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.item.prosthesis.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3112,9 +3090,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3129,9 +3106,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3148,7 +3124,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.initial"/>
-      <short value="Is this the initial service"/>
+      <short value="Indicates whether this is the initial placement of a fixed prosthesis."/>
       <definition value="Indicates whether this is the initial placement of a fixed prosthesis."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -3159,7 +3135,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.priorDate"/>
-      <short value="Initial service Date"/>
+      <short value="Date of the initial placement."/>
       <definition value="Date of the initial placement."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -3170,7 +3146,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.priorMaterial"/>
-      <short value="Prosthetic Material"/>
+      <short value="Material of the prior denture or bridge prosthesis. (Oral)."/>
       <definition value="Material of the prior denture or bridge prosthesis. (Oral)."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -3188,7 +3164,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.additionalMaterials"/>
-      <short value="Additional materials, documents, etc."/>
+      <short value="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission."/>
       <definition value="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission."/>
       <min value="0"/>
       <max value="*"/>
@@ -3205,7 +3181,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth"/>
-      <short value="Only if type = oral"/>
+      <short value="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons."/>
       <definition value="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons."/>
       <requirements value="The list of missing teeth may influence the adjudication of services for example with Bridges."/>
       <min value="0"/>
@@ -3217,7 +3193,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Claim.missingTeeth.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3231,9 +3207,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3248,9 +3223,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3267,7 +3241,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.tooth"/>
-      <short value="Tooth Code"/>
+      <short value="The code identifying which tooth is missing."/>
       <definition value="The code identifying which tooth is missing."/>
       <requirements value="Provides the tooth number of the missing tooth."/>
       <min value="1"/>
@@ -3285,7 +3259,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.reason"/>
-      <short value="Reason for missing"/>
+      <short value="Missing reason may be: E-extraction, O-other."/>
       <definition value="Missing reason may be: E-extraction, O-other."/>
       <requirements value="Provides the reason for the missing tooth."/>
       <min value="0"/>
@@ -3303,7 +3277,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.extractionDate"/>
-      <short value="Date of Extraction"/>
+      <short value="The date of the extraction either known from records or patient reported estimate."/>
       <definition value="The date of the extraction either known from records or patient reported estimate."/>
       <requirements value="Some services and adjudications require this information."/>
       <min value="0"/>
@@ -3316,7 +3290,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="Claim"/>
-      <short value="Claim, Pre-determination or Pre-authorization"/>
+      <short value="A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery."/>
       <definition value="A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery."/>
       <min value="1"/>
       <max value="1"/>
@@ -3326,9 +3300,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.type"/>
-      <short value="institutional | oral | pharmacy | professional | vision"/>
+      <short value="The category of claim this is."/>
       <definition value="The category of claim this is."/>
-      <comments value="Affects which fields and value sets are used."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -3338,13 +3311,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="required"/>
         <description value="The type or discipline-style of the claim"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/type-link"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-type-link"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.identifier"/>
-      <short value="Claim number"/>
+      <short value="The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number."/>
       <definition value="The business identifier for the instance: invoice number, claim number, pre-determination or pre-authorization number."/>
       <min value="0"/>
       <max value="*"/>
@@ -3354,7 +3327,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.ruleset"/>
-      <short value="Current specification followed"/>
+      <short value="The version of the specification on which this instance relies."/>
       <definition value="The version of the specification on which this instance relies."/>
       <alias value="BusinessVersion"/>
       <min value="0"/>
@@ -3372,7 +3345,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.originalRuleset"/>
-      <short value="Original specification followed"/>
+      <short value="The version of the specification from which the original instance was created."/>
       <definition value="The version of the specification from which the original instance was created."/>
       <alias value="OriginalBusinessVersion"/>
       <min value="0"/>
@@ -3390,7 +3363,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.created"/>
-      <short value="Creation date"/>
+      <short value="The date when the enclosed suite of services were performed or completed."/>
       <definition value="The date when the enclosed suite of services were performed or completed."/>
       <min value="0"/>
       <max value="1"/>
@@ -3400,7 +3373,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.target"/>
-      <short value="Insurer"/>
+      <short value="Insurer Identifier, typical BIN number (6 digit)."/>
       <definition value="Insurer Identifier, typical BIN number (6 digit)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3411,7 +3384,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.provider"/>
-      <short value="Responsible provider"/>
+      <short value="The provider which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <definition value="The provider which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -3422,7 +3395,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.organization"/>
-      <short value="Responsible organization"/>
+      <short value="The organization which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <definition value="The organization which is responsible for the bill, claim pre-determination, pre-authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -3433,7 +3406,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.use"/>
-      <short value="complete | proposed | exploratory | other"/>
+      <short value="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)."/>
       <definition value="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3444,13 +3417,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="required"/>
         <description value="Complete, proposed, exploratory, other"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/use-link"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-use-link"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.priority"/>
-      <short value="Desired processing priority"/>
+      <short value="Immediate (STAT), best effort (NORMAL), deferred (DEFER)."/>
       <definition value="Immediate (STAT), best effort (NORMAL), deferred (DEFER)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3467,7 +3440,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.fundsReserve"/>
-      <short value="Funds requested to be reserved"/>
+      <short value="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved (&#39;Patient&#39; or &#39;Provider&#39;) to pay for the Benefits determined on the subsequent claim(s). &#39;None&#39; explicitly indicates no funds reserving is requested."/>
       <definition value="In the case of a Pre-Determination/Pre-Authorization the provider may request that funds in the amount of the expected Benefit be reserved (&#39;Patient&#39; or &#39;Provider&#39;) to pay for the Benefits determined on the subsequent claim(s). &#39;None&#39; explicitly indicates no funds reserving is requested."/>
       <min value="0"/>
       <max value="1"/>
@@ -3484,7 +3457,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.enterer"/>
-      <short value="Author"/>
+      <short value="Person who created the invoice/claim/pre-determination or pre-authorization."/>
       <definition value="Person who created the invoice/claim/pre-determination or pre-authorization."/>
       <min value="0"/>
       <max value="1"/>
@@ -3495,7 +3468,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.facility"/>
-      <short value="Servicing Facility"/>
+      <short value="Facility where the services were provided."/>
       <definition value="Facility where the services were provided."/>
       <min value="0"/>
       <max value="1"/>
@@ -3506,7 +3479,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.prescription"/>
-      <short value="Prescription"/>
+      <short value="Prescription to support the dispensing of Pharmacy or Vision products."/>
       <definition value="Prescription to support the dispensing of Pharmacy or Vision products."/>
       <requirements value="For type=Pharmacy and Vision only."/>
       <min value="0"/>
@@ -3522,7 +3495,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.originalPrescription"/>
-      <short value="Original Prescription"/>
+      <short value="Original prescription to support the dispensing of pharmacy services, medications or products."/>
       <definition value="Original prescription to support the dispensing of pharmacy services, medications or products."/>
       <min value="0"/>
       <max value="1"/>
@@ -3533,14 +3506,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee"/>
-      <short value="Payee"/>
+      <short value="The party to be reimbursed for the services."/>
       <definition value="The party to be reimbursed for the services."/>
       <min value="0"/>
       <max value="1"/>
     </element>
     <element>
       <path value="Claim.payee.type"/>
-      <short value="Party to be paid any benefits payable"/>
+      <short value="Party to be reimbursed: Subscriber, provider, other."/>
       <definition value="Party to be reimbursed: Subscriber, provider, other."/>
       <min value="0"/>
       <max value="1"/>
@@ -3557,7 +3530,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.provider"/>
-      <short value="Provider who is the payee"/>
+      <short value="The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <definition value="The provider who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3568,7 +3541,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.organization"/>
-      <short value="Organization who is the payee"/>
+      <short value="The organization who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <definition value="The organization who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3579,7 +3552,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.payee.person"/>
-      <short value="Other person who is the payee"/>
+      <short value="The person other than the subscriber who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <definition value="The person other than the subscriber who is to be reimbursed for the claim (the party to whom any benefit is assigned)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3590,7 +3563,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.referral"/>
-      <short value="Treatment Referral"/>
+      <short value="The referral resource which lists the date, practitioner, reason and other supporting information."/>
       <definition value="The referral resource which lists the date, practitioner, reason and other supporting information."/>
       <min value="0"/>
       <max value="1"/>
@@ -3601,14 +3574,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis"/>
-      <short value="Diagnosis"/>
+      <short value="Ordered list of patient diagnosis for which care is sought."/>
       <definition value="Ordered list of patient diagnosis for which care is sought."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Claim.diagnosis.sequence"/>
-      <short value="Sequence of diagnosis"/>
+      <short value="Sequence of diagnosis which serves to order and provide a link."/>
       <definition value="Sequence of diagnosis which serves to order and provide a link."/>
       <requirements value="Required to maintain order of the diagnoses."/>
       <min value="1"/>
@@ -3619,7 +3592,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.diagnosis.diagnosis"/>
-      <short value="Patient&#39;s list of diagnosis"/>
+      <short value="The diagnosis."/>
       <definition value="The diagnosis."/>
       <requirements value="Required to adjudicate services rendered to condition presented."/>
       <min value="1"/>
@@ -3637,7 +3610,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.condition"/>
-      <short value="List of presenting Conditions"/>
+      <short value="List of patient conditions for which care is sought."/>
       <definition value="List of patient conditions for which care is sought."/>
       <min value="0"/>
       <max value="*"/>
@@ -3654,7 +3627,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.patient"/>
-      <short value="The subject of the Products and Services"/>
+      <short value="Patient Resource."/>
       <definition value="Patient Resource."/>
       <min value="1"/>
       <max value="1"/>
@@ -3665,7 +3638,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage"/>
-      <short value="Insurance or medical plan"/>
+      <short value="Financial instrument by which payment information for health care."/>
       <definition value="Financial instrument by which payment information for health care."/>
       <requirements value="Health care programs and insurers are significant payors of health service costs."/>
       <min value="0"/>
@@ -3677,7 +3650,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.sequence"/>
-      <short value="Service instance identifier"/>
+      <short value="A service line item."/>
       <definition value="A service line item."/>
       <requirements value="To maintain order of the coverages."/>
       <min value="1"/>
@@ -3688,7 +3661,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.focal"/>
-      <short value="Is the focal Coverage"/>
+      <short value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <definition value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <requirements value="To identify which coverage is being adjudicated."/>
       <min value="1"/>
@@ -3699,7 +3672,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.coverage"/>
-      <short value="Insurance information"/>
+      <short value="Reference to the program or plan identification, underwriter or payor."/>
       <definition value="Reference to the program or plan identification, underwriter or payor."/>
       <requirements value="Need to identify the issuer to target for processing and for coordination of benefit processing."/>
       <min value="1"/>
@@ -3711,7 +3684,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.businessArrangement"/>
-      <short value="Business agreement"/>
+      <short value="The contract number of a business agreement which describes the terms and conditions."/>
       <definition value="The contract number of a business agreement which describes the terms and conditions."/>
       <min value="0"/>
       <max value="1"/>
@@ -3721,7 +3694,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.relationship"/>
-      <short value="Patient relationship to subscriber"/>
+      <short value="The relationship of the patient to the subscriber."/>
       <definition value="The relationship of the patient to the subscriber."/>
       <requirements value="To determine relationship between the patient and the subscriber."/>
       <min value="1"/>
@@ -3739,7 +3712,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.preAuthRef"/>
-      <short value="Pre-Authorization/Determination Reference"/>
+      <short value="A list of references from the Insurer to which these services pertain."/>
       <definition value="A list of references from the Insurer to which these services pertain."/>
       <requirements value="To provide any pre=determination or prior authorization reference."/>
       <min value="0"/>
@@ -3750,7 +3723,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.claimResponse"/>
-      <short value="Adjudication results"/>
+      <short value="The Coverages adjudication details."/>
       <definition value="The Coverages adjudication details."/>
       <requirements value="Used by downstream payers to determine what balance remains and the net payable."/>
       <min value="0"/>
@@ -3762,7 +3735,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.coverage.originalRuleset"/>
-      <short value="Original version"/>
+      <short value="The style (standard) and version of the original material which was converted into this resource."/>
       <definition value="The style (standard) and version of the original material which was converted into this resource."/>
       <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
       <min value="0"/>
@@ -3780,7 +3753,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.exception"/>
-      <short value="Eligibility exceptions"/>
+      <short value="Factors which may influence the applicability of coverage."/>
       <definition value="Factors which may influence the applicability of coverage."/>
       <requirements value="To determine extenuating circumstances for coverage."/>
       <min value="0"/>
@@ -3792,13 +3765,13 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="example"/>
         <description value="The eligibility exception codes."/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/exception"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-exception"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.school"/>
-      <short value="Name of School"/>
+      <short value="Name of school for over-aged dependants."/>
       <definition value="Name of school for over-aged dependants."/>
       <requirements value="Often required for over-age dependents."/>
       <min value="0"/>
@@ -3809,7 +3782,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.accident"/>
-      <short value="Accident Date"/>
+      <short value="Date of an accident which these services are addressing."/>
       <definition value="Date of an accident which these services are addressing."/>
       <requirements value="Coverage may be dependant on accidents."/>
       <min value="0"/>
@@ -3820,7 +3793,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.accidentType"/>
-      <short value="Accident Type"/>
+      <short value="Type of accident: work, auto, etc."/>
       <definition value="Type of accident: work, auto, etc."/>
       <requirements value="Coverage may be dependant on the type of accident."/>
       <min value="0"/>
@@ -3838,7 +3811,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.interventionException"/>
-      <short value="Intervention and exception code (Pharma)"/>
+      <short value="A list of intervention and exception codes which may influence the adjudication of the claim."/>
       <definition value="A list of intervention and exception codes which may influence the adjudication of the claim."/>
       <requirements value="Coverage may be modified based on exception information provided."/>
       <min value="0"/>
@@ -3856,14 +3829,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item"/>
-      <short value="Goods and Services"/>
+      <short value="First tier of goods and services."/>
       <definition value="First tier of goods and services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Claim.item.sequence"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -3873,7 +3846,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.type"/>
-      <short value="Group or type of product or service"/>
+      <short value="The type of product or service."/>
       <definition value="The type of product or service."/>
       <min value="1"/>
       <max value="1"/>
@@ -3890,7 +3863,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.provider"/>
-      <short value="Responsible practitioner"/>
+      <short value="The practitioner who is responsible for the services rendered to the patient."/>
       <definition value="The practitioner who is responsible for the services rendered to the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -3901,7 +3874,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.diagnosisLinkId"/>
-      <short value="Diagnosis Link"/>
+      <short value="Diagnosis applicable for this service or product line."/>
       <definition value="Diagnosis applicable for this service or product line."/>
       <min value="0"/>
       <max value="*"/>
@@ -3911,7 +3884,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.service"/>
-      <short value="Item Code"/>
+      <short value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <definition value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -3928,7 +3901,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.serviceDate"/>
-      <short value="Date of Service"/>
+      <short value="The date when the enclosed suite of services were performed or completed."/>
       <definition value="The date when the enclosed suite of services were performed or completed."/>
       <min value="0"/>
       <max value="1"/>
@@ -3938,7 +3911,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.quantity"/>
-      <short value="Count of Products or Services"/>
+      <short value="The number of repetitions of a service or product."/>
       <definition value="The number of repetitions of a service or product."/>
       <min value="0"/>
       <max value="1"/>
@@ -3948,7 +3921,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.unitPrice"/>
-      <short value="Fee, charge or cost per point"/>
+      <short value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <definition value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <min value="0"/>
       <max value="1"/>
@@ -3958,7 +3931,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.factor"/>
-      <short value="Price scaling factor"/>
+      <short value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <definition value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3969,7 +3942,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.points"/>
-      <short value="Difficulty scaling factor"/>
+      <short value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3980,7 +3953,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.net"/>
-      <short value="Total item cost"/>
+      <short value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <definition value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -3991,7 +3964,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.udi"/>
-      <short value="Unique Device Identifier"/>
+      <short value="List of Unique Device Identifiers associated with this line item."/>
       <definition value="List of Unique Device Identifiers associated with this line item."/>
       <requirements value="The UDI code and issuer if applicable for the supplied product."/>
       <min value="0"/>
@@ -4009,7 +3982,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.bodySite"/>
-      <short value="Service Location"/>
+      <short value="Physical service site on the patient (limb, tooth, etc)."/>
       <definition value="Physical service site on the patient (limb, tooth, etc)."/>
       <min value="0"/>
       <max value="1"/>
@@ -4026,7 +3999,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.subSite"/>
-      <short value="Service Sub-location"/>
+      <short value="A region or surface of the site, eg. limb region or tooth surface(s)."/>
       <definition value="A region or surface of the site, eg. limb region or tooth surface(s)."/>
       <min value="0"/>
       <max value="*"/>
@@ -4043,7 +4016,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.modifier"/>
-      <short value="Service/Product billing modifiers"/>
+      <short value="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen."/>
       <definition value="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -4055,20 +4028,20 @@ Not all the content has to be in the base language. The Resource.language should
         <strength value="example"/>
         <description value="Item type or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or an appliance was lost or stolen."/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/modifiers"/>
+          <reference value="http://hl7.org/fhir/ValueSet/claim-modifiers"/>
         </valueSetReference>
       </binding>
     </element>
     <element>
       <path value="Claim.item.detail"/>
-      <short value="Additional items"/>
+      <short value="Second tier of goods and services."/>
       <definition value="Second tier of goods and services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Claim.item.detail.sequence"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -4078,7 +4051,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.type"/>
-      <short value="Group or type of product or service"/>
+      <short value="The type of product or service."/>
       <definition value="The type of product or service."/>
       <min value="1"/>
       <max value="1"/>
@@ -4095,7 +4068,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.service"/>
-      <short value="Additional item codes"/>
+      <short value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <definition value="If a grouping item then &#39;GROUP&#39; otherwise it is a node therefore a code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -4112,7 +4085,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.quantity"/>
-      <short value="Count of Products or Services"/>
+      <short value="The number of repetitions of a service or product."/>
       <definition value="The number of repetitions of a service or product."/>
       <min value="0"/>
       <max value="1"/>
@@ -4122,7 +4095,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.unitPrice"/>
-      <short value="Fee, charge or cost per point"/>
+      <short value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <definition value="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4133,7 +4106,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.factor"/>
-      <short value="Price scaling factor"/>
+      <short value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <definition value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4144,7 +4117,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.points"/>
-      <short value="Difficulty scaling factor"/>
+      <short value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4155,7 +4128,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.net"/>
-      <short value="Total additional item cost"/>
+      <short value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <definition value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4166,7 +4139,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.udi"/>
-      <short value="Unique Device Identifier"/>
+      <short value="List of Unique Device Identifiers associated with this line item."/>
       <definition value="List of Unique Device Identifiers associated with this line item."/>
       <requirements value="The UDI code and issuer if applicable for the supplied product."/>
       <min value="0"/>
@@ -4184,14 +4157,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail"/>
-      <short value="Additional items"/>
+      <short value="Third tier of goods and services."/>
       <definition value="Third tier of goods and services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.sequence"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -4201,7 +4174,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.type"/>
-      <short value="Type of product or service"/>
+      <short value="The type of product or service."/>
       <definition value="The type of product or service."/>
       <min value="1"/>
       <max value="1"/>
@@ -4218,7 +4191,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.service"/>
-      <short value="Additional item codes"/>
+      <short value="The fee for an addittional service or product or charge."/>
       <definition value="The fee for an addittional service or product or charge."/>
       <min value="1"/>
       <max value="1"/>
@@ -4235,7 +4208,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.quantity"/>
-      <short value="Count of Products or Services"/>
+      <short value="The number of repetitions of a service or product."/>
       <definition value="The number of repetitions of a service or product."/>
       <min value="0"/>
       <max value="1"/>
@@ -4245,7 +4218,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.unitPrice"/>
-      <short value="Fee, charge or cost per point"/>
+      <short value="The fee for an addittional service or product or charge."/>
       <definition value="The fee for an addittional service or product or charge."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4256,7 +4229,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.factor"/>
-      <short value="Price scaling factor"/>
+      <short value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <definition value="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4267,7 +4240,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.points"/>
-      <short value="Difficulty scaling factor"/>
+      <short value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <definition value="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the good or service delivered. The concept of Points allows for assignment of point values for services and/or goods, such that a monetary amount can be assigned to each point."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4278,7 +4251,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.net"/>
-      <short value="Net additional item cost"/>
+      <short value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <definition value="The quantity times the unit price for an addittional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied."/>
       <requirements value="If a fee is present the associated product/service code must be present."/>
       <min value="0"/>
@@ -4289,7 +4262,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.detail.subDetail.udi"/>
-      <short value="Unique Device Identifier"/>
+      <short value="List of Unique Device Identifiers associated with this line item."/>
       <definition value="List of Unique Device Identifiers associated with this line item."/>
       <requirements value="The UDI code and issuer if applicable for the supplied product."/>
       <min value="0"/>
@@ -4307,14 +4280,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis"/>
-      <short value="Prosthetic details"/>
+      <short value="The materials and placement date of prior fixed prosthesis."/>
       <definition value="The materials and placement date of prior fixed prosthesis."/>
       <min value="0"/>
       <max value="1"/>
     </element>
     <element>
       <path value="Claim.item.prosthesis.initial"/>
-      <short value="Is this the initial service"/>
+      <short value="Indicates whether this is the initial placement of a fixed prosthesis."/>
       <definition value="Indicates whether this is the initial placement of a fixed prosthesis."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -4325,7 +4298,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.priorDate"/>
-      <short value="Initial service Date"/>
+      <short value="Date of the initial placement."/>
       <definition value="Date of the initial placement."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -4336,7 +4309,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.item.prosthesis.priorMaterial"/>
-      <short value="Prosthetic Material"/>
+      <short value="Material of the prior denture or bridge prosthesis. (Oral)."/>
       <definition value="Material of the prior denture or bridge prosthesis. (Oral)."/>
       <requirements value="May impact on adjudication."/>
       <min value="0"/>
@@ -4354,7 +4327,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.additionalMaterials"/>
-      <short value="Additional materials, documents, etc."/>
+      <short value="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission."/>
       <definition value="Code to indicate that Xrays, images, emails, documents, models or attachments are being sent in support of this submission."/>
       <min value="0"/>
       <max value="*"/>
@@ -4371,7 +4344,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth"/>
-      <short value="Only if type = oral"/>
+      <short value="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons."/>
       <definition value="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons."/>
       <requirements value="The list of missing teeth may influence the adjudication of services for example with Bridges."/>
       <min value="0"/>
@@ -4379,7 +4352,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.tooth"/>
-      <short value="Tooth Code"/>
+      <short value="The code identifying which tooth is missing."/>
       <definition value="The code identifying which tooth is missing."/>
       <requirements value="Provides the tooth number of the missing tooth."/>
       <min value="1"/>
@@ -4397,7 +4370,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.reason"/>
-      <short value="Reason for missing"/>
+      <short value="Missing reason may be: E-extraction, O-other."/>
       <definition value="Missing reason may be: E-extraction, O-other."/>
       <requirements value="Provides the reason for the missing tooth."/>
       <min value="0"/>
@@ -4415,7 +4388,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Claim.missingTeeth.extractionDate"/>
-      <short value="Date of Extraction"/>
+      <short value="The date of the extraction either known from records or patient reported estimate."/>
       <definition value="The date of the extraction either known from records or patient reported estimate."/>
       <requirements value="Some services and adjudications require this information."/>
       <min value="0"/>

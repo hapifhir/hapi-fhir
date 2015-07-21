@@ -144,14 +144,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Quantity Resource"/>
   <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -164,13 +164,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Quantity"/>
-      <short value="A measured or measurable amount"/>
+      <short value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."/>
       <definition value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
       <min value="1"/>
       <max value="1"/>
@@ -195,7 +193,7 @@
     <element>
       <path value="Quantity.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -209,9 +207,8 @@
     </element>
     <element>
       <path value="Quantity.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -226,9 +223,8 @@
     </element>
     <element>
       <path value="Quantity.value"/>
-      <short value="Numerical value (with implicit precision)"/>
+      <short value="The value of the measured amount. The value includes an implicit precision in the presentation of the value."/>
       <definition value="The value of the measured amount. The value includes an implicit precision in the presentation of the value."/>
-      <comments value="The implicit precision in the value should always be honored. Monetary values have their own rules for handling precision (refer to standard accounting text books)."/>
       <requirements value="Precision is handled implicitly in almost all cases of measurement."/>
       <min value="0"/>
       <max value="1"/>
@@ -246,9 +242,8 @@
     </element>
     <element>
       <path value="Quantity.comparator"/>
-      <short value="&lt; | &lt;= | &gt;= | &gt; - how to understand the value"/>
+      <short value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value."/>
       <definition value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because the comparator modifies the interpretation of the value significantly. If there is no comparator, then there is no modification of the value."/>
       <requirements value="Need a framework for handling measures where the value is &lt;5ug/L or &gt;400mg/L due to the limitations of measuring methodology."/>
       <min value="0"/>
       <max value="1"/>
@@ -275,7 +270,7 @@
     </element>
     <element>
       <path value="Quantity.units"/>
-      <short value="Unit representation"/>
+      <short value="A human-readable form of the units."/>
       <definition value="A human-readable form of the units."/>
       <requirements value="There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
       <min value="0"/>
@@ -294,7 +289,7 @@
     </element>
     <element>
       <path value="Quantity.system"/>
-      <short value="System that defines coded unit form"/>
+      <short value="The identification of the system that provides the coded form of the unit."/>
       <definition value="The identification of the system that provides the coded form of the unit."/>
       <requirements value="Need to know the system that defines the coded form of the unit."/>
       <min value="0"/>
@@ -314,11 +309,8 @@
     </element>
     <element>
       <path value="Quantity.code"/>
-      <short value="Coded form of the unit"/>
+      <short value="A computer processable form of the units in some unit representation system."/>
       <definition value="A computer processable form of the units in some unit representation system."/>
-      <comments value="The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.
-
-The context of use may additionally require a code from a particular system."/>
       <requirements value="Need a computable form of the units that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
       <min value="0"/>
       <max value="1"/>
@@ -338,9 +330,8 @@ The context of use may additionally require a code from a particular system."/>
   <differential>
     <element>
       <path value="Quantity"/>
-      <short value="A measured or measurable amount"/>
+      <short value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."/>
       <definition value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."/>
-      <comments value="The context of use may frequently define what kind of quantity this is and therefore what kind of units can be used. The context of use may also restrict the values for the comparator."/>
       <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
       <min value="1"/>
       <max value="1"/>
@@ -364,9 +355,8 @@ The context of use may additionally require a code from a particular system."/>
     </element>
     <element>
       <path value="Quantity.value"/>
-      <short value="Numerical value (with implicit precision)"/>
+      <short value="The value of the measured amount. The value includes an implicit precision in the presentation of the value."/>
       <definition value="The value of the measured amount. The value includes an implicit precision in the presentation of the value."/>
-      <comments value="The implicit precision in the value should always be honored. Monetary values have their own rules for handling precision (refer to standard accounting text books)."/>
       <requirements value="Precision is handled implicitly in almost all cases of measurement."/>
       <min value="0"/>
       <max value="1"/>
@@ -384,9 +374,8 @@ The context of use may additionally require a code from a particular system."/>
     </element>
     <element>
       <path value="Quantity.comparator"/>
-      <short value="&lt; | &lt;= | &gt;= | &gt; - how to understand the value"/>
+      <short value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value."/>
       <definition value="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is &quot;&lt;&quot; , then the real value is &lt; stated value."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because the comparator modifies the interpretation of the value significantly. If there is no comparator, then there is no modification of the value."/>
       <requirements value="Need a framework for handling measures where the value is &lt;5ug/L or &gt;400mg/L due to the limitations of measuring methodology."/>
       <min value="0"/>
       <max value="1"/>
@@ -413,7 +402,7 @@ The context of use may additionally require a code from a particular system."/>
     </element>
     <element>
       <path value="Quantity.units"/>
-      <short value="Unit representation"/>
+      <short value="A human-readable form of the units."/>
       <definition value="A human-readable form of the units."/>
       <requirements value="There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
       <min value="0"/>
@@ -432,7 +421,7 @@ The context of use may additionally require a code from a particular system."/>
     </element>
     <element>
       <path value="Quantity.system"/>
-      <short value="System that defines coded unit form"/>
+      <short value="The identification of the system that provides the coded form of the unit."/>
       <definition value="The identification of the system that provides the coded form of the unit."/>
       <requirements value="Need to know the system that defines the coded form of the unit."/>
       <min value="0"/>
@@ -452,11 +441,8 @@ The context of use may additionally require a code from a particular system."/>
     </element>
     <element>
       <path value="Quantity.code"/>
-      <short value="Coded form of the unit"/>
+      <short value="A computer processable form of the units in some unit representation system."/>
       <definition value="A computer processable form of the units in some unit representation system."/>
-      <comments value="The preferred system is UCUM, but SNOMED CT can also be used (for customary units) or ISO 4217 for currency.
-
-The context of use may additionally require a code from a particular system."/>
       <requirements value="Need a computable form of the units that is fixed across all forms. UCUM provides this for quantities, but SNOMED CT provides many units of interest."/>
       <min value="0"/>
       <max value="1"/>

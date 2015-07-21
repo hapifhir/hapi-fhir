@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Practitioner"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -425,19 +425,19 @@
   <publisher value="Health Level Seven International (Patient Administration)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Practitioner Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -454,13 +454,12 @@
     <name value="ServD"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Practitioner"/>
-      <short value="A person with a  formal responsibility in the provisioning of healthcare or related services"/>
+      <short value="A person who is directly or indirectly involved in the provisioning of healthcare."/>
       <definition value="A person who is directly or indirectly involved in the provisioning of healthcare."/>
-      <comments value="Note that a cab driver no longer fits the bill. You probably would be interested in the organization rather than the individual?"/>
       <requirements value="Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -482,9 +481,8 @@
     </element>
     <element>
       <path value="Practitioner.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -493,7 +491,7 @@
     </element>
     <element>
       <path value="Practitioner.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -503,9 +501,8 @@
     </element>
     <element>
       <path value="Practitioner.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -515,11 +512,8 @@
     </element>
     <element>
       <path value="Practitioner.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -533,9 +527,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -553,9 +546,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -571,9 +563,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -588,9 +579,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -606,7 +596,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.identifier"/>
-      <short value="A identifier for the person as this agent"/>
+      <short value="An identifier that applies to this person in this role."/>
       <definition value="An identifier that applies to this person in this role."/>
       <requirements value="Often, specific identities are assigned for the agent."/>
       <min value="0"/>
@@ -630,7 +620,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.name"/>
-      <short value="A name associated with the person"/>
+      <short value="A name associated with the person."/>
       <definition value="A name associated with the person."/>
       <requirements value="Contact persons need to be identified by name, but it is uncommon to need details about multiple other names for that person."/>
       <min value="0"/>
@@ -654,9 +644,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.telecom"/>
-      <short value="A contact detail for the practitioner"/>
+      <short value="A contact detail for the practitioner, e.g. a telephone number or an email address."/>
       <definition value="A contact detail for the practitioner, e.g. a telephone number or an email address."/>
-      <comments value="Person may have multiple ways to be contacted with different uses or applicable periods. May need to have options for contacting the person urgently, and also to help with identification."/>
       <requirements value="Need to know how to reach a practitioner."/>
       <min value="0"/>
       <max value="*"/>
@@ -679,7 +668,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.address"/>
-      <short value="Where practitioner can be found/visited"/>
+      <short value="The postal address where the practitioner can be found or visited or to which mail can be delivered."/>
       <definition value="The postal address where the practitioner can be found or visited or to which mail can be delivered."/>
       <requirements value="Need to keep track where the practitioner can found during work or for directing mail."/>
       <min value="0"/>
@@ -703,7 +692,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.gender"/>
-      <short value="male | female | other | unknown"/>
+      <short value="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."/>
       <definition value="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."/>
       <requirements value="Needed to address the person correctly."/>
       <min value="0"/>
@@ -734,7 +723,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.birthDate"/>
-      <short value="The date  on which the practitioner was born"/>
+      <short value="The date of birth for the practitioner."/>
       <definition value="The date of birth for the practitioner."/>
       <requirements value="Needed for identification."/>
       <min value="0"/>
@@ -758,7 +747,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.photo"/>
-      <short value="Image of the person"/>
+      <short value="Image of the person."/>
       <definition value="Image of the person."/>
       <requirements value="Many EHR systems have the capability to capture an image of patients and personnel. Fits with newer social media usage too."/>
       <min value="0"/>
@@ -777,7 +766,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole"/>
-      <short value="The list of Roles/Organizations that the Practitioner is associated with"/>
+      <short value="The list of Roles/Organizations that the Practitioner is associated with."/>
       <definition value="The list of Roles/Organizations that the Practitioner is associated with."/>
       <min value="0"/>
       <max value="*"/>
@@ -792,7 +781,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Practitioner.practitionerRole.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -806,9 +795,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -823,9 +811,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -842,7 +829,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.managingOrganization"/>
-      <short value="The Organization where the Practitioner performs the roles associated"/>
+      <short value="The Organization where the Practitioner performs the roles associated."/>
       <definition value="The Organization where the Practitioner performs the roles associated."/>
       <min value="0"/>
       <max value="1"/>
@@ -857,9 +844,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.role"/>
-      <short value="Roles which this practitioner may perform"/>
+      <short value="Roles which this practitioner is authorized to perform for the organization."/>
       <definition value="Roles which this practitioner is authorized to perform for the organization."/>
-      <comments value="A person may have more than one role. At least one role is required."/>
       <requirements value="Need to know what authority the practitioner has - what can they do?"/>
       <min value="0"/>
       <max value="1"/>
@@ -889,7 +875,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.specialty"/>
-      <short value="Specific specialty of the practitioner"/>
+      <short value="Specific specialty of the practitioner."/>
       <definition value="Specific specialty of the practitioner."/>
       <min value="0"/>
       <max value="*"/>
@@ -919,7 +905,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.period"/>
-      <short value="The period during which the practitioner is authorized to perform in these role(s)"/>
+      <short value="The period during which the person is authorized to act as a practitioner in these role(s) for the organization."/>
       <definition value="The period during which the person is authorized to act as a practitioner in these role(s) for the organization."/>
       <requirements value="Even after the agencies is revoked, the fact that it existed must still be recorded."/>
       <min value="0"/>
@@ -943,7 +929,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.location"/>
-      <short value="The location(s) at which this practitioner provides care"/>
+      <short value="The location(s) at which this practitioner provides care."/>
       <definition value="The location(s) at which this practitioner provides care."/>
       <min value="0"/>
       <max value="*"/>
@@ -957,12 +943,13 @@ Not all the content has to be in the base language. The Resource.language should
       </mapping>
       <mapping>
         <identity value="servd"/>
-        <map value="(ServD maps Practitioners and Organizations via another entity, so this concept is not available)&lt;br/&gt;However these are accessed via the Site.ServiceSite.ServiceSiteProvider record. (The Site has the location)"/>
+        <map value="(ServD maps Practitioners and Organizations via another entity, so this concept is not available)&lt;br/&gt;
+However these are accessed via the Site.ServiceSite.ServiceSiteProvider record. (The Site has the location)"/>
       </mapping>
     </element>
     <element>
       <path value="Practitioner.practitionerRole.healthcareService"/>
-      <short value="The list of healthcare services that this worker provides for this role&#39;s Organization/Location(s)"/>
+      <short value="The list of healthcare services that this worker provides for this role&#39;s Organization/Location(s)."/>
       <definition value="The list of healthcare services that this worker provides for this role&#39;s Organization/Location(s)."/>
       <min value="0"/>
       <max value="*"/>
@@ -977,7 +964,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification"/>
-      <short value="Qualifications obtained by training and certification"/>
+      <short value="Qualifications obtained by training and certification."/>
       <definition value="Qualifications obtained by training and certification."/>
       <min value="0"/>
       <max value="*"/>
@@ -1000,7 +987,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Practitioner.qualification.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1014,9 +1001,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1031,9 +1017,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1050,7 +1035,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.identifier"/>
-      <short value="An identifier for this qualification for the practitioner"/>
+      <short value="An identifier that applies to this person&#39;s qualification in this role."/>
       <definition value="An identifier that applies to this person&#39;s qualification in this role."/>
       <requirements value="Often, specific identities are assigned for the qualification."/>
       <min value="0"/>
@@ -1065,7 +1050,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.code"/>
-      <short value="Coded representation of the qualification"/>
+      <short value="Coded representation of the qualification."/>
       <definition value="Coded representation of the qualification."/>
       <min value="1"/>
       <max value="1"/>
@@ -1090,7 +1075,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.period"/>
-      <short value="Period during which the qualification is valid"/>
+      <short value="Period during which the qualification is valid."/>
       <definition value="Period during which the qualification is valid."/>
       <requirements value="Qualifications are often for a limited period of time, and can be revoked."/>
       <min value="0"/>
@@ -1109,7 +1094,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.issuer"/>
-      <short value="Organization that regulates and issues the qualification"/>
+      <short value="Organization that regulates and issues the qualification."/>
       <definition value="Organization that regulates and issues the qualification."/>
       <min value="0"/>
       <max value="1"/>
@@ -1124,9 +1109,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.communication"/>
-      <short value="A language the practitioner is able to use in patient communication"/>
+      <short value="A language the practitioner is able to use in patient communication."/>
       <definition value="A language the practitioner is able to use in patient communication."/>
-      <comments value="The structure aa-BB with this exact casing is one the most widely used notations for locale. However not all systems actually code this but instead have it as free text. Hence CodeableConcept instead of code as the data type."/>
       <requirements value="Knowing which language a practitioner speaks can help in facilitating communication with patients."/>
       <min value="0"/>
       <max value="*"/>
@@ -1155,9 +1139,8 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="Practitioner"/>
-      <short value="A person with a  formal responsibility in the provisioning of healthcare or related services"/>
+      <short value="A person who is directly or indirectly involved in the provisioning of healthcare."/>
       <definition value="A person who is directly or indirectly involved in the provisioning of healthcare."/>
-      <comments value="Note that a cab driver no longer fits the bill. You probably would be interested in the organization rather than the individual?"/>
       <requirements value="Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -1179,7 +1162,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.identifier"/>
-      <short value="A identifier for the person as this agent"/>
+      <short value="An identifier that applies to this person in this role."/>
       <definition value="An identifier that applies to this person in this role."/>
       <requirements value="Often, specific identities are assigned for the agent."/>
       <min value="0"/>
@@ -1203,7 +1186,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.name"/>
-      <short value="A name associated with the person"/>
+      <short value="A name associated with the person."/>
       <definition value="A name associated with the person."/>
       <requirements value="Contact persons need to be identified by name, but it is uncommon to need details about multiple other names for that person."/>
       <min value="0"/>
@@ -1227,9 +1210,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.telecom"/>
-      <short value="A contact detail for the practitioner"/>
+      <short value="A contact detail for the practitioner, e.g. a telephone number or an email address."/>
       <definition value="A contact detail for the practitioner, e.g. a telephone number or an email address."/>
-      <comments value="Person may have multiple ways to be contacted with different uses or applicable periods. May need to have options for contacting the person urgently, and also to help with identification."/>
       <requirements value="Need to know how to reach a practitioner."/>
       <min value="0"/>
       <max value="*"/>
@@ -1252,7 +1234,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.address"/>
-      <short value="Where practitioner can be found/visited"/>
+      <short value="The postal address where the practitioner can be found or visited or to which mail can be delivered."/>
       <definition value="The postal address where the practitioner can be found or visited or to which mail can be delivered."/>
       <requirements value="Need to keep track where the practitioner can found during work or for directing mail."/>
       <min value="0"/>
@@ -1276,7 +1258,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.gender"/>
-      <short value="male | female | other | unknown"/>
+      <short value="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."/>
       <definition value="Administrative Gender - the gender that the person is considered to have for administration and record keeping purposes."/>
       <requirements value="Needed to address the person correctly."/>
       <min value="0"/>
@@ -1307,7 +1289,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.birthDate"/>
-      <short value="The date  on which the practitioner was born"/>
+      <short value="The date of birth for the practitioner."/>
       <definition value="The date of birth for the practitioner."/>
       <requirements value="Needed for identification."/>
       <min value="0"/>
@@ -1331,7 +1313,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.photo"/>
-      <short value="Image of the person"/>
+      <short value="Image of the person."/>
       <definition value="Image of the person."/>
       <requirements value="Many EHR systems have the capability to capture an image of patients and personnel. Fits with newer social media usage too."/>
       <min value="0"/>
@@ -1350,7 +1332,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole"/>
-      <short value="The list of Roles/Organizations that the Practitioner is associated with"/>
+      <short value="The list of Roles/Organizations that the Practitioner is associated with."/>
       <definition value="The list of Roles/Organizations that the Practitioner is associated with."/>
       <min value="0"/>
       <max value="*"/>
@@ -1361,7 +1343,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.managingOrganization"/>
-      <short value="The Organization where the Practitioner performs the roles associated"/>
+      <short value="The Organization where the Practitioner performs the roles associated."/>
       <definition value="The Organization where the Practitioner performs the roles associated."/>
       <min value="0"/>
       <max value="1"/>
@@ -1376,9 +1358,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.role"/>
-      <short value="Roles which this practitioner may perform"/>
+      <short value="Roles which this practitioner is authorized to perform for the organization."/>
       <definition value="Roles which this practitioner is authorized to perform for the organization."/>
-      <comments value="A person may have more than one role. At least one role is required."/>
       <requirements value="Need to know what authority the practitioner has - what can they do?"/>
       <min value="0"/>
       <max value="1"/>
@@ -1408,7 +1389,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.specialty"/>
-      <short value="Specific specialty of the practitioner"/>
+      <short value="Specific specialty of the practitioner."/>
       <definition value="Specific specialty of the practitioner."/>
       <min value="0"/>
       <max value="*"/>
@@ -1438,7 +1419,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.period"/>
-      <short value="The period during which the practitioner is authorized to perform in these role(s)"/>
+      <short value="The period during which the person is authorized to act as a practitioner in these role(s) for the organization."/>
       <definition value="The period during which the person is authorized to act as a practitioner in these role(s) for the organization."/>
       <requirements value="Even after the agencies is revoked, the fact that it existed must still be recorded."/>
       <min value="0"/>
@@ -1462,7 +1443,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.practitionerRole.location"/>
-      <short value="The location(s) at which this practitioner provides care"/>
+      <short value="The location(s) at which this practitioner provides care."/>
       <definition value="The location(s) at which this practitioner provides care."/>
       <min value="0"/>
       <max value="*"/>
@@ -1476,12 +1457,13 @@ Not all the content has to be in the base language. The Resource.language should
       </mapping>
       <mapping>
         <identity value="servd"/>
-        <map value="(ServD maps Practitioners and Organizations via another entity, so this concept is not available)&lt;br/&gt;However these are accessed via the Site.ServiceSite.ServiceSiteProvider record. (The Site has the location)"/>
+        <map value="(ServD maps Practitioners and Organizations via another entity, so this concept is not available)&lt;br/&gt;
+However these are accessed via the Site.ServiceSite.ServiceSiteProvider record. (The Site has the location)"/>
       </mapping>
     </element>
     <element>
       <path value="Practitioner.practitionerRole.healthcareService"/>
-      <short value="The list of healthcare services that this worker provides for this role&#39;s Organization/Location(s)"/>
+      <short value="The list of healthcare services that this worker provides for this role&#39;s Organization/Location(s)."/>
       <definition value="The list of healthcare services that this worker provides for this role&#39;s Organization/Location(s)."/>
       <min value="0"/>
       <max value="*"/>
@@ -1496,7 +1478,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification"/>
-      <short value="Qualifications obtained by training and certification"/>
+      <short value="Qualifications obtained by training and certification."/>
       <definition value="Qualifications obtained by training and certification."/>
       <min value="0"/>
       <max value="*"/>
@@ -1515,7 +1497,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.identifier"/>
-      <short value="An identifier for this qualification for the practitioner"/>
+      <short value="An identifier that applies to this person&#39;s qualification in this role."/>
       <definition value="An identifier that applies to this person&#39;s qualification in this role."/>
       <requirements value="Often, specific identities are assigned for the qualification."/>
       <min value="0"/>
@@ -1530,7 +1512,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.code"/>
-      <short value="Coded representation of the qualification"/>
+      <short value="Coded representation of the qualification."/>
       <definition value="Coded representation of the qualification."/>
       <min value="1"/>
       <max value="1"/>
@@ -1555,7 +1537,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.period"/>
-      <short value="Period during which the qualification is valid"/>
+      <short value="Period during which the qualification is valid."/>
       <definition value="Period during which the qualification is valid."/>
       <requirements value="Qualifications are often for a limited period of time, and can be revoked."/>
       <min value="0"/>
@@ -1574,7 +1556,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.qualification.issuer"/>
-      <short value="Organization that regulates and issues the qualification"/>
+      <short value="Organization that regulates and issues the qualification."/>
       <definition value="Organization that regulates and issues the qualification."/>
       <min value="0"/>
       <max value="1"/>
@@ -1589,9 +1571,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Practitioner.communication"/>
-      <short value="A language the practitioner is able to use in patient communication"/>
+      <short value="A language the practitioner is able to use in patient communication."/>
       <definition value="A language the practitioner is able to use in patient communication."/>
-      <comments value="The structure aa-BB with this exact casing is one the most widely used notations for locale. However not all systems actually code this but instead have it as free text. Hence CodeableConcept instead of code as the data type."/>
       <requirements value="Knowing which language a practitioner speaks can help in facilitating communication with patients."/>
       <min value="0"/>
       <max value="*"/>

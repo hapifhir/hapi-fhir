@@ -63,7 +63,7 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="datatypes.html#code">code</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">phone | fax | email | url
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">phone | fax | email | pager | other
             <br/>
             <a href="valueset-contact-point-system.html" title="Telecommunications form for contact point">ContactPointSystem</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
@@ -132,14 +132,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for ContactPoint Resource"/>
   <requirements value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -157,11 +157,10 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="ContactPoint"/>
-      <short value="Details of a Technology mediated contact point (phone, fax, email, etc)"/>
+      <short value="Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc."/>
       <definition value="Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc."/>
       <requirements value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
       <min value="1"/>
@@ -191,7 +190,7 @@
     <element>
       <path value="ContactPoint.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -205,9 +204,8 @@
     </element>
     <element>
       <path value="ContactPoint.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -222,7 +220,7 @@
     </element>
     <element>
       <path value="ContactPoint.system"/>
-      <short value="phone | fax | email | url"/>
+      <short value="Telecommunications form for contact point - what communications system is required to make use of the contact."/>
       <definition value="Telecommunications form for contact point - what communications system is required to make use of the contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -252,9 +250,8 @@
     </element>
     <element>
       <path value="ContactPoint.value"/>
-      <short value="The actual contact point details"/>
+      <short value="The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."/>
       <definition value="The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."/>
-      <comments value="Additional out of band data such as extensions, or notes about use of the contact are sometimes included in the value."/>
       <requirements value="Need to support legacy numbers that are not in a tightly controlled format."/>
       <min value="0"/>
       <max value="1"/>
@@ -276,9 +273,8 @@
     </element>
     <element>
       <path value="ContactPoint.use"/>
-      <short value="home | work | temp | old | mobile - purpose of this contact point"/>
+      <short value="Identifies the purpose for the contact point."/>
       <definition value="Identifies the purpose for the contact point."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary or old contact etc for a current/permanent one. Applications can assume that a contact is current unless it explicitly says that it is temporary or old."/>
       <requirements value="Need to track the way a person uses this contact, so a user can choose which is appropriate for their purpose."/>
       <min value="0"/>
       <max value="1"/>
@@ -308,7 +304,7 @@
     </element>
     <element>
       <path value="ContactPoint.period"/>
-      <short value="Time period when the contact point was/is in use"/>
+      <short value="Time period when the contact point was/is in use."/>
       <definition value="Time period when the contact point was/is in use."/>
       <min value="0"/>
       <max value="1"/>
@@ -332,7 +328,7 @@
   <differential>
     <element>
       <path value="ContactPoint"/>
-      <short value="Details of a Technology mediated contact point (phone, fax, email, etc)"/>
+      <short value="Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc."/>
       <definition value="Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc."/>
       <requirements value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
       <min value="1"/>
@@ -361,7 +357,7 @@
     </element>
     <element>
       <path value="ContactPoint.system"/>
-      <short value="phone | fax | email | url"/>
+      <short value="Telecommunications form for contact point - what communications system is required to make use of the contact."/>
       <definition value="Telecommunications form for contact point - what communications system is required to make use of the contact."/>
       <min value="0"/>
       <max value="1"/>
@@ -391,9 +387,8 @@
     </element>
     <element>
       <path value="ContactPoint.value"/>
-      <short value="The actual contact point details"/>
+      <short value="The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."/>
       <definition value="The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)."/>
-      <comments value="Additional out of band data such as extensions, or notes about use of the contact are sometimes included in the value."/>
       <requirements value="Need to support legacy numbers that are not in a tightly controlled format."/>
       <min value="0"/>
       <max value="1"/>
@@ -415,9 +410,8 @@
     </element>
     <element>
       <path value="ContactPoint.use"/>
-      <short value="home | work | temp | old | mobile - purpose of this contact point"/>
+      <short value="Identifies the purpose for the contact point."/>
       <definition value="Identifies the purpose for the contact point."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary or old contact etc for a current/permanent one. Applications can assume that a contact is current unless it explicitly says that it is temporary or old."/>
       <requirements value="Need to track the way a person uses this contact, so a user can choose which is appropriate for their purpose."/>
       <min value="0"/>
       <max value="1"/>
@@ -447,7 +441,7 @@
     </element>
     <element>
       <path value="ContactPoint.period"/>
-      <short value="Time period when the contact point was/is in use"/>
+      <short value="Time period when the contact point was/is in use."/>
       <definition value="Time period when the contact point was/is in use."/>
       <min value="0"/>
       <max value="1"/>

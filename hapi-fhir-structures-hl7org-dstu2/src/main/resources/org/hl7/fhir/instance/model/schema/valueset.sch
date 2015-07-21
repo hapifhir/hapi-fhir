@@ -46,7 +46,7 @@
     <sch:rule context="f:ValueSet/f:contact/f:telecom/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
-    <sch:rule context="f:ValueSet/f:define">
+    <sch:rule context="f:ValueSet/f:codeSystem">
       <sch:assert test="count(descendant::f:concept)=count(distinct-values(descendant::f:concept/f:code/@value))">vsd-8: Codes must be unique</sch:assert>
       <sch:assert test="count(distinct-values(descendant::f:concept/f:code/@value))=count(descendant::f:concept)">vsd-3: Within a code system definition, all the codes SHALL be unique</sch:assert>
     </sch:rule>

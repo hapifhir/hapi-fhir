@@ -147,8 +147,8 @@ public class WorkerContext implements NameResolver {
     valueSets.put(vs.getId(), vs);
     valueSets.put(url, vs);
     valueSets.put(vs.getUrl(), vs);
-    if (vs.hasDefine()) {
-      codeSystems.put(vs.getDefine().getSystem().toString(), vs);
+	  if (vs.hasCodeSystem()) {
+	    codeSystems.put(vs.getCodeSystem().getSystem().toString(), vs);
     }
   }
 

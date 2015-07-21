@@ -206,14 +206,14 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Address Resource"/>
   <requirements value="Need to be able to record postal addresses, along with notes about their use."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -236,13 +236,11 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Address"/>
-      <short value="A postal address"/>
+      <short value="There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world."/>
       <definition value="There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world."/>
-      <comments value="Note: address is for postal addresses, not physical locations."/>
       <requirements value="Need to be able to record postal addresses, along with notes about their use."/>
       <min value="1"/>
       <max value="1"/>
@@ -265,7 +263,7 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
     <element>
       <path value="Address.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -279,9 +277,8 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
     </element>
     <element>
       <path value="Address.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -296,9 +293,8 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
     </element>
     <element>
       <path value="Address.use"/>
-      <short value="home | work | temp | old - purpose of this address"/>
+      <short value="The purpose of this address."/>
       <definition value="The purpose of this address."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary or old address etc for a current/permanent one. Applications can assume that an address is current unless it explicitly says that it is temporary or old."/>
       <requirements value="Allows an appropriate address to be chosen from a list of many."/>
       <min value="0"/>
       <max value="1"/>
@@ -329,7 +325,7 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
     </element>
     <element>
       <path value="Address.type"/>
-      <short value="postal | physical | both"/>
+      <short value="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both."/>
       <definition value="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both."/>
       <min value="0"/>
       <max value="1"/>
@@ -355,9 +351,8 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
     </element>
     <element>
       <path value="Address.text"/>
-      <short value="Text representation of the address"/>
+      <short value="A full text representation of the address."/>
       <definition value="A full text representation of the address."/>
-      <comments value="Can provide both a text representation and parts."/>
       <requirements value="A renderable, unencoded form."/>
       <min value="0"/>
       <max value="1"/>
@@ -376,7 +371,8 @@ P.O. Box number, delivery hints, and similar address information.">line</a>
     </element>
     <element>
       <path value="Address.line"/>
-      <short value="Street name, number, direction &amp; P.O. Box etc"/>
+      <short value="This component contains the house number, apartment number, street name, street direction, 
+P.O. Box number, delivery hints, and similar address information."/>
       <definition value="This component contains the house number, apartment number, street name, street direction, 
 P.O. Box number, delivery hints, and similar address information."/>
       <requirements value="home | work | temp | old - purpose of this address."/>
@@ -405,7 +401,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.city"/>
-      <short value="Name of city, town etc."/>
+      <short value="The name of the city, town, village or other community or delivery center."/>
       <definition value="The name of the city, town, village or other community or delivery center."/>
       <alias value="Muncipality"/>
       <min value="0"/>
@@ -433,7 +429,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.state"/>
-      <short value="Sub-unit of country (abreviations ok)"/>
+      <short value="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)."/>
       <definition value="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)."/>
       <alias value="Province"/>
       <alias value="Territory"/>
@@ -461,7 +457,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.postalCode"/>
-      <short value="Postal code for area"/>
+      <short value="A postal code designating a region defined by the postal service."/>
       <definition value="A postal code designating a region defined by the postal service."/>
       <alias value="Zip"/>
       <min value="0"/>
@@ -489,9 +485,8 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.country"/>
-      <short value="Country (can be ISO 3166 3 letter code)"/>
+      <short value="Country - a nation as commonly understood or generally accepted."/>
       <definition value="Country - a nation as commonly understood or generally accepted."/>
-      <comments value="ISO 3166 3 letter codes can be used in place of a full country name."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -516,7 +511,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.period"/>
-      <short value="Time period when address was/is in use"/>
+      <short value="Time period when address was/is in use."/>
       <definition value="Time period when address was/is in use."/>
       <requirements value="Allows addresses to be placed in historical context."/>
       <min value="0"/>
@@ -545,9 +540,8 @@ P.O. Box number, delivery hints, and similar address information."/>
   <differential>
     <element>
       <path value="Address"/>
-      <short value="A postal address"/>
+      <short value="There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world."/>
       <definition value="There is a variety of postal address formats defined around the world. This format defines a superset that is the basis for all addresses around the world."/>
-      <comments value="Note: address is for postal addresses, not physical locations."/>
       <requirements value="Need to be able to record postal addresses, along with notes about their use."/>
       <min value="1"/>
       <max value="1"/>
@@ -569,9 +563,8 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.use"/>
-      <short value="home | work | temp | old - purpose of this address"/>
+      <short value="The purpose of this address."/>
       <definition value="The purpose of this address."/>
-      <comments value="This is labeled as &quot;Is Modifier&quot; because applications should not mistake a temporary or old address etc for a current/permanent one. Applications can assume that an address is current unless it explicitly says that it is temporary or old."/>
       <requirements value="Allows an appropriate address to be chosen from a list of many."/>
       <min value="0"/>
       <max value="1"/>
@@ -602,7 +595,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.type"/>
-      <short value="postal | physical | both"/>
+      <short value="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both."/>
       <definition value="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both."/>
       <min value="0"/>
       <max value="1"/>
@@ -628,9 +621,8 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.text"/>
-      <short value="Text representation of the address"/>
+      <short value="A full text representation of the address."/>
       <definition value="A full text representation of the address."/>
-      <comments value="Can provide both a text representation and parts."/>
       <requirements value="A renderable, unencoded form."/>
       <min value="0"/>
       <max value="1"/>
@@ -649,7 +641,8 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.line"/>
-      <short value="Street name, number, direction &amp; P.O. Box etc"/>
+      <short value="This component contains the house number, apartment number, street name, street direction, 
+P.O. Box number, delivery hints, and similar address information."/>
       <definition value="This component contains the house number, apartment number, street name, street direction, 
 P.O. Box number, delivery hints, and similar address information."/>
       <requirements value="home | work | temp | old - purpose of this address."/>
@@ -678,7 +671,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.city"/>
-      <short value="Name of city, town etc."/>
+      <short value="The name of the city, town, village or other community or delivery center."/>
       <definition value="The name of the city, town, village or other community or delivery center."/>
       <alias value="Muncipality"/>
       <min value="0"/>
@@ -706,7 +699,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.state"/>
-      <short value="Sub-unit of country (abreviations ok)"/>
+      <short value="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)."/>
       <definition value="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)."/>
       <alias value="Province"/>
       <alias value="Territory"/>
@@ -734,7 +727,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.postalCode"/>
-      <short value="Postal code for area"/>
+      <short value="A postal code designating a region defined by the postal service."/>
       <definition value="A postal code designating a region defined by the postal service."/>
       <alias value="Zip"/>
       <min value="0"/>
@@ -762,9 +755,8 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.country"/>
-      <short value="Country (can be ISO 3166 3 letter code)"/>
+      <short value="Country - a nation as commonly understood or generally accepted."/>
       <definition value="Country - a nation as commonly understood or generally accepted."/>
-      <comments value="ISO 3166 3 letter codes can be used in place of a full country name."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -789,7 +781,7 @@ P.O. Box number, delivery hints, and similar address information."/>
     </element>
     <element>
       <path value="Address.period"/>
-      <short value="Time period when address was/is in use"/>
+      <short value="Time period when address was/is in use."/>
       <definition value="Time period when address was/is in use."/>
       <requirements value="Allows addresses to be placed in historical context."/>
       <min value="0"/>

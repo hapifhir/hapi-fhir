@@ -29,25 +29,25 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum OralProsthodonticMaterial {
 
         /**
-         * null
+         * Fixed Bridge
          */
         _1, 
         /**
-         * null
+         * Maryland Bridge
          */
         _2, 
         /**
-         * null
+         * Denture Acrylic
          */
         _3, 
         /**
-         * null
+         * Denture Chrome Cobalt
          */
         _4, 
         /**
@@ -81,19 +81,19 @@ public enum OralProsthodonticMaterial {
         }
         public String getDefinition() {
           switch (this) {
-            case _1: return "";
-            case _2: return "";
-            case _3: return "";
-            case _4: return "";
+            case _1: return "Fixed Bridge";
+            case _2: return "Maryland Bridge";
+            case _3: return "Denture Acrylic";
+            case _4: return "Denture Chrome Cobalt";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case _1: return "1";
-            case _2: return "2";
-            case _3: return "3";
-            case _4: return "4";
+            case _1: return "Fixed Bridge";
+            case _2: return "Maryland Bridge";
+            case _3: return "Denture Acrylic";
+            case _4: return "Denture Chrome Cobalt";
             default: return "?";
           }
     }

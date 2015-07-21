@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -231,14 +231,14 @@ public class DeviceMetric extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case BLACK: return "col-black";
-            case RED: return "col-red";
-            case GREEN: return "col-green";
-            case YELLOW: return "col-yellow";
-            case BLUE: return "col-blue";
-            case MAGENTA: return "col-magenta";
-            case CYAN: return "col-cyan";
-            case WHITE: return "col-white";
+            case BLACK: return "Color Black";
+            case RED: return "Color Red";
+            case GREEN: return "Color Green";
+            case YELLOW: return "Color Yellow";
+            case BLUE: return "Color Blue";
+            case MAGENTA: return "Color Magenta";
+            case CYAN: return "Color Cyan";
+            case WHITE: return "Color White";
             default: return "?";
           }
         }

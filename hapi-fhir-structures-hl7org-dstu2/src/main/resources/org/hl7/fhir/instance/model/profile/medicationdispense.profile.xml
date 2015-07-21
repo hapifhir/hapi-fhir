@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="MedicationDispense"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -152,7 +152,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Trial fill, partial fill, emergency fill, etc.
             <br/>
-            <a href="v3/vs/ActPharmacySupplyType/index.html" title="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.">ActPharmacySupplyType</a> (
+            <a href="v3/ActPharmacySupplyType/index.html" title="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.">ActPharmacySupplyType</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -387,7 +387,9 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
-            <span title="A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  Dates SHALL be valid dates.">scheduleDateTime</span>
+            <span title="A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.  
+						
+							Dates SHALL be valid dates.">scheduleDateTime</span>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"></td>
@@ -527,7 +529,9 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="heirarchy"/> 
-            <span title="MedicationDispense.dosageInstruction.method : A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration.">method</span>
+            <span title="MedicationDispense.dosageInstruction.method : A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration.">method</span>
             <a name="MedicationDispense.dosageInstruction.method"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
@@ -657,7 +661,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Type of substitiution
             <br/>
-            <a href="v3/vs/ActSubstanceAdminSubstitutionCode/index.html" title="A coded concept describing whether a different medicinal product may be dispensed other than the product as specified exactly in the prescription">ActSubstanceAdminSubstitutionCode</a> (
+            <a href="v3/ActSubstanceAdminSubstitutionCode/index.html" title="A coded concept describing whether a different medicinal product may be dispensed other than the product as specified exactly in the prescription">ActSubstanceAdminSubstitutionCode</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -678,7 +682,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Why was substitution made
             <br/>
-            <a href="v3/vs/SubstanceAdminSubstitutionReason/index.html" title="A coded concept describing the reason that a different medication should (or should not) be substituted from what was prescribed">SubstanceAdminSubstitutionReason</a> (
+            <a href="v3/SubstanceAdminSubstitutionReason/index.html" title="A coded concept describing the reason that a different medication should (or should not) be substituted from what was prescribed">SubstanceAdminSubstitutionReason</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -711,19 +715,19 @@
   <publisher value="Health Level Seven International (Pharmacy)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/medication/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for MedicationDispense Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -735,11 +739,11 @@
     <name value="HL7 v2"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="MedicationDispense"/>
-      <short value="Dispensing a medication to a named patient"/>
+      <short value="Dispensing a medication to a named patient.  This includes a description of the supply provided and the instructions for administering the medication."/>
       <definition value="Dispensing a medication to a named patient.  This includes a description of the supply provided and the instructions for administering the medication."/>
       <min value="1"/>
       <max value="1"/>
@@ -759,9 +763,8 @@
     </element>
     <element>
       <path value="MedicationDispense.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -770,7 +773,7 @@
     </element>
     <element>
       <path value="MedicationDispense.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -780,9 +783,8 @@
     </element>
     <element>
       <path value="MedicationDispense.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -792,11 +794,8 @@
     </element>
     <element>
       <path value="MedicationDispense.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -810,9 +809,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -830,9 +828,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -848,9 +845,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -865,9 +861,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -883,7 +878,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.identifier"/>
-      <short value="External identifier"/>
+      <short value="Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR."/>
       <definition value="Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR."/>
       <min value="0"/>
       <max value="1"/>
@@ -897,7 +892,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.status"/>
-      <short value="in-progress | on-hold | completed | entered-in-error | stopped"/>
+      <short value="A code specifying the state of the set of dispense events."/>
       <definition value="A code specifying the state of the set of dispense events."/>
       <min value="0"/>
       <max value="1"/>
@@ -923,9 +918,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.patient"/>
-      <short value="Who the dispense is for"/>
+      <short value="A link to a resource representing the person to whom the medication will be given."/>
       <definition value="A link to a resource representing the person to whom the medication will be given."/>
-      <comments value="SubstanceAdministration-&gt;subject-&gt;Patient."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -943,7 +937,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dispenser"/>
-      <short value="Practitioner responsible for dispensing medication"/>
+      <short value="The individual responsible for dispensing the medication."/>
       <definition value="The individual responsible for dispensing the medication."/>
       <min value="0"/>
       <max value="1"/>
@@ -962,7 +956,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.authorizingPrescription"/>
-      <short value="Medication order that authorizes the dispense"/>
+      <short value="Indicates the medication order that is being dispensed against."/>
       <definition value="Indicates the medication order that is being dispensed against."/>
       <min value="0"/>
       <max value="*"/>
@@ -981,7 +975,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.type"/>
-      <short value="Trial fill, partial fill, emergency fill, etc."/>
+      <short value="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc."/>
       <definition value="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -1006,7 +1000,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.quantity"/>
-      <short value="Amount dispensed"/>
+      <short value="The amount of medication that has been dispensed. Includes unit of measure."/>
       <definition value="The amount of medication that has been dispensed. Includes unit of measure."/>
       <min value="0"/>
       <max value="1"/>
@@ -1024,7 +1018,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.daysSupply"/>
-      <short value="Days Supply"/>
+      <short value="The amount of medication expressed as a timing amount."/>
       <definition value="The amount of medication expressed as a timing amount."/>
       <min value="0"/>
       <max value="1"/>
@@ -1034,9 +1028,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.medication[x]"/>
-      <short value="What medication was supplied"/>
+      <short value="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."/>
       <definition value="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."/>
-      <comments value="If only a code is specified, then it needs to be a code for a specific product.  If more information is required, then the use of the medication resource is recommended.Note: do not use Medication.name to describe the dispensed medication. When the only available information is a text description of the medication, Medication.code.text should be used."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1057,7 +1050,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.whenPrepared"/>
-      <short value="Dispense processing time"/>
+      <short value="The time when the dispensed product was packaged and reviewed."/>
       <definition value="The time when the dispensed product was packaged and reviewed."/>
       <min value="0"/>
       <max value="1"/>
@@ -1075,7 +1068,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.whenHandedOver"/>
-      <short value="Handover time"/>
+      <short value="The time the dispensed product was provided to the patient or their representative."/>
       <definition value="The time the dispensed product was provided to the patient or their representative."/>
       <min value="0"/>
       <max value="1"/>
@@ -1093,7 +1086,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.destination"/>
-      <short value="Where the medication was sent"/>
+      <short value="Identification of the facility/location where the medication was shipped to, as part of the dispense event."/>
       <definition value="Identification of the facility/location where the medication was shipped to, as part of the dispense event."/>
       <min value="0"/>
       <max value="1"/>
@@ -1112,7 +1105,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.receiver"/>
-      <short value="Who collected the medication"/>
+      <short value="Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional."/>
       <definition value="Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional."/>
       <min value="0"/>
       <max value="*"/>
@@ -1131,7 +1124,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.note"/>
-      <short value="Information about the dispense"/>
+      <short value="Extra information about the dispense that could not be conveyed in the other attributes."/>
       <definition value="Extra information about the dispense that could not be conveyed in the other attributes."/>
       <min value="0"/>
       <max value="1"/>
@@ -1141,9 +1134,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction"/>
-      <short value="Medicine administration instructions to the patient/carer"/>
+      <short value="Indicates how the medication is to be used by the patient."/>
       <definition value="Indicates how the medication is to be used by the patient."/>
-      <comments value="When the dose or rate is intended to change over the entire administration period, eg. Tapering dose prescriptions, multiple instances of dosage instructions will need to be supplied to convey the different doses/rates."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1157,7 +1149,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="MedicationDispense.dosageInstruction.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1171,9 +1163,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1188,9 +1179,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1207,7 +1197,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.text"/>
-      <short value="Dosage Instructions"/>
+      <short value="Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication."/>
       <definition value="Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication."/>
       <min value="0"/>
       <max value="1"/>
@@ -1217,7 +1207,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.additionalInstructions"/>
-      <short value="E.g. &quot;Take with food&quot;"/>
+      <short value="Additional instructions such as &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
       <definition value="Additional instructions such as &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
       <min value="0"/>
       <max value="1"/>
@@ -1231,7 +1221,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.schedule[x]"/>
-      <short value="When medication should be administered"/>
+      <short value="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  &quot;Every  8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;;  &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <definition value="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  &quot;Every  8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;;  &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1255,7 +1245,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.asNeeded[x]"/>
-      <short value="Take &quot;as needed&quot; f(or x)"/>
+      <short value="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication."/>
       <definition value="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication."/>
       <min value="0"/>
       <max value="1"/>
@@ -1271,12 +1261,14 @@ Not all the content has to be in the base language. The Resource.language should
       </binding>
       <mapping>
         <identity value="rim"/>
-        <map value="boolean: .outboundRelationship[typeCode=PRCN].negationInd (inversed - so negationInd = true means asNeeded=falseCodeableConcept: .outboundRelationship[typCode=PRCN].target[classCode=OBS, moodCode=EVN, isCriterionInd=true, code=&quot;Assertion&quot;].value"/>
+        <map value="boolean: .outboundRelationship[typeCode=PRCN].negationInd (inversed - so negationInd = true means asNeeded=false
+
+CodeableConcept: .outboundRelationship[typCode=PRCN].target[classCode=OBS, moodCode=EVN, isCriterionInd=true, code=&quot;Assertion&quot;].value"/>
       </mapping>
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.site"/>
-      <short value="Body site to administer to"/>
+      <short value="A coded specification of the anatomic site where the medication first enters the body."/>
       <definition value="A coded specification of the anatomic site where the medication first enters the body."/>
       <min value="0"/>
       <max value="1"/>
@@ -1301,7 +1293,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.route"/>
-      <short value="How drug should enter body"/>
+      <short value="A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject."/>
       <definition value="A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject."/>
       <min value="0"/>
       <max value="1"/>
@@ -1326,8 +1318,12 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.method"/>
-      <short value="Technique for administering medication"/>
-      <definition value="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration."/>
+      <short value="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration."/>
+      <definition value="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1351,9 +1347,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.dose[x]"/>
-      <short value="Amount of medication per dose"/>
+      <short value="The amount of therapeutic or other substance given at one administration event."/>
       <definition value="The amount of therapeutic or other substance given at one administration event."/>
-      <comments value="Note that this specifies the quantity of the specified medication, not the quantity of active ingredient(s).  The prescribed strength can be calculated by multiplying the doseQuantity by the strength of each active ingredient in the prescribed Medication.If the administration is not intended to be instantaneous (rate is present or timing has a duration), this can be specified to convey the total amount to be administered over the period of time as indicated by the schedule."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1373,9 +1368,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.rate"/>
-      <short value="Amount of medication per unit of time"/>
+      <short value="Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours."/>
       <definition value="Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours."/>
-      <comments value="It is possible to supply both a rate and a doseQuantity to provide full details about how the medication is to be administered and supplied.If the rate is intended to change over time, each change should be captured as a distinct &quot;dosage&quot; repetition, except for titration orders."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1392,7 +1386,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.maxDosePerPeriod"/>
-      <short value="Upper limit on medication per unit of time"/>
+      <short value="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time,  e.g. 1000mg in 24 hours."/>
       <definition value="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time,  e.g. 1000mg in 24 hours."/>
       <min value="0"/>
       <max value="1"/>
@@ -1410,7 +1404,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution"/>
-      <short value="Deals with substitution of one medicine for another"/>
+      <short value="Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn&#39;t happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why."/>
       <definition value="Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn&#39;t happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why."/>
       <min value="0"/>
       <max value="1"/>
@@ -1425,7 +1419,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="MedicationDispense.substitution.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1439,9 +1433,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1456,9 +1449,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1475,7 +1467,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.type"/>
-      <short value="Type of substitiution"/>
+      <short value="A code signifying whether a different drug was dispensed from what was prescribed."/>
       <definition value="A code signifying whether a different drug was dispensed from what was prescribed."/>
       <min value="1"/>
       <max value="1"/>
@@ -1500,7 +1492,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.reason"/>
-      <short value="Why was substitution made"/>
+      <short value="Indicates the reason for the substitution of (or lack of substitution) from what was prescribed."/>
       <definition value="Indicates the reason for the substitution of (or lack of substitution) from what was prescribed."/>
       <min value="0"/>
       <max value="*"/>
@@ -1521,9 +1513,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.responsibleParty"/>
-      <short value="Who is responsible for the substitution"/>
+      <short value="The person or organization that has primary responsibility for the substitution."/>
       <definition value="The person or organization that has primary responsibility for the substitution."/>
-      <comments value="rename."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1539,7 +1530,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="MedicationDispense"/>
-      <short value="Dispensing a medication to a named patient"/>
+      <short value="Dispensing a medication to a named patient.  This includes a description of the supply provided and the instructions for administering the medication."/>
       <definition value="Dispensing a medication to a named patient.  This includes a description of the supply provided and the instructions for administering the medication."/>
       <min value="1"/>
       <max value="1"/>
@@ -1559,7 +1550,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.identifier"/>
-      <short value="External identifier"/>
+      <short value="Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR."/>
       <definition value="Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR."/>
       <min value="0"/>
       <max value="1"/>
@@ -1573,7 +1564,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.status"/>
-      <short value="in-progress | on-hold | completed | entered-in-error | stopped"/>
+      <short value="A code specifying the state of the set of dispense events."/>
       <definition value="A code specifying the state of the set of dispense events."/>
       <min value="0"/>
       <max value="1"/>
@@ -1599,9 +1590,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.patient"/>
-      <short value="Who the dispense is for"/>
+      <short value="A link to a resource representing the person to whom the medication will be given."/>
       <definition value="A link to a resource representing the person to whom the medication will be given."/>
-      <comments value="SubstanceAdministration-&gt;subject-&gt;Patient."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1619,7 +1609,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dispenser"/>
-      <short value="Practitioner responsible for dispensing medication"/>
+      <short value="The individual responsible for dispensing the medication."/>
       <definition value="The individual responsible for dispensing the medication."/>
       <min value="0"/>
       <max value="1"/>
@@ -1638,7 +1628,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.authorizingPrescription"/>
-      <short value="Medication order that authorizes the dispense"/>
+      <short value="Indicates the medication order that is being dispensed against."/>
       <definition value="Indicates the medication order that is being dispensed against."/>
       <min value="0"/>
       <max value="*"/>
@@ -1657,7 +1647,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.type"/>
-      <short value="Trial fill, partial fill, emergency fill, etc."/>
+      <short value="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc."/>
       <definition value="Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -1682,7 +1672,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.quantity"/>
-      <short value="Amount dispensed"/>
+      <short value="The amount of medication that has been dispensed. Includes unit of measure."/>
       <definition value="The amount of medication that has been dispensed. Includes unit of measure."/>
       <min value="0"/>
       <max value="1"/>
@@ -1700,7 +1690,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.daysSupply"/>
-      <short value="Days Supply"/>
+      <short value="The amount of medication expressed as a timing amount."/>
       <definition value="The amount of medication expressed as a timing amount."/>
       <min value="0"/>
       <max value="1"/>
@@ -1710,9 +1700,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.medication[x]"/>
-      <short value="What medication was supplied"/>
+      <short value="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."/>
       <definition value="Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications."/>
-      <comments value="If only a code is specified, then it needs to be a code for a specific product.  If more information is required, then the use of the medication resource is recommended.Note: do not use Medication.name to describe the dispensed medication. When the only available information is a text description of the medication, Medication.code.text should be used."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -1733,7 +1722,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.whenPrepared"/>
-      <short value="Dispense processing time"/>
+      <short value="The time when the dispensed product was packaged and reviewed."/>
       <definition value="The time when the dispensed product was packaged and reviewed."/>
       <min value="0"/>
       <max value="1"/>
@@ -1751,7 +1740,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.whenHandedOver"/>
-      <short value="Handover time"/>
+      <short value="The time the dispensed product was provided to the patient or their representative."/>
       <definition value="The time the dispensed product was provided to the patient or their representative."/>
       <min value="0"/>
       <max value="1"/>
@@ -1769,7 +1758,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.destination"/>
-      <short value="Where the medication was sent"/>
+      <short value="Identification of the facility/location where the medication was shipped to, as part of the dispense event."/>
       <definition value="Identification of the facility/location where the medication was shipped to, as part of the dispense event."/>
       <min value="0"/>
       <max value="1"/>
@@ -1788,7 +1777,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.receiver"/>
-      <short value="Who collected the medication"/>
+      <short value="Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional."/>
       <definition value="Identifies the person who picked up the medication.  This will usually be a patient or their carer, but some cases exist where it can be a healthcare professional."/>
       <min value="0"/>
       <max value="*"/>
@@ -1807,7 +1796,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.note"/>
-      <short value="Information about the dispense"/>
+      <short value="Extra information about the dispense that could not be conveyed in the other attributes."/>
       <definition value="Extra information about the dispense that could not be conveyed in the other attributes."/>
       <min value="0"/>
       <max value="1"/>
@@ -1817,9 +1806,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction"/>
-      <short value="Medicine administration instructions to the patient/carer"/>
+      <short value="Indicates how the medication is to be used by the patient."/>
       <definition value="Indicates how the medication is to be used by the patient."/>
-      <comments value="When the dose or rate is intended to change over the entire administration period, eg. Tapering dose prescriptions, multiple instances of dosage instructions will need to be supplied to convey the different doses/rates."/>
       <min value="0"/>
       <max value="*"/>
       <mapping>
@@ -1829,7 +1817,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.text"/>
-      <short value="Dosage Instructions"/>
+      <short value="Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication."/>
       <definition value="Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication."/>
       <min value="0"/>
       <max value="1"/>
@@ -1839,7 +1827,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.additionalInstructions"/>
-      <short value="E.g. &quot;Take with food&quot;"/>
+      <short value="Additional instructions such as &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
       <definition value="Additional instructions such as &quot;Swallow with plenty of water&quot; which may or may not be coded."/>
       <min value="0"/>
       <max value="1"/>
@@ -1853,7 +1841,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.schedule[x]"/>
-      <short value="When medication should be administered"/>
+      <short value="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  &quot;Every  8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;;  &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <definition value="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  &quot;Every  8 hours&quot;; &quot;Three times a day&quot;; &quot;1/2 an hour before breakfast for 10 days from 23-Dec 2011:&quot;;  &quot;15 Oct 2013, 17 Oct 2013 and 1 Nov 2013&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1877,7 +1865,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.asNeeded[x]"/>
-      <short value="Take &quot;as needed&quot; f(or x)"/>
+      <short value="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication."/>
       <definition value="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication."/>
       <min value="0"/>
       <max value="1"/>
@@ -1893,12 +1881,14 @@ Not all the content has to be in the base language. The Resource.language should
       </binding>
       <mapping>
         <identity value="rim"/>
-        <map value="boolean: .outboundRelationship[typeCode=PRCN].negationInd (inversed - so negationInd = true means asNeeded=falseCodeableConcept: .outboundRelationship[typCode=PRCN].target[classCode=OBS, moodCode=EVN, isCriterionInd=true, code=&quot;Assertion&quot;].value"/>
+        <map value="boolean: .outboundRelationship[typeCode=PRCN].negationInd (inversed - so negationInd = true means asNeeded=false
+
+CodeableConcept: .outboundRelationship[typCode=PRCN].target[classCode=OBS, moodCode=EVN, isCriterionInd=true, code=&quot;Assertion&quot;].value"/>
       </mapping>
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.site"/>
-      <short value="Body site to administer to"/>
+      <short value="A coded specification of the anatomic site where the medication first enters the body."/>
       <definition value="A coded specification of the anatomic site where the medication first enters the body."/>
       <min value="0"/>
       <max value="1"/>
@@ -1923,7 +1913,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.route"/>
-      <short value="How drug should enter body"/>
+      <short value="A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject."/>
       <definition value="A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject."/>
       <min value="0"/>
       <max value="1"/>
@@ -1948,8 +1938,12 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.method"/>
-      <short value="Technique for administering medication"/>
-      <definition value="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.Terminologies used often pre-coordinate this term with the route and or form of administration."/>
+      <short value="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration."/>
+      <definition value="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
+
+Terminologies used often pre-coordinate this term with the route and or form of administration."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1973,9 +1967,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.dose[x]"/>
-      <short value="Amount of medication per dose"/>
+      <short value="The amount of therapeutic or other substance given at one administration event."/>
       <definition value="The amount of therapeutic or other substance given at one administration event."/>
-      <comments value="Note that this specifies the quantity of the specified medication, not the quantity of active ingredient(s).  The prescribed strength can be calculated by multiplying the doseQuantity by the strength of each active ingredient in the prescribed Medication.If the administration is not intended to be instantaneous (rate is present or timing has a duration), this can be specified to convey the total amount to be administered over the period of time as indicated by the schedule."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1995,9 +1988,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.rate"/>
-      <short value="Amount of medication per unit of time"/>
+      <short value="Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours."/>
       <definition value="Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours."/>
-      <comments value="It is possible to supply both a rate and a doseQuantity to provide full details about how the medication is to be administered and supplied.If the rate is intended to change over time, each change should be captured as a distinct &quot;dosage&quot; repetition, except for titration orders."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2014,7 +2006,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.dosageInstruction.maxDosePerPeriod"/>
-      <short value="Upper limit on medication per unit of time"/>
+      <short value="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time,  e.g. 1000mg in 24 hours."/>
       <definition value="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time,  e.g. 1000mg in 24 hours."/>
       <min value="0"/>
       <max value="1"/>
@@ -2032,7 +2024,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution"/>
-      <short value="Deals with substitution of one medicine for another"/>
+      <short value="Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn&#39;t happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why."/>
       <definition value="Indicates whether or not substitution was made as part of the dispense.  In some cases substitution will be expected but doesn&#39;t happen, in other cases substitution is not expected but does happen.  This block explains what substitition did or did not happen and why."/>
       <min value="0"/>
       <max value="1"/>
@@ -2043,7 +2035,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.type"/>
-      <short value="Type of substitiution"/>
+      <short value="A code signifying whether a different drug was dispensed from what was prescribed."/>
       <definition value="A code signifying whether a different drug was dispensed from what was prescribed."/>
       <min value="1"/>
       <max value="1"/>
@@ -2068,7 +2060,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.reason"/>
-      <short value="Why was substitution made"/>
+      <short value="Indicates the reason for the substitution of (or lack of substitution) from what was prescribed."/>
       <definition value="Indicates the reason for the substitution of (or lack of substitution) from what was prescribed."/>
       <min value="0"/>
       <max value="*"/>
@@ -2089,9 +2081,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="MedicationDispense.substitution.responsibleParty"/>
-      <short value="Who is responsible for the substitution"/>
+      <short value="The person or organization that has primary responsibility for the substitution."/>
       <definition value="The person or organization that has primary responsibility for the substitution."/>
-      <comments value="rename."/>
       <min value="0"/>
       <max value="*"/>
       <type>

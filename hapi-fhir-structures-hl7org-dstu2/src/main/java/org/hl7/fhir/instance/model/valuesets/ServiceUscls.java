@@ -29,85 +29,85 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum ServiceUscls {
 
         /**
-         * null
+         * Exam, comp, primary
          */
         _1101, 
         /**
-         * null
+         * Exam, comp, mixed
          */
         _1102, 
         /**
-         * null
+         * Exam, comp, permanent
          */
         _1103, 
         /**
-         * null
+         * Exam, recall
          */
         _1201, 
         /**
-         * null
+         * Exam, emergency
          */
         _1205, 
         /**
-         * null
+         * Radiograph, series (12)
          */
         _2101, 
         /**
-         * null
+         * Radiograph, series (16)
          */
         _2102, 
         /**
-         * null
+         * Radiograph, bytewing
          */
         _2141, 
         /**
-         * null
+         * Radiograph, panoramic
          */
         _2601, 
         /**
-         * null
+         * Polishing, 1 unit
          */
         _11101, 
         /**
-         * null
+         * Polishing, 2 unit
          */
         _11102, 
         /**
-         * null
+         * Polishing, 3 unit
          */
         _11103, 
         /**
-         * null
+         * Polishing, 4 unit
          */
         _11104, 
         /**
-         * null
+         * Amalgam, 1 surface
          */
         _21211, 
         /**
-         * null
+         * Amalgam, 2 surface
          */
         _21212, 
         /**
-         * null
+         * Crown, PFM
          */
         _27211, 
         /**
-         * null
+         * Lab, commercial
          */
         _99111, 
         /**
-         * null
+         * Lab, in office
          */
         _99333, 
         /**
-         * null
+         * Expense
          */
         _99555, 
         /**
@@ -186,49 +186,49 @@ public enum ServiceUscls {
         }
         public String getDefinition() {
           switch (this) {
-            case _1101: return "";
-            case _1102: return "";
-            case _1103: return "";
-            case _1201: return "";
-            case _1205: return "";
-            case _2101: return "";
-            case _2102: return "";
-            case _2141: return "";
-            case _2601: return "";
-            case _11101: return "";
-            case _11102: return "";
-            case _11103: return "";
-            case _11104: return "";
-            case _21211: return "";
-            case _21212: return "";
-            case _27211: return "";
-            case _99111: return "";
-            case _99333: return "";
-            case _99555: return "";
+            case _1101: return "Exam, comp, primary";
+            case _1102: return "Exam, comp, mixed";
+            case _1103: return "Exam, comp, permanent";
+            case _1201: return "Exam, recall";
+            case _1205: return "Exam, emergency";
+            case _2101: return "Radiograph, series (12)";
+            case _2102: return "Radiograph, series (16)";
+            case _2141: return "Radiograph, bytewing";
+            case _2601: return "Radiograph, panoramic";
+            case _11101: return "Polishing, 1 unit";
+            case _11102: return "Polishing, 2 unit";
+            case _11103: return "Polishing, 3 unit";
+            case _11104: return "Polishing, 4 unit";
+            case _21211: return "Amalgam, 1 surface";
+            case _21212: return "Amalgam, 2 surface";
+            case _27211: return "Crown, PFM";
+            case _99111: return "Lab, commercial";
+            case _99333: return "Lab, in office";
+            case _99555: return "Expense";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case _1101: return "1101";
-            case _1102: return "1102";
-            case _1103: return "1103";
-            case _1201: return "1201";
-            case _1205: return "1205";
-            case _2101: return "2101";
-            case _2102: return "2102";
-            case _2141: return "2141";
-            case _2601: return "2601";
-            case _11101: return "11101";
-            case _11102: return "11102";
-            case _11103: return "11103";
-            case _11104: return "11104";
-            case _21211: return "21211";
-            case _21212: return "21212";
-            case _27211: return "27211";
-            case _99111: return "99111";
-            case _99333: return "99333";
-            case _99555: return "99555";
+            case _1101: return "Exam, comp, primary";
+            case _1102: return "Exam, comp, mixed";
+            case _1103: return "Exam, comp, permanent";
+            case _1201: return "Exam, recall";
+            case _1205: return "Exam, emergency";
+            case _2101: return "Radiograph, series (12)";
+            case _2102: return "Radiograph, series (16)";
+            case _2141: return "Radiograph, bytewing";
+            case _2601: return "Radiograph, panoramic";
+            case _11101: return "Polishing, 1 unit";
+            case _11102: return "Polishing, 2 unit";
+            case _11103: return "Polishing, 3 unit";
+            case _11104: return "Polishing, 4 unit";
+            case _21211: return "Amalgam, 1 surface";
+            case _21212: return "Amalgam, 2 surface";
+            case _27211: return "Crown, PFM";
+            case _99111: return "Lab, commercial";
+            case _99333: return "Lab, in office";
+            case _99555: return "Expense";
             default: return "?";
           }
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1862,8 +1862,6 @@ public class Condition extends DomainResource {
   public static final String SP_EVIDENCE = "evidence";
   @SearchParamDefinition(name="date-asserted", path="Condition.dateAsserted", description="When first detected/suspected/entered", type="date" )
   public static final String SP_DATEASSERTED = "date-asserted";
-  @SearchParamDefinition(name="subject", path="Condition.patient", description="Who has the condition?", type="reference" )
-  public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="dueto-item", path="Condition.dueTo.target", description="Relationship target resource", type="reference" )
   public static final String SP_DUETOITEM = "dueto-item";
   @SearchParamDefinition(name="encounter", path="Condition.encounter", description="Encounter when condition first asserted", type="reference" )

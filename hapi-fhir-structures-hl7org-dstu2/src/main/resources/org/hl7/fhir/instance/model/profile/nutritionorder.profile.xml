@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="NutritionOrder"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -829,19 +829,19 @@
   <publisher value="Health Level Seven International (Orders and Observations)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for NutritionOrder Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -853,13 +853,12 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="NutritionOrder"/>
-      <short value="A request for a diet, formula or nutritional supplement"/>
+      <short value="A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident."/>
       <definition value="A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident."/>
-      <comments value="Referenced by an Order Request (workflow)."/>
       <alias value="Diet Order"/>
       <alias value="Diet"/>
       <alias value="Nutritional Supplement"/>
@@ -886,9 +885,8 @@
     </element>
     <element>
       <path value="NutritionOrder.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -897,7 +895,7 @@
     </element>
     <element>
       <path value="NutritionOrder.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -907,9 +905,8 @@
     </element>
     <element>
       <path value="NutritionOrder.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -919,11 +916,8 @@
     </element>
     <element>
       <path value="NutritionOrder.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -937,9 +931,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -957,9 +950,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -975,9 +967,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -992,9 +983,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1010,7 +1000,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.patient"/>
-      <short value="The person who requires the diet, formula or nutritional supplement"/>
+      <short value="The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding."/>
       <definition value="The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding."/>
       <min value="1"/>
       <max value="1"/>
@@ -1030,7 +1020,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.orderer"/>
-      <short value="Who ordered the diet, formula or nutritional supplement"/>
+      <short value="The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings."/>
       <definition value="The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings."/>
       <min value="0"/>
       <max value="1"/>
@@ -1050,7 +1040,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.identifier"/>
-      <short value="Identifiers assigned to this order"/>
+      <short value="Identifiers assigned to this order by the order sender or by the order receiver."/>
       <definition value="Identifiers assigned to this order by the order sender or by the order receiver."/>
       <min value="0"/>
       <max value="*"/>
@@ -1068,7 +1058,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.encounter"/>
-      <short value="The encounter associated with that this nutrition order"/>
+      <short value="An encounter that provides additional information about the healthcare context in which this request is made."/>
       <definition value="An encounter that provides additional information about the healthcare context in which this request is made."/>
       <min value="0"/>
       <max value="1"/>
@@ -1087,7 +1077,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.dateTime"/>
-      <short value="Date and time the nutrition order was requested"/>
+      <short value="The date and time that this nutrition order was requested."/>
       <definition value="The date and time that this nutrition order was requested."/>
       <min value="1"/>
       <max value="1"/>
@@ -1106,9 +1096,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.status"/>
-      <short value="proposed | draft | planned | requested | active | on-hold | completed | cancelled"/>
+      <short value="The workflow status of the nutrition order/request."/>
       <definition value="The workflow status of the nutrition order/request."/>
-      <comments value="Typically the system placing the order sets the status to requested. There after, the order is maintained by the receiver that updates the status as the request is handled."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1134,9 +1123,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.allergyIntolerance"/>
-      <short value="List of the patient&#39;s food and nutrition-related allergies and intolerances"/>
+      <short value="A link to a record of allergies or Intolerances  which should be included in the nutrition order."/>
       <definition value="A link to a record of allergies or Intolerances  which should be included in the nutrition order."/>
-      <comments value="Information on a patient&#39;s food allergies and intolerances, inform healthcare personnel about the type of foods that the patient should receive or consume."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1150,9 +1138,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.foodPreferenceModifier"/>
-      <short value="Order-specific modifier about the type of food that should be given"/>
+      <short value="This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
       <definition value="This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
-      <comments value="Information on a patient&#39;s food preferences inform healthcare personnel about the food that the patient should receive or consume."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1176,9 +1163,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.excludeFoodModifier"/>
-      <short value="Order-specific modifier about the type of food that should not be given"/>
+      <short value="This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
       <definition value="This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
-      <comments value="Information on a patient&#39;s food allergies and intolerances, and preferences inform healthcare personnel about the type  of foods that the patient should receive or consume."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1198,7 +1184,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet"/>
-      <short value="Oral diet components"/>
+      <short value="Diet given orally in contrast to enteral (tube) feeding."/>
       <definition value="Diet given orally in contrast to enteral (tube) feeding."/>
       <min value="0"/>
       <max value="1"/>
@@ -1218,7 +1204,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="NutritionOrder.oralDiet.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1232,9 +1218,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1249,9 +1234,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1268,7 +1252,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.type"/>
-      <short value="Type of oral diet or diet restrictions that describe what can be consumed orally"/>
+      <short value="The kind of diet or dietary restriction such as fiber restricted diet or diabetic diet."/>
       <definition value="The kind of diet or dietary restriction such as fiber restricted diet or diabetic diet."/>
       <min value="0"/>
       <max value="*"/>
@@ -1294,7 +1278,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.schedule"/>
-      <short value="Scheduled frequency of diet"/>
+      <short value="The time period and frequency at which the diet should be given."/>
       <definition value="The time period and frequency at which the diet should be given."/>
       <alias value="frequency"/>
       <min value="0"/>
@@ -1313,7 +1297,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient"/>
-      <short value="Required  nutrient modifications"/>
+      <short value="Class that defines the quantity and type of nutrient modifications required for the oral diet."/>
       <definition value="Class that defines the quantity and type of nutrient modifications required for the oral diet."/>
       <min value="0"/>
       <max value="*"/>
@@ -1332,7 +1316,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1346,9 +1330,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1363,9 +1346,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1382,7 +1364,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.modifier"/>
-      <short value="Type of nutrient that is being modified"/>
+      <short value="The nutrient that is being modified such as carbohydrate or sodium."/>
       <definition value="The nutrient that is being modified such as carbohydrate or sodium."/>
       <min value="0"/>
       <max value="1"/>
@@ -1407,7 +1389,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.amount"/>
-      <short value="Quantity of the specified nutrient"/>
+      <short value="The quantity of the specified nutrient to include in diet."/>
       <definition value="The quantity of the specified nutrient to include in diet."/>
       <min value="0"/>
       <max value="1"/>
@@ -1425,7 +1407,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture"/>
-      <short value="Required  texture modifications"/>
+      <short value="Class that describes any texture modifications required for the patient to safely consume various types of solid foods."/>
       <definition value="Class that describes any texture modifications required for the patient to safely consume various types of solid foods."/>
       <min value="0"/>
       <max value="*"/>
@@ -1444,7 +1426,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="NutritionOrder.oralDiet.texture.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1458,9 +1440,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1475,9 +1456,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1494,9 +1474,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture.modifier"/>
-      <short value="Code to indicate how to alter the texture of the foods, e.g., pureed"/>
+      <short value="Any texture modifications (for solid foods) that should be made, e.g. easy to chew, chopped, ground, and pureed."/>
       <definition value="Any texture modifications (for solid foods) that should be made, e.g. easy to chew, chopped, ground, and pureed."/>
-      <comments value="Coupled with the foodType (Meat)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1520,9 +1499,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture.foodType"/>
-      <short value="Concepts that are used to identify an entity that is ingested for nutritional purposes"/>
+      <short value="The food type(s) (e.g., meats, all foods)  that the texture modification applies to.  This could be all foods types."/>
       <definition value="The food type(s) (e.g., meats, all foods)  that the texture modification applies to.  This could be all foods types."/>
-      <comments value="Coupled with the textureModifier; could be (All Foods)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1546,7 +1524,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.fluidConsistencyType"/>
-      <short value="The required consistency of fluids and liquids provided to the patient"/>
+      <short value="The required consistency (e.g., honey-thick, nectar-thick, thin, thickened.) of liquids or fluids served to the patient."/>
       <definition value="The required consistency (e.g., honey-thick, nectar-thick, thin, thickened.) of liquids or fluids served to the patient."/>
       <min value="0"/>
       <max value="*"/>
@@ -1571,9 +1549,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.instruction"/>
-      <short value="Instructions or additional information about the oral diet"/>
+      <short value="Free text or additional instructions or information pertaining to the oral diet."/>
       <definition value="Free text or additional instructions or information pertaining to the oral diet."/>
-      <comments value="Free text dosage instructions can be used for cases where the instructions are too complex to code."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1591,7 +1568,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement"/>
-      <short value="Supplement components"/>
+      <short value="Oral nutritional products given in order to add further nutritional value to the patient&#39;s diet."/>
       <definition value="Oral nutritional products given in order to add further nutritional value to the patient&#39;s diet."/>
       <min value="0"/>
       <max value="*"/>
@@ -1611,7 +1588,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="NutritionOrder.supplement.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1625,9 +1602,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1642,9 +1618,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1661,7 +1636,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.type"/>
-      <short value="Type of supplement product requested"/>
+      <short value="The kind of nutritional supplement product required such as a high protein or pediatric clear liquid supplement."/>
       <definition value="The kind of nutritional supplement product required such as a high protein or pediatric clear liquid supplement."/>
       <min value="0"/>
       <max value="1"/>
@@ -1687,7 +1662,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.productName"/>
-      <short value="Product or brand name of the nutritional supplement"/>
+      <short value="The product or brand name of the nutritional supplement such as &quot;Acme Protein Shake&quot;."/>
       <definition value="The product or brand name of the nutritional supplement such as &quot;Acme Protein Shake&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1705,7 +1680,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.schedule"/>
-      <short value="Scheduled frequency of supplement"/>
+      <short value="The time period and frequency at which the supplement(s) should be given."/>
       <definition value="The time period and frequency at which the supplement(s) should be given."/>
       <alias value="frequency"/>
       <min value="0"/>
@@ -1724,7 +1699,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.quantity"/>
-      <short value="Amount of the nutritional supplement"/>
+      <short value="The amount of the nutritional supplement to be given."/>
       <definition value="The amount of the nutritional supplement to be given."/>
       <min value="0"/>
       <max value="1"/>
@@ -1742,9 +1717,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.instruction"/>
-      <short value="Instructions or additional information about the oral supplement"/>
+      <short value="Free text or additional instructions or information pertaining to the oral supplement."/>
       <definition value="Free text or additional instructions or information pertaining to the oral supplement."/>
-      <comments value="Free text dosage instructions can be used for cases where the instructions are too complex to code."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1762,7 +1736,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula"/>
-      <short value="Enteral formula components"/>
+      <short value="Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity."/>
       <definition value="Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity."/>
       <min value="0"/>
       <max value="1"/>
@@ -1782,7 +1756,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="NutritionOrder.enteralFormula.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1796,9 +1770,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1813,9 +1786,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1832,7 +1804,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.baseFormulaType"/>
-      <short value="Type of enteral or infant formula"/>
+      <short value="The type of enteral or infant formula such as an adult standard formula with fiber or a soy-based infant formula."/>
       <definition value="The type of enteral or infant formula such as an adult standard formula with fiber or a soy-based infant formula."/>
       <min value="0"/>
       <max value="1"/>
@@ -1858,7 +1830,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.baseFormulaProductName"/>
-      <short value="Product or brand name of the enteral or infant formula"/>
+      <short value="The product or brand name of the enteral or infant formula product such as &quot;ACME Adult Standard Formula&quot;."/>
       <definition value="The product or brand name of the enteral or infant formula product such as &quot;ACME Adult Standard Formula&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -1876,7 +1848,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.additiveType"/>
-      <short value="Type of modular component to add to the feeding"/>
+      <short value="Indicates the type of modular component such as protein, carbohydrate, fat or fiber to be provided in addition to or mixed with the base formula."/>
       <definition value="Indicates the type of modular component such as protein, carbohydrate, fat or fiber to be provided in addition to or mixed with the base formula."/>
       <min value="0"/>
       <max value="1"/>
@@ -1901,7 +1873,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.additiveProductName"/>
-      <short value="Product or brand name of the modular additive"/>
+      <short value="The product or brand name of the type of modular component to be added to the formula."/>
       <definition value="The product or brand name of the type of modular component to be added to the formula."/>
       <min value="0"/>
       <max value="1"/>
@@ -1919,7 +1891,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.caloricDensity"/>
-      <short value="Amount of energy per specified volume that is required"/>
+      <short value="The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL."/>
       <definition value="The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL."/>
       <min value="0"/>
       <max value="1"/>
@@ -1937,7 +1909,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.routeofAdministration"/>
-      <short value="How the formula should enter the patient&#39;s gastrointestinal tract"/>
+      <short value="The route or physiological path of administration into the patient &#39;s gastrointestinal  tract for purposes of providing the formula feeding, e.g., nasogastric tube."/>
       <definition value="The route or physiological path of administration into the patient &#39;s gastrointestinal  tract for purposes of providing the formula feeding, e.g., nasogastric tube."/>
       <min value="0"/>
       <max value="1"/>
@@ -1962,9 +1934,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration"/>
-      <short value="Formula feeding instruction as structured data"/>
+      <short value="Formula administration instructions as structured data.  This repeating structure allows for changing the administration rate or volume over time for both bolus and continuous feeding.  An example of this would be an instruction to increase the rate of continuous feeding every 2 hours."/>
       <definition value="Formula administration instructions as structured data.  This repeating structure allows for changing the administration rate or volume over time for both bolus and continuous feeding.  An example of this would be an instruction to increase the rate of continuous feeding every 2 hours."/>
-      <comments value="See implementation notes below for further discussion on how to order continuous vs bolus enteral feeding using this resource."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1982,7 +1953,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="NutritionOrder.enteralFormula.administration.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1996,9 +1967,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2013,9 +1983,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2032,7 +2001,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.schedule"/>
-      <short value="Scheduled frequency of enteral feeding"/>
+      <short value="The time period and frequency at which the enteral formula should be delivered to the patient."/>
       <definition value="The time period and frequency at which the enteral formula should be delivered to the patient."/>
       <alias value="frequency"/>
       <min value="0"/>
@@ -2051,7 +2020,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.quantity"/>
-      <short value="The volume of formula to provide"/>
+      <short value="The volume of formula to provide to the patient per the specified administration schedule."/>
       <definition value="The volume of formula to provide to the patient per the specified administration schedule."/>
       <min value="0"/>
       <max value="1"/>
@@ -2069,9 +2038,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.rate[x]"/>
-      <short value="Speed with which the formula is provided per period of time"/>
+      <short value="The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule."/>
       <definition value="The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule."/>
-      <comments value="Ratio is used when the quantity value in the denominator is not &quot;1&quot;, otherwise use Quantity. For example, the Ratio datatype is used for &quot;200 mL/4 hrs&quot; versus the Quantity datatype for &quot;50 mL/hr&quot;."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2091,7 +2059,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.maxVolumeToDeliver"/>
-      <short value="Upper limit on formula volume per unit of time"/>
+      <short value="The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours."/>
       <definition value="The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours."/>
       <min value="0"/>
       <max value="1"/>
@@ -2109,9 +2077,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administrationInstruction"/>
-      <short value="Formula feeding instructions expressed as text"/>
+      <short value="Free text formula administration, feeding instructions or additional instructions or information."/>
       <definition value="Free text formula administration, feeding instructions or additional instructions or information."/>
-      <comments value="Free text dosage instructions can be used for cases where the instructions are too complex to code."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2131,9 +2098,8 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="NutritionOrder"/>
-      <short value="A request for a diet, formula or nutritional supplement"/>
+      <short value="A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident."/>
       <definition value="A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident."/>
-      <comments value="Referenced by an Order Request (workflow)."/>
       <alias value="Diet Order"/>
       <alias value="Diet"/>
       <alias value="Nutritional Supplement"/>
@@ -2160,7 +2126,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.patient"/>
-      <short value="The person who requires the diet, formula or nutritional supplement"/>
+      <short value="The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding."/>
       <definition value="The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding."/>
       <min value="1"/>
       <max value="1"/>
@@ -2180,7 +2146,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.orderer"/>
-      <short value="Who ordered the diet, formula or nutritional supplement"/>
+      <short value="The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings."/>
       <definition value="The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings."/>
       <min value="0"/>
       <max value="1"/>
@@ -2200,7 +2166,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.identifier"/>
-      <short value="Identifiers assigned to this order"/>
+      <short value="Identifiers assigned to this order by the order sender or by the order receiver."/>
       <definition value="Identifiers assigned to this order by the order sender or by the order receiver."/>
       <min value="0"/>
       <max value="*"/>
@@ -2218,7 +2184,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.encounter"/>
-      <short value="The encounter associated with that this nutrition order"/>
+      <short value="An encounter that provides additional information about the healthcare context in which this request is made."/>
       <definition value="An encounter that provides additional information about the healthcare context in which this request is made."/>
       <min value="0"/>
       <max value="1"/>
@@ -2237,7 +2203,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.dateTime"/>
-      <short value="Date and time the nutrition order was requested"/>
+      <short value="The date and time that this nutrition order was requested."/>
       <definition value="The date and time that this nutrition order was requested."/>
       <min value="1"/>
       <max value="1"/>
@@ -2256,9 +2222,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.status"/>
-      <short value="proposed | draft | planned | requested | active | on-hold | completed | cancelled"/>
+      <short value="The workflow status of the nutrition order/request."/>
       <definition value="The workflow status of the nutrition order/request."/>
-      <comments value="Typically the system placing the order sets the status to requested. There after, the order is maintained by the receiver that updates the status as the request is handled."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2284,9 +2249,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.allergyIntolerance"/>
-      <short value="List of the patient&#39;s food and nutrition-related allergies and intolerances"/>
+      <short value="A link to a record of allergies or Intolerances  which should be included in the nutrition order."/>
       <definition value="A link to a record of allergies or Intolerances  which should be included in the nutrition order."/>
-      <comments value="Information on a patient&#39;s food allergies and intolerances, inform healthcare personnel about the type of foods that the patient should receive or consume."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2300,9 +2264,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.foodPreferenceModifier"/>
-      <short value="Order-specific modifier about the type of food that should be given"/>
+      <short value="This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
       <definition value="This modifier is used to convey order-specific modifiers about the type of food that should be given. These can be derived from patient allergies, intolerances, or preferences such as Halal, Vegan or Kosher. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
-      <comments value="Information on a patient&#39;s food preferences inform healthcare personnel about the food that the patient should receive or consume."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2326,9 +2289,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.excludeFoodModifier"/>
-      <short value="Order-specific modifier about the type of food that should not be given"/>
+      <short value="This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
       <definition value="This modifier is used to convey order-specific modifiers about the type of food that should NOT be given. These can be derived from patient allergies, intolerances, or preferences such as No Red Meat, No Soy or No Wheat or  Gluten-Free. This modifier applies to the entire nutrition order inclusive of the oral diet, nutritional supplements and enteral formula feedings."/>
-      <comments value="Information on a patient&#39;s food allergies and intolerances, and preferences inform healthcare personnel about the type  of foods that the patient should receive or consume."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2348,7 +2310,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet"/>
-      <short value="Oral diet components"/>
+      <short value="Diet given orally in contrast to enteral (tube) feeding."/>
       <definition value="Diet given orally in contrast to enteral (tube) feeding."/>
       <min value="0"/>
       <max value="1"/>
@@ -2364,7 +2326,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.type"/>
-      <short value="Type of oral diet or diet restrictions that describe what can be consumed orally"/>
+      <short value="The kind of diet or dietary restriction such as fiber restricted diet or diabetic diet."/>
       <definition value="The kind of diet or dietary restriction such as fiber restricted diet or diabetic diet."/>
       <min value="0"/>
       <max value="*"/>
@@ -2390,7 +2352,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.schedule"/>
-      <short value="Scheduled frequency of diet"/>
+      <short value="The time period and frequency at which the diet should be given."/>
       <definition value="The time period and frequency at which the diet should be given."/>
       <alias value="frequency"/>
       <min value="0"/>
@@ -2409,7 +2371,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient"/>
-      <short value="Required  nutrient modifications"/>
+      <short value="Class that defines the quantity and type of nutrient modifications required for the oral diet."/>
       <definition value="Class that defines the quantity and type of nutrient modifications required for the oral diet."/>
       <min value="0"/>
       <max value="*"/>
@@ -2424,7 +2386,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.modifier"/>
-      <short value="Type of nutrient that is being modified"/>
+      <short value="The nutrient that is being modified such as carbohydrate or sodium."/>
       <definition value="The nutrient that is being modified such as carbohydrate or sodium."/>
       <min value="0"/>
       <max value="1"/>
@@ -2449,7 +2411,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.nutrient.amount"/>
-      <short value="Quantity of the specified nutrient"/>
+      <short value="The quantity of the specified nutrient to include in diet."/>
       <definition value="The quantity of the specified nutrient to include in diet."/>
       <min value="0"/>
       <max value="1"/>
@@ -2467,7 +2429,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture"/>
-      <short value="Required  texture modifications"/>
+      <short value="Class that describes any texture modifications required for the patient to safely consume various types of solid foods."/>
       <definition value="Class that describes any texture modifications required for the patient to safely consume various types of solid foods."/>
       <min value="0"/>
       <max value="*"/>
@@ -2482,9 +2444,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture.modifier"/>
-      <short value="Code to indicate how to alter the texture of the foods, e.g., pureed"/>
+      <short value="Any texture modifications (for solid foods) that should be made, e.g. easy to chew, chopped, ground, and pureed."/>
       <definition value="Any texture modifications (for solid foods) that should be made, e.g. easy to chew, chopped, ground, and pureed."/>
-      <comments value="Coupled with the foodType (Meat)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2508,9 +2469,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.texture.foodType"/>
-      <short value="Concepts that are used to identify an entity that is ingested for nutritional purposes"/>
+      <short value="The food type(s) (e.g., meats, all foods)  that the texture modification applies to.  This could be all foods types."/>
       <definition value="The food type(s) (e.g., meats, all foods)  that the texture modification applies to.  This could be all foods types."/>
-      <comments value="Coupled with the textureModifier; could be (All Foods)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2534,7 +2494,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.fluidConsistencyType"/>
-      <short value="The required consistency of fluids and liquids provided to the patient"/>
+      <short value="The required consistency (e.g., honey-thick, nectar-thick, thin, thickened.) of liquids or fluids served to the patient."/>
       <definition value="The required consistency (e.g., honey-thick, nectar-thick, thin, thickened.) of liquids or fluids served to the patient."/>
       <min value="0"/>
       <max value="*"/>
@@ -2559,9 +2519,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.oralDiet.instruction"/>
-      <short value="Instructions or additional information about the oral diet"/>
+      <short value="Free text or additional instructions or information pertaining to the oral diet."/>
       <definition value="Free text or additional instructions or information pertaining to the oral diet."/>
-      <comments value="Free text dosage instructions can be used for cases where the instructions are too complex to code."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2579,7 +2538,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement"/>
-      <short value="Supplement components"/>
+      <short value="Oral nutritional products given in order to add further nutritional value to the patient&#39;s diet."/>
       <definition value="Oral nutritional products given in order to add further nutritional value to the patient&#39;s diet."/>
       <min value="0"/>
       <max value="*"/>
@@ -2595,7 +2554,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.type"/>
-      <short value="Type of supplement product requested"/>
+      <short value="The kind of nutritional supplement product required such as a high protein or pediatric clear liquid supplement."/>
       <definition value="The kind of nutritional supplement product required such as a high protein or pediatric clear liquid supplement."/>
       <min value="0"/>
       <max value="1"/>
@@ -2621,7 +2580,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.productName"/>
-      <short value="Product or brand name of the nutritional supplement"/>
+      <short value="The product or brand name of the nutritional supplement such as &quot;Acme Protein Shake&quot;."/>
       <definition value="The product or brand name of the nutritional supplement such as &quot;Acme Protein Shake&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -2639,7 +2598,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.schedule"/>
-      <short value="Scheduled frequency of supplement"/>
+      <short value="The time period and frequency at which the supplement(s) should be given."/>
       <definition value="The time period and frequency at which the supplement(s) should be given."/>
       <alias value="frequency"/>
       <min value="0"/>
@@ -2658,7 +2617,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.quantity"/>
-      <short value="Amount of the nutritional supplement"/>
+      <short value="The amount of the nutritional supplement to be given."/>
       <definition value="The amount of the nutritional supplement to be given."/>
       <min value="0"/>
       <max value="1"/>
@@ -2676,9 +2635,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.supplement.instruction"/>
-      <short value="Instructions or additional information about the oral supplement"/>
+      <short value="Free text or additional instructions or information pertaining to the oral supplement."/>
       <definition value="Free text or additional instructions or information pertaining to the oral supplement."/>
-      <comments value="Free text dosage instructions can be used for cases where the instructions are too complex to code."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2696,7 +2654,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula"/>
-      <short value="Enteral formula components"/>
+      <short value="Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity."/>
       <definition value="Feeding provided through the gastrointestinal tract via a tube, catheter, or stoma that delivers nutrition distal to the oral cavity."/>
       <min value="0"/>
       <max value="1"/>
@@ -2712,7 +2670,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.baseFormulaType"/>
-      <short value="Type of enteral or infant formula"/>
+      <short value="The type of enteral or infant formula such as an adult standard formula with fiber or a soy-based infant formula."/>
       <definition value="The type of enteral or infant formula such as an adult standard formula with fiber or a soy-based infant formula."/>
       <min value="0"/>
       <max value="1"/>
@@ -2738,7 +2696,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.baseFormulaProductName"/>
-      <short value="Product or brand name of the enteral or infant formula"/>
+      <short value="The product or brand name of the enteral or infant formula product such as &quot;ACME Adult Standard Formula&quot;."/>
       <definition value="The product or brand name of the enteral or infant formula product such as &quot;ACME Adult Standard Formula&quot;."/>
       <min value="0"/>
       <max value="1"/>
@@ -2756,7 +2714,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.additiveType"/>
-      <short value="Type of modular component to add to the feeding"/>
+      <short value="Indicates the type of modular component such as protein, carbohydrate, fat or fiber to be provided in addition to or mixed with the base formula."/>
       <definition value="Indicates the type of modular component such as protein, carbohydrate, fat or fiber to be provided in addition to or mixed with the base formula."/>
       <min value="0"/>
       <max value="1"/>
@@ -2781,7 +2739,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.additiveProductName"/>
-      <short value="Product or brand name of the modular additive"/>
+      <short value="The product or brand name of the type of modular component to be added to the formula."/>
       <definition value="The product or brand name of the type of modular component to be added to the formula."/>
       <min value="0"/>
       <max value="1"/>
@@ -2799,7 +2757,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.caloricDensity"/>
-      <short value="Amount of energy per specified volume that is required"/>
+      <short value="The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL."/>
       <definition value="The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL."/>
       <min value="0"/>
       <max value="1"/>
@@ -2817,7 +2775,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.routeofAdministration"/>
-      <short value="How the formula should enter the patient&#39;s gastrointestinal tract"/>
+      <short value="The route or physiological path of administration into the patient &#39;s gastrointestinal  tract for purposes of providing the formula feeding, e.g., nasogastric tube."/>
       <definition value="The route or physiological path of administration into the patient &#39;s gastrointestinal  tract for purposes of providing the formula feeding, e.g., nasogastric tube."/>
       <min value="0"/>
       <max value="1"/>
@@ -2842,9 +2800,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration"/>
-      <short value="Formula feeding instruction as structured data"/>
+      <short value="Formula administration instructions as structured data.  This repeating structure allows for changing the administration rate or volume over time for both bolus and continuous feeding.  An example of this would be an instruction to increase the rate of continuous feeding every 2 hours."/>
       <definition value="Formula administration instructions as structured data.  This repeating structure allows for changing the administration rate or volume over time for both bolus and continuous feeding.  An example of this would be an instruction to increase the rate of continuous feeding every 2 hours."/>
-      <comments value="See implementation notes below for further discussion on how to order continuous vs bolus enteral feeding using this resource."/>
       <min value="0"/>
       <max value="*"/>
       <mapping>
@@ -2858,7 +2815,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.schedule"/>
-      <short value="Scheduled frequency of enteral feeding"/>
+      <short value="The time period and frequency at which the enteral formula should be delivered to the patient."/>
       <definition value="The time period and frequency at which the enteral formula should be delivered to the patient."/>
       <alias value="frequency"/>
       <min value="0"/>
@@ -2877,7 +2834,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.quantity"/>
-      <short value="The volume of formula to provide"/>
+      <short value="The volume of formula to provide to the patient per the specified administration schedule."/>
       <definition value="The volume of formula to provide to the patient per the specified administration schedule."/>
       <min value="0"/>
       <max value="1"/>
@@ -2895,9 +2852,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administration.rate[x]"/>
-      <short value="Speed with which the formula is provided per period of time"/>
+      <short value="The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule."/>
       <definition value="The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule."/>
-      <comments value="Ratio is used when the quantity value in the denominator is not &quot;1&quot;, otherwise use Quantity. For example, the Ratio datatype is used for &quot;200 mL/4 hrs&quot; versus the Quantity datatype for &quot;50 mL/hr&quot;."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2917,7 +2873,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.maxVolumeToDeliver"/>
-      <short value="Upper limit on formula volume per unit of time"/>
+      <short value="The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours."/>
       <definition value="The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours."/>
       <min value="0"/>
       <max value="1"/>
@@ -2935,9 +2891,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="NutritionOrder.enteralFormula.administrationInstruction"/>
-      <short value="Formula feeding instructions expressed as text"/>
+      <short value="Free text formula administration, feeding instructions or additional instructions or information."/>
       <definition value="Free text formula administration, feeding instructions or additional instructions or information."/>
-      <comments value="Free text dosage instructions can be used for cases where the instructions are too complex to code."/>
       <min value="0"/>
       <max value="1"/>
       <type>

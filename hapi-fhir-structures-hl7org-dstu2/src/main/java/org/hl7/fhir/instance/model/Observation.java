@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -141,8 +141,8 @@ public class Observation extends DomainResource {
             case FINAL: return "Final";
             case AMENDED: return "Amended";
             case CANCELLED: return "Cancelled";
-            case ENTEREDINERROR: return "Entered In Error";
-            case UNKNOWN: return "Unknown";
+            case ENTEREDINERROR: return "Entered in Error";
+            case UNKNOWN: return "Unknown Status";
             default: return "?";
           }
         }
@@ -278,13 +278,13 @@ public class Observation extends DomainResource {
         }
         public String getDisplay() {
           switch (this) {
-            case OK: return "Ok";
-            case ONGOING: return "Ongoing";
+            case OK: return "OK";
+            case ONGOING: return "Measurement Ongoing";
             case EARLY: return "Early";
             case QUESTIONABLE: return "Questionable";
             case CALIBRATING: return "Calibrating";
-            case ERROR: return "Error";
-            case UNKNOWN: return "Unknown";
+            case ERROR: return "Error Occurred";
+            case UNKNOWN: return "Reliability Unknown";
             default: return "?";
           }
         }
@@ -414,7 +414,7 @@ public class Observation extends DomainResource {
             case HASMEMBER: return "Has Member";
             case DERIVEDFROM: return "Derived From";
             case SEQUELTO: return "Sequel To";
-            case REPLACES: return "Replaces";
+            case REPLACES: return "Replaces Replaces";
             case QUALIFIEDBY: return "Qualified By";
             case INTERFEREDBY: return "Interfered By";
             default: return "?";

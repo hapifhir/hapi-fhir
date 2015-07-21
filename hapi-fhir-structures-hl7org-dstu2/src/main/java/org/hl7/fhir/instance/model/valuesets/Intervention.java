@@ -29,17 +29,17 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum Intervention {
 
         /**
-         * null
+         * Unknown
          */
         UNKNOWN, 
         /**
-         * null
+         * Other
          */
         OTHER, 
         /**
@@ -67,15 +67,15 @@ public enum Intervention {
         }
         public String getDefinition() {
           switch (this) {
-            case UNKNOWN: return "";
-            case OTHER: return "";
+            case UNKNOWN: return "Unknown";
+            case OTHER: return "Other";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case UNKNOWN: return "unknown";
-            case OTHER: return "other";
+            case UNKNOWN: return "Unknown";
+            case OTHER: return "Other";
             default: return "?";
           }
     }

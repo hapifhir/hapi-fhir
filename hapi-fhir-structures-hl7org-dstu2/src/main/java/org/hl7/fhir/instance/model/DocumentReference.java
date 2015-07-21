@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -799,10 +799,10 @@ public class DocumentReference extends DomainResource {
     protected CodeableConcept type;
 
     /**
-     * A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level.
+     * A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.
      */
     @Child(name = "class", type = {CodeableConcept.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="Categorization of document", formalDefinition="A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level." )
+    @Description(shortDefinition="Categorization of document", formalDefinition="A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type." )
     protected CodeableConcept class_;
 
     /**
@@ -1058,7 +1058,7 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #class_} (A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level.)
+     * @return {@link #class_} (A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.)
      */
     public CodeableConcept getClass_() { 
       if (this.class_ == null)
@@ -1074,7 +1074,7 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @param value {@link #class_} (A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level.)
+     * @param value {@link #class_} (A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.)
      */
     public DocumentReference setClass_(CodeableConcept value) { 
       this.class_ = value;
@@ -1629,7 +1629,7 @@ public class DocumentReference extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Other identifiers associated with the document, including version independent identifiers.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure).", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("type", "CodeableConcept", "Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of document. The class is an abstraction from the type specifying the high-level kind of document  (e.g., Report, Summary, Images, Treatment Plan, Patient Preferences, Workflow) at a macro level.", 0, java.lang.Integer.MAX_VALUE, class_));
+        childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.", 0, java.lang.Integer.MAX_VALUE, class_));
         childrenList.add(new Property("format", "uri", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
         childrenList.add(new Property("author", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("custodian", "Reference(Organization)", "Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.", 0, java.lang.Integer.MAX_VALUE, custodian));

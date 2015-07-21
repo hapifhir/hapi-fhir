@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Encounter"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -763,19 +763,19 @@ The indication will typically be a Condition (with other resources referenced in
   <publisher value="Health Level Seven International (Patient Administration)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Encounter Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -787,11 +787,11 @@ The indication will typically be a Condition (with other resources referenced in
     <name value="HL7 v2"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="Encounter"/>
-      <short value="An interaction during which services are provided to the patient"/>
+      <short value="An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient."/>
       <definition value="An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient."/>
       <alias value="Visit"/>
       <min value="1"/>
@@ -806,9 +806,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -817,7 +816,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -827,9 +826,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -839,11 +837,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -857,9 +852,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -877,9 +871,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -895,9 +888,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -912,9 +904,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -930,7 +921,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.identifier"/>
-      <short value="Identifier(s) by which this encounter is known"/>
+      <short value="Identifier(s) by which this encounter is known."/>
       <definition value="Identifier(s) by which this encounter is known."/>
       <min value="0"/>
       <max value="*"/>
@@ -949,7 +940,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.status"/>
-      <short value="planned | arrived | in-progress | onleave | finished | cancelled"/>
+      <short value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <definition value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -976,7 +967,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.statusHistory"/>
-      <short value="List of Encounter statuses"/>
+      <short value="The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them."/>
       <definition value="The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them."/>
       <min value="0"/>
       <max value="*"/>
@@ -987,7 +978,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="Encounter.statusHistory.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1001,9 +992,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.statusHistory.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1018,9 +1008,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.statusHistory.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1037,7 +1026,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.statusHistory.status"/>
-      <short value="planned | arrived | in-progress | onleave | finished | cancelled"/>
+      <short value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <definition value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -1054,7 +1043,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.statusHistory.period"/>
-      <short value="The time that the episode was in the specified status"/>
+      <short value="The time that the episode was in the specified status."/>
       <definition value="The time that the episode was in the specified status."/>
       <min value="1"/>
       <max value="1"/>
@@ -1064,7 +1053,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.class"/>
-      <short value="inpatient | outpatient | ambulatory | emergency +"/>
+      <short value="inpatient | outpatient | ambulatory | emergency +."/>
       <definition value="inpatient | outpatient | ambulatory | emergency +."/>
       <min value="0"/>
       <max value="1"/>
@@ -1090,9 +1079,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.type"/>
-      <short value="Specific type of encounter"/>
+      <short value="Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)."/>
       <definition value="Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)."/>
-      <comments value="Since there are many ways to further classify encounters, this element is 0..*."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1117,9 +1105,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.patient"/>
-      <short value="The patient present at the encounter"/>
+      <short value="The patient present at the encounter."/>
       <definition value="The patient present at the encounter."/>
-      <comments value="While the encounter is always about the patient, the patient may not actually be known in all contexts of use."/>
       <alias value="patient"/>
       <min value="0"/>
       <max value="1"/>
@@ -1139,7 +1126,9 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="Encounter.episodeOfCare"/>
-      <short value="Episode(s) of care that this encounter should be recorded against"/>
+      <short value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
+
+The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
       <definition value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
 
 The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
@@ -1157,7 +1146,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.incomingReferralRequest"/>
-      <short value="Incoming Referral Request"/>
+      <short value="The referral request that this encounter satisfies (incoming referral)."/>
       <definition value="The referral request that this encounter satisfies (incoming referral)."/>
       <min value="0"/>
       <max value="*"/>
@@ -1168,7 +1157,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant"/>
-      <short value="List of participants involved in the encounter"/>
+      <short value="The main practitioner responsible for providing the service."/>
       <definition value="The main practitioner responsible for providing the service."/>
       <min value="0"/>
       <max value="*"/>
@@ -1188,7 +1177,7 @@ The association is recorded on the encounter as these are typically created afte
     <element>
       <path value="Encounter.participant.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1202,9 +1191,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1219,9 +1207,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1238,9 +1225,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.type"/>
-      <short value="Role of participant in encounter"/>
+      <short value="Role of participant in encounter."/>
       <definition value="Role of participant in encounter."/>
-      <comments value="The Participant Type indicates how an individual parcitipates in an encounter. It includes non practitioner participants, and for practitioners this is to describe the action type in the context of this encounter (e.g. Admitting Dr, Attending Dr, Translator, Consulting Dr). This is different to the Practitioner Roles which are functional roles, derived from terms of employment, education, licensing, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1265,7 +1251,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.period"/>
-      <short value="Period of time during the encounter participant was present"/>
+      <short value="The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period."/>
       <definition value="The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period."/>
       <min value="0"/>
       <max value="1"/>
@@ -1279,7 +1265,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.individual"/>
-      <short value="Persons involved in the encounter other than the patient"/>
+      <short value="Persons involved in the encounter other than the patient."/>
       <definition value="Persons involved in the encounter other than the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -1303,7 +1289,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.fulfills"/>
-      <short value="The appointment that scheduled this encounter"/>
+      <short value="The appointment that scheduled this encounter."/>
       <definition value="The appointment that scheduled this encounter."/>
       <min value="0"/>
       <max value="1"/>
@@ -1323,9 +1309,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.period"/>
-      <short value="The start and end time of the encounter"/>
+      <short value="The start and end time of the encounter."/>
       <definition value="The start and end time of the encounter."/>
-      <comments value="If not (yet) known, the end of the Period may be omitted."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1343,9 +1328,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.length"/>
-      <short value="Quantity of time the encounter lasted (less time absent)"/>
+      <short value="Quantity of time the encounter lasted. This excludes the time during leaves of absence."/>
       <definition value="Quantity of time the encounter lasted. This excludes the time during leaves of absence."/>
-      <comments value="May differ from the time the Encounter.period lasted because of leave of absence."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1362,7 +1346,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.reason"/>
-      <short value="Reason the encounter takes place (code)"/>
+      <short value="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis."/>
       <definition value="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis."/>
       <min value="0"/>
       <max value="*"/>
@@ -1389,7 +1373,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.indication"/>
-      <short value="Reason the encounter takes place (resource)"/>
+      <short value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
+The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
       <definition value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
 The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
       <alias value="Admission diagnosis"/>
@@ -1410,7 +1395,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.priority"/>
-      <short value="Indicates the urgency of the encounter"/>
+      <short value="Indicates the urgency of the encounter."/>
       <definition value="Indicates the urgency of the encounter."/>
       <min value="0"/>
       <max value="1"/>
@@ -1435,7 +1420,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization"/>
-      <short value="Details about an admission to a clinic"/>
+      <short value="Details about an admission to a clinic."/>
       <definition value="Details about an admission to a clinic."/>
       <min value="0"/>
       <max value="1"/>
@@ -1450,7 +1435,7 @@ The indication will typically be a Condition (with other resources referenced in
     <element>
       <path value="Encounter.hospitalization.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1464,9 +1449,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1481,9 +1465,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1500,7 +1483,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.preAdmissionIdentifier"/>
-      <short value="Pre-admission identifier"/>
+      <short value="Pre-admission identifier."/>
       <definition value="Pre-admission identifier."/>
       <min value="0"/>
       <max value="1"/>
@@ -1518,7 +1501,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.origin"/>
-      <short value="The location from which the patient came before admission"/>
+      <short value="The location from which the patient came before admission."/>
       <definition value="The location from which the patient came before admission."/>
       <min value="0"/>
       <max value="1"/>
@@ -1533,7 +1516,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.admitSource"/>
-      <short value="From where patient was admitted (physician referral, transfer)"/>
+      <short value="From where patient was admitted (physician referral, transfer)."/>
       <definition value="From where patient was admitted (physician referral, transfer)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1558,7 +1541,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.admittingDiagnosis"/>
-      <short value="The admitting Diagnosis as reported by admitting practitioner"/>
+      <short value="The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter."/>
       <definition value="The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter."/>
       <min value="0"/>
       <max value="*"/>
@@ -1569,7 +1552,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.reAdmission"/>
-      <short value="The type of hospital re-admission that has occurred (if any). If the value is absent, then this is not identified as a readmission"/>
+      <short value="Whether this hospitalization is a readmission and why if known."/>
       <definition value="Whether this hospitalization is a readmission and why if known."/>
       <min value="0"/>
       <max value="1"/>
@@ -1587,9 +1570,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.dietPreference"/>
-      <short value="Diet preferences reported by the patient"/>
+      <short value="Diet preferences reported by the patient."/>
       <definition value="Diet preferences reported by the patient."/>
-      <comments value="For example a patient may request both a dairy-free and nut-free diet preference (not mutually exclusive)."/>
       <requirements value="Used to track patient&#39;s diet restrictions and/or preference. For a complete description of the nutrition needs of a patient during their stay, one should use the nutritionOrder resource which links to Encounter."/>
       <min value="0"/>
       <max value="*"/>
@@ -1614,7 +1596,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.specialCourtesy"/>
-      <short value="Special courtesies (VIP, board member)"/>
+      <short value="Special courtesies (VIP, board member)."/>
       <definition value="Special courtesies (VIP, board member)."/>
       <min value="0"/>
       <max value="*"/>
@@ -1639,7 +1621,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.specialArrangement"/>
-      <short value="Wheelchair, translator, stretcher, etc"/>
+      <short value="Wheelchair, translator, stretcher, etc."/>
       <definition value="Wheelchair, translator, stretcher, etc."/>
       <min value="0"/>
       <max value="*"/>
@@ -1664,7 +1646,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.destination"/>
-      <short value="Location to which the patient is discharged"/>
+      <short value="Location to which the patient is discharged."/>
       <definition value="Location to which the patient is discharged."/>
       <min value="0"/>
       <max value="1"/>
@@ -1683,7 +1665,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.dischargeDisposition"/>
-      <short value="Category or kind of location after discharge"/>
+      <short value="Category or kind of location after discharge."/>
       <definition value="Category or kind of location after discharge."/>
       <min value="0"/>
       <max value="1"/>
@@ -1708,7 +1690,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.dischargeDiagnosis"/>
-      <short value="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete"/>
+      <short value="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete."/>
       <definition value="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete."/>
       <min value="0"/>
       <max value="*"/>
@@ -1723,7 +1705,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location"/>
-      <short value="List of locations the patient has been at"/>
+      <short value="List of locations at which the patient has been."/>
       <definition value="List of locations at which the patient has been."/>
       <min value="0"/>
       <max value="*"/>
@@ -1738,7 +1720,7 @@ The indication will typically be a Condition (with other resources referenced in
     <element>
       <path value="Encounter.location.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1752,9 +1734,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1769,9 +1750,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1788,7 +1768,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.location"/>
-      <short value="Location the encounter takes place"/>
+      <short value="The location where the encounter takes place."/>
       <definition value="The location where the encounter takes place."/>
       <min value="1"/>
       <max value="1"/>
@@ -1807,7 +1787,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.status"/>
-      <short value="planned | present | reserved"/>
+      <short value="The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time."/>
       <definition value="The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time."/>
       <min value="0"/>
       <max value="1"/>
@@ -1824,7 +1804,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.period"/>
-      <short value="Time period during which the patient was present at the location"/>
+      <short value="Time period during which the patient was present at the location."/>
       <definition value="Time period during which the patient was present at the location."/>
       <min value="0"/>
       <max value="1"/>
@@ -1838,7 +1818,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.serviceProvider"/>
-      <short value="The custodian organization of this Encounter record"/>
+      <short value="An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location&#39;s Organization."/>
       <definition value="An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location&#39;s Organization."/>
       <min value="0"/>
       <max value="1"/>
@@ -1857,7 +1837,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.partOf"/>
-      <short value="Another Encounter this encounter is part of"/>
+      <short value="Another Encounter of which this encounter is a part of (administratively or in time)."/>
       <definition value="Another Encounter of which this encounter is a part of (administratively or in time)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1874,7 +1854,7 @@ The indication will typically be a Condition (with other resources referenced in
   <differential>
     <element>
       <path value="Encounter"/>
-      <short value="An interaction during which services are provided to the patient"/>
+      <short value="An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient."/>
       <definition value="An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient."/>
       <alias value="Visit"/>
       <min value="1"/>
@@ -1889,7 +1869,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.identifier"/>
-      <short value="Identifier(s) by which this encounter is known"/>
+      <short value="Identifier(s) by which this encounter is known."/>
       <definition value="Identifier(s) by which this encounter is known."/>
       <min value="0"/>
       <max value="*"/>
@@ -1908,7 +1888,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.status"/>
-      <short value="planned | arrived | in-progress | onleave | finished | cancelled"/>
+      <short value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <definition value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -1935,14 +1915,14 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.statusHistory"/>
-      <short value="List of Encounter statuses"/>
+      <short value="The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them."/>
       <definition value="The current status is always found in the current version of the resource. This status history permits the encounter resource to contain the status history without the needing to read through the historical versions of the resource, or even have the server store them."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="Encounter.statusHistory.status"/>
-      <short value="planned | arrived | in-progress | onleave | finished | cancelled"/>
+      <short value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <definition value="planned | arrived | in-progress | onleave | finished | cancelled."/>
       <min value="1"/>
       <max value="1"/>
@@ -1959,7 +1939,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.statusHistory.period"/>
-      <short value="The time that the episode was in the specified status"/>
+      <short value="The time that the episode was in the specified status."/>
       <definition value="The time that the episode was in the specified status."/>
       <min value="1"/>
       <max value="1"/>
@@ -1969,7 +1949,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.class"/>
-      <short value="inpatient | outpatient | ambulatory | emergency +"/>
+      <short value="inpatient | outpatient | ambulatory | emergency +."/>
       <definition value="inpatient | outpatient | ambulatory | emergency +."/>
       <min value="0"/>
       <max value="1"/>
@@ -1995,9 +1975,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.type"/>
-      <short value="Specific type of encounter"/>
+      <short value="Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)."/>
       <definition value="Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation)."/>
-      <comments value="Since there are many ways to further classify encounters, this element is 0..*."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2022,9 +2001,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.patient"/>
-      <short value="The patient present at the encounter"/>
+      <short value="The patient present at the encounter."/>
       <definition value="The patient present at the encounter."/>
-      <comments value="While the encounter is always about the patient, the patient may not actually be known in all contexts of use."/>
       <alias value="patient"/>
       <min value="0"/>
       <max value="1"/>
@@ -2044,7 +2022,9 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.episodeOfCare"/>
-      <short value="Episode(s) of care that this encounter should be recorded against"/>
+      <short value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
+
+The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
       <definition value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
 
 The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
@@ -2062,7 +2042,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.incomingReferralRequest"/>
-      <short value="Incoming Referral Request"/>
+      <short value="The referral request that this encounter satisfies (incoming referral)."/>
       <definition value="The referral request that this encounter satisfies (incoming referral)."/>
       <min value="0"/>
       <max value="*"/>
@@ -2073,7 +2053,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant"/>
-      <short value="List of participants involved in the encounter"/>
+      <short value="The main practitioner responsible for providing the service."/>
       <definition value="The main practitioner responsible for providing the service."/>
       <min value="0"/>
       <max value="*"/>
@@ -2089,9 +2069,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.type"/>
-      <short value="Role of participant in encounter"/>
+      <short value="Role of participant in encounter."/>
       <definition value="Role of participant in encounter."/>
-      <comments value="The Participant Type indicates how an individual parcitipates in an encounter. It includes non practitioner participants, and for practitioners this is to describe the action type in the context of this encounter (e.g. Admitting Dr, Attending Dr, Translator, Consulting Dr). This is different to the Practitioner Roles which are functional roles, derived from terms of employment, education, licensing, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2116,7 +2095,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.period"/>
-      <short value="Period of time during the encounter participant was present"/>
+      <short value="The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period."/>
       <definition value="The period of time that the specified participant was present during the encounter. These can overlap or be sub-sets of the overall encounters period."/>
       <min value="0"/>
       <max value="1"/>
@@ -2130,7 +2109,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.participant.individual"/>
-      <short value="Persons involved in the encounter other than the patient"/>
+      <short value="Persons involved in the encounter other than the patient."/>
       <definition value="Persons involved in the encounter other than the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -2154,7 +2133,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.fulfills"/>
-      <short value="The appointment that scheduled this encounter"/>
+      <short value="The appointment that scheduled this encounter."/>
       <definition value="The appointment that scheduled this encounter."/>
       <min value="0"/>
       <max value="1"/>
@@ -2174,9 +2153,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.period"/>
-      <short value="The start and end time of the encounter"/>
+      <short value="The start and end time of the encounter."/>
       <definition value="The start and end time of the encounter."/>
-      <comments value="If not (yet) known, the end of the Period may be omitted."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2194,9 +2172,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.length"/>
-      <short value="Quantity of time the encounter lasted (less time absent)"/>
+      <short value="Quantity of time the encounter lasted. This excludes the time during leaves of absence."/>
       <definition value="Quantity of time the encounter lasted. This excludes the time during leaves of absence."/>
-      <comments value="May differ from the time the Encounter.period lasted because of leave of absence."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -2213,7 +2190,7 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.reason"/>
-      <short value="Reason the encounter takes place (code)"/>
+      <short value="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis."/>
       <definition value="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis."/>
       <min value="0"/>
       <max value="*"/>
@@ -2240,7 +2217,8 @@ The association is recorded on the encounter as these are typically created afte
     </element>
     <element>
       <path value="Encounter.indication"/>
-      <short value="Reason the encounter takes place (resource)"/>
+      <short value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
+The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
       <definition value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
 The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
       <alias value="Admission diagnosis"/>
@@ -2261,7 +2239,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.priority"/>
-      <short value="Indicates the urgency of the encounter"/>
+      <short value="Indicates the urgency of the encounter."/>
       <definition value="Indicates the urgency of the encounter."/>
       <min value="0"/>
       <max value="1"/>
@@ -2286,7 +2264,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization"/>
-      <short value="Details about an admission to a clinic"/>
+      <short value="Details about an admission to a clinic."/>
       <definition value="Details about an admission to a clinic."/>
       <min value="0"/>
       <max value="1"/>
@@ -2297,7 +2275,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.preAdmissionIdentifier"/>
-      <short value="Pre-admission identifier"/>
+      <short value="Pre-admission identifier."/>
       <definition value="Pre-admission identifier."/>
       <min value="0"/>
       <max value="1"/>
@@ -2315,7 +2293,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.origin"/>
-      <short value="The location from which the patient came before admission"/>
+      <short value="The location from which the patient came before admission."/>
       <definition value="The location from which the patient came before admission."/>
       <min value="0"/>
       <max value="1"/>
@@ -2330,7 +2308,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.admitSource"/>
-      <short value="From where patient was admitted (physician referral, transfer)"/>
+      <short value="From where patient was admitted (physician referral, transfer)."/>
       <definition value="From where patient was admitted (physician referral, transfer)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2355,7 +2333,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.admittingDiagnosis"/>
-      <short value="The admitting Diagnosis as reported by admitting practitioner"/>
+      <short value="The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter."/>
       <definition value="The admitting Diagnosis field is used to record the diagnosis codes as reported by admitting practitioner. This could be different or in addition to the conditions reported as reason-condition(s) for the encounter."/>
       <min value="0"/>
       <max value="*"/>
@@ -2366,7 +2344,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.reAdmission"/>
-      <short value="The type of hospital re-admission that has occurred (if any). If the value is absent, then this is not identified as a readmission"/>
+      <short value="Whether this hospitalization is a readmission and why if known."/>
       <definition value="Whether this hospitalization is a readmission and why if known."/>
       <min value="0"/>
       <max value="1"/>
@@ -2384,9 +2362,8 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.dietPreference"/>
-      <short value="Diet preferences reported by the patient"/>
+      <short value="Diet preferences reported by the patient."/>
       <definition value="Diet preferences reported by the patient."/>
-      <comments value="For example a patient may request both a dairy-free and nut-free diet preference (not mutually exclusive)."/>
       <requirements value="Used to track patient&#39;s diet restrictions and/or preference. For a complete description of the nutrition needs of a patient during their stay, one should use the nutritionOrder resource which links to Encounter."/>
       <min value="0"/>
       <max value="*"/>
@@ -2411,7 +2388,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.specialCourtesy"/>
-      <short value="Special courtesies (VIP, board member)"/>
+      <short value="Special courtesies (VIP, board member)."/>
       <definition value="Special courtesies (VIP, board member)."/>
       <min value="0"/>
       <max value="*"/>
@@ -2436,7 +2413,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.specialArrangement"/>
-      <short value="Wheelchair, translator, stretcher, etc"/>
+      <short value="Wheelchair, translator, stretcher, etc."/>
       <definition value="Wheelchair, translator, stretcher, etc."/>
       <min value="0"/>
       <max value="*"/>
@@ -2461,7 +2438,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.destination"/>
-      <short value="Location to which the patient is discharged"/>
+      <short value="Location to which the patient is discharged."/>
       <definition value="Location to which the patient is discharged."/>
       <min value="0"/>
       <max value="1"/>
@@ -2480,7 +2457,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.dischargeDisposition"/>
-      <short value="Category or kind of location after discharge"/>
+      <short value="Category or kind of location after discharge."/>
       <definition value="Category or kind of location after discharge."/>
       <min value="0"/>
       <max value="1"/>
@@ -2505,7 +2482,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.hospitalization.dischargeDiagnosis"/>
-      <short value="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete"/>
+      <short value="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete."/>
       <definition value="The final diagnosis given a patient before release from the hospital after all testing, surgery, and workup are complete."/>
       <min value="0"/>
       <max value="*"/>
@@ -2520,7 +2497,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location"/>
-      <short value="List of locations the patient has been at"/>
+      <short value="List of locations at which the patient has been."/>
       <definition value="List of locations at which the patient has been."/>
       <min value="0"/>
       <max value="*"/>
@@ -2531,7 +2508,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.location"/>
-      <short value="Location the encounter takes place"/>
+      <short value="The location where the encounter takes place."/>
       <definition value="The location where the encounter takes place."/>
       <min value="1"/>
       <max value="1"/>
@@ -2550,7 +2527,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.status"/>
-      <short value="planned | present | reserved"/>
+      <short value="The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time."/>
       <definition value="The status of the participants presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time."/>
       <min value="0"/>
       <max value="1"/>
@@ -2567,7 +2544,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.location.period"/>
-      <short value="Time period during which the patient was present at the location"/>
+      <short value="Time period during which the patient was present at the location."/>
       <definition value="Time period during which the patient was present at the location."/>
       <min value="0"/>
       <max value="1"/>
@@ -2581,7 +2558,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.serviceProvider"/>
-      <short value="The custodian organization of this Encounter record"/>
+      <short value="An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location&#39;s Organization."/>
       <definition value="An organization that is in charge of maintaining the information of this Encounter (e.g., who maintains the report or the master service catalog item, etc.). This MAY be the same as the organization on the Patient record, however it could be different. This MAY not be not the Service Delivery Location&#39;s Organization."/>
       <min value="0"/>
       <max value="1"/>
@@ -2600,7 +2577,7 @@ The indication will typically be a Condition (with other resources referenced in
     </element>
     <element>
       <path value="Encounter.partOf"/>
-      <short value="Another Encounter this encounter is part of"/>
+      <short value="Another Encounter of which this encounter is a part of (administratively or in time)."/>
       <definition value="Another Encounter of which this encounter is a part of (administratively or in time)."/>
       <min value="0"/>
       <max value="1"/>

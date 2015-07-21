@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -2345,6 +2345,8 @@ public class StructureDefinition extends DomainResource {
   public static final String SP_NAME = "name";
   @SearchParamDefinition(name="context", path="StructureDefinition.useContext", description="A use context assigned to the structure", type="token" )
   public static final String SP_CONTEXT = "context";
+  @SearchParamDefinition(name="base-path", path="StructureDefinition.snapshot.element.base.path|StructureDefinition.differential.element.base.path", description="Path that identifies the base element", type="token" )
+  public static final String SP_BASEPATH = "base-path";
   @SearchParamDefinition(name="publisher", path="StructureDefinition.publisher", description="Name of the publisher of the profile", type="string" )
   public static final String SP_PUBLISHER = "publisher";
   @SearchParamDefinition(name="status", path="StructureDefinition.status", description="The current status of the profile", type="token" )

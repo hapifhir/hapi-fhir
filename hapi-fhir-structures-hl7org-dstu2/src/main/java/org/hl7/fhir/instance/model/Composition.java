@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -120,9 +120,9 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "Preliminary";
             case FINAL: return "Final";
-            case APPENDED: return "Appended";
+            case APPENDED: return "Appended ap Appended";
             case AMENDED: return "Amended";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -962,10 +962,10 @@ public class Composition extends DomainResource {
     protected CodeableConcept type;
 
     /**
-     * A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.
+     * A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.
      */
     @Child(name = "class", type = {CodeableConcept.class}, order=3, min=0, max=1)
-    @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type." )
+    @Description(shortDefinition="Categorization of Composition", formalDefinition="A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type." )
     protected CodeableConcept class_;
 
     /**
@@ -1172,7 +1172,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @return {@link #class_} (A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.)
+     * @return {@link #class_} (A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.)
      */
     public CodeableConcept getClass_() { 
       if (this.class_ == null)
@@ -1188,7 +1188,7 @@ public class Composition extends DomainResource {
     }
 
     /**
-     * @param value {@link #class_} (A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.)
+     * @param value {@link #class_} (A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.)
      */
     public Composition setClass_(CodeableConcept value) { 
       this.class_ = value;
@@ -1639,7 +1639,7 @@ public class Composition extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "Logical Identifier for the composition, assigned when created. This identifier stays constant as the composition is changed over time.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("date", "dateTime", "The composition editing time, when the composition was last logically changed by the author.", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("type", "CodeableConcept", "Specifies the particular kind of composition (e.g. History and Physical, Discharge Summary, Progress Note). This usually equates to the purpose of making the composition.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of the composition. This may be implied by or derived from the code specified in the Composition Type.", 0, java.lang.Integer.MAX_VALUE, class_));
+        childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of the composition - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.", 0, java.lang.Integer.MAX_VALUE, class_));
         childrenList.add(new Property("title", "string", "Official human-readable label for the composition.", 0, java.lang.Integer.MAX_VALUE, title));
         childrenList.add(new Property("status", "code", "The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("confidentiality", "code", "The code specifying the level of confidentiality of the Composition.", 0, java.lang.Integer.MAX_VALUE, confidentiality));

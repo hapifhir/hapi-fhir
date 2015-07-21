@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.EnumFactory;
@@ -51,14 +51,12 @@ public class ToothEnumFactory implements EnumFactory<Tooth> {
       return Tooth._4;
     if ("5".equals(codeString))
       return Tooth._5;
-    if ("10".equals(codeString))
-      return Tooth._10;
-    if ("20".equals(codeString))
-      return Tooth._20;
-    if ("30".equals(codeString))
-      return Tooth._30;
-    if ("40".equals(codeString))
-      return Tooth._40;
+    if ("6".equals(codeString))
+      return Tooth._6;
+    if ("7".equals(codeString))
+      return Tooth._7;
+    if ("8".equals(codeString))
+      return Tooth._8;
     if ("11".equals(codeString))
       return Tooth._11;
     if ("12".equals(codeString))
@@ -139,14 +137,12 @@ public class ToothEnumFactory implements EnumFactory<Tooth> {
       return "4";
     if (code == Tooth._5)
       return "5";
-    if (code == Tooth._10)
-      return "10";
-    if (code == Tooth._20)
-      return "20";
-    if (code == Tooth._30)
-      return "30";
-    if (code == Tooth._40)
-      return "40";
+    if (code == Tooth._6)
+      return "6";
+    if (code == Tooth._7)
+      return "7";
+    if (code == Tooth._8)
+      return "8";
     if (code == Tooth._11)
       return "11";
     if (code == Tooth._12)

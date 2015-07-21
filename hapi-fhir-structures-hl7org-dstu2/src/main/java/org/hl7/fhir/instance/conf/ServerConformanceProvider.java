@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.Conformance;
+import org.hl7.fhir.instance.model.Conformance.ConditionalDeleteStatus;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestComponent;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceComponent;
 import org.hl7.fhir.instance.model.Conformance.ConformanceRestResourceSearchParamComponent;
@@ -228,7 +229,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 									resource.setConditionalCreate(true);
 									break;
 								case DELETE:
-									resource.setConditionalDelete(true);
+									resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
 									break;
 								case UPDATE:
 									resource.setConditionalUpdate(true);

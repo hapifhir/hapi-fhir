@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ImagingObjectSelection"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -398,19 +398,19 @@
   <publisher value="Health Level Seven International (Imaging Integration)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/imagemgt/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for ImagingObjectSelection Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="dicom"/>
     <uri value="http://nema.org/dicom"/>
@@ -422,11 +422,11 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="ImagingObjectSelection"/>
-      <short value="Key Object Selection"/>
+      <short value="A set of DICOM SOP Instances of a patient, selected for some application purpose, e.g., quality assurance, teaching, conference, consulting, etc.  Objects selected can be from different studies, but must be of the same patient."/>
       <definition value="A set of DICOM SOP Instances of a patient, selected for some application purpose, e.g., quality assurance, teaching, conference, consulting, etc.  Objects selected can be from different studies, but must be of the same patient."/>
       <requirements value="A FHIR representation of DICOM Key Object Selection (KOS) SOP Instances enables access to a set of selected DICOM SOP Instances."/>
       <alias value="ImageManifest
@@ -443,9 +443,8 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -454,7 +453,7 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -464,9 +463,8 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -476,11 +474,8 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -494,9 +489,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -514,9 +508,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -532,9 +525,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -549,9 +541,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -567,7 +558,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.uid"/>
-      <short value="Instance UID"/>
+      <short value="Instance UID of the DICOM KOS SOP Instances represenetd in this resource."/>
       <definition value="Instance UID of the DICOM KOS SOP Instances represenetd in this resource."/>
       <requirements value="DICOM SOP Instance is always assigned with a unique identifier (UID)."/>
       <min value="1"/>
@@ -586,9 +577,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.patient"/>
-      <short value="Patient of the selected objects"/>
+      <short value="A patient resource reference which is the patient subject of all DICOM SOP Instances in this key object selection."/>
       <definition value="A patient resource reference which is the patient subject of all DICOM SOP Instances in this key object selection."/>
-      <comments value="SOP instances selected in the key object selection can be from different studies, but must be of the same patient."/>
       <requirements value="SOP Instances in key object selection must be from the same patient."/>
       <min value="1"/>
       <max value="1"/>
@@ -609,11 +599,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ImagingObjectSelection.title"/>
-      <short value="Reason for selection"/>
+      <short value="The reason for, or significance of, the selection of objects referenced in the resource."/>
       <definition value="The reason for, or significance of, the selection of objects referenced in the resource."/>
-      <comments value="Coded concept of kind of the key object selection. Value set is defined in the DICOM standard CID-7010.
-
-http://medical.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_7010.html."/>
       <requirements value="Need to represent the application purpose that the SOP instances in key object selection are selected for."/>
       <min value="1"/>
       <max value="1"/>
@@ -634,9 +621,8 @@ http://medical.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_7010.
     </element>
     <element>
       <path value="ImagingObjectSelection.description"/>
-      <short value="Description text"/>
+      <short value="Text description of the DICOM SOP instances selected in the key object selection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection."/>
       <definition value="Text description of the DICOM SOP instances selected in the key object selection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection."/>
-      <comments value="Free text narrative description of the key object selection."/>
       <requirements value="Need to provide a narrative description of the SOP instances in the selection."/>
       <min value="0"/>
       <max value="1"/>
@@ -651,9 +637,8 @@ SR content item immediately under the root item, concept name code = (113012, DC
     </element>
     <element>
       <path value="ImagingObjectSelection.author"/>
-      <short value="Author (human or machine)"/>
+      <short value="Author of key object selection. It can be a human authtor or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attached in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion."/>
       <definition value="Author of key object selection. It can be a human authtor or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attached in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion."/>
-      <comments value="Author of the key object selection. This can be a human author or a device author. Human author is represented with the HumanName type. Device author is represented with a reference to the Device resource."/>
       <requirements value="Track the selection decision maker."/>
       <min value="0"/>
       <max value="1"/>
@@ -685,9 +670,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.authoringTime"/>
-      <short value="Authoring time of the selection"/>
+      <short value="Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource."/>
       <definition value="Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource."/>
-      <comments value="Authoring time."/>
       <requirements value="Date and time when the selection was made can be important to understand the content of selection."/>
       <min value="0"/>
       <max value="1"/>
@@ -705,9 +689,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study"/>
-      <short value="Study identity of the selected instances"/>
+      <short value="Study identity and locating information of the DICOM SOP instances in the selection."/>
       <definition value="Study identity and locating information of the DICOM SOP instances in the selection."/>
-      <comments value="Study component represents the study level identity and locator information of the DICOM SOP instances in the selection. It is the top level identity of the hierachical identification of the instances."/>
       <requirements value="DICOM SOP instances are identified through the UIDs of the study - series - instance hierarchy. In addition, the locator at the study level provide a means of retrieving the entire study."/>
       <min value="1"/>
       <max value="*"/>
@@ -718,7 +701,7 @@ TID 1002 - Observer Context"/>
     <element>
       <path value="ImagingObjectSelection.study.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -732,9 +715,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -749,9 +731,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -768,7 +749,7 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.uid"/>
-      <short value="Study instance uid"/>
+      <short value="Study instance uid of the SOP instances in the selection."/>
       <definition value="Study instance uid of the SOP instances in the selection."/>
       <requirements value="Study instance uid is required to fully identify the DICOM SOP instances in the selection."/>
       <min value="1"/>
@@ -783,9 +764,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection."/>
       <definition value="WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection."/>
-      <comments value="Study level locator information is optional. If provided, this is the URL to retrieve the entire study with WADO-RS interaction, though only a subset of these are selected in the selection."/>
       <requirements value="WADO-RS URL enables retrieval of the entire study using DICOM WADO-RS API."/>
       <min value="0"/>
       <max value="1"/>
@@ -799,9 +779,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series"/>
-      <short value="Series identity of the selected instances"/>
+      <short value="Series indetity and locating information of the DICOM SOP instances in the selection."/>
       <definition value="Series indetity and locating information of the DICOM SOP instances in the selection."/>
-      <comments value="Series component represents the series level indentity and locator information of the DICOM SOP instances in the selection."/>
       <requirements value="DICOM SOP instances are identified through the UIDs of the study - series - instance hierarchy. In addition, the locator at the series level provide a means of retrieving the entire series."/>
       <min value="1"/>
       <max value="*"/>
@@ -812,7 +791,7 @@ TID 1002 - Observer Context"/>
     <element>
       <path value="ImagingObjectSelection.study.series.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -826,9 +805,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -843,9 +821,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -862,7 +839,7 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.uid"/>
-      <short value="Series instance uid"/>
+      <short value="Series instance uid of the SOP instances in the selection."/>
       <definition value="Series instance uid of the SOP instances in the selection."/>
       <requirements value="Series instance uid is required to fully identify the DICOM SOP instances in the selection."/>
       <min value="0"/>
@@ -877,9 +854,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the series Note that this URL retrieves all SOP instances of the series not only those in the selection."/>
       <definition value="WADO-RS URL to retrieve the series Note that this URL retrieves all SOP instances of the series not only those in the selection."/>
-      <comments value="Series level locator information is optional. If provided, this is the URL to retrieve the entire series with WADO-RS interaction, though only a subset of these are selected in the selection."/>
       <requirements value="WADO-RS URL enables retrieval of the entire series using DICOM WADO-RS API."/>
       <min value="0"/>
       <max value="1"/>
@@ -893,9 +869,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance"/>
-      <short value="The selected instance"/>
+      <short value="Identity and locating information of the selected DICOM SOP instances."/>
       <definition value="Identity and locating information of the selected DICOM SOP instances."/>
-      <comments value="SOP Instance component identify the instance selected in the selection, along with the study and series identities to form the DICOM identity hierachy."/>
       <requirements value="DICOM SOP instances are identified through the UIDs of the study - series - instance hierarchy. This is the instance level identity of the instance in the selection."/>
       <min value="1"/>
       <max value="*"/>
@@ -906,7 +881,7 @@ TID 1002 - Observer Context"/>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -920,9 +895,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -937,9 +911,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -956,9 +929,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.sopClass"/>
-      <short value="SOP class uid of instance"/>
+      <short value="SOP class uid of the selected instance."/>
       <definition value="SOP class uid of the selected instance."/>
-      <comments value="SOP class uid provides the type of the selected instances, e.g., CT image, Gray scale softcopy presentation state, ECG waveform, etc."/>
       <requirements value="DICOM SOP instance can be an imaging or other data object. The SOP class uid provide the accurate information about what type the instance is."/>
       <min value="1"/>
       <max value="1"/>
@@ -972,9 +944,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.uid"/>
-      <short value="Uid of the selected instance"/>
+      <short value="SOP Instance uid of the selected instance."/>
       <definition value="SOP Instance uid of the selected instance."/>
-      <comments value="SOP instance uid identifies the instance."/>
       <requirements value="SOP instance uid is required to fully identify the DICOM SOP instance in the selection."/>
       <min value="1"/>
       <max value="1"/>
@@ -988,9 +959,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the DICOM SOP Instance."/>
       <definition value="WADO-RS URL to retrieve the DICOM SOP Instance."/>
-      <comments value="Instance level locator information is required."/>
       <requirements value="WADO-RS URL enables retrieval of the SOP instance using DICOM WADO-RS API."/>
       <min value="1"/>
       <max value="1"/>
@@ -1004,9 +974,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames"/>
-      <short value="The frame set"/>
+      <short value="Identity and location information of the frames in the selected instance."/>
       <definition value="Identity and location information of the frames in the selected instance."/>
-      <comments value="This component may be used if the referenced image SOP Instance is a multi-frame image."/>
       <requirements value="The DICOM frames for a given study, series, SOP Instance UID, and frame numbers. The retrieveUrl retrieves the pixel data, and is encapsulated in a multipart MIME response."/>
       <min value="0"/>
       <max value="*"/>
@@ -1017,7 +986,7 @@ TID 1002 - Observer Context"/>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1031,9 +1000,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1048,9 +1016,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1067,7 +1034,7 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.frameNumbers"/>
-      <short value="Frame numbers"/>
+      <short value="The frame numbers in the frame set."/>
       <definition value="The frame numbers in the frame set."/>
       <requirements value="one or more non duplicate frame numbers."/>
       <min value="1"/>
@@ -1078,9 +1045,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the DICOM frames."/>
       <definition value="WADO-RS URL to retrieve the DICOM frames."/>
-      <comments value="Frame level locator information is required."/>
       <requirements value="WADO-RS URL enables retrieval of the frames using DICOM WADO-RS API."/>
       <min value="1"/>
       <max value="1"/>
@@ -1096,7 +1062,7 @@ TID 1002 - Observer Context"/>
   <differential>
     <element>
       <path value="ImagingObjectSelection"/>
-      <short value="Key Object Selection"/>
+      <short value="A set of DICOM SOP Instances of a patient, selected for some application purpose, e.g., quality assurance, teaching, conference, consulting, etc.  Objects selected can be from different studies, but must be of the same patient."/>
       <definition value="A set of DICOM SOP Instances of a patient, selected for some application purpose, e.g., quality assurance, teaching, conference, consulting, etc.  Objects selected can be from different studies, but must be of the same patient."/>
       <requirements value="A FHIR representation of DICOM Key Object Selection (KOS) SOP Instances enables access to a set of selected DICOM SOP Instances."/>
       <alias value="ImageManifest
@@ -1113,7 +1079,7 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.uid"/>
-      <short value="Instance UID"/>
+      <short value="Instance UID of the DICOM KOS SOP Instances represenetd in this resource."/>
       <definition value="Instance UID of the DICOM KOS SOP Instances represenetd in this resource."/>
       <requirements value="DICOM SOP Instance is always assigned with a unique identifier (UID)."/>
       <min value="1"/>
@@ -1132,9 +1098,8 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.patient"/>
-      <short value="Patient of the selected objects"/>
+      <short value="A patient resource reference which is the patient subject of all DICOM SOP Instances in this key object selection."/>
       <definition value="A patient resource reference which is the patient subject of all DICOM SOP Instances in this key object selection."/>
-      <comments value="SOP instances selected in the key object selection can be from different studies, but must be of the same patient."/>
       <requirements value="SOP Instances in key object selection must be from the same patient."/>
       <min value="1"/>
       <max value="1"/>
@@ -1155,11 +1120,8 @@ KeyImageNote"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.title"/>
-      <short value="Reason for selection"/>
+      <short value="The reason for, or significance of, the selection of objects referenced in the resource."/>
       <definition value="The reason for, or significance of, the selection of objects referenced in the resource."/>
-      <comments value="Coded concept of kind of the key object selection. Value set is defined in the DICOM standard CID-7010.
-
-http://medical.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_7010.html."/>
       <requirements value="Need to represent the application purpose that the SOP instances in key object selection are selected for."/>
       <min value="1"/>
       <max value="1"/>
@@ -1180,9 +1142,8 @@ http://medical.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_7010.
     </element>
     <element>
       <path value="ImagingObjectSelection.description"/>
-      <short value="Description text"/>
+      <short value="Text description of the DICOM SOP instances selected in the key object selection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection."/>
       <definition value="Text description of the DICOM SOP instances selected in the key object selection. This should be aligned with the content of the title element, and can provide further explanation of the SOP instances in the selection."/>
-      <comments value="Free text narrative description of the key object selection."/>
       <requirements value="Need to provide a narrative description of the SOP instances in the selection."/>
       <min value="0"/>
       <max value="1"/>
@@ -1197,9 +1158,8 @@ SR content item immediately under the root item, concept name code = (113012, DC
     </element>
     <element>
       <path value="ImagingObjectSelection.author"/>
-      <short value="Author (human or machine)"/>
+      <short value="Author of key object selection. It can be a human authtor or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attached in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion."/>
       <definition value="Author of key object selection. It can be a human authtor or a device which made the decision of the SOP instances selected. For example, a radiologist selected a set of imaging SOP instances to attached in a diagnostic report, and a CAD application may author a selection to describe SOP instances it used to generate a detection conclusion."/>
-      <comments value="Author of the key object selection. This can be a human author or a device author. Human author is represented with the HumanName type. Device author is represented with a reference to the Device resource."/>
       <requirements value="Track the selection decision maker."/>
       <min value="0"/>
       <max value="1"/>
@@ -1231,9 +1191,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.authoringTime"/>
-      <short value="Authoring time of the selection"/>
+      <short value="Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource."/>
       <definition value="Date and time when the key object selection was authored. Note that this is the date and time the DICOM SOP instances in the selection were selected (selection decision making). It is different from the creation date and time of the selection resource."/>
-      <comments value="Authoring time."/>
       <requirements value="Date and time when the selection was made can be important to understand the content of selection."/>
       <min value="0"/>
       <max value="1"/>
@@ -1251,16 +1210,15 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study"/>
-      <short value="Study identity of the selected instances"/>
+      <short value="Study identity and locating information of the DICOM SOP instances in the selection."/>
       <definition value="Study identity and locating information of the DICOM SOP instances in the selection."/>
-      <comments value="Study component represents the study level identity and locator information of the DICOM SOP instances in the selection. It is the top level identity of the hierachical identification of the instances."/>
       <requirements value="DICOM SOP instances are identified through the UIDs of the study - series - instance hierarchy. In addition, the locator at the study level provide a means of retrieving the entire study."/>
       <min value="1"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.uid"/>
-      <short value="Study instance uid"/>
+      <short value="Study instance uid of the SOP instances in the selection."/>
       <definition value="Study instance uid of the SOP instances in the selection."/>
       <requirements value="Study instance uid is required to fully identify the DICOM SOP instances in the selection."/>
       <min value="1"/>
@@ -1275,9 +1233,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection."/>
       <definition value="WADO-RS URL to retrieve the study. Note that this URL retrieves all SOP instances of the study, not only those in the selection."/>
-      <comments value="Study level locator information is optional. If provided, this is the URL to retrieve the entire study with WADO-RS interaction, though only a subset of these are selected in the selection."/>
       <requirements value="WADO-RS URL enables retrieval of the entire study using DICOM WADO-RS API."/>
       <min value="0"/>
       <max value="1"/>
@@ -1291,16 +1248,15 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series"/>
-      <short value="Series identity of the selected instances"/>
+      <short value="Series indetity and locating information of the DICOM SOP instances in the selection."/>
       <definition value="Series indetity and locating information of the DICOM SOP instances in the selection."/>
-      <comments value="Series component represents the series level indentity and locator information of the DICOM SOP instances in the selection."/>
       <requirements value="DICOM SOP instances are identified through the UIDs of the study - series - instance hierarchy. In addition, the locator at the series level provide a means of retrieving the entire series."/>
       <min value="1"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.uid"/>
-      <short value="Series instance uid"/>
+      <short value="Series instance uid of the SOP instances in the selection."/>
       <definition value="Series instance uid of the SOP instances in the selection."/>
       <requirements value="Series instance uid is required to fully identify the DICOM SOP instances in the selection."/>
       <min value="0"/>
@@ -1315,9 +1271,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the series Note that this URL retrieves all SOP instances of the series not only those in the selection."/>
       <definition value="WADO-RS URL to retrieve the series Note that this URL retrieves all SOP instances of the series not only those in the selection."/>
-      <comments value="Series level locator information is optional. If provided, this is the URL to retrieve the entire series with WADO-RS interaction, though only a subset of these are selected in the selection."/>
       <requirements value="WADO-RS URL enables retrieval of the entire series using DICOM WADO-RS API."/>
       <min value="0"/>
       <max value="1"/>
@@ -1331,18 +1286,16 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance"/>
-      <short value="The selected instance"/>
+      <short value="Identity and locating information of the selected DICOM SOP instances."/>
       <definition value="Identity and locating information of the selected DICOM SOP instances."/>
-      <comments value="SOP Instance component identify the instance selected in the selection, along with the study and series identities to form the DICOM identity hierachy."/>
       <requirements value="DICOM SOP instances are identified through the UIDs of the study - series - instance hierarchy. This is the instance level identity of the instance in the selection."/>
       <min value="1"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.sopClass"/>
-      <short value="SOP class uid of instance"/>
+      <short value="SOP class uid of the selected instance."/>
       <definition value="SOP class uid of the selected instance."/>
-      <comments value="SOP class uid provides the type of the selected instances, e.g., CT image, Gray scale softcopy presentation state, ECG waveform, etc."/>
       <requirements value="DICOM SOP instance can be an imaging or other data object. The SOP class uid provide the accurate information about what type the instance is."/>
       <min value="1"/>
       <max value="1"/>
@@ -1356,9 +1309,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.uid"/>
-      <short value="Uid of the selected instance"/>
+      <short value="SOP Instance uid of the selected instance."/>
       <definition value="SOP Instance uid of the selected instance."/>
-      <comments value="SOP instance uid identifies the instance."/>
       <requirements value="SOP instance uid is required to fully identify the DICOM SOP instance in the selection."/>
       <min value="1"/>
       <max value="1"/>
@@ -1372,9 +1324,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the DICOM SOP Instance."/>
       <definition value="WADO-RS URL to retrieve the DICOM SOP Instance."/>
-      <comments value="Instance level locator information is required."/>
       <requirements value="WADO-RS URL enables retrieval of the SOP instance using DICOM WADO-RS API."/>
       <min value="1"/>
       <max value="1"/>
@@ -1388,16 +1339,15 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames"/>
-      <short value="The frame set"/>
+      <short value="Identity and location information of the frames in the selected instance."/>
       <definition value="Identity and location information of the frames in the selected instance."/>
-      <comments value="This component may be used if the referenced image SOP Instance is a multi-frame image."/>
       <requirements value="The DICOM frames for a given study, series, SOP Instance UID, and frame numbers. The retrieveUrl retrieves the pixel data, and is encapsulated in a multipart MIME response."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.frameNumbers"/>
-      <short value="Frame numbers"/>
+      <short value="The frame numbers in the frame set."/>
       <definition value="The frame numbers in the frame set."/>
       <requirements value="one or more non duplicate frame numbers."/>
       <min value="1"/>
@@ -1408,9 +1358,8 @@ TID 1002 - Observer Context"/>
     </element>
     <element>
       <path value="ImagingObjectSelection.study.series.instance.frames.url"/>
-      <short value="Retrieve URL"/>
+      <short value="WADO-RS URL to retrieve the DICOM frames."/>
       <definition value="WADO-RS URL to retrieve the DICOM frames."/>
-      <comments value="Frame level locator information is required."/>
       <requirements value="WADO-RS URL enables retrieval of the frames using DICOM WADO-RS API."/>
       <min value="1"/>
       <max value="1"/>

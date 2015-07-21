@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,15 +48,15 @@ public class Contraindication extends DomainResource {
 
     public enum ContraindicationSeverity {
         /**
-         * null
+         * Indicates the condition may be life-threatening or has the potential to cause permanent injury
          */
         HIGH, 
         /**
-         * null
+         * Indicates the condition may result in noticable adverse adverse consequences but is unlikely to be life-threatening or cause permanent injury
          */
         MODERATE, 
         /**
-         * null
+         * Indicates the condition may result in some adverse consequences but is unlikely to substantially affect the situation of the subjec
          */
         LOW, 
         /**
@@ -84,25 +84,25 @@ public class Contraindication extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case HIGH: return "High";
-            case MODERATE: return "Moderate";
-            case LOW: return "Low";
+            case HIGH: return "http://hl7.org/fhir/contraindication-severity";
+            case MODERATE: return "http://hl7.org/fhir/contraindication-severity";
+            case LOW: return "http://hl7.org/fhir/contraindication-severity";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case HIGH: return "";
-            case MODERATE: return "";
-            case LOW: return "";
+            case HIGH: return "Indicates the condition may be life-threatening or has the potential to cause permanent injury";
+            case MODERATE: return "Indicates the condition may result in noticable adverse adverse consequences but is unlikely to be life-threatening or cause permanent injury";
+            case LOW: return "Indicates the condition may result in some adverse consequences but is unlikely to substantially affect the situation of the subjec";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case HIGH: return "high";
-            case MODERATE: return "moderate";
-            case LOW: return "low";
+            case HIGH: return "High";
+            case MODERATE: return "Moderate";
+            case LOW: return "Low";
             default: return "?";
           }
         }

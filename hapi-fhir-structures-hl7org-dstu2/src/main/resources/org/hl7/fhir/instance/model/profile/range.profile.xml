@@ -94,14 +94,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Range Resource"/>
   <requirements value="Need to be able to specify ranges of values."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -114,13 +114,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Range"/>
-      <short value="Set of values bounded by low and high"/>
+      <short value="A set of ordered Quantities defined by a low and high limit."/>
       <definition value="A set of ordered Quantities defined by a low and high limit."/>
-      <comments value="The stated low and high value are assumed to have arbitrarily high precision when it comes to determining which values are in the range. I.e. 1.99 is not in the range 2 -&gt; 3."/>
       <requirements value="Need to be able to specify ranges of values."/>
       <min value="1"/>
       <max value="1"/>
@@ -151,7 +149,7 @@
     <element>
       <path value="Range.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -165,9 +163,8 @@
     </element>
     <element>
       <path value="Range.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -182,9 +179,8 @@
     </element>
     <element>
       <path value="Range.low"/>
-      <short value="Low limit"/>
+      <short value="The low limit. The boundary is inclusive."/>
       <definition value="The low limit. The boundary is inclusive."/>
-      <comments value="If the low element is missing, the low boundary is not known."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -203,9 +199,8 @@
     </element>
     <element>
       <path value="Range.high"/>
-      <short value="High limit"/>
+      <short value="The high limit. The boundary is inclusive."/>
       <definition value="The high limit. The boundary is inclusive."/>
-      <comments value="If the high element is missing, the high boundary is not known."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -226,9 +221,8 @@
   <differential>
     <element>
       <path value="Range"/>
-      <short value="Set of values bounded by low and high"/>
+      <short value="A set of ordered Quantities defined by a low and high limit."/>
       <definition value="A set of ordered Quantities defined by a low and high limit."/>
-      <comments value="The stated low and high value are assumed to have arbitrarily high precision when it comes to determining which values are in the range. I.e. 1.99 is not in the range 2 -&gt; 3."/>
       <requirements value="Need to be able to specify ranges of values."/>
       <min value="1"/>
       <max value="1"/>
@@ -258,9 +252,8 @@
     </element>
     <element>
       <path value="Range.low"/>
-      <short value="Low limit"/>
+      <short value="The low limit. The boundary is inclusive."/>
       <definition value="The low limit. The boundary is inclusive."/>
-      <comments value="If the low element is missing, the low boundary is not known."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -279,9 +272,8 @@
     </element>
     <element>
       <path value="Range.high"/>
-      <short value="High limit"/>
+      <short value="The high limit. The boundary is inclusive."/>
       <definition value="The high limit. The boundary is inclusive."/>
-      <comments value="If the high element is missing, the high boundary is not known."/>
       <min value="0"/>
       <max value="1"/>
       <type>

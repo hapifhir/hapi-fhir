@@ -42,6 +42,9 @@
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="f:DataElement/f:element">
+      <sch:assert test="not(exists(f:base))">dae-1: No base allowed</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:DataElement/f:element">
       <sch:assert test="(not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (f:max/@value &gt;= f:min/@value)">eld-2: Min &lt;= Max</sch:assert>
       <sch:assert test="not(exists(f:nameReference) and exists(f:*[starts-with(local-name(.), 'value')]))">eld-5: Either a namereference or a fixed value (but not both) is permitted</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)=1 )">eld-7: Pattern may only be specified if there is one type</sch:assert>

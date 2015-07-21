@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum MessageTransport {
@@ -82,9 +82,9 @@ public enum MessageTransport {
         }
         public String getDisplay() {
           switch (this) {
-            case HTTP: return "Http";
-            case FTP: return "Ftp";
-            case MLLP: return "Mllp";
+            case HTTP: return "HTTP";
+            case FTP: return "FTP";
+            case MLLP: return "MLLP";
             default: return "?";
           }
     }

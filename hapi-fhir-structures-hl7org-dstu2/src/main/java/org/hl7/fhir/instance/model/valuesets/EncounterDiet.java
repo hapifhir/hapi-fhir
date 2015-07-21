@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum EncounterDiet {
@@ -114,13 +114,13 @@ public enum EncounterDiet {
         }
         public String getDisplay() {
           switch (this) {
-            case VEGETARIAN: return "vegetarian";
-            case DAIRYFREE: return "dairy-free";
-            case NUTFREE: return "nut-free";
-            case GLUTENFREE: return "gluten-free";
-            case VEGAN: return "vegan";
-            case HALAL: return "halal";
-            case KOSHER: return "kosher";
+            case VEGETARIAN: return "Vegetarian";
+            case DAIRYFREE: return "Dairy Free";
+            case NUTFREE: return "Nut Free";
+            case GLUTENFREE: return "Gluten Free";
+            case VEGAN: return "Vegan";
+            case HALAL: return "Halal";
+            case KOSHER: return "Kosher";
             default: return "?";
           }
     }

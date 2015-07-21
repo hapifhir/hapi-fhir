@@ -192,14 +192,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Attachment Resource"/>
   <requirements value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -212,13 +212,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Attachment"/>
-      <short value="Content in a format defined elsewhere"/>
+      <short value="For referring to data content defined in other formats."/>
       <definition value="For referring to data content defined in other formats."/>
-      <comments value="When providing a summary view (for example with Observation.value[x]) Attachment should be represented with a brief display text such as &quot;Attachment&quot;."/>
       <requirements value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -243,7 +241,7 @@
     <element>
       <path value="Attachment.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -257,9 +255,8 @@
     </element>
     <element>
       <path value="Attachment.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -274,7 +271,7 @@
     </element>
     <element>
       <path value="Attachment.contentType"/>
-      <short value="Mime type of the content, with charset etc."/>
+      <short value="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate."/>
       <definition value="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate."/>
       <requirements value="Processors of the data need to be able to know how to interpret the data."/>
       <min value="0"/>
@@ -299,7 +296,7 @@
     </element>
     <element>
       <path value="Attachment.language"/>
-      <short value="Human language of the content (BCP-47)"/>
+      <short value="The human language of the content. The value can be any valid value according to BCP 47."/>
       <definition value="The human language of the content. The value can be any valid value according to BCP 47."/>
       <requirements value="Users need to be able to choose between the languages in a set of attachments."/>
       <min value="0"/>
@@ -320,9 +317,8 @@
     </element>
     <element>
       <path value="Attachment.data"/>
-      <short value="Data inline, base64ed"/>
+      <short value="The actual data of the attachment - a sequence of bytes. In XML, represented using base64."/>
       <definition value="The actual data of the attachment - a sequence of bytes. In XML, represented using base64."/>
-      <comments value="The base64-encoded data SHALL be expressed in the same character set as the base resource XML or JSON."/>
       <requirements value="The data needs to able to be transmitted inline."/>
       <min value="0"/>
       <max value="1"/>
@@ -340,9 +336,8 @@
     </element>
     <element>
       <path value="Attachment.url"/>
-      <short value="Uri where the data can be found"/>
+      <short value="An alternative location where the data can be accessed."/>
       <definition value="An alternative location where the data can be accessed."/>
-      <comments value="If both data and url are provided, the url SHALL point to the same content as the data contains. Urls may be relative references or may reference transient locations such as a wrapping envelope using cid: though this has ramifications for using signatures. Relative URLs are interpreted relative to the service url, like a resource reference, rather than relative to the resource itself. If a URL is provided, it SHALL resolve to actual data."/>
       <requirements value="The data needs to be transmitted by reference."/>
       <min value="0"/>
       <max value="1"/>
@@ -361,9 +356,8 @@
     </element>
     <element>
       <path value="Attachment.size"/>
-      <short value="Number of bytes of content (if url provided)"/>
+      <short value="The number of bytes of data that make up this attachment."/>
       <definition value="The number of bytes of data that make up this attachment."/>
-      <comments value="The number of bytes is redundant if the data is provided as a base64binary, but is useful if the data is provided as a url reference."/>
       <requirements value="Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all."/>
       <min value="0"/>
       <max value="1"/>
@@ -377,7 +371,7 @@
     </element>
     <element>
       <path value="Attachment.hash"/>
-      <short value="Hash of the data (sha-1, base64ed )"/>
+      <short value="The calculated hash of the data using SHA-1. Represented using base64."/>
       <definition value="The calculated hash of the data using SHA-1. Represented using base64."/>
       <requirements value="Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature."/>
       <min value="0"/>
@@ -392,7 +386,7 @@
     </element>
     <element>
       <path value="Attachment.title"/>
-      <short value="Label to display in place of the data"/>
+      <short value="A label or set of text to display in place of the data."/>
       <definition value="A label or set of text to display in place of the data."/>
       <requirements value="Applications need a label to display to a human user in place of the actual data if the data cannot be rendered or perceived by the viewer."/>
       <min value="0"/>
@@ -408,7 +402,7 @@
     </element>
     <element>
       <path value="Attachment.creation"/>
-      <short value="Date attachment was first created"/>
+      <short value="The date that the attachment was first created."/>
       <definition value="The date that the attachment was first created."/>
       <requirements value="This is often tracked as an integrity issue for use of the attachment."/>
       <min value="0"/>
@@ -425,9 +419,8 @@
   <differential>
     <element>
       <path value="Attachment"/>
-      <short value="Content in a format defined elsewhere"/>
+      <short value="For referring to data content defined in other formats."/>
       <definition value="For referring to data content defined in other formats."/>
-      <comments value="When providing a summary view (for example with Observation.value[x]) Attachment should be represented with a brief display text such as &quot;Attachment&quot;."/>
       <requirements value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -451,7 +444,7 @@
     </element>
     <element>
       <path value="Attachment.contentType"/>
-      <short value="Mime type of the content, with charset etc."/>
+      <short value="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate."/>
       <definition value="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate."/>
       <requirements value="Processors of the data need to be able to know how to interpret the data."/>
       <min value="0"/>
@@ -476,7 +469,7 @@
     </element>
     <element>
       <path value="Attachment.language"/>
-      <short value="Human language of the content (BCP-47)"/>
+      <short value="The human language of the content. The value can be any valid value according to BCP 47."/>
       <definition value="The human language of the content. The value can be any valid value according to BCP 47."/>
       <requirements value="Users need to be able to choose between the languages in a set of attachments."/>
       <min value="0"/>
@@ -497,9 +490,8 @@
     </element>
     <element>
       <path value="Attachment.data"/>
-      <short value="Data inline, base64ed"/>
+      <short value="The actual data of the attachment - a sequence of bytes. In XML, represented using base64."/>
       <definition value="The actual data of the attachment - a sequence of bytes. In XML, represented using base64."/>
-      <comments value="The base64-encoded data SHALL be expressed in the same character set as the base resource XML or JSON."/>
       <requirements value="The data needs to able to be transmitted inline."/>
       <min value="0"/>
       <max value="1"/>
@@ -517,9 +509,8 @@
     </element>
     <element>
       <path value="Attachment.url"/>
-      <short value="Uri where the data can be found"/>
+      <short value="An alternative location where the data can be accessed."/>
       <definition value="An alternative location where the data can be accessed."/>
-      <comments value="If both data and url are provided, the url SHALL point to the same content as the data contains. Urls may be relative references or may reference transient locations such as a wrapping envelope using cid: though this has ramifications for using signatures. Relative URLs are interpreted relative to the service url, like a resource reference, rather than relative to the resource itself. If a URL is provided, it SHALL resolve to actual data."/>
       <requirements value="The data needs to be transmitted by reference."/>
       <min value="0"/>
       <max value="1"/>
@@ -538,9 +529,8 @@
     </element>
     <element>
       <path value="Attachment.size"/>
-      <short value="Number of bytes of content (if url provided)"/>
+      <short value="The number of bytes of data that make up this attachment."/>
       <definition value="The number of bytes of data that make up this attachment."/>
-      <comments value="The number of bytes is redundant if the data is provided as a base64binary, but is useful if the data is provided as a url reference."/>
       <requirements value="Representing the size allows applications to determine whether they should fetch the content automatically in advance, or refuse to fetch it at all."/>
       <min value="0"/>
       <max value="1"/>
@@ -554,7 +544,7 @@
     </element>
     <element>
       <path value="Attachment.hash"/>
-      <short value="Hash of the data (sha-1, base64ed )"/>
+      <short value="The calculated hash of the data using SHA-1. Represented using base64."/>
       <definition value="The calculated hash of the data using SHA-1. Represented using base64."/>
       <requirements value="Included so that applications can verify that the contents of a location have not changed and so that a signature of the content can implicitly sign the content of an image without having to include the data in the instance or reference the url in the signature."/>
       <min value="0"/>
@@ -569,7 +559,7 @@
     </element>
     <element>
       <path value="Attachment.title"/>
-      <short value="Label to display in place of the data"/>
+      <short value="A label or set of text to display in place of the data."/>
       <definition value="A label or set of text to display in place of the data."/>
       <requirements value="Applications need a label to display to a human user in place of the actual data if the data cannot be rendered or perceived by the viewer."/>
       <min value="0"/>
@@ -585,7 +575,7 @@
     </element>
     <element>
       <path value="Attachment.creation"/>
-      <short value="Date attachment was first created"/>
+      <short value="The date that the attachment was first created."/>
       <definition value="The date that the attachment was first created."/>
       <requirements value="This is often tracked as an integrity issue for use of the attachment."/>
       <min value="0"/>

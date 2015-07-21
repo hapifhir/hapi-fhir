@@ -131,13 +131,13 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Meta Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -145,11 +145,10 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Meta"/>
-      <short value="Metadata about a resource"/>
+      <short value="The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="1"/>
       <max value="1"/>
@@ -160,7 +159,7 @@
     <element>
       <path value="Meta.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -174,9 +173,8 @@
     </element>
     <element>
       <path value="Meta.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -191,9 +189,8 @@
     </element>
     <element>
       <path value="Meta.versionId"/>
-      <short value="Version specific identifier"/>
+      <short value="The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted."/>
       <definition value="The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted."/>
-      <comments value="The server assigns this value, and ignores what the client specifies, except in the case that the server is imposing version integrity on updates/deletes."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -202,9 +199,8 @@
     </element>
     <element>
       <path value="Meta.lastUpdated"/>
-      <short value="When the resource version last changed"/>
+      <short value="When the resource last changed - e.g. when the version changed."/>
       <definition value="When the resource last changed - e.g. when the version changed."/>
-      <comments value="This value is always populated except when the resource is first being created. The server / resource manager sets this value; what a client provides is irrelevant."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -213,11 +209,8 @@
     </element>
     <element>
       <path value="Meta.profile"/>
-      <short value="Profiles this resource claims to conform to"/>
+      <short value="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]."/>
       <definition value="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]."/>
-      <comments value="It is up to the server and/or other infrastructure of policy to determine whether/how these claims are verified and/or updated over time.
-
-The list of profile URLs is a set."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -226,11 +219,8 @@ The list of profile URLs is a set."/>
     </element>
     <element>
       <path value="Meta.security"/>
-      <short value="Security Labels applied to this resource"/>
+      <short value="Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure."/>
       <definition value="Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure."/>
-      <comments value="The security labels can be updated without changing the stated version of the resource
-
-The list of security labels is a set. Uniqueness is based the system/code, and version and display are ignored."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -239,11 +229,8 @@ The list of security labels is a set. Uniqueness is based the system/code, and v
     </element>
     <element>
       <path value="Meta.tag"/>
-      <short value="Tags applied"/>
+      <short value="Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource."/>
       <definition value="Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource."/>
-      <comments value="The tags can be updated without changing the stated version of the resource.
-
-The list of tags is a set. Uniqueness is based the system/code, and version and display are ignored."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -254,7 +241,7 @@ The list of tags is a set. Uniqueness is based the system/code, and version and 
   <differential>
     <element>
       <path value="Meta"/>
-      <short value="Metadata about a resource"/>
+      <short value="The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="1"/>
       <max value="1"/>
@@ -264,9 +251,8 @@ The list of tags is a set. Uniqueness is based the system/code, and version and 
     </element>
     <element>
       <path value="Meta.versionId"/>
-      <short value="Version specific identifier"/>
+      <short value="The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted."/>
       <definition value="The version specific identifier, as it appears in the version portion of the url. This values changes when the resource is created, updated, or deleted."/>
-      <comments value="The server assigns this value, and ignores what the client specifies, except in the case that the server is imposing version integrity on updates/deletes."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -275,9 +261,8 @@ The list of tags is a set. Uniqueness is based the system/code, and version and 
     </element>
     <element>
       <path value="Meta.lastUpdated"/>
-      <short value="When the resource version last changed"/>
+      <short value="When the resource last changed - e.g. when the version changed."/>
       <definition value="When the resource last changed - e.g. when the version changed."/>
-      <comments value="This value is always populated except when the resource is first being created. The server / resource manager sets this value; what a client provides is irrelevant."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -286,11 +271,8 @@ The list of tags is a set. Uniqueness is based the system/code, and version and 
     </element>
     <element>
       <path value="Meta.profile"/>
-      <short value="Profiles this resource claims to conform to"/>
+      <short value="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]."/>
       <definition value="A list of profiles [[[StructureDefinition]]]s that this resource claims to conform to. The URL is a reference to [[[StructureDefinition.url]]]."/>
-      <comments value="It is up to the server and/or other infrastructure of policy to determine whether/how these claims are verified and/or updated over time.
-
-The list of profile URLs is a set."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -299,11 +281,8 @@ The list of profile URLs is a set."/>
     </element>
     <element>
       <path value="Meta.security"/>
-      <short value="Security Labels applied to this resource"/>
+      <short value="Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure."/>
       <definition value="Security labels applied to this resource. These tags connect specific resources to the overall security policy and infrastructure."/>
-      <comments value="The security labels can be updated without changing the stated version of the resource
-
-The list of security labels is a set. Uniqueness is based the system/code, and version and display are ignored."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -312,11 +291,8 @@ The list of security labels is a set. Uniqueness is based the system/code, and v
     </element>
     <element>
       <path value="Meta.tag"/>
-      <short value="Tags applied"/>
+      <short value="Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource."/>
       <definition value="Tags applied to this resource. Tags are intended to to be used to identify and relate resources to process and workflow, and applications are not required to consider the tags when interpreting the meaning of a resource."/>
-      <comments value="The tags can be updated without changing the stated version of the resource.
-
-The list of tags is a set. Uniqueness is based the system/code, and version and display are ignored."/>
       <min value="0"/>
       <max value="*"/>
       <type>

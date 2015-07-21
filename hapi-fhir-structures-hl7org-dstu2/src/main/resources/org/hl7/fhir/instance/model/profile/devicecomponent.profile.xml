@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="DeviceComponent"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -276,32 +276,31 @@
   <publisher value="Health Level Seven International (Health Care Devices)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/healthcaredevices/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for DeviceComponent Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="DeviceComponent"/>
-      <short value="An instance of a medical-related component of a medical device"/>
+      <short value="Describes the characteristics, operational status and capabilities of a medical-related component of a medical device."/>
       <definition value="Describes the characteristics, operational status and capabilities of a medical-related component of a medical device."/>
-      <comments value="For the initial scope, this DeviceComponent resource is only applicable to describe a single node in the containment tree that is produced by the context scanner in any medical device that implements or derives from the ISO/IEEE 11073 standard and that does not represent a metric. Examples for such a node are MDS, VMD, or Channel."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -310,9 +309,8 @@
     </element>
     <element>
       <path value="DeviceComponent.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -321,7 +319,7 @@
     </element>
     <element>
       <path value="DeviceComponent.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -331,9 +329,8 @@
     </element>
     <element>
       <path value="DeviceComponent.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -343,11 +340,8 @@
     </element>
     <element>
       <path value="DeviceComponent.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -361,9 +355,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -381,9 +374,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -399,9 +391,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -416,9 +407,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -434,9 +424,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.type"/>
-      <short value="What kind of component it is"/>
+      <short value="Describes the specific component type as defined in the object-oriented or metric nomenclature partition."/>
       <definition value="Describes the specific component type as defined in the object-oriented or metric nomenclature partition."/>
-      <comments value="DeviceComponent.type can be referred to either GDMN (nomenclature system supported by FDA Global UDI Database) or preferable RTMMS coding system."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -450,7 +439,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.identifier"/>
-      <short value="Instance id assigned by the software stack"/>
+      <short value="Describes the local assigned unique identification by the software. For example: handle ID."/>
       <definition value="Describes the local assigned unique identification by the software. For example: handle ID."/>
       <min value="1"/>
       <max value="1"/>
@@ -460,7 +449,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.lastSystemChange"/>
-      <short value="Recent system change timestamp"/>
+      <short value="Describes the timestamp for the most recent system change which includes device configuration or setting change."/>
       <definition value="Describes the timestamp for the most recent system change which includes device configuration or setting change."/>
       <min value="1"/>
       <max value="1"/>
@@ -470,7 +459,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.source"/>
-      <short value="A source device of this component"/>
+      <short value="Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc."/>
       <definition value="Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -481,7 +470,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.parent"/>
-      <short value="Parent resource link"/>
+      <short value="Describes the link to the parent resource. For example: Channel is linked to its VMD parent."/>
       <definition value="Describes the link to the parent resource. For example: Channel is linked to its VMD parent."/>
       <min value="0"/>
       <max value="1"/>
@@ -492,9 +481,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.operationalStatus"/>
-      <short value="Component operational status"/>
+      <short value="Indicates current operational status of the device. For example: On, Off, Standby, etc."/>
       <definition value="Indicates current operational status of the device. For example: On, Off, Standby, etc."/>
-      <comments value="OperationalStatus for the MDS, VMD, or Channel will be bound to a specific ValueSet that is defined in its profile."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -503,7 +491,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.parameterGroup"/>
-      <short value="Current supported parameter group"/>
+      <short value="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular."/>
       <definition value="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular."/>
       <min value="0"/>
       <max value="1"/>
@@ -513,7 +501,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.measurementPrinciple"/>
-      <short value="other | chemical | electrical | impedance | nuclear | optical | thermal | biological | mechanical | acoustical | manual+"/>
+      <short value="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc."/>
       <definition value="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -530,7 +518,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification"/>
-      <short value="Production specification of the component"/>
+      <short value="Describes the production specification such as component revision, serial number, etc."/>
       <definition value="Describes the production specification such as component revision, serial number, etc."/>
       <min value="0"/>
       <max value="*"/>
@@ -541,7 +529,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="DeviceComponent.productionSpecification.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -555,9 +543,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -572,9 +559,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -591,7 +577,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.specType"/>
-      <short value="Specification type"/>
+      <short value="Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc."/>
       <definition value="Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -601,7 +587,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.componentId"/>
-      <short value="Internal component unique identification"/>
+      <short value="Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of."/>
       <definition value="Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of."/>
       <min value="0"/>
       <max value="1"/>
@@ -611,7 +597,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.productionSpec"/>
-      <short value="A printable string defining the component"/>
+      <short value="Describes the printable string defining the component."/>
       <definition value="Describes the printable string defining the component."/>
       <min value="0"/>
       <max value="1"/>
@@ -621,7 +607,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.languageCode"/>
-      <short value="Language code for the human-readable text strings produced by the device"/>
+      <short value="Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US."/>
       <definition value="Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US."/>
       <min value="0"/>
       <max value="1"/>
@@ -633,9 +619,8 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="DeviceComponent"/>
-      <short value="An instance of a medical-related component of a medical device"/>
+      <short value="Describes the characteristics, operational status and capabilities of a medical-related component of a medical device."/>
       <definition value="Describes the characteristics, operational status and capabilities of a medical-related component of a medical device."/>
-      <comments value="For the initial scope, this DeviceComponent resource is only applicable to describe a single node in the containment tree that is produced by the context scanner in any medical device that implements or derives from the ISO/IEEE 11073 standard and that does not represent a metric. Examples for such a node are MDS, VMD, or Channel."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -644,9 +629,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.type"/>
-      <short value="What kind of component it is"/>
+      <short value="Describes the specific component type as defined in the object-oriented or metric nomenclature partition."/>
       <definition value="Describes the specific component type as defined in the object-oriented or metric nomenclature partition."/>
-      <comments value="DeviceComponent.type can be referred to either GDMN (nomenclature system supported by FDA Global UDI Database) or preferable RTMMS coding system."/>
       <min value="1"/>
       <max value="1"/>
       <type>
@@ -660,7 +644,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.identifier"/>
-      <short value="Instance id assigned by the software stack"/>
+      <short value="Describes the local assigned unique identification by the software. For example: handle ID."/>
       <definition value="Describes the local assigned unique identification by the software. For example: handle ID."/>
       <min value="1"/>
       <max value="1"/>
@@ -670,7 +654,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.lastSystemChange"/>
-      <short value="Recent system change timestamp"/>
+      <short value="Describes the timestamp for the most recent system change which includes device configuration or setting change."/>
       <definition value="Describes the timestamp for the most recent system change which includes device configuration or setting change."/>
       <min value="1"/>
       <max value="1"/>
@@ -680,7 +664,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.source"/>
-      <short value="A source device of this component"/>
+      <short value="Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc."/>
       <definition value="Describes the link to the source Device that contains administrative device information such as manufacture, serial number, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -691,7 +675,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.parent"/>
-      <short value="Parent resource link"/>
+      <short value="Describes the link to the parent resource. For example: Channel is linked to its VMD parent."/>
       <definition value="Describes the link to the parent resource. For example: Channel is linked to its VMD parent."/>
       <min value="0"/>
       <max value="1"/>
@@ -702,9 +686,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.operationalStatus"/>
-      <short value="Component operational status"/>
+      <short value="Indicates current operational status of the device. For example: On, Off, Standby, etc."/>
       <definition value="Indicates current operational status of the device. For example: On, Off, Standby, etc."/>
-      <comments value="OperationalStatus for the MDS, VMD, or Channel will be bound to a specific ValueSet that is defined in its profile."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -713,7 +696,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.parameterGroup"/>
-      <short value="Current supported parameter group"/>
+      <short value="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular."/>
       <definition value="Describes the parameter group supported by the current device component that is based on some nomenclature, e.g., cardiovascular."/>
       <min value="0"/>
       <max value="1"/>
@@ -723,7 +706,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.measurementPrinciple"/>
-      <short value="other | chemical | electrical | impedance | nuclear | optical | thermal | biological | mechanical | acoustical | manual+"/>
+      <short value="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc."/>
       <definition value="Describes the physical principle of the measurement. For example: thermal, chemical, acoustical, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -740,14 +723,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification"/>
-      <short value="Production specification of the component"/>
+      <short value="Describes the production specification such as component revision, serial number, etc."/>
       <definition value="Describes the production specification such as component revision, serial number, etc."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.specType"/>
-      <short value="Specification type"/>
+      <short value="Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc."/>
       <definition value="Describes the specification type, such as, serial number, part number, hardware revision, software revision, etc."/>
       <min value="0"/>
       <max value="1"/>
@@ -757,7 +740,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.componentId"/>
-      <short value="Internal component unique identification"/>
+      <short value="Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of."/>
       <definition value="Describes the internal component unique identification. This is a provision for manufacture specific standard components using a private OID. 11073-10101 has a partition for private OID semantic that the manufacture can make use of."/>
       <min value="0"/>
       <max value="1"/>
@@ -767,7 +750,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.productionSpecification.productionSpec"/>
-      <short value="A printable string defining the component"/>
+      <short value="Describes the printable string defining the component."/>
       <definition value="Describes the printable string defining the component."/>
       <min value="0"/>
       <max value="1"/>
@@ -777,7 +760,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="DeviceComponent.languageCode"/>
-      <short value="Language code for the human-readable text strings produced by the device"/>
+      <short value="Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US."/>
       <definition value="Describes the language code for the human-readable text string produced by the device. This language code will follow the IETF language tag. Example: en-US."/>
       <min value="0"/>
       <max value="1"/>

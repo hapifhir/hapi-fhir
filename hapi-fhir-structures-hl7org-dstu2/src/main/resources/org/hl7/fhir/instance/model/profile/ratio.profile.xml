@@ -88,14 +88,14 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Ratio Resource"/>
   <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -108,11 +108,10 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Ratio"/>
-      <short value="A ratio of two Quantity values - a numerator and a denominator"/>
+      <short value="A relationship of two Quantity values - expressed as a numerator and a denominator."/>
       <definition value="A relationship of two Quantity values - expressed as a numerator and a denominator."/>
       <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
       <min value="1"/>
@@ -138,7 +137,7 @@
     <element>
       <path value="Ratio.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -152,9 +151,8 @@
     </element>
     <element>
       <path value="Ratio.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -169,7 +167,7 @@
     </element>
     <element>
       <path value="Ratio.numerator"/>
-      <short value="Numerator value"/>
+      <short value="The value of the numerator."/>
       <definition value="The value of the numerator."/>
       <min value="0"/>
       <max value="1"/>
@@ -183,7 +181,7 @@
     </element>
     <element>
       <path value="Ratio.denominator"/>
-      <short value="Denominator value"/>
+      <short value="The value of the denominator."/>
       <definition value="The value of the denominator."/>
       <min value="0"/>
       <max value="1"/>
@@ -199,7 +197,7 @@
   <differential>
     <element>
       <path value="Ratio"/>
-      <short value="A ratio of two Quantity values - a numerator and a denominator"/>
+      <short value="A relationship of two Quantity values - expressed as a numerator and a denominator."/>
       <definition value="A relationship of two Quantity values - expressed as a numerator and a denominator."/>
       <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
       <min value="1"/>
@@ -224,7 +222,7 @@
     </element>
     <element>
       <path value="Ratio.numerator"/>
-      <short value="Numerator value"/>
+      <short value="The value of the numerator."/>
       <definition value="The value of the numerator."/>
       <min value="0"/>
       <max value="1"/>
@@ -238,7 +236,7 @@
     </element>
     <element>
       <path value="Ratio.denominator"/>
-      <short value="Denominator value"/>
+      <short value="The value of the denominator."/>
       <definition value="The value of the denominator."/>
       <min value="0"/>
       <max value="1"/>

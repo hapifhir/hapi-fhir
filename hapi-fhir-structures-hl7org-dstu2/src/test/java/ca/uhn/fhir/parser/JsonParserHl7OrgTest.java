@@ -52,14 +52,13 @@ import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetDefineComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.After;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -500,7 +499,7 @@ public class JsonParserHl7OrgTest {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setId("123456");
 
-		ValueSetDefineComponent define = valueSet.getDefine();
+		ValueSetCodeSystemComponent define = valueSet.getCodeSystem();
 		ConceptDefinitionComponent code = define.addConcept();
 		code.setCode("someCode");
 		code.setDisplay("someDisplay");
@@ -512,7 +511,7 @@ public class JsonParserHl7OrgTest {
 
 		assertThat(encoded, (containsString("123456")));
 		assertEquals(
-				"{\"resourceType\":\"ValueSet\",\"id\":\"123456\",\"define\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}",
+				"{\"resourceType\":\"ValueSet\",\"id\":\"123456\",\"codeSystem\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}",
 				encoded);
 
 	}

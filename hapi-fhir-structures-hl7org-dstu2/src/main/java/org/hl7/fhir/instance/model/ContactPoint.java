@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -59,9 +59,13 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         EMAIL, 
         /**
-         * The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses
+         * The value is a pager number. These may be local pager numbers that are only usable on a particular pager system
          */
-        URL, 
+        PAGER, 
+        /**
+         * A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation
+         */
+        OTHER, 
         /**
          * added to help the parsers
          */
@@ -75,8 +79,10 @@ public class ContactPoint extends Type implements ICompositeType {
           return FAX;
         if ("email".equals(codeString))
           return EMAIL;
-        if ("url".equals(codeString))
-          return URL;
+        if ("pager".equals(codeString))
+          return PAGER;
+        if ("other".equals(codeString))
+          return OTHER;
         throw new Exception("Unknown ContactPointSystem code '"+codeString+"'");
         }
         public String toCode() {
@@ -84,7 +90,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case PHONE: return "phone";
             case FAX: return "fax";
             case EMAIL: return "email";
-            case URL: return "url";
+            case PAGER: return "pager";
+            case OTHER: return "other";
             default: return "?";
           }
         }
@@ -93,7 +100,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case PHONE: return "http://hl7.org/fhir/contact-point-system";
             case FAX: return "http://hl7.org/fhir/contact-point-system";
             case EMAIL: return "http://hl7.org/fhir/contact-point-system";
-            case URL: return "http://hl7.org/fhir/contact-point-system";
+            case PAGER: return "http://hl7.org/fhir/contact-point-system";
+            case OTHER: return "http://hl7.org/fhir/contact-point-system";
             default: return "?";
           }
         }
@@ -102,7 +110,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case PHONE: return "The value is a telephone number used for voice calls. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
             case FAX: return "The value is a fax machine. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
             case EMAIL: return "The value is an email address";
-            case URL: return "The value is a url. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses";
+            case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system";
+            case OTHER: return "A contact that is not a phone, fax, or email address. The format of the value SHOULD be a URL. This is intended for various personal contacts including blogs, Twitter, Facebook, etc. Do not use for email addresses. If this is not a URL, then it will require human interpretation";
             default: return "?";
           }
         }
@@ -111,7 +120,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case PHONE: return "Phone";
             case FAX: return "Fax";
             case EMAIL: return "Email";
-            case URL: return "Url";
+            case PAGER: return "Pager";
+            case OTHER: return "URL";
             default: return "?";
           }
         }
@@ -128,8 +138,10 @@ public class ContactPoint extends Type implements ICompositeType {
           return ContactPointSystem.FAX;
         if ("email".equals(codeString))
           return ContactPointSystem.EMAIL;
-        if ("url".equals(codeString))
-          return ContactPointSystem.URL;
+        if ("pager".equals(codeString))
+          return ContactPointSystem.PAGER;
+        if ("other".equals(codeString))
+          return ContactPointSystem.OTHER;
         throw new IllegalArgumentException("Unknown ContactPointSystem code '"+codeString+"'");
         }
     public String toCode(ContactPointSystem code) {
@@ -139,8 +151,10 @@ public class ContactPoint extends Type implements ICompositeType {
         return "fax";
       if (code == ContactPointSystem.EMAIL)
         return "email";
-      if (code == ContactPointSystem.URL)
-        return "url";
+      if (code == ContactPointSystem.PAGER)
+        return "pager";
+      if (code == ContactPointSystem.OTHER)
+        return "other";
       return "?";
       }
     }
@@ -263,7 +277,7 @@ public class ContactPoint extends Type implements ICompositeType {
      * Telecommunications form for contact point - what communications system is required to make use of the contact.
      */
     @Child(name = "system", type = {CodeType.class}, order=0, min=0, max=1)
-    @Description(shortDefinition="phone | fax | email | url", formalDefinition="Telecommunications form for contact point - what communications system is required to make use of the contact." )
+    @Description(shortDefinition="phone | fax | email | pager | other", formalDefinition="Telecommunications form for contact point - what communications system is required to make use of the contact." )
     protected Enumeration<ContactPointSystem> system;
 
     /**

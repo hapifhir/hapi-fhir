@@ -76,8 +76,13 @@ public class FhirResourceDaoQuestionnaireAnswersDstu2 extends FhirResourceDaoDst
 			 */
 			if ("ValueSet".equals(theType.getSimpleName())) {
 				IFhirResourceDao<ValueSet> dao = getDao(ValueSet.class);
-				ValueSet vs = dao.read(theId);
-				return myRefImplCtx.newJsonParser().parseResource(theType, getContext().newJsonParser().encodeResourceToString(vs));
+				ValueSet in = dao.read(theId);
+				String encoded = getContext().newJsonParser().encodeResourceToString(in);
+				
+				// TODO: this is temporary until structures-dstu2 catches up to structures-hl7org.dstu2
+				encoded = encoded.replace("\"define\"", "\"codeSystem\"");
+				
+				return myRefImplCtx.newJsonParser().parseResource(theType, encoded);
 			} else if ("Questionnaire".equals(theType.getSimpleName())) {
 				IFhirResourceDao<Questionnaire> dao = getDao(Questionnaire.class);
 				Questionnaire vs = dao.read(theId);

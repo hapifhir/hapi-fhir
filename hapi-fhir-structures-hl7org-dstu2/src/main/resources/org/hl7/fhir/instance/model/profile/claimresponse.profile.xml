@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ClaimResponse"/>
   <meta>
-    <lastUpdated value="2015-07-14T17:35:58.706-04:00"/>
+    <lastUpdated value="2015-07-21T10:37:59.557-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -1398,19 +1398,19 @@
   <publisher value="Health Level Seven International (Financial Management)"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for ClaimResponse Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="cdanetv4"/>
     <uri value="http://www.cda-adc.ca/en/services/cdanet/"/>
@@ -1422,11 +1422,11 @@
     <name value="RIM"/>
   </mapping>
   <kind value="resource"/>
-  <abstract value="true"/>
+  <abstract value="false"/>
   <snapshot>
     <element>
       <path value="ClaimResponse"/>
-      <short value="Remittance resource"/>
+      <short value="This resource provides the adjudication details from the processing of a Claim resource."/>
       <definition value="This resource provides the adjudication details from the processing of a Claim resource."/>
       <alias value="Remittance Advice"/>
       <min value="1"/>
@@ -1437,9 +1437,8 @@
     </element>
     <element>
       <path value="ClaimResponse.id"/>
-      <short value="Logical id of this artifact"/>
+      <short value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
       <definition value="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes."/>
-      <comments value="The only time that a resource does not have an id is when it is being submitted to the server using a create operation. Bundles always have an id, though it is usually a generated UUID."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1448,7 +1447,7 @@
     </element>
     <element>
       <path value="ClaimResponse.meta"/>
-      <short value="Metadata about the resource"/>
+      <short value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <definition value="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource."/>
       <min value="0"/>
       <max value="1"/>
@@ -1458,9 +1457,8 @@
     </element>
     <element>
       <path value="ClaimResponse.implicitRules"/>
-      <short value="A set of rules under which this content was created"/>
+      <short value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
       <definition value="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content."/>
-      <comments value="Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element as much as possible."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1470,11 +1468,8 @@
     </element>
     <element>
       <path value="ClaimResponse.language"/>
-      <short value="Language of the resource content"/>
+      <short value="The base language in which the resource is written."/>
       <definition value="The base language in which the resource is written."/>
-      <comments value="Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource
-
-Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute)."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -1488,9 +1483,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.text"/>
-      <short value="Text summary of the resource, for human interpretation"/>
+      <short value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
       <definition value="A human-readable narrative that contains a summary of the resource, and may be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it &quot;clinically safe&quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety."/>
-      <comments value="Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative."/>
       <alias value="narrative"/>
       <alias value="html"/>
       <alias value="xhtml"/>
@@ -1508,9 +1502,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.contained"/>
-      <short value="Contained, inline Resources"/>
+      <short value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
       <definition value="These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope."/>
-      <comments value="This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again."/>
       <alias value="inline resources"/>
       <alias value="anonymous resources"/>
       <alias value="contained resources"/>
@@ -1526,9 +1519,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1543,9 +1535,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the resource, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1561,7 +1552,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.identifier"/>
-      <short value="Response  number"/>
+      <short value="The Response Business Identifier."/>
       <definition value="The Response Business Identifier."/>
       <min value="0"/>
       <max value="*"/>
@@ -1571,7 +1562,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.request"/>
-      <short value="Id of resource triggering adjudication"/>
+      <short value="Original request resource referrence."/>
       <definition value="Original request resource referrence."/>
       <min value="0"/>
       <max value="1"/>
@@ -1586,7 +1577,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.ruleset"/>
-      <short value="Resource version"/>
+      <short value="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources."/>
       <definition value="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources."/>
       <min value="0"/>
       <max value="1"/>
@@ -1603,7 +1594,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.originalRuleset"/>
-      <short value="Original version"/>
+      <short value="The style (standard) and version of the original material which was converted into this resource."/>
       <definition value="The style (standard) and version of the original material which was converted into this resource."/>
       <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
       <min value="0"/>
@@ -1621,7 +1612,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.created"/>
-      <short value="Creation date"/>
+      <short value="The date when the enclosed suite of services were performed or completed."/>
       <definition value="The date when the enclosed suite of services were performed or completed."/>
       <min value="0"/>
       <max value="1"/>
@@ -1631,7 +1622,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.organization"/>
-      <short value="Insurer"/>
+      <short value="The Insurer who produced this adjudicated response."/>
       <definition value="The Insurer who produced this adjudicated response."/>
       <min value="0"/>
       <max value="1"/>
@@ -1642,7 +1633,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.requestProvider"/>
-      <short value="Responsible practitioner"/>
+      <short value="The practitioner who is responsible for the services rendered to the patient."/>
       <definition value="The practitioner who is responsible for the services rendered to the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -1657,7 +1648,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.requestOrganization"/>
-      <short value="Responsible organization"/>
+      <short value="The organization which is responsible for the services rendered to the patient."/>
       <definition value="The organization which is responsible for the services rendered to the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -1668,7 +1659,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.outcome"/>
-      <short value="complete | error"/>
+      <short value="Transaction status: error, complete."/>
       <definition value="Transaction status: error, complete."/>
       <min value="0"/>
       <max value="1"/>
@@ -1685,7 +1676,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.disposition"/>
-      <short value="Disposition Message"/>
+      <short value="A description of the status of the adjudication."/>
       <definition value="A description of the status of the adjudication."/>
       <min value="0"/>
       <max value="1"/>
@@ -1695,7 +1686,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.payeeType"/>
-      <short value="Party to be paid any benefits payable"/>
+      <short value="Party to be reimbursed: Subscriber, provider, other."/>
       <definition value="Party to be reimbursed: Subscriber, provider, other."/>
       <min value="0"/>
       <max value="1"/>
@@ -1712,7 +1703,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item"/>
-      <short value="Line items"/>
+      <short value="The first tier service adjudications for submitted services."/>
       <definition value="The first tier service adjudications for submitted services."/>
       <min value="0"/>
       <max value="*"/>
@@ -1723,7 +1714,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.item.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1737,9 +1728,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1754,9 +1744,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1773,7 +1762,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.sequenceLinkId"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -1787,7 +1776,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.noteNumber"/>
-      <short value="List of note numbers which apply"/>
+      <short value="A list of note references to the notes provided below."/>
       <definition value="A list of note references to the notes provided below."/>
       <min value="0"/>
       <max value="*"/>
@@ -1797,7 +1786,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication"/>
-      <short value="Adjudication details"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
@@ -1808,7 +1797,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.item.adjudication.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1822,9 +1811,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1839,9 +1827,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1858,7 +1845,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -1875,7 +1862,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -1885,7 +1872,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -1895,7 +1882,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail"/>
-      <short value="Detail line items"/>
+      <short value="The second tier service adjudications for submitted services."/>
       <definition value="The second tier service adjudications for submitted services."/>
       <min value="0"/>
       <max value="*"/>
@@ -1906,7 +1893,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.item.detail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1920,9 +1907,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -1937,9 +1923,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -1956,7 +1941,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.sequenceLinkId"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -1970,7 +1955,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication"/>
-      <short value="Detail adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
@@ -1981,7 +1966,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.item.detail.adjudication.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -1995,9 +1980,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2012,9 +1996,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2031,7 +2014,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -2048,7 +2031,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -2058,7 +2041,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -2068,7 +2051,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail"/>
-      <short value="Subdetail line items"/>
+      <short value="The third tier service adjudications for submitted services."/>
       <definition value="The third tier service adjudications for submitted services."/>
       <min value="0"/>
       <max value="*"/>
@@ -2079,7 +2062,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.item.detail.subDetail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2093,9 +2076,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2110,9 +2092,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2129,7 +2110,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.sequenceLinkId"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -2143,7 +2124,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication"/>
-      <short value="Subdetail adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
@@ -2154,7 +2135,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2168,9 +2149,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2185,9 +2165,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2204,7 +2183,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -2221,7 +2200,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -2231,7 +2210,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -2241,7 +2220,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem"/>
-      <short value="Insurer added line items"/>
+      <short value="The first tier service adjudications for payor added services."/>
       <definition value="The first tier service adjudications for payor added services."/>
       <min value="0"/>
       <max value="*"/>
@@ -2252,7 +2231,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.addItem.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2266,9 +2245,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2283,9 +2261,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2302,7 +2279,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.sequenceLinkId"/>
-      <short value="Service instances"/>
+      <short value="List of input service items which this service line is intended to replace."/>
       <definition value="List of input service items which this service line is intended to replace."/>
       <min value="0"/>
       <max value="*"/>
@@ -2312,7 +2289,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.service"/>
-      <short value="Group, Service or Product"/>
+      <short value="A code to indicate the Professional Service or Product supplied."/>
       <definition value="A code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -2329,7 +2306,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.fee"/>
-      <short value="Professional fee or Product charge"/>
+      <short value="The fee charged for the professional service or product.."/>
       <definition value="The fee charged for the professional service or product.."/>
       <min value="0"/>
       <max value="1"/>
@@ -2339,7 +2316,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.noteNumberLinkId"/>
-      <short value="List of note numbers which apply"/>
+      <short value="A list of note references to the notes provided below."/>
       <definition value="A list of note references to the notes provided below."/>
       <min value="0"/>
       <max value="*"/>
@@ -2349,7 +2326,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication"/>
-      <short value="Added items adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
@@ -2360,7 +2337,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.addItem.adjudication.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2374,9 +2351,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2391,9 +2367,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2410,7 +2385,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -2427,7 +2402,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -2437,7 +2412,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -2447,7 +2422,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail"/>
-      <short value="Added items details"/>
+      <short value="The second tier service adjudications for payor added services."/>
       <definition value="The second tier service adjudications for payor added services."/>
       <min value="0"/>
       <max value="*"/>
@@ -2458,7 +2433,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.addItem.detail.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2472,9 +2447,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2489,9 +2463,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2508,7 +2481,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.service"/>
-      <short value="Service or Product"/>
+      <short value="A code to indicate the Professional Service or Product supplied."/>
       <definition value="A code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -2525,7 +2498,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.fee"/>
-      <short value="Professional fee or Product charge"/>
+      <short value="The fee charged for the professional service or product.."/>
       <definition value="The fee charged for the professional service or product.."/>
       <min value="0"/>
       <max value="1"/>
@@ -2535,7 +2508,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication"/>
-      <short value="Added items detail adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
@@ -2546,7 +2519,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2560,9 +2533,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2577,9 +2549,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2596,7 +2567,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -2613,7 +2584,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -2623,7 +2594,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -2633,7 +2604,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error"/>
-      <short value="Processing errors"/>
+      <short value="Mutually exclusive with Services Provided (Item)."/>
       <definition value="Mutually exclusive with Services Provided (Item)."/>
       <min value="0"/>
       <max value="*"/>
@@ -2644,7 +2615,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.error.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2658,9 +2629,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2675,9 +2645,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2694,7 +2663,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.sequenceLinkId"/>
-      <short value="Item sequence number"/>
+      <short value="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere."/>
       <definition value="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere."/>
       <min value="0"/>
       <max value="1"/>
@@ -2704,7 +2673,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.detailSequenceLinkId"/>
-      <short value="Detail sequence number"/>
+      <short value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <min value="0"/>
       <max value="1"/>
@@ -2714,7 +2683,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.subdetailSequenceLinkId"/>
-      <short value="Subdetail sequence number"/>
+      <short value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <min value="0"/>
       <max value="1"/>
@@ -2724,7 +2693,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.code"/>
-      <short value="Error code detailing processing issues"/>
+      <short value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
       <definition value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
       <min value="1"/>
       <max value="1"/>
@@ -2741,7 +2710,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.totalCost"/>
-      <short value="Total Cost of service from the Claim"/>
+      <short value="The total cost of the services reported."/>
       <definition value="The total cost of the services reported."/>
       <requirements value="This is a check value that the receiver calculates and returns."/>
       <min value="0"/>
@@ -2752,7 +2721,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.unallocDeductable"/>
-      <short value="Unallocated deductable"/>
+      <short value="The amount of deductable applied which was not allocated to any particular service line."/>
       <definition value="The amount of deductable applied which was not allocated to any particular service line."/>
       <min value="0"/>
       <max value="1"/>
@@ -2762,7 +2731,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.totalBenefit"/>
-      <short value="Total benefit payable for the Claim"/>
+      <short value="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)."/>
       <definition value="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2772,7 +2741,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentAdjustment"/>
-      <short value="Payment adjustment for non-Claim issues"/>
+      <short value="Adjustment to the payment of this transaction which is not related to adjudication of this transaction."/>
       <definition value="Adjustment to the payment of this transaction which is not related to adjudication of this transaction."/>
       <min value="0"/>
       <max value="1"/>
@@ -2782,7 +2751,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentAdjustmentReason"/>
-      <short value="Reason for Payment adjustment"/>
+      <short value="Reason for the payment adjustment."/>
       <definition value="Reason for the payment adjustment."/>
       <min value="0"/>
       <max value="1"/>
@@ -2799,7 +2768,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentDate"/>
-      <short value="Expected data of Payment"/>
+      <short value="Estimated payment data."/>
       <definition value="Estimated payment data."/>
       <min value="0"/>
       <max value="1"/>
@@ -2809,7 +2778,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentAmount"/>
-      <short value="Payment amount"/>
+      <short value="Payable less any payment adjustment."/>
       <definition value="Payable less any payment adjustment."/>
       <min value="0"/>
       <max value="1"/>
@@ -2819,7 +2788,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentRef"/>
-      <short value="Payment identifier"/>
+      <short value="Payment identifer."/>
       <definition value="Payment identifer."/>
       <min value="0"/>
       <max value="1"/>
@@ -2829,7 +2798,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.reserved"/>
-      <short value="Funds reserved status"/>
+      <short value="Status of funds reservation (For provider, for Patient, None)."/>
       <definition value="Status of funds reservation (For provider, for Patient, None)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2846,7 +2815,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.form"/>
-      <short value="Printed Form Identifier"/>
+      <short value="The form to be used for printing the content."/>
       <definition value="The form to be used for printing the content."/>
       <min value="0"/>
       <max value="1"/>
@@ -2867,7 +2836,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note"/>
-      <short value="Processing notes"/>
+      <short value="Note text."/>
       <definition value="Note text."/>
       <min value="0"/>
       <max value="*"/>
@@ -2878,7 +2847,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.note.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2892,9 +2861,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -2909,9 +2877,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -2928,7 +2895,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.number"/>
-      <short value="Note Number for this note"/>
+      <short value="An integer associated with each note which may be referred to from each service line item."/>
       <definition value="An integer associated with each note which may be referred to from each service line item."/>
       <min value="0"/>
       <max value="1"/>
@@ -2938,7 +2905,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.type"/>
-      <short value="display | print | printoper"/>
+      <short value="The note purpose: Print/Display."/>
       <definition value="The note purpose: Print/Display."/>
       <min value="0"/>
       <max value="1"/>
@@ -2955,7 +2922,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.text"/>
-      <short value="Note explanitory text"/>
+      <short value="The note text."/>
       <definition value="The note text."/>
       <min value="0"/>
       <max value="1"/>
@@ -2969,7 +2936,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage"/>
-      <short value="Insurance or medical plan"/>
+      <short value="Financial instrument by which payment information for health care."/>
       <definition value="Financial instrument by which payment information for health care."/>
       <requirements value="Health care programs and insurers are significant payors of health service costs."/>
       <min value="0"/>
@@ -2985,7 +2952,7 @@ Not all the content has to be in the base language. The Resource.language should
     <element>
       <path value="ClaimResponse.coverage.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -2999,9 +2966,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -3016,9 +2982,8 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.modifierExtension"/>
-      <short value="Extensions that cannot be ignored"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element, and that modifies the understanding of the element that contains it. Usually modifier elements provide negation or qualification. In order to make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <alias value="modifiers"/>
@@ -3035,7 +3000,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.sequence"/>
-      <short value="Service instance identifier"/>
+      <short value="A service line item."/>
       <definition value="A service line item."/>
       <requirements value="To maintain order of the coverages."/>
       <min value="1"/>
@@ -3046,7 +3011,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.focal"/>
-      <short value="Is the focal Coverage"/>
+      <short value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <definition value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <requirements value="To identify which coverage is being adjudicated."/>
       <min value="1"/>
@@ -3057,7 +3022,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.coverage"/>
-      <short value="Insurance information"/>
+      <short value="Reference to the program or plan identification, underwriter or payor."/>
       <definition value="Reference to the program or plan identification, underwriter or payor."/>
       <requirements value="Need to identify the issuer to target for processing and for coordination of benefit processing."/>
       <min value="1"/>
@@ -3069,7 +3034,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.businessArrangement"/>
-      <short value="Business agreement"/>
+      <short value="The contract number of a business agreement which describes the terms and conditions."/>
       <definition value="The contract number of a business agreement which describes the terms and conditions."/>
       <min value="0"/>
       <max value="1"/>
@@ -3079,7 +3044,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.relationship"/>
-      <short value="Patient relationship to subscriber"/>
+      <short value="The relationship of the patient to the subscriber."/>
       <definition value="The relationship of the patient to the subscriber."/>
       <requirements value="To determine relationship between the patient and the subscriber."/>
       <min value="1"/>
@@ -3101,7 +3066,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.preAuthRef"/>
-      <short value="Pre-Authorization/Determination Reference"/>
+      <short value="A list of references from the Insurer to which these services pertain."/>
       <definition value="A list of references from the Insurer to which these services pertain."/>
       <requirements value="To provide any pre=determination or prior authorization reference."/>
       <min value="0"/>
@@ -3116,7 +3081,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.claimResponse"/>
-      <short value="Adjudication results"/>
+      <short value="The Coverages adjudication details."/>
       <definition value="The Coverages adjudication details."/>
       <requirements value="Used by downstream payers to determine what balance remains and the net payable."/>
       <min value="0"/>
@@ -3132,7 +3097,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.originalRuleset"/>
-      <short value="Original version"/>
+      <short value="The style (standard) and version of the original material which was converted into this resource."/>
       <definition value="The style (standard) and version of the original material which was converted into this resource."/>
       <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
       <min value="0"/>
@@ -3152,7 +3117,7 @@ Not all the content has to be in the base language. The Resource.language should
   <differential>
     <element>
       <path value="ClaimResponse"/>
-      <short value="Remittance resource"/>
+      <short value="This resource provides the adjudication details from the processing of a Claim resource."/>
       <definition value="This resource provides the adjudication details from the processing of a Claim resource."/>
       <alias value="Remittance Advice"/>
       <min value="1"/>
@@ -3163,7 +3128,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.identifier"/>
-      <short value="Response  number"/>
+      <short value="The Response Business Identifier."/>
       <definition value="The Response Business Identifier."/>
       <min value="0"/>
       <max value="*"/>
@@ -3173,7 +3138,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.request"/>
-      <short value="Id of resource triggering adjudication"/>
+      <short value="Original request resource referrence."/>
       <definition value="Original request resource referrence."/>
       <min value="0"/>
       <max value="1"/>
@@ -3188,7 +3153,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.ruleset"/>
-      <short value="Resource version"/>
+      <short value="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources."/>
       <definition value="The version of the style of resource contents. This should be mapped to the allowable profiles for this and supporting resources."/>
       <min value="0"/>
       <max value="1"/>
@@ -3205,7 +3170,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.originalRuleset"/>
-      <short value="Original version"/>
+      <short value="The style (standard) and version of the original material which was converted into this resource."/>
       <definition value="The style (standard) and version of the original material which was converted into this resource."/>
       <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
       <min value="0"/>
@@ -3223,7 +3188,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.created"/>
-      <short value="Creation date"/>
+      <short value="The date when the enclosed suite of services were performed or completed."/>
       <definition value="The date when the enclosed suite of services were performed or completed."/>
       <min value="0"/>
       <max value="1"/>
@@ -3233,7 +3198,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.organization"/>
-      <short value="Insurer"/>
+      <short value="The Insurer who produced this adjudicated response."/>
       <definition value="The Insurer who produced this adjudicated response."/>
       <min value="0"/>
       <max value="1"/>
@@ -3244,7 +3209,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.requestProvider"/>
-      <short value="Responsible practitioner"/>
+      <short value="The practitioner who is responsible for the services rendered to the patient."/>
       <definition value="The practitioner who is responsible for the services rendered to the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -3259,7 +3224,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.requestOrganization"/>
-      <short value="Responsible organization"/>
+      <short value="The organization which is responsible for the services rendered to the patient."/>
       <definition value="The organization which is responsible for the services rendered to the patient."/>
       <min value="0"/>
       <max value="1"/>
@@ -3270,7 +3235,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.outcome"/>
-      <short value="complete | error"/>
+      <short value="Transaction status: error, complete."/>
       <definition value="Transaction status: error, complete."/>
       <min value="0"/>
       <max value="1"/>
@@ -3287,7 +3252,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.disposition"/>
-      <short value="Disposition Message"/>
+      <short value="A description of the status of the adjudication."/>
       <definition value="A description of the status of the adjudication."/>
       <min value="0"/>
       <max value="1"/>
@@ -3297,7 +3262,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.payeeType"/>
-      <short value="Party to be paid any benefits payable"/>
+      <short value="Party to be reimbursed: Subscriber, provider, other."/>
       <definition value="Party to be reimbursed: Subscriber, provider, other."/>
       <min value="0"/>
       <max value="1"/>
@@ -3314,14 +3279,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item"/>
-      <short value="Line items"/>
+      <short value="The first tier service adjudications for submitted services."/>
       <definition value="The first tier service adjudications for submitted services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.item.sequenceLinkId"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -3335,7 +3300,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.noteNumber"/>
-      <short value="List of note numbers which apply"/>
+      <short value="A list of note references to the notes provided below."/>
       <definition value="A list of note references to the notes provided below."/>
       <min value="0"/>
       <max value="*"/>
@@ -3345,14 +3310,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication"/>
-      <short value="Adjudication details"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -3369,7 +3334,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -3379,7 +3344,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -3389,14 +3354,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail"/>
-      <short value="Detail line items"/>
+      <short value="The second tier service adjudications for submitted services."/>
       <definition value="The second tier service adjudications for submitted services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.item.detail.sequenceLinkId"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -3410,14 +3375,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication"/>
-      <short value="Detail adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -3434,7 +3399,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -3444,7 +3409,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -3454,14 +3419,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail"/>
-      <short value="Subdetail line items"/>
+      <short value="The third tier service adjudications for submitted services."/>
       <definition value="The third tier service adjudications for submitted services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.sequenceLinkId"/>
-      <short value="Service instance"/>
+      <short value="A service line number."/>
       <definition value="A service line number."/>
       <min value="1"/>
       <max value="1"/>
@@ -3475,14 +3440,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication"/>
-      <short value="Subdetail adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -3499,7 +3464,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -3509,7 +3474,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.item.detail.subDetail.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -3519,14 +3484,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem"/>
-      <short value="Insurer added line items"/>
+      <short value="The first tier service adjudications for payor added services."/>
       <definition value="The first tier service adjudications for payor added services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.addItem.sequenceLinkId"/>
-      <short value="Service instances"/>
+      <short value="List of input service items which this service line is intended to replace."/>
       <definition value="List of input service items which this service line is intended to replace."/>
       <min value="0"/>
       <max value="*"/>
@@ -3536,7 +3501,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.service"/>
-      <short value="Group, Service or Product"/>
+      <short value="A code to indicate the Professional Service or Product supplied."/>
       <definition value="A code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -3553,7 +3518,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.fee"/>
-      <short value="Professional fee or Product charge"/>
+      <short value="The fee charged for the professional service or product.."/>
       <definition value="The fee charged for the professional service or product.."/>
       <min value="0"/>
       <max value="1"/>
@@ -3563,7 +3528,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.noteNumberLinkId"/>
-      <short value="List of note numbers which apply"/>
+      <short value="A list of note references to the notes provided below."/>
       <definition value="A list of note references to the notes provided below."/>
       <min value="0"/>
       <max value="*"/>
@@ -3573,14 +3538,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication"/>
-      <short value="Added items adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -3597,7 +3562,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -3607,7 +3572,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -3617,14 +3582,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail"/>
-      <short value="Added items details"/>
+      <short value="The second tier service adjudications for payor added services."/>
       <definition value="The second tier service adjudications for payor added services."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.service"/>
-      <short value="Service or Product"/>
+      <short value="A code to indicate the Professional Service or Product supplied."/>
       <definition value="A code to indicate the Professional Service or Product supplied."/>
       <min value="1"/>
       <max value="1"/>
@@ -3641,7 +3606,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.fee"/>
-      <short value="Professional fee or Product charge"/>
+      <short value="The fee charged for the professional service or product.."/>
       <definition value="The fee charged for the professional service or product.."/>
       <min value="0"/>
       <max value="1"/>
@@ -3651,14 +3616,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication"/>
-      <short value="Added items detail adjudication"/>
+      <short value="The adjudications results."/>
       <definition value="The adjudications results."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.code"/>
-      <short value="Adjudication category such as co-pay, eligible, benefit, etc."/>
+      <short value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <definition value="Code indicating: Co-Pay, deductable, elegible, benefit, tax, etc."/>
       <min value="1"/>
       <max value="1"/>
@@ -3675,7 +3640,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.amount"/>
-      <short value="Monetary amount"/>
+      <short value="Monitory amount associated with the code."/>
       <definition value="Monitory amount associated with the code."/>
       <min value="0"/>
       <max value="1"/>
@@ -3685,7 +3650,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.addItem.detail.adjudication.value"/>
-      <short value="Non-monitory value"/>
+      <short value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <definition value="A non-monetary value for example a percentage. Mutually exclusive to the amount element above."/>
       <min value="0"/>
       <max value="1"/>
@@ -3695,14 +3660,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error"/>
-      <short value="Processing errors"/>
+      <short value="Mutually exclusive with Services Provided (Item)."/>
       <definition value="Mutually exclusive with Services Provided (Item)."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.error.sequenceLinkId"/>
-      <short value="Item sequence number"/>
+      <short value="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere."/>
       <definition value="The sequence number of the line item submitted which contains the error. This value is ommitted when the error is elsewhere."/>
       <min value="0"/>
       <max value="1"/>
@@ -3712,7 +3677,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.detailSequenceLinkId"/>
-      <short value="Detail sequence number"/>
+      <short value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <min value="0"/>
       <max value="1"/>
@@ -3722,7 +3687,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.subdetailSequenceLinkId"/>
-      <short value="Subdetail sequence number"/>
+      <short value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <definition value="The sequence number of the addition within the line item submitted which contains the error. This value is ommitted when the error is not related to an Addition."/>
       <min value="0"/>
       <max value="1"/>
@@ -3732,7 +3697,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.error.code"/>
-      <short value="Error code detailing processing issues"/>
+      <short value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
       <definition value="An error code,froma specified code system, which details why the claim could not be adjudicated."/>
       <min value="1"/>
       <max value="1"/>
@@ -3749,7 +3714,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.totalCost"/>
-      <short value="Total Cost of service from the Claim"/>
+      <short value="The total cost of the services reported."/>
       <definition value="The total cost of the services reported."/>
       <requirements value="This is a check value that the receiver calculates and returns."/>
       <min value="0"/>
@@ -3760,7 +3725,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.unallocDeductable"/>
-      <short value="Unallocated deductable"/>
+      <short value="The amount of deductable applied which was not allocated to any particular service line."/>
       <definition value="The amount of deductable applied which was not allocated to any particular service line."/>
       <min value="0"/>
       <max value="1"/>
@@ -3770,7 +3735,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.totalBenefit"/>
-      <short value="Total benefit payable for the Claim"/>
+      <short value="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)."/>
       <definition value="Total amount of benefit payable (Equal to sum of the Benefit amounts from all detail lines and additions less the Unallocated Deductable)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3780,7 +3745,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentAdjustment"/>
-      <short value="Payment adjustment for non-Claim issues"/>
+      <short value="Adjustment to the payment of this transaction which is not related to adjudication of this transaction."/>
       <definition value="Adjustment to the payment of this transaction which is not related to adjudication of this transaction."/>
       <min value="0"/>
       <max value="1"/>
@@ -3790,7 +3755,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentAdjustmentReason"/>
-      <short value="Reason for Payment adjustment"/>
+      <short value="Reason for the payment adjustment."/>
       <definition value="Reason for the payment adjustment."/>
       <min value="0"/>
       <max value="1"/>
@@ -3807,7 +3772,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentDate"/>
-      <short value="Expected data of Payment"/>
+      <short value="Estimated payment data."/>
       <definition value="Estimated payment data."/>
       <min value="0"/>
       <max value="1"/>
@@ -3817,7 +3782,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentAmount"/>
-      <short value="Payment amount"/>
+      <short value="Payable less any payment adjustment."/>
       <definition value="Payable less any payment adjustment."/>
       <min value="0"/>
       <max value="1"/>
@@ -3827,7 +3792,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.paymentRef"/>
-      <short value="Payment identifier"/>
+      <short value="Payment identifer."/>
       <definition value="Payment identifer."/>
       <min value="0"/>
       <max value="1"/>
@@ -3837,7 +3802,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.reserved"/>
-      <short value="Funds reserved status"/>
+      <short value="Status of funds reservation (For provider, for Patient, None)."/>
       <definition value="Status of funds reservation (For provider, for Patient, None)."/>
       <min value="0"/>
       <max value="1"/>
@@ -3854,7 +3819,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.form"/>
-      <short value="Printed Form Identifier"/>
+      <short value="The form to be used for printing the content."/>
       <definition value="The form to be used for printing the content."/>
       <min value="0"/>
       <max value="1"/>
@@ -3875,14 +3840,14 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note"/>
-      <short value="Processing notes"/>
+      <short value="Note text."/>
       <definition value="Note text."/>
       <min value="0"/>
       <max value="*"/>
     </element>
     <element>
       <path value="ClaimResponse.note.number"/>
-      <short value="Note Number for this note"/>
+      <short value="An integer associated with each note which may be referred to from each service line item."/>
       <definition value="An integer associated with each note which may be referred to from each service line item."/>
       <min value="0"/>
       <max value="1"/>
@@ -3892,7 +3857,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.type"/>
-      <short value="display | print | printoper"/>
+      <short value="The note purpose: Print/Display."/>
       <definition value="The note purpose: Print/Display."/>
       <min value="0"/>
       <max value="1"/>
@@ -3909,7 +3874,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.note.text"/>
-      <short value="Note explanitory text"/>
+      <short value="The note text."/>
       <definition value="The note text."/>
       <min value="0"/>
       <max value="1"/>
@@ -3923,7 +3888,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage"/>
-      <short value="Insurance or medical plan"/>
+      <short value="Financial instrument by which payment information for health care."/>
       <definition value="Financial instrument by which payment information for health care."/>
       <requirements value="Health care programs and insurers are significant payors of health service costs."/>
       <min value="0"/>
@@ -3935,7 +3900,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.sequence"/>
-      <short value="Service instance identifier"/>
+      <short value="A service line item."/>
       <definition value="A service line item."/>
       <requirements value="To maintain order of the coverages."/>
       <min value="1"/>
@@ -3946,7 +3911,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.focal"/>
-      <short value="Is the focal Coverage"/>
+      <short value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <definition value="The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated."/>
       <requirements value="To identify which coverage is being adjudicated."/>
       <min value="1"/>
@@ -3957,7 +3922,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.coverage"/>
-      <short value="Insurance information"/>
+      <short value="Reference to the program or plan identification, underwriter or payor."/>
       <definition value="Reference to the program or plan identification, underwriter or payor."/>
       <requirements value="Need to identify the issuer to target for processing and for coordination of benefit processing."/>
       <min value="1"/>
@@ -3969,7 +3934,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.businessArrangement"/>
-      <short value="Business agreement"/>
+      <short value="The contract number of a business agreement which describes the terms and conditions."/>
       <definition value="The contract number of a business agreement which describes the terms and conditions."/>
       <min value="0"/>
       <max value="1"/>
@@ -3979,7 +3944,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.relationship"/>
-      <short value="Patient relationship to subscriber"/>
+      <short value="The relationship of the patient to the subscriber."/>
       <definition value="The relationship of the patient to the subscriber."/>
       <requirements value="To determine relationship between the patient and the subscriber."/>
       <min value="1"/>
@@ -4001,7 +3966,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.preAuthRef"/>
-      <short value="Pre-Authorization/Determination Reference"/>
+      <short value="A list of references from the Insurer to which these services pertain."/>
       <definition value="A list of references from the Insurer to which these services pertain."/>
       <requirements value="To provide any pre=determination or prior authorization reference."/>
       <min value="0"/>
@@ -4016,7 +3981,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.claimResponse"/>
-      <short value="Adjudication results"/>
+      <short value="The Coverages adjudication details."/>
       <definition value="The Coverages adjudication details."/>
       <requirements value="Used by downstream payers to determine what balance remains and the net payable."/>
       <min value="0"/>
@@ -4032,7 +3997,7 @@ Not all the content has to be in the base language. The Resource.language should
     </element>
     <element>
       <path value="ClaimResponse.coverage.originalRuleset"/>
-      <short value="Original version"/>
+      <short value="The style (standard) and version of the original material which was converted into this resource."/>
       <definition value="The style (standard) and version of the original material which was converted into this resource."/>
       <requirements value="Knowledge of the original version can inform the processing of this instance so that information which is processable by the originating system may be generated."/>
       <min value="0"/>

@@ -90,13 +90,13 @@
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
-      <system value="url"/>
+      <system value="other"/>
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
   <description value="Base StructureDefinition for Reference Resource"/>
   <status value="draft"/>
-  <date value="2015-07-14T17:35:58-04:00"/>
+  <date value="2015-07-21T10:37:59-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -104,11 +104,10 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="Reference"/>
-      <short value="A reference from one resource to another"/>
+      <short value="A reference from one resource to another."/>
       <definition value="A reference from one resource to another."/>
       <min value="1"/>
       <max value="1"/>
@@ -129,7 +128,7 @@
     <element>
       <path value="Reference.id"/>
       <representation value="xmlAttr"/>
-      <short value="xml:id (or equivalent in JSON)"/>
+      <short value="unique id for the element within a resource (for internal references)."/>
       <definition value="unique id for the element within a resource (for internal references)."/>
       <min value="0"/>
       <max value="1"/>
@@ -143,9 +142,8 @@
     </element>
     <element>
       <path value="Reference.extension"/>
-      <short value="Additional Content defined by implementations"/>
+      <short value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
       <definition value="May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension."/>
-      <comments value="There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone."/>
       <alias value="extensions"/>
       <alias value="user content"/>
       <min value="0"/>
@@ -160,11 +158,8 @@
     </element>
     <element>
       <path value="Reference.reference"/>
-      <short value="Relative, internal or absolute URL reference"/>
+      <short value="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with &#39;#&#39;) refer to contained resources."/>
       <definition value="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with &#39;#&#39;) refer to contained resources."/>
-      <comments value="Using absolute URLs provides a stable scalable approach suitable for a cloud/web context, while using relative/logical references provides a flexible approach suitable for use when trading across closed eco-system boundaries. 
-
-Absolute URLs do not need to point to a FHIR RESTful server, though this is the preferred approach. If the url conforms to the structure &quot;/[type]/[id]&quot; then it should be assumed that the reference is to a FHIR RESTful server."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -178,9 +173,8 @@ Absolute URLs do not need to point to a FHIR RESTful server, though this is the 
     </element>
     <element>
       <path value="Reference.display"/>
-      <short value="Text alternative for the resource"/>
+      <short value="Plain text narrative that identifies the resource in addition to the resource reference."/>
       <definition value="Plain text narrative that identifies the resource in addition to the resource reference."/>
-      <comments value="This is generally not the same as the Resource.text of the referenced resource.  The purpose is to identify what&#39;s being referenced, not to fully describe it."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -195,7 +189,7 @@ Absolute URLs do not need to point to a FHIR RESTful server, though this is the 
   <differential>
     <element>
       <path value="Reference"/>
-      <short value="A reference from one resource to another"/>
+      <short value="A reference from one resource to another."/>
       <definition value="A reference from one resource to another."/>
       <min value="1"/>
       <max value="1"/>
@@ -215,11 +209,8 @@ Absolute URLs do not need to point to a FHIR RESTful server, though this is the 
     </element>
     <element>
       <path value="Reference.reference"/>
-      <short value="Relative, internal or absolute URL reference"/>
+      <short value="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with &#39;#&#39;) refer to contained resources."/>
       <definition value="A reference to a location at which the other resource is found. The reference may be a relative reference, in which case it is relative to the service base URL, or an absolute URL that resolves to the location where the resource is found. The reference may be version specific or not. If the reference is not to a FHIR RESTful server, then it should be assumed to be version specific. Internal fragment references (start with &#39;#&#39;) refer to contained resources."/>
-      <comments value="Using absolute URLs provides a stable scalable approach suitable for a cloud/web context, while using relative/logical references provides a flexible approach suitable for use when trading across closed eco-system boundaries. 
-
-Absolute URLs do not need to point to a FHIR RESTful server, though this is the preferred approach. If the url conforms to the structure &quot;/[type]/[id]&quot; then it should be assumed that the reference is to a FHIR RESTful server."/>
       <min value="0"/>
       <max value="1"/>
       <type>
@@ -233,9 +224,8 @@ Absolute URLs do not need to point to a FHIR RESTful server, though this is the 
     </element>
     <element>
       <path value="Reference.display"/>
-      <short value="Text alternative for the resource"/>
+      <short value="Plain text narrative that identifies the resource in addition to the resource reference."/>
       <definition value="Plain text narrative that identifies the resource in addition to the resource reference."/>
-      <comments value="This is generally not the same as the Resource.text of the referenced resource.  The purpose is to identify what&#39;s being referenced, not to fully describe it."/>
       <min value="0"/>
       <max value="1"/>
       <type>

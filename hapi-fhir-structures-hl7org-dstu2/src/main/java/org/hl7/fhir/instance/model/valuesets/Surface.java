@@ -29,53 +29,53 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 14, 2015 17:35-0400 for FHIR v0.5.0
+// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
 
 
 public enum Surface {
 
         /**
-         * null
+         * The surface of a tooth that is closest to the midline (middle) of the face
          */
         M, 
         /**
-         * null
+         * The chewing surface of posterior teeth
          */
         O, 
         /**
-         * null
+         * The biting edge of anterior teeth
          */
         I, 
         /**
-         * null
+         * The surface of a tooth that faces away from the midline of the face
          */
         D, 
         /**
-         * null
+         * The surface of a posterior tooth facing the cheeks
          */
         B, 
         /**
-         * null
+         * The surface of a tooth facing the lips
          */
         V, 
         /**
-         * null
+         * The surface of a tooth facing the tongue
          */
         L, 
         /**
-         * null
+         * The Mesioclusal surfaces of a tooth
          */
         MO, 
         /**
-         * null
+         * The Distoclusal surfaces of a tooth
          */
         DO, 
         /**
-         * null
+         * The Distoincisal surfaces of a tooth
          */
         DI, 
         /**
-         * null
+         * The Mesioclusodistal surfaces of a tooth
          */
         MOD, 
         /**
@@ -130,33 +130,33 @@ public enum Surface {
         }
         public String getDefinition() {
           switch (this) {
-            case M: return "";
-            case O: return "";
-            case I: return "";
-            case D: return "";
-            case B: return "";
-            case V: return "";
-            case L: return "";
-            case MO: return "";
-            case DO: return "";
-            case DI: return "";
-            case MOD: return "";
+            case M: return "The surface of a tooth that is closest to the midline (middle) of the face";
+            case O: return "The chewing surface of posterior teeth";
+            case I: return "The biting edge of anterior teeth";
+            case D: return "The surface of a tooth that faces away from the midline of the face";
+            case B: return "The surface of a posterior tooth facing the cheeks";
+            case V: return "The surface of a tooth facing the lips";
+            case L: return "The surface of a tooth facing the tongue";
+            case MO: return "The Mesioclusal surfaces of a tooth";
+            case DO: return "The Distoclusal surfaces of a tooth";
+            case DI: return "The Distoincisal surfaces of a tooth";
+            case MOD: return "The Mesioclusodistal surfaces of a tooth";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case M: return "M";
-            case O: return "O";
-            case I: return "I";
-            case D: return "D";
-            case B: return "B";
-            case V: return "V";
-            case L: return "L";
-            case MO: return "MO";
-            case DO: return "DO";
-            case DI: return "DI";
-            case MOD: return "MOD";
+            case M: return "Mesial";
+            case O: return "Occlusal";
+            case I: return "Incisal";
+            case D: return "Distal";
+            case B: return "Buccal";
+            case V: return "Ventral";
+            case L: return "Lingual";
+            case MO: return "Mesioclusal";
+            case DO: return "Distoclusal";
+            case DI: return "Distoincisal";
+            case MOD: return "Mesioclusodistal";
             default: return "?";
           }
     }
