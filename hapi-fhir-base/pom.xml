@@ -192,6 +192,28 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
+
+        <!-- enable this plugin if you want to gen the source code -->
+        <!--
+        <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <classifier>sources</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins> 
+        -->
+               
 	</build>
 
 	<profiles>

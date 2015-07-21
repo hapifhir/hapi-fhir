@@ -273,6 +273,24 @@
 					<buildDatatypes>true</buildDatatypes>
 				</configuration>
 			</plugin>
+            <!-- enable this plugin if you want to give the source code to anyone -->
+            <!-- 
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <classifier>sources</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
 		</plugins>
 		<pluginManagement>
 			<plugins>
