@@ -41,6 +41,8 @@ import ca.uhn.fhir.util.XmlUtil;
 @DatatypeDef(name = "xhtml")
 public class XhtmlDt extends BasePrimitive<List<XMLEvent>> {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constructor
 	 */

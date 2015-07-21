@@ -1,5 +1,7 @@
 package org.hl7.fhir.instance.model.api;
 
+import java.io.Serializable;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -25,7 +27,7 @@ package org.hl7.fhir.instance.model.api;
  * structure of some kind. It is provided mostly to simplify convergence
  * between the HL7.org structures and the HAPI ones. 
  */
-public interface IBase {
+public interface IBase extends Serializable {
 
 	boolean isEmpty();
 

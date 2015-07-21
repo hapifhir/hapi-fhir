@@ -22,6 +22,7 @@ package ca.uhn.fhir.model.api;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -61,7 +62,9 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * define their own keys for storage in resource metadata if needed.
  * </p>
  */
-public abstract class ResourceMetadataKeyEnum<T> {
+public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * If present and populated with a date/time (as an instance of {@link InstantDt}), this value is an indication that the resource is in the deleted state. This key is only used in a limited number

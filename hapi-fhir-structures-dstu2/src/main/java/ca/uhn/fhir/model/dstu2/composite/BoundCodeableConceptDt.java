@@ -26,6 +26,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.api.IBoundCodeableConcept;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -38,9 +40,18 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	private IValueSetEnumBinder<T> myBinder;
 
 	/**
+	 * @deprecated This constructor is provided only for serialization support. Do not call it directly!
+	 */
+	@Deprecated
+	public BoundCodeableConceptDt() {
+		// nothing
+	}
+
+	/**
 	 * Constructor
 	 */
 	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder) {
+		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 	}
 
@@ -48,6 +59,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 * Constructor
 	 */
 	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, T theValue) {
+		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
 	}
@@ -56,6 +68,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 * Constructor
 	 */
 	public BoundCodeableConceptDt(IValueSetEnumBinder<T> theBinder, Collection<T> theValues) {
+		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 		setValueAsEnum(theValues);
 	}
@@ -70,6 +83,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 *            The value to add, or <code>null</code>
 	 */
 	public void setValueAsEnum(Collection<T> theValues) {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeableConceptDt() should not be called!");
 		getCoding().clear();
 		if (theValues != null) {
 			for (T next : theValues) {
@@ -88,6 +102,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 *            The value to add, or <code>null</code>
 	 */
 	public void setValueAsEnum(T theValue) {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeableConceptDt() should not be called!");
 		getCoding().clear();
 		if (theValue == null) {
 			return;
@@ -107,6 +122,7 @@ public class BoundCodeableConceptDt<T extends Enum<?>> extends CodeableConceptDt
 	 *         no codes that match the enum.
 	 */
 	public Set<T> getValueAsEnum() {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeableConceptDt() should not be called!");
 		Set<T> retVal = new HashSet<T>();
 		for (CodingDt next : getCoding()) {
 			if (next == null) {

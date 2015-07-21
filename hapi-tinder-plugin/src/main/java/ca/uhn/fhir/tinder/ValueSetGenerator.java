@@ -308,7 +308,7 @@ public class ValueSetGenerator {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
-		ValueSetGenerator p = new ValueSetGenerator("dev");
+		ValueSetGenerator p = new ValueSetGenerator("dstu1");
 		p.parse();
 
 	}

@@ -20,6 +20,8 @@ package ca.uhn.fhir.model.primitive;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
+
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
@@ -28,16 +30,27 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 
 	private IValueSetEnumBinder<T> myBinder;
 
+	/**
+	 * @deprecated This constructor is provided only for serialization support. Do not call it directly!
+	 */
+	@Deprecated
+	public BoundCodeDt() {
+		// nothing
+	}
+	
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder) {
+		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 	}
 
 	public BoundCodeDt(IValueSetEnumBinder<T> theBinder, T theValue) {
+		Validate.notNull(theBinder, "theBinder must not be null");
 		myBinder = theBinder;
 		setValueAsEnum(theValue);
 	}
 
 	public void setValueAsEnum(T theValue) {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
 		if (theValue==null) {
 			setValue(null);
 		} else {
@@ -46,6 +59,7 @@ public class BoundCodeDt<T extends Enum<?>> extends CodeDt {
 	}
 
 	public T getValueAsEnum() {
+		Validate.notNull(myBinder, "This object does not have a binder. Constructor BoundCodeDt() should not be called!");
 		T retVal = myBinder.fromCodeString(getValue());
 		if (retVal == null) {
 			// TODO: throw special exception type?

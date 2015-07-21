@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
+import org.hl7.fhir.instance.model.QuestionnaireAnswers.QuestionnaireAnswersStatus;
 import org.hl7.fhir.instance.utils.WorkerContext;
 import org.hl7.fhir.instance.validation.QuestionnaireAnswersValidator;
 import org.hl7.fhir.instance.validation.ValidationMessage;
@@ -99,6 +100,7 @@ public class QuestionnaireAnswersValidatorTest {
 		q.getGroup().addQuestion().setLinkId("link1").setRequired(true).setType(AnswerFormat.STRING);
 		
 		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		qa.setStatus(QuestionnaireAnswersStatus.COMPLETED);
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 		qa.getGroup().addQuestion().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 		

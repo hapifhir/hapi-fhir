@@ -24,7 +24,9 @@ import net.sourceforge.cobertura.CoverageIgnore;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 
 /**
  * Represents an <b>HTTP 422 Unprocessable Entity</b> response, which means that a resource was rejected by the server because it "violated applicable FHIR profiles or server business rules".
@@ -56,9 +58,19 @@ public class UnprocessableEntityException extends BaseServerResponseException {
 	
 	/**
 	 * Constructor which accepts an {@link IBaseOperationOutcome} resource which will be supplied in the response
+	 * 
+	 * @deprecated Use constructor with FhirContext argument
 	 */
+	@Deprecated
 	public UnprocessableEntityException(IBaseOperationOutcome theOperationOutcome) {
 		super(STATUS_CODE, DEFAULT_MESSAGE, theOperationOutcome);
+	}
+
+	/**
+	 * Constructor which accepts an {@link IBaseOperationOutcome} resource which will be supplied in the response
+	 */
+	public UnprocessableEntityException(FhirContext theCtx, IBaseOperationOutcome theOperationOutcome) {
+		super(STATUS_CODE, OperationOutcomeUtil.getFirstIssueDetails(theCtx, theOperationOutcome), theOperationOutcome);
 	}
 
 	/**

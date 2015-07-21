@@ -20,16 +20,30 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.parser.DataFormatException;
 
-public abstract class BasePrimitive<T> extends BaseIdentifiableElement implements IPrimitiveDatatype<T> {
+public abstract class BasePrimitive<T> extends BaseIdentifiableElement implements IPrimitiveDatatype<T>, Externalizable {
 
 	private T myCoercedValue;
 	private String myStringValue;
+
+	/**
+	 * Subclasses must override to convert a "coerced" value into an encoded one.
+	 * 
+	 * @param theValue
+	 *           Will not be null
+	 * @return May return null if the value does not correspond to anything
+	 */
+	protected abstract String encode(T theValue);
 
 	@Override
 	public boolean equals(Object theObj) {
@@ -67,20 +81,26 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 		return super.isBaseEmpty() && getValue() == null;
 	}
 
+	/**
+	 * Subclasses must override to convert an encoded representation of this datatype into a "coerced" one
+	 * 
+	 * @param theValue
+	 *           Will not be null
+	 * @return May return null if the value does not correspond to anything
+	 */
+	protected abstract T parse(String theValue);
+
+	@Override
+	public void readExternal(ObjectInput theIn) throws IOException, ClassNotFoundException {
+		String object = (String) theIn.readObject();
+		setValueAsString(object);
+	}
+
 	@Override
 	public IPrimitiveType<T> setValue(T theValue) throws DataFormatException {
 		myCoercedValue = theValue;
 		updateStringValue();
 		return this;
-	}
-
-	protected void updateStringValue() {
-		if (myCoercedValue == null) {
-			myStringValue = null;
-		} else {
-			// NB this might be null
-			myStringValue = encode(myCoercedValue);
-		}
 	}
 
 	@Override
@@ -94,26 +114,22 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 		myStringValue = theValue;
 	}
 
-	/**
-	 * Subclasses must override to convert an encoded representation of this datatype into a "coerced" one
-	 * 
-	 * @param theValue
-	 *            Will not be null
-	 * @return May return null if the value does not correspond to anything
-	 */
-	protected abstract T parse(String theValue);
-
-	/**
-	 * Subclasses must override to convert a "coerced" value into an encoded one.
-	 * 
-	 * @param theValue
-	 *            Will not be null
-	 * @return May return null if the value does not correspond to anything
-	 */
-	protected abstract String encode(T theValue);
-
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "[" + getValueAsString() + "]";
+	}
+
+	protected void updateStringValue() {
+		if (myCoercedValue == null) {
+			myStringValue = null;
+		} else {
+			// NB this might be null
+			myStringValue = encode(myCoercedValue);
+		}
+	}
+
+	@Override
+	public void writeExternal(ObjectOutput theOut) throws IOException {
+		theOut.writeObject(getValueAsString());
 	}
 }

@@ -49,6 +49,10 @@
 				Operations in server generated conformance statement should only
 				appear once per name, since the name needs to be unique.
 			</action>
+			<action>
+				Resources and datatypes are now serializable. This is an
+				experimental feature which hasn't yet been extensively tested. Please test and give us your feedback!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
