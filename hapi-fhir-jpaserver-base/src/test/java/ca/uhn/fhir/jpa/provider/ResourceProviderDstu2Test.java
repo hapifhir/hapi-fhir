@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -36,12 +37,14 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.theories.suppliers.TestedOn;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -83,6 +86,7 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -90,6 +94,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -130,6 +135,148 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		} while (resources.size() > 0);
 	}
 
+	/**
+	 * See #198
+	 */
+	@Test
+	public void testSortFromResourceProvider() {
+		Patient p;
+		String methodName = "testSortFromResourceProvider";
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Daniel").addFamily("Adams");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Aaron").addFamily("Alexis");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Carol").addFamily("Allen");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Ruth").addFamily("Black");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Brian").addFamily("Brooks");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Susan").addFamily("Clark");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Amy").addFamily("Clark");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Anthony").addFamily("Coleman");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Steven").addFamily("Coleman");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Lisa").addFamily("Coleman");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Ruth").addFamily("Cook");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Betty").addFamily("Davis");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Joshua").addFamily("Diaz");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Brian").addFamily("Gracia");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Stephan").addFamily("Graham");
+		ourClient.create().resource(p).execute();
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().addGiven("Sarah").addFamily("Graham");
+		ourClient.create().resource(p).execute();
+
+		//@formatter:off
+		Bundle resp = ourClient
+			.search()
+			.forResource(Patient.class)
+			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", methodName))
+			.sort().ascending(Patient.FAMILY)
+			.sort().ascending(Patient.GIVEN)
+			.limitTo(100)
+			.execute();
+		//@formatter:on
+
+		List<String> names = toNameList(resp);
+
+		ourLog.info(StringUtils.join(names, '\n'));
+
+		//@formatter:off
+		assertThat(names, contains( // this matches in order only
+			"Daniel Adams",
+			"Aaron Alexis",
+			"Carol Allen",
+			"Ruth Black",
+			"Brian Brooks",
+			"Amy Clark",
+			"Susan Clark",
+			"Anthony Coleman",
+			"Lisa Coleman",
+			"Steven Coleman",
+			"Ruth Cook",
+			"Betty Davis",
+			"Joshua Diaz",
+			"Brian Gracia",
+			"Sarah Graham",
+			"Stephan Graham"));
+		//@formatter:om
+			
+	}
+
+
+	private List<String> toNameList(Bundle resp) {
+		List<String> names = new ArrayList<String>();
+		for (BundleEntry next : resp.getEntries()) {
+			Patient nextPt= (Patient) next.getResource();
+			String nextStr = nextPt.getNameFirstRep().getGivenAsSingleString()+ " " + nextPt.getNameFirstRep().getFamilyAsSingleString();
+			if (isNotBlank(nextStr)) {
+			names.add(nextStr);
+			}
+		}
+		return names;
+	}
+	
 	private void deleteToken(String theResourceType, String theParamName, String theParamSystem, String theParamValue) {
 		Bundle resources = ourClient.search().forResource(theResourceType).where(new TokenClientParam(theParamName).exactly().systemAndCode(theParamSystem, theParamValue)).execute();
 		for (IResource next : resources.toListOfResources()) {
