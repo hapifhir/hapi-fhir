@@ -2,7 +2,7 @@
 /target
 target/
 .idea/
-.project/
+.project
 .settings/
 .metadata/
 RemoteSystemsTempFiles/
