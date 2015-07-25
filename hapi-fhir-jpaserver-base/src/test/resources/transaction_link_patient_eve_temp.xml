@@ -35,9 +35,9 @@
                 </agent>
             </Provenance>
         </resource>
-        <transaction>
+        <request>
             <method value="POST"/>
-        </transaction>
+        </request>
     </entry>
     <entry>
         <resource>
@@ -97,10 +97,10 @@
                 <active value="true"/>
             </Patient>
         </resource>
-        <transaction>
+        <request>
             <method value="PUT"/>
             <url value="Patient/?identifier=http://ghh.org/patient%7C555-44-4444"/>
-        </transaction>
+        </request>
     </entry>
     <entry>
         <resource>
@@ -131,10 +131,10 @@
                 <active value="true"/>
             </Patient>
         </resource>
-        <transaction>
+        <request>
             <method value="PUT"/>
             <url value="Patient/?identifier=http://ghh.org/patient%7Ctemp6789"/>
-        </transaction>
+        </request>
     </entry>
     <entry>
         <resource>
@@ -158,11 +158,11 @@
                 <active value="true"/>
             </Organization>
         </resource>
-        <transaction>
+        <request>
             <method value="POST"/>
             <url value="Organization"/>
             <ifNoneExist value="Organization/?identifier=http://ghh.org/department%7CGHH"/>
-        </transaction>
+        </request>
     </entry>
 </Bundle>
 

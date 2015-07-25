@@ -19,9 +19,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -44,7 +42,7 @@ import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryTransactionResponse;
+import ca.uhn.fhir.model.dstu2.resource.Bundle.EntryResponse;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -62,7 +60,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoDstu2.class);
 
 	private String extractTransactionUrlOrThrowException(Entry nextEntry, HTTPVerbEnum verb) {
-		String url = nextEntry.getTransaction().getUrl();
+		String url = nextEntry.getRequest().getUrl();
 		if (isBlank(url)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionMissingUrl", verb.name()));
 		}
@@ -193,9 +191,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 			}
 
-			HTTPVerbEnum verb = nextEntry.getTransaction().getMethodElement().getValueAsEnum();
+			HTTPVerbEnum verb = nextEntry.getRequest().getMethodElement().getValueAsEnum();
 			if (verb == null) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextEntry.getTransaction().getMethod()));
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionEntryHasInvalidVerb", nextEntry.getRequest().getMethod()));
 			}
 
 			String resourceType = res != null ? getContext().getResourceDefinition(res).getName() : null;
@@ -208,7 +206,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				res.setId((String) null);
 				DaoMethodOutcome outcome;
 				Entry newEntry = response.addEntry();
-				outcome = resourceDao.create(res, nextEntry.getTransaction().getIfNoneExist(), false);
+				outcome = resourceDao.create(res, nextEntry.getRequest().getIfNoneExist(), false);
 				handleTransactionCreateOrUpdateOutcome(idSubstitutions, idToPersistedOutcome, nextResourceId, outcome, newEntry, resourceType);
 				break;
 			}
@@ -223,7 +221,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					parts.getDao().deleteByUrl(parts.getResourceType() + '?' + parts.getParams());
 				}
 
-				newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_204_NO_CONTENT));
+				newEntry.getResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_204_NO_CONTENT));
 				break;
 			}
 			case PUT: {
@@ -256,7 +254,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				@SuppressWarnings("rawtypes")
 				IFhirResourceDao resourceDao = parts.getDao();
 
-				String ifNoneMatch = nextEntry.getTransaction().getIfNoneMatch();
+				String ifNoneMatch = nextEntry.getRequest().getIfNoneMatch();
 				if (isNotBlank(ifNoneMatch)) {
 					ifNoneMatch = MethodUtil.parseETagValue(ifNoneMatch);
 				}
@@ -279,7 +277,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					if (notChanged == false) {
 						entry.setResource(found);
 					}
-					EntryTransactionResponse resp = entry.getTransactionResponse();
+					EntryResponse resp = entry.getResponse();
 					resp.setLocation(found.getId().toUnqualified().getValue());
 					resp.setEtag(found.getId().getVersionIdPart());
 					if (!notChanged) {
@@ -307,7 +305,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 					Entry newEntry = response.addEntry();
 					newEntry.setResource(searchBundle);
-					newEntry.getTransactionResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_200_OK));
+					newEntry.getResponse().setStatus(Integer.toString(Constants.STATUS_HTTP_200_OK));
 				}
 			}
 			}
@@ -376,12 +374,12 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		}
 		idToPersistedOutcome.put(newId, outcome);
 		if (outcome.getCreated().booleanValue()) {
-			newEntry.getTransactionResponse().setStatus(Long.toString(Constants.STATUS_HTTP_201_CREATED));
+			newEntry.getResponse().setStatus(Long.toString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
-			newEntry.getTransactionResponse().setStatus(Long.toString(Constants.STATUS_HTTP_200_OK));
+			newEntry.getResponse().setStatus(Long.toString(Constants.STATUS_HTTP_200_OK));
 		}
-		newEntry.getTransactionResponse().setLocation(outcome.getId().toUnqualified().getValue());
-		newEntry.getTransactionResponse().setEtag(outcome.getId().getVersionIdPart());
+		newEntry.getResponse().setLocation(outcome.getId().toUnqualified().getValue());
+		newEntry.getResponse().setEtag(outcome.getId().getVersionIdPart());
 	}
 
 	private static boolean isPlaceholder(IdDt theId) {

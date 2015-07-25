@@ -95,6 +95,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	private List<IParameter> myParameters;
 	private Object myProvider;
 	private boolean mySupportsConditional;
+	private boolean mySupportsConditionalMultiple;
 
 	public BaseMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		assert theMethod != null;
@@ -108,6 +109,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		for (IParameter next : myParameters) {
 			if (next instanceof ConditionalParamBinder) {
 				mySupportsConditional = true;
+				if (((ConditionalParamBinder) next).isSupportsMultiple()) {
+					mySupportsConditionalMultiple = true;
+				}
 				break;
 			}
 		}
@@ -285,6 +289,13 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 */
 	public boolean isSupportsConditional() {
 		return mySupportsConditional;
+	}
+
+	/**
+	 * Does this method support conditional operations over multiple objects (basically for conditional delete)
+	 */
+	public boolean isSupportsConditionalMultiple() {
+		return mySupportsConditionalMultiple;
 	}
 
 	protected byte[] loadRequestContents(RequestDetails theRequest) throws IOException {

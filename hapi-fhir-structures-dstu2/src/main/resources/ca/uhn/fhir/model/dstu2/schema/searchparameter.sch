@@ -18,16 +18,10 @@
     </sch:pattern>
   <sch:pattern>
     <sch:title>SearchParameter</sch:title>
-    <sch:rule context="f:SearchParameter/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:SearchParameter/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
     <sch:rule context="f:SearchParameter">
-      <sch:assert test="not(parent::f:contained and f:contained)">dom-2: If the resource is contained in another resource, it SHALL not contain nested Resources</sch:assert>
-      <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL not contain any narrative</sch:assert>
-      <sch:assert test="not(exists(f:contained/f:meta/f:versionId)) and not(exists(f:contained/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL not have a meta.versionId or a meta.lastUpdated</sch:assert>
+      <sch:assert test="not(parent::f:contained and f:contained)">dom-2: If the resource is contained in another resource, it SHALL NOT contain nested Resources</sch:assert>
+      <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL NOT contain any narrative</sch:assert>
+      <sch:assert test="not(exists(f:contained/f:meta/f:versionId)) and not(exists(f:contained/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated</sch:assert>
       <sch:assert test="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))">dom-3: If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource</sch:assert>
     </sch:rule>
     <sch:rule context="f:SearchParameter/f:text/f:div">
@@ -35,17 +29,8 @@
       <sch:assert test="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])">txt-1: The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
       <sch:assert test="descendant::text()[normalize-space(.)!=''] or descendant::h:img[@src]">txt-2: The narrative SHALL have some non-whitespace content</sch:assert>
     </sch:rule>
-    <sch:rule context="f:SearchParameter/f:contained/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:SearchParameter/f:contained/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:SearchParameter/f:contained/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:SearchParameter/f:contained/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
+    <sch:rule context="f:SearchParameter">
+      <sch:assert test="not(exists(f:xpath)) or exists(f:xpathUsage)">spd-1: If an xpath is present, there SHALL be be an xpathUsage</sch:assert>
     </sch:rule>
     <sch:rule context="f:SearchParameter/f:contact/f:telecom">
       <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>

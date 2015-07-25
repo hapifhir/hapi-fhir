@@ -268,10 +268,6 @@ public class JsonParser extends BaseParser implements IParser {
 
 		writeOptionalTagWithTextNode(theEventWriter, "type", theBundle.getType());
 
-		if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			writeOptionalTagWithTextNode(theEventWriter, "base", theBundle.getLinkBase());
-		}
-
 		writeOptionalTagWithNumberNode(theEventWriter, "total", theBundle.getTotalResults());
 
 		boolean linkStarted = false;
@@ -288,12 +284,8 @@ public class JsonParser extends BaseParser implements IParser {
 		for (BundleEntry nextEntry : theBundle.getEntries()) {
 			theEventWriter.writeStartObject();
 
-			if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-				writeOptionalTagWithTextNode(theEventWriter, "base", determineResourceBaseUrl(theBundle.getLinkBase().getValue(), nextEntry));
-			} else {
-				if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
-					writeOptionalTagWithTextNode(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
-				}
+			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+				writeOptionalTagWithTextNode(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
 			
 			boolean deleted = nextEntry.getDeletedAt() != null && nextEntry.getDeletedAt().isEmpty() == false;
@@ -312,7 +304,7 @@ public class JsonParser extends BaseParser implements IParser {
 			}
 
 			if (nextEntry.getTransactionMethod().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
-				theEventWriter.writeStartObject("transaction");
+				theEventWriter.writeStartObject("request");
 				writeOptionalTagWithTextNode(theEventWriter, "method", nextEntry.getTransactionMethod().getValue());
 				writeOptionalTagWithTextNode(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEnd();

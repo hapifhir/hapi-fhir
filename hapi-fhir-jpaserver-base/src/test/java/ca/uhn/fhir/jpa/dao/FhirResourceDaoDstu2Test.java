@@ -146,7 +146,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	public void testChoiceParamDateAlt() {
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testChoiceParamDateAlt02");
-		o2.setApplies(new DateTimeDt("2015-03-08T11:11:11"));
+		o2.setEffective(new DateTimeDt("2015-03-08T11:11:11"));
 		IIdType id2 = ourObservationDao.create(o2).getId();
 
 		{
@@ -163,7 +163,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	public void testChoiceParamQuantity() {
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
-		o3.setValue(new QuantityDt(QuantityComparatorEnum.GREATERTHAN, 123.0, "foo", "bar").setCode("bar"));
+		o3.setValue(new QuantityDt(QuantityComparatorEnum.GREATER_THAN, 123.0, "foo", "bar").setCode("bar"));
 		IIdType id3 = ourObservationDao.create(o3).getId();
 
 		{
@@ -528,7 +528,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		ourLog.info("Created patient, got it: {}", id);
 
 		Bundle request = new Bundle();
-		request.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.DELETE).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.DELETE).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		ourPatientDao.deleteByUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
 
@@ -761,12 +761,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		IIdType patientId02 = ourPatientDao.create(patient02).getId();
 
 		Observation obs01 = new Observation();
-		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setEffective(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
 		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
-		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setEffective(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(patientId02));
 		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
@@ -1517,12 +1517,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		IIdType patientId02 = ourPatientDao.create(patient02).getId();
 
 		Observation obs01 = new Observation();
-		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setEffective(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
 		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
-		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setEffective(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(patientId02));
 		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
@@ -1615,12 +1615,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		IIdType locId01 = ourLocationDao.create(loc01).getId();
 
 		Observation obs01 = new Observation();
-		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setEffective(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
 		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
-		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setEffective(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(locId01));
 		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 
@@ -1656,12 +1656,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		IIdType patientId02 = ourPatientDao.update(patient02).getId();
 
 		Observation obs01 = new Observation();
-		obs01.setApplies(new DateTimeDt(new Date()));
+		obs01.setEffective(new DateTimeDt(new Date()));
 		obs01.setSubject(new ResourceReferenceDt(patientId01));
 		IIdType obsId01 = ourObservationDao.create(obs01).getId();
 
 		Observation obs02 = new Observation();
-		obs02.setApplies(new DateTimeDt(new Date()));
+		obs02.setEffective(new DateTimeDt(new Date()));
 		obs02.setSubject(new ResourceReferenceDt(patientId02));
 		IIdType obsId02 = ourObservationDao.create(obs02).getId();
 

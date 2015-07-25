@@ -385,9 +385,6 @@ public class XmlParser extends BaseParser implements IParser {
 		String bundleBaseUrl = theBundle.getLinkBase().getValue();
 
 		writeOptionalTagWithValue(theEventWriter, "type", theBundle.getType().getValue());
-		if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			writeOptionalTagWithValue(theEventWriter, "base", bundleBaseUrl);
-		}
 		writeOptionalTagWithValue(theEventWriter, "total", theBundle.getTotalResults().getValueAsString());
 
 		writeBundleResourceLink(theEventWriter, "first", theBundle.getLinkFirst());
@@ -404,16 +401,10 @@ public class XmlParser extends BaseParser implements IParser {
 				deleted = true;
 			}
 
-			if (!myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-				writeOptionalTagWithValue(theEventWriter, "base", determineResourceBaseUrl(bundleBaseUrl, nextEntry));
-			}
-			
 			writeBundleResourceLink(theEventWriter, "alternate", nextEntry.getLinkAlternate());
 
-			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-				if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
-					writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
-				}
+			if (nextEntry.getResource() != null && nextEntry.getResource().getId().getBaseUrl() != null) {
+				writeOptionalTagWithValue(theEventWriter, "fullUrl", nextEntry.getResource().getId().getValue());
 			}
 			
 			IResource resource = nextEntry.getResource();
@@ -434,7 +425,7 @@ public class XmlParser extends BaseParser implements IParser {
 			}
 
 			if (nextEntry.getTransactionMethod().isEmpty() == false || nextEntry.getLinkSearch().isEmpty() == false) {
-				theEventWriter.writeStartElement("transaction");
+				theEventWriter.writeStartElement("request");
 				writeOptionalTagWithValue(theEventWriter, "method", nextEntry.getTransactionMethod().getValue());
 				writeOptionalTagWithValue(theEventWriter, "url", nextEntry.getLinkSearch().getValue());
 				theEventWriter.writeEndElement();

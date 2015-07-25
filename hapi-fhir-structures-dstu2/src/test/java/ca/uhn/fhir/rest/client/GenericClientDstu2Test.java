@@ -1139,8 +1139,8 @@ public class GenericClientDstu2Test {
 	public void testTransactionWithListOfResources() throws Exception {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
 		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -1175,9 +1175,9 @@ public class GenericClientDstu2Test {
 		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
 		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
 		assertEquals(2, requestBundle.getEntry().size());
-		assertEquals("POST", requestBundle.getEntry().get(0).getTransaction().getMethod());
-		assertEquals("PUT", requestBundle.getEntry().get(1).getTransaction().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getTransaction().getUrl());
+		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
+		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
+		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
 
 		p1 = (Patient) response.get(0);
 		assertEquals(new IdDt("Patient/1/_history/1"), p1.getId().toUnqualified());
@@ -1198,8 +1198,8 @@ public class GenericClientDstu2Test {
 		String reqStringXml = ourCtx.newXmlParser().encodeResourceToString(req);
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
 		final String respStringJson = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -1248,8 +1248,8 @@ public class GenericClientDstu2Test {
 	public void testTransactionWithTransactionResource() throws Exception {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		resp.addEntry().getTransactionResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getTransactionResponse().setLocation("Patient/2/_history/2");
+		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
+		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
 		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -1281,8 +1281,8 @@ public class GenericClientDstu2Test {
 		assertEquals("http://example.com/fhir?_format=json", capt.getValue().getURI().toString());
 		assertEquals(2, response.getEntry().size());
 
-		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getTransactionResponse().getLocation());
-		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getTransactionResponse().getLocation());
+		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getResponse().getLocation());
 	}
 
 	@Test

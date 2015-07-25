@@ -273,7 +273,10 @@ public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser
 						 * Paths have changed in DSTU2
 						 */
 						for (SearchParameter nextParam : theResource.getSearchParameters()) {
-							if (nextPart.equals("value[x]") && nextParam.getName().startsWith("value-")) {
+							if (nextPart.equals("value[x]") && (nextParam.getName().startsWith("value-"))) {
+								part.add(nextParam);
+							}
+							if (nextPart.equals("component-value[x]") && (nextParam.getName().startsWith("component-value-"))) {
 								part.add(nextParam);
 							}
 						}

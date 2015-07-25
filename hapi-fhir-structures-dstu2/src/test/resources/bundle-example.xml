@@ -5,7 +5,6 @@
     <lastUpdated value="2014-08-18T01:43:30Z"/>
   </meta>
   <type value="searchset"/>  
-  <base value="http://example.com/base"/> 
   <total value="3"/>
   <link>
     <relation value="next"/>
@@ -20,6 +19,7 @@
   		<relation value="alternate"/>
   		<url value="http://example.com/base/MedicationPrescription/3123/_history/1"/>
   	</link>
+    <fullUrl value="http://example.com/base/MedicationPrescription/3123/_history/1"/>
     <resource>
       <MedicationPrescription>
         <id value="3123"/>
@@ -30,20 +30,21 @@
         <patient>
           <reference value="Patient/347"/>
         </patient>
-        <medication>
+        <medicationReference>
           <reference value="Medication/example"/>
-        </medication>
+        </medicationReference>
       </MedicationPrescription>
     </resource>
     <search>
       <mode value="match"/> 
       <score value="1"/>
     </search>
-    <transaction>
+    <request>
       <url value="http://foo?search"/>
-    </transaction>
+    </request>
   </entry>
   <entry>
+    <fullUrl value="http://example.com/base/Medication/example"/>
     <resource>
       <Medication>
         <id value="example"/>

@@ -18,16 +18,10 @@
     </sch:pattern>
   <sch:pattern>
     <sch:title>StructureDefinition</sch:title>
-    <sch:rule context="f:StructureDefinition/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
     <sch:rule context="f:StructureDefinition">
-      <sch:assert test="not(parent::f:contained and f:contained)">dom-2: If the resource is contained in another resource, it SHALL not contain nested Resources</sch:assert>
-      <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL not contain any narrative</sch:assert>
-      <sch:assert test="not(exists(f:contained/f:meta/f:versionId)) and not(exists(f:contained/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL not have a meta.versionId or a meta.lastUpdated</sch:assert>
+      <sch:assert test="not(parent::f:contained and f:contained)">dom-2: If the resource is contained in another resource, it SHALL NOT contain nested Resources</sch:assert>
+      <sch:assert test="not(parent::f:contained and f:text)">dom-1: If the resource is contained in another resource, it SHALL NOT contain any narrative</sch:assert>
+      <sch:assert test="not(exists(f:contained/f:meta/f:versionId)) and not(exists(f:contained/f:meta/f:lastUpdated))">dom-4: If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated</sch:assert>
       <sch:assert test="not(exists(for $id in f:contained/*/@id return $id[not(ancestor::f:contained/parent::*/descendant::f:reference/@value=concat('#', $id))]))">dom-3: If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:text/f:div">
@@ -35,51 +29,29 @@
       <sch:assert test="not(descendant-or-self::*[not(local-name(.)=('a', 'abbr', 'acronym', 'b', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'colgroup', 'dd', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'))])">txt-1: The narrative SHALL contain only the basic html formatting elements described in chapters 7-11 (except section 4 of chapter 9) and 15 of the HTML 4.0 standard, &lt;a&gt; elements (either name or href), images and internally contained style attributes</sch:assert>
       <sch:assert test="descendant::text()[normalize-space(.)!=''] or descendant::h:img[@src]">txt-2: The narrative SHALL have some non-whitespace content</sch:assert>
     </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:contained/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:contained/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:contained/f:meta/f:security">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:contained/f:meta/f:tag">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
     <sch:rule context="f:StructureDefinition">
+      <sch:assert test="not(exists(f:snapshot/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)])) and not(exists(f:differential/f:element[not(contains(f:path/@value, '.')) and (f:label or f:code or f:requirements)]))">sdf-9: In any snapshot or differential, no label, code or requirements on the an element without a &quot;.&quot; in the path (e.g. the first element)</sch:assert>
       <sch:assert test="string-join(for $elementName in f:*[self::f:snapshot or self::f:differential]/f:element[position()&gt;1]/f:path/@value return if (starts-with($elementName, concat($elementName/ancestor::f:element/parent::f:*/f:element[1]/f:path/@value, '.'))) then '' else $elementName,'')=''">sdf-8: In any snapshot or differential, all the elements except the first have to have a path that starts with the path of the first + &quot;.&quot;</sch:assert>
+      <sch:assert test="f:base or not(exists(f:snapshot/f:element/f:base) or exists(f:differential/f:element/f:base))">sdf-12: element.base cannot appear if theres's no base on the structure definition</sch:assert>
+      <sch:assert test="not(exists(f:constrainedType)) and (not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value))">sdf-11: If there's a constrained type, it's content must match the path name in the first element of a snapshot</sch:assert>
+      <sch:assert test="not(f:base) or not(f:snapshot/f:element[not(f:base)])">sdf-13: element.base must appear if theres's a base on the structure definition</sch:assert>
+      <sch:assert test="(not(exists(f:constrainedType)) and not(exists(f:abstract/@value='true'))) or exists(f:base)">sdf-10: If the struture is not abstract, or there's a constrained type, then there SHALL be a base</sch:assert>
       <sch:assert test="not(f:type/@value=('Resource', 'Type')) or f:url/@value=concat('http://hl7.org/fhir/StructureDefinition/', f:name/@value)">sdf-7: If the type is Resource or Type, the url has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the name</sch:assert>
       <sch:assert test="f:snapshot or f:differential">sdf-6: A structure must have either a differential, or a snapshot (or both)</sch:assert>
       <sch:assert test="not(f:type/@value = 'extension') or (f:context and f:contextType)">sdf-5: If the type is 'extension' then the structure must have context information</sch:assert>
       <sch:assert test="(f:type/@value = 'abstract') or f:base">sdf-4: A structure must have a base unless it’s type is 'abstract'</sch:assert>
     </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:identifier/f:type">
-      <sch:assert test="count(f:coding[f:primary/@value='true'])&lt;=1">ccc-2: Only one coding in a set can be chosen directly by the user</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:identifier/f:type/f:coding">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
-    </sch:rule>
     <sch:rule context="f:StructureDefinition/f:identifier/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:identifier/f:assigner">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:useContext">
-      <sch:assert test="count(f:coding[f:primary/@value='true'])&lt;=1">ccc-2: Only one coding in a set can be chosen directly by the user</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:useContext/f:coding">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:contact/f:telecom">
       <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:contact/f:telecom/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:code">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:mapping">
       <sch:assert test="exists(f:uri) or exists(f:name)">sdf-2: Must have at a name or a uri (or both)</sch:assert>
@@ -97,11 +69,7 @@
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'value')]))">eld-8: Pattern and value are mutually exclusive</sch:assert>
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">eld-14: Constraints must be unique by key</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))">eld-13: Types must be unique by the combination of code and profile</sch:assert>
-      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">eld-16: default value and meaningWhenMissing are mutually exclusive</sch:assert>
-      <sch:assert test="count(f:constraint[f:name]) = count(distinct-values(f:constraint/f:name/@value))">eld-15: Constraint names must be unique.</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:snapshot/f:element/f:code">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
+      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">eld-15: default value and meaningWhenMissing are mutually exclusive</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:snapshot/f:element/f:slicing">
       <sch:assert test="(f:discriminator) or (f:definition)">eld-1: If there are no discriminators, there must be a definition</sch:assert>
@@ -120,7 +88,7 @@
       <sch:assert test="starts-with(@value, 'http:') or starts-with(@value, 'https:')">eld-12: uri SHALL start with http:// or https://</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:snapshot/f:element/f:binding/f:valueSetReference">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:differential/f:element">
       <sch:assert test="(not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (f:max/@value &gt;= f:min/@value)">eld-2: Min &lt;= Max</sch:assert>
@@ -131,11 +99,7 @@
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'value')]))">eld-8: Pattern and value are mutually exclusive</sch:assert>
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">eld-14: Constraints must be unique by key</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value and f:profile/@value = $type/f:profile/@value]))">eld-13: Types must be unique by the combination of code and profile</sch:assert>
-      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">eld-16: default value and meaningWhenMissing are mutually exclusive</sch:assert>
-      <sch:assert test="count(f:constraint[f:name]) = count(distinct-values(f:constraint/f:name/@value))">eld-15: Constraint names must be unique.</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:StructureDefinition/f:differential/f:element/f:code">
-      <sch:assert test="not (exists(f:valueSet) and exists(f:code)) or exists(f:system)">cod-1: If a valueSet is provided, a system URI Is required</sch:assert>
+      <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">eld-15: default value and meaningWhenMissing are mutually exclusive</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:differential/f:element/f:slicing">
       <sch:assert test="(f:discriminator) or (f:definition)">eld-1: If there are no discriminators, there must be a definition</sch:assert>
@@ -154,7 +118,7 @@
       <sch:assert test="starts-with(@value, 'http:') or starts-with(@value, 'https:')">eld-12: uri SHALL start with http:// or https://</sch:assert>
     </sch:rule>
     <sch:rule context="f:StructureDefinition/f:differential/f:element/f:binding/f:valueSetReference">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     </sch:pattern>
 </sch:schema>

@@ -150,7 +150,7 @@ public class OperationServerTest {
 		assertEquals("$OP_TYPE_RET_BUNDLE", ourLastMethod);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-		assertEquals("100", resp.getEntryFirstRep().getTransactionResponse().getStatus());
+		assertEquals("100", resp.getEntryFirstRep().getResponse().getStatus());
 	}
 
 	@Test
@@ -500,7 +500,7 @@ public class OperationServerTest {
 			ourLastParam2 = theParam2;
 
 			Bundle retVal = new Bundle();
-			retVal.addEntry().getTransactionResponse().setStatus("100");
+			retVal.addEntry().getResponse().setStatus("100");
 			return retVal;
 		}
 

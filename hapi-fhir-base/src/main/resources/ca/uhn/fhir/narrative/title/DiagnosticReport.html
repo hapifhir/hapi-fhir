@@ -1,8 +1,16 @@
 <div>
-	<th:block th:if="${not resource.name.textElement.empty}" th:text="${resource.name.textElement.value}"/>
-	<th:block th:if="    ${resource.name.textElement.empty} and ${not resource.name.codingFirstRep.displayElement.empty}" th:text="${resource.name.codingFirstRep.display}"/>
-	<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
-	
+	<th:block th:switch="${fhirVersion}">
+		<th:block th:case="'DSTU1'">
+			<th:block th:if="${not resource.name.textElement.empty}" th:text="${resource.name.textElement.value}"/>
+			<th:block th:if="    ${resource.name.textElement.empty} and ${not resource.name.codingFirstRep.displayElement.empty}" th:text="${resource.name.codingFirstRep.display}"/>
+			<th:block th:if=    "${resource.name.textElement.empty} and     ${resource.name.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+		</th:block>
+		<th:block th:case="*">
+			<th:block th:if="${not resource.code.textElement.empty}" th:text="${resource.code.textElement.value}"/>
+			<th:block th:if="    ${resource.code.textElement.empty} and ${not resource.code.codingFirstRep.displayElement.empty}" th:text="${resource.code.codingFirstRep.display}"/>
+			<th:block th:if=    "${resource.code.textElement.empty} and     ${resource.code.codingFirstRep.displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+		</th:block>
+	</th:block>	
 	<th:block th:if="${not resource.statusElement.empty}" th:text="' - ' + ${resource.statusElement.value}"/>
 	<th:block th:text="' - ' + ${resource.result.size} + ' observations'"/>
 	

@@ -49,6 +49,7 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceInteraction;
 import ca.uhn.fhir.model.dstu2.resource.Conformance.RestResourceSearchParam;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
+import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
@@ -218,7 +219,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 									resource.setConditionalCreate(true);
 									break;
 								case DELETE:
-									resource.setConditionalDelete(true);
+									if (nextMethodBinding.isSupportsConditionalMultiple()) {
+										resource.setConditionalDelete(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
+									} else {
+										resource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+									}
 									break;
 								case UPDATE:
 									resource.setConditionalUpdate(true);

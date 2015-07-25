@@ -103,6 +103,7 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		
 		if (!version.equals("dstu")) {			
 			retVal.add(("/dt/" + version + "/meta.xml"));
+			retVal.add(("/dt/" + version + "/annotation.xml"));
 			retVal.add(("/dt/" + version + "/attachment.xml"));
 			retVal.add(("/dt/" + version + "/contactpoint.xml"));
 			retVal.add(("/dt/" + version + "/elementdefinition.xml"));

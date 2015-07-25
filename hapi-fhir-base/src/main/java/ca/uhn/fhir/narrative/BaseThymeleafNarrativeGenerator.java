@@ -205,6 +205,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		try {
 			Context context = new Context();
 			context.setVariable("resource", theResource);
+			context.setVariable("fhirVersion", myFhirContext.getVersion().getVersion().name());
 
 			String result = myTitleTemplateEngine.process(name, context);
 

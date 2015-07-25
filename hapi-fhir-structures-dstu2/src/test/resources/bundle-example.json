@@ -6,7 +6,6 @@
     "lastUpdated": "2014-08-18T01:43:30Z"
   },
   "type": "searchset",
-  "base": "http://example.com/base",
   "total": 3,
   "link": [
     {
@@ -20,6 +19,7 @@
   ],
   "entry": [
     {
+		"fullUrl": "http://example.com/base/MedicationPrescription/3123/_history/1",
       "resource": {
         "resourceType": "MedicationPrescription",
         "id": "3123",
@@ -30,7 +30,7 @@
         "patient": {
           "reference": "Patient/347"
         },
-        "medication": {
+        "medicationReference": {
           "reference": "Medication/example"
         }
       },
@@ -40,6 +40,7 @@
       }
     },
     {
+		"fullUrl": "http://example.com/base/Medication/example",
       "resource": {
         "resourceType": "Medication",
         "id": "example"

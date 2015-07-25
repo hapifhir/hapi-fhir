@@ -421,7 +421,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		String methodName = "testCreateQuestionnaireAnswersWithValidation";
 
 		ValueSet options = new ValueSet();
-		options.getDefine().setSystem("urn:system").addConcept().setCode("code0");
+		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
 		IIdType optId = ourClient.create().resource(options).execute().getId();
 		
 		Questionnaire q = new Questionnaire();
@@ -707,12 +707,12 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 		List<IdDt> ids = new ArrayList<IdDt>();
 		for (Entry next : resp.getEntry()) {
-			IdDt toAdd = new IdDt(next.getTransactionResponse().getLocation()).toUnqualifiedVersionless();
+			IdDt toAdd = new IdDt(next.getResponse().getLocation()).toUnqualifiedVersionless();
 			ids.add(toAdd);
 		}
 		ourLog.info("Created: " + ids.toString());
 
-		IdDt patientId = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt patientId = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
 		{
@@ -763,17 +763,17 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		Patient p = new Patient();
 		p.setId("1");
-		b.addEntry().setResource(p).getTransaction().setMethod(HTTPVerbEnum.POST);
+		b.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST);
 
 		Condition c = new Condition();
 		c.getPatient().setReference("Patient/1");
-		b.addEntry().setResource(c).getTransaction().setMethod(HTTPVerbEnum.POST);
+		b.addEntry().setResource(c).getRequest().setMethod(HTTPVerbEnum.POST);
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle resp = ourClient.transaction().withBundle(b).execute();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		IdDt patientId = new IdDt(resp.getEntry().get(1).getTransactionResponse().getLocation());
+		IdDt patientId = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
@@ -796,37 +796,37 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		Organization org1 = new Organization();
 		org1.setName(methodName + "1");
-		IIdType orgId1 = ourClient.create().resource(org1).execute().getId();
+		IIdType orgId1 = ourClient.create().resource(org1).execute().getId().toUnqualifiedVersionless();
 
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
 		p.getManagingOrganization().setReference(orgId1);
-		IIdType patientId = ourClient.create().resource(p).execute().getId();
+		IIdType patientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
 		Organization org2 = new Organization();
 		org2.setName(methodName + "1");
-		IIdType orgId2 = ourClient.create().resource(org2).execute().getId();
+		IIdType orgId2 = ourClient.create().resource(org2).execute().getId().toUnqualifiedVersionless();
 
 		Device dev = new Device();
 		dev.setModel(methodName);
 		dev.getOwner().setReference(orgId2);
-		IIdType devId = ourClient.create().resource(dev).execute().getId();
+		IIdType devId = ourClient.create().resource(dev).execute().getId().toUnqualifiedVersionless();
 
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId);
 		obs.getDevice().setReference(devId);
-		IIdType obsId = ourClient.create().resource(obs).execute().getId();
+		IIdType obsId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
 
 		Encounter enc = new Encounter();
 		enc.getPatient().setReference(patientId);
-		IIdType encId = ourClient.create().resource(enc).execute().getId();
+		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
 
 		Set<IdDt> ids = new HashSet<IdDt>();
 		for (Entry next : b.getEntry()) {
-			ids.add(next.getResource().getId());
+			ids.add(next.getResource().getId().toUnqualifiedVersionless());
 		}
 
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2));

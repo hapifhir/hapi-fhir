@@ -36,9 +36,9 @@
             <patient>
                <reference value="Patient/13123"/>
             </patient>
-            <medication>
+            <medicationReference>
                <reference value="#med"/>
-            </medication>
+            </medicationReference>
             <dosageInstruction>
                <text value="1 daily"/>
                <doseQuantity>

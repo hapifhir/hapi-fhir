@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
@@ -223,8 +224,8 @@ public class JsonParserDstu2Test {
 		p.addName().addFamily("FAMILY");
 
 		List<BaseCodingDt> labels = new ArrayList<BaseCodingDt>();
-		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setPrimary(true).setVersion("VERSION1"));
-		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setPrimary(false).setVersion("VERSION2"));
+		labels.add(new CodingDt().setSystem("SYSTEM1").setCode("CODE1").setDisplay("DISPLAY1").setVersion("VERSION1"));
+		labels.add(new CodingDt().setSystem("SYSTEM2").setCode("CODE2").setDisplay("DISPLAY2").setVersion("VERSION2"));
 
 		ResourceMetadataKeyEnum.SECURITY_LABELS.put(p, labels);
 
@@ -240,15 +241,13 @@ public class JsonParserDstu2Test {
 			"                \"system\":\"SYSTEM1\",\n" + 
 			"                \"version\":\"VERSION1\",\n" + 
 			"                \"code\":\"CODE1\",\n" + 
-			"                \"display\":\"DISPLAY1\",\n" + 
-			"                \"primary\":true\n" + 
+			"                \"display\":\"DISPLAY1\"\n" + 
 			"            },\n" + 
 			"            {\n" + 
 			"                \"system\":\"SYSTEM2\",\n" + 
 			"                \"version\":\"VERSION2\",\n" + 
 			"                \"code\":\"CODE2\",\n" + 
-			"                \"display\":\"DISPLAY2\",\n" + 
-			"                \"primary\":false\n" + 
+			"                \"display\":\"DISPLAY2\"\n" + 
 			"            }\n" + 
 			"        ]\n" + 
 			"    },\n" + 
@@ -271,14 +270,12 @@ public class JsonParserDstu2Test {
 		assertEquals("SYSTEM1", label.getSystem());
 		assertEquals("CODE1", label.getCode());
 		assertEquals("DISPLAY1", label.getDisplay());
-		assertEquals(true, label.getPrimary());
 		assertEquals("VERSION1", label.getVersion());
 
 		label = (CodingDt) gotLabels.get(1);
 		assertEquals("SYSTEM2", label.getSystem());
 		assertEquals("CODE2", label.getCode());
 		assertEquals("DISPLAY2", label.getDisplay());
-		assertEquals(false, label.getPrimary());
 		assertEquals("VERSION2", label.getVersion());
 	}
 
@@ -412,13 +409,12 @@ public class JsonParserDstu2Test {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
 		Bundle parsed = ourCtx.newJsonParser().parseBundle(content);
-		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
+		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals("1", parsed.getId().getVersionIdPart());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType().getValue());
 		assertEquals(3, parsed.getTotalResults().getValue().intValue());
-		assertEquals("http://example.com/base", parsed.getLinkBase().getValue());
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLinkNext().getValue());
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLinkSelf().getValue());
 
@@ -431,7 +427,7 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertSame(p.getMedication().getResource(), m);
+		assertSame(((ResourceReferenceDt)p.getMedication()).getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
@@ -461,9 +457,9 @@ public class JsonParserDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
-		assertEquals("#med", p.getMedication().getReference().getValue());
+		assertEquals("#med", ((ResourceReferenceDt)p.getMedication()).getReference().getValue());
 
-		Medication m = (Medication) p.getMedication().getResource();
+		Medication m = (Medication) ((ResourceReferenceDt)p.getMedication()).getResource();
 		assertNotNull(m);
 		assertEquals("#med", m.getId().getValue());
 		assertEquals(1, p.getContained().getContainedResources().size());
@@ -483,13 +479,12 @@ public class JsonParserDstu2Test {
 		String content = IOUtils.toString(JsonParserDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
-		assertEquals("http://example.com/base/Bundle/example/_history/1", parsed.getId().getValue());
+		assertEquals("Bundle/example/_history/1", parsed.getId().getValue());
 		assertEquals("1", parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.VERSION));
 		assertEquals("1", parsed.getId().getVersionIdPart());
 		assertEquals(new InstantDt("2014-08-18T01:43:30Z"), parsed.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED));
 		assertEquals("searchset", parsed.getType());
 		assertEquals(3, parsed.getTotal().intValue());
-		assertEquals("http://example.com/base", parsed.getBaseElement().getValueAsString());
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
 		assertEquals("https://example.com/base/MedicationPrescription?patient=347&_include=MedicationPrescription.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
@@ -502,8 +497,8 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertEquals("Medication/example", p.getMedication().getReference().getValue());
-		assertSame(p.getMedication().getResource(), m);
+		assertEquals("Medication/example", ((ResourceReferenceDt)p.getMedication()).getReference().getValue());
+		assertSame(((ResourceReferenceDt)p.getMedication()).getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
@@ -542,8 +537,8 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertEquals("Medication/example", p.getMedication().getReference().getValue());
-		assertSame(p.getMedication().getResource(), m);
+		assertEquals("Medication/example", ((ResourceReferenceDt)p.getMedication()).getReference().getValue());
+		assertSame(((ResourceReferenceDt)p.getMedication()).getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
@@ -592,7 +587,7 @@ public class JsonParserDstu2Test {
 				"    \"type\":\"document\",\n" + 
 				"    \"entry\":[\n" + 
 				"        {\n" + 
-				"            \"base\":\"urn:uuid:\",\n" + 
+				"            \"fullUrl\":\"urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57\",\n" + 
 				"            \"resource\":{\n" + 
 				"                \"resourceType\":\"Composition\",\n" + 
 				"                \"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\",\n" + 
@@ -718,14 +713,13 @@ public class JsonParserDstu2Test {
 		//@formatter:off
 		String bundle = "{\n" + 
 			"  \"resourceType\" : \"Bundle\",\n" + 
-			"  \"base\" : \"http://foo/fhirBase1\",\n" + 
 			"  \"total\" : 1,\n" + 
 			"   \"link\": [{\n" + 
 			"      \"relation\" : \"self\",\n" + 
 			"      \"url\" : \"http://localhost:52788/Binary?_pretty=true\"\n" + 
 			"   }],\n" + 
 			"   \"entry\" : [{\n" + 
-			"      \"base\" : \"http://foo/fhirBase2\",\n" +
+			"      \"fullUrl\" : \"http://foo/fhirBase2/Patient/1/_history/2\",\n" +
 			"      \"resource\" : {\n" + 
 			"         \"resourceType\" : \"Patient\",\n" + 
 			"         \"id\" : \"1\",\n" + 
@@ -739,7 +733,7 @@ public class JsonParserDstu2Test {
 			"         \"mode\" : \"match\",\n" +
 			"         \"score\" : 0.123\n" +
 			"      },\n" +
-			"      \"transaction\" : {\n" +
+			"      \"request\" : {\n" +
 			"         \"method\" : \"POST\",\n" +
 			"         \"url\" : \"http://foo/Patient?identifier=value\"\n" +
 			"      }\n" +

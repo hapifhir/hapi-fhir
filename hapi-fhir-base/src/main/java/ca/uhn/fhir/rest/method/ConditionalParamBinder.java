@@ -39,10 +39,21 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 class ConditionalParamBinder implements IParameter {
 
 	private RestfulOperationTypeEnum myOperationType;
+	private boolean mySupportsMultiple;
 
-	ConditionalParamBinder(RestfulOperationTypeEnum theOperationType) {
+	ConditionalParamBinder(RestfulOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
 		Validate.notNull(theOperationType, "theOperationType can not be null");
 		myOperationType = theOperationType;
+		mySupportsMultiple = theSupportsMultiple;
+	}
+
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		// nothing
+	}
+
+	public boolean isSupportsMultiple() {
+		return mySupportsMultiple;
 	}
 
 	@Override
@@ -82,11 +93,6 @@ class ConditionalParamBinder implements IParameter {
 		
 		int questionMarkIndex = theRequest.getCompleteUrl().indexOf('?');
 		return theRequest.getResourceName() + theRequest.getCompleteUrl().substring(questionMarkIndex);
-	}
-
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		// nothing
 	}
 
 }

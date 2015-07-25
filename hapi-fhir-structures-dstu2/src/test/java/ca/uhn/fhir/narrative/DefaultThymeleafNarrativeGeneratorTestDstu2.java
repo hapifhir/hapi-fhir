@@ -95,7 +95,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 	@Test
 	public void testGenerateDiagnosticReport() throws DataFormatException {
 		DiagnosticReport value = new DiagnosticReport();
-		value.getName().setText("Some Diagnostic Report");
+		value.getCode().setText("Some Diagnostic Report");
 
 		value.addResult().setReference("Observation/1");
 		value.addResult().setReference("Observation/2");
@@ -106,7 +106,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString(value.getName().getTextElement().getValue()));
+		assertThat(output, StringContains.containsString(value.getCode().getTextElement().getValue()));
 	}
 
 	@Test
@@ -151,7 +151,7 @@ public class DefaultThymeleafNarrativeGeneratorTestDstu2 {
 		value.getIssuedElement().setValueAsString("2011-02-22T11:13:00");
 		value.setStatus(DiagnosticReportStatusEnum.FINAL);
 
-		value.getName().setText("Some & Diagnostic Report");
+		value.getCode().setText("Some & Diagnostic Report");
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("1938HB").setDisplay("Hemoglobin");

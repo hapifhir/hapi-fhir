@@ -128,8 +128,8 @@ public class FhirDataModel {
       // If you need to set other fields (such as the display name) after
       // using the Enum type, you may still do so.
       patient.getMaritalStatus().getCodingFirstRep().setDisplay("Married");
-      patient.getMaritalStatus().getCodingFirstRep().setPrimary(true);
       patient.getMaritalStatus().getCodingFirstRep().setVersion("1.0");
+      patient.getMaritalStatus().getCodingFirstRep().setUserSelected(true);
       
       // You can use accessors to retrieve values from CodeableConcept fields
       

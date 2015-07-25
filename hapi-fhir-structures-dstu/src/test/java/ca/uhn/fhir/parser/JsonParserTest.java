@@ -116,6 +116,34 @@ public class JsonParserTest {
 	}
 
 	@Test
+	public void testParseStringWithNewlineUnencoded() {
+		Observation obs = new Observation();
+		obs.setValue(new StringDt("line1\\nline2"));
+		
+		String output = ourCtx.newJsonParser().encodeResourceToString(obs);
+		
+		ourLog.info(output);
+		assertEquals("{\"resourceType\":\"Observation\",\"valueString\":\"line1\\\\nline2\"}", output);
+		
+		obs = ourCtx.newJsonParser().parseResource(Observation.class, output);
+		assertEquals("line1\\nline2", ((StringDt)obs.getValue()).getValue());
+	}
+
+	@Test
+	public void testParseStringWithNewlineEncoded() {
+		Observation obs = new Observation();
+		obs.setValue(new StringDt("line1\nline2"));
+		
+		String output = ourCtx.newJsonParser().encodeResourceToString(obs);
+		
+		ourLog.info(output);
+		assertEquals("{\"resourceType\":\"Observation\",\"valueString\":\"line1\\nline2\"}", output);
+		
+		obs = ourCtx.newJsonParser().parseResource(Observation.class, output);
+		assertEquals("line1\nline2", ((StringDt)obs.getValue()).getValue());
+	}
+	
+	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
 		Patient patient = new Patient();

@@ -26,9 +26,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeInclude;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -78,17 +78,17 @@ public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDst
 			 */
 			
 			ComposeInclude include = null;
-			for (DefineConcept next : source.getDefine().getConcept()) {
+			for (CodeSystemConcept next : source.getCodeSystem().getConcept()) {
 				if (theFilter == null || theFilter.isEmpty()) {
 					if (include == null) {
-						include = getOrAddComposeInclude(retVal, systemToCompose, source.getDefine().getSystem());
+						include = getOrAddComposeInclude(retVal, systemToCompose, source.getCodeSystem().getSystem());
 					}
 					include.addConcept(new ComposeIncludeConcept().setCode(next.getCode()).setDisplay(next.getDisplay()));
 				} else {
 					String filter = theFilter.getValue().toLowerCase();
 					if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
 						if (include == null) {
-							include = getOrAddComposeInclude(retVal, systemToCompose, source.getDefine().getSystem());
+							include = getOrAddComposeInclude(retVal, systemToCompose, source.getCodeSystem().getSystem());
 						}
 						include.addConcept(new ComposeIncludeConcept().setCode(next.getCode()).setDisplay(next.getDisplay()));
 					}

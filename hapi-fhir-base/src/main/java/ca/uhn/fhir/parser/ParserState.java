@@ -1028,6 +1028,7 @@ class ParserState<T> {
 
 		private BundleEntry myEntry;
 		private Class<? extends IBaseResource> myResourceType;
+		private IdDt myFullUrl;
 
 		public BundleEntryState(Bundle theInstance, Class<? extends IBaseResource> theResourceType) {
 			super(null);
@@ -1046,7 +1047,7 @@ class ParserState<T> {
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			if ("base".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkBase()));
-			} else if ("transaction".equals(theLocalPart)) {
+			} else if ("request".equals(theLocalPart)) {
 				push(new BundleEntryTransactionState(myEntry));
 			} else if ("search".equals(theLocalPart)) {
 				push(new BundleEntrySearchState(myEntry));
@@ -1058,6 +1059,9 @@ class ParserState<T> {
 				push(new BundleEntryDeletedState(getPreResourceState(), myEntry));
 			} else if ("link".equals(theLocalPart)) {
 				push(new BundleLinkState(myEntry));
+			} else if ("fullUrl".equals(theLocalPart)) {
+				myFullUrl = new IdDt();
+				push(new PrimitiveState(getPreResourceState(), myFullUrl));
 			} else {
 				throw new DataFormatException("Unexpected element in entry: " + theLocalPart);
 			}
@@ -1076,6 +1080,10 @@ class ParserState<T> {
 			IdDt id = myEntry.getId();
 			if (id != null && id.isEmpty() == false) {
 				myEntry.getResource().setId(id);
+			}
+			
+			if (myFullUrl != null && !myFullUrl.isEmpty()) {
+				myEntry.getResource().setId(myFullUrl);
 			}
 
 			Map<ResourceMetadataKeyEnum<?>, Object> metadata = myEntry.getResource().getResourceMetadata();
@@ -1226,7 +1234,7 @@ class ParserState<T> {
 		}
 
 	}
-
+	
 	private class BundleState extends BaseState {
 
 		private Bundle myInstance;
@@ -1323,7 +1331,9 @@ class ParserState<T> {
 					} else {
 						baseUrl = bundleBaseUrl;
 					}
-					if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
+					if (baseUrl == null) {
+						// nothing
+					} else if (!baseUrl.startsWith("cid:") && !baseUrl.startsWith("urn:")) {
 						nextResource.setId(new IdDt(baseUrl, resourceName, bundleIdPart, version));
 					} else {
 						if (baseUrl.endsWith(":")) {

@@ -453,7 +453,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(theRestfulOperationTypeEnum);
+						param = new ConditionalParamBinder(theRestfulOperationTypeEnum, ((ConditionalUrlParam)nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
