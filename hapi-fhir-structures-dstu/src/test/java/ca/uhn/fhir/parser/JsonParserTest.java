@@ -59,6 +59,7 @@ import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.dstu.resource.Profile;
 import ca.uhn.fhir.model.dstu.resource.Query;
 import ca.uhn.fhir.model.dstu.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu.resource.Remittance;
 import ca.uhn.fhir.model.dstu.resource.Specimen;
 import ca.uhn.fhir.model.dstu.resource.ValueSet;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
@@ -115,6 +116,21 @@ public class JsonParserTest {
 		assertEquals(number, parsed.getPosition().getLatitude().getValueAsString());
 	}
 
+
+	@Test
+	public void testDecimalPrecisionPreservedInResource() {
+		Remittance obs = new Remittance();
+		obs.addService().setRate(new DecimalDt("0.10000"));
+		
+		String output = ourCtx.newJsonParser().encodeResourceToString(obs);
+		
+		ourLog.info(output);
+		assertEquals("{\"resourceType\":\"Remittance\",\"service\":[{\"rate\":0.10000}]}", output);
+		
+		obs = ourCtx.newJsonParser().parseResource(Remittance.class, output);
+		assertEquals("0.10000", obs.getService().get(0).getRate().getValueAsString());
+	}
+	
 	@Test
 	public void testParseStringWithNewlineUnencoded() {
 		Observation obs = new Observation();
