@@ -66,6 +66,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		chef.roles_path = "./chef/roles"
 		chef.data_bags_path = "./chef/data_bags"
 
+		chef.add_recipe 'apt'
 		chef.add_recipe 'nmap'
 		chef.add_recipe 'mysql::server'
 		chef.add_recipe 'mysql::client'
