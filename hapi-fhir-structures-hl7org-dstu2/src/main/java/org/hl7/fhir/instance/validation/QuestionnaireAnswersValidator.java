@@ -35,8 +35,12 @@ import org.hl7.fhir.instance.model.Type;
 import org.hl7.fhir.instance.model.UriType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.WorkerContext;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /**
  * Validates that an instance of {@link QuestionnaireAnswers} is valid against the {@link Questionnaire} that it claims to conform to.
@@ -45,8 +49,8 @@ import org.hl7.fhir.instance.utils.WorkerContext;
  */
 public class QuestionnaireAnswersValidator extends BaseValidator {
 
-	/* *****************************************************************
-	 * Note to anyone working on this class -
+	/*
+	 * ***************************************************************** Note to anyone working on this class -
 	 * 
 	 * This class has unit tests which run within the HAPI project build. Please sync any changes here to HAPI and ensure that unit tests are run.
 	 * ****************************************************************
@@ -299,8 +303,8 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 				thePathStack.add("answer(" + answerIdx + ")");
 				Type nextValue = nextAnswer.getValue();
 				if (!allowedAnswerTypes.contains(nextValue.getClass())) {
-					rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] found of type [{1}] but this is invalid for question of type [{2}]", linkId, nextValue
-							.getClass().getSimpleName(), type.toCode());
+					rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Answer to question with linkId[{0}] found of type [{1}] but this is invalid for question of type [{2}]", linkId,
+							nextValue.getClass().getSimpleName(), type.toCode());
 					continue;
 				}
 
@@ -339,6 +343,25 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 									break;
 								}
 							}
+						}
+						if (!found) {
+							for (ConceptSetComponent nextCompose : valueSet.getCompose().getInclude()) {
+								if (coding.getSystem().equals(nextCompose.getSystem())) {
+									for (ConceptReferenceComponent next : nextCompose.getConcept()) {
+										if (coding.getCode().equals(next.getCode())) {
+											found = true;
+											break;
+										}
+									}
+								}
+								if (found) {
+									break;
+								}
+							}
+						}
+
+						if (!found) {
+							System.out.println(FhirContext.forDstu2Hl7Org().newXmlParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 						}
 
 						rule(theErrors, IssueType.BUSINESSRULE, thePathStack, found, "Question with linkId[{0}] has answer with system[{1}] and code[{2}] but this is not a valid answer for ValueSet[{3}]",

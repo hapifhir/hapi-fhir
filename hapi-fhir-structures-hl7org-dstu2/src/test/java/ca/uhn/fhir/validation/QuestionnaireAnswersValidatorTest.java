@@ -65,6 +65,7 @@ public class QuestionnaireAnswersValidatorTest {
 				
 		ValueSet options = new ValueSet();
 		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
+		options.getCompose().addInclude().setSystem("urn:system2").addConcept().setCode("code2");
 		myWorkerCtx.getValueSets().put("http://somevalueset", options);
 		
 		QuestionnaireAnswers qa;
@@ -78,7 +79,14 @@ public class QuestionnaireAnswersValidatorTest {
 		errors = new ArrayList<ValidationMessage>();
 		myVal.validate(errors, qa);
 		assertEquals(errors.toString(), 0, errors.size());
-		
+
+		qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference(questionnaireRef);
+		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system2").setCode("code2"));
+		errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		assertEquals(errors.toString(), 0, errors.size());
+
 		// Bad code
 		
 		qa = new QuestionnaireAnswers();
@@ -89,6 +97,16 @@ public class QuestionnaireAnswersValidatorTest {
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("location=QuestionnaireAnswers.group(0).question(0).answer(0)"));
 		assertThat(errors.toString(), containsString("message=Question with linkId[link0] has answer with system[urn:system] and code[code1] but this is not a valid answer for ValueSet[http://somevalueset]"));
+		
+		qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference(questionnaireRef);
+		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system2").setCode("code3"));
+		errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("location=QuestionnaireAnswers.group(0).question(0).answer(0)"));
+		assertThat(errors.toString(), containsString("message=Question with linkId[link0] has answer with system[urn:system2] and code[code3] but this is not a valid answer for ValueSet[http://somevalueset]"));
+		
 	}
 
 
