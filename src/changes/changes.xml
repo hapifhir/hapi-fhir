@@ -53,6 +53,12 @@
 				Resources and datatypes are now serializable. This is an
 				experimental feature which hasn't yet been extensively tested. Please test and give us your feedback!
 			</action>
+			<action type="add">
+				Switch REST server to using HttpServletRequest#getContextPath() to get
+				the servlet's context path. This means that the server should behave more
+				predictably, and should work in servlet 2.4 environments. Thanks to 
+				Ken Zeisset for the suggestion!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

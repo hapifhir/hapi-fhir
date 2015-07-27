@@ -220,6 +220,8 @@ public class IncomingRequestAddressStrategyTest {
 
 	private static class MyServlet extends HttpServlet {
 
+		private static final long serialVersionUID = -8903322104434705422L;
+
 		@Override
 		protected void doGet(HttpServletRequest theReq, HttpServletResponse theResp) throws ServletException, IOException {
 			
