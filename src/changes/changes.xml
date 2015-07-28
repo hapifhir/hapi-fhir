@@ -59,6 +59,11 @@
 				predictably, and should work in servlet 2.4 environments. Thanks to 
 				Ken Zeisset for the suggestion!
 			</action>
+			<action type="add" issue="200">
+				Vagrant environment now has an apt recipt to ensure that
+				package lists are up to date. Thanks to GitHub user
+				Brian S. Corbin (@corbinbs) for thr contribution!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
