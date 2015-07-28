@@ -360,10 +360,6 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 							}
 						}
 
-						if (!found) {
-							System.out.println(FhirContext.forDstu2Hl7Org().newXmlParser().setPrettyPrint(true).encodeResourceToString(valueSet));
-						}
-
 						rule(theErrors, IssueType.BUSINESSRULE, thePathStack, found, "Question with linkId[{0}] has answer with system[{1}] and code[{2}] but this is not a valid answer for ValueSet[{3}]",
 								linkId, coding.getSystem(), coding.getCode(), optionsRef);
 					}
