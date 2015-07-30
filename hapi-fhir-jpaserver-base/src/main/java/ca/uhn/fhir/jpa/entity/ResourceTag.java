@@ -44,12 +44,12 @@ public class ResourceTag extends BaseTag {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
 	private ResourceTable myResource;
 
-	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN,nullable=false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
-	@Column(name="RES_ID", insertable=false,updatable=false)
+	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
-	
+
 	public Long getResourceId() {
 		return myResourceId;
 	}

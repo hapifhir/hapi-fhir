@@ -129,6 +129,7 @@ import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu1;
 import ca.uhn.fhir.rest.method.ValidateMethodBindingDstu2;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
@@ -1556,6 +1557,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			myCriterion.populateParamList(params);
 
+			for (TokenParam next : myTags) {
+				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
+			}
+
 			for (Include next : myInclude) {
 				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
 			}
@@ -1686,6 +1691,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IQuery withIdAndCompartment(String theResourceId, String theCompartmentName) {
 			myResourceId = theResourceId;
 			myCompartmentName = theCompartmentName;
+			return this;
+		}
+
+		private List<TokenParam> myTags = new ArrayList<TokenParam>();
+		
+		@Override
+		public IQuery<Object> withTag(String theSystem, String theCode) {
+			Validate.notBlank(theCode, "theCode must not be null or empty");
+			myTags.add(new TokenParam(theSystem, theCode));
 			return this;
 		}
 

@@ -110,6 +110,7 @@ public class Constants {
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
 	public static final String PARAM_TAGS = "_tags";
+	public static final String PARAM_TAG = "_tag";
 	public static final String PARAM_VALIDATE = "_validate";
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";

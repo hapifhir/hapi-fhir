@@ -87,6 +87,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -1870,6 +1871,80 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		param = new QuantityParam(QuantityCompararatorEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
 		found = ourObservationDao.searchForIds("value-quantity", param);
 		assertEquals(1, found.size());
+
+	}
+
+	@Test
+	public void testSearchWithTagParameter() {
+		String methodName = "testSearchWithTagParameter";
+		
+		IIdType tag1id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			TagList tagList = new TagList();
+			tagList.addTag("urn:taglist", methodName + "1a");
+			tagList.addTag("urn:taglist", methodName + "1b");
+			ResourceMetadataKeyEnum.TAG_LIST.put(org, tagList);
+			tag1id = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType tag2id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			TagList tagList = new TagList();
+			tagList.addTag("urn:taglist", methodName + "2a");
+			tagList.addTag("urn:taglist", methodName + "2b");
+			ResourceMetadataKeyEnum.TAG_LIST.put(org, tagList);
+			tag2id = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			// One tag
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
+		{
+			// Code only
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam(null, methodName + "1a"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
+		{
+			// Or tags
+			SearchParameterMap params = new SearchParameterMap();
+			TokenOrListParam orListParam = new TokenOrListParam();
+			orListParam.add(new TokenParam("urn:taglist", methodName + "1a"));
+			orListParam.add(new TokenParam("urn:taglist", methodName + "2a"));
+			params.add("_tag", orListParam);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id, tag2id));
+		}
+		// TODO: get multiple/AND working
+		{
+			// And tags
+			SearchParameterMap params = new SearchParameterMap();
+			TokenAndListParam andListParam = new TokenAndListParam();
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "1a"));
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "2a"));
+			params.add("_tag", andListParam);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertEquals(0, patients.size());
+		}
+
+		{
+			// And tags
+			SearchParameterMap params = new SearchParameterMap();
+			TokenAndListParam andListParam = new TokenAndListParam();
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "1a"));
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "1b"));
+			params.add("_tag", andListParam);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
 
 	}
 

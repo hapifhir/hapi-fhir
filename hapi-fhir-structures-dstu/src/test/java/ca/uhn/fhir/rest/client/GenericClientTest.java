@@ -695,6 +695,34 @@ public class GenericClientTest {
 
 	@SuppressWarnings("unused")
 	@Test
+	public void testSearchByTag() throws Exception {
+
+		String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		//@formatter:off
+		Bundle response = client.search()
+				.forResource(Patient.class)
+				.withTag("urn:foo", "123")
+				.withTag("urn:bar", "456")
+				.execute();
+		//@formatter:on
+
+		assertEquals(
+				"http://example.com/fhir/Patient?_tag=urn%3Afoo%7C123&_tag=urn%3Abar%7C456",
+				capt.getValue().getURI().toString());
+
+	}
+
+	@SuppressWarnings("unused")
+	@Test
 	public void testSearchWithReverseInclude() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
