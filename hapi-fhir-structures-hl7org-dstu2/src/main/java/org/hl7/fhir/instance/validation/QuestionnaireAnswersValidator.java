@@ -15,9 +15,12 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.Coding;
+import org.hl7.fhir.instance.model.DataElement;
 import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
+import org.hl7.fhir.instance.model.ElementDefinition;
+import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
@@ -42,8 +45,6 @@ import org.hl7.fhir.instance.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.WorkerContext;
 
-import ca.uhn.fhir.context.FhirContext;
-
 /**
  * Validates that an instance of {@link QuestionnaireAnswers} is valid against the {@link Questionnaire} that it claims to conform to.
  * 
@@ -58,6 +59,7 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 	 * ****************************************************************
 	 */
 
+	private static final List<String> EMPTY_PATH = Collections.emptyList();
 	private WorkerContext myWorkerCtx;
 
 	public QuestionnaireAnswersValidator(WorkerContext theWorkerCtx) {
@@ -192,29 +194,54 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 
 	private void validateQuestion(List<ValidationMessage> theErrors, QuestionComponent theQuestion, org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent theAnsGroup,
 			LinkedList<String> thePathStack, QuestionnaireAnswers theAnswers, boolean theValidateRequired) {
-		String linkId = theQuestion.getLinkId();
+		QuestionComponent question = theQuestion;
+		String linkId = question.getLinkId();
 		if (!fail(theErrors, IssueType.INVALID, thePathStack, isNotBlank(linkId), "Questionnaire is invalid, question found with no link ID")) {
 			return;
 		}
 
-		AnswerFormat type = theQuestion.getType();
+		AnswerFormat type = question.getType();
 		if (type == null) {
-			if (theQuestion.getGroup().isEmpty()) {
-				rule(theErrors, IssueType.INVALID, thePathStack, false, "Questionnaire in invalid, no type and no groups specified for question with link ID[{0}]", linkId);
-				return;
+			// Support old format/casing and new
+			List<Extension> extensions = question.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/questionnaire-deReference");
+			if (extensions.isEmpty()) {
+				extensions = question.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/questionnaire-dereference");
 			}
-			type = AnswerFormat.NULL;
+			if (extensions.isEmpty() == false) {
+				if (extensions.size() > 1) {
+					warning(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Questionnaire is invalid, element contains multiple extensions with URL 'questionnaire-dereference', maximum one may be contained in a single element");
+				}
+				return;
+				/*
+				 * Hopefully we will implement this soon...
+				 */
+				
+//				Extension ext = extensions.get(0);
+//				Reference ref = (Reference) ext.getValue();
+//				DataElement de = myWorkerCtx.getDataElements().get(ref.getReference());
+//				if (de.getElement().size() != 1) {
+//					warning(theErrors, IssueType.BUSINESSRULE, EMPTY_PATH, false, "DataElement {0} has wrong number of elements: {1}", ref.getReference(), de.getElement().size());
+//				}
+//				ElementDefinition element = de.getElement().get(0);
+//				question = toQuestion(element);
+			} else {
+				if (question.getGroup().isEmpty()) {
+					rule(theErrors, IssueType.INVALID, thePathStack, false, "Questionnaire is invalid, no type and no groups specified for question with link ID[{0}]", linkId);
+					return;
+				}
+				type = AnswerFormat.NULL;
+			}
 		}
 
 		List<org.hl7.fhir.instance.model.QuestionnaireAnswers.QuestionComponent> answers = findAnswersByLinkId(theAnsGroup.getQuestion(), linkId);
 		if (answers.size() > 1) {
-			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !theQuestion.getRequired(), "Multiple answers repetitions found with linkId[{0}]", linkId);
+			rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(), "Multiple answers repetitions found with linkId[{0}]", linkId);
 		}
 		if (answers.size() == 0) {
 			if (theValidateRequired) {
-				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !theQuestion.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
+				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
 			} else {
-				hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !theQuestion.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
+				hint(theErrors, IssueType.BUSINESSRULE, thePathStack, !question.getRequired(), "Missing answer to required question with linkId[{0}]", linkId);
 			}
 			return;
 		}
@@ -222,12 +249,13 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 		org.hl7.fhir.instance.model.QuestionnaireAnswers.QuestionComponent answerQuestion = answers.get(0);
 		try {
 			thePathStack.add("question[" + answers.indexOf(answerQuestion) + "]");
-			validateQuestionAnswers(theErrors, theQuestion, thePathStack, type, answerQuestion, theAnswers, theValidateRequired);
-			validateQuestionGroups(theErrors, theQuestion, answerQuestion, thePathStack, theAnswers, theValidateRequired);
+			validateQuestionAnswers(theErrors, question, thePathStack, type, answerQuestion, theAnswers, theValidateRequired);
+			validateQuestionGroups(theErrors, question, answerQuestion, thePathStack, theAnswers, theValidateRequired);
 		} finally {
 			thePathStack.removeLast();
 		}
 	}
+
 
 	private void validateQuestionGroups(List<ValidationMessage> theErrors, QuestionComponent theQuestion, org.hl7.fhir.instance.model.QuestionnaireAnswers.QuestionComponent theAnswerQuestion,
 			LinkedList<String> thePathSpec, QuestionnaireAnswers theAnswers, boolean theValidateRequired) {

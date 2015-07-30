@@ -1,0 +1,63 @@
+{
+    "resourceType":"Questionnaire",
+    "id":"4772",
+    "meta":{
+        "versionId":"1",
+        "lastUpdated":"2015-07-09T03:30:29.589-04:00"
+    },
+    "identifier":[
+        {
+            "value":"My First Questionnaire"
+        }
+    ],
+    "date":"2015-07-09T11:32:03+04:00",
+    "publisher":"Edifecs",
+    "group":{
+        "title":"Main Group",
+        "group":[
+            {
+                "text":"Common",
+                "question":[
+                    {
+                        "linkId":"Link0",
+                        "text":"What is your name?",
+                        "type":"string"
+                    },
+                    {
+                        "linkId":"Link1",
+                        "text":"What is your age?",
+                        "type":"integer"
+                    },
+                    {
+                        "linkId":"Link2",
+                        "text":"Do you smoke?",
+                        "type":"boolean"
+                    },
+                    {
+                        "extension":[
+                            {
+                                "url":"http://hl7.org/fhir/StructureDefinition/questionnaire-deReference",
+                                "valueReference":{
+                                    "reference":"DataElement/4770"
+                                }
+                            }
+                        ],
+                        "linkId":"Link3"
+                    },
+                    {
+                        "extension":[
+                            {
+                                "url":"http://hl7.org/fhir/StructureDefinition/questionnaire-deReference",
+                                "valueReference":{
+                                    "reference":"DataElement/4771"
+                                }
+                            }
+                        ],
+                        "linkId":"Link4"
+                    }
+                ]
+            }
+        ]
+    }
+}
+

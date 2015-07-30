@@ -302,4 +302,20 @@ public class BaseValidator {
     return thePass;
   }
 
+  /**
+   * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
+   * 
+   * @param thePass
+   *          Set this parameter to <code>false</code> if the validation does not pass
+   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
+   */
+  protected boolean warning(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
+    if (!thePass) {
+      String path = toPath(pathParts);
+      String message = formatMessage(theMessage, theMessageArguments);
+      errors.add(new ValidationMessage(source, type, -1, -1, path, message, IssueSeverity.WARNING));
+    }
+    return thePass;
+  }
+
 }

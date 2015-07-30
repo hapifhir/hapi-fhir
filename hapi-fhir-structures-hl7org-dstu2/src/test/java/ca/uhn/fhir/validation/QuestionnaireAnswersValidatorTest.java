@@ -4,11 +4,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.Coding;
+import org.hl7.fhir.instance.model.DataElement;
 import org.hl7.fhir.instance.model.Questionnaire;
 import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
 import org.hl7.fhir.instance.model.Questionnaire.GroupComponent;
@@ -24,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.DataFormatException;
 
 public class QuestionnaireAnswersValidatorTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
@@ -56,6 +59,20 @@ public class QuestionnaireAnswersValidatorTest {
 		assertThat(errors.toString(), containsString("Answer to question with linkId[link0] found of type [StringType] but this is invalid for question of type [boolean]"));
 	}
 
+	@Test
+	public void testExtensionDereference() throws Exception {
+		Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-q.json")));
+		QuestionnaireAnswers qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-qa.xml")));
+		DataElement de = ourCtx.newJsonParser().parseResource(DataElement.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-de.json")));
+		
+		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
+		myWorkerCtx.getDataElements().put("DataElement/4771", de);
+		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		
+		ourLog.info(errors.toString());
+		assertEquals(errors.toString(), errors.size(), 0);
+	}
 	
 	@Test
 	public void testGroupWithNoLinkIdInQuestionnaireAnswers() {

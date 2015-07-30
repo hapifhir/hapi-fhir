@@ -37,12 +37,31 @@ import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
  * Base definition for all elements in a resource.
  */
 public abstract class Element extends Base implements IBaseHasExtensions {
+   /**
+    * Returns an unmodifiable list containing all extensions on this element which 
+    * match the given URL.
+    * 
+    * @param theUrl The URL. Must not be blank or null.
+    * @return an unmodifiable list containing all extensions on this element which 
+    * match the given URL
+    */
+   public List<Extension> getExtensionsByUrl(String theUrl) {
+     Validate.notBlank(theUrl, "theUrl must not be blank or null");
+     ArrayList<Extension> retVal = new ArrayList<Extension>();
+     for (Extension next : getExtension()) {
+       if (theUrl.equals(next.getUrl())) {
+         retVal.add(next);
+       }
+     }
+     return Collections.unmodifiableList(retVal);
+   }
 
     /**
      * unique id for the element within a resource (for internal references).
