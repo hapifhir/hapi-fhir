@@ -64,7 +64,7 @@ public class BaseValidator {
    */
   protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
     if (!thePass) {
-      String path = StringUtils.join(pathParts, '.');
+      String path = toPath(pathParts);
       errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.FATAL));
     }
     return thePass;
@@ -79,7 +79,7 @@ public class BaseValidator {
    */
   protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
     if (!thePass) {
-      String path = StringUtils.join(pathParts, '.');
+      String path = toPath(pathParts);
       errors.add(new ValidationMessage(source, type, -1, -1, path, formatMessage(theMessage, theMessageArguments), IssueSeverity.FATAL));
     }
     return thePass;
@@ -151,7 +151,7 @@ public class BaseValidator {
    */
   protected boolean hint(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
     if (!thePass) {
-      String path = StringUtils.join(pathParts, '.');
+      String path = toPath(pathParts);
       String message = formatMessage(theMessage, theMessageArguments);
       errors.add(new ValidationMessage(source, type, -1, -1, path, message, IssueSeverity.INFORMATION));
     }
@@ -181,7 +181,7 @@ public class BaseValidator {
    */
   protected boolean rule(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
     if (!thePass) {
-      String path = StringUtils.join(pathParts, '.');
+      String path = toPath(pathParts);
       errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.ERROR));
     }
     return thePass;
@@ -196,11 +196,18 @@ public class BaseValidator {
    */
   protected boolean rule(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
     if (!thePass) {
-      String path = StringUtils.join(pathParts, '.');
+      String path = toPath(pathParts);
       String message = formatMessage(theMessage, theMessageArguments);
       errors.add(new ValidationMessage(source, type, -1, -1, path, message, IssueSeverity.ERROR));
     }
     return thePass;
+  }
+
+  private String toPath(List<String> pathParts) {
+    if (pathParts == null || pathParts.isEmpty()) {
+      return "";
+    }
+    return "//" + StringUtils.join(pathParts, '/');
   }
 
   /**

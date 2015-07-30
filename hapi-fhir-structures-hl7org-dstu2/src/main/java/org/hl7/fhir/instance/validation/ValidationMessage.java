@@ -52,7 +52,8 @@ public class ValidationMessage {
     Schematron, 
     Publisher, 
     Ontology, 
-    ProfileComparer
+    ProfileComparer, 
+    QuestionnaireAnswersValidator
   }
   //@formatter:on
 
