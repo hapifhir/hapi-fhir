@@ -358,6 +358,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return pids;
 	}
 
+	@Override
+	public Set<Long> processMatchUrl(String theMatchUrl) {
+		return processMatchUrl(theMatchUrl, getResourceType());
+	}
+
 	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
 			IQueryParameterType nextOr) {
 		boolean missingFalse = false;

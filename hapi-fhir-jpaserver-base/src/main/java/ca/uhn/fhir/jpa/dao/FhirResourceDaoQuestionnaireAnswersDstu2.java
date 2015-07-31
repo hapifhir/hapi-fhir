@@ -46,7 +46,7 @@ public class FhirResourceDaoQuestionnaireAnswersDstu2 extends FhirResourceDaoDst
 		super.validateResourceForStorage(theResource);
 
 		QuestionnaireAnswers qa = (QuestionnaireAnswers) theResource;
-		if (qa.getQuestionnaire().getReference().isEmpty()) {
+		if (qa == null || qa.getQuestionnaire() == null || qa.getQuestionnaire().getReference() == null || qa.getQuestionnaire().getReference().isEmpty()) {
 			return;
 		}
 

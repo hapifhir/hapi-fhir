@@ -67,6 +67,9 @@
 			<action type="add">
 				JPA server and generic client now both support the _tag search parameter
 			</action>
+			<action type="add">
+				Add support for BATCH mode to JPA server transaction operation
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

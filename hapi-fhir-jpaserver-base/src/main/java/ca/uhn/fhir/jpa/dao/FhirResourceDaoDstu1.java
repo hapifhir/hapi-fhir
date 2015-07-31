@@ -65,6 +65,5 @@ public class FhirResourceDaoDstu1<T extends IResource> extends BaseHapiFhirResou
 		oo.getIssueFirstRep().getDetailsElement().setValue(theMessage);
 		return oo;
 	}
-
 	
 }
