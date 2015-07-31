@@ -1086,6 +1086,19 @@ public class RestfulServer extends HttpServlet {
 		if (myStarted) {
 			throw new IllegalStateException("Server is already started");
 		}
+
+		// call the setRestfulServer() method to point the Conformance
+		// Provider to this server instance. This is done to avoid
+		// passing the server into the constructor. Having that sort
+		// of cross linkage causes reference cycles in Spring wiring 
+		try {
+			Method setRestfulServer = theServerConformanceProvider.getClass().getMethod("setRestfulServer", new Class[]{RestfulServer.class});
+			if (setRestfulServer != null) {
+				setRestfulServer.invoke(theServerConformanceProvider, new Object[]{this});
+			}
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			ourLog.warn("Error calling IServerConformanceProvider.setRestfulServer", e);
+		} 
 		myServerConformanceProvider = theServerConformanceProvider;
 	}
 

@@ -77,9 +77,23 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
 	private String myPublisher = "Not provided";
-	private final RestfulServer myRestfulServer;
+	private RestfulServer myRestfulServer;
 
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
+		myRestfulServer = theRestfulServer;
+	}
+	
+	/*
+	 * Add a no-arg constructor and seetter so that the
+	 * ServerConfirmanceProvider can be Spring-wired with
+	 * the RestfulService avoiding the potential reference
+	 * cycle that would happen.
+	 */
+	public ServerConformanceProvider () {
+		super();
+	}
+	
+	public void setRestfulServer (RestfulServer theRestfulServer) {
 		myRestfulServer = theRestfulServer;
 	}
 

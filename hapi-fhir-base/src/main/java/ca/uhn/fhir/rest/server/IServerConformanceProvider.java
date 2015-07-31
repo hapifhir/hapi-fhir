@@ -33,4 +33,12 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 */
 	public abstract T getServerConformance(HttpServletRequest theRequest);
 
+	/**
+	 * This setter is needed in implementation classes (along with
+	 * a no-arg constructor) to avoid reference cycles in the
+	 * Spring wiring of a RestfulServer instance.
+	 * 
+	 * @param theRestfulServer
+	 */
+	public void setRestfulServer (RestfulServer theRestfulServer);
 }
