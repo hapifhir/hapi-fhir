@@ -251,6 +251,12 @@ public interface IGenericClient extends IRestfulClient {
 	@Override
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
+	/**
+	 * Search for resources matching a given set of criteria. Searching is a very powerful
+	 * feature in FHIR with many features for specifying exactly what should be seaerched for 
+	 * and how it should be returned. See the <a href="http://www.hl7.org/fhir/search.html">specification on search</a>
+	 * for more information.
+	 */
 	IUntypedQuery search();
 
 	/**

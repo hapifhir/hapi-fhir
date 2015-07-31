@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuestionnaireAnswers xmlns="http://hl7.org/fhir">
+	<text>
+	   Most of the items requested by NICE is collected within the first 24hours of ICU admission.
+	   Therefore we would like an update of the message with these values. 
+	</text>
+   <questionnaire>
+   		<reference value="Questionnaire/nice-pilot-questionnaire" /> <!--  Should reference the nice-pilot-questionnaire.xml -->
+   	</questionnaire>
+ 	<status value="in-progress"/>
+
+	<group>
+		<linkId value="NICE-FHIR-Pilot"/>
+		
+<!--  1  -->
+		<group>
+			<linkId value="opname identificatie"/>
+			<question>
+				<linkId value="hospno"/>
+				<answer>
+					<valueInteger value="88"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="icno"/>
+				<answer>
+					<valueInteger value="1"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="admno"/>
+				<answer>
+					<valueInteger value="1239827"/>
+				</answer>
+			</question>
+		</group>
+		
+<!-- 2 -->
+		<group>
+			<linkId value="patientinformation" />
+			<question>
+				<linkId value="patno"/>
+				<answer>
+					<valueString value="KSJDHFSDFMNCVXJK"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="partialBSN"/>
+				<answer>
+					<valueInteger value="1232456"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="date_of_birth"/>
+				<answer>
+					<valueDate value="1964-03-09"/>
+				</answer>
+			</question>
+		</group>
+
+<!-- 3 -->
+		<group>
+			<linkId value="opnamegegevens"/>
+			<question>
+				<linkId value="adm_hosp"/>
+				<answer>
+					<valueDateTime value="2015-07-21T14:04:00+01:00"/>
+				</answer>
+			</question>
+  			<question>
+				<linkId value="adm_icu"/>
+				<answer>
+					<valueDateTime value="2015-07-21T14:04:00+01:00"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="adm_source"/>
+				<answer>
+					<valueInteger value="1"/> 
+				</answer>
+			</question>
+			<question>
+				<linkId value="cardio_vas_insuf"/>
+				<answer>
+					<valueBoolean value="true"/>
+				</answer>
+			</question>
+		</group>
+<!-- 4  -->
+		<group>
+			<linkId value="1ste 24uur na opname"/>
+			<question>
+				<linkId value="ap4diag1"/>
+				<answer>
+					<valueInteger value="129"/>  <!--  Guillian-Barre syndrome -->
+				</answer>
+			</question>
+			<question>
+				<linkId value="ap4diag2"/>
+				<answer>
+					<valueInteger value="246"/>  <!--  CABG with other operation -->
+				</answer>
+			</question>
+			<question>
+				<linkId value="meanbl_max"/>
+				<answer>
+					<valueQuantity>
+						<value value="240" />
+						<units value="mmHg" />
+						<system value="http://unitsofmeasure.org" />
+						<code value="mm[Hg]" />
+					</valueQuantity>
+				</answer>
+			</question>
+			<question>
+				<linkId value="meanbl_min"/>
+				<answer>
+					<valueQuantity>
+						<value value="11" />
+						<units value="mmHg" />
+						<system value="http://unitsofmeasure.org" />
+						<code value="mm[Hg]" />
+					</valueQuantity>
+				</answer>
+			</question>
+			<question>
+				<linkId value="creat_max"/>
+				<answer>
+					<valueDecimal value="287"/>
+				</answer>
+				<!--  should be in umol/l -->
+			</question>
+			<question>
+				<linkId value="creat_min"/>
+				<answer>
+					<valueDecimal value="99"/>
+				</answer>
+				<!--  should be in umol/l -->
+			</question>
+			<question>
+				<linkId value="eye_24"/>
+				<type value="choice"/> 
+				<answer>
+					<valueInteger value="2" />
+				</answer>
+
+				<!-- could or should i use loinc?
+				<code>
+ 			       <coding>
+          			<system value="http://loinc.org"/>
+          			<code value="9267-6"/>
+          			<display value="Glasgow coma score eye opening"/>
+        		</coding>
+      		  	<text value="Eyes"/>
+      			</code>
+				 -->
+			</question>
+			<question>
+				<linkId value="motor_24"/>
+				<answer>
+					<ValueInteger value="3"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="verbal_24"/>
+				<answer>
+					<valueInteger value="1"/>
+				</answer>
+				<!-- could or should i use loinc?
+				 <code>
+        			<coding>
+          				<system value="http://loinc.org"/>
+          				<code value="9270-0"/>
+          				<display value="Glasgow coma score verbal"/>
+        			</coding>
+        			<text value="Verbal"/>
+      			</code> -->
+			</question>
+		</group>
+	</group>
+</QuestionnaireAnswers>

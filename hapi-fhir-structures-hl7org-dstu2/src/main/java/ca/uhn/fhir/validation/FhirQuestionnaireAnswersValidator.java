@@ -1,5 +1,7 @@
 package ca.uhn.fhir.validation;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,9 +12,11 @@ import org.hl7.fhir.instance.model.QuestionnaireAnswers;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.WorkerContext;
 import org.hl7.fhir.instance.validation.QuestionnaireAnswersValidator;
 import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.hl7.fhir.instance.validation.ValidationMessage.Source;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.parser.IParser;
@@ -87,7 +91,9 @@ public class FhirQuestionnaireAnswersValidator extends BaseValidatorBridge {
 		for (ResourceReferenceInfo nextRefInfo : refs) {
 			IIdType nextRef = nextRefInfo.getResourceReference().getReferenceElement();
 			String resourceType = nextRef.getResourceType();
-			if ("ValueSet".equals(resourceType)) {
+			if (isBlank(resourceType)) {
+				theMessages.add(new ValidationMessage(Source.QuestionnaireAnswersValidator, IssueType.INVALID, null, "Invalid reference '" + nextRef.getValue() + "' - Does not identify resource type", IssueSeverity.FATAL));
+			} else if ("ValueSet".equals(resourceType)) {
 				if (!theWorkerCtx.getValueSets().containsKey(nextRef.getValue())) {
 					ValueSet resource = tryToLoad(ValueSet.class, nextRef, theMessages);
 					if (resource == null) {
