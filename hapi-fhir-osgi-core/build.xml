@@ -1,0 +1,52 @@
+<project name="HAPI FHIR Core OSGi Bundle" default="all">
+	<property file="project.properties"/>
+	<property name="spring.dir" value="${resources.dir}/META-INF/spring" />
+	<property name="bundle.jar" value="${bundle.file.name}_${major.version}.${minor.version}.${micro.version}.jar" />
+	<property name="bundle.file" value="${target.dir}/${bundle.jar}" />
+	<property name="hapi.fhir.base.jar" value="${hapi.fhir.base.name}-${hapi.fhir.version}.jar" />
+	<property name="hapi.fhir.base.file" value="../${hapi.fhir.base.name}/target/${hapi.fhir.base.jar}" />
+	<property name="hapi.fhir.dstu.jar" value="${hapi.fhir.dstu.name}-${hapi.fhir.version}.jar" />
+	<property name="hapi.fhir.dstu.file" value="../${hapi.fhir.dstu.name}/target/${hapi.fhir.dstu.jar}" />
+	<property name="hapi.fhir.dstu2.jar" value="${hapi.fhir.dstu2.name}-${hapi.fhir.version}.jar" />
+	<property name="hapi.fhir.dstu2.file" value="../${hapi.fhir.dstu2.name}/target/${hapi.fhir.dstu2.jar}" />
+	<property name="hapi.fhir.hl7dstu2.jar" value="${hapi.fhir.hl7dstu2.name}-${hapi.fhir.version}.jar" />
+	<property name="hapi.fhir.hl7dstu2.file" value="../${hapi.fhir.hl7dstu2.name}/target/${hapi.fhir.hl7dstu2.jar}" />
+	
+	<target name="all" depends="bundle" />
+	
+	<target name="init">
+		<delete dir="${obr.target.dir}" failonerror="false"/>
+		<mkdir dir="${obr.target.dir}" />
+	</target>
+	
+	<target name="collect.jars" depends="init">
+		<delete dir="${temp.target.dir}" failonerror="false"/>
+		<mkdir dir="${temp.target.dir}" />
+		<copy todir="${temp.target.dir}">
+			<fileset file="${hapi.fhir.base.file}"/>
+			<fileset file="${hapi.fhir.dstu.file}"/>
+			<fileset file="${hapi.fhir.dstu2.file}"/>
+			<fileset file="${hapi.fhir.hl7dstu2.file}"/>
+		</copy>
+	</target>
+	
+	<target name="bundle" depends="collect.jars">
+		<echo>creating HAPI FHIR Core OSGi Bundle</echo>
+		<concat destfile="${temp.target.dir}/MANIFEST.MF">
+			<fileset dir="${resources.dir}/META-INF" includes="MANIFEST.MF" />
+<footer>
+Bundle-Classpath: .,
+ lib/${hapi.fhir.base.jar},
+ lib/${hapi.fhir.dstu.jar},
+ lib/${hapi.fhir.dstu2.jar},
+ lib/${hapi.fhir.hl7dstu2.jar}
+</footer>
+		</concat>
+		<jar destfile="${bundle.file}" manifest="${temp.target.dir}/MANIFEST.MF">
+			<fileset dir="${classes.dir}" includes="**/*" />
+			<zipfileset dir="${temp.target.dir}" includes="*.jar" prefix="lib"/>
+			<zipfileset dir="${spring.dir}" prefix="META-INF/spring"/>
+		</jar>
+	</target>
+
+</project>
