@@ -70,6 +70,11 @@
 			<action type="add">
 				Add support for BATCH mode to JPA server transaction operation
 			</action>
+			<action type="fix" issue="192">
+				Server was not correctly unescaping URL parameter values with
+				a trailing comma or an escaped backslash. Thanks to GitHub user
+				@SherryH for all of her help in diagnosing this issue!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

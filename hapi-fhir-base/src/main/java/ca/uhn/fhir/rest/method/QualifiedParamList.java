@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.method;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -29,21 +31,21 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 public class QualifiedParamList extends ArrayList<String> {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private String myQualifier;
 
 	public QualifiedParamList() {
 		super();
 	}
-	
+
 	public QualifiedParamList(int theCapacity) {
 		super(theCapacity);
 	}
 
 	public QualifiedParamList(IQueryParameterOr<?> theNextOr) {
 		for (IQueryParameterType next : theNextOr.getValuesAsQueryTokens()) {
-			if (myQualifier==null) {
-				myQualifier=next.getQueryParameterQualifier();
+			if (myQualifier == null) {
+				myQualifier = next.getQueryParameterQualifier();
 			}
 			add(next.getValueAsQueryToken());
 		}
@@ -60,36 +62,68 @@ public class QualifiedParamList extends ArrayList<String> {
 	public static QualifiedParamList singleton(String theParamValue) {
 		return singleton(null, theParamValue);
 	}
-	
+
 	public static QualifiedParamList singleton(String theQualifier, String theParamValue) {
 		QualifiedParamList retVal = new QualifiedParamList(1);
 		retVal.setQualifier(theQualifier);
 		retVal.add(theParamValue);
 		return retVal;
 	}
-	
-	
-	public static QualifiedParamList splitQueryStringByCommasIgnoreEscape(String theQualifier, String theParams){
-		 QualifiedParamList retVal = new QualifiedParamList();
-		 retVal.setQualifier(theQualifier);
-		
-		StringTokenizer tok = new StringTokenizer(theParams,",");
-		String prev=null;
+
+	public static QualifiedParamList splitQueryStringByCommasIgnoreEscape(String theQualifier, String theParams) {
+		QualifiedParamList retVal = new QualifiedParamList();
+		retVal.setQualifier(theQualifier);
+
+		StringTokenizer tok = new StringTokenizer(theParams, ",", true);
+		String prev = null;
 		while (tok.hasMoreElements()) {
 			String str = tok.nextToken();
-			if (prev!=null&&prev.endsWith("\\")) {
-				int idx = retVal.size()-1;
-				String existing = retVal.get(idx);
-				retVal.set(idx, existing.substring(0, existing.length()-1) + "," + str);
-			}else {
-				retVal.add(str);
+			if (isBlank(str)) {
+				prev = null;
+				continue;
 			}
 			
-			prev=str;
+			if (str.equals(",")) {
+					if (countTrailingSlashes(prev) % 2 == 1) {
+						int idx = retVal.size() - 1;
+						String existing = retVal.get(idx);
+						prev = existing.substring(0, existing.length() - 1) + ',';
+						retVal.set(idx, prev);
+					} else {
+						prev = null;
+					}
+				continue;
+			}
+
+			if (prev != null && prev.length() > 0 && prev.charAt(prev.length() - 1) == ',') {
+				int idx = retVal.size() - 1;
+				String existing = retVal.get(idx);
+				prev = existing + str;
+				retVal.set(idx, prev);
+			} else {
+				retVal.add(str);
+				prev = str;
+			}
+
 		}
-		
+
 		return retVal;
 	}
 
-	
+	private static int countTrailingSlashes(String theString) {
+		if(theString==null) {
+			return 0;
+		}
+		int retVal = 0;
+		for (int i = theString.length() - 1; i >= 0; i--) {
+			char nextChar = theString.charAt(i);
+			if (nextChar != '\\') {
+				break;
+			} else {
+				retVal++;
+			}
+		}
+		return retVal;
+	}
+
 }
