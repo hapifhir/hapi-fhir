@@ -14,6 +14,7 @@ cache:
 
 install: /bin/true
 script:
+  - export MAVEN_OPTS="-XX:MaxPermSize=512m -Xmx4g"
   - mvn -B clean install && cd hapi-fhir-cobertura && mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:cobertura coveralls:report 
 #  - mvn -B clean install -Dcobertura.skip=true && mvn -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID -P COBERTURA clean cobertura:cobertura coveralls:report 
 
