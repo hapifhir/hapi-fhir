@@ -78,6 +78,11 @@
 			<version>${commons_io_version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${commons_codec_version}</version>
+		</dependency>
 
 		<!-- Android does not come with the Servlet API bundled, and MethodUtil 
 			requires it -->
@@ -153,17 +158,21 @@
 							<shadedClassifierName>dstu</shadedClassifierName>
 							<artifactSet>
 								<includes>
+									<!--
 									<include>commons-codec:commons-codec</include>
+									-->
 									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
 									<include>org.glassfish:javax.json</include>
 									<include>org.codehaus.woodstox:woodstox-core-asl</include>
 									<include>javax.xml.stream:stax-api</include>
-									<include>javax.servlet:javax.servlet-api</include>
+									<!-- <include>javax.servlet:javax.servlet-api</include>-->
 									<include>org.codehaus.woodstox:stax2-api</include>
 									<!-- <include>org.slf4j:slf4j*</include> -->
+									<!--
 									<include>org.apache.commons:*</include>
 									<include>org.apache.httpcomponents:*</include>
+									-->
 									<include>org.glassfish:javax.json</include>
 								</includes>
 							</artifactSet>
@@ -201,16 +210,20 @@
 							<shadedClassifierName>dstu2</shadedClassifierName>
 							<artifactSet>
 								<includes>
+									<!--
 									<include>commons-codec:commons-codec</include>
+									-->
 									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
 									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
 									<include>org.glassfish:javax.json</include>
 									<include>org.codehaus.woodstox:woodstox-core-asl</include>
 									<include>javax.xml.stream:stax-api</include>
-									<include>javax.servlet:javax.servlet-api</include>
+									<!-- <include>javax.servlet:javax.servlet-api</include>-->
 									<include>org.codehaus.woodstox:stax2-api</include>
+									<!--
 									<include>org.apache.commons:*</include>
 									<include>org.apache.httpcomponents:*</include>
+									-->
 									<include>org.glassfish:javax.json</include>
 								</includes>
 							</artifactSet>
