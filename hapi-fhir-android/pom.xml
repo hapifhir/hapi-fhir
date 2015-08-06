@@ -38,13 +38,11 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>1.2-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>1.2-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
 		<!--
 		<dependency>
@@ -115,7 +113,7 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>${maven_failsafe_plugin_version}</version>
 				<configuration>
-					<classpathDependencyScopeExclude>compile+runtime+test</classpathDependencyScopeExclude>
+					<classpathDependencyScopeExclude>compile+runtime+test+provided</classpathDependencyScopeExclude>
 					<additionalClasspathElements>
 						<additionalClasspathElement>${project.build.directory}/hapi-fhir-android-${project.version}-dstu2.jar</additionalClasspathElement>
 					</additionalClasspathElements>

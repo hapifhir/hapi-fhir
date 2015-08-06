@@ -1643,7 +1643,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IClientExecutable returnBundle(Class theClass) {
+		public IQuery returnBundle(Class theClass) {
 			if (theClass == null) {
 				throw new NullPointerException("theClass must not be null");
 			}
