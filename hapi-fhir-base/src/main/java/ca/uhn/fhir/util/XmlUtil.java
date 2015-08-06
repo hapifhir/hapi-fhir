@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -49,6 +50,7 @@ import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
 
 import com.ctc.wstx.api.WstxInputProperties;
+import com.ctc.wstx.stax.WstxInputFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
 
 /**
@@ -1546,7 +1548,16 @@ public class XmlUtil {
 
 	private static XMLInputFactory getOrCreateInputFactory() throws FactoryConfigurationError {
 		if (ourInputFactory == null) {
-			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+
+			try {
+				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLInputFactory");
+				System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+			} catch (ClassNotFoundException e) {
+				// ok
+			}
+			
+			XMLInputFactory inputFactory;
+			inputFactory = XMLInputFactory.newInstance();
 
 			if (!ourHaveLoggedStaxImplementation) {
 				logStaxImplementation(inputFactory.getClass());
@@ -1576,6 +1587,14 @@ public class XmlUtil {
 
 	private static XMLOutputFactory getOrCreateOutputFactory() throws FactoryConfigurationError {
 		if (ourOutputFactory == null) {
+
+			try {
+				Class.forName("ca.uhn.fhir.repackage.javax.xml.stream.XMLOutputFactory");
+				System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+			} catch (ClassNotFoundException e) {
+				// ok
+			}
+
 			XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
 
 			if (!ourHaveLoggedStaxImplementation) {
@@ -1668,8 +1687,8 @@ public class XmlUtil {
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println(Character.toString((char) 167));
+	public static void main(String[] args) throws FactoryConfigurationError, XMLStreamException {
+		createXmlWriter(new StringWriter());
 	}
 
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
