@@ -94,6 +94,28 @@ public class QuestionnaireAnswersValidatorTest {
 	}
 
 	@Test
+	public void testMultipleGroupsWithNoLinkIdInQuestionnaire() {
+		Questionnaire q = new Questionnaire();
+		GroupComponent qGroup = q.getGroup().addGroup();
+		qGroup.addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
+		qGroup = q.getGroup().addGroup();
+		qGroup.addQuestion().setLinkId("link1").setRequired(true).setType(AnswerFormat.BOOLEAN);
+		
+		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
+		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+		
+		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
+		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("ValidationMessage[level=FATAL,type=BUSINESSRULE,location=//QuestionnaireAnswers/group[0],message=Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with blank/missing linkId]"));
+		assertEquals(1, errors.size());
+	}
+
+	@Test
 	public void testMultipleGroupsWithNoLinkIdInQuestionnaireAnswers() {
 		Questionnaire q = new Questionnaire();
 		GroupComponent qGroup = q.getGroup().addGroup();

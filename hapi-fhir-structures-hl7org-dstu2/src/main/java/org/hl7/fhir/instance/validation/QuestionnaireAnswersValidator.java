@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -15,11 +16,9 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.Attachment;
 import org.hl7.fhir.instance.model.BooleanType;
 import org.hl7.fhir.instance.model.Coding;
-import org.hl7.fhir.instance.model.DataElement;
 import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.DecimalType;
-import org.hl7.fhir.instance.model.ElementDefinition;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.IntegerType;
@@ -52,14 +51,17 @@ import org.hl7.fhir.instance.utils.WorkerContext;
  */
 public class QuestionnaireAnswersValidator extends BaseValidator {
 
+	//@formatter:off
 	/*
-	 * ***************************************************************** Note to anyone working on this class -
+	 * ***************************************************************** 
+	 * Note to anyone working on this class -
 	 * 
-	 * This class has unit tests which run within the HAPI project build. Please sync any changes here to HAPI and ensure that unit tests are run.
+	 * This class has unit tests which run within the HAPI project build. 
+	 * Please sync any changes here to HAPI and ensure that unit tests are run.
 	 * ****************************************************************
 	 */
+	//@formatter:on
 
-	private static final List<String> EMPTY_PATH = Collections.emptyList();
 	private WorkerContext myWorkerCtx;
 
 	public QuestionnaireAnswersValidator(WorkerContext theWorkerCtx) {
@@ -126,6 +128,22 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 		pathStack.removeLast();
 		pathStack.add("group[0]");
 		validateGroup(theErrors, questionnaire.getGroup(), theAnswers.getGroup(), pathStack, theAnswers, validateRequired);
+		
+		/*
+		 * If we found any fatal errors, any other errors will be removed since the fatal error means
+		 * the parsing was invalid
+		 */
+		for (ValidationMessage next : theErrors) {
+			if (next.getLevel() == IssueSeverity.FATAL) {
+				for (Iterator<ValidationMessage> iter = theErrors.iterator(); iter.hasNext(); ) {
+					if (iter.next().getLevel() != IssueSeverity.FATAL) {
+						iter.remove();
+					}
+				}
+				break;
+			}
+		}
+		
 	}
 
 	private Questionnaire getQuestionnaire(QuestionnaireAnswers theAnswers, Reference theQuestionnaireRef) {
@@ -273,7 +291,11 @@ public class QuestionnaireAnswersValidator extends BaseValidator {
 		for (GroupComponent nextQuestionGroup : theQuestionGroups) {
 			String nextLinkId = StringUtils.defaultString(nextQuestionGroup.getLinkId());
 			if (!linkIds.add(nextLinkId)) {
-				rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with linkId[{0}]", nextLinkId);
+				if (isBlank(nextLinkId)) {
+					fail(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with blank/missing linkId", nextLinkId);
+				} else {
+					fail(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with linkId[{0}]", nextLinkId);
+				}
 			}
 		}
 		

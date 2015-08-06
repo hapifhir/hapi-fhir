@@ -199,24 +199,6 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
 
-	/**
-	 * #158
-	 */
-	@Test
-	public void testEncodeEmptyTag2() {
-		TagList tagList = new TagList();
-		tagList.addTag("scheme", "code", null);
-		tagList.addTag(null, null, "Label");
-		
-		Patient p = new Patient();
-		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
-		
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertThat(encoded, containsString("tag"));
-		assertThat(encoded, containsString("scheme"));
-		assertThat(encoded, not(containsString("Label")));
-	}
-
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -282,7 +264,6 @@ public class JsonParserDstu2Test {
 		assertEquals("VERSION2", label.getVersion());
 	}
 
-	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -304,7 +285,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
@@ -324,6 +304,7 @@ public class JsonParserDstu2Test {
 
 	}
 
+	
 	/**
 	 * Fixing #89
 	 */
@@ -343,6 +324,7 @@ public class JsonParserDstu2Test {
 		//@formatter:on
 	}
 
+	
 	/**
 	 * #158
 	 */
@@ -357,6 +339,43 @@ public class JsonParserDstu2Test {
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, not(containsString("tag")));
+	}
+
+	/**
+	 * #158
+	 */
+	@Test
+	public void testEncodeEmptyTag2() {
+		TagList tagList = new TagList();
+		tagList.addTag("scheme", "code", null);
+		tagList.addTag(null, null, "Label");
+		
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertThat(encoded, containsString("tag"));
+		assertThat(encoded, containsString("scheme"));
+		assertThat(encoded, not(containsString("Label")));
+	}
+
+	/**
+	 * See #205
+	 */
+	@Test
+	public void testEncodeTags() {
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("sys").setValue("val");
+
+		TagList tagList = new TagList();
+		tagList.addTag("scheme", "term", "display");
+		ResourceMetadataKeyEnum.TAG_LIST.put(pt, tagList);
+
+		String enc = ourCtx.newJsonParser().encodeResourceToString(pt);
+		ourLog.info(enc);
+
+		assertEquals("{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}", enc);
+
 	}
 
 	@Test
