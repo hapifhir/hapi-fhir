@@ -13,6 +13,7 @@ Servers/
 nohup.out
 .DS_Store
 *.orig
+tmp.txt
 
 # Vagrant stuff.
 .vagrant

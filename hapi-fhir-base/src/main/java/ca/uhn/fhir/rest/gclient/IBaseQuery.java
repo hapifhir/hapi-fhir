@@ -20,7 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
-public interface IBaseQuery<T> {
+public interface IBaseQuery<T extends IBaseQuery<?>> {
 
     T where(ICriterion<?> theCriterion);
 

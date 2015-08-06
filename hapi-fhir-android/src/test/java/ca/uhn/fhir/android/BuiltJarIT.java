@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Observable;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
@@ -14,9 +15,15 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ctc.wstx.stax.WstxInputFactory;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -24,8 +31,16 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 public class BuiltJarIT {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BuiltJarIT.class);
 
+	@BeforeClass
+	public static void beforeClass() {
+		System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
+		System.setProperty("javax.xml.stream.XMLOutputFactory", "com.ctc.wstx.stax.WstxOutputFactory");
+	}
+	
 	@Test
-	public void testParser() {
+	public void testParserXml() throws Exception {
+//		fail("*******: " + WstxInputFactory.class.getProtectionDomain().getCodeSource().getLocation().toString());
+		
 		FhirContext ctx = FhirContext.forDstu2();
 		
 		Patient p = new Patient();
@@ -37,6 +52,26 @@ public class BuiltJarIT {
 		assertEquals("system", p2.getIdentifierFirstRep().getSystemElement().getValueAsString());
 	}
 	
+	@Test
+	public void testParserJson() {
+		FhirContext ctx = FhirContext.forDstu2();
+		
+		Observation o = new Observation();
+		o.getCode().setText("TEXT");
+		o.setValue(new QuantityDt(123));
+		o.addIdentifier().setSystem("system");
+		
+		String str = ctx.newJsonParser().encodeResourceToString(o);
+		Observation p2 = ctx.newJsonParser().parseResource(Observation.class, str);
+		
+		assertEquals("TEXT", p2.getCode().getText());
+		
+		QuantityDt dt = (QuantityDt) p2.getValue();
+		dt.getComparatorElement().getValueAsEnum();
+		
+		QuantityCompararatorEnum.GREATERTHAN.name();
+	}
+
 	/**
 	 * A simple client test - We try to connect to a server that doesn't exist, but
 	 * if we at least get the right exception it means we made it up to the HTTP/network stack
@@ -113,7 +148,7 @@ public class BuiltJarIT {
 				
 				ourLog.info("File {} contains {} entries", file, names.size());
 				ourLog.info("Total classes {} - Total methods {}", totalClasses, totalMethods);
-				ourLog.info("Top classes {}", new ArrayList<ClassMethodCount>(topMethods).subList(topMethods.size() - 10, topMethods.size()));
+				ourLog.info("Top classes {}", new ArrayList<ClassMethodCount>(topMethods).subList(Math.max(0,topMethods.size() - 10), topMethods.size()));
 				
 			} finally {
 				zip.close();

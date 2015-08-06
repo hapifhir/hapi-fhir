@@ -74,6 +74,20 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
-	<B extends IBaseBundle> IClientExecutable<IQuery<B>, B> returnBundle(Class<B> theClass);
-	
+	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);
+
+	/**
+	 * {@inheritDoc}
+	 */
+	// This is here as an overridden method to allow mocking clients with Mockito to work
+	@Override
+	IQuery<T> where(ICriterion<?> theCriterion);
+
+	/**
+	 * {@inheritDoc}
+	 */
+	// This is here as an overridden method to allow mocking clients with Mockito to work
+	@Override
+	IQuery<T> and(ICriterion<?> theCriterion);
+
 }

@@ -60,62 +60,6 @@ public class QuestionnaireAnswersValidatorTest {
 	}
 
 	@Test
-	public void testExtensionDereference() throws Exception {
-		Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-q.json")));
-		QuestionnaireAnswers qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-qa.xml")));
-		DataElement de = ourCtx.newJsonParser().parseResource(DataElement.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-de.json")));
-		
-		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
-		myWorkerCtx.getDataElements().put("DataElement/4771", de);
-		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
-		myVal.validate(errors, qa);
-		
-		ourLog.info(errors.toString());
-		assertEquals(errors.toString(), errors.size(), 0);
-	}
-	
-	@Test
-	public void testGroupWithNoLinkIdInQuestionnaireAnswers() {
-		Questionnaire q = new Questionnaire();
-		GroupComponent qGroup = q.getGroup().addGroup();
-		qGroup.addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
-		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
-		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
-		
-		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
-		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
-		myVal.validate(errors, qa);
-		
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Answer to question with linkId[link0] found of type [StringType] but this is invalid for question of type [boolean]"));
-	}
-
-	@Test
-	public void testMultipleGroupsWithNoLinkIdInQuestionnaireAnswers() {
-		Questionnaire q = new Questionnaire();
-		GroupComponent qGroup = q.getGroup().addGroup();
-		qGroup.addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
-		GroupComponent qGroup2 = q.getGroup().addGroup();
-		qGroup2.addQuestion().setLinkId("link1").setRequired(true).setType(AnswerFormat.BOOLEAN);
-		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
-		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
-		
-		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
-		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
-		myVal.validate(errors, qa);
-		
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with linkId[]"));
-	}
-	
-	
-	@Test
 	public void testCodedAnswer() {
 		String questionnaireRef = "http://example.com/Questionnaire/q1";
 		
@@ -169,8 +113,43 @@ public class QuestionnaireAnswersValidatorTest {
 		assertThat(errors.toString(), containsString("message=Question with linkId[link0] has answer with system[urn:system2] and code[code3] but this is not a valid answer for ValueSet[http://somevalueset]"));
 		
 	}
+	
+	@Test
+	public void testExtensionDereference() throws Exception {
+		Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-q.json")));
+		QuestionnaireAnswers qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-qa.xml")));
+		DataElement de = ourCtx.newJsonParser().parseResource(DataElement.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-de.json")));
+		
+		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
+		myWorkerCtx.getDataElements().put("DataElement/4771", de);
+		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		
+		ourLog.info(errors.toString());
+		assertEquals(errors.toString(), errors.size(), 0);
+	}
 
+	@Test
+	public void testGroupWithNoLinkIdInQuestionnaireAnswers() {
+		Questionnaire q = new Questionnaire();
+		GroupComponent qGroup = q.getGroup().addGroup();
+		qGroup.addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
+		
+		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
+		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+		
+		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
+		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("Answer to question with linkId[link0] found of type [StringType] but this is invalid for question of type [boolean]"));
+	}
 
+	
+	
 	@Test
 	public void testMissingRequiredQuestion() {
 		
@@ -189,6 +168,29 @@ public class QuestionnaireAnswersValidatorTest {
 		
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("Missing answer to required question with linkId[link0]"));
+	}
+
+
+	@Test
+	public void testMultipleGroupsWithNoLinkIdInQuestionnaire() {
+		Questionnaire q = new Questionnaire();
+		GroupComponent qGroup = q.getGroup().addGroup();
+		qGroup.addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
+		qGroup = q.getGroup().addGroup();
+		qGroup.addQuestion().setLinkId("link1").setRequired(true).setType(AnswerFormat.BOOLEAN);
+		
+		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
+		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+		
+		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
+		List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
+		myVal.validate(errors, qa);
+		
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("ValidationMessage[level=FATAL,type=BUSINESSRULE,location=//QuestionnaireAnswers/group[0],message=Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with blank/missing linkId]"));
+		assertEquals(1, errors.size());
 	}
 
 	@Test

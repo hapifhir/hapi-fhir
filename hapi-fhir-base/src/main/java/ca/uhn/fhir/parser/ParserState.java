@@ -227,7 +227,7 @@ class ParserState<T> {
 
 	/**
 	 * @param theResourceType
-	 *            May be null
+	 *           May be null
 	 */
 	static <T extends IBaseResource> ParserState<T> getPreResourceInstance(Class<T> theResourceType, FhirContext theContext, boolean theJsonMode, IParserErrorHandler theErrorHandler)
 			throws DataFormatException {
@@ -796,6 +796,10 @@ class ParserState<T> {
 			myPreResourceState = thePreResourceState;
 		}
 
+		/**
+		 * @param theValue
+		 *           The attribute value
+		 */
 		public void attributeValue(String theName, String theValue) throws DataFormatException {
 			myErrorHandler.unknownAttribute(null, theName);
 		}
@@ -804,6 +808,15 @@ class ParserState<T> {
 			// ignore by default
 		}
 
+		protected void logAndSwallowUnexpectedElement(String theLocalPart) {
+			myErrorHandler.unknownElement(null, theLocalPart);
+			push(new SwallowChildrenWholeState(getPreResourceState()));
+		}
+
+		/**
+		 * @param theNamespaceUri
+		 *           The XML namespace (if XML) or null
+		 */
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
 			myErrorHandler.unknownElement(null, theLocalPart);
 		}
@@ -860,7 +873,7 @@ class ParserState<T> {
 
 		/**
 		 * @param theData
-		 *            The string value
+		 *           The string value
 		 */
 		public void string(String theData) {
 			// ignore by default
@@ -872,7 +885,7 @@ class ParserState<T> {
 
 		/**
 		 * @param theNextEvent
-		 *            The XML event
+		 *           The XML event
 		 */
 		public void xmlEvent(XMLEvent theNextEvent) {
 			// ignore
@@ -1151,12 +1164,12 @@ class ParserState<T> {
 			} else if ("url".equals(theLocalPart)) {
 				push(new PrimitiveState(getPreResourceState(), myEntry.getLinkSearch()));
 			} else {
-				ourLog.warn("Unexpected element in Bundle.entry.search: " + theLocalPart);
-				push(new SwallowChildrenWholeState(getPreResourceState()));
+				logAndSwallowUnexpectedElement(theLocalPart);
 			}
 		}
 
 	}
+
 
 	private class BundleLinkState extends BaseState {
 
@@ -1563,13 +1576,13 @@ class ParserState<T> {
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 				return;
 			}
-			
+
 			if ((child.getMax() == 0 || child.getMax() == 1) && !myParsedNonRepeatableNames.add(theChildName)) {
 				myErrorHandler.unexpectedRepeatingElement(null, theChildName);
 				push(new SwallowChildrenWholeState(getPreResourceState()));
 				return;
 			}
-			
+
 			BaseRuntimeElementDefinition<?> target = child.getChildByName(theChildName);
 			if (target == null) {
 				// This is a bug with the structures and shouldn't happen..
@@ -2338,11 +2351,14 @@ class ParserState<T> {
 				} else if ("resource".equals(theLocalPart)) {
 					mySubState = ResourceReferenceSubState.REFERENCE;
 					break;
+				} else {
+					logAndSwallowUnexpectedElement(theLocalPart);
+					break;
 				}
-				//$FALL-THROUGH$
 			case DISPLAY:
 			case REFERENCE:
-				throw new DataFormatException("Unexpected element: " + theLocalPart);
+				logAndSwallowUnexpectedElement(theLocalPart);
+				break;
 			}
 		}
 

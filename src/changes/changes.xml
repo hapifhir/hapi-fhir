@@ -75,6 +75,13 @@
 				a trailing comma or an escaped backslash. Thanks to GitHub user
 				@SherryH for all of her help in diagnosing this issue!
 			</action>
+			<action type="fix">
+				Avoid crash when parsing if an invalid child element is found in 
+				a resource reference.
+			</action>
+			<action type="add">
+				Create new android specialty libraries for DSTU1 and DSTU2
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
