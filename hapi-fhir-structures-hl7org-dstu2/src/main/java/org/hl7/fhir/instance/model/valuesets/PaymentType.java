@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 
 public enum PaymentType {
@@ -70,7 +70,7 @@ public enum PaymentType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/contracttypecodes";
+          return "http://hl7.org/fhir/payment-type";
         }
         public String getDefinition() {
           switch (this) {

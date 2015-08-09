@@ -255,6 +255,7 @@ public class ParameterUtil {
 					case '$':
 					case ',':
 					case '|':
+					case '\\':
 						continue;
 					default:
 						b.append(next);

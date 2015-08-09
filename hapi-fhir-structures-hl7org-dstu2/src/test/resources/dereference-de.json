@@ -1,0 +1,30 @@
+{
+    "resourceType":"DataElement",
+    "id":"4770",
+    "meta":{
+        "versionId":"1",
+        "lastUpdated":"2015-07-09T03:28:33.831-04:00"
+    },
+    "text":{
+        "status":"generated",
+        "div":"<div xmlns=\"http://www.w3.org/1999/xhtml\"><!-- Snipped for brevity --></div>"
+    },
+    "identifier":{
+        "value":"Age Question"
+    },
+    "version":"1.0",
+    "name":"QuestionSample",
+    "status":"active",
+    "publisher":"EDIFECS",
+    "element":[
+        {
+            "path":"DataElement.question",
+            "label":"What is your age?",
+            "type":[
+                {
+                    "code":"positiveInt"
+                }
+            ]
+        }
+    ]
+}

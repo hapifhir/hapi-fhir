@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,7 +52,7 @@ public class Contract extends DomainResource {
         /**
          * Who or what actors are assigned roles in this Contract.
          */
-        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class, Supply.class}, order=1, min=1, max=1)
+        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Contract Actor Type", formalDefinition="Who or what actors are assigned roles in this Contract." )
         protected Reference entity;
 
@@ -166,7 +166,7 @@ public class Contract extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("entity", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance|Supply)", "Who or what actors are assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, entity));
+          childrenList.add(new Property("entity", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "Who or what actors are assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, entity));
           childrenList.add(new Property("role", "CodeableConcept", "Role type of actors assigned roles in this Contract.", 0, java.lang.Integer.MAX_VALUE, role));
         }
 
@@ -1447,7 +1447,7 @@ public class Contract extends DomainResource {
         /**
          * The actor assigned a role in this Contract Provision.
          */
-        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class, Supply.class}, order=1, min=1, max=1)
+        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Contract Term Actor", formalDefinition="The actor assigned a role in this Contract Provision." )
         protected Reference entity;
 
@@ -1561,7 +1561,7 @@ public class Contract extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("entity", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance|Supply)", "The actor assigned a role in this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, entity));
+          childrenList.add(new Property("entity", "Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)", "The actor assigned a role in this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, entity));
           childrenList.add(new Property("role", "CodeableConcept", "Role played by the actor assigned this role in this Contract Provision.", 0, java.lang.Integer.MAX_VALUE, role));
         }
 
@@ -2022,7 +2022,7 @@ public class Contract extends DomainResource {
         /**
          * Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.
          */
-        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireAnswers.class}, order=1, min=1, max=1)
+        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Easily comprehended representation of this Contract", formalDefinition="Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability." )
         protected Type content;
 
@@ -2090,7 +2090,7 @@ public class Contract extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireAnswers)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, java.lang.Integer.MAX_VALUE, content));
+          childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.", 0, java.lang.Integer.MAX_VALUE, content));
         }
 
       public FriendlyLanguageComponent copy() {
@@ -2131,7 +2131,7 @@ public class Contract extends DomainResource {
         /**
          * Contract legal text in human renderable form.
          */
-        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireAnswers.class}, order=1, min=1, max=1)
+        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=1, min=1, max=1)
         @Description(shortDefinition="Contract Legal Text", formalDefinition="Contract legal text in human renderable form." )
         protected Type content;
 
@@ -2199,7 +2199,7 @@ public class Contract extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireAnswers)", "Contract legal text in human renderable form.", 0, java.lang.Integer.MAX_VALUE, content));
+          childrenList.add(new Property("content[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Contract legal text in human renderable form.", 0, java.lang.Integer.MAX_VALUE, content));
         }
 
       public LegalLanguageComponent copy() {
@@ -2460,7 +2460,7 @@ public class Contract extends DomainResource {
     /**
      * Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.
      */
-    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireAnswers.class}, order=14, min=0, max=1)
+    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=14, min=0, max=1)
     @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the 'source of truth' and which would be the basis for legal action related to enforcement of this Contract." )
     protected Type binding;
 
@@ -3247,7 +3247,7 @@ public class Contract extends DomainResource {
         childrenList.add(new Property("valuedItem", "", "Contract Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
         childrenList.add(new Property("signer", "", "Party signing this Contract.", 0, java.lang.Integer.MAX_VALUE, signer));
         childrenList.add(new Property("term", "", "One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.", 0, java.lang.Integer.MAX_VALUE, term));
-        childrenList.add(new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireAnswers)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the 'source of truth' and which would be the basis for legal action related to enforcement of this Contract.", 0, java.lang.Integer.MAX_VALUE, binding));
+        childrenList.add(new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the 'source of truth' and which would be the basis for legal action related to enforcement of this Contract.", 0, java.lang.Integer.MAX_VALUE, binding));
         childrenList.add(new Property("friendly", "", "The 'patient friendly language' versionof the Contract in whole or in parts. 'Patient friendly language' means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.", 0, java.lang.Integer.MAX_VALUE, friendly));
         childrenList.add(new Property("legal", "", "List of Legal expressions or representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, legal));
         childrenList.add(new Property("rule", "", "List of Computable Policy Rule Language Representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, rule));

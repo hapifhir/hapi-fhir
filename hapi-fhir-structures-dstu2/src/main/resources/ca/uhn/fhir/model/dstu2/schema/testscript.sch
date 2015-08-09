@@ -33,6 +33,12 @@
       <sch:assert test="not(f:assert)">inv-16: Assertions SHALL be present in TestScript.setup.action and TestScript.test.action only.</sch:assert>
       <sch:assert test="not(f:operation)">inv-15: Operations SHALL be present in TestScript.setup.action, TestScript.test.action and TestScript.teardown.action only.</sch:assert>
     </sch:rule>
+    <sch:rule context="f:TestScript/f:contact/f:telecom">
+      <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:TestScript/f:contact/f:telecom/f:period">
+      <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
+    </sch:rule>
     <sch:rule context="f:TestScript/f:metadata">
       <sch:assert test="f:capabilities/f:required or f:capabilities/f:validated or (f:capabilities/f:required and f:capabilities/f:validated)">inv-5: TestScript metadata capabilities SHALL contain required or validated or both.</sch:assert>
     </sch:rule>

@@ -49,8 +49,24 @@ public class TokenParameterTest {
 	 * Test #192
 	 */
 	@Test
-	public void testOrListWithEscapedValue() throws Exception {
+	public void testOrListWithEscapedValue1() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=" + UrlUtil.escape("system|code-include-but-not-end-with-comma\\,suffix"));
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals("system", ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals("code-include-but-not-end-with-comma,suffix", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals(1, ourLastOrList.getListAsCodings().size());
+	}
+
+	/**
+	 * Test #192
+	 */
+	@Test
+	public void testOrListWithEscapedValue2() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=" + UrlUtil.escape("system|code-include-end-with-comma\\,"));
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -58,7 +74,65 @@ public class TokenParameterTest {
 
 		assertEquals(1, ourLastOrList.getListAsCodings().size());
 		assertEquals("system", ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
-		assertEquals("code-include-but-not-end-with-comma,suffix", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals("code-include-end-with-comma,", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+	}
+
+	/**
+	 * Test #192
+	 */
+	@Test
+	public void testOrListWithEscapedValue3() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=" + UrlUtil.escape("system|code-include-end-with-comma1,system|code-include-end-with-comma2,,,,,"));
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(2, ourLastOrList.getListAsCodings().size());
+		assertEquals("system", ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals("code-include-end-with-comma1", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals("system", ourLastOrList.getListAsCodings().get(1).getSystemElement().getValue());
+		assertEquals("code-include-end-with-comma2", ourLastOrList.getListAsCodings().get(1).getCodeElement().getValue());
+	}
+
+	/**
+	 * Test #192
+	 */
+	@Test
+	public void testOrListWithEscapedValue4() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=" + UrlUtil.escape("\\,\\,\\,value1\\,\\,\\,with\\,\\,\\,commas\\,\\,\\,,,,\\,\\,\\,value2\\,\\,\\,with\\,\\,\\,commas,,,\\,"));
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(null, ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals(",,,value1,,,with,,,commas,,,", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals(null, ourLastOrList.getListAsCodings().get(1).getSystemElement().getValue());
+		assertEquals(",,,value2,,,with,,,commas", ourLastOrList.getListAsCodings().get(1).getCodeElement().getValue());
+		assertEquals(null, ourLastOrList.getListAsCodings().get(2).getSystemElement().getValue());
+		assertEquals(",", ourLastOrList.getListAsCodings().get(2).getCodeElement().getValue());
+		assertEquals(3, ourLastOrList.getListAsCodings().size());
+	}
+	
+	/**
+	 * Test #192
+	 */
+	@Test
+	public void testOrListWithEscapedValue5() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=" + UrlUtil.escape("A\\\\,B,\\$"));
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals(null, ourLastOrList.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals("A\\", ourLastOrList.getListAsCodings().get(0).getCodeElement().getValue());
+		assertEquals(null, ourLastOrList.getListAsCodings().get(1).getSystemElement().getValue());
+		assertEquals("B", ourLastOrList.getListAsCodings().get(1).getCodeElement().getValue());
+		assertEquals(null, ourLastOrList.getListAsCodings().get(2).getSystemElement().getValue());
+		assertEquals("$", ourLastOrList.getListAsCodings().get(2).getCodeElement().getValue());
+		assertEquals(3, ourLastOrList.getListAsCodings().size());
 	}
 
 	@AfterClass

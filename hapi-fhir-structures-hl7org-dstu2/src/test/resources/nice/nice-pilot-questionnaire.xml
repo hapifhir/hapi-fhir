@@ -1,0 +1,251 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Questionnaire xmlns="http://hl7.org/fhir">
+	<text>
+		The Dutch National Intensive Care Evaluation (NICE) foundation
+		facilitates a registry to enable participating intensive care units to
+		quantify and improve the quality of care they offer. The NICE
+		foundation offers intensive care units feedback and benchmarking on
+		patient outcomes, including mortality and allows them to compare their
+		outcomes with those achieved nationally and in groups of similar
+		hospitals. The foundation provides each participating intensive care
+		unit with biannual quality reports and access to an online tool
+		enabling each intensive care unit to perform additional analyses on
+		their data at any time. It also publishes two magazines each year with
+		features based on analyses of registry data and organizes a national
+		conference to enable medical and nursing specialists to meet and
+		discuss their own and national results. In addition, the foundation
+		collects data to enable quality indicators developed by the
+		Netherlands Society of Intensive Care to be calculated.
+		
+		The data is collected since 1996 until today using Ms Access files which
+		where send monthly. Now a pilot is setup to collect this data "realtime"  
+		with FHIR. 
+		
+		In this questionnaire is a representative selection of items from the NICE definitions. 
+		The language used in the texts, is dutch (sorry).  
+
+	</text>
+	<identifier>
+		<use value="official"/>
+		<system value="http://stichting-nice.nl/pilot/fhir"/>
+	</identifier>
+	<status value="draft"/>
+	<group>
+		<linkId value="NICE-FHIR-Pilot"/>
+		<title value="NICE FHIR Pilot questionnaire"/>
+		<required value="true"/>
+		<repeats value="false"/>
+
+<!--  1  -->
+		<group>
+			<linkId value="opname identificatie"/>
+			<required value="true"/>
+			<repeats value="false"/>
+			<title value="Wat is de identificatie van de opname volgens de regels van NICE?"/>
+			<text value="Vrijwel alle gegevens die de NICE wil ontvangen, is gerelateerd aan een IC-opname. Deze wordt door de NICE  
+				geidentificeerd met behulp van de combinatie ziekenhuisnummer, ic-nummer en het opnamenummer.  
+				Dit onderdeel is dan ook verplicht voor elke opname gerelateerde questionnaire. De periodieke gegevens als  
+				de jaargegevens, kwartaalgegevens en de dagelijkse fteâs en bedbezetting hebben een aangepaste sleutel. "/>
+			<required value="true"/>
+			<repeats value="false"/>
+			<question>
+				<linkId value="hospno"/>
+				<text value="Wat is het door NICE toegekende ziekenhuisnummer?"/>
+				<type value="integer"/>
+				<required value="true"/>
+				<repeats value="false"/>
+			</question>
+			<question>
+				<linkId value="icno"/>
+				<text value="Wat is het door NICE toegekende IC nummer voor de afdeling?"/>
+				<type value="integer"/>
+				<required value="true"/>
+				<repeats value="false"/>
+			</question>
+			<question>
+				<linkId value="admno"/>
+				<text value="Wat is het unieke nummer dat door de instelling is toegewezen aan deze opname?"/>
+				<type value="integer"/>
+				<required value="true"/>
+				<repeats value="false"/>
+			</question>
+		</group>   
+
+<!-- 2  -->
+		<group>
+			<!-- For now as questions, might want to use a reference to a patient resource -->
+			<linkId value="patientinformation" />
+			<text value="De gegevens die bekent zijn bij IC opname"/>
+			<required value="false"/>
+			<repeats value="false"/>
+			<question>
+				<linkId value="patno"/>
+				<text value="Wat is het NICE geencrypteerde patientnummer?"/>
+				<type value="string"/>
+				<required value="true"/>
+			</question>
+			<question>
+				<linkId value="partialBSN"/>
+				<text value="Wat zijn de eerste 6 cijfers van het BSN?"/>
+				<type value="string"/>
+			</question>
+			<question>
+				<linkId value="date_of_birth"/>
+				<text value="Wat is de geboortedatum van de patient?"/>
+				<type value="date"/>
+				<required value="true"/>
+			</question>
+		</group>
+<!-- 3 -->
+		<group>	
+			<linkId value="opnamegegevens"/>
+			<required value="false"/>
+			<repeats value="false"/>
+			<question>
+				<linkId value="adm_hosp"/>
+				<text value="Wat is de ziekenhuisopnamedatum ( optioneel: en -tijd)?"/>
+				<type value="dateTime"/>
+			</question>
+  			<question>
+				<linkId value="adm_icu"/>
+				<text value="Wat is de IC opnamedatum en -tijd?"/>
+				<type value="dateTime"/>
+				<required value="true"/>
+			</question>
+			<question>
+				<linkId value="adm_source"/>
+				<text value="Wat is de herkomst van de patient direct voor IC-opname"/>
+				<type value="choice"/>
+				<options>
+		 			<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/AdmissionSource"/>    
+				</options>
+			</question>
+			<question>
+				<linkId value="cardio_vas_insuf"/>
+				<text value="Angina of symptomen in rust of bij minimale inspanning (aankleden en verzorging)? (New York Heart Association klasse IV)."/>
+				<type value="boolean"/>
+			</question>
+		</group>
+<!-- 4 -->
+		<group>
+			<linkId value="1ste 24uur na opname"/>
+			<required value="false"/>
+			<repeats value="false"/>
+			<text value="De gegevens over de 1ste 24uur van de IC opname"/>
+			<question>
+				<linkId value="ap4diag1"/>
+				<text value="Welke APACHE IV diagnose hoort bij deze IC opname?"/>
+				<type value="choice"/>
+				<options>
+				    <!--  reference exists -->
+					<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/ApacheIVDiagnose"/>
+				</options>
+			</question>
+			<question>
+				<linkId value="ap4diag2"/>
+				<text value="Welke optionele 2de APACHE IV diagnose hoort bij deze IC opname?"/>
+				<type value="choice"/>
+				<options>
+					<!--  reference exists -->
+					<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/ApacheIVDiagnose"/>
+				</options>
+			</question>
+			<question>
+				<linkId value="meanbl_max"/>
+				<text value="Wat was de hoogste gemiddelde bloeddruk in de 1ste 24uur van IC opname?"/>
+				<type value="quantity"/>
+				<!--  should be in mmHg -->
+			</question>
+			<question>
+				<linkId value="meanbl_min"/>
+				<text value="Wat was de laagste gemiddelde bloeddruk in de 1ste 24uur van IC opname?"/>
+				<type value="quantity"/>
+				<!--  should be in mmHg -->
+			</question>
+			<question>
+				<linkId value="creat_max"/>
+				<text value="Wat was de hoogste waarde serum creatinine in de 1ste 24uur van IC opname?"/>
+				<type value="quantity"/>
+				<!--  should be in umol/l -->
+			</question>
+			<question>
+				<linkId value="creat_min"/>
+				<text value="Wat was de laagste waarde serum creatinine in de 1ste 24uur van IC opname?"/>
+				<type value="quantity"/>
+				<!--  should be in umol/l -->
+			</question>
+			<question>
+				<linkId value="eye_24"/>
+				<text value="Wat is de oogreactie 24uur na IC opname?"/>
+				<type value="choice"/> 
+				<options>
+					<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/104"/>
+				</options>
+
+				<!-- could or should i use loinc?
+				<code>
+ 			       <coding>
+          			<system value="http://loinc.org"/>
+          			<code value="9267-6"/>
+          			<display value="Glasgow coma score eye opening"/>
+        		</coding>
+      		  	<text value="Eyes"/>
+      			</code>
+				 -->
+			</question>
+			<question>
+				<linkId value="motor_24"/>
+				<concept>
+					<coding>
+          				<system value="http://loinc.org"/>
+          				<code value="9268-4"/>
+          				<display value="Glasgow coma score motor"/>
+        			</coding>
+				</concept>
+				<text value="Wat is de motorische reactie 24uur na IC opname?"/>
+				<type value="choice"/> 
+				<options>
+					<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/198"/>
+				</options>
+			</question>
+			<question>
+				<linkId value="verbal_24"/>
+				<text value="Wat is de verbale reactie 24uur na IC opname?"/>
+				<type value="choice"/> 
+				<options>
+					<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/435"/>
+				</options>
+
+				<!-- could or should i use loinc?
+				 <code>
+        			<coding>
+          				<system value="http://loinc.org"/>
+          				<code value="9270-0"/>
+          				<display value="Glasgow coma score verbal"/>
+        			</coding>
+        			<text value="Verbal"/>
+      			</code> -->
+			</question>
+		</group>
+<!-- 5 -->
+		<group>
+			<linkId value="IC ontslaggegevens"/>
+			<required value="false"/>
+			<repeats value="false"/>
+			<text value="De gegevens die bekend zijn na IC ontslag"/>
+			<question>
+				<linkId value="dis_icu"/>
+				<text value="Wat is de IC ontslagdatum en âtijd?"/>
+				<type value="dateTime"/>
+			</question>
+			<question>
+				<linkId value="discharged_to"/>
+				<text value="Wat is de ontslagbestemming?"/>
+				<type value="choice"/>
+				<options>
+		 			<reference value="https://stichting-nice.nl/pilot/fhir/ValueSet/Discharged_to"/>    
+				</options>
+			</question>
+		</group>
+	</group>
+</Questionnaire>

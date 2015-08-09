@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -43,17 +39,19 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
 
 public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
@@ -200,24 +198,6 @@ public class JsonParserDstu2Test {
 		assertEquals(new Tag("scheme2", "term2", "label2"), tagList.get(1));
 	}
 
-	/**
-	 * #158
-	 */
-	@Test
-	public void testEncodeEmptyTag2() {
-		TagList tagList = new TagList();
-		tagList.addTag("scheme", "code", null);
-		tagList.addTag(null, null, "Label");
-		
-		Patient p = new Patient();
-		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
-		
-		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertThat(encoded, containsString("tag"));
-		assertThat(encoded, containsString("scheme"));
-		assertThat(encoded, not(containsString("Label")));
-	}
-
 	@Test
 	public void testEncodeAndParseSecurityLabels() {
 		Patient p = new Patient();
@@ -279,7 +259,6 @@ public class JsonParserDstu2Test {
 		assertEquals("VERSION2", label.getVersion());
 	}
 
-	
 	@Test
 	public void testEncodeBundleNewBundleNoText() {
 
@@ -301,7 +280,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	@Test
 	public void testEncodeBundleOldBundleNoText() {
 
@@ -321,6 +299,7 @@ public class JsonParserDstu2Test {
 
 	}
 
+	
 	/**
 	 * Fixing #89
 	 */
@@ -340,6 +319,7 @@ public class JsonParserDstu2Test {
 		//@formatter:on
 	}
 
+	
 	/**
 	 * #158
 	 */
@@ -354,6 +334,43 @@ public class JsonParserDstu2Test {
 		
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, not(containsString("tag")));
+	}
+
+	/**
+	 * #158
+	 */
+	@Test
+	public void testEncodeEmptyTag2() {
+		TagList tagList = new TagList();
+		tagList.addTag("scheme", "code", null);
+		tagList.addTag(null, null, "Label");
+		
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
+		
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
+		assertThat(encoded, containsString("tag"));
+		assertThat(encoded, containsString("scheme"));
+		assertThat(encoded, not(containsString("Label")));
+	}
+
+	/**
+	 * See #205
+	 */
+	@Test
+	public void testEncodeTags() {
+		Patient pt = new Patient();
+		pt.addIdentifier().setSystem("sys").setValue("val");
+
+		TagList tagList = new TagList();
+		tagList.addTag("scheme", "term", "display");
+		ResourceMetadataKeyEnum.TAG_LIST.put(pt, tagList);
+
+		String enc = ourCtx.newJsonParser().encodeResourceToString(pt);
+		ourLog.info(enc);
+
+		assertEquals("{\"resourceType\":\"Patient\",\"meta\":{\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"display\"}]},\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}]}", enc);
+
 	}
 
 	@Test
@@ -383,7 +400,7 @@ public class JsonParserDstu2Test {
 	@Test
 	public void testJsonPrimitiveWithExtensionEncoding() {
 
-		QuestionnaireAnswers parsed = new QuestionnaireAnswers();
+		QuestionnaireResponse parsed = new QuestionnaireResponse();
 		parsed.getGroup().setLinkId("value123");
 		parsed.getGroup().getLinkIdElement().addUndeclaredExtension(false, "http://123", new StringDt("HELLO"));
 
@@ -830,7 +847,6 @@ public class JsonParserDstu2Test {
 		obsv.getCode().addCoding().setCode("name");
 		obsv.setValue(new StringDt("value test"));
 		obsv.setStatus(ObservationStatusEnum.FINAL);
-		obsv.setReliability(ObservationReliabilityEnum.OK);
 		obsv.addIdentifier().setSystem("System").setValue("id value");
 
 		DiagnosticReport report = new DiagnosticReport();
@@ -853,7 +869,6 @@ public class JsonParserDstu2Test {
 		obsv.getCode().addCoding().setCode("name");
 		obsv.setValue(new StringDt("value test"));
 		obsv.setStatus(ObservationStatusEnum.FINAL);
-		obsv.setReliability(ObservationReliabilityEnum.OK);
 		obsv.addIdentifier().setSystem("System").setValue("id value");
 
 		DiagnosticReport report = new DiagnosticReport();

@@ -525,15 +525,11 @@ public class RestfulServer extends HttpServlet {
 			String requestFullPath = StringUtils.defaultString(theRequest.getRequestURI());
 			String servletPath = StringUtils.defaultString(theRequest.getServletPath());
 			StringBuffer requestUrl = theRequest.getRequestURL();
-			String servletContextPath = "";
+			String servletContextPath = IncomingRequestAddressStrategy.determineServletContextPath(theRequest, this);
 
-			// if (getServletContext().getMajorVersion() >= 3) {
-			// // getServletContext is only supported in version 3+ of servlet-api
-			if (getServletContext() != null) {
-				servletContextPath = StringUtils.defaultString(getServletContext().getContextPath());
-			}
-			// }
-
+			/*
+			 * Just for debugging..
+			 */
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("Request FullPath: {}", requestFullPath);
 				ourLog.trace("Servlet Path: {}", servletPath);
@@ -752,6 +748,7 @@ public class RestfulServer extends HttpServlet {
 		}
 	}
 
+
 	/**
 	 * Initializes the server. Note that this method is final to avoid accidentally introducing bugs in implementations,
 	 * but subclasses may put initialization code in {@link #initialize()}, which is called immediately before beginning
@@ -842,6 +839,7 @@ public class RestfulServer extends HttpServlet {
 	 *            (which extends {@link ServletException}), as this is a flag to the servlet container that the servlet
 	 *            is not usable.
 	 */
+	@SuppressWarnings("unused")
 	protected void initialize() throws ServletException {
 		// nothing by default
 	}

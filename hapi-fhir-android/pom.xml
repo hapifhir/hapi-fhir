@@ -38,14 +38,13 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
 			<version>1.2-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>1.2-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-schematron</artifactId>
@@ -56,6 +55,7 @@
 			<artifactId>phloc-commons</artifactId>
 			<version>${phloc_commons_version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient-android</artifactId>
@@ -76,7 +76,16 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>${commons_io_version}</version>
-			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>${commons_codec_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons_lang_version}</version>
 		</dependency>
 
 		<!-- Android does not come with the Servlet API bundled, and MethodUtil 
@@ -113,10 +122,18 @@
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>${maven_failsafe_plugin_version}</version>
 				<configuration>
-					<classpathDependencyScopeExclude>compile+runtime</classpathDependencyScopeExclude>
+					<classpathDependencyScopeExclude>compile+runtime+test+provided</classpathDependencyScopeExclude>
 					<additionalClasspathElements>
-						<additionalClasspathElement>${project.build.directory}/hapi-fhir-android-${project.version}.jar</additionalClasspathElement>
+						<additionalClasspathElement>${project.build.directory}/hapi-fhir-android-${project.version}-dstu2.jar</additionalClasspathElement>
 					</additionalClasspathElements>
+					<classpathDependencyExcludes>
+						<classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-base</classpathDependencyExclude>
+						<!-- <classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</classpathDependencyExclude>  -->
+						<!-- <classpathDependencyExclude>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</classpathDependencyExclude> -->
+						<classpathDependencyExclude>org.codehaus.woodstox:*</classpathDependencyExclude>
+						<classpathDependencyExclude>javax.json:*</classpathDependencyExclude>
+						<classpathDependencyExclude>org.glassfish:javax.json</classpathDependencyExclude>
+					</classpathDependencyExcludes>
 				</configuration>
 				<executions>
 					<execution>
@@ -133,27 +150,33 @@
 				<version>2.3</version>
 				<executions>
 					<execution>
+						<id>dstu</id>
 						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
 						</goals>
 						<configuration>
 							<createDependencyReducedPom>true</createDependencyReducedPom>
-							<!-- <minimizeJar>true</minimizeJar>  -->
+							<createSourcesJar>true</createSourcesJar>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>dstu</shadedClassifierName>
 							<artifactSet>
 								<includes>
+									<!--
 									<include>commons-codec:commons-codec</include>
+									-->
 									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
-									<!--<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
-									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>-->
+									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu</include>
 									<include>org.glassfish:javax.json</include>
 									<include>org.codehaus.woodstox:woodstox-core-asl</include>
 									<include>javax.xml.stream:stax-api</include>
-									<include>javax.servlet:javax.servlet-api</include>
+									<!-- <include>javax.servlet:javax.servlet-api</include>-->
 									<include>org.codehaus.woodstox:stax2-api</include>
 									<!-- <include>org.slf4j:slf4j*</include> -->
+									<!--
 									<include>org.apache.commons:*</include>
 									<include>org.apache.httpcomponents:*</include>
+									-->
 									<include>org.glassfish:javax.json</include>
 								</includes>
 							</artifactSet>
@@ -176,6 +199,48 @@
 									</excludes>
 								</filter>
 							</filters>
+						</configuration>
+					</execution>
+					<execution>
+						<id>dstu2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<createSourcesJar>true</createSourcesJar>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>dstu2</shadedClassifierName>
+							<artifactSet>
+								<includes>
+									<!--
+									<include>commons-codec:commons-codec</include>
+									-->
+									<include>ca.uhn.hapi.fhir:hapi-fhir-base</include>
+									<include>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2</include>
+									<include>org.glassfish:javax.json</include>
+									<include>org.codehaus.woodstox:woodstox-core-asl</include>
+									<include>javax.xml.stream:stax-api</include>
+									<!-- <include>javax.servlet:javax.servlet-api</include>-->
+									<include>org.codehaus.woodstox:stax2-api</include>
+									<!--
+									<include>org.apache.commons:*</include>
+									<include>org.apache.httpcomponents:*</include>
+									-->
+									<include>org.glassfish:javax.json</include>
+								</includes>
+							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>javax.xml.stream</pattern>
+									<shadedPattern>ca.uhn.fhir.repackage.javax.xml.stream</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>javax.json</pattern>
+									<shadedPattern>ca.uhn.fhir.repackage.javax.json</shadedPattern>
+								</relocation>
+							</relocations>
 						</configuration>
 					</execution>
 				</executions>

@@ -178,7 +178,7 @@
 				<h4>Search - Other Query Options</h4>
 				<p>
 					The fluent search also has methods for sorting, limiting, specifying
-					JSON encoding, _include, _revinclude, _lastUpdated, etc.
+					JSON encoding, _include, _revinclude, _lastUpdated, _tag, etc.
 				</p>
 				<macro name="snippet">
 					<param name="id" value="searchAdv" />

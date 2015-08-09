@@ -1,0 +1,53 @@
+<QuestionnaireResponse xmlns="http://hl7.org/fhir">
+	<identifier>
+		<value value="4772"/>
+	</identifier>
+	<questionnaire>
+		<reference value="Questionnaire/4772"/>
+	</questionnaire>
+	<subject>
+		<reference value="Organization/4769"/>
+	</subject>
+	<authored value="2015-07-29T20:39:17+04:00"/>
+	<group>
+		<title value="Main Group"/>
+		<group>
+			<text value="Common"/>
+			<question>
+				<linkId value="Link0"/>
+				<text value="What is your name?"/>
+				<answer>
+					<valueString value="swewe"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="Link1"/>
+				<text value="What is your age?"/>
+				<answer>
+					<valueInteger value="1"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="Link2"/>
+				<text value="Do you smoke?"/>
+				<answer>
+					<valueBoolean value="false"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="Link3"/>
+				<text value="What is your age?"/>
+				<answer>
+					<valueInteger value="23"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="Link4"/>
+				<text value="Do you smoke?"/>
+				<answer>
+					<valueBoolean value="false"/>
+				</answer>
+			</question>
+		</group>
+	</group>
+</QuestionnaireResponse>

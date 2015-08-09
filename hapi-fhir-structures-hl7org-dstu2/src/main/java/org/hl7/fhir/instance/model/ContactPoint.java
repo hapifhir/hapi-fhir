@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -295,13 +295,20 @@ public class ContactPoint extends Type implements ICompositeType {
     protected Enumeration<ContactPointUse> use;
 
     /**
+     * Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
+     */
+    @Child(name = "rank", type = {PositiveIntType.class}, order=3, min=0, max=1)
+    @Description(shortDefinition="Specify preferred order of use (1 = highest)", formalDefinition="Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values." )
+    protected PositiveIntType rank;
+
+    /**
      * Time period when the contact point was/is in use.
      */
-    @Child(name = "period", type = {Period.class}, order=3, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Time period when the contact point was/is in use", formalDefinition="Time period when the contact point was/is in use." )
     protected Period period;
 
-    private static final long serialVersionUID = 1972725348L;
+    private static final long serialVersionUID = 1509610874L;
 
   /*
    * Constructor
@@ -458,6 +465,51 @@ public class ContactPoint extends Type implements ICompositeType {
     }
 
     /**
+     * @return {@link #rank} (Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
+     */
+    public PositiveIntType getRankElement() { 
+      if (this.rank == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ContactPoint.rank");
+        else if (Configuration.doAutoCreate())
+          this.rank = new PositiveIntType(); // bb
+      return this.rank;
+    }
+
+    public boolean hasRankElement() { 
+      return this.rank != null && !this.rank.isEmpty();
+    }
+
+    public boolean hasRank() { 
+      return this.rank != null && !this.rank.isEmpty();
+    }
+
+    /**
+     * @param value {@link #rank} (Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
+     */
+    public ContactPoint setRankElement(PositiveIntType value) { 
+      this.rank = value;
+      return this;
+    }
+
+    /**
+     * @return Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
+     */
+    public int getRank() { 
+      return this.rank == null || this.rank.isEmpty() ? 0 : this.rank.getValue();
+    }
+
+    /**
+     * @param value Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
+     */
+    public ContactPoint setRank(int value) { 
+        if (this.rank == null)
+          this.rank = new PositiveIntType();
+        this.rank.setValue(value);
+      return this;
+    }
+
+    /**
      * @return {@link #period} (Time period when the contact point was/is in use.)
      */
     public Period getPeriod() { 
@@ -486,6 +538,7 @@ public class ContactPoint extends Type implements ICompositeType {
         childrenList.add(new Property("system", "code", "Telecommunications form for contact point - what communications system is required to make use of the contact.", 0, java.lang.Integer.MAX_VALUE, system));
         childrenList.add(new Property("value", "string", "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).", 0, java.lang.Integer.MAX_VALUE, value));
         childrenList.add(new Property("use", "code", "Identifies the purpose for the contact point.", 0, java.lang.Integer.MAX_VALUE, use));
+        childrenList.add(new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.", 0, java.lang.Integer.MAX_VALUE, rank));
         childrenList.add(new Property("period", "Period", "Time period when the contact point was/is in use.", 0, java.lang.Integer.MAX_VALUE, period));
       }
 
@@ -495,6 +548,7 @@ public class ContactPoint extends Type implements ICompositeType {
         dst.system = system == null ? null : system.copy();
         dst.value = value == null ? null : value.copy();
         dst.use = use == null ? null : use.copy();
+        dst.rank = rank == null ? null : rank.copy();
         dst.period = period == null ? null : period.copy();
         return dst;
       }
@@ -511,7 +565,7 @@ public class ContactPoint extends Type implements ICompositeType {
           return false;
         ContactPoint o = (ContactPoint) other;
         return compareDeep(system, o.system, true) && compareDeep(value, o.value, true) && compareDeep(use, o.use, true)
-           && compareDeep(period, o.period, true);
+           && compareDeep(rank, o.rank, true) && compareDeep(period, o.period, true);
       }
 
       @Override
@@ -522,12 +576,13 @@ public class ContactPoint extends Type implements ICompositeType {
           return false;
         ContactPoint o = (ContactPoint) other;
         return compareValues(system, o.system, true) && compareValues(value, o.value, true) && compareValues(use, o.use, true)
-          ;
+           && compareValues(rank, o.rank, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (system == null || system.isEmpty()) && (value == null || value.isEmpty())
-           && (use == null || use.isEmpty()) && (period == null || period.isEmpty());
+           && (use == null || use.isEmpty()) && (rank == null || rank.isEmpty()) && (period == null || period.isEmpty())
+          ;
       }
 
 

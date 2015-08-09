@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Binary;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
 import org.hl7.fhir.instance.model.Conformance;
 import org.hl7.fhir.instance.model.DateTimeType;
 import org.hl7.fhir.instance.model.DateType;
@@ -548,7 +549,7 @@ public class JsonParserHl7OrgTest {
 		ourLog.info("---------------");
 
 		c = new Conformance();
-		c.getAcceptUnknownElement().setValue(true);
+		c.getAcceptUnknownElement().setValue(UnknownContentCode.EXTENSIONS);
 		c.getAcceptUnknownElement().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
@@ -556,7 +557,7 @@ public class JsonParserHl7OrgTest {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":true,\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"extensions\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
 	

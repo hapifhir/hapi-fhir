@@ -46,7 +46,13 @@ public interface BaseOperationOutcome extends IResource, IBaseOperationOutcome {
 
 		public abstract BaseIssue addLocation(String theString);
 
+		/**
+		 * @deprecated Use {@link #setDiagnostics(String)} instead - Field was renamed in DSTU2
+		 */
+		@Deprecated
 		public abstract BaseIssue setDetails(String theString);
+
+		public abstract BaseIssue setDiagnostics(String theString);
 
 		public abstract StringDt getLocationFirstRep();
 	}

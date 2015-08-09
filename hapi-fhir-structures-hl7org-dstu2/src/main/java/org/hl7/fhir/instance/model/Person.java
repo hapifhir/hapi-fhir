@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -919,8 +919,10 @@ public class Person extends DomainResource {
   public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Person.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESSCOUNTRY = "address-country";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
+  @SearchParamDefinition(name="phonetic", path="Person.name", description="A portion of name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="phone", path="Person.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="patient", path="Person.link.target", description="The Person links to this Patient", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="organization", path="Person.managingOrganization", description="The organization at which this person record is being managed", type="reference" )
@@ -933,6 +935,8 @@ public class Person extends DomainResource {
   public static final String SP_TELECOM = "telecom";
   @SearchParamDefinition(name="address-city", path="Person.address.city", description="A city specified in an address", type="string" )
   public static final String SP_ADDRESSCITY = "address-city";
+  @SearchParamDefinition(name="email", path="Person.telecom(system=email)", description="A value in an email contact", type="token" )
+  public static final String SP_EMAIL = "email";
 
 }
 

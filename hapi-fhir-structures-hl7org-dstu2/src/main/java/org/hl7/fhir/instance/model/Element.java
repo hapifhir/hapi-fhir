@@ -29,20 +29,38 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import java.util.*;
-
-import org.hl7.fhir.utilities.Utilities;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.annotations.DatatypeDef;
-import org.hl7.fhir.instance.model.annotations.Block;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.utilities.Utilities;
 /**
  * Base definition for all elements in a resource.
  */
 public abstract class Element extends Base implements IBaseHasExtensions {
+   /**
+    * Returns an unmodifiable list containing all extensions on this element which 
+    * match the given URL.
+    * 
+    * @param theUrl The URL. Must not be blank or null.
+    * @return an unmodifiable list containing all extensions on this element which 
+    * match the given URL
+    */
+   public List<Extension> getExtensionsByUrl(String theUrl) {
+     Validate.notBlank(theUrl, "theUrl must not be blank or null");
+     ArrayList<Extension> retVal = new ArrayList<Extension>();
+     for (Extension next : getExtension()) {
+       if (theUrl.equals(next.getUrl())) {
+         retVal.add(next);
+       }
+     }
+     return Collections.unmodifiableList(retVal);
+   }
 
     /**
      * unique id for the element within a resource (for internal references).

@@ -49,6 +49,11 @@ public class ${className}ResourceProvider extends
 			@Description(shortDefinition="The resource language")
 			@OptionalParam(name="_language")
 			StringParam theResourceLanguage, 
+
+			@Description(shortDefinition="Search for resources which have the given tag")
+			@OptionalParam(name="_tag")
+			TokenAndListParam theSearchForTag, 
+
 #foreach ( $param in $searchParams ) #{if}(true) #{end} 
 
 			@Description(shortDefinition="${param.description}")
@@ -113,10 +118,11 @@ public class ${className}ResourceProvider extends
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add("_id", theId);		
-			paramMap.add("_language", theResourceLanguage);			
+			paramMap.add("_id", theId);
+			paramMap.add("_language", theResourceLanguage);
+			paramMap.add("_tag", theSearchForTag);
 #foreach ( $param in $searchParams ) 
-			paramMap.add("${param.name}", the${param.nameCapitalized});	
+			paramMap.add("${param.name}", the${param.nameCapitalized});
 #end
 #if ( $version != 'dstu' )
 			paramMap.setRevIncludes(theRevIncludes);

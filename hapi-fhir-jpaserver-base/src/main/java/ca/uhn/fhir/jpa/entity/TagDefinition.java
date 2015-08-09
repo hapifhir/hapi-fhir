@@ -39,9 +39,7 @@ import ca.uhn.fhir.model.api.Tag;
 
 //@formatter:on
 @Entity
-@Table(name = "HFJ_TAG_DEF", uniqueConstraints = { 
-	@UniqueConstraint(columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" }) 
-})
+@Table(name = "HFJ_TAG_DEF", uniqueConstraints = { @UniqueConstraint(columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" }) })
 //@formatter:off
 public class TagDefinition implements Serializable {
 
@@ -87,6 +85,10 @@ public class TagDefinition implements Serializable {
 
 	public String getDisplay() {
 		return myDisplay;
+	}
+
+	public Long getId() {
+		return myId;
 	}
 
 	public String getSystem() {

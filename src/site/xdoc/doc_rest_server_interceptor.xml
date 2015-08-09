@@ -184,7 +184,11 @@
 					this address into their URL bar, they will get nice formatted HTML back with a human readable version
 					of the content. This is helpful for testers.
 				</p>
-				
+<p>
+                                       To see an example of how this looks, see our demo server using the following example
+                                       query:
+                                       <a href="http://fhirtest.uhn.ca/baseDstu2/Patient/">http://fhirtest.uhn.ca/baseDstu2/Patient</a>
+</p>				
 				<p>
 					The following example shows how to register this interceptor within
 					a FHIR RESTful server.

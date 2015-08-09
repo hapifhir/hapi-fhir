@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuestionnaireResponse xmlns="http://hl7.org/fhir">
+
+	<text>
+		First message at the moment of admission. 	
+	</text>
+
+   <questionnaire>
+   		<reference value="Questionnaire/nice-pilot-questionnaire" /> <!--  Should reference the nice-pilot-questionnaire.xml -->
+   	</questionnaire>
+ 	<status value="in-progress"/>
+
+	<group>
+		<linkId value="NICE-FHIR-Pilot"/>
+		
+<!--  1  -->
+		<group>
+			<linkId value="opname identificatie"/>
+			<question>
+				<linkId value="hospno"/>
+				<answer>
+					<valueInteger value="88"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="icno"/>
+				<answer>
+					<valueInteger value="1"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="admno"/>
+				<answer>
+					<valueInteger value="1239827"/>
+				</answer>
+			</question>
+		</group>
+		
+<!-- 2 -->
+		<group>
+			<linkId value="patientinformation" />
+			<question>
+				<linkId value="patno"/>
+				<answer>
+					<valueString value="KSJDHFSDFMNCVXJK"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="partialBSN"/>
+				<answer>
+					<valueInteger value="1232456"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="date_of_birth"/>
+				<answer>
+					<valueDate value="1964-03-09"/>
+				</answer>
+			</question>
+		</group>
+
+<!-- 3 -->
+		<group>
+			<linkId value="opnamegegevens"/>
+			<question>
+				<linkId value="adm_hosp"/>
+				<answer>
+					<valueDateTime value="2015-07-21T14:04:00+01:00"/>
+				</answer>
+			</question>
+  			<question>
+				<linkId value="adm_icu"/>
+				<answer>
+					<valueDateTime value="2015-07-21T14:04:00+01:00"/>
+				</answer>
+			</question>
+			<question>
+				<linkId value="adm_source"/>
+				<answer>
+					<valueInteger value="1"/> 
+				</answer>
+			</question>
+			<question>
+				<linkId value="cardio_vas_insuf"/>
+				<answer>
+					<valueBoolean value="true"/>
+				</answer>
+			</question>
+		</group>
+	</group>
+</QuestionnaireResponse>

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1211,7 +1211,7 @@ public class Provenance extends DomainResource {
   public static final String SP_AGENT = "agent";
   @SearchParamDefinition(name="entitytype", path="Provenance.entity.reference", description="Identity of entity", type="uri" )
   public static final String SP_ENTITYTYPE = "entitytype";
-  @SearchParamDefinition(name="patient", path="", description="A patient that the target resource(s) refer to", type="reference" )
+  @SearchParamDefinition(name="patient", path="Provenance.target", description="Target Reference(s) (usually version specific)", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="start", path="Provenance.period.start", description="Starting time with inclusive boundary", type="date" )
   public static final String SP_START = "start";

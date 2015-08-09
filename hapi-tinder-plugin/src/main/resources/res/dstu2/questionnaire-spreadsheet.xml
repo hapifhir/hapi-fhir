@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -20,8 +20,7 @@
   <WindowWidth>28800</WindowWidth>
   <WindowTopX>0</WindowTopX>
   <WindowTopY>0</WindowTopY>
-  <ActiveSheet>4</ActiveSheet>
-  <MaxChange>0.0001</MaxChange>
+  <ActiveSheet>7</ActiveSheet>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1259,7 +1258,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Resource that can be subject of QuestionnaireAnswers</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Resource that can be subject of QuestionnaireResponse</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Identifies the types of subjects that can be the subject of the questionnaire.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1331,11 +1330,11 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">To link questionnaire with questionnaire answers</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">To link questionnaire with questionnaire response</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireAnswers resource.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a QuestionnaireResponse resource.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">[[[QuestionnaireAnswers]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient.</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">[[[QuestionnaireResponse]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">May be omitted if there is no expectation to link answers back to a questionnaire.  This *can* be a meaningful id (e.g. a LOINC code) but is not intended to have any meaning.  GUIDs or sequential numbers are appropriate here.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1613,11 +1612,11 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">To link questionnaire with questionnaire answers</Data><NamedCell
+    <Cell ss:StyleID="s88"><Data ss:Type="String">To link questionnaire with questionnaire response</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a [[[QuestionnaireAnswers]]] resource.</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">An identifier that is unique within the questionnaire allowing linkage to the equivalent group in a [[[QuestionnaireResponse]]] resource.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">[[[QuestionnaireAnswers]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient.</Data><NamedCell
+    <Cell ss:StyleID="s90"><Data ss:Type="String">[[[QuestionnaireResponse]]] does not require omitted groups to be included and may have some groups that repeat, so linkage based on position alone is not sufficient.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">May be omitted if there is no expectation to link answers back to a questionnaire.  This *can* be a meaningful id (e.g. a LOINC code) but is not intended to have any meaning.  GUIDs or sequential numbers are appropriate here.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
@@ -1829,7 +1828,7 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">Reference to a valueset containing the a list of codes representing permitted answers for the question</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">LOINC defines many useful value sets for questionnaire answers. See [LOINC Answer Lists](loinc.html#alist)</Data><NamedCell
+    <Cell ss:StyleID="s89"><Data ss:Type="String">LOINC defines many useful value sets for questionnaire response. See [LOINC Answer Lists](loinc.html#alist)</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Not supported - MIF/templating layer to capture value set</Data><NamedCell
@@ -4843,9 +4842,9 @@
     <Cell ss:StyleID="s116"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s116"><Data ss:Type="String">Populate Questionnaire</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="String">Generates a [[[QuestionnaireAnswers]]] instance  based on a specified [[[Questionnaire]]], filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the [[[Questionnaire]]].  If the operation is not called at the instance level, one of the identifier or questionnaire 'in' parameters must be provided.  (If called at the instance level, these parameters will be ignored.)  The response will contain a [[[QuestionnaireAnswers]]] instance based on the specified [[[Questionnaire]]] and/or an [[[OperationOutcome]]] resource with errors or warnings.  The [[[QuestionnaireAnswers]]] instance will be populated with an unanswered set of questions following the group and question structure of the specified [[[Questionnaire]]].  If  *content* parameters were specified or the *local* parameter was set to true, some of the questions may have answers filled in as well.  In the case of repeating questions or groups, typically only one repetition will be provided unless answer values exist that would support populating multiple repetitions.  Population of the [[[QuestionnaireAnswers]]] with appropriate data is dependent on the questions and/or groups in the [[[Questionnaire]]] having metadata that allows the server to recognize the questions.  This might be through *Questionnaire.group.question.code*, through extensions such as the [[[http://hl7.org/fhir/StructureDefinition/questionnaire-deReference]]] extension or through us of the [[[ConceptMap]]] resource.  Regardless of the mechanism used to link the questions in a questionnaire to a &quot;known&quot; mapable concept, solutions using this operation should ensure that the details of the question and associated linkage element are sufficiently similar as to safely allow auto-population.  I.e. the question text and context must be sufficiently the same, the value set for the question must fall within the value set for the mapped element, the data types must be the same or convertable, etc.</Data><NamedCell
+    <Cell ss:StyleID="s130"><Data ss:Type="String">Generates a [[[QuestionnaireResponse]]] instance  based on a specified [[[Questionnaire]]], filling in answers to questions where possible based on information provided as part of the operation or already known by the server about the subject of the [[[Questionnaire]]].  If the operation is not called at the instance level, one of the identifier or questionnaire 'in' parameters must be provided.  (If called at the instance level, these parameters will be ignored.)  The response will contain a [[[QuestionnaireResponse]]] instance based on the specified [[[Questionnaire]]] and/or an [[[OperationOutcome]]] resource with errors or warnings.  The [[[QuestionnaireResponse]]] instance will be populated with an unanswered set of questions following the group and question structure of the specified [[[Questionnaire]]].  If  *content* parameters were specified or the *local* parameter was set to true, some of the questions may have answers filled in as well.  In the case of repeating questions or groups, typically only one repetition will be provided unless answer values exist that would support populating multiple repetitions.  Population of the [[[QuestionnaireResponse]]] with appropriate data is dependent on the questions and/or groups in the [[[Questionnaire]]] having metadata that allows the server to recognize the questions.  This might be through *Questionnaire.group.question.code*, through extensions such as the [[[http://hl7.org/fhir/StructureDefinition/questionnaire-deReference]]] extension or through us of the [[[ConceptMap]]] resource.  Regardless of the mechanism used to link the questions in a questionnaire to a &quot;known&quot; mapable concept, solutions using this operation should ensure that the details of the question and associated linkage element are sufficiently similar as to safely allow auto-population.  I.e. the question text and context must be sufficiently the same, the value set for the question must fall within the value set for the mapped element, the data types must be the same or convertable, etc.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">While it is theoretically possible for a [[[QuestionnaireAnswers]]] instance to be completely auto-populated and submitted without human review, the intention of this transaction is merely to reduce redundant data entry.  A client **SHOULD** ensure that a human submitter has an opportunity to review the auto-populated answers to confirm correctness as well as to complete or expand on information provided by the auto-population process.  Complex form designs with conditional logic or tight constraints on cardinalities may be challenging to auto-populate.  A server MAY choose to traverse the questionnaire as if it were a human respondant, answering only those questions that are enabled based on previously answered questions.  However doing so may result in minimal population.  Alternatively, systems may choose to populate all known answers, independent of dependencies and other constraints.  This may cause questions to be answered that should not be answered.  It will be up to the client to appropriately prune the final populated questionnaire once human review has taken place.  Invoking this operation with the ''content'' parameter may involve the disclosure of personally identifiable healthcare information to the system which is performing the population process.  No such disclosures should be made unless the system on which the operation is being invoked is a &quot;trusted&quot; system and appropriate agreements are in place to protect the confidentiality of any information shared with that system.</Data><NamedCell
+    <Cell ss:StyleID="s131"><Data ss:Type="String">While it is theoretically possible for a [[[QuestionnaireResponse]]] instance to be completely auto-populated and submitted without human review, the intention of this transaction is merely to reduce redundant data entry.  A client **SHOULD** ensure that a human submitter has an opportunity to review the auto-populated answers to confirm correctness as well as to complete or expand on information provided by the auto-population process.  Complex form designs with conditional logic or tight constraints on cardinalities may be challenging to auto-populate.  A server MAY choose to traverse the questionnaire as if it were a human respondant, answering only those questions that are enabled based on previously answered questions.  However doing so may result in minimal population.  Alternatively, systems may choose to populate all known answers, independent of dependencies and other constraints.  This may cause questions to be answered that should not be answered.  It will be up to the client to appropriately prune the final populated questionnaire once human review has taken place.  Invoking this operation with the ''content'' parameter may involve the disclosure of personally identifiable healthcare information to the system which is performing the population process.  No such disclosures should be made unless the system on which the operation is being invoked is a &quot;trusted&quot; system and appropriate agreements are in place to protect the confidentiality of any information shared with that system.</Data><NamedCell
       ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
@@ -4878,7 +4877,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">Reference</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s133"><Data ss:Type="String">The resource that is to be the *QuestionnaireAnswers.subject*. The [[[QuestionnaireAnswers]]] instance will reference the provided subject.  In addition, if the *local* parameter is set to true, server information about the specified subject will be used to populate the instance.</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">The resource that is to be the *QuestionnaireResponse.subject*. The [[[QuestionnaireResponse]]] instance will reference the provided subject.  In addition, if the *local* parameter is set to true, server information about the specified subject will be used to populate the instance.</Data></Cell>
     <Cell ss:StyleID="s134"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
@@ -4889,7 +4888,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">Any</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s133"><Data ss:Type="String">Resources containing information to be used to help populate the [[[QuestionnaireAnswers]]].  These may be FHIR resources or may be Binaries containing FHIR documents, CDA documents or other source materials.  Servers may not support all possible source materials and may ignore materials they do not recognize.  (They MAY provide warnings if ignoring submitted resources.)</Data></Cell>
+    <Cell ss:StyleID="s133"><Data ss:Type="String">Resources containing information to be used to help populate the [[[QuestionnaireResponse]]].  These may be FHIR resources or may be Binaries containing FHIR documents, CDA documents or other source materials.  Servers may not support all possible source materials and may ignore materials they do not recognize.  (They MAY provide warnings if ignoring submitted resources.)</Data></Cell>
     <Cell ss:StyleID="s134"/>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
@@ -4908,7 +4907,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">out</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">QuestionnaireAnswers</Data></Cell>
+    <Cell ss:StyleID="s119"><Data ss:Type="String">QuestionnaireResponse</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s133"><Data ss:Type="String">The partially (or fully)-populated set of answers for the specified Questionnaire</Data></Cell>
@@ -5385,7 +5384,6 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6092,13 +6090,13 @@
     <Cell ss:StyleID="s143"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s142"/>
+    <Cell ss:StyleID="s142"><Data ss:Type="String">Glasgow Coma Score</Data></Cell>
     <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s89"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s88"/>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Glasgow Coma Score example form</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">gcs</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">questionnaire-example-gcs.xml</Data></Cell>
     <Cell ss:StyleID="s132"/>
-    <Cell ss:StyleID="s143"/>
+    <Cell ss:StyleID="s143"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s142"/>
@@ -6406,6 +6404,7 @@
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
    <Unsynced/>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6425,9 +6424,8 @@
     </Pane>
     <Pane>
      <Number>0</Number>
-     <ActiveRow>4</ActiveRow>
-     <ActiveCol>0</ActiveCol>
-     <RangeSelection>R5:R6</RangeSelection>
+     <ActiveRow>10</ActiveRow>
+     <ActiveCol>5</ActiveCol>
     </Pane>
    </Panes>
    <ProtectObjects>False</ProtectObjects>

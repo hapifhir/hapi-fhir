@@ -59,6 +59,8 @@
     </assigner>
   </identifier>
 
+  <active value="true"/>
+
   <!--   Peter James Chalmers, but called &quot;Jim&quot;   -->
   <name>
     <use value="official"/>
@@ -128,6 +130,5 @@
     <reference value="Organization/1"/>
   </managingOrganization>
 
-  <active value="true"/>
 
 </Patient>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <?mso-application progid="Excel.Sheet"?>
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel">
 	<DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
@@ -2101,7 +2101,7 @@ jurisdication</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance|Supply)</Data>
+					<Data ss:Type="String">Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -4037,7 +4037,7 @@ jurisdication</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance|Supply)</Data>
+					<Data ss:Type="String">Reference(Contract|Device|Group|Location|Organization|Patient|Practitioner|RelatedPerson|Substance)</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -5044,7 +5044,7 @@ should this be on top of term group elements?</Font>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Attachment|Reference(Composition|DocumentReference|QuestionnaireAnswers)</Data>
+					<Data ss:Type="String">Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -5273,7 +5273,7 @@ should this be on top of term group elements?</Font>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Attachment|Reference(Composition|DocumentReference|QuestionnaireAnswers)</Data>
+					<Data ss:Type="String">Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
@@ -5502,7 +5502,7 @@ should this be on top of term group elements?</Font>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">Attachment|Reference(Composition|DocumentReference|QuestionnaireAnswers)</Data>
+					<Data ss:Type="String">Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1265,8 +1265,10 @@ public class Practitioner extends DomainResource {
   public static final String SP_ADDRESSPOSTALCODE = "address-postalcode";
   @SearchParamDefinition(name="address-country", path="Practitioner.address.country", description="A country specified in an address", type="string" )
   public static final String SP_ADDRESSCOUNTRY = "address-country";
-  @SearchParamDefinition(name="phonetic", path="", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
+  @SearchParamDefinition(name="phonetic", path="Practitioner.name", description="A portion of either family or given name using some kind of phonetic matching algorithm", type="string" )
   public static final String SP_PHONETIC = "phonetic";
+  @SearchParamDefinition(name="phone", path="Practitioner.telecom(system=phone)", description="A value in a phone contact", type="token" )
+  public static final String SP_PHONE = "phone";
   @SearchParamDefinition(name="organization", path="Practitioner.practitionerRole.managingOrganization", description="The identity of the organization the practitioner represents / acts on behalf of", type="reference" )
   public static final String SP_ORGANIZATION = "organization";
   @SearchParamDefinition(name="name", path="Practitioner.name", description="A portion of either family or given name", type="string" )
@@ -1283,6 +1285,8 @@ public class Practitioner extends DomainResource {
   public static final String SP_ADDRESSCITY = "address-city";
   @SearchParamDefinition(name="communication", path="Practitioner.communication", description="One of the languages that the practitioner can communicate with", type="token" )
   public static final String SP_COMMUNICATION = "communication";
+  @SearchParamDefinition(name="email", path="Practitioner.telecom(system=email)", description="A value in an email contact", type="token" )
+  public static final String SP_EMAIL = "email";
 
 }
 

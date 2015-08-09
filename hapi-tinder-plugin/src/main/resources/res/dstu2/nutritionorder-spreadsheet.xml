@@ -1431,7 +1431,7 @@ v2. Chapter 4 - ODS Segment</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">
-					<Data ss:Type="String">when.context</Data>
+					<Data ss:Type="String">context</Data>
 					<NamedCell ss:Name="_FilterDatabase"/>
 				</Cell>
 				<Cell ss:StyleID="s87">

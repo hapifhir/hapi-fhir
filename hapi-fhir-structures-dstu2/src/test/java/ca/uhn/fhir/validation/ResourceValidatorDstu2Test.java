@@ -10,11 +10,9 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -27,7 +25,6 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.UnitsOfTimeEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 
 public class ResourceValidatorDstu2Test {
 
@@ -182,7 +179,7 @@ public class ResourceValidatorDstu2Test {
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.getOperationOutcome();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertEquals(1, operationOutcome.getIssue().size());
-		assertThat(operationOutcome.getIssueFirstRep().getDetails(), containsString("cpt-2:"));
+		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics(), containsString("cpt-2:"));
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);

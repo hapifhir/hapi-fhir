@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.client.ResourceFormat;
 import org.hl7.fhir.instance.model.Bundle;
 import org.hl7.fhir.instance.model.ConceptMap;
 import org.hl7.fhir.instance.model.Conformance;
+import org.hl7.fhir.instance.model.DataElement;
 import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Parameters;
@@ -52,6 +53,7 @@ public class WorkerContext implements NameResolver {
   private ITerminologyServices terminologyServices = new NullTerminologyServices();
   private IFHIRClient client = new NullClient();
   private Map<String, ValueSet> codeSystems = new HashMap<String, ValueSet>();
+  private Map<String, DataElement> dataElements = new HashMap<String, DataElement>();
   private Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
   private Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
   private Map<String, StructureDefinition> profiles = new HashMap<String, StructureDefinition>();
@@ -95,6 +97,10 @@ public class WorkerContext implements NameResolver {
 
   public Map<String, ValueSet> getCodeSystems() {
     return codeSystems;
+  }
+
+  public Map<String, DataElement> getDataElements() {
+    return dataElements;
   }
 
   public Map<String, ValueSet> getValueSets() {
@@ -327,6 +333,11 @@ public class WorkerContext implements NameResolver {
 
     @Override
     public Conformance getConformanceStatementQuick(boolean useOptionsVerb) {
+      throw new Error("call to NullClient");
+    }
+
+    @Override
+    public String getAddress() {
       throw new Error("call to NullClient");
     }
 

@@ -51,7 +51,7 @@ import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -73,6 +73,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -96,7 +97,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	@SuppressWarnings("unused")
-	private static IFhirResourceDao<QuestionnaireAnswers> ourQuestionnaireAnswersDao;
+	private static IFhirResourceDao<QuestionnaireResponse> ourQuestionnaireResponseDao;
 	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
 	private static IFhirResourceDao<Practitioner> ourPractitionerDao;
@@ -1927,6 +1928,80 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
+	public void testSearchWithTagParameter() {
+		String methodName = "testSearchWithTagParameter";
+		
+		IIdType tag1id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			TagList tagList = new TagList();
+			tagList.addTag("urn:taglist", methodName + "1a");
+			tagList.addTag("urn:taglist", methodName + "1b");
+			ResourceMetadataKeyEnum.TAG_LIST.put(org, tagList);
+			tag1id = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType tag2id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			TagList tagList = new TagList();
+			tagList.addTag("urn:taglist", methodName + "2a");
+			tagList.addTag("urn:taglist", methodName + "2b");
+			ResourceMetadataKeyEnum.TAG_LIST.put(org, tagList);
+			tag2id = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			// One tag
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
+		{
+			// Code only
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam(null, methodName + "1a"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
+		{
+			// Or tags
+			SearchParameterMap params = new SearchParameterMap();
+			TokenOrListParam orListParam = new TokenOrListParam();
+			orListParam.add(new TokenParam("urn:taglist", methodName + "1a"));
+			orListParam.add(new TokenParam("urn:taglist", methodName + "2a"));
+			params.add("_tag", orListParam);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id, tag2id));
+		}
+		// TODO: get multiple/AND working
+		{
+			// And tags
+			SearchParameterMap params = new SearchParameterMap();
+			TokenAndListParam andListParam = new TokenAndListParam();
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "1a"));
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "2a"));
+			params.add("_tag", andListParam);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertEquals(0, patients.size());
+		}
+
+		{
+			// And tags
+			SearchParameterMap params = new SearchParameterMap();
+			TokenAndListParam andListParam = new TokenAndListParam();
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "1a"));
+			andListParam.addValue(new TokenOrListParam("urn:taglist", methodName + "1b"));
+			params.add("_tag", andListParam);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
+
+	}
+
+	@Test
 	public void testSearchWithIncludes() {
 		IIdType parentOrgId;
 		{
@@ -2959,7 +3034,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu2", IFhirResourceDao.class);
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 		ourQuestionnaireDao = ourCtx.getBean("myQuestionnaireDaoDstu2", IFhirResourceDao.class);
-		ourQuestionnaireAnswersDao = ourCtx.getBean("myQuestionnaireAnswersDaoDstu2", IFhirResourceDao.class);
+		ourQuestionnaireResponseDao = ourCtx.getBean("myQuestionnaireResponseDaoDstu2", IFhirResourceDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
 	}
 

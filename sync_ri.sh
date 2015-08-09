@@ -17,6 +17,7 @@ cp -vp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.instance/src/org/hl7/f
 cp -vp $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/xhtml/HeirarchicalTableGenerator.java hapi-fhir-structures-hl7org-dstu2/src/main/java/org/hl7/fhir/utilities/xhtml/
 cp -av $FHIRTRUNK/build/implementations/java/org.hl7.fhir.utilities/src/org/hl7/fhir/utilities/Utilities.java hapi-fhir-structures-hl7org-dstu2/src/main/java/org/hl7/fhir/utilities/
 cp -av $FHIRTRUNK/build/implementations/java/org.hl7.fhir.instance/src/org/hl7/fhir/instance/utils/ToolingExtensions.java hapi-fhir-structures-hl7org-dstu2/src/main/java/org/hl7/fhir/instance/utils/
+cp -av $FHIRTRUNK/build/implementations/java/org.hl7.fhir.instance/src/org/hl7/fhir/instance/client/IFHIRClient.java hapi-fhir-structures-hl7org-dstu2/src/main/java/org/hl7/fhir/instance/client/
 
 # Schemas
 cp -vp $FHIRTRUNK/build/publish/fhir-single.xsd hapi-fhir-structures-hl7org-dstu2/src/main/resources/org/hl7/fhir/instance/model/schema/

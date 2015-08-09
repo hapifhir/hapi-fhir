@@ -43,6 +43,7 @@
     </sch:rule>
     <sch:rule context="f:DataElement/f:element">
       <sch:assert test="not(exists(f:base))">dae-1: No base allowed</sch:assert>
+      <sch:assert test="not(exists(f:slicing))">dae-2: No slicing allowed</sch:assert>
     </sch:rule>
     <sch:rule context="f:DataElement/f:element">
       <sch:assert test="(not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (f:max/@value &gt;= f:min/@value)">eld-2: Min &lt;= Max</sch:assert>

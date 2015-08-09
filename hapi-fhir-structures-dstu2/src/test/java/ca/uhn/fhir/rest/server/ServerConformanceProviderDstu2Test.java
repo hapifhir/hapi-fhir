@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.method.SearchParameter;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
+import ca.uhn.fhir.validation.ValidationResult;
 
 public class ServerConformanceProviderDstu2Test {
 
@@ -437,7 +438,8 @@ public class ServerConformanceProviderDstu2Test {
 
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
-		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
+		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
+		assertTrue(result.getMessages().toString(), result.isSuccessful());
 	}
 
 	public static class ConditionalProvider implements IResourceProvider {

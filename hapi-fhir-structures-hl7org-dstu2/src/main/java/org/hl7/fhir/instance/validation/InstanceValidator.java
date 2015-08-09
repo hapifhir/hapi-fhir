@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.instance.model.Extension;
 import org.hl7.fhir.instance.model.HumanName;
 import org.hl7.fhir.instance.model.Identifier;
+import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.Period;
 import org.hl7.fhir.instance.model.Quantity;
@@ -40,7 +41,7 @@ import org.hl7.fhir.instance.model.UriType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.instance.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.instance.model.valuesets.IssueType;
+import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
 import org.hl7.fhir.instance.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.instance.terminologies.ValueSetExpansionCache;
 import org.hl7.fhir.instance.utils.ProfileUtilities;
@@ -1075,6 +1076,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
     	}
     for (ElementInfo ei : children) 
+      if (ei.path.endsWith(".extension")) 
+        rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition != null, "Element is unknown or does not match any slice (url=\""+ei.element.getAttribute("url")+"\")");
+      else
   		rule(errors, IssueType.INVALID, ei.line(), ei.col(), ei.path, ei.definition != null, "Element is unknown or does not match any slice");
     
     // 3. report any definitions that have a cardinality problem
@@ -1234,7 +1238,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 				return snapshot.get(index);
 			index++;
 		}
-		throw new Error("Unable to find discriminator definition for "+goal+" at "+path);
+		throw new Error("Unable to find discriminator definition for "+goal+" in "+discriminator+" at "+path);
   }
 	
   private boolean isPrimitiveType(String type) {
@@ -2298,7 +2302,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	private void checkQuantity(List<ValidationMessage> errors, String path, WrapperElement focus, Quantity fixed) {
 	  checkFixedValue(errors, path+".value", focus.getNamedChild("value"), fixed.getValueElement(), "value");
 	  checkFixedValue(errors, path+".comparator", focus.getNamedChild("comparator"), fixed.getComparatorElement(), "comparator");
-	  checkFixedValue(errors, path+".units", focus.getNamedChild("units"), fixed.getUnitsElement(), "units");
+	  checkFixedValue(errors, path+".units", focus.getNamedChild("unit"), fixed.getUnitElement(), "units");
 	  checkFixedValue(errors, path+".system", focus.getNamedChild("system"), fixed.getSystemElement(), "system");
 	  checkFixedValue(errors, path+".code", focus.getNamedChild("code"), fixed.getCodeElement(), "code");
   }

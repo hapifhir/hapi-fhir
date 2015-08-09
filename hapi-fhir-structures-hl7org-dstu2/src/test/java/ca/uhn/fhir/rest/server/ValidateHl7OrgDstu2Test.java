@@ -112,7 +112,7 @@ public class ValidateHl7OrgDstu2Test {
 	public void testValidateWithResults() throws Exception {
 
 		ourOutcomeToReturn = new OperationOutcome();
-		ourOutcomeToReturn.addIssue().setDetails("FOOBAR");
+		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
