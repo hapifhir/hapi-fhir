@@ -133,6 +133,9 @@ import ca.uhn.fhir.util.ObjectUtil;
 @Transactional(propagation = Propagation.REQUIRED)
 public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseHapiFhirDao implements IFhirResourceDao<T> {
 
+	static final String OO_SEVERITY_INFO = "information";
+	static final String OO_SEVERITY_ERROR = "error";
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -962,11 +965,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	protected IBaseOperationOutcome createErrorOperationOutcome(String theMessage) {
-		return createOperationOutcome(IssueSeverityEnum.ERROR.getCode(), theMessage);
+		return createOperationOutcome(OO_SEVERITY_ERROR, theMessage);
 	}
 
 	protected IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
-		return createOperationOutcome(IssueSeverityEnum.INFORMATION.getCode(), theMessage);
+		return createOperationOutcome(OO_SEVERITY_INFO, theMessage);
 	}
 
 	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage);
