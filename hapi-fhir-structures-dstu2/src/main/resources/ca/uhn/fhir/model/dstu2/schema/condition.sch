@@ -88,20 +88,5 @@
     <sch:rule context="f:Condition/f:evidence/f:detail">
       <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
-    <sch:rule context="f:Condition/f:location/f:siteReference">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:Condition/f:dueTo">
-      <sch:assert test="exists(f:code) != exists(f:target)">con-4: Relationship SHALL have either a code or a target</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:Condition/f:dueTo/f:target">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:Condition/f:occurredFollowing">
-      <sch:assert test="exists(f:code) != exists(f:target)">con-5: Relationship SHALL have either a code or a target</sch:assert>
-    </sch:rule>
-    <sch:rule context="f:Condition/f:occurredFollowing/f:target">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
-    </sch:rule>
     </sch:pattern>
 </sch:schema>

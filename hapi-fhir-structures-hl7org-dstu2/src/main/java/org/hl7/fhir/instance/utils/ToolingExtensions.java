@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hl7.fhir.instance.model.BooleanType;
@@ -413,5 +414,15 @@ public class ToolingExtensions {
         return;
       }
     focus.getExtension().add(new Extension().setUrl(url).setValue(c));    
+  }
+
+  public static void removeExtension(DomainResource focus, String url) {
+    Iterator<Extension> i = focus.getExtension().iterator();
+    while (i.hasNext()) {
+      Extension e = i.next(); // must be called before you can call i.remove()
+      if (e.getUrl().equals(url)) {
+        i.remove();
+      }
+    }
   }
 }

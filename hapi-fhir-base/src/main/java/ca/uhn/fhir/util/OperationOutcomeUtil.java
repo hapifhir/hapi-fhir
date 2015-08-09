@@ -33,6 +33,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
@@ -86,7 +87,11 @@ public class OperationOutcomeUtil {
 	}
 
 	public static String getFirstIssueDetails(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
-		return getFirstIssueStringPart(theCtx, theOutcome, "details");
+		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			return getFirstIssueStringPart(theCtx, theOutcome, "diagnostics");
+		} else {
+			return getFirstIssueStringPart(theCtx, theOutcome, "details");
+		}
 	}
 
 	public static String getFirstIssueLocation(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
@@ -142,7 +147,12 @@ public class OperationOutcomeUtil {
 
 	private static void populateDetails(FhirContext theCtx, IBase theIssue, String theSeverity, String theDetails, String theLocation) {
 		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) theCtx.getElementDefinition(theIssue.getClass());
-		BaseRuntimeChildDefinition detailsChild = issueElement.getChildByName("details");
+		BaseRuntimeChildDefinition detailsChild;
+		if (theCtx.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU1)) {
+			detailsChild = issueElement.getChildByName("diagnostics");
+		} else {
+			detailsChild = issueElement.getChildByName("details");
+		}
 		BaseRuntimeElementDefinition<?> stringDef = theCtx.getElementDefinition("string");
 		BaseRuntimeChildDefinition severityChild = issueElement.getChildByName("severity");
 		BaseRuntimeChildDefinition locationChild = issueElement.getChildByName("location");

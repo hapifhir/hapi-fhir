@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -91,11 +91,11 @@ public class Specimen extends DomainResource {
         /**
          * Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.
          */
-        @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=6, min=0, max=1)
+        @Child(name = "bodySite", type = {CodeableConcept.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Anatomical collection site", formalDefinition="Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens." )
-        protected Type bodySite;
+        protected CodeableConcept bodySite;
 
-        private static final long serialVersionUID = 2117268554L;
+        private static final long serialVersionUID = 139465743L;
 
     /*
      * Constructor
@@ -298,34 +298,13 @@ public class Specimen extends DomainResource {
         /**
          * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
-        public Type getBodySite() { 
+        public CodeableConcept getBodySite() { 
+          if (this.bodySite == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenCollectionComponent.bodySite");
+            else if (Configuration.doAutoCreate())
+              this.bodySite = new CodeableConcept(); // cc
           return this.bodySite;
-        }
-
-        /**
-         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
-         */
-        public CodeableConcept getBodySiteCodeableConcept() throws Exception { 
-          if (!(this.bodySite instanceof CodeableConcept))
-            throw new Exception("Type mismatch: the type CodeableConcept was expected, but "+this.bodySite.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.bodySite;
-        }
-
-        public boolean hasBodySiteCodeableConcept() throws Exception { 
-          return this.bodySite instanceof CodeableConcept;
-        }
-
-        /**
-         * @return {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
-         */
-        public Reference getBodySiteReference() throws Exception { 
-          if (!(this.bodySite instanceof Reference))
-            throw new Exception("Type mismatch: the type Reference was expected, but "+this.bodySite.getClass().getName()+" was encountered");
-          return (Reference) this.bodySite;
-        }
-
-        public boolean hasBodySiteReference() throws Exception { 
-          return this.bodySite instanceof Reference;
         }
 
         public boolean hasBodySite() { 
@@ -335,7 +314,7 @@ public class Specimen extends DomainResource {
         /**
          * @param value {@link #bodySite} (Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.)
          */
-        public SpecimenCollectionComponent setBodySite(Type value) { 
+        public SpecimenCollectionComponent setBodySite(CodeableConcept value) { 
           this.bodySite = value;
           return this;
         }
@@ -347,7 +326,7 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("collected[x]", "dateTime|Period", "Time when specimen was collected from subject - the physiologically relevant time.", 0, java.lang.Integer.MAX_VALUE, collected));
           childrenList.add(new Property("quantity", "Quantity", "The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value specifying the technique that is used to perform the procedure.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("bodySite[x]", "CodeableConcept|Reference(BodySite)", "Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.", 0, java.lang.Integer.MAX_VALUE, bodySite));
+          childrenList.add(new Property("bodySite", "CodeableConcept", "Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.", 0, java.lang.Integer.MAX_VALUE, bodySite));
         }
 
       public SpecimenCollectionComponent copy() {
@@ -1451,12 +1430,12 @@ public class Specimen extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
   public static final String SP_PARENT = "parent";
+  @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token" )
+  public static final String SP_BODYSITE = "bodysite";
   @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
   public static final String SP_SUBJECT = "subject";
   @SearchParamDefinition(name="patient", path="Specimen.subject", description="The patient the specimen comes from", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="site-reference", path="Specimen.collection.bodySiteReference", description="BodySite resource for the body site from where the specimen originated", type="reference" )
-  public static final String SP_SITEREFERENCE = "site-reference";
   @SearchParamDefinition(name="collected", path="Specimen.collection.collected[x]", description="The date the specimen was collected", type="date" )
   public static final String SP_COLLECTED = "collected";
   @SearchParamDefinition(name="accession", path="Specimen.accessionIdentifier", description="The accession number associated with the specimen", type="token" )
@@ -1465,8 +1444,6 @@ public class Specimen extends DomainResource {
   public static final String SP_TYPE = "type";
   @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
   public static final String SP_CONTAINERID = "containerid";
-  @SearchParamDefinition(name="site-code", path="Specimen.collection.bodySiteCodeableConcept", description="The code for the body site from where the specimen originated", type="token" )
-  public static final String SP_SITECODE = "site-code";
   @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
   public static final String SP_COLLECTOR = "collector";
 

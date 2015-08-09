@@ -8,13 +8,13 @@ import java.util.List;
 
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.Questionnaire;
-import org.hl7.fhir.instance.model.QuestionnaireAnswers;
+import org.hl7.fhir.instance.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.WorkerContext;
-import org.hl7.fhir.instance.validation.QuestionnaireAnswersValidator;
+import org.hl7.fhir.instance.validation.QuestionnaireResponseValidator;
 import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.hl7.fhir.instance.validation.ValidationMessage.Source;
 
@@ -23,17 +23,17 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 
-public class FhirQuestionnaireAnswersValidator extends BaseValidatorBridge {
+public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirQuestionnaireAnswersValidator.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirQuestionnaireResponseValidator.class);
 	private IResourceLoader myResourceLoader;
 
 	/**
-	 * Set the class which will be used to load linked resources from the <code>QuestionnaireAnswers</code>. Specifically, if the <code>QuestionnaireAnswers</code> refers to an external (non-contained)
+	 * Set the class which will be used to load linked resources from the <code>QuestionnaireResponse</code>. Specifically, if the <code>QuestionnaireResponse</code> refers to an external (non-contained)
 	 * <code>Questionnaire</code>, or to any external (non-contained) <code>ValueSet</code>, the resource loader will be used to fetch those resources during the validation.
 	 * 
 	 * @param theResourceLoader
-	 *           The resourceloader to use. May be <code>null</code> if no resource loader should be used (in which case any <code>QuestionaireAnswers</code> with external references will fail to
+	 *           The resourceloader to use. May be <code>null</code> if no resource loader should be used (in which case any <code>QuestionaireResponse</code> with external references will fail to
 	 *           validate.)
 	 */
 	public void setResourceLoader(IResourceLoader theResourceLoader) {
@@ -48,12 +48,12 @@ public class FhirQuestionnaireAnswersValidator extends BaseValidatorBridge {
 			return Collections.emptyList();
 		}
 
-		if (resource instanceof QuestionnaireAnswers) {
-			return doValidate(theCtx, (QuestionnaireAnswers) resource);
+		if (resource instanceof QuestionnaireResponse) {
+			return doValidate(theCtx, (QuestionnaireResponse) resource);
 		}
 
 		RuntimeResourceDefinition def = theCtx.getFhirContext().getResourceDefinition((IBaseResource) resource);
-		if ("QuestionnaireAnswers".equals(def.getName()) == false) {
+		if ("QuestionnaireResponse".equals(def.getName()) == false) {
 			return Collections.emptyList();
 		}
 
@@ -63,12 +63,12 @@ public class FhirQuestionnaireAnswersValidator extends BaseValidatorBridge {
 
 		IParser p = theCtx.getFhirContext().newJsonParser();
 		String string = p.encodeResourceToString((IBaseResource) resource);
-		QuestionnaireAnswers qa = p.parseResource(QuestionnaireAnswers.class, string);
+		QuestionnaireResponse qa = p.parseResource(QuestionnaireResponse.class, string);
 
 		return doValidate(theCtx, qa);
 	}
 
-	private List<ValidationMessage> doValidate(IValidationContext<?> theValCtx, QuestionnaireAnswers theResource) {
+	private List<ValidationMessage> doValidate(IValidationContext<?> theValCtx, QuestionnaireResponse theResource) {
 
 		WorkerContext workerCtx = new WorkerContext();
 		ArrayList<ValidationMessage> retVal = new ArrayList<ValidationMessage>();
@@ -77,7 +77,7 @@ public class FhirQuestionnaireAnswersValidator extends BaseValidatorBridge {
 			return retVal;
 		}
 
-		QuestionnaireAnswersValidator val = new QuestionnaireAnswersValidator(workerCtx);
+		QuestionnaireResponseValidator val = new QuestionnaireResponseValidator(workerCtx);
 
 		val.validate(retVal, theResource);
 		return retVal;
@@ -92,7 +92,7 @@ public class FhirQuestionnaireAnswersValidator extends BaseValidatorBridge {
 			IIdType nextRef = nextRefInfo.getResourceReference().getReferenceElement();
 			String resourceType = nextRef.getResourceType();
 			if (isBlank(resourceType)) {
-				theMessages.add(new ValidationMessage(Source.QuestionnaireAnswersValidator, IssueType.INVALID, null, "Invalid reference '" + nextRef.getValue() + "' - Does not identify resource type", IssueSeverity.FATAL));
+				theMessages.add(new ValidationMessage(Source.QuestionnaireResponseValidator, org.hl7.fhir.instance.model.OperationOutcome.IssueType.INVALID, "Invalid reference '" + nextRef.getValue() + "' - Does not identify resource type", IssueSeverity.FATAL));
 			} else if ("ValueSet".equals(resourceType)) {
 				if (!theWorkerCtx.getValueSets().containsKey(nextRef.getValue())) {
 					ValueSet resource = tryToLoad(ValueSet.class, nextRef, theMessages);

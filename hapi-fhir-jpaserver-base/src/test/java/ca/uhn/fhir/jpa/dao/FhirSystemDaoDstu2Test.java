@@ -228,19 +228,19 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		// Bundle.entry[0] is operation outcome
 		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
 		assertEquals(IssueSeverityEnum.INFORMATION, ((OperationOutcome)resp.getEntry().get(0).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertThat(((OperationOutcome)resp.getEntry().get(0).getResource()).getIssue().get(0).getDetails(), startsWith("Batch completed in "));
+		assertThat(((OperationOutcome)resp.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics(), startsWith("Batch completed in "));
 
 		// Bundle.entry[1] is create response
 		assertEquals(OperationOutcome.class, resp.getEntry().get(1).getResource().getClass());
 		assertEquals(IssueSeverityEnum.INFORMATION, ((OperationOutcome)resp.getEntry().get(1).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertThat(((OperationOutcome)resp.getEntry().get(1).getResource()).getIssue().get(0).getDetails(), startsWith("Batch sub-request completed in"));
+		assertThat(((OperationOutcome)resp.getEntry().get(1).getResource()).getIssue().get(0).getDiagnostics(), startsWith("Batch sub-request completed in"));
 		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
 		assertThat(resp.getEntry().get(1).getResponse().getLocation(), startsWith("Patient/"));
 		
 		// Bundle.entry[2] is failed read response
 		assertEquals(OperationOutcome.class, resp.getEntry().get(2).getResource().getClass());
 		assertEquals(IssueSeverityEnum.ERROR, ((OperationOutcome)resp.getEntry().get(2).getResource()).getIssue().get(0).getSeverityElement().getValueAsEnum());
-		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome)resp.getEntry().get(2).getResource()).getIssue().get(0).getDetails());
+		assertEquals("Resource Patient/THIS_ID_DOESNT_EXIST is not known", ((OperationOutcome)resp.getEntry().get(2).getResource()).getIssue().get(0).getDiagnostics());
 		assertEquals("404 Not Found", resp.getEntry().get(2).getResponse().getStatus());
 
 		// Check POST
@@ -1047,7 +1047,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
 
 		OperationOutcome outcome = (OperationOutcome) resp.getEntry().get(0).getResource();
-		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
+		assertThat(outcome.getIssue().get(1).getDiagnostics(), containsString("Placeholder resource ID \"urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
 
 		assertTrue(resp.getEntry().get(1).getResponse().getLocation(), new IdDt(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
 		assertTrue(resp.getEntry().get(2).getResponse().getLocation(), new IdDt(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
@@ -1095,7 +1095,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		assertEquals(OperationOutcome.class, resp.getEntry().get(0).getResource().getClass());
 
 		OperationOutcome outcome = (OperationOutcome) resp.getEntry().get(0).getResource();
-		assertThat(outcome.getIssue().get(1).getDetails(), containsString("Placeholder resource ID \"urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
+		assertThat(outcome.getIssue().get(1).getDiagnostics(), containsString("Placeholder resource ID \"urn:oid:0.1.2.3\" was replaced with permanent ID \"Patient/"));
 
 		assertTrue(resp.getEntry().get(1).getResponse().getLocation(), new IdDt(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
 		assertTrue(resp.getEntry().get(2).getResponse().getLocation(), new IdDt(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));

@@ -1,7 +1,9 @@
 #!/bin/sh
 
+rm hapi-tinder-plugin/src/main/resources/res/dstu2/*
 for i in $(find ~/workspace/fhirbuild/trunk/build/source -name *-spreadsheet.xml | egrep "/[a-z0-9]+-spreadsheet"); do cp -v $i hapi-tinder-plugin/src/main/resources/res/dstu2/; done
 
+rm hapi-tinder-plugin/src/main/resources/dt/dstu2/*
 for i in $(find ~/workspace/fhirbuild/trunk/build/source/datatypes | grep xml | grep -v spreadsheet | grep -v -); do cp -v $i hapi-tinder-plugin/src/main/resources/dt/dstu2/; done
 
 cp /Users/james/workspace/fhir/trunk/build/publish/valuesets.xml hapi-tinder-plugin/src/main/resources/vs/dstu2/all-valuesets-bundle.xml

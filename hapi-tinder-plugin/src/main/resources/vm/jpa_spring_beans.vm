@@ -28,7 +28,7 @@
 
 #foreach ( $res in $resources )
 	<bean id="my${res.name}Dao${versionCapitalized}" 
-#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'QuestionnaireAnswers' ))
+#if ( ${versionCapitalized} == 'Dstu2' && ( ${res.name} == 'Bundle' || ${res.name} == 'QuestionnaireResponse' ))
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${res.name}${versionCapitalized}">
 #else
 		class="ca.uhn.fhir.jpa.dao.FhirResourceDao${versionCapitalized}">

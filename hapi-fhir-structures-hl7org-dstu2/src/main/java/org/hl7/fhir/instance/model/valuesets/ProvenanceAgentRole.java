@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 
 public enum ProvenanceAgentRole {
@@ -63,6 +63,10 @@ public enum ProvenanceAgentRole {
          */
         INFORMANT, 
         /**
+         * The entity that is accountable for maintaining a true an accurate copy of the original record
+         */
+        CUSTODIAN, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -83,6 +87,8 @@ public enum ProvenanceAgentRole {
           return ATTESTER;
         if ("informant".equals(codeString))
           return INFORMANT;
+        if ("custodian".equals(codeString))
+          return CUSTODIAN;
         throw new Exception("Unknown ProvenanceAgentRole code '"+codeString+"'");
         }
         public String toCode() {
@@ -94,6 +100,7 @@ public enum ProvenanceAgentRole {
             case LEGAL: return "legal";
             case ATTESTER: return "attester";
             case INFORMANT: return "informant";
+            case CUSTODIAN: return "custodian";
             default: return "?";
           }
         }
@@ -109,6 +116,7 @@ public enum ProvenanceAgentRole {
             case LEGAL: return "The person authenticated the content and accepted legal responsibility for its content";
             case ATTESTER: return "A verifier who attests to the accuracy of the resource";
             case INFORMANT: return "A person who reported information that contributed to the resource";
+            case CUSTODIAN: return "The entity that is accountable for maintaining a true an accurate copy of the original record";
             default: return "?";
           }
         }
@@ -121,6 +129,7 @@ public enum ProvenanceAgentRole {
             case LEGAL: return "Legal Authenticator";
             case ATTESTER: return "Attester";
             case INFORMANT: return "Informant";
+            case CUSTODIAN: return "Custodian";
             default: return "?";
           }
     }

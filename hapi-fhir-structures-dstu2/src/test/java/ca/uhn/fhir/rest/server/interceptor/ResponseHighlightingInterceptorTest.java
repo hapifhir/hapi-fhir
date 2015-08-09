@@ -107,7 +107,7 @@ public class ResponseHighlightingInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		ResourceNotFoundException exception = new ResourceNotFoundException("Not found");
-		exception.setOperationOutcome(new OperationOutcome().addIssue(new Issue().setDetails("Hello")));
+		exception.setOperationOutcome(new OperationOutcome().addIssue(new Issue().setDiagnostics("Hello")));
 		
 		assertFalse(ic.handleException(reqDetails, exception, req, resp));
 

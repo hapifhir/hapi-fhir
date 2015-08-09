@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -253,11 +253,10 @@ public class Address extends Type implements ICompositeType {
     protected StringType text;
 
     /**
-     * This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information.
+     * This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.
      */
     @Child(name = "line", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Street name, number, direction & P.O. Box etc", formalDefinition="This component contains the house number, apartment number, street name, street direction, \nP.O. Box number, delivery hints, and similar address information." )
+    @Description(shortDefinition="Street name, number, direction & P.O. Box etc", formalDefinition="This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information." )
     protected List<StringType> line;
 
     /**
@@ -268,34 +267,41 @@ P.O. Box number, delivery hints, and similar address information.
     protected StringType city;
 
     /**
+     * The name of the administrative area (county).
+     */
+    @Child(name = "district", type = {StringType.class}, order=5, min=0, max=1)
+    @Description(shortDefinition="District name (aka county)", formalDefinition="The name of the administrative area (county)." )
+    protected StringType district;
+
+    /**
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      */
-    @Child(name = "state", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "state", type = {StringType.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Sub-unit of country (abreviations ok)", formalDefinition="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)." )
     protected StringType state;
 
     /**
      * A postal code designating a region defined by the postal service.
      */
-    @Child(name = "postalCode", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "postalCode", type = {StringType.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Postal code for area", formalDefinition="A postal code designating a region defined by the postal service." )
     protected StringType postalCode;
 
     /**
      * Country - a nation as commonly understood or generally accepted.
      */
-    @Child(name = "country", type = {StringType.class}, order=7, min=0, max=1)
+    @Child(name = "country", type = {StringType.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Country (can be ISO 3166 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
     protected StringType country;
 
     /**
      * Time period when address was/is in use.
      */
-    @Child(name = "period", type = {Period.class}, order=8, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Time period when address was/is in use", formalDefinition="Time period when address was/is in use." )
     protected Period period;
 
-    private static final long serialVersionUID = 1890613287L;
+    private static final long serialVersionUID = 561490318L;
 
   /*
    * Constructor
@@ -452,8 +458,7 @@ P.O. Box number, delivery hints, and similar address information.
     }
 
     /**
-     * @return {@link #line} (This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information.)
+     * @return {@link #line} (This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.)
      */
     public List<StringType> getLine() { 
       if (this.line == null)
@@ -471,8 +476,7 @@ P.O. Box number, delivery hints, and similar address information.)
     }
 
     /**
-     * @return {@link #line} (This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information.)
+     * @return {@link #line} (This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.)
      */
     // syntactic sugar
     public StringType addLineElement() {//2 
@@ -484,8 +488,7 @@ P.O. Box number, delivery hints, and similar address information.)
     }
 
     /**
-     * @param value {@link #line} (This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information.)
+     * @param value {@link #line} (This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.)
      */
     public Address addLine(String value) { //1
       StringType t = new StringType();
@@ -497,8 +500,7 @@ P.O. Box number, delivery hints, and similar address information.)
     }
 
     /**
-     * @param value {@link #line} (This component contains the house number, apartment number, street name, street direction, 
-P.O. Box number, delivery hints, and similar address information.)
+     * @param value {@link #line} (This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.)
      */
     public boolean hasLine(String value) { 
       if (this.line == null)
@@ -554,6 +556,55 @@ P.O. Box number, delivery hints, and similar address information.)
         if (this.city == null)
           this.city = new StringType();
         this.city.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #district} (The name of the administrative area (county).). This is the underlying object with id, value and extensions. The accessor "getDistrict" gives direct access to the value
+     */
+    public StringType getDistrictElement() { 
+      if (this.district == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Address.district");
+        else if (Configuration.doAutoCreate())
+          this.district = new StringType(); // bb
+      return this.district;
+    }
+
+    public boolean hasDistrictElement() { 
+      return this.district != null && !this.district.isEmpty();
+    }
+
+    public boolean hasDistrict() { 
+      return this.district != null && !this.district.isEmpty();
+    }
+
+    /**
+     * @param value {@link #district} (The name of the administrative area (county).). This is the underlying object with id, value and extensions. The accessor "getDistrict" gives direct access to the value
+     */
+    public Address setDistrictElement(StringType value) { 
+      this.district = value;
+      return this;
+    }
+
+    /**
+     * @return The name of the administrative area (county).
+     */
+    public String getDistrict() { 
+      return this.district == null ? null : this.district.getValue();
+    }
+
+    /**
+     * @param value The name of the administrative area (county).
+     */
+    public Address setDistrict(String value) { 
+      if (Utilities.noString(value))
+        this.district = null;
+      else {
+        if (this.district == null)
+          this.district = new StringType();
+        this.district.setValue(value);
       }
       return this;
     }
@@ -734,8 +785,9 @@ P.O. Box number, delivery hints, and similar address information.)
         childrenList.add(new Property("use", "code", "The purpose of this address.", 0, java.lang.Integer.MAX_VALUE, use));
         childrenList.add(new Property("type", "code", "Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("text", "string", "A full text representation of the address.", 0, java.lang.Integer.MAX_VALUE, text));
-        childrenList.add(new Property("line", "string", "This component contains the house number, apartment number, street name, street direction, \nP.O. Box number, delivery hints, and similar address information.", 0, java.lang.Integer.MAX_VALUE, line));
+        childrenList.add(new Property("line", "string", "This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.", 0, java.lang.Integer.MAX_VALUE, line));
         childrenList.add(new Property("city", "string", "The name of the city, town, village or other community or delivery center.", 0, java.lang.Integer.MAX_VALUE, city));
+        childrenList.add(new Property("district", "string", "The name of the administrative area (county).", 0, java.lang.Integer.MAX_VALUE, district));
         childrenList.add(new Property("state", "string", "Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).", 0, java.lang.Integer.MAX_VALUE, state));
         childrenList.add(new Property("postalCode", "string", "A postal code designating a region defined by the postal service.", 0, java.lang.Integer.MAX_VALUE, postalCode));
         childrenList.add(new Property("country", "string", "Country - a nation as commonly understood or generally accepted.", 0, java.lang.Integer.MAX_VALUE, country));
@@ -754,6 +806,7 @@ P.O. Box number, delivery hints, and similar address information.)
             dst.line.add(i.copy());
         };
         dst.city = city == null ? null : city.copy();
+        dst.district = district == null ? null : district.copy();
         dst.state = state == null ? null : state.copy();
         dst.postalCode = postalCode == null ? null : postalCode.copy();
         dst.country = country == null ? null : country.copy();
@@ -773,9 +826,9 @@ P.O. Box number, delivery hints, and similar address information.)
           return false;
         Address o = (Address) other;
         return compareDeep(use, o.use, true) && compareDeep(type, o.type, true) && compareDeep(text, o.text, true)
-           && compareDeep(line, o.line, true) && compareDeep(city, o.city, true) && compareDeep(state, o.state, true)
-           && compareDeep(postalCode, o.postalCode, true) && compareDeep(country, o.country, true) && compareDeep(period, o.period, true)
-          ;
+           && compareDeep(line, o.line, true) && compareDeep(city, o.city, true) && compareDeep(district, o.district, true)
+           && compareDeep(state, o.state, true) && compareDeep(postalCode, o.postalCode, true) && compareDeep(country, o.country, true)
+           && compareDeep(period, o.period, true);
       }
 
       @Override
@@ -786,15 +839,16 @@ P.O. Box number, delivery hints, and similar address information.)
           return false;
         Address o = (Address) other;
         return compareValues(use, o.use, true) && compareValues(type, o.type, true) && compareValues(text, o.text, true)
-           && compareValues(line, o.line, true) && compareValues(city, o.city, true) && compareValues(state, o.state, true)
-           && compareValues(postalCode, o.postalCode, true) && compareValues(country, o.country, true);
+           && compareValues(line, o.line, true) && compareValues(city, o.city, true) && compareValues(district, o.district, true)
+           && compareValues(state, o.state, true) && compareValues(postalCode, o.postalCode, true) && compareValues(country, o.country, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (use == null || use.isEmpty()) && (type == null || type.isEmpty())
            && (text == null || text.isEmpty()) && (line == null || line.isEmpty()) && (city == null || city.isEmpty())
-           && (state == null || state.isEmpty()) && (postalCode == null || postalCode.isEmpty()) && (country == null || country.isEmpty())
-           && (period == null || period.isEmpty());
+           && (district == null || district.isEmpty()) && (state == null || state.isEmpty()) && (postalCode == null || postalCode.isEmpty())
+           && (country == null || country.isEmpty()) && (period == null || period.isEmpty());
       }
 
 

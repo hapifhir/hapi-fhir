@@ -1099,20 +1099,21 @@ public class XmlParserHl7OrgDstu2Test {
 
 		//@formatter:off
 		String msg = "<Patient xmlns=\"http://hl7.org/fhir\">" 
-				+ "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div></text>"
-				+ "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-				+ "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-				+ "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-				+ "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
+				+ "<text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333 </div></text>"
+				+ "<identifier><system value=\"http://orionhealth.com/mrn\"/><value value=\"PRP1660\"/></identifier>"
+				+ "<active value=\"true\"/>"
+				+ "<name><use value=\"official\"/><family value=\"Cardinal\"/><given value=\"John\"/></name>"
+				+ "<name><family value=\"Kramer\"/><given value=\"Doe\" /></name>"
+				+ "<telecom><system value=\"phone\"/><value value=\"555-555-2004\" /><use value=\"work\"/></telecom>"
 				+ "<gender value=\"male\"/>"
-				+ "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
+				+ "<address><use value=\"home\"/><line value=\"2222 Home Street\"/></address>"
 				+ "</Patient>";
 		//@formatter:on
 
 		Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 
 		assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333        </div>", patient.getText().getDiv().getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal:            444333333 </div>", patient.getText().getDiv().getValueAsString());
 		assertEquals("PRP1660", patient.getIdentifier().get(0).getValue());
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(patient);

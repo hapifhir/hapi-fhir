@@ -336,6 +336,11 @@ public class WorkerContext implements NameResolver {
       throw new Error("call to NullClient");
     }
 
+    @Override
+    public String getAddress() {
+      throw new Error("call to NullClient");
+    }
+
   }
 
   public StructureDefinition getExtensionStructure(StructureDefinition context, String url) throws Exception {

@@ -67,7 +67,7 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.QuantityComparatorEnum;
@@ -111,7 +111,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	@SuppressWarnings("unused")
-	private static IFhirResourceDao<QuestionnaireAnswers> ourQuestionnaireAnswersDao;
+	private static IFhirResourceDao<QuestionnaireResponse> ourQuestionnaireResponseDao;
 	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
 
@@ -2989,7 +2989,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		ourEncounterDao = ourCtx.getBean("myEncounterDaoDstu2", IFhirResourceDao.class);
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 		ourQuestionnaireDao = ourCtx.getBean("myQuestionnaireDaoDstu2", IFhirResourceDao.class);
-		ourQuestionnaireAnswersDao = ourCtx.getBean("myQuestionnaireAnswersDaoDstu2", IFhirResourceDao.class);
+		ourQuestionnaireResponseDao = ourCtx.getBean("myQuestionnaireResponseDaoDstu2", IFhirResourceDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
 	}
 

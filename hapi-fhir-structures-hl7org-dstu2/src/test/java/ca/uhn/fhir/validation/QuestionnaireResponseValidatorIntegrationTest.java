@@ -1,34 +1,27 @@
 package ca.uhn.fhir.validation;
 
-import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.IntegerType;
 import org.hl7.fhir.instance.model.Questionnaire;
+import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
 import org.hl7.fhir.instance.model.Questionnaire.GroupComponent;
-import org.hl7.fhir.instance.model.QuestionnaireAnswers;
+import org.hl7.fhir.instance.model.QuestionnaireResponse;
+import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
-import org.hl7.fhir.instance.model.QuestionnaireAnswers.QuestionnaireAnswersStatus;
-import org.hl7.fhir.instance.utils.WorkerContext;
-import org.hl7.fhir.instance.validation.QuestionnaireAnswersValidator;
-import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,13 +29,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
-public class QuestionnaireAnswersValidatorIntegrationTest {
+public class QuestionnaireResponseValidatorIntegrationTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireAnswersValidatorIntegrationTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorIntegrationTest.class);
 
 	private IResourceLoader myResourceLoaderMock;
 
@@ -52,7 +44,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 	public void before() {
 		myResourceLoaderMock = mock(IResourceLoader.class);
 
-		FhirQuestionnaireAnswersValidator qaVal = new FhirQuestionnaireAnswersValidator();
+		FhirQuestionnaireResponseValidator qaVal = new FhirQuestionnaireResponseValidator();
 		qaVal.setResourceLoader(myResourceLoaderMock);
 
 		myVal = ourCtx.newValidator();
@@ -68,7 +60,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		when(myResourceLoaderMock.load(Mockito.eq(Questionnaire.class), Mockito.eq(new IdType("http://example.com/Questionnaire/q1")))).thenReturn(q);
 
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
@@ -88,7 +80,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		// Wrong type
 		{
-			QuestionnaireAnswers qa = new QuestionnaireAnswers();
+			QuestionnaireResponse qa = new QuestionnaireResponse();
 			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 			qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new IntegerType(123));
 
@@ -99,7 +91,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		// Not populated, no status
 		{
-			QuestionnaireAnswers qa = new QuestionnaireAnswers();
+			QuestionnaireResponse qa = new QuestionnaireResponse();
 			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 
 			ValidationResult result = myVal.validateWithResult(qa);
@@ -109,9 +101,9 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		// Not populated, partial status
 		{
-			QuestionnaireAnswers qa = new QuestionnaireAnswers();
+			QuestionnaireResponse qa = new QuestionnaireResponse();
 			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-			qa.setStatus(QuestionnaireAnswersStatus.INPROGRESS);
+			qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
 
 			ValidationResult result = myVal.validateWithResult(qa);
 			ourLog.info(result.getMessages().toString());
@@ -120,9 +112,9 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		// Not populated, finished status
 		{
-			QuestionnaireAnswers qa = new QuestionnaireAnswers();
+			QuestionnaireResponse qa = new QuestionnaireResponse();
 			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-			qa.setStatus(QuestionnaireAnswersStatus.COMPLETED);
+			qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 			ValidationResult result = myVal.validateWithResult(qa);
 			ourLog.info(result.getMessages().toString());
@@ -142,11 +134,11 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
 		when(myResourceLoaderMock.load(Mockito.eq(ValueSet.class), Mockito.eq(new IdType("http://somevalueset/ValueSet/123")))).thenReturn(options);
 
-		QuestionnaireAnswers qa;
+		QuestionnaireResponse qa;
 
 		// Good code
 
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code0"));
 		ValidationResult result = myVal.validateWithResult(qa);
@@ -154,12 +146,12 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		// Bad code
 
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
 		result = myVal.validateWithResult(qa);
 		ourLog.info(result.getMessages().toString());
-		assertThat(result.getMessages().toString(), containsString("myLocationString=//QuestionnaireAnswers/group[0]/question[0]/answer[0]"));
+		assertThat(result.getMessages().toString(), containsString("myLocationString=//QuestionnaireResponse/group[0]/question[0]/answer[0]"));
 		assertThat(result.getMessages().toString(),
 				containsString("myMessage=Question with linkId[link0] has answer with system[urn:system] and code[code1] but this is not a valid answer for ValueSet[http://somevalueset/ValueSet/123]"));
 
@@ -168,7 +160,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 	@Test
 	public void testInvalidReference() {
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("someReference"); // not relative
 		ValidationResult result = myVal.validateWithResult(qa);
 		assertEquals(result.getMessages().toString(), 1, result.getMessages().size());
@@ -185,11 +177,11 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 
 		when(myResourceLoaderMock.load(Mockito.eq(ValueSet.class), Mockito.eq(new IdType("http://somevalueset/ValueSet/123")))).thenThrow(new ResourceNotFoundException("Unknown"));
 
-		QuestionnaireAnswers qa;
+		QuestionnaireResponse qa;
 
 		// Bad code
 
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
 		ValidationResult result = myVal.validateWithResult(qa);
@@ -224,7 +216,7 @@ public class QuestionnaireAnswersValidatorIntegrationTest {
 			}
 		});
 
-		QuestionnaireAnswers qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, new InputStreamReader(getClass().getResourceAsStream("/nice/answer-1-admission.xml")));
+		QuestionnaireResponse qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, new InputStreamReader(getClass().getResourceAsStream("/nice/answer-1-admission.xml")));
 
 		ValidationResult result = myVal.validateWithResult(qa);
 		ourLog.info(result.getMessages().toString());

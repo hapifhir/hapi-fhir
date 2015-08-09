@@ -34,13 +34,13 @@
       <sch:assert test="not(f:replacedBy) or f:status/@value='retired'">nsd-3: Can only have replacedBy if namingsystem is retired</sch:assert>
       <sch:assert test="not(exists(for $type in distinct-values(f:uniqueId/f:type) return if (count(f:uniqueId[f:type/@value=$type and f:primary/@value='true'])&gt;1) then $type else ()))">nsd-2: Can't have more than one preferred identifier for a type</sch:assert>
     </sch:rule>
-    <sch:rule context="f:NamingSystem/f:uniqueId/f:period">
-      <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
-    </sch:rule>
     <sch:rule context="f:NamingSystem/f:contact/f:telecom">
       <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>
     </sch:rule>
     <sch:rule context="f:NamingSystem/f:contact/f:telecom/f:period">
+      <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:NamingSystem/f:uniqueId/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="f:NamingSystem/f:replacedBy">

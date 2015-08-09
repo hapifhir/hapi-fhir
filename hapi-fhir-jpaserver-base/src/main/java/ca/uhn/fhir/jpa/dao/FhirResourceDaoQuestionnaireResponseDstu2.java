@@ -28,16 +28,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.validation.FhirQuestionnaireAnswersValidator;
+import ca.uhn.fhir.validation.FhirQuestionnaireResponseValidator;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.ValidationResult;
 
-public class FhirResourceDaoQuestionnaireAnswersDstu2 extends FhirResourceDaoDstu2<QuestionnaireAnswers> {
+public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDstu2<QuestionnaireResponse> {
 
 	private FhirContext myRefImplCtx = FhirContext.forDstu2Hl7Org();
 	
@@ -45,7 +45,7 @@ public class FhirResourceDaoQuestionnaireAnswersDstu2 extends FhirResourceDaoDst
 	protected void validateResourceForStorage(IResource theResource) {
 		super.validateResourceForStorage(theResource);
 
-		QuestionnaireAnswers qa = (QuestionnaireAnswers) theResource;
+		QuestionnaireResponse qa = (QuestionnaireResponse) theResource;
 		if (qa == null || qa.getQuestionnaire() == null || qa.getQuestionnaire().getReference() == null || qa.getQuestionnaire().getReference().isEmpty()) {
 			return;
 		}
@@ -54,7 +54,7 @@ public class FhirResourceDaoQuestionnaireAnswersDstu2 extends FhirResourceDaoDst
 		val.setValidateAgainstStandardSchema(false);
 		val.setValidateAgainstStandardSchematron(false);
 
-		FhirQuestionnaireAnswersValidator module = new FhirQuestionnaireAnswersValidator();
+		FhirQuestionnaireResponseValidator module = new FhirQuestionnaireResponseValidator();
 		module.setResourceLoader(new JpaResourceLoader());
 		val.registerValidatorModule(module);
 
@@ -70,7 +70,7 @@ public class FhirResourceDaoQuestionnaireAnswersDstu2 extends FhirResourceDaoDst
 		@Override
 		public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
 			/*
-			 * The QuestionnaireAnswers validator uses RI structures, so for now we need
+			 * The QuestionnaireResponse validator uses RI structures, so for now we need
 			 * to convert between that and HAPI structures. This is a bit hackish, but
 			 * hopefully it will go away at some point.
 			 */

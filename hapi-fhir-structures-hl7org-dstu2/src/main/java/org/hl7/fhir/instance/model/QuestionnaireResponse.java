@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -43,27 +43,27 @@ import org.hl7.fhir.instance.model.api.*;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the underlying questions.
  */
-@ResourceDef(name="QuestionnaireAnswers", profile="http://hl7.org/fhir/Profile/QuestionnaireAnswers")
-public class QuestionnaireAnswers extends DomainResource {
+@ResourceDef(name="QuestionnaireResponse", profile="http://hl7.org/fhir/Profile/QuestionnaireResponse")
+public class QuestionnaireResponse extends DomainResource {
 
-    public enum QuestionnaireAnswersStatus {
+    public enum QuestionnaireResponseStatus {
         /**
-         * This QuestionnaireAnswers has been partially filled out with answers, but changes or additions are still expected to be made to it.
+         * This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.
          */
         INPROGRESS, 
         /**
-         * This QuestionnaireAnswers has been filled out with answers, and the current content is regarded as definitive.
+         * This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.
          */
         COMPLETED, 
         /**
-         * This QuestionnaireAnswers has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.
+         * This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.
          */
         AMENDED, 
         /**
          * added to help the parsers
          */
         NULL;
-        public static QuestionnaireAnswersStatus fromCode(String codeString) throws Exception {
+        public static QuestionnaireResponseStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
@@ -72,7 +72,7 @@ public class QuestionnaireAnswers extends DomainResource {
           return COMPLETED;
         if ("amended".equals(codeString))
           return AMENDED;
-        throw new Exception("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
+        throw new Exception("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -92,9 +92,9 @@ public class QuestionnaireAnswers extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INPROGRESS: return "This QuestionnaireAnswers has been partially filled out with answers, but changes or additions are still expected to be made to it.";
-            case COMPLETED: return "This QuestionnaireAnswers has been filled out with answers, and the current content is regarded as definitive.";
-            case AMENDED: return "This QuestionnaireAnswers has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
+            case INPROGRESS: return "This QuestionnaireResponse has been partially filled out with answers, but changes or additions are still expected to be made to it.";
+            case COMPLETED: return "This QuestionnaireResponse has been filled out with answers, and the current content is regarded as definitive.";
+            case AMENDED: return "This QuestionnaireResponse has been filled out with answers, then marked as complete, yet changes or additions have been made to it afterwards.";
             default: return "?";
           }
         }
@@ -108,25 +108,25 @@ public class QuestionnaireAnswers extends DomainResource {
         }
     }
 
-  public static class QuestionnaireAnswersStatusEnumFactory implements EnumFactory<QuestionnaireAnswersStatus> {
-    public QuestionnaireAnswersStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class QuestionnaireResponseStatusEnumFactory implements EnumFactory<QuestionnaireResponseStatus> {
+    public QuestionnaireResponseStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("in-progress".equals(codeString))
-          return QuestionnaireAnswersStatus.INPROGRESS;
+          return QuestionnaireResponseStatus.INPROGRESS;
         if ("completed".equals(codeString))
-          return QuestionnaireAnswersStatus.COMPLETED;
+          return QuestionnaireResponseStatus.COMPLETED;
         if ("amended".equals(codeString))
-          return QuestionnaireAnswersStatus.AMENDED;
-        throw new IllegalArgumentException("Unknown QuestionnaireAnswersStatus code '"+codeString+"'");
+          return QuestionnaireResponseStatus.AMENDED;
+        throw new IllegalArgumentException("Unknown QuestionnaireResponseStatus code '"+codeString+"'");
         }
-    public String toCode(QuestionnaireAnswersStatus code) {
-      if (code == QuestionnaireAnswersStatus.INPROGRESS)
+    public String toCode(QuestionnaireResponseStatus code) {
+      if (code == QuestionnaireResponseStatus.INPROGRESS)
         return "in-progress";
-      if (code == QuestionnaireAnswersStatus.COMPLETED)
+      if (code == QuestionnaireResponseStatus.COMPLETED)
         return "completed";
-      if (code == QuestionnaireAnswersStatus.AMENDED)
+      if (code == QuestionnaireResponseStatus.AMENDED)
         return "amended";
       return "?";
       }
@@ -135,10 +135,10 @@ public class QuestionnaireAnswers extends DomainResource {
     @Block()
     public static class GroupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.
+         * Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.
          */
         @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Corresponding group within Questionnaire", formalDefinition="Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource." )
+        @Description(shortDefinition="Corresponding group within Questionnaire", formalDefinition="Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource." )
         protected StringType linkId;
 
         /**
@@ -156,14 +156,14 @@ public class QuestionnaireAnswers extends DomainResource {
         protected StringType text;
 
         /**
-         * More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.
+         * More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.
          */
         @Child(name = "subject", type = {}, order=4, min=0, max=1)
-        @Description(shortDefinition="The subject this group's answers are about", formalDefinition="More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers." )
+        @Description(shortDefinition="The subject this group's answers are about", formalDefinition="More specific subject this section's answers are about, details the subject given in QuestionnaireResponse." )
         protected Reference subject;
 
         /**
-         * The actual object that is the target of the reference (More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.)
+         * The actual object that is the target of the reference (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
          */
         protected Resource subjectTarget;
 
@@ -171,7 +171,7 @@ public class QuestionnaireAnswers extends DomainResource {
          * A sub-group within a group. The ordering of groups within this group is relevant.
          */
         @Child(name = "group", type = {GroupComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Nested questionnaire answers group", formalDefinition="A sub-group within a group. The ordering of groups within this group is relevant." )
+        @Description(shortDefinition="Nested questionnaire response group", formalDefinition="A sub-group within a group. The ordering of groups within this group is relevant." )
         protected List<GroupComponent> group;
 
         /**
@@ -191,7 +191,7 @@ public class QuestionnaireAnswers extends DomainResource {
       }
 
         /**
-         * @return {@link #linkId} (Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
+         * @return {@link #linkId} (Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
          */
         public StringType getLinkIdElement() { 
           if (this.linkId == null)
@@ -211,7 +211,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @param value {@link #linkId} (Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
+         * @param value {@link #linkId} (Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
          */
         public GroupComponent setLinkIdElement(StringType value) { 
           this.linkId = value;
@@ -219,14 +219,14 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.
+         * @return Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.
          */
         public String getLinkId() { 
           return this.linkId == null ? null : this.linkId.getValue();
         }
 
         /**
-         * @param value Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.
+         * @param value Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.
          */
         public GroupComponent setLinkId(String value) { 
           if (Utilities.noString(value))
@@ -338,7 +338,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.)
+         * @return {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
          */
         public Reference getSubject() { 
           if (this.subject == null)
@@ -354,7 +354,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @param value {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.)
+         * @param value {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
          */
         public GroupComponent setSubject(Reference value) { 
           this.subject = value;
@@ -362,14 +362,14 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.)
+         * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
          */
         public Resource getSubjectTarget() { 
           return this.subjectTarget;
         }
 
         /**
-         * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.)
+         * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
          */
         public GroupComponent setSubjectTarget(Resource value) { 
           this.subjectTarget = value;
@@ -458,11 +458,11 @@ public class QuestionnaireAnswers extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("linkId", "string", "Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireAnswers resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
+          childrenList.add(new Property("linkId", "string", "Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
           childrenList.add(new Property("title", "string", "Text that is displayed above the contents of the group.", 0, java.lang.Integer.MAX_VALUE, title));
           childrenList.add(new Property("text", "string", "Additional text for the group, used for display purposes.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireAnswers.", 0, java.lang.Integer.MAX_VALUE, subject));
-          childrenList.add(new Property("group", "@QuestionnaireAnswers.group", "A sub-group within a group. The ordering of groups within this group is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
+          childrenList.add(new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, subject));
+          childrenList.add(new Property("group", "@QuestionnaireResponse.group", "A sub-group within a group. The ordering of groups within this group is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
           childrenList.add(new Property("question", "", "Set of questions within this group. The order of questions within the group is relevant.", 0, java.lang.Integer.MAX_VALUE, question));
         }
 
@@ -520,10 +520,10 @@ public class QuestionnaireAnswers extends DomainResource {
     @Block()
     public static class QuestionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.
+         * Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.
          */
         @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Corresponding question within Questionnaire", formalDefinition="Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource." )
+        @Description(shortDefinition="Corresponding question within Questionnaire", formalDefinition="Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource." )
         protected StringType linkId;
 
         /**
@@ -540,14 +540,7 @@ public class QuestionnaireAnswers extends DomainResource {
         @Description(shortDefinition="The response(s) to the question", formalDefinition="The respondent's answer(s) to the question." )
         protected List<QuestionAnswerComponent> answer;
 
-        /**
-         * Nested group, containing nested question for this question. The order of groups within the question is relevant.
-         */
-        @Child(name = "group", type = {GroupComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Nested questionnaire group", formalDefinition="Nested group, containing nested question for this question. The order of groups within the question is relevant." )
-        protected List<GroupComponent> group;
-
-        private static final long serialVersionUID = -564009278L;
+        private static final long serialVersionUID = -265263901L;
 
     /*
      * Constructor
@@ -557,7 +550,7 @@ public class QuestionnaireAnswers extends DomainResource {
       }
 
         /**
-         * @return {@link #linkId} (Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
+         * @return {@link #linkId} (Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
          */
         public StringType getLinkIdElement() { 
           if (this.linkId == null)
@@ -577,7 +570,7 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @param value {@link #linkId} (Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
+         * @param value {@link #linkId} (Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.). This is the underlying object with id, value and extensions. The accessor "getLinkId" gives direct access to the value
          */
         public QuestionComponent setLinkIdElement(StringType value) { 
           this.linkId = value;
@@ -585,14 +578,14 @@ public class QuestionnaireAnswers extends DomainResource {
         }
 
         /**
-         * @return Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.
+         * @return Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.
          */
         public String getLinkId() { 
           return this.linkId == null ? null : this.linkId.getValue();
         }
 
         /**
-         * @param value Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.
+         * @param value Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.
          */
         public QuestionComponent setLinkId(String value) { 
           if (Utilities.noString(value))
@@ -694,52 +687,11 @@ public class QuestionnaireAnswers extends DomainResource {
           return this;
         }
 
-        /**
-         * @return {@link #group} (Nested group, containing nested question for this question. The order of groups within the question is relevant.)
-         */
-        public List<GroupComponent> getGroup() { 
-          if (this.group == null)
-            this.group = new ArrayList<GroupComponent>();
-          return this.group;
-        }
-
-        public boolean hasGroup() { 
-          if (this.group == null)
-            return false;
-          for (GroupComponent item : this.group)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #group} (Nested group, containing nested question for this question. The order of groups within the question is relevant.)
-         */
-    // syntactic sugar
-        public GroupComponent addGroup() { //3
-          GroupComponent t = new GroupComponent();
-          if (this.group == null)
-            this.group = new ArrayList<GroupComponent>();
-          this.group.add(t);
-          return t;
-        }
-
-    // syntactic sugar
-        public QuestionComponent addGroup(GroupComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.group == null)
-            this.group = new ArrayList<GroupComponent>();
-          this.group.add(t);
-          return this;
-        }
-
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("linkId", "string", "Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireAnswers resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
+          childrenList.add(new Property("linkId", "string", "Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.", 0, java.lang.Integer.MAX_VALUE, linkId));
           childrenList.add(new Property("text", "string", "The actual question as shown to the user to prompt them for an answer.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
-          childrenList.add(new Property("group", "@QuestionnaireAnswers.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 
       public QuestionComponent copy() {
@@ -752,11 +704,6 @@ public class QuestionnaireAnswers extends DomainResource {
           for (QuestionAnswerComponent i : answer)
             dst.answer.add(i.copy());
         };
-        if (group != null) {
-          dst.group = new ArrayList<GroupComponent>();
-          for (GroupComponent i : group)
-            dst.group.add(i.copy());
-        };
         return dst;
       }
 
@@ -768,7 +715,7 @@ public class QuestionnaireAnswers extends DomainResource {
           return false;
         QuestionComponent o = (QuestionComponent) other;
         return compareDeep(linkId, o.linkId, true) && compareDeep(text, o.text, true) && compareDeep(answer, o.answer, true)
-           && compareDeep(group, o.group, true);
+          ;
       }
 
       @Override
@@ -783,7 +730,7 @@ public class QuestionnaireAnswers extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && (linkId == null || linkId.isEmpty()) && (text == null || text.isEmpty())
-           && (answer == null || answer.isEmpty()) && (group == null || group.isEmpty());
+           && (answer == null || answer.isEmpty());
       }
 
   }
@@ -797,7 +744,14 @@ public class QuestionnaireAnswers extends DomainResource {
         @Description(shortDefinition="Single-valued answer to the question", formalDefinition="The answer (or one of the answers) provided by the respondant to the question." )
         protected Type value;
 
-        private static final long serialVersionUID = -732981989L;
+        /**
+         * Nested group, containing nested question for this question. The order of groups within the question is relevant.
+         */
+        @Child(name = "group", type = {GroupComponent.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Nested questionnaire group", formalDefinition="Nested group, containing nested question for this question. The order of groups within the question is relevant." )
+        protected List<GroupComponent> group;
+
+        private static final long serialVersionUID = -1223680118L;
 
     /*
      * Constructor
@@ -994,15 +948,61 @@ public class QuestionnaireAnswers extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #group} (Nested group, containing nested question for this question. The order of groups within the question is relevant.)
+         */
+        public List<GroupComponent> getGroup() { 
+          if (this.group == null)
+            this.group = new ArrayList<GroupComponent>();
+          return this.group;
+        }
+
+        public boolean hasGroup() { 
+          if (this.group == null)
+            return false;
+          for (GroupComponent item : this.group)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #group} (Nested group, containing nested question for this question. The order of groups within the question is relevant.)
+         */
+    // syntactic sugar
+        public GroupComponent addGroup() { //3
+          GroupComponent t = new GroupComponent();
+          if (this.group == null)
+            this.group = new ArrayList<GroupComponent>();
+          this.group.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public QuestionAnswerComponent addGroup(GroupComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.group == null)
+            this.group = new ArrayList<GroupComponent>();
+          this.group.add(t);
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("value[x]", "boolean|decimal|integer|date|dateTime|instant|time|string|uri|Attachment|Coding|Quantity|Reference(Any)", "The answer (or one of the answers) provided by the respondant to the question.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("group", "@QuestionnaireResponse.group", "Nested group, containing nested question for this question. The order of groups within the question is relevant.", 0, java.lang.Integer.MAX_VALUE, group));
         }
 
       public QuestionAnswerComponent copy() {
         QuestionAnswerComponent dst = new QuestionAnswerComponent();
         copyValues(dst);
         dst.value = value == null ? null : value.copy();
+        if (group != null) {
+          dst.group = new ArrayList<GroupComponent>();
+          for (GroupComponent i : group)
+            dst.group.add(i.copy());
+        };
         return dst;
       }
 
@@ -1013,7 +1013,7 @@ public class QuestionnaireAnswers extends DomainResource {
         if (!(other instanceof QuestionAnswerComponent))
           return false;
         QuestionAnswerComponent o = (QuestionAnswerComponent) other;
-        return compareDeep(value, o.value, true);
+        return compareDeep(value, o.value, true) && compareDeep(group, o.group, true);
       }
 
       @Override
@@ -1027,7 +1027,8 @@ public class QuestionnaireAnswers extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (value == null || value.isEmpty());
+        return super.isEmpty() && (value == null || value.isEmpty()) && (group == null || group.isEmpty())
+          ;
       }
 
   }
@@ -1052,41 +1053,41 @@ public class QuestionnaireAnswers extends DomainResource {
     protected Questionnaire questionnaireTarget;
 
     /**
-     * The lifecycle status of the questionnaire answers as a whole.
+     * The lifecycle status of the questionnaire response as a whole.
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1)
-    @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire answers as a whole." )
-    protected Enumeration<QuestionnaireAnswersStatus> status;
+    @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
+    protected Enumeration<QuestionnaireResponseStatus> status;
 
     /**
-     * The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.
+     * The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.
      */
     @Child(name = "subject", type = {}, order=3, min=0, max=1)
-    @Description(shortDefinition="The subject of the questions", formalDefinition="The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information." )
+    @Description(shortDefinition="The subject of the questions", formalDefinition="The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
+     * The actual object that is the target of the reference (The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
      */
     protected Resource subjectTarget;
 
     /**
-     * Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.
+     * Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.
      */
     @Child(name = "author", type = {Device.class, Practitioner.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=1)
-    @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system." )
+    @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system." )
     protected Reference author;
 
     /**
-     * The actual object that is the target of the reference (Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.)
+     * The actual object that is the target of the reference (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
     protected Resource authorTarget;
 
     /**
-     * The date and/or time that this version of the questionnaire answers was authored.
+     * The date and/or time that this version of the questionnaire response was authored.
      */
     @Child(name = "authored", type = {DateTimeType.class}, order=5, min=0, max=1)
-    @Description(shortDefinition="Date this version was authored", formalDefinition="The date and/or time that this version of the questionnaire answers was authored." )
+    @Description(shortDefinition="Date this version was authored", formalDefinition="The date and/or time that this version of the questionnaire response was authored." )
     protected DateTimeType authored;
 
     /**
@@ -1102,37 +1103,37 @@ public class QuestionnaireAnswers extends DomainResource {
     protected Resource sourceTarget;
 
     /**
-     * Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.
+     * Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.
      */
     @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1)
-    @Description(shortDefinition="Primary encounter during which the answers were collected", formalDefinition="Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers." )
+    @Description(shortDefinition="Primary encounter during which the answers were collected", formalDefinition="Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers." )
     protected Reference encounter;
 
     /**
-     * The actual object that is the target of the reference (Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
+     * The actual object that is the target of the reference (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
      */
     protected Encounter encounterTarget;
 
     /**
-     * A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.
+     * A group of questions to a possibly similarly grouped set of questions in the questionnaire response.
      */
     @Child(name = "group", type = {}, order=8, min=0, max=1)
-    @Description(shortDefinition="Grouped questions", formalDefinition="A group of questions to a possibly similarly grouped set of questions in the questionnaire answers." )
+    @Description(shortDefinition="Grouped questions", formalDefinition="A group of questions to a possibly similarly grouped set of questions in the questionnaire response." )
     protected GroupComponent group;
 
-    private static final long serialVersionUID = -949684393L;
+    private static final long serialVersionUID = -1081988635L;
 
   /*
    * Constructor
    */
-    public QuestionnaireAnswers() {
+    public QuestionnaireResponse() {
       super();
     }
 
   /*
    * Constructor
    */
-    public QuestionnaireAnswers(Enumeration<QuestionnaireAnswersStatus> status) {
+    public QuestionnaireResponse(Enumeration<QuestionnaireResponseStatus> status) {
       super();
       this.status = status;
     }
@@ -1143,7 +1144,7 @@ public class QuestionnaireAnswers extends DomainResource {
     public Identifier getIdentifier() { 
       if (this.identifier == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.identifier");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.identifier");
         else if (Configuration.doAutoCreate())
           this.identifier = new Identifier(); // cc
       return this.identifier;
@@ -1156,7 +1157,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * @param value {@link #identifier} (A business identifier assigned to a particular completed (or partially completed) questionnaire.)
      */
-    public QuestionnaireAnswers setIdentifier(Identifier value) { 
+    public QuestionnaireResponse setIdentifier(Identifier value) { 
       this.identifier = value;
       return this;
     }
@@ -1167,7 +1168,7 @@ public class QuestionnaireAnswers extends DomainResource {
     public Reference getQuestionnaire() { 
       if (this.questionnaire == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.questionnaire");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.questionnaire");
         else if (Configuration.doAutoCreate())
           this.questionnaire = new Reference(); // cc
       return this.questionnaire;
@@ -1180,7 +1181,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * @param value {@link #questionnaire} (Indicates the Questionnaire resource that defines the form for which answers are being provided.)
      */
-    public QuestionnaireAnswers setQuestionnaire(Reference value) { 
+    public QuestionnaireResponse setQuestionnaire(Reference value) { 
       this.questionnaire = value;
       return this;
     }
@@ -1191,7 +1192,7 @@ public class QuestionnaireAnswers extends DomainResource {
     public Questionnaire getQuestionnaireTarget() { 
       if (this.questionnaireTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.questionnaire");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.questionnaire");
         else if (Configuration.doAutoCreate())
           this.questionnaireTarget = new Questionnaire(); // aa
       return this.questionnaireTarget;
@@ -1200,20 +1201,20 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * @param value {@link #questionnaire} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Indicates the Questionnaire resource that defines the form for which answers are being provided.)
      */
-    public QuestionnaireAnswers setQuestionnaireTarget(Questionnaire value) { 
+    public QuestionnaireResponse setQuestionnaireTarget(Questionnaire value) { 
       this.questionnaireTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #status} (The lifecycle status of the questionnaire answers as a whole.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @return {@link #status} (The lifecycle status of the questionnaire response as a whole.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<QuestionnaireAnswersStatus> getStatusElement() { 
+    public Enumeration<QuestionnaireResponseStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.status");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<QuestionnaireAnswersStatus>(new QuestionnaireAnswersStatusEnumFactory()); // bb
+          this.status = new Enumeration<QuestionnaireResponseStatus>(new QuestionnaireResponseStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -1226,37 +1227,37 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     /**
-     * @param value {@link #status} (The lifecycle status of the questionnaire answers as a whole.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     * @param value {@link #status} (The lifecycle status of the questionnaire response as a whole.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public QuestionnaireAnswers setStatusElement(Enumeration<QuestionnaireAnswersStatus> value) { 
+    public QuestionnaireResponse setStatusElement(Enumeration<QuestionnaireResponseStatus> value) { 
       this.status = value;
       return this;
     }
 
     /**
-     * @return The lifecycle status of the questionnaire answers as a whole.
+     * @return The lifecycle status of the questionnaire response as a whole.
      */
-    public QuestionnaireAnswersStatus getStatus() { 
+    public QuestionnaireResponseStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
-     * @param value The lifecycle status of the questionnaire answers as a whole.
+     * @param value The lifecycle status of the questionnaire response as a whole.
      */
-    public QuestionnaireAnswers setStatus(QuestionnaireAnswersStatus value) { 
+    public QuestionnaireResponse setStatus(QuestionnaireResponseStatus value) { 
         if (this.status == null)
-          this.status = new Enumeration<QuestionnaireAnswersStatus>(new QuestionnaireAnswersStatusEnumFactory());
+          this.status = new Enumeration<QuestionnaireResponseStatus>(new QuestionnaireResponseStatusEnumFactory());
         this.status.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #subject} (The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
+     * @return {@link #subject} (The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.subject");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.subject");
         else if (Configuration.doAutoCreate())
           this.subject = new Reference(); // cc
       return this.subject;
@@ -1267,35 +1268,35 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
+     * @param value {@link #subject} (The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
      */
-    public QuestionnaireAnswers setSubject(Reference value) { 
+    public QuestionnaireResponse setSubject(Reference value) { 
       this.subject = value;
       return this;
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.)
      */
-    public QuestionnaireAnswers setSubjectTarget(Resource value) { 
+    public QuestionnaireResponse setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #author} (Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.)
+     * @return {@link #author} (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
     public Reference getAuthor() { 
       if (this.author == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.author");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.author");
         else if (Configuration.doAutoCreate())
           this.author = new Reference(); // cc
       return this.author;
@@ -1306,35 +1307,35 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     /**
-     * @param value {@link #author} (Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.)
+     * @param value {@link #author} (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
-    public QuestionnaireAnswers setAuthor(Reference value) { 
+    public QuestionnaireResponse setAuthor(Reference value) { 
       this.author = value;
       return this;
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.)
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
     public Resource getAuthorTarget() { 
       return this.authorTarget;
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.)
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.)
      */
-    public QuestionnaireAnswers setAuthorTarget(Resource value) { 
+    public QuestionnaireResponse setAuthorTarget(Resource value) { 
       this.authorTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #authored} (The date and/or time that this version of the questionnaire answers was authored.). This is the underlying object with id, value and extensions. The accessor "getAuthored" gives direct access to the value
+     * @return {@link #authored} (The date and/or time that this version of the questionnaire response was authored.). This is the underlying object with id, value and extensions. The accessor "getAuthored" gives direct access to the value
      */
     public DateTimeType getAuthoredElement() { 
       if (this.authored == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.authored");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.authored");
         else if (Configuration.doAutoCreate())
           this.authored = new DateTimeType(); // bb
       return this.authored;
@@ -1349,24 +1350,24 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     /**
-     * @param value {@link #authored} (The date and/or time that this version of the questionnaire answers was authored.). This is the underlying object with id, value and extensions. The accessor "getAuthored" gives direct access to the value
+     * @param value {@link #authored} (The date and/or time that this version of the questionnaire response was authored.). This is the underlying object with id, value and extensions. The accessor "getAuthored" gives direct access to the value
      */
-    public QuestionnaireAnswers setAuthoredElement(DateTimeType value) { 
+    public QuestionnaireResponse setAuthoredElement(DateTimeType value) { 
       this.authored = value;
       return this;
     }
 
     /**
-     * @return The date and/or time that this version of the questionnaire answers was authored.
+     * @return The date and/or time that this version of the questionnaire response was authored.
      */
     public Date getAuthored() { 
       return this.authored == null ? null : this.authored.getValue();
     }
 
     /**
-     * @param value The date and/or time that this version of the questionnaire answers was authored.
+     * @param value The date and/or time that this version of the questionnaire response was authored.
      */
-    public QuestionnaireAnswers setAuthored(Date value) { 
+    public QuestionnaireResponse setAuthored(Date value) { 
       if (value == null)
         this.authored = null;
       else {
@@ -1383,7 +1384,7 @@ public class QuestionnaireAnswers extends DomainResource {
     public Reference getSource() { 
       if (this.source == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.source");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.source");
         else if (Configuration.doAutoCreate())
           this.source = new Reference(); // cc
       return this.source;
@@ -1396,7 +1397,7 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * @param value {@link #source} (The person who answered the questions about the subject.)
      */
-    public QuestionnaireAnswers setSource(Reference value) { 
+    public QuestionnaireResponse setSource(Reference value) { 
       this.source = value;
       return this;
     }
@@ -1411,18 +1412,18 @@ public class QuestionnaireAnswers extends DomainResource {
     /**
      * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person who answered the questions about the subject.)
      */
-    public QuestionnaireAnswers setSourceTarget(Resource value) { 
+    public QuestionnaireResponse setSourceTarget(Resource value) { 
       this.sourceTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #encounter} (Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
+     * @return {@link #encounter} (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
      */
     public Reference getEncounter() { 
       if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.encounter");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.encounter");
         else if (Configuration.doAutoCreate())
           this.encounter = new Reference(); // cc
       return this.encounter;
@@ -1433,40 +1434,40 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     /**
-     * @param value {@link #encounter} (Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
+     * @param value {@link #encounter} (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
      */
-    public QuestionnaireAnswers setEncounter(Reference value) { 
+    public QuestionnaireResponse setEncounter(Reference value) { 
       this.encounter = value;
       return this;
     }
 
     /**
-     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
      */
     public Encounter getEncounterTarget() { 
       if (this.encounterTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.encounter");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.encounter");
         else if (Configuration.doAutoCreate())
           this.encounterTarget = new Encounter(); // aa
       return this.encounterTarget;
     }
 
     /**
-     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.)
      */
-    public QuestionnaireAnswers setEncounterTarget(Encounter value) { 
+    public QuestionnaireResponse setEncounterTarget(Encounter value) { 
       this.encounterTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #group} (A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.)
+     * @return {@link #group} (A group of questions to a possibly similarly grouped set of questions in the questionnaire response.)
      */
     public GroupComponent getGroup() { 
       if (this.group == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create QuestionnaireAnswers.group");
+          throw new Error("Attempt to auto-create QuestionnaireResponse.group");
         else if (Configuration.doAutoCreate())
           this.group = new GroupComponent(); // cc
       return this.group;
@@ -1477,9 +1478,9 @@ public class QuestionnaireAnswers extends DomainResource {
     }
 
     /**
-     * @param value {@link #group} (A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.)
+     * @param value {@link #group} (A group of questions to a possibly similarly grouped set of questions in the questionnaire response.)
      */
-    public QuestionnaireAnswers setGroup(GroupComponent value) { 
+    public QuestionnaireResponse setGroup(GroupComponent value) { 
       this.group = value;
       return this;
     }
@@ -1488,17 +1489,17 @@ public class QuestionnaireAnswers extends DomainResource {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "A business identifier assigned to a particular completed (or partially completed) questionnaire.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("questionnaire", "Reference(Questionnaire)", "Indicates the Questionnaire resource that defines the form for which answers are being provided.", 0, java.lang.Integer.MAX_VALUE, questionnaire));
-        childrenList.add(new Property("status", "code", "The lifecycle status of the questionnaire answers as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
-        childrenList.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire answers.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireAnswers and recorded them in the system.", 0, java.lang.Integer.MAX_VALUE, author));
-        childrenList.add(new Property("authored", "dateTime", "The date and/or time that this version of the questionnaire answers was authored.", 0, java.lang.Integer.MAX_VALUE, authored));
+        childrenList.add(new Property("status", "code", "The lifecycle status of the questionnaire response as a whole.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, java.lang.Integer.MAX_VALUE, author));
+        childrenList.add(new Property("authored", "dateTime", "The date and/or time that this version of the questionnaire response was authored.", 0, java.lang.Integer.MAX_VALUE, authored));
         childrenList.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, java.lang.Integer.MAX_VALUE, source));
-        childrenList.add(new Property("encounter", "Reference(Encounter)", "Encounter during which this set of questionnaire answers were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.", 0, java.lang.Integer.MAX_VALUE, encounter));
-        childrenList.add(new Property("group", "", "A group of questions to a possibly similarly grouped set of questions in the questionnaire answers.", 0, java.lang.Integer.MAX_VALUE, group));
+        childrenList.add(new Property("encounter", "Reference(Encounter)", "Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.", 0, java.lang.Integer.MAX_VALUE, encounter));
+        childrenList.add(new Property("group", "", "A group of questions to a possibly similarly grouped set of questions in the questionnaire response.", 0, java.lang.Integer.MAX_VALUE, group));
       }
 
-      public QuestionnaireAnswers copy() {
-        QuestionnaireAnswers dst = new QuestionnaireAnswers();
+      public QuestionnaireResponse copy() {
+        QuestionnaireResponse dst = new QuestionnaireResponse();
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.questionnaire = questionnaire == null ? null : questionnaire.copy();
@@ -1512,7 +1513,7 @@ public class QuestionnaireAnswers extends DomainResource {
         return dst;
       }
 
-      protected QuestionnaireAnswers typedCopy() {
+      protected QuestionnaireResponse typedCopy() {
         return copy();
       }
 
@@ -1520,9 +1521,9 @@ public class QuestionnaireAnswers extends DomainResource {
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof QuestionnaireAnswers))
+        if (!(other instanceof QuestionnaireResponse))
           return false;
-        QuestionnaireAnswers o = (QuestionnaireAnswers) other;
+        QuestionnaireResponse o = (QuestionnaireResponse) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(questionnaire, o.questionnaire, true)
            && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true) && compareDeep(author, o.author, true)
            && compareDeep(authored, o.authored, true) && compareDeep(source, o.source, true) && compareDeep(encounter, o.encounter, true)
@@ -1533,9 +1534,9 @@ public class QuestionnaireAnswers extends DomainResource {
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof QuestionnaireAnswers))
+        if (!(other instanceof QuestionnaireResponse))
           return false;
-        QuestionnaireAnswers o = (QuestionnaireAnswers) other;
+        QuestionnaireResponse o = (QuestionnaireResponse) other;
         return compareValues(status, o.status, true) && compareValues(authored, o.authored, true);
       }
 
@@ -1548,24 +1549,24 @@ public class QuestionnaireAnswers extends DomainResource {
 
   @Override
   public ResourceType getResourceType() {
-    return ResourceType.QuestionnaireAnswers;
+    return ResourceType.QuestionnaireResponse;
    }
 
-  @SearchParamDefinition(name="authored", path="QuestionnaireAnswers.authored", description="When the questionnaire was authored", type="date" )
+  @SearchParamDefinition(name="authored", path="QuestionnaireResponse.authored", description="When the questionnaire was authored", type="date" )
   public static final String SP_AUTHORED = "authored";
-  @SearchParamDefinition(name="questionnaire", path="QuestionnaireAnswers.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
+  @SearchParamDefinition(name="questionnaire", path="QuestionnaireResponse.questionnaire", description="The questionnaire the answers are provided for", type="reference" )
   public static final String SP_QUESTIONNAIRE = "questionnaire";
-  @SearchParamDefinition(name="subject", path="QuestionnaireAnswers.subject", description="The subject of the questionnaire", type="reference" )
+  @SearchParamDefinition(name="subject", path="QuestionnaireResponse.subject", description="The subject of the questionnaire", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="author", path="QuestionnaireAnswers.author", description="The author of the questionnaire", type="reference" )
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire", type="reference" )
   public static final String SP_AUTHOR = "author";
-  @SearchParamDefinition(name="patient", path="QuestionnaireAnswers.subject", description="The patient that is the subject of the questionnaire", type="reference" )
+  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="encounter", path="QuestionnaireAnswers.encounter", description="Encounter during which questionnaire was authored", type="reference" )
+  @SearchParamDefinition(name="encounter", path="QuestionnaireResponse.encounter", description="Encounter during which questionnaire was authored", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="source", path="QuestionnaireAnswers.source", description="The person who answered the questions", type="reference" )
+  @SearchParamDefinition(name="source", path="QuestionnaireResponse.source", description="The person who answered the questions", type="reference" )
   public static final String SP_SOURCE = "source";
-  @SearchParamDefinition(name="status", path="QuestionnaireAnswers.status", description="The status of the questionnaire answers", type="token" )
+  @SearchParamDefinition(name="status", path="QuestionnaireResponse.status", description="The status of the questionnaire response", type="token" )
   public static final String SP_STATUS = "status";
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import org.hl7.fhir.instance.model.annotations.DatatypeDef;
 import org.hl7.fhir.instance.model.annotations.Block;
@@ -40,14 +40,14 @@ import org.hl7.fhir.instance.model.api.*;
 @DatatypeDef(name="Age")
 public class Age extends Quantity {
 
-    private static final long serialVersionUID = -483422721L;
+    private static final long serialVersionUID = 1069574054L;
 
       public Age copy() {
         Age dst = new Age();
         copyValues(dst);
         dst.value = value == null ? null : value.copy();
         dst.comparator = comparator == null ? null : comparator.copy();
-        dst.units = units == null ? null : units.copy();
+        dst.unit = unit == null ? null : unit.copy();
         dst.system = system == null ? null : system.copy();
         dst.code = code == null ? null : code.copy();
         return dst;
@@ -64,7 +64,7 @@ public class Age extends Quantity {
         if (!(other instanceof Age))
           return false;
         Age o = (Age) other;
-        return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(units, o.units, true)
+        return compareDeep(value, o.value, true) && compareDeep(comparator, o.comparator, true) && compareDeep(unit, o.unit, true)
            && compareDeep(system, o.system, true) && compareDeep(code, o.code, true);
       }
 
@@ -75,13 +75,13 @@ public class Age extends Quantity {
         if (!(other instanceof Age))
           return false;
         Age o = (Age) other;
-        return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(units, o.units, true)
+        return compareValues(value, o.value, true) && compareValues(comparator, o.comparator, true) && compareValues(unit, o.unit, true)
            && compareValues(system, o.system, true) && compareValues(code, o.code, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (value == null || value.isEmpty()) && (comparator == null || comparator.isEmpty())
-           && (units == null || units.isEmpty()) && (system == null || system.isEmpty()) && (code == null || code.isEmpty())
+           && (unit == null || unit.isEmpty()) && (system == null || system.isEmpty()) && (code == null || code.isEmpty())
           ;
       }
 

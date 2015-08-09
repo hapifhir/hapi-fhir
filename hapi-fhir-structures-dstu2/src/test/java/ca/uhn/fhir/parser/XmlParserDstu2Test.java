@@ -1,7 +1,16 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -122,14 +131,14 @@ public class XmlParserDstu2Test {
 	public void testDuration() {
 		Encounter enc = new Encounter();
 		DurationDt duration = new DurationDt();
-		duration.setUnits("day").setValue(123L);
+		duration.setUnit("day").setValue(123L);
 		enc.setLength(duration);
 
 		String str = ourCtx.newXmlParser().encodeResourceToString(enc);
 		ourLog.info(str);
 
 		assertThat(str, not(containsString("meta")));
-		assertThat(str, containsString("<length><value value=\"123\"/><units value=\"day\"/></length>"));
+		assertThat(str, containsString("<length><value value=\"123\"/><unit value=\"day\"/></length>"));
 	}
 
 	@Test
@@ -494,9 +503,9 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeAndReEncodeContainedJson() {
 		Composition comp = new Composition();
-		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
-		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
-		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 
@@ -519,9 +528,9 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeAndReEncodeContainedXml() {
 		Composition comp = new Composition();
-		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
-		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
-		comp.addSection().getContent().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section0_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section1_Allergy0"));
+		comp.addSection().addEntry().setResource(new AllergyIntolerance().setComment("Section2_Allergy0"));
 
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
@@ -985,8 +994,8 @@ public class XmlParserDstu2Test {
 						"<id value=\"2179414\"/>"+ 
 						"<url value=\"2179414\"/>"+ 
 						"<version value=\"1.0\"/>"+ 
-						"<description value=\"All codes representing the gender of a person.\"/>"+ 
 						"<status value=\"active\"/>"+ 
+						"<description value=\"All codes representing the gender of a person.\"/>"+ 
 						"<compose>"+ 
 						"<include>"+ 
 						"<system value=\"http://ncit.nci.nih.gov\"/>"+ 
@@ -1077,6 +1086,8 @@ public class XmlParserDstu2Test {
 					"</identifier>"+ 
 					"<version value=\"1.0\"/>"+ 
 					"<name value=\"Gender Code\"/>"+ 
+					"<status value=\"active\"/>"+ 
+					"<publisher value=\"DCP\"/>"+ 
 					"<useContext>"+ 
 						"<coding>"+ 
 						"<system value=\"http://example.org/FBPP\"/>"+ 
@@ -1143,8 +1154,6 @@ public class XmlParserDstu2Test {
 						"<display value=\"Sulindac for Breast\"/>"+ 
 						"</coding>"+ 
 					"</useContext>"+ 
-					"<status value=\"active\"/>"+ 
-					"<publisher value=\"DCP\"/>"+ 
 					"<element>"+ 
 						"<extension url=\"http://hl7.org/fhir/StructureDefinition/minLength\">"+ 
 							"<valueInteger value=\"1\"/>"+ 

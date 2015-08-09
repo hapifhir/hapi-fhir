@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -469,15 +469,14 @@ public class Timing extends Type implements ICompositeType {
          * The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).
          */
         @Child(name = "frequency", type = {IntegerType.class}, order=6, min=0, max=1)
-        @Description(shortDefinition="Event occurs frequency times per duration", formalDefinition="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)." )
+        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)." )
         protected IntegerType frequency;
 
         /**
-         * If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
-						or period range.
+         * If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         @Child(name = "frequencyMax", type = {IntegerType.class}, order=7, min=0, max=1)
-        @Description(shortDefinition="Event occurs frequency times per duration", formalDefinition="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period \n						or period range." )
+        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range." )
         protected IntegerType frequencyMax;
 
         /**
@@ -813,8 +812,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return {@link #frequencyMax} (If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
-						or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
+         * @return {@link #frequencyMax} (If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
          */
         public IntegerType getFrequencyMaxElement() { 
           if (this.frequencyMax == null)
@@ -834,8 +832,7 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #frequencyMax} (If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
-						or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
+         * @param value {@link #frequencyMax} (If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
          */
         public TimingRepeatComponent setFrequencyMaxElement(IntegerType value) { 
           this.frequencyMax = value;
@@ -843,16 +840,14 @@ public class Timing extends Type implements ICompositeType {
         }
 
         /**
-         * @return If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
-						or period range.
+         * @return If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         public int getFrequencyMax() { 
           return this.frequencyMax == null || this.frequencyMax.isEmpty() ? 0 : this.frequencyMax.getValue();
         }
 
         /**
-         * @param value If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period 
-						or period range.
+         * @param value If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
         public TimingRepeatComponent setFrequencyMax(int value) { 
             if (this.frequencyMax == null)
@@ -1065,7 +1060,7 @@ public class Timing extends Type implements ICompositeType {
           childrenList.add(new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, java.lang.Integer.MAX_VALUE, durationMax));
           childrenList.add(new Property("durationUnits", "code", "The units of time for the duration, in UCUM units.", 0, java.lang.Integer.MAX_VALUE, durationUnits));
           childrenList.add(new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, java.lang.Integer.MAX_VALUE, frequency));
-          childrenList.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period \n						or period range.", 0, java.lang.Integer.MAX_VALUE, frequencyMax));
+          childrenList.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, java.lang.Integer.MAX_VALUE, frequencyMax));
           childrenList.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur.  E.g. to express '3 times per day', 3 would be the frequency and '1 day' would be the period.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as 'do this once every 3-5 days.", 0, java.lang.Integer.MAX_VALUE, periodMax));
           childrenList.add(new Property("periodUnits", "code", "The units of time for the period in UCUM units.", 0, java.lang.Integer.MAX_VALUE, periodUnits));
@@ -1145,7 +1140,7 @@ public class Timing extends Type implements ICompositeType {
      * A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes.
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1)
-    @Description(shortDefinition="BID | TID | QID | AM | PM +", formalDefinition="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes." )
+    @Description(shortDefinition="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +", formalDefinition="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes." )
     protected CodeableConcept code;
 
     private static final long serialVersionUID = 791565112L;

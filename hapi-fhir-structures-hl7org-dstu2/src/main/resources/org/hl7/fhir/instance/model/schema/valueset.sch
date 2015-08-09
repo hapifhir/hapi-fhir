@@ -32,13 +32,13 @@
     <sch:rule context="f:ValueSet">
       <sch:assert test="not(f:define/f:system/@value = f:identifier/@value)">vsd-7: A defined code system (if present) SHALL have a different identifier to the value set itself</sch:assert>
       <sch:assert test="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:define))">vsd-2: A value set with only one import SHALL also have an include and/or an exclude unless the value set defines its own codes</sch:assert>
-      <sch:assert test="exists(f:define) or exists(f:compose) or exists(f:expansion)">vsd-5: Value set SHALL contain either a define, a compose, or an expansion element</sch:assert>
+      <sch:assert test="exists(f:define) or exists(f:compose) or exists(f:expansion)">vsd-5: Value set SHALL contain at least one of a define, a compose, or an expansion element</sch:assert>
     </sch:rule>
     <sch:rule context="f:ValueSet/f:identifier/f:period">
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="f:ValueSet/f:identifier/f:assigner">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:ValueSet/f:contact/f:telecom">
       <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>

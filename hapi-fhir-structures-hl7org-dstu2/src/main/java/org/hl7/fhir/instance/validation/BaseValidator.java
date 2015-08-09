@@ -34,7 +34,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.instance.model.valuesets.IssueType;
+import org.hl7.fhir.instance.model.OperationOutcome.IssueType;
 import org.hl7.fhir.instance.validation.ValidationMessage.Source;
 
 public class BaseValidator {
@@ -49,10 +49,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean fail(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.FATAL));
-    }
-    return thePass;
+    return test(errors, type, line, col, path, thePass, msg, IssueSeverity.FATAL);
   }
 
   /**
@@ -63,11 +60,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
-    if (!thePass) {
-      String path = toPath(pathParts);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.FATAL));
-    }
-    return thePass;
+    return test(errors, type, pathParts, thePass, msg, IssueSeverity.FATAL);
   }
 
   /**
@@ -78,11 +71,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean fail(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
-    if (!thePass) {
-      String path = toPath(pathParts);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, formatMessage(theMessage, theMessageArguments), IssueSeverity.FATAL));
-    }
-    return thePass;
+    return test(errors, type, pathParts, thePass, theMessage, IssueSeverity.FATAL, theMessageArguments);
   }
 
   /**
@@ -93,13 +82,9 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean fail(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.FATAL));
-    }
-    return thePass;
+    return test(errors, type, path, thePass, msg, IssueSeverity.FATAL);
   }
-
-
+  
   private String formatMessage(String theMessage, Object... theMessageArguments) {
     String message;
     if (theMessageArguments != null && theMessageArguments.length > 0) {
@@ -122,24 +107,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean hint(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.INFORMATION));
-    }
-    return thePass;
-  }
-
-  /**
-   * Test a rule and add a {@link IssueSeverity#INFORMATION} validation message if the validation fails
-   * 
-   * @param thePass
-   *          Set this parameter to <code>false</code> if the validation does not pass
-   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
-   */
-  protected boolean hint(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.INFORMATION));
-    }
-    return thePass;
+    return test(errors, type, line, col, path, thePass, msg, IssueSeverity.INFORMATION);
   }
 
   /**
@@ -150,12 +118,19 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean hint(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
-    if (!thePass) {
-      String path = toPath(pathParts);
-      String message = formatMessage(theMessage, theMessageArguments);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, message, IssueSeverity.INFORMATION));
-    }
-    return thePass;
+    return test(errors, type, pathParts, thePass, theMessage, IssueSeverity.INFORMATION, theMessageArguments);
+  }
+
+
+  /**
+   * Test a rule and add a {@link IssueSeverity#INFORMATION} validation message if the validation fails
+   * 
+   * @param thePass
+   *          Set this parameter to <code>false</code> if the validation does not pass
+   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
+   */
+  protected boolean hint(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg) {
+    return test(errors, type, path, thePass, msg, IssueSeverity.INFORMATION);
   }
 
   /**
@@ -166,10 +141,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean rule(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.ERROR));
-    }
-    return thePass;
+    return test(errors, type, line, col, path, thePass, msg, IssueSeverity.ERROR);
   }
 
   /**
@@ -180,11 +152,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean rule(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String msg) {
-    if (!thePass) {
-      String path = toPath(pathParts);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.ERROR));
-    }
-    return thePass;
+    return test(errors, type, pathParts, thePass, msg, IssueSeverity.ERROR);
   }
 
   /**
@@ -195,19 +163,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean rule(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
-    if (!thePass) {
-      String path = toPath(pathParts);
-      String message = formatMessage(theMessage, theMessageArguments);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, message, IssueSeverity.ERROR));
-    }
-    return thePass;
-  }
-
-  private String toPath(List<String> pathParts) {
-    if (pathParts == null || pathParts.isEmpty()) {
-      return "";
-    }
-    return "//" + StringUtils.join(pathParts, '/');
+    return test(errors, type, pathParts, thePass, theMessage, IssueSeverity.ERROR, theMessageArguments);
   }
 
   /**
@@ -217,11 +173,8 @@ public class BaseValidator {
    *          Set this parameter to <code>false</code> if the validation does not pass
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
-  protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.ERROR));
-    }
-    return thePass;
+  protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String theMessage) {
+    return test(errors, type, path, thePass, theMessage, IssueSeverity.ERROR);
   }
 
   /**
@@ -232,10 +185,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg, String html) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, html, IssueSeverity.ERROR));
-    }
-    return thePass;
+    return test(errors, type, path, thePass, msg, html, IssueSeverity.ERROR);
   }
 
   protected String splitByCamelCase(String s) {
@@ -259,6 +209,55 @@ public class BaseValidator {
     return b.toString();
   }
 
+  protected boolean test(List<ValidationMessage> errors, IssueType type, int line, int col, String path,
+      boolean thePass, String msg, IssueSeverity issueSeverity) {
+    if (!thePass) {
+      errors.add(new ValidationMessage(source, type, line, col, path, msg, issueSeverity));
+    }
+    return thePass;
+  }
+
+  protected boolean test(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass,
+      String msg, IssueSeverity issueSeverity) {
+    if (!thePass) {
+      String path = toPath(pathParts);
+      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, issueSeverity));
+    }
+    return thePass;
+  }
+
+  protected boolean test(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass,
+      String theMessage, IssueSeverity issueSeverity, Object... theMessageArguments) {
+    if (!thePass) {
+      String path = toPath(pathParts);
+      errors.add(new ValidationMessage(source, type, -1, -1, path, formatMessage(theMessage, theMessageArguments), issueSeverity));
+    }
+    return thePass;
+  }
+
+  protected boolean test(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg,
+      IssueSeverity issueSeverity) {
+    if (!thePass) {
+      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, issueSeverity));
+    }
+    return thePass;
+  }
+
+  protected boolean test(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg,
+      String html, IssueSeverity issueSeverity) {
+    if (!thePass) {
+      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, html, issueSeverity));
+    }
+    return thePass;
+  }
+
+  private String toPath(List<String> pathParts) {
+    if (pathParts == null || pathParts.isEmpty()) {
+      return "";
+    }
+    return "//" + StringUtils.join(pathParts, '/');
+  }
+
   /**
    * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
    * 
@@ -267,39 +266,7 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean warning(List<ValidationMessage> errors, IssueType type, int line, int col, String path, boolean thePass, String msg) {
-    if (!thePass) { 
-      errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.WARNING));
-    }
-    return thePass;
-
-  }
-
-  /**
-   * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
-   * 
-   * @param thePass
-   *          Set this parameter to <code>false</code> if the validation does not pass
-   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
-   */
-  protected boolean warning(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, IssueSeverity.WARNING));
-    }
-    return thePass;
-  }
-
-  /**
-   * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
-   * 
-   * @param thePass
-   *          Set this parameter to <code>false</code> if the validation does not pass
-   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
-   */
-  protected boolean warning(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg, String html) {
-    if (!thePass) {
-      errors.add(new ValidationMessage(source, type, -1, -1, path, msg, html, IssueSeverity.WARNING));
-    }
-    return thePass;
+    return test(errors, type, line, col, path, thePass, msg, IssueSeverity.WARNING);
   }
 
   /**
@@ -310,12 +277,29 @@ public class BaseValidator {
    * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
    */
   protected boolean warning(List<ValidationMessage> errors, IssueType type, List<String> pathParts, boolean thePass, String theMessage, Object... theMessageArguments) {
-    if (!thePass) {
-      String path = toPath(pathParts);
-      String message = formatMessage(theMessage, theMessageArguments);
-      errors.add(new ValidationMessage(source, type, -1, -1, path, message, IssueSeverity.WARNING));
-    }
-    return thePass;
+    return test(errors, type, pathParts, thePass, theMessage, IssueSeverity.WARNING, theMessageArguments);
+  }
+
+  /**
+   * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
+   * 
+   * @param thePass
+   *          Set this parameter to <code>false</code> if the validation does not pass
+   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
+   */
+  protected boolean warning(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg) {
+    return test(errors, type, path, thePass, msg, IssueSeverity.WARNING);
+  }
+
+  /**
+   * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
+   * 
+   * @param thePass
+   *          Set this parameter to <code>false</code> if the validation does not pass
+   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
+   */
+  protected boolean warning(List<ValidationMessage> errors, IssueType type, String path, boolean thePass, String msg, String html) {
+    return test(errors, type, path, thePass, msg, html, IssueSeverity.WARNING);
   }
 
 }

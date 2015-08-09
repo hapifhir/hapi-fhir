@@ -32,10 +32,10 @@
     <sch:rule context="f:Conformance">
       <sch:assert test="count(f:rest)=count(distinct-values(f:rest/f:mode/@value))">cnf-8: There can only be one REST declaration per mode</sch:assert>
       <sch:assert test="count(f:document[f:mode='producer'])=count(distinct-values(f:document[f:mode='producer']/f:profile/@value)) and count(f:document[f:mode='consumer'])=count(distinct-values(f:document[f:mode='consumer']/f:profile/@value))">cnf-7: The set of documents must be unique by the combination of profile &amp; mode</sch:assert>
-      <sch:assert test="count(f:messaging)&lt;=1 or not(f:messaging[not(f:endpoint)])">cnf-4: If there is more than one messaging element, endpoint must be specified for each one</sch:assert>
-      <sch:assert test="count(f:messaging/f:endpoint)=count(distinct-values(f:messaging/f:endpoint/@value))">cnf-5: The set of end points listed for messaging must be unique</sch:assert>
       <sch:assert test="count(f:software | f:implementation | f:description) &gt; 0">cnf-2: A Conformance statement SHALL have at least one of description, software, or implementation</sch:assert>
       <sch:assert test="exists(f:rest) or exists(f:messaging) or exists(f:document)">cnf-1: A Conformance statement SHALL have at least one of rest, messaging or document</sch:assert>
+      <sch:assert test="not(exists(f:software) or exists(f:implementation)) or (f:kind/@value != 'requirements')">cnf-14: Conformance statements of kind 'requirements' do not have software or implementation elements</sch:assert>
+      <sch:assert test="not(exists(f:implementation)) or (f:kind/@value != 'capability')">cnf-15: Conformance statements of kind 'software' do not have implementation elements</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:contact/f:telecom">
       <sch:assert test="not(exists(f:value)) or exists(f:system)">cpt-2: A system is required if a value is provided.</sch:assert>
@@ -44,7 +44,7 @@
       <sch:assert test="not(exists(f:start)) or not(exists(f:end)) or (f:start/@value &lt;= f:end/@value)">per-1: If present, start SHALL have a lower value than end</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:profile">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:rest">
       <sch:assert test="count(f:resource)=count(distinct-values(f:resource/f:type/@value))">cnf-9: A given resource can only be described once per RESTful mode</sch:assert>
@@ -55,23 +55,25 @@
       <sch:assert test="count(f:searchParam)=count(distinct-values(f:searchParam/f:name/@value))">cnf-12: Search parameter names must be unique in the context of a resource</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:rest/f:resource/f:profile">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+    </sch:rule>
+    <sch:rule context="f:Conformance/f:rest/f:resource/f:searchParam">
+      <sch:assert test="not(exists(f:chain)) or (f:type/@value = 'reference')">cnf-13: Search parameters can only have chain names when the search parameter type is 'reference'</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:rest/f:operation/f:definition">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:messaging">
-      <sch:assert test="count(f:event[f:mode='sender'])=count(distinct-values(f:event[f:mode='sender']/f:code/@value)) and count(f:event[f:mode='receiver'])=count(distinct-values(f:event[f:mode='receiver']/f:code/@value))">cnf-6: The set of events per messaging endpoint must be unique by the combination of code &amp; mode</sch:assert>
-      <sch:assert test="exists(f:endpoint) = exists(parent::f:Conformance/f:implementation)">cnf-3: Messaging end point is required (and is only permitted) when statement is for an implementation</sch:assert>
+      <sch:assert test="exists(f:endpoint) = (f:kind/@value = 'implementation')">cnf-3: Messaging end point is required (and is only permitted) when statement is for an implementation</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:messaging/f:event/f:request">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:messaging/f:event/f:response">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     <sch:rule context="f:Conformance/f:document/f:profile">
-      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::f:entry/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
+      <sch:assert test="not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])">ref-1: SHALL have a local reference if the resource is provided inline</sch:assert>
     </sch:rule>
     </sch:pattern>
 </sch:schema>

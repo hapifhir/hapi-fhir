@@ -31,18 +31,15 @@ package org.hl7.fhir.instance.validation;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.valuesets.IssueType;
 import org.hl7.fhir.instance.utils.ToolingExtensions;
 import org.hl7.fhir.utilities.Utilities;
 
-public class ValidationMessage {
-  
-  //@formatter:off
+public class ValidationMessage 
+{
   public enum Source {
     ExampleValidator, 
     ProfileValidator, 
@@ -52,85 +49,140 @@ public class ValidationMessage {
     Schematron, 
     Publisher, 
     Ontology, 
-    ProfileComparer, 
-    QuestionnaireAnswersValidator
+    ProfileComparer,
+    QuestionnaireResponseValidator
   }
-  //@formatter:on
 
   private Source source;
   private int line;
   private int col;
   private String location;
   private String message;
-  private IssueType type;
+  private OperationOutcome.IssueType type;
   private IssueSeverity level;
   private String html;
 
-  public ValidationMessage(Source source, IssueType type, String path, String message, IssueSeverity level) {
-    super();
-    this.line = -1;
-    this.col = -1;
-    this.location = path;
-    this.message = message;
-    this.html = Utilities.escapeXml(message);
-    this.level = level;
-    this.source = source;
-    this.type = type;
-    if (type == null)
-      throw new Error("A type must be provided");
-  }
-
-  public ValidationMessage(Source source, IssueType type, int line, int col, String path, String message,
-      IssueSeverity level) {
-    super();
-    this.line = line;
-    this.col = col;
-    this.location = path;
-    this.message = message;
-    this.html = Utilities.escapeXml(message);
-    this.level = level;
-    this.source = source;
-    this.type = type;
-    if (type == null)
-      throw new Error("A type must be provided");
-  }
-
-  public ValidationMessage(Source source, IssueType type, String path, String message, String html, IssueSeverity level) {
-    super();
-    this.line = -1;
-    this.col = -1;
-    this.location = path;
-    this.message = message;
-    this.html = html;
-    this.level = level;
-    this.source = source;
-    this.type = type;
-    if (type == null)
-      throw new Error("A type must be provided");
-  }
-
-  public ValidationMessage(Source source, IssueType type, int line, int col, String path, String message, String html,
-      IssueSeverity level) {
-    super();
-    this.line = line;
-    this.col = col;
-    this.location = path;
-    this.message = message;
-    this.html = html;
-    this.level = level;
-    this.source = source;
-    this.type = type;
-    if (type == null)
-      throw new Error("A type must be provided");
-  }
-
   public ValidationMessage() {
+    super();
+  }
+
+  public ValidationMessage(Source source, OperationOutcome.IssueType type, String path, String message, IssueSeverity level) {
+    super();
+    this.line = -1;
+    this.col = -1;
+    this.location = path;
+    this.message = message;
+    this.html = Utilities.escapeXml(message);
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (level == IssueSeverity.NULL)
+      determineLevel(path);
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+
+  public ValidationMessage(Source source, OperationOutcome.IssueType type, int line, int col, String path, String message, IssueSeverity level) {
+    super();
+    this.line = line;
+    this.col = col;
+    this.location = path;
+    this.message = message;
+    this.html = Utilities.escapeXml(message);
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (level == IssueSeverity.NULL)
+      determineLevel(path);
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+
+  public ValidationMessage(Source source, OperationOutcome.IssueType type, String path, String message, String html, IssueSeverity level) {
+    super();
+    this.line = -1;
+    this.col = -1;
+    this.location = path;
+    this.message = message;
+    this.html = html;
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (level == IssueSeverity.NULL)
+      determineLevel(path);
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+
+  public ValidationMessage(Source source, OperationOutcome.IssueType type, int line, int col, String path, String message, String html, IssueSeverity level) {
+    super();
+    this.line = line;
+    this.col = col;
+    this.location = path;
+    this.message = message;
+    this.html = html;
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (level == IssueSeverity.NULL)
+      determineLevel(path);
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+
+  public ValidationMessage(Source source, OperationOutcome.IssueType type, String message, IssueSeverity level) {
+    super();
+    this.line = -1;
+    this.col = -1;
+    this.message = message;
+    this.level = level;
+    this.source = source;
+    this.type = type;
+    if (type == null)
+      throw new Error("A type must be provided");
+  }
+
+  private IssueSeverity determineLevel(String path) {
+    if (isGrandfathered(path))
+      return IssueSeverity.WARNING;
+    else
+      return IssueSeverity.ERROR;
+  }
+
+  private boolean isGrandfathered(String path) {
+    if (path.startsWith("xds-documentmanifest."))
+      return true;
+    if (path.startsWith("observation-device-metric-devicemetricobservation."))
+      return true;
+    if (path.startsWith("medicationadministration-immunization-vaccine."))
+      return true;
+    if (path.startsWith("elementdefinition-de-dataelement."))
+      return true;
+    if (path.startsWith("dataelement-sdc-sdcelement."))
+      return true;
+    if (path.startsWith("questionnaireresponse-sdc-structureddatacaptureanswers."))
+      return true;
+    if (path.startsWith("valueset-sdc-structureddatacapturevalueset."))
+      return true;
+    if (path.startsWith("dataelement-sdc-de-sdcelement."))
+      return true;
+    if (path.startsWith("do-uslab-uslabdo."))
+      return true;
+    if (path.startsWith("."))
+      return true;
+    if (path.startsWith("."))
+      return true;
+    if (path.startsWith("."))
+      return true;
+    if (path.startsWith("."))
+      return true;
+     
+    return false;
   }
 
   public String getMessage() {
     return message;
   }
-
   public ValidationMessage setMessage(String message) {
     this.message = message;
     return this;
@@ -139,7 +191,6 @@ public class ValidationMessage {
   public IssueSeverity getLevel() {
     return level;
   }
-
   public ValidationMessage setLevel(IssueSeverity level) {
     this.level = level;
     return this;
@@ -148,73 +199,66 @@ public class ValidationMessage {
   public Source getSource() {
     return source;
   }
-
   public ValidationMessage setSource(Source source) {
     this.source = source;
     return this;
   }
 
+  public int getLine() {
+    return line;
+  }
+
+  public void setLine(int theLine) {
+    line = theLine;
+  }
+
+  public int getCol() {
+    return col;
+  }
+
+  public void setCol(int theCol) {
+    col = theCol;
+  }
+
   public String getLocation() {
     return location;
   }
-
   public ValidationMessage setLocation(String location) {
     this.location = location;
     return this;
   }
 
-  public IssueType getType() {
+  public OperationOutcome.IssueType getType() {
     return type;
   }
 
-  public ValidationMessage setType(IssueType type) {
+  public ValidationMessage setType(OperationOutcome.IssueType type) {
     this.type = type;
     return this;
   }
 
   public String summary() {
-    return level.toString() + " @ " + location
-        + (line >= 0 && col >= 0 ? " (line " + Integer.toString(line) + ", col" + Integer.toString(col) + ") " : " ")
-        + message + (source != null ? " (src = " + source + ")" : "");
+    return level.toString()+" @ "+location+(line>= 0 && col >= 0 ? " (line "+Integer.toString(line)+", col"+Integer.toString(col)+") " : " ") +message +(source != null ? " (src = "+source+")" : "");
   }
 
   public OperationOutcomeIssueComponent asIssue(OperationOutcome op) throws Exception {
     OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent();
-    issue.setCode(new CodeableConcept());
-    issue.getCode().addCoding().setSystem(type.getSystem()).setCode(type.toCode());
+    issue.setCode(type);
     if (location != null) {
       StringType s = new StringType();
-      s.setValue(location
-          + (line >= 0 && col >= 0 ? " (line " + Integer.toString(line) + ", col" + Integer.toString(col) + ")" : ""));
+      s.setValue(location+(line>= 0 && col >= 0 ? " (line "+Integer.toString(line)+", col"+Integer.toString(col)+")" : "") );
       issue.getLocation().add(s);
     }
     issue.setSeverity(level);
-    issue.setDetails(message);
+    issue.getDetails().setText(message);
     if (source != null) {
       issue.getExtension().add(ToolingExtensions.makeIssueSource(source));
     }
     return issue;
   }
   
-  
-  /**
-   * @return Returns -1 if the value is not set or not known
-   */
-  public int getLine() {
-    return line;
-  }
-
-  /**
-   * @return Returns -1 if the value is not set or not known
-   */
-  public int getCol() {
-    return col;
-  }
-
   public String toXML() {
-    return "<message source=\"" + source + "\" line=\"" + line + "\" col=\"" + col + "\" location=\"" + location
-        + "\" type=\"" + type + "\" level=\"" + level + "\"><plain>" + Utilities.escapeXml(message) + "</plain><html>"
-        + html + "</html></message>";
+  	return "<message source=\"" + source + "\" line=\"" + line + "\" col=\"" + col + "\" location=\"" + Utilities.escapeXml(location) + "\" type=\"" + type + "\" level=\"" + level + "\"><plain>" + Utilities.escapeXml(message) + "</plain><html>" + html + "</html></message>";
   }
 
   public String getHtml() {
@@ -222,8 +266,9 @@ public class ValidationMessage {
   }
 
   /**
-   * Returns a representation of this ValidationMessage suitable for logging. The values of most of the internal fields are included, so this may not be
-   * suitable for display to an end user.
+   * Returns a representation of this ValidationMessage suitable for logging. The values of
+   * most of the internal fields are included, so this may not be suitable for display to 
+   * an end user.
    */
   @Override
   public String toString() {
@@ -235,4 +280,6 @@ public class ValidationMessage {
     return b.build();
   }
 
+  
+  
 }

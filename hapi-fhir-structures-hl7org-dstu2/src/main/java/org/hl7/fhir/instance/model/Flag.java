@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -173,9 +173,21 @@ public class Flag extends DomainResource {
     protected Resource subjectTarget;
 
     /**
+     * This alert is only relevant during the encounter.
+     */
+    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1)
+    @Description(shortDefinition="Alert relevant during encounter", formalDefinition="This alert is only relevant during the encounter." )
+    protected Reference encounter;
+
+    /**
+     * The actual object that is the target of the reference (This alert is only relevant during the encounter.)
+     */
+    protected Encounter encounterTarget;
+
+    /**
      * The person or device that created the flag.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order=5, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Flag creator", formalDefinition="The person or device that created the flag." )
     protected Reference author;
 
@@ -187,11 +199,11 @@ public class Flag extends DomainResource {
     /**
      * The coded value or textual component of the flag to display to the user.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=6, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=7, min=1, max=1)
     @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the flag to display to the user." )
     protected CodeableConcept code;
 
-    private static final long serialVersionUID = -48488440L;
+    private static final long serialVersionUID = 701147751L;
 
   /*
    * Constructor
@@ -383,6 +395,50 @@ public class Flag extends DomainResource {
     }
 
     /**
+     * @return {@link #encounter} (This alert is only relevant during the encounter.)
+     */
+    public Reference getEncounter() { 
+      if (this.encounter == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Flag.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounter = new Reference(); // cc
+      return this.encounter;
+    }
+
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
+    }
+
+    /**
+     * @param value {@link #encounter} (This alert is only relevant during the encounter.)
+     */
+    public Flag setEncounter(Reference value) { 
+      this.encounter = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This alert is only relevant during the encounter.)
+     */
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Flag.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
+    }
+
+    /**
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This alert is only relevant during the encounter.)
+     */
+    public Flag setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #author} (The person or device that created the flag.)
      */
     public Reference getAuthor() { 
@@ -452,6 +508,7 @@ public class Flag extends DomainResource {
         childrenList.add(new Property("status", "code", "Supports basic workflow.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner)", "The patient, location, group , organization , or practitioner this is about record this flag is associated with.", 0, java.lang.Integer.MAX_VALUE, subject));
+        childrenList.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, java.lang.Integer.MAX_VALUE, encounter));
         childrenList.add(new Property("author", "Reference(Practitioner|Patient|Device)", "The person or device that created the flag.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("code", "CodeableConcept", "The coded value or textual component of the flag to display to the user.", 0, java.lang.Integer.MAX_VALUE, code));
       }
@@ -468,6 +525,7 @@ public class Flag extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.period = period == null ? null : period.copy();
         dst.subject = subject == null ? null : subject.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.author = author == null ? null : author.copy();
         dst.code = code == null ? null : code.copy();
         return dst;
@@ -485,8 +543,8 @@ public class Flag extends DomainResource {
           return false;
         Flag o = (Flag) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(category, o.category, true) && compareDeep(status, o.status, true)
-           && compareDeep(period, o.period, true) && compareDeep(subject, o.subject, true) && compareDeep(author, o.author, true)
-           && compareDeep(code, o.code, true);
+           && compareDeep(period, o.period, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
+           && compareDeep(author, o.author, true) && compareDeep(code, o.code, true);
       }
 
       @Override
@@ -502,7 +560,8 @@ public class Flag extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (category == null || category.isEmpty())
            && (status == null || status.isEmpty()) && (period == null || period.isEmpty()) && (subject == null || subject.isEmpty())
-           && (author == null || author.isEmpty()) && (code == null || code.isEmpty());
+           && (encounter == null || encounter.isEmpty()) && (author == null || author.isEmpty()) && (code == null || code.isEmpty())
+          ;
       }
 
   @Override
@@ -518,6 +577,8 @@ public class Flag extends DomainResource {
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference" )
   public static final String SP_AUTHOR = "author";
+  @SearchParamDefinition(name="encounter", path="Flag.encounter", description="Alert relevant during encounter", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
 
 }
 

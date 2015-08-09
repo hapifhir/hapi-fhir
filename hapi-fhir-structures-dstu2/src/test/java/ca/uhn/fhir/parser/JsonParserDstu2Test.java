@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
@@ -43,17 +39,19 @@ import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationPrescription;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.resource.QuestionnaireAnswers;
+import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.dstu2.valueset.ObservationReliabilityEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.JsonConfig;
 
 public class JsonParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
@@ -402,7 +400,7 @@ public class JsonParserDstu2Test {
 	@Test
 	public void testJsonPrimitiveWithExtensionEncoding() {
 
-		QuestionnaireAnswers parsed = new QuestionnaireAnswers();
+		QuestionnaireResponse parsed = new QuestionnaireResponse();
 		parsed.getGroup().setLinkId("value123");
 		parsed.getGroup().getLinkIdElement().addUndeclaredExtension(false, "http://123", new StringDt("HELLO"));
 
@@ -849,7 +847,6 @@ public class JsonParserDstu2Test {
 		obsv.getCode().addCoding().setCode("name");
 		obsv.setValue(new StringDt("value test"));
 		obsv.setStatus(ObservationStatusEnum.FINAL);
-		obsv.setReliability(ObservationReliabilityEnum.OK);
 		obsv.addIdentifier().setSystem("System").setValue("id value");
 
 		DiagnosticReport report = new DiagnosticReport();
@@ -872,7 +869,6 @@ public class JsonParserDstu2Test {
 		obsv.getCode().addCoding().setCode("name");
 		obsv.setValue(new StringDt("value test"));
 		obsv.setStatus(ObservationStatusEnum.FINAL);
-		obsv.setReliability(ObservationReliabilityEnum.OK);
 		obsv.addIdentifier().setSystem("System").setValue("id value");
 
 		DiagnosticReport report = new DiagnosticReport();

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -706,25 +706,53 @@ public class Composition extends DomainResource {
         protected CodeableConcept code;
 
         /**
-         * The content (narrative and data entries) associated with the section.
+         * A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.
          */
-        @Child(name = "content", type = {List_.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="The Content of the section (narrative + data entries)", formalDefinition="The content (narrative and data entries) associated with the section." )
-        protected Reference content;
+        @Child(name = "text", type = {Narrative.class}, order=3, min=0, max=1)
+        @Description(shortDefinition="Text summary of the section, for human interpretation", formalDefinition="A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it 'clinically safe' for a human to just read the narrative." )
+        protected Narrative text;
 
         /**
-         * The actual object that is the target of the reference (The content (narrative and data entries) associated with the section.)
+         * How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
          */
-        protected List_ contentTarget;
+        @Child(name = "mode", type = {CodeType.class}, order=4, min=0, max=1)
+        @Description(shortDefinition="working | snapshot | changes", formalDefinition="How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
+        protected CodeType mode;
+
+        /**
+         * What order applies to the items in the section entries.
+         */
+        @Child(name = "orderedBy", type = {CodeableConcept.class}, order=5, min=0, max=1)
+        @Description(shortDefinition="What order the section entries are in", formalDefinition="What order applies to the items in the section entries." )
+        protected CodeableConcept orderedBy;
+
+        /**
+         * A reference to the actual resource from which the narrative in the section is derived.
+         */
+        @Child(name = "entry", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="A reference to data that supports this section", formalDefinition="A reference to the actual resource from which the narrative in the section is derived." )
+        protected List<Reference> entry;
+        /**
+         * The actual objects that are the target of the reference (A reference to the actual resource from which the narrative in the section is derived.)
+         */
+        protected List<Resource> entryTarget;
+
+
+        /**
+         * If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.
+         */
+        @Child(name = "emptyReason", type = {CodeableConcept.class}, order=7, min=0, max=1)
+        @Description(shortDefinition="Why the section is empty", formalDefinition="If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason." )
+        protected CodeableConcept emptyReason;
 
         /**
          * A nested sub-section within this section.
          */
-        @Child(name = "section", type = {SectionComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "section", type = {SectionComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Nested Section", formalDefinition="A nested sub-section within this section." )
         protected List<SectionComponent> section;
 
-        private static final long serialVersionUID = -1683518435L;
+        private static final long serialVersionUID = -726390626L;
 
     /*
      * Constructor
@@ -807,46 +835,172 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #content} (The content (narrative and data entries) associated with the section.)
+         * @return {@link #text} (A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.)
          */
-        public Reference getContent() { 
-          if (this.content == null)
+        public Narrative getText() { 
+          if (this.text == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SectionComponent.content");
+              throw new Error("Attempt to auto-create SectionComponent.text");
             else if (Configuration.doAutoCreate())
-              this.content = new Reference(); // cc
-          return this.content;
+              this.text = new Narrative(); // cc
+          return this.text;
         }
 
-        public boolean hasContent() { 
-          return this.content != null && !this.content.isEmpty();
+        public boolean hasText() { 
+          return this.text != null && !this.text.isEmpty();
         }
 
         /**
-         * @param value {@link #content} (The content (narrative and data entries) associated with the section.)
+         * @param value {@link #text} (A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.)
          */
-        public SectionComponent setContent(Reference value) { 
-          this.content = value;
+        public SectionComponent setText(Narrative value) { 
+          this.text = value;
           return this;
         }
 
         /**
-         * @return {@link #content} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The content (narrative and data entries) associated with the section.)
+         * @return {@link #mode} (How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public List_ getContentTarget() { 
-          if (this.contentTarget == null)
+        public CodeType getModeElement() { 
+          if (this.mode == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SectionComponent.content");
+              throw new Error("Attempt to auto-create SectionComponent.mode");
             else if (Configuration.doAutoCreate())
-              this.contentTarget = new List_(); // aa
-          return this.contentTarget;
+              this.mode = new CodeType(); // bb
+          return this.mode;
+        }
+
+        public boolean hasModeElement() { 
+          return this.mode != null && !this.mode.isEmpty();
+        }
+
+        public boolean hasMode() { 
+          return this.mode != null && !this.mode.isEmpty();
         }
 
         /**
-         * @param value {@link #content} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The content (narrative and data entries) associated with the section.)
+         * @param value {@link #mode} (How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
-        public SectionComponent setContentTarget(List_ value) { 
-          this.contentTarget = value;
+        public SectionComponent setModeElement(CodeType value) { 
+          this.mode = value;
+          return this;
+        }
+
+        /**
+         * @return How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+         */
+        public String getMode() { 
+          return this.mode == null ? null : this.mode.getValue();
+        }
+
+        /**
+         * @param value How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
+         */
+        public SectionComponent setMode(String value) { 
+          if (Utilities.noString(value))
+            this.mode = null;
+          else {
+            if (this.mode == null)
+              this.mode = new CodeType();
+            this.mode.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #orderedBy} (What order applies to the items in the section entries.)
+         */
+        public CodeableConcept getOrderedBy() { 
+          if (this.orderedBy == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SectionComponent.orderedBy");
+            else if (Configuration.doAutoCreate())
+              this.orderedBy = new CodeableConcept(); // cc
+          return this.orderedBy;
+        }
+
+        public boolean hasOrderedBy() { 
+          return this.orderedBy != null && !this.orderedBy.isEmpty();
+        }
+
+        /**
+         * @param value {@link #orderedBy} (What order applies to the items in the section entries.)
+         */
+        public SectionComponent setOrderedBy(CodeableConcept value) { 
+          this.orderedBy = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #entry} (A reference to the actual resource from which the narrative in the section is derived.)
+         */
+        public List<Reference> getEntry() { 
+          if (this.entry == null)
+            this.entry = new ArrayList<Reference>();
+          return this.entry;
+        }
+
+        public boolean hasEntry() { 
+          if (this.entry == null)
+            return false;
+          for (Reference item : this.entry)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #entry} (A reference to the actual resource from which the narrative in the section is derived.)
+         */
+    // syntactic sugar
+        public Reference addEntry() { //3
+          Reference t = new Reference();
+          if (this.entry == null)
+            this.entry = new ArrayList<Reference>();
+          this.entry.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public SectionComponent addEntry(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.entry == null)
+            this.entry = new ArrayList<Reference>();
+          this.entry.add(t);
+          return this;
+        }
+
+        /**
+         * @return {@link #entry} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. A reference to the actual resource from which the narrative in the section is derived.)
+         */
+        public List<Resource> getEntryTarget() { 
+          if (this.entryTarget == null)
+            this.entryTarget = new ArrayList<Resource>();
+          return this.entryTarget;
+        }
+
+        /**
+         * @return {@link #emptyReason} (If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.)
+         */
+        public CodeableConcept getEmptyReason() { 
+          if (this.emptyReason == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SectionComponent.emptyReason");
+            else if (Configuration.doAutoCreate())
+              this.emptyReason = new CodeableConcept(); // cc
+          return this.emptyReason;
+        }
+
+        public boolean hasEmptyReason() { 
+          return this.emptyReason != null && !this.emptyReason.isEmpty();
+        }
+
+        /**
+         * @param value {@link #emptyReason} (If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.)
+         */
+        public SectionComponent setEmptyReason(CodeableConcept value) { 
+          this.emptyReason = value;
           return this;
         }
 
@@ -894,7 +1048,11 @@ public class Composition extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("title", "string", "The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents.", 0, java.lang.Integer.MAX_VALUE, title));
           childrenList.add(new Property("code", "CodeableConcept", "A code identifying the kind of content contained within the section. This must be consistent with the section title.", 0, java.lang.Integer.MAX_VALUE, code));
-          childrenList.add(new Property("content", "Reference(List)", "The content (narrative and data entries) associated with the section.", 0, java.lang.Integer.MAX_VALUE, content));
+          childrenList.add(new Property("text", "Narrative", "A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it 'clinically safe' for a human to just read the narrative.", 0, java.lang.Integer.MAX_VALUE, text));
+          childrenList.add(new Property("mode", "code", "How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, java.lang.Integer.MAX_VALUE, mode));
+          childrenList.add(new Property("orderedBy", "CodeableConcept", "What order applies to the items in the section entries.", 0, java.lang.Integer.MAX_VALUE, orderedBy));
+          childrenList.add(new Property("entry", "Reference(Any)", "A reference to the actual resource from which the narrative in the section is derived.", 0, java.lang.Integer.MAX_VALUE, entry));
+          childrenList.add(new Property("emptyReason", "CodeableConcept", "If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.", 0, java.lang.Integer.MAX_VALUE, emptyReason));
           childrenList.add(new Property("section", "@Composition.section", "A nested sub-section within this section.", 0, java.lang.Integer.MAX_VALUE, section));
         }
 
@@ -903,7 +1061,15 @@ public class Composition extends DomainResource {
         copyValues(dst);
         dst.title = title == null ? null : title.copy();
         dst.code = code == null ? null : code.copy();
-        dst.content = content == null ? null : content.copy();
+        dst.text = text == null ? null : text.copy();
+        dst.mode = mode == null ? null : mode.copy();
+        dst.orderedBy = orderedBy == null ? null : orderedBy.copy();
+        if (entry != null) {
+          dst.entry = new ArrayList<Reference>();
+          for (Reference i : entry)
+            dst.entry.add(i.copy());
+        };
+        dst.emptyReason = emptyReason == null ? null : emptyReason.copy();
         if (section != null) {
           dst.section = new ArrayList<SectionComponent>();
           for (SectionComponent i : section)
@@ -919,8 +1085,9 @@ public class Composition extends DomainResource {
         if (!(other instanceof SectionComponent))
           return false;
         SectionComponent o = (SectionComponent) other;
-        return compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(content, o.content, true)
-           && compareDeep(section, o.section, true);
+        return compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(text, o.text, true)
+           && compareDeep(mode, o.mode, true) && compareDeep(orderedBy, o.orderedBy, true) && compareDeep(entry, o.entry, true)
+           && compareDeep(emptyReason, o.emptyReason, true) && compareDeep(section, o.section, true);
       }
 
       @Override
@@ -930,12 +1097,14 @@ public class Composition extends DomainResource {
         if (!(other instanceof SectionComponent))
           return false;
         SectionComponent o = (SectionComponent) other;
-        return compareValues(title, o.title, true);
+        return compareValues(title, o.title, true) && compareValues(mode, o.mode, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (title == null || title.isEmpty()) && (code == null || code.isEmpty())
-           && (content == null || content.isEmpty()) && (section == null || section.isEmpty());
+           && (text == null || text.isEmpty()) && (mode == null || mode.isEmpty()) && (orderedBy == null || orderedBy.isEmpty())
+           && (entry == null || entry.isEmpty()) && (emptyReason == null || emptyReason.isEmpty()) && (section == null || section.isEmpty())
+          ;
       }
 
   }
@@ -1744,9 +1913,7 @@ public class Composition extends DomainResource {
   public static final String SP_AUTHOR = "author";
   @SearchParamDefinition(name="confidentiality", path="Composition.confidentiality", description="As defined by affinity domain", type="token" )
   public static final String SP_CONFIDENTIALITY = "confidentiality";
-  @SearchParamDefinition(name="section-code", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
-  public static final String SP_SECTIONCODE = "section-code";
-  @SearchParamDefinition(name="section", path="Composition.section.content", description="The Content of the section (narrative + data entries)", type="reference" )
+  @SearchParamDefinition(name="section", path="Composition.section.code", description="Classification of section (recommended)", type="token" )
   public static final String SP_SECTION = "section";
   @SearchParamDefinition(name="encounter", path="Composition.encounter", description="Context of the conposition", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
@@ -1756,6 +1923,8 @@ public class Composition extends DomainResource {
   public static final String SP_TITLE = "title";
   @SearchParamDefinition(name="attester", path="Composition.attester.party", description="Who attested the composition", type="reference" )
   public static final String SP_ATTESTER = "attester";
+  @SearchParamDefinition(name="entry", path="Composition.section.entry", description="A reference to data that supports this section", type="reference" )
+  public static final String SP_ENTRY = "entry";
   @SearchParamDefinition(name="patient", path="Composition.subject", description="Who and/or what the composition is about", type="reference" )
   public static final String SP_PATIENT = "patient";
   @SearchParamDefinition(name="context", path="Composition.event.code", description="Code(s) that apply to the event being documented", type="token" )

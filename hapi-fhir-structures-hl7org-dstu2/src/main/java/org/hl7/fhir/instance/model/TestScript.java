@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Tue, Jul 21, 2015 10:37-0400 for FHIR v0.5.0
+// Generated on Fri, Aug 7, 2015 06:45-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -586,6 +586,165 @@ public class TestScript extends DomainResource {
       return "?";
       }
     }
+
+    @Block()
+    public static class TestScriptContactComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The name of an individual to contact regarding the Test Script.
+         */
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the Test Script." )
+        protected StringType name;
+
+        /**
+         * Contact details for individual (if a name was provided) or the publisher.
+         */
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
+        protected List<ContactPoint> telecom;
+
+        private static final long serialVersionUID = -1179697803L;
+
+    /*
+     * Constructor
+     */
+      public TestScriptContactComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #name} (The name of an individual to contact regarding the Test Script.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public StringType getNameElement() { 
+          if (this.name == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptContactComponent.name");
+            else if (Configuration.doAutoCreate())
+              this.name = new StringType(); // bb
+          return this.name;
+        }
+
+        public boolean hasNameElement() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
+        }
+
+        /**
+         * @param value {@link #name} (The name of an individual to contact regarding the Test Script.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+         */
+        public TestScriptContactComponent setNameElement(StringType value) { 
+          this.name = value;
+          return this;
+        }
+
+        /**
+         * @return The name of an individual to contact regarding the Test Script.
+         */
+        public String getName() { 
+          return this.name == null ? null : this.name.getValue();
+        }
+
+        /**
+         * @param value The name of an individual to contact regarding the Test Script.
+         */
+        public TestScriptContactComponent setName(String value) { 
+          if (Utilities.noString(value))
+            this.name = null;
+          else {
+            if (this.name == null)
+              this.name = new StringType();
+            this.name.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
+         */
+        public List<ContactPoint> getTelecom() { 
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          return this.telecom;
+        }
+
+        public boolean hasTelecom() { 
+          if (this.telecom == null)
+            return false;
+          for (ContactPoint item : this.telecom)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #telecom} (Contact details for individual (if a name was provided) or the publisher.)
+         */
+    // syntactic sugar
+        public ContactPoint addTelecom() { //3
+          ContactPoint t = new ContactPoint();
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public TestScriptContactComponent addTelecom(ContactPoint t) { //3
+          if (t == null)
+            return this;
+          if (this.telecom == null)
+            this.telecom = new ArrayList<ContactPoint>();
+          this.telecom.add(t);
+          return this;
+        }
+
+        protected void listChildren(List<Property> childrenList) {
+          super.listChildren(childrenList);
+          childrenList.add(new Property("name", "string", "The name of an individual to contact regarding the Test Script.", 0, java.lang.Integer.MAX_VALUE, name));
+          childrenList.add(new Property("telecom", "ContactPoint", "Contact details for individual (if a name was provided) or the publisher.", 0, java.lang.Integer.MAX_VALUE, telecom));
+        }
+
+      public TestScriptContactComponent copy() {
+        TestScriptContactComponent dst = new TestScriptContactComponent();
+        copyValues(dst);
+        dst.name = name == null ? null : name.copy();
+        if (telecom != null) {
+          dst.telecom = new ArrayList<ContactPoint>();
+          for (ContactPoint i : telecom)
+            dst.telecom.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other) {
+        if (!super.equalsDeep(other))
+          return false;
+        if (!(other instanceof TestScriptContactComponent))
+          return false;
+        TestScriptContactComponent o = (TestScriptContactComponent) other;
+        return compareDeep(name, o.name, true) && compareDeep(telecom, o.telecom, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other) {
+        if (!super.equalsShallow(other))
+          return false;
+        if (!(other instanceof TestScriptContactComponent))
+          return false;
+        TestScriptContactComponent o = (TestScriptContactComponent) other;
+        return compareValues(name, o.name, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && (name == null || name.isEmpty()) && (telecom == null || telecom.isEmpty())
+          ;
+      }
+
+  }
 
     @Block()
     public static class TestScriptMetadataComponent extends BackboneElement implements IBaseBackboneElement {
@@ -2091,48 +2250,55 @@ public class TestScript extends DomainResource {
         protected IntegerType destination;
 
         /**
+         * Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
+         */
+        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=0, max=1)
+        @Description(shortDefinition="Whether or not to send the request url in encoded format", formalDefinition="Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths." )
+        protected BooleanType encodeRequestUrl;
+
+        /**
          * Path plus parameters after [type].  Used to set parts of the request URL explicitly.
          */
-        @Child(name = "params", type = {StringType.class}, order=8, min=0, max=1)
+        @Child(name = "params", type = {StringType.class}, order=9, min=0, max=1)
         @Description(shortDefinition="Params", formalDefinition="Path plus parameters after [type].  Used to set parts of the request URL explicitly." )
         protected StringType params;
 
         /**
          * Header elements would be used to set HTTP headers.
          */
-        @Child(name = "requestHeader", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "requestHeader", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Each operation can have one ore more header elements", formalDefinition="Header elements would be used to set HTTP headers." )
         protected List<TestScriptSetupActionOperationRequestHeaderComponent> requestHeader;
 
         /**
          * The fixture id (maybe new) to map to the response.
          */
-        @Child(name = "responseId", type = {IdType.class}, order=10, min=0, max=1)
+        @Child(name = "responseId", type = {IdType.class}, order=11, min=0, max=1)
         @Description(shortDefinition="Response Id", formalDefinition="The fixture id (maybe new) to map to the response." )
         protected IdType responseId;
 
         /**
          * The id of the fixture used as the body of a PUT or POST request.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=11, min=0, max=1)
+        @Child(name = "sourceId", type = {IdType.class}, order=12, min=0, max=1)
         @Description(shortDefinition="Fixture Id of body for PUT and POST requests", formalDefinition="The id of the fixture used as the body of a PUT or POST request." )
         protected IdType sourceId;
 
         /**
          * Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.
          */
-        @Child(name = "targetId", type = {IdType.class}, order=12, min=0, max=1)
+        @Child(name = "targetId", type = {IdType.class}, order=13, min=0, max=1)
         @Description(shortDefinition="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests", formalDefinition="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests." )
         protected IdType targetId;
 
         /**
          * Complete request URL.
          */
-        @Child(name = "url", type = {StringType.class}, order=13, min=0, max=1)
+        @Child(name = "url", type = {StringType.class}, order=14, min=0, max=1)
         @Description(shortDefinition="Request URL", formalDefinition="Complete request URL." )
         protected StringType url;
 
-        private static final long serialVersionUID = 276957824L;
+        private static final long serialVersionUID = -590188078L;
 
     /*
      * Constructor
@@ -2456,6 +2622,51 @@ public class TestScript extends DomainResource {
         }
 
         /**
+         * @return {@link #encodeRequestUrl} (Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.). This is the underlying object with id, value and extensions. The accessor "getEncodeRequestUrl" gives direct access to the value
+         */
+        public BooleanType getEncodeRequestUrlElement() { 
+          if (this.encodeRequestUrl == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create TestScriptSetupActionOperationComponent.encodeRequestUrl");
+            else if (Configuration.doAutoCreate())
+              this.encodeRequestUrl = new BooleanType(); // bb
+          return this.encodeRequestUrl;
+        }
+
+        public boolean hasEncodeRequestUrlElement() { 
+          return this.encodeRequestUrl != null && !this.encodeRequestUrl.isEmpty();
+        }
+
+        public boolean hasEncodeRequestUrl() { 
+          return this.encodeRequestUrl != null && !this.encodeRequestUrl.isEmpty();
+        }
+
+        /**
+         * @param value {@link #encodeRequestUrl} (Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.). This is the underlying object with id, value and extensions. The accessor "getEncodeRequestUrl" gives direct access to the value
+         */
+        public TestScriptSetupActionOperationComponent setEncodeRequestUrlElement(BooleanType value) { 
+          this.encodeRequestUrl = value;
+          return this;
+        }
+
+        /**
+         * @return Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
+         */
+        public boolean getEncodeRequestUrl() { 
+          return this.encodeRequestUrl == null || this.encodeRequestUrl.isEmpty() ? false : this.encodeRequestUrl.getValue();
+        }
+
+        /**
+         * @param value Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
+         */
+        public TestScriptSetupActionOperationComponent setEncodeRequestUrl(boolean value) { 
+            if (this.encodeRequestUrl == null)
+              this.encodeRequestUrl = new BooleanType();
+            this.encodeRequestUrl.setValue(value);
+          return this;
+        }
+
+        /**
          * @return {@link #params} (Path plus parameters after [type].  Used to set parts of the request URL explicitly.). This is the underlying object with id, value and extensions. The accessor "getParams" gives direct access to the value
          */
         public StringType getParamsElement() { 
@@ -2749,6 +2960,7 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("accept", "code", "The content-type or mime-type to use for RESTful operation in the 'Accept' header.", 0, java.lang.Integer.MAX_VALUE, accept));
           childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
           childrenList.add(new Property("destination", "integer", "Which server to perform the operation on.", 0, java.lang.Integer.MAX_VALUE, destination));
+          childrenList.add(new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, java.lang.Integer.MAX_VALUE, encodeRequestUrl));
           childrenList.add(new Property("params", "string", "Path plus parameters after [type].  Used to set parts of the request URL explicitly.", 0, java.lang.Integer.MAX_VALUE, params));
           childrenList.add(new Property("requestHeader", "", "Header elements would be used to set HTTP headers.", 0, java.lang.Integer.MAX_VALUE, requestHeader));
           childrenList.add(new Property("responseId", "id", "The fixture id (maybe new) to map to the response.", 0, java.lang.Integer.MAX_VALUE, responseId));
@@ -2767,6 +2979,7 @@ public class TestScript extends DomainResource {
         dst.accept = accept == null ? null : accept.copy();
         dst.contentType = contentType == null ? null : contentType.copy();
         dst.destination = destination == null ? null : destination.copy();
+        dst.encodeRequestUrl = encodeRequestUrl == null ? null : encodeRequestUrl.copy();
         dst.params = params == null ? null : params.copy();
         if (requestHeader != null) {
           dst.requestHeader = new ArrayList<TestScriptSetupActionOperationRequestHeaderComponent>();
@@ -2789,9 +3002,10 @@ public class TestScript extends DomainResource {
         TestScriptSetupActionOperationComponent o = (TestScriptSetupActionOperationComponent) other;
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true) && compareDeep(label, o.label, true)
            && compareDeep(description, o.description, true) && compareDeep(accept, o.accept, true) && compareDeep(contentType, o.contentType, true)
-           && compareDeep(destination, o.destination, true) && compareDeep(params, o.params, true) && compareDeep(requestHeader, o.requestHeader, true)
-           && compareDeep(responseId, o.responseId, true) && compareDeep(sourceId, o.sourceId, true) && compareDeep(targetId, o.targetId, true)
-           && compareDeep(url, o.url, true);
+           && compareDeep(destination, o.destination, true) && compareDeep(encodeRequestUrl, o.encodeRequestUrl, true)
+           && compareDeep(params, o.params, true) && compareDeep(requestHeader, o.requestHeader, true) && compareDeep(responseId, o.responseId, true)
+           && compareDeep(sourceId, o.sourceId, true) && compareDeep(targetId, o.targetId, true) && compareDeep(url, o.url, true)
+          ;
       }
 
       @Override
@@ -2803,17 +3017,19 @@ public class TestScript extends DomainResource {
         TestScriptSetupActionOperationComponent o = (TestScriptSetupActionOperationComponent) other;
         return compareValues(resource, o.resource, true) && compareValues(label, o.label, true) && compareValues(description, o.description, true)
            && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true) && compareValues(destination, o.destination, true)
-           && compareValues(params, o.params, true) && compareValues(responseId, o.responseId, true) && compareValues(sourceId, o.sourceId, true)
-           && compareValues(targetId, o.targetId, true) && compareValues(url, o.url, true);
+           && compareValues(encodeRequestUrl, o.encodeRequestUrl, true) && compareValues(params, o.params, true)
+           && compareValues(responseId, o.responseId, true) && compareValues(sourceId, o.sourceId, true) && compareValues(targetId, o.targetId, true)
+           && compareValues(url, o.url, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (type == null || type.isEmpty()) && (resource == null || resource.isEmpty())
            && (label == null || label.isEmpty()) && (description == null || description.isEmpty()) && (accept == null || accept.isEmpty())
            && (contentType == null || contentType.isEmpty()) && (destination == null || destination.isEmpty())
-           && (params == null || params.isEmpty()) && (requestHeader == null || requestHeader.isEmpty())
-           && (responseId == null || responseId.isEmpty()) && (sourceId == null || sourceId.isEmpty())
-           && (targetId == null || targetId.isEmpty()) && (url == null || url.isEmpty());
+           && (encodeRequestUrl == null || encodeRequestUrl.isEmpty()) && (params == null || params.isEmpty())
+           && (requestHeader == null || requestHeader.isEmpty()) && (responseId == null || responseId.isEmpty())
+           && (sourceId == null || sourceId.isEmpty()) && (targetId == null || targetId.isEmpty()) && (url == null || url.isEmpty())
+          ;
       }
 
   }
@@ -4634,76 +4850,146 @@ public class TestScript extends DomainResource {
   }
 
     /**
-     * Name of the Test Script.
+     * An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
      */
-    @Child(name = "name", type = {StringType.class}, order=0, min=0, max=1)
-    @Description(shortDefinition="Name", formalDefinition="Name of the Test Script." )
+    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1)
+    @Description(shortDefinition="Literal URL used to reference this TestScript", formalDefinition="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published." )
+    protected UriType url;
+
+    /**
+     * The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.
+     */
+    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1)
+    @Description(shortDefinition="Logical id for this version of the TestScript", formalDefinition="The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually." )
+    protected StringType version;
+
+    /**
+     * A free text natural language name identifying the TestScript.
+     */
+    @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1)
+    @Description(shortDefinition="Informal name for this TestScript", formalDefinition="A free text natural language name identifying the TestScript." )
     protected StringType name;
 
     /**
-     * Description of the Test Script.
+     * The status of the TestScript.
      */
-    @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1)
-    @Description(shortDefinition="Short description", formalDefinition="Description of the Test Script." )
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1)
+    @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the TestScript." )
+    protected Enumeration<ConformanceResourceStatus> status;
+
+    /**
+     * This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     */
+    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1)
+    @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
+    protected BooleanType experimental;
+
+    /**
+     * The name of the individual or organization that published the Test Script.
+     */
+    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1)
+    @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the Test Script." )
+    protected StringType publisher;
+
+    /**
+     * Contacts to assist a user in finding and communicating with the publisher.
+     */
+    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
+    protected List<TestScriptContactComponent> contact;
+
+    /**
+     * The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
+     */
+    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1)
+    @Description(shortDefinition="Date for this version of the TestScript", formalDefinition="The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change." )
+    protected DateTimeType date;
+
+    /**
+     * A free text natural language description of the TestScript and its use.
+     */
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1)
+    @Description(shortDefinition="Natural language description of the TestScript", formalDefinition="A free text natural language description of the TestScript and its use." )
     protected StringType description;
+
+    /**
+     * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.
+     */
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts." )
+    protected List<CodeableConcept> useContext;
+
+    /**
+     * Explains why this Test Script is needed and why it's been constrained as it has.
+     */
+    @Child(name = "requirements", type = {StringType.class}, order=10, min=0, max=1)
+    @Description(shortDefinition="Scope and Usage this Test Script is for", formalDefinition="Explains why this Test Script is needed and why it's been constrained as it has." )
+    protected StringType requirements;
+
+    /**
+     * A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     */
+    @Child(name = "copyright", type = {StringType.class}, order=11, min=0, max=1)
+    @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
+    protected StringType copyright;
 
     /**
      * The required capability must exist and is assumed to function correctly on the FHIR server being tested.
      */
-    @Child(name = "metadata", type = {}, order=2, min=0, max=1)
+    @Child(name = "metadata", type = {}, order=12, min=0, max=1)
     @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and is assumed to function correctly on the FHIR server being tested." )
     protected TestScriptMetadataComponent metadata;
 
     /**
      * If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.
      */
-    @Child(name = "multiserver", type = {BooleanType.class}, order=3, min=0, max=1)
+    @Child(name = "multiserver", type = {BooleanType.class}, order=13, min=0, max=1)
     @Description(shortDefinition="Whether or not the tests apply to more than one FHIR server", formalDefinition="If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified." )
     protected BooleanType multiserver;
 
     /**
      * Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.
      */
-    @Child(name = "fixture", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "fixture", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Fixture in the test script - by reference (uri)", formalDefinition="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute." )
     protected List<TestScriptFixtureComponent> fixture;
 
     /**
      * Reference to the profile to be used for validation.
      */
-    @Child(name = "profile", type = {Reference.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "profile", type = {Reference.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Reference of the validation profile", formalDefinition="Reference to the profile to be used for validation." )
     protected List<Reference> profile;
 
     /**
      * Variable is set based either on element value in response body or on header field value in the response headers.
      */
-    @Child(name = "variable", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "variable", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Variable", formalDefinition="Variable is set based either on element value in response body or on header field value in the response headers." )
     protected List<TestScriptVariableComponent> variable;
 
     /**
      * A series of required setup operations before tests are executed.
      */
-    @Child(name = "setup", type = {}, order=7, min=0, max=1)
+    @Child(name = "setup", type = {}, order=17, min=0, max=1)
     @Description(shortDefinition="A series of required setup operations before tests are executed", formalDefinition="A series of required setup operations before tests are executed." )
     protected TestScriptSetupComponent setup;
 
     /**
      * A test in this script.
      */
-    @Child(name = "test", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "test", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="A test in this script", formalDefinition="A test in this script." )
     protected List<TestScriptTestComponent> test;
 
     /**
      * A series of operations required to clean up after the all the tests are executed (successfully or otherwise).
      */
-    @Child(name = "teardown", type = {}, order=9, min=0, max=1)
+    @Child(name = "teardown", type = {}, order=19, min=0, max=1)
     @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
-    private static final long serialVersionUID = 45077637L;
+    private static final long serialVersionUID = 1220428481L;
 
   /*
    * Constructor
@@ -4712,8 +4998,112 @@ public class TestScript extends DomainResource {
       super();
     }
 
+  /*
+   * Constructor
+   */
+    public TestScript(UriType url, StringType name, Enumeration<ConformanceResourceStatus> status) {
+      super();
+      this.url = url;
+      this.name = name;
+      this.status = status;
+    }
+
     /**
-     * @return {@link #name} (Name of the Test Script.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @return {@link #url} (An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public UriType getUrlElement() { 
+      if (this.url == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.url");
+        else if (Configuration.doAutoCreate())
+          this.url = new UriType(); // bb
+      return this.url;
+    }
+
+    public boolean hasUrlElement() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    public boolean hasUrl() { 
+      return this.url != null && !this.url.isEmpty();
+    }
+
+    /**
+     * @param value {@link #url} (An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     */
+    public TestScript setUrlElement(UriType value) { 
+      this.url = value;
+      return this;
+    }
+
+    /**
+     * @return An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
+     */
+    public String getUrl() { 
+      return this.url == null ? null : this.url.getValue();
+    }
+
+    /**
+     * @param value An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
+     */
+    public TestScript setUrl(String value) { 
+        if (this.url == null)
+          this.url = new UriType();
+        this.url.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #version} (The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public StringType getVersionElement() { 
+      if (this.version == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.version");
+        else if (Configuration.doAutoCreate())
+          this.version = new StringType(); // bb
+      return this.version;
+    }
+
+    public boolean hasVersionElement() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    public boolean hasVersion() { 
+      return this.version != null && !this.version.isEmpty();
+    }
+
+    /**
+     * @param value {@link #version} (The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.). This is the underlying object with id, value and extensions. The accessor "getVersion" gives direct access to the value
+     */
+    public TestScript setVersionElement(StringType value) { 
+      this.version = value;
+      return this;
+    }
+
+    /**
+     * @return The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.
+     */
+    public String getVersion() { 
+      return this.version == null ? null : this.version.getValue();
+    }
+
+    /**
+     * @param value The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.
+     */
+    public TestScript setVersion(String value) { 
+      if (Utilities.noString(value))
+        this.version = null;
+      else {
+        if (this.version == null)
+          this.version = new StringType();
+        this.version.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #name} (A free text natural language name identifying the TestScript.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public StringType getNameElement() { 
       if (this.name == null)
@@ -4733,7 +5123,7 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @param value {@link #name} (Name of the Test Script.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
+     * @param value {@link #name} (A free text natural language name identifying the TestScript.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
      */
     public TestScript setNameElement(StringType value) { 
       this.name = value;
@@ -4741,28 +5131,252 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return Name of the Test Script.
+     * @return A free text natural language name identifying the TestScript.
      */
     public String getName() { 
       return this.name == null ? null : this.name.getValue();
     }
 
     /**
-     * @param value Name of the Test Script.
+     * @param value A free text natural language name identifying the TestScript.
      */
     public TestScript setName(String value) { 
-      if (Utilities.noString(value))
-        this.name = null;
-      else {
         if (this.name == null)
           this.name = new StringType();
         this.name.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #status} (The status of the TestScript.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public Enumeration<ConformanceResourceStatus> getStatusElement() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory()); // bb
+      return this.status;
+    }
+
+    public boolean hasStatusElement() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (The status of the TestScript.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+     */
+    public TestScript setStatusElement(Enumeration<ConformanceResourceStatus> value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return The status of the TestScript.
+     */
+    public ConformanceResourceStatus getStatus() { 
+      return this.status == null ? null : this.status.getValue();
+    }
+
+    /**
+     * @param value The status of the TestScript.
+     */
+    public TestScript setStatus(ConformanceResourceStatus value) { 
+        if (this.status == null)
+          this.status = new Enumeration<ConformanceResourceStatus>(new ConformanceResourceStatusEnumFactory());
+        this.status.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #experimental} (This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     */
+    public BooleanType getExperimentalElement() { 
+      if (this.experimental == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.experimental");
+        else if (Configuration.doAutoCreate())
+          this.experimental = new BooleanType(); // bb
+      return this.experimental;
+    }
+
+    public boolean hasExperimentalElement() { 
+      return this.experimental != null && !this.experimental.isEmpty();
+    }
+
+    public boolean hasExperimental() { 
+      return this.experimental != null && !this.experimental.isEmpty();
+    }
+
+    /**
+     * @param value {@link #experimental} (This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.). This is the underlying object with id, value and extensions. The accessor "getExperimental" gives direct access to the value
+     */
+    public TestScript setExperimentalElement(BooleanType value) { 
+      this.experimental = value;
+      return this;
+    }
+
+    /**
+     * @return This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     */
+    public boolean getExperimental() { 
+      return this.experimental == null || this.experimental.isEmpty() ? false : this.experimental.getValue();
+    }
+
+    /**
+     * @param value This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
+     */
+    public TestScript setExperimental(boolean value) { 
+        if (this.experimental == null)
+          this.experimental = new BooleanType();
+        this.experimental.setValue(value);
+      return this;
+    }
+
+    /**
+     * @return {@link #publisher} (The name of the individual or organization that published the Test Script.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     */
+    public StringType getPublisherElement() { 
+      if (this.publisher == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.publisher");
+        else if (Configuration.doAutoCreate())
+          this.publisher = new StringType(); // bb
+      return this.publisher;
+    }
+
+    public boolean hasPublisherElement() { 
+      return this.publisher != null && !this.publisher.isEmpty();
+    }
+
+    public boolean hasPublisher() { 
+      return this.publisher != null && !this.publisher.isEmpty();
+    }
+
+    /**
+     * @param value {@link #publisher} (The name of the individual or organization that published the Test Script.). This is the underlying object with id, value and extensions. The accessor "getPublisher" gives direct access to the value
+     */
+    public TestScript setPublisherElement(StringType value) { 
+      this.publisher = value;
+      return this;
+    }
+
+    /**
+     * @return The name of the individual or organization that published the Test Script.
+     */
+    public String getPublisher() { 
+      return this.publisher == null ? null : this.publisher.getValue();
+    }
+
+    /**
+     * @param value The name of the individual or organization that published the Test Script.
+     */
+    public TestScript setPublisher(String value) { 
+      if (Utilities.noString(value))
+        this.publisher = null;
+      else {
+        if (this.publisher == null)
+          this.publisher = new StringType();
+        this.publisher.setValue(value);
       }
       return this;
     }
 
     /**
-     * @return {@link #description} (Description of the Test Script.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     */
+    public List<TestScriptContactComponent> getContact() { 
+      if (this.contact == null)
+        this.contact = new ArrayList<TestScriptContactComponent>();
+      return this.contact;
+    }
+
+    public boolean hasContact() { 
+      if (this.contact == null)
+        return false;
+      for (TestScriptContactComponent item : this.contact)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #contact} (Contacts to assist a user in finding and communicating with the publisher.)
+     */
+    // syntactic sugar
+    public TestScriptContactComponent addContact() { //3
+      TestScriptContactComponent t = new TestScriptContactComponent();
+      if (this.contact == null)
+        this.contact = new ArrayList<TestScriptContactComponent>();
+      this.contact.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public TestScript addContact(TestScriptContactComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.contact == null)
+        this.contact = new ArrayList<TestScriptContactComponent>();
+      this.contact.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #date} (The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public DateTimeType getDateElement() { 
+      if (this.date == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.date");
+        else if (Configuration.doAutoCreate())
+          this.date = new DateTimeType(); // bb
+      return this.date;
+    }
+
+    public boolean hasDateElement() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    public boolean hasDate() { 
+      return this.date != null && !this.date.isEmpty();
+    }
+
+    /**
+     * @param value {@link #date} (The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+     */
+    public TestScript setDateElement(DateTimeType value) { 
+      this.date = value;
+      return this;
+    }
+
+    /**
+     * @return The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
+     */
+    public Date getDate() { 
+      return this.date == null ? null : this.date.getValue();
+    }
+
+    /**
+     * @param value The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
+     */
+    public TestScript setDate(Date value) { 
+      if (value == null)
+        this.date = null;
+      else {
+        if (this.date == null)
+          this.date = new DateTimeType();
+        this.date.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #description} (A free text natural language description of the TestScript and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public StringType getDescriptionElement() { 
       if (this.description == null)
@@ -4782,7 +5396,7 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @param value {@link #description} (Description of the Test Script.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (A free text natural language description of the TestScript and its use.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public TestScript setDescriptionElement(StringType value) { 
       this.description = value;
@@ -4790,14 +5404,14 @@ public class TestScript extends DomainResource {
     }
 
     /**
-     * @return Description of the Test Script.
+     * @return A free text natural language description of the TestScript and its use.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value Description of the Test Script.
+     * @param value A free text natural language description of the TestScript and its use.
      */
     public TestScript setDescription(String value) { 
       if (Utilities.noString(value))
@@ -4806,6 +5420,144 @@ public class TestScript extends DomainResource {
         if (this.description == null)
           this.description = new StringType();
         this.description.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.)
+     */
+    public List<CodeableConcept> getUseContext() { 
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      return this.useContext;
+    }
+
+    public boolean hasUseContext() { 
+      if (this.useContext == null)
+        return false;
+      for (CodeableConcept item : this.useContext)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.)
+     */
+    // syntactic sugar
+    public CodeableConcept addUseContext() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      this.useContext.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public TestScript addUseContext(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.useContext == null)
+        this.useContext = new ArrayList<CodeableConcept>();
+      this.useContext.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #requirements} (Explains why this Test Script is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     */
+    public StringType getRequirementsElement() { 
+      if (this.requirements == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.requirements");
+        else if (Configuration.doAutoCreate())
+          this.requirements = new StringType(); // bb
+      return this.requirements;
+    }
+
+    public boolean hasRequirementsElement() { 
+      return this.requirements != null && !this.requirements.isEmpty();
+    }
+
+    public boolean hasRequirements() { 
+      return this.requirements != null && !this.requirements.isEmpty();
+    }
+
+    /**
+     * @param value {@link #requirements} (Explains why this Test Script is needed and why it's been constrained as it has.). This is the underlying object with id, value and extensions. The accessor "getRequirements" gives direct access to the value
+     */
+    public TestScript setRequirementsElement(StringType value) { 
+      this.requirements = value;
+      return this;
+    }
+
+    /**
+     * @return Explains why this Test Script is needed and why it's been constrained as it has.
+     */
+    public String getRequirements() { 
+      return this.requirements == null ? null : this.requirements.getValue();
+    }
+
+    /**
+     * @param value Explains why this Test Script is needed and why it's been constrained as it has.
+     */
+    public TestScript setRequirements(String value) { 
+      if (Utilities.noString(value))
+        this.requirements = null;
+      else {
+        if (this.requirements == null)
+          this.requirements = new StringType();
+        this.requirements.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #copyright} (A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public StringType getCopyrightElement() { 
+      if (this.copyright == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create TestScript.copyright");
+        else if (Configuration.doAutoCreate())
+          this.copyright = new StringType(); // bb
+      return this.copyright;
+    }
+
+    public boolean hasCopyrightElement() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    public boolean hasCopyright() { 
+      return this.copyright != null && !this.copyright.isEmpty();
+    }
+
+    /**
+     * @param value {@link #copyright} (A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.). This is the underlying object with id, value and extensions. The accessor "getCopyright" gives direct access to the value
+     */
+    public TestScript setCopyrightElement(StringType value) { 
+      this.copyright = value;
+      return this;
+    }
+
+    /**
+     * @return A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     */
+    public String getCopyright() { 
+      return this.copyright == null ? null : this.copyright.getValue();
+    }
+
+    /**
+     * @param value A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
+     */
+    public TestScript setCopyright(String value) { 
+      if (Utilities.noString(value))
+        this.copyright = null;
+      else {
+        if (this.copyright == null)
+          this.copyright = new StringType();
+        this.copyright.setValue(value);
       }
       return this;
     }
@@ -5089,8 +5841,18 @@ public class TestScript extends DomainResource {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("name", "string", "Name of the Test Script.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("description", "string", "Description of the Test Script.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("url", "uri", "An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.", 0, java.lang.Integer.MAX_VALUE, url));
+        childrenList.add(new Property("version", "string", "The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.", 0, java.lang.Integer.MAX_VALUE, version));
+        childrenList.add(new Property("name", "string", "A free text natural language name identifying the TestScript.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("status", "code", "The status of the TestScript.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("experimental", "boolean", "This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.", 0, java.lang.Integer.MAX_VALUE, experimental));
+        childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the Test Script.", 0, java.lang.Integer.MAX_VALUE, publisher));
+        childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
+        childrenList.add(new Property("date", "dateTime", "The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.", 0, java.lang.Integer.MAX_VALUE, date));
+        childrenList.add(new Property("description", "string", "A free text natural language description of the TestScript and its use.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        childrenList.add(new Property("requirements", "string", "Explains why this Test Script is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
+        childrenList.add(new Property("copyright", "string", "A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.", 0, java.lang.Integer.MAX_VALUE, copyright));
         childrenList.add(new Property("metadata", "", "The required capability must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
         childrenList.add(new Property("multiserver", "boolean", "If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.", 0, java.lang.Integer.MAX_VALUE, multiserver));
         childrenList.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
@@ -5104,8 +5866,26 @@ public class TestScript extends DomainResource {
       public TestScript copy() {
         TestScript dst = new TestScript();
         copyValues(dst);
+        dst.url = url == null ? null : url.copy();
+        dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
+        dst.status = status == null ? null : status.copy();
+        dst.experimental = experimental == null ? null : experimental.copy();
+        dst.publisher = publisher == null ? null : publisher.copy();
+        if (contact != null) {
+          dst.contact = new ArrayList<TestScriptContactComponent>();
+          for (TestScriptContactComponent i : contact)
+            dst.contact.add(i.copy());
+        };
+        dst.date = date == null ? null : date.copy();
         dst.description = description == null ? null : description.copy();
+        if (useContext != null) {
+          dst.useContext = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : useContext)
+            dst.useContext.add(i.copy());
+        };
+        dst.requirements = requirements == null ? null : requirements.copy();
+        dst.copyright = copyright == null ? null : copyright.copy();
         dst.metadata = metadata == null ? null : metadata.copy();
         dst.multiserver = multiserver == null ? null : multiserver.copy();
         if (fixture != null) {
@@ -5144,10 +5924,14 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScript))
           return false;
         TestScript o = (TestScript) other;
-        return compareDeep(name, o.name, true) && compareDeep(description, o.description, true) && compareDeep(metadata, o.metadata, true)
-           && compareDeep(multiserver, o.multiserver, true) && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true)
-           && compareDeep(variable, o.variable, true) && compareDeep(setup, o.setup, true) && compareDeep(test, o.test, true)
-           && compareDeep(teardown, o.teardown, true);
+        return compareDeep(url, o.url, true) && compareDeep(version, o.version, true) && compareDeep(name, o.name, true)
+           && compareDeep(status, o.status, true) && compareDeep(experimental, o.experimental, true) && compareDeep(publisher, o.publisher, true)
+           && compareDeep(contact, o.contact, true) && compareDeep(date, o.date, true) && compareDeep(description, o.description, true)
+           && compareDeep(useContext, o.useContext, true) && compareDeep(requirements, o.requirements, true)
+           && compareDeep(copyright, o.copyright, true) && compareDeep(metadata, o.metadata, true) && compareDeep(multiserver, o.multiserver, true)
+           && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
+           && compareDeep(setup, o.setup, true) && compareDeep(test, o.test, true) && compareDeep(teardown, o.teardown, true)
+          ;
       }
 
       @Override
@@ -5157,12 +5941,18 @@ public class TestScript extends DomainResource {
         if (!(other instanceof TestScript))
           return false;
         TestScript o = (TestScript) other;
-        return compareValues(name, o.name, true) && compareValues(description, o.description, true) && compareValues(multiserver, o.multiserver, true)
-          ;
+        return compareValues(url, o.url, true) && compareValues(version, o.version, true) && compareValues(name, o.name, true)
+           && compareValues(status, o.status, true) && compareValues(experimental, o.experimental, true) && compareValues(publisher, o.publisher, true)
+           && compareValues(date, o.date, true) && compareValues(description, o.description, true) && compareValues(requirements, o.requirements, true)
+           && compareValues(copyright, o.copyright, true) && compareValues(multiserver, o.multiserver, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (name == null || name.isEmpty()) && (description == null || description.isEmpty())
+        return super.isEmpty() && (url == null || url.isEmpty()) && (version == null || version.isEmpty())
+           && (name == null || name.isEmpty()) && (status == null || status.isEmpty()) && (experimental == null || experimental.isEmpty())
+           && (publisher == null || publisher.isEmpty()) && (contact == null || contact.isEmpty()) && (date == null || date.isEmpty())
+           && (description == null || description.isEmpty()) && (useContext == null || useContext.isEmpty())
+           && (requirements == null || requirements.isEmpty()) && (copyright == null || copyright.isEmpty())
            && (metadata == null || metadata.isEmpty()) && (multiserver == null || multiserver.isEmpty())
            && (fixture == null || fixture.isEmpty()) && (profile == null || profile.isEmpty()) && (variable == null || variable.isEmpty())
            && (setup == null || setup.isEmpty()) && (test == null || test.isEmpty()) && (teardown == null || teardown.isEmpty())

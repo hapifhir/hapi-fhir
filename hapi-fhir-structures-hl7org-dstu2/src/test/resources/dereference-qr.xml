@@ -1,4 +1,4 @@
-<QuestionnaireAnswers xmlns="http://hl7.org/fhir">
+<QuestionnaireResponse xmlns="http://hl7.org/fhir">
 	<identifier>
 		<value value="4772"/>
 	</identifier>
@@ -50,4 +50,4 @@
 			</question>
 		</group>
 	</group>
-</QuestionnaireAnswers>
+</QuestionnaireResponse>

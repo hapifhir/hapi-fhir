@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,32 +13,31 @@ import org.hl7.fhir.instance.model.DataElement;
 import org.hl7.fhir.instance.model.Questionnaire;
 import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
 import org.hl7.fhir.instance.model.Questionnaire.GroupComponent;
-import org.hl7.fhir.instance.model.QuestionnaireAnswers;
-import org.hl7.fhir.instance.model.QuestionnaireAnswers.QuestionnaireAnswersStatus;
+import org.hl7.fhir.instance.model.QuestionnaireResponse;
+import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.ValueSet;
 import org.hl7.fhir.instance.utils.WorkerContext;
-import org.hl7.fhir.instance.validation.QuestionnaireAnswersValidator;
+import org.hl7.fhir.instance.validation.QuestionnaireResponseValidator;
 import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.DataFormatException;
 
-public class QuestionnaireAnswersValidatorTest {
+public class QuestionnaireResponseValidatorTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireAnswersValidatorTest.class);
-	private QuestionnaireAnswersValidator myVal;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorTest.class);
+	private QuestionnaireResponseValidator myVal;
 
 	private WorkerContext myWorkerCtx;
 	
 	@Before
 	public void before() {
 		myWorkerCtx = new WorkerContext();
-		myVal = new QuestionnaireAnswersValidator(myWorkerCtx);
+		myVal = new QuestionnaireResponseValidator(myWorkerCtx);
 	}
 	
 	@Test
@@ -47,7 +45,7 @@ public class QuestionnaireAnswersValidatorTest {
 		Questionnaire q = new Questionnaire();
 		q.getGroup().addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
 		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 		
@@ -72,19 +70,19 @@ public class QuestionnaireAnswersValidatorTest {
 		options.getCompose().addInclude().setSystem("urn:system2").addConcept().setCode("code2");
 		myWorkerCtx.getValueSets().put("http://somevalueset", options);
 		
-		QuestionnaireAnswers qa;
+		QuestionnaireResponse qa;
 		List<ValidationMessage> errors;
 		
 		// Good code
 		
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code0"));
 		errors = new ArrayList<ValidationMessage>();
 		myVal.validate(errors, qa);
 		assertEquals(errors.toString(), 0, errors.size());
 
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system2").setCode("code2"));
 		errors = new ArrayList<ValidationMessage>();
@@ -93,23 +91,23 @@ public class QuestionnaireAnswersValidatorTest {
 
 		// Bad code
 		
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system").setCode("code1"));
 		errors = new ArrayList<ValidationMessage>();
 		myVal.validate(errors, qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("location=//QuestionnaireAnswers/group[0]/question[0]/answer[0]"));
+		assertThat(errors.toString(), containsString("location=//QuestionnaireResponse/group[0]/question[0]/answer[0]"));
 		assertThat(errors.toString(), containsString("message=Question with linkId[link0] has answer with system[urn:system] and code[code1] but this is not a valid answer for ValueSet[http://somevalueset]"));
 		
-		qa = new QuestionnaireAnswers();
+		qa = new QuestionnaireResponse();
 		
 		qa.getQuestionnaire().setReference(questionnaireRef);
 		qa.getGroup().addQuestion().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("urn:system2").setCode("code3"));
 		errors = new ArrayList<ValidationMessage>();
 		myVal.validate(errors, qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("location=//QuestionnaireAnswers/group[0]/question[0]/answer[0]"));
+		assertThat(errors.toString(), containsString("location=//QuestionnaireResponse/group[0]/question[0]/answer[0]"));
 		assertThat(errors.toString(), containsString("message=Question with linkId[link0] has answer with system[urn:system2] and code[code3] but this is not a valid answer for ValueSet[http://somevalueset]"));
 		
 	}
@@ -117,7 +115,7 @@ public class QuestionnaireAnswersValidatorTest {
 	@Test
 	public void testExtensionDereference() throws Exception {
 		Questionnaire q = ourCtx.newJsonParser().parseResource(Questionnaire.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-q.json")));
-		QuestionnaireAnswers qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-qa.xml")));
+		QuestionnaireResponse qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-qr.xml")));
 		DataElement de = ourCtx.newJsonParser().parseResource(DataElement.class, IOUtils.toString(getClass().getResourceAsStream("/dereference-de.json")));
 		
 		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
@@ -130,14 +128,14 @@ public class QuestionnaireAnswersValidatorTest {
 	}
 
 	@Test
-	public void testGroupWithNoLinkIdInQuestionnaireAnswers() {
+	public void testGroupWithNoLinkIdInQuestionnaireResponse() {
 		Questionnaire q = new Questionnaire();
 		GroupComponent qGroup = q.getGroup().addGroup();
 		qGroup.addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.BOOLEAN);
 		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
+		org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent qaGroup = qa.getGroup().addGroup();
 		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 		
 		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
@@ -157,8 +155,8 @@ public class QuestionnaireAnswersValidatorTest {
 		q.getGroup().addQuestion().setLinkId("link0").setRequired(true).setType(AnswerFormat.STRING);
 		q.getGroup().addQuestion().setLinkId("link1").setRequired(true).setType(AnswerFormat.STRING);
 		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
-		qa.setStatus(QuestionnaireAnswersStatus.COMPLETED);
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 		qa.getGroup().addQuestion().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 		
@@ -179,9 +177,9 @@ public class QuestionnaireAnswersValidatorTest {
 		qGroup = q.getGroup().addGroup();
 		qGroup.addQuestion().setLinkId("link1").setRequired(true).setType(AnswerFormat.BOOLEAN);
 		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		org.hl7.fhir.instance.model.QuestionnaireAnswers.GroupComponent qaGroup = qa.getGroup().addGroup();
+		org.hl7.fhir.instance.model.QuestionnaireResponse.GroupComponent qaGroup = qa.getGroup().addGroup();
 		qaGroup.addQuestion().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 		
 		myWorkerCtx.getQuestionnaires().put(qa.getQuestionnaire().getReference(), q);
@@ -189,7 +187,7 @@ public class QuestionnaireAnswersValidatorTest {
 		myVal.validate(errors, qa);
 		
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("ValidationMessage[level=FATAL,type=BUSINESSRULE,location=//QuestionnaireAnswers/group[0],message=Questionnaire in invalid, unable to validate QuestionnaireAnswers: Multiple groups found at this position with blank/missing linkId]"));
+		assertThat(errors.toString(), containsString("ValidationMessage[level=FATAL,type=BUSINESSRULE,location=//QuestionnaireResponse/group[0],message=Questionnaire in invalid, unable to validate QuestionnaireResponse: Multiple groups found at this position with blank/missing linkId]"));
 		assertEquals(1, errors.size());
 	}
 
@@ -198,7 +196,7 @@ public class QuestionnaireAnswersValidatorTest {
 		Questionnaire q = new Questionnaire();
 		q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormat.BOOLEAN);
 		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 		qa.getGroup().addQuestion().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 		
@@ -207,7 +205,7 @@ public class QuestionnaireAnswersValidatorTest {
 		myVal.validate(errors, qa);
 		
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("location=//QuestionnaireAnswers/group[0]/question[0]"));
+		assertThat(errors.toString(), containsString("location=//QuestionnaireResponse/group[0]/question[0]"));
 		assertThat(errors.toString(), containsString("message=Found answer with linkId[link1] but this ID is not allowed at this position"));
 	}
 	
@@ -216,7 +214,7 @@ public class QuestionnaireAnswersValidatorTest {
 		Questionnaire q = new Questionnaire();
 		q.getGroup().addQuestion().setLinkId("link0").setRequired(false).setType(AnswerFormat.BOOLEAN);
 		
-		QuestionnaireAnswers qa = new QuestionnaireAnswers();
+		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
 		qa.getGroup().addGroup().setLinkId("link1");
 		
@@ -225,15 +223,15 @@ public class QuestionnaireAnswersValidatorTest {
 		myVal.validate(errors, qa);
 		
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("location=//QuestionnaireAnswers/group[0]/group[0]"));
+		assertThat(errors.toString(), containsString("location=//QuestionnaireResponse/group[0]/group[0]"));
 		assertThat(errors.toString(), containsString("Group with linkId[link1] found at this position, but this group does not exist at this position in Questionnaire"));
 	}
 
 //	@Test
 	public void validateHealthConnexExample() throws Exception {
-		String input = IOUtils.toString(QuestionnaireAnswersValidatorTest.class.getResourceAsStream("/questionnaireanswers-0f431c50ddbe4fff8e0dd6b7323625fc.xml"));
+		String input = IOUtils.toString(QuestionnaireResponseValidatorTest.class.getResourceAsStream("/questionnaireanswers-0f431c50ddbe4fff8e0dd6b7323625fc.xml"));
 
-		QuestionnaireAnswers qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, input);
+		QuestionnaireResponse qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, input);
 		ArrayList<ValidationMessage> errors = new ArrayList<ValidationMessage>();
 		myVal.validate(errors, qa);
 		assertEquals(errors.toString(), 0, errors.size());
@@ -258,7 +256,7 @@ public class QuestionnaireAnswersValidatorTest {
 		assertThat(input, containsString("GGG"));
 		//@formatter:on
 		
-		qa = ourCtx.newXmlParser().parseResource(QuestionnaireAnswers.class, input);
+		qa = ourCtx.newXmlParser().parseResource(QuestionnaireResponse.class, input);
 		errors = new ArrayList<ValidationMessage>();
 		myVal.validate(errors, qa);
 		assertEquals(errors.toString(), 10, errors.size());
