@@ -19,9 +19,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -100,7 +98,7 @@ import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum;
+import ca.uhn.fhir.model.dstu.resource.OperationOutcome.Issue;
 import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -133,6 +131,7 @@ import ca.uhn.fhir.util.ObjectUtil;
 @Transactional(propagation = Propagation.REQUIRED)
 public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseHapiFhirDao implements IFhirResourceDao<T> {
 
+	static final String OO_SEVERITY_WARN = "warning";
 	static final String OO_SEVERITY_INFO = "information";
 	static final String OO_SEVERITY_ERROR = "error";
 
@@ -381,8 +380,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return missingFalse;
 	}
 
-	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates,
-			IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresentForResourceLink(CriteriaBuilder theBuilder, String theParamName, Root<? extends ResourceLink> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -1034,8 +1032,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
-			From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
+	private Predicate createPredicateString(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamString, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -1054,8 +1051,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
-					+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
 		}
 
 		String likeExpression = normalizeString(rawSearchTerm);
@@ -1069,8 +1065,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return singleCode;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder,
-			From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
+	private Predicate createPredicateToken(IQueryParameterType theParameter, String theParamName, CriteriaBuilder theBuilder, From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> theFrom) {
 		String code;
 		String system;
 		if (theParameter instanceof TokenParam) {
@@ -1249,8 +1244,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		if (isNotBlank(theResource.getId().getIdPart())) {
 			if (isValidPid(theResource.getId())) {
-				throw new UnprocessableEntityException(
-						"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
+				throw new UnprocessableEntityException("This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
 			}
 			createForcedIdIfNeeded(entity, theResource.getId());
 
@@ -1327,8 +1321,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		final T current = currentTmp;
 
-		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END"
-				+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
+		String querySring = "SELECT count(h) FROM ResourceHistoryTable h " + "WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE" + " AND h.myUpdated < :END" + (theSince != null ? " AND h.myUpdated >= :SINCE" : "");
 		TypedQuery<Long> countQuery = myEntityManager.createQuery(querySring, Long.class);
 		countQuery.setParameter("PID", translateForcedIdToPid(theId));
 		countQuery.setParameter("RESTYPE", resourceType);
@@ -1366,8 +1359,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 					retVal.add(current);
 				}
 
-				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END "
-						+ (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT h FROM ResourceHistoryTable h WHERE h.myResourceId = :PID AND h.myResourceType = :RESTYPE AND h.myUpdated < :END " + (theSince != null ? " AND h.myUpdated >= :SINCE" : "") + " ORDER BY h.myUpdated ASC",
+						ResourceHistoryTable.class);
 				q.setParameter("PID", translateForcedIdToPid(theId));
 				q.setParameter("RESTYPE", resourceType);
 				q.setParameter("END", end.getValue(), TemporalType.TIMESTAMP);
@@ -1851,8 +1844,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
 
 						/*
-						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as they are counted towards the total count and paged, so they are loaded outside the
-						 * bundle provider
+						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as
+						 * they are counted towards the total count and paged, so they are loaded outside the bundle provider
 						 */
 						if (theParams.getIncludes() != null && theParams.getIncludes().isEmpty() == false) {
 							Set<IIdType> previouslyLoadedPids = new HashSet<IIdType>();
@@ -1900,8 +1893,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
 								OperationOutcome oo = new OperationOutcome();
-								oo.addIssue().setSeverity(IssueSeverityEnum.WARNING)
-										.setDetails("Not all _include resources were actually included as the request surpassed the limit of " + getConfig().getIncludeLimit() + " resources");
+								Issue issue = oo.addIssue();
+								issue.getSeverity().setValue(OO_SEVERITY_WARN);
+								issue.setDetails("Not all _include resources were actually included as the request surpassed the limit of " + getConfig().getIncludeLimit() + " resources");
 								retVal.add(0, oo);
 							}
 						}
@@ -2083,7 +2077,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
+	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to
+	 * share the same value.
 	 */
 	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;

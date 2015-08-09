@@ -170,6 +170,7 @@ public class FhirTerser {
 	@SuppressWarnings("unchecked")
 	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		String name = theSubList.get(0);
+				
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
 		List<T> retVal = new ArrayList<T>();

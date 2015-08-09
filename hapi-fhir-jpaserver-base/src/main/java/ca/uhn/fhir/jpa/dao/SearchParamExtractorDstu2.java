@@ -424,6 +424,16 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 			List<String> systems = new ArrayList<String>();
 			List<String> codes = new ArrayList<String>();
 
+			String needContactPointSystem = null;
+			if (nextPath.endsWith("(system=phone)")) {
+				nextPath = nextPath.substring(0, nextPath.length() - "(system=phone)".length());
+				needContactPointSystem = "phone";
+			}
+			if (nextPath.endsWith("(system=email)")) {
+				nextPath = nextPath.substring(0, nextPath.length() - "(system=email)".length());
+				needContactPointSystem = "email";
+			}
+
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 				
 				// Patient:language 
@@ -443,6 +453,11 @@ class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISea
 						ContactPointDt nextValue = (ContactPointDt) nextObject;
 						if (nextValue.isEmpty()) {
 							continue;
+						}
+						if (isNotBlank(needContactPointSystem)) {
+							if (!needContactPointSystem.equals(nextValue.getSystemElement().getValueAsString())) {
+								continue;
+							}
 						}
 						systems.add(nextValue.getSystemElement().getValueAsString());
 						codes.add(nextValue.getValueElement().getValue());
