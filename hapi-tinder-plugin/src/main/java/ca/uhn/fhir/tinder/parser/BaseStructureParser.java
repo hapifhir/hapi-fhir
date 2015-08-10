@@ -4,10 +4,12 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -394,7 +396,8 @@ public abstract class BaseStructureParser {
 	}
 
 	private void write(BaseRootType theResource, File theFile, String thePackageBase) throws IOException, MojoFailureException {
-		FileWriter w = new FileWriter(theFile, false);
+		FileOutputStream fos = new FileOutputStream(theFile, false);
+		OutputStreamWriter w = new OutputStreamWriter(fos, "UTF-8");
 
 		ourLog.debug("Writing file: {}", theFile.getAbsolutePath());
 
@@ -457,6 +460,7 @@ public abstract class BaseStructureParser {
 		v.evaluate(ctx, w, "", templateReader);
 
 		w.close();
+		fos.close();
 	}
 
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
