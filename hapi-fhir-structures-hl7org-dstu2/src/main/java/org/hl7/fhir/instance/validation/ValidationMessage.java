@@ -31,6 +31,7 @@ package org.hl7.fhir.instance.validation;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.OperationOutcome;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.OperationOutcome.OperationOutcomeIssueComponent;
@@ -49,7 +50,7 @@ public class ValidationMessage
     Schematron, 
     Publisher, 
     Ontology, 
-    ProfileComparer,
+    ProfileComparer, 
     QuestionnaireResponseValidator
   }
 
@@ -62,10 +63,14 @@ public class ValidationMessage
   private IssueSeverity level;
   private String html;
 
-  public ValidationMessage() {
-    super();
-  }
 
+  /**
+   * Constructor
+   */
+  public ValidationMessage() {
+    // nothing
+  }
+  
   public ValidationMessage(Source source, OperationOutcome.IssueType type, String path, String message, IssueSeverity level) {
     super();
     this.line = -1;

@@ -6,6 +6,10 @@ import static org.junit.Assert.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.security.sasl.AuthorizeCallback;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import junit.framework.AssertionFailedError;
 
 import org.apache.commons.io.IOUtils;
@@ -34,10 +38,13 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.util.PortUtil;
 
 /**
@@ -54,11 +61,11 @@ public class ExceptionTest {
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private static final FhirContext ourCtx = FhirContext.forDstu1();
-	
+
 	@Before
 	public void before() {
 		ourGenerateOperationOutcome = false;
-		ourExceptionType=null;
+		ourExceptionType = null;
 	}
 
 	@Test
@@ -73,6 +80,29 @@ public class ExceptionTest {
 			OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDetails().getValue(), StringContains.containsString("Exception Text"));
 			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("InternalErrorException")));
+		}
+	}
+
+	@Test
+	public void testAuthorizationFailureInPreProcessInterceptor() throws Exception {
+		IServerInterceptor interceptor = new InterceptorAdapter() {
+			@Override
+			public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
+				throw new AuthenticationException();
+			}
+		};
+
+		servlet.registerInterceptor(interceptor);
+		try {
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?throwInternalError=aaa");
+			HttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent());
+			IOUtils.closeQuietly(status.getEntity().getContent());
+			ourLog.info(responseContent);
+			assertEquals(AuthenticationException.STATUS_CODE, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, StringContains.containsString("Client unauthorized"));
+		} finally {
+			servlet.unregisterInterceptor(interceptor);
 		}
 	}
 
@@ -124,8 +154,8 @@ public class ExceptionTest {
 	public void testResourceReturning() throws Exception {
 		// No OO
 		{
-			ourExceptionType=ResourceNotFoundException.class;
-			ourGenerateOperationOutcome=false;
+			ourExceptionType = ResourceNotFoundException.class;
+			ourGenerateOperationOutcome = false;
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -137,8 +167,8 @@ public class ExceptionTest {
 		}
 		// Yes OO
 		{
-			ourExceptionType=ResourceNotFoundException.class;
-			ourGenerateOperationOutcome=true;
+			ourExceptionType = ResourceNotFoundException.class;
+			ourGenerateOperationOutcome = true;
 			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123");
 			HttpResponse status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
@@ -179,7 +209,7 @@ public class ExceptionTest {
 			assertThat(oo.getIssueFirstRep().getDetails().getValue(), not(StringContains.containsString("UnprocessableEntityException")));
 		}
 	}
-	
+
 	@Test
 	public void testMethodNotAllowed() throws Exception {
 		{
@@ -193,7 +223,7 @@ public class ExceptionTest {
 			assertEquals("POST,PUT", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
 		}
 	}
-	
+
 	@AfterClass
 	public static void afterClass() throws Exception {
 		ourServer.stop();
@@ -220,11 +250,11 @@ public class ExceptionTest {
 		ourClient = builder.build();
 
 	}
+
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
-
 
 		@Override
 		public Class<? extends IResource> getResourceType() {
@@ -238,13 +268,13 @@ public class ExceptionTest {
 				oo = new OperationOutcome();
 				oo.addIssue().setDetails(OPERATION_OUTCOME_DETAILS);
 			}
-			
+
 			if (ourExceptionType == ResourceNotFoundException.class) {
 				throw new ResourceNotFoundException(theId, oo);
-			}else {
+			} else {
 				throw new AssertionFailedError("Unknown exception type: " + ourExceptionType);
 			}
-			
+
 		}
 
 		@Search
