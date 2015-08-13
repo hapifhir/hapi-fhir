@@ -31,6 +31,8 @@ import ca.uhn.fhir.model.dstu.resource.ValueSet.ComposeInclude;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.Define;
 import ca.uhn.fhir.model.dstu.resource.ValueSet.DefineConcept;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystem;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.parser.IParser;
@@ -187,7 +189,7 @@ public class ValueSetGenerator {
 	}
 
 	private ValueSetTm parseValueSet(ca.uhn.fhir.model.dstu2.resource.ValueSet nextVs) {
-		myConceptCount += nextVs.getDefine().getConcept().size();
+		myConceptCount += nextVs.getCodeSystem().getConcept().size();
 		ourLog.info("Parsing ValueSetTm #{} - {} - {} concepts total", myValueSetCount++, nextVs.getName(), myConceptCount);
 		// output.addConcept(next.getCode().getValue(),
 		// next.getDisplay().getValue(), next.getDefinition());
@@ -200,9 +202,9 @@ public class ValueSetGenerator {
 		vs.setClassName(toClassName(nextVs.getName()));
 
 		{
-			ca.uhn.fhir.model.dstu2.resource.ValueSet.Define define = nextVs.getDefine();
+			CodeSystem define = nextVs.getCodeSystem();
 			String system = define.getSystemElement().getValueAsString();
-			for (ca.uhn.fhir.model.dstu2.resource.ValueSet.DefineConcept nextConcept : define.getConcept()) {
+			for (CodeSystemConcept nextConcept : define.getConcept()) {
 				String nextCodeValue = nextConcept.getCode();
 				String nextCodeDisplay = StringUtils.defaultString(nextConcept.getDisplay());
 				String nextCodeDefinition = StringUtils.defaultString(nextConcept.getDefinition());

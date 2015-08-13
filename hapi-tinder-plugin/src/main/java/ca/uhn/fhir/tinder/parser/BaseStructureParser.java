@@ -81,20 +81,20 @@ public abstract class BaseStructureParser {
 		myResources.add(theResource);
 	}
 
-	private void bindValueSets(BaseElement theResource, ValueSetGenerator theVsp) {
-		if (isNotBlank(theResource.getBinding())) {
-			String bindingClass = theVsp.getClassForValueSetIdAndMarkAsNeeded(theResource.getBinding());
+	private void bindValueSets(BaseElement theElement, ValueSetGenerator theVsp) {
+		if (isNotBlank(theElement.getBinding())) {
+			String bindingClass = theVsp.getClassForValueSetIdAndMarkAsNeeded(theElement.getBinding());
 			if (bindingClass != null) {
 				ourLog.debug("Adding binding ValueSet class: {}", bindingClass);
-				theResource.setBindingClass(bindingClass);
+				theElement.setBindingClass(bindingClass);
 				addImport(bindingClass);
 				myLocallyDefinedClassNames.put(bindingClass, "valueset");
 			} else {
-				ourLog.debug("No binding found for: {}", theResource.getBinding());
+				ourLog.debug("No binding found for: {}", theElement.getBinding());
 				ourLog.debug(" * Valid: {}", new TreeSet<String>(theVsp.getValueSets().keySet()));
 			}
 		}
-		for (BaseElement next : theResource.getChildren()) {
+		for (BaseElement next : theElement.getChildren()) {
 			bindValueSets(next, theVsp);
 		}
 	}

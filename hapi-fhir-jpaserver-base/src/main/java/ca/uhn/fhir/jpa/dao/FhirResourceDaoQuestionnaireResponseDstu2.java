@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -40,7 +42,7 @@ import ca.uhn.fhir.validation.ValidationResult;
 public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDstu2<QuestionnaireResponse> {
 
 	private FhirContext myRefImplCtx = FhirContext.forDstu2Hl7Org();
-	
+
 	@Override
 	protected void validateResourceForStorage(IResource theResource) {
 		super.validateResourceForStorage(theResource);
@@ -69,19 +71,18 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 
 		@Override
 		public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
+
 			/*
-			 * The QuestionnaireResponse validator uses RI structures, so for now we need
-			 * to convert between that and HAPI structures. This is a bit hackish, but
-			 * hopefully it will go away at some point.
+			 * The QuestionnaireResponse validator uses RI structures, so for now we need to convert between that and HAPI structures. This is a bit hackish, but hopefully it will go away at some point.
 			 */
 			if ("ValueSet".equals(theType.getSimpleName())) {
 				IFhirResourceDao<ValueSet> dao = getDao(ValueSet.class);
 				ValueSet in = dao.read(theId);
 				String encoded = getContext().newJsonParser().encodeResourceToString(in);
-				
+
 				// TODO: this is temporary until structures-dstu2 catches up to structures-hl7org.dstu2
 				encoded = encoded.replace("\"define\"", "\"codeSystem\"");
-				
+
 				return myRefImplCtx.newJsonParser().parseResource(theType, encoded);
 			} else if ("Questionnaire".equals(theType.getSimpleName())) {
 				IFhirResourceDao<Questionnaire> dao = getDao(Questionnaire.class);

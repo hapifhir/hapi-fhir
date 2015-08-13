@@ -51,11 +51,13 @@ import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition.Parameter;
 import ca.uhn.fhir.model.dstu2.valueset.ConditionalDeleteStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ConformanceResourceStatusEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ConformanceStatementKindEnum;
 import ca.uhn.fhir.model.dstu2.valueset.OperationParameterUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.RestfulConformanceModeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SystemRestfulInteractionEnum;
 import ca.uhn.fhir.model.dstu2.valueset.TypeRestfulInteractionEnum;
+import ca.uhn.fhir.model.dstu2.valueset.UnknownContentCodeEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -162,11 +164,11 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		retVal.setPublisher(myPublisher);
 		retVal.setDate(DateTimeDt.withCurrentTime());
 		retVal.setFhirVersion("0.5.0"); // TODO: pull from model
-		retVal.setAcceptUnknown("extensions"); // TODO: make this configurable - this is a fairly big effort since the parser
+		retVal.setAcceptUnknown(UnknownContentCodeEnum.UNKNOWN_EXTENSIONS); // TODO: make this configurable - this is a fairly big effort since the parser
 		// needs to be modified to actually allow it
 
 		retVal.getImplementation().setDescription(myRestfulServer.getImplementationDescription());
-		retVal.setKind("instance");
+		retVal.setKind(ConformanceStatementKindEnum.INSTANCE);
 		retVal.getSoftware().setName(myRestfulServer.getServerName());
 		retVal.getSoftware().setVersion(myRestfulServer.getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
