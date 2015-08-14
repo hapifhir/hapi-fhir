@@ -19,8 +19,8 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -41,13 +41,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -64,7 +63,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final boolean myIdempotent;
 	private final Integer myIdParamIndex;
 	private final String myName;
-	private final OtherOperationTypeEnum myOtherOperatiopnType;
+	private final RestOperationTypeEnum myOtherOperatiopnType;
 	private List<ReturnType> myReturnParams;
 	private final ReturnTypeEnum myReturnType;
 
@@ -118,11 +117,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (getResourceName() == null) {
-			myOtherOperatiopnType = OtherOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 		} else if (myIdParamIndex == null) {
-			myOtherOperatiopnType = OtherOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 		} else {
-			myOtherOperatiopnType = OtherOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		}
 
 		myReturnParams = new ArrayList<OperationMethodBinding.ReturnType>();
@@ -167,15 +166,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public OtherOperationTypeEnum getOtherOperationType() {
+	public RestOperationTypeEnum getResourceOperationType() {
 		return myOtherOperatiopnType;
 	}
-
-	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
-		return null;
-	}
-
+	
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
@@ -188,11 +182,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return myReturnType;
-	}
-
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return null;
 	}
 
 	@Override

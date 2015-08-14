@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,8 +45,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.AddTags;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -63,6 +60,7 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.BundleProviders;
@@ -185,10 +183,6 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return myMethod;
 	}
 
-	public OtherOperationTypeEnum getOtherOperationType() {
-		return null;
-	}
-
 	public List<IParameter> getParameters() {
 		return myParameters;
 	}
@@ -238,29 +232,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 */
 	public abstract String getResourceName();
 
-	public abstract RestfulOperationTypeEnum getResourceOperationType();
-
-	/**
-	 * Returns the value of {@link #getResourceOperationType()} or {@link #getSystemOperationType()} or
-	 * {@link #getOtherOperationType()}
-	 */
-	public String getResourceOrSystemOperationType() {
-		Enum<?> retVal = getResourceOperationType();
-		if (retVal != null) {
-			return retVal.name();
-		}
-		retVal = getSystemOperationType();
-		if (retVal != null) {
-			return retVal.name();
-		}
-		retVal = getOtherOperationType();
-		if (retVal != null) {
-			return retVal.name();
-		}
-		return null;
-	}
-
-	public abstract RestfulOperationSystemEnum getSystemOperationType();
+	public abstract RestOperationTypeEnum getResourceOperationType();
 
 	public abstract boolean incomingServerRequestMatchesMethod(RequestDetails theRequest);
 

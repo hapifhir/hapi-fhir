@@ -83,10 +83,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
  * 
  * <p>
- * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is
- * always returned unless {@link #setCache(boolean)} is called with a value of <code>false</code>. This means that if
- * you are adding anything to the returned conformance instance on each call you should call
- * <code>setCache(false)</code> in your provider constructor.
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
+ * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
  * </p>
  */
 public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
@@ -103,12 +101,12 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private void checkBindingForSystemOps(Rest rest, Set<SystemRestfulInteractionEnum> systemOps, BaseMethodBinding<?> nextMethodBinding) {
-		if (nextMethodBinding.getSystemOperationType() != null) {
-			String sysOpCode = nextMethodBinding.getSystemOperationType().getCode();
+		if (nextMethodBinding.getResourceOperationType() != null) {
+			String sysOpCode = nextMethodBinding.getResourceOperationType().getCode();
 			if (sysOpCode != null) {
 				SystemRestfulInteractionEnum sysOp = SystemRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(sysOpCode);
 				if (sysOp == null) {
-					throw new InternalErrorException("Unknown system-restful-interaction: " + sysOpCode);
+					return;
 				}
 				if (systemOps.contains(sysOp) == false) {
 					systemOps.add(sysOp);
@@ -144,9 +142,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
-	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
-	 * "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public String getPublisher() {
 		return myPublisher;
@@ -200,39 +197,38 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						String resOpCode = nextMethodBinding.getResourceOperationType().getCode();
 						if (resOpCode != null) {
 							TypeRestfulInteractionEnum resOp = TypeRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(resOpCode);
-							if (resOp == null) {
-								throw new InternalErrorException("Unknown type-restful-interaction: " + resOpCode);
-							}
-							if (resourceOps.contains(resOp) == false) {
-								resourceOps.add(resOp);
-								resource.addInteraction().setCode(resOp);
-							}
-							if ("vread".equals(resOpCode)) {
-								// vread implies read
-								resOp = TypeRestfulInteractionEnum.READ;
+							if (resOp != null) {
 								if (resourceOps.contains(resOp) == false) {
 									resourceOps.add(resOp);
 									resource.addInteraction().setCode(resOp);
 								}
-							}
-
-							if (nextMethodBinding.isSupportsConditional()) {
-								switch (resOp) {
-								case CREATE:
-									resource.setConditionalCreate(true);
-									break;
-								case DELETE:
-									if (nextMethodBinding.isSupportsConditionalMultiple()) {
-										resource.setConditionalDelete(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
-									} else {
-										resource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+								if ("vread".equals(resOpCode)) {
+									// vread implies read
+									resOp = TypeRestfulInteractionEnum.READ;
+									if (resourceOps.contains(resOp) == false) {
+										resourceOps.add(resOp);
+										resource.addInteraction().setCode(resOp);
 									}
-									break;
-								case UPDATE:
-									resource.setConditionalUpdate(true);
-									break;
-								default:
-									break;
+								}
+
+								if (nextMethodBinding.isSupportsConditional()) {
+									switch (resOp) {
+									case CREATE:
+										resource.setConditionalCreate(true);
+										break;
+									case DELETE:
+										if (nextMethodBinding.isSupportsConditionalMultiple()) {
+											resource.setConditionalDelete(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
+										} else {
+											resource.setConditionalDelete(ConditionalDeleteStatusEnum.SINGLE_DELETES_SUPPORTED);
+										}
+										break;
+									case UPDATE:
+										resource.setConditionalUpdate(true);
+										break;
+									default:
+										break;
+									}
 								}
 							}
 						}
@@ -452,7 +448,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		Set<String> inParams = new HashSet<String>();
 		Set<String> outParams = new HashSet<String>();
-		
+
 		for (OperationMethodBinding sharedDescription : sharedDescriptions) {
 			if (isNotBlank(sharedDescription.getDescription())) {
 				op.setDescription(sharedDescription.getDescription());
@@ -517,9 +513,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	/**
-	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a
-	 * mandatory element, the value should not be null (although this is not enforced). The value defaults to
-	 * "Not provided" but may be set to null, which will cause this element to be omitted.
+	 * Sets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
+	 * value defaults to "Not provided" but may be set to null, which will cause this element to be omitted.
 	 */
 	public void setPublisher(String thePublisher) {
 		myPublisher = thePublisher;

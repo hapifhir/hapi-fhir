@@ -1,7 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -20,13 +21,13 @@ import org.hl7.fhir.instance.model.OperationDefinition;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.util.PortUtil;
@@ -110,7 +111,7 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 	public static class BaseProvider {
 
 		@Operation(name = "$myoperation", idempotent = true)
-		public Parameters opInstanceReturnsBundleProvider(@OperationParam(name = "myparam") StringDt theString) {
+		public Parameters opInstanceReturnsBundleProvider(@OperationParam(name = "myparam") StringType theString) {
 			return null;
 		}
 
@@ -137,7 +138,7 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 	public static class PlainProvider {
 
 		@Operation(name = "$myoperation", idempotent = true)
-		public Parameters opInstanceReturnsBundleProvider(@OperationParam(name = "myparam") StringDt theString) {
+		public Parameters opInstanceReturnsBundleProvider(@OperationParam(name = "myparam") StringType theString) {
 			return null;
 		}
 

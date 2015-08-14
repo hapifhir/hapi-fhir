@@ -39,7 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * of all methods, always returning <code>true</code> 
  */
 @SuppressWarnings("unused")
-public class InterceptorAdapter implements IServerInterceptor {
+public class InterceptorAdapter implements IServerInterceptor, IServerActionInterceptor {
 
 	@Override
 	public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
@@ -80,6 +80,11 @@ public class InterceptorAdapter implements IServerInterceptor {
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException,
 			IOException {
 		return true;
+	}
+
+	@Override
+	public void preAction(HttpServletRequest theServletRequest, ActionOperationEnum theOperation, ActionRequestDetails theRequestDetails) {
+		// nothing
 	}
 
 }

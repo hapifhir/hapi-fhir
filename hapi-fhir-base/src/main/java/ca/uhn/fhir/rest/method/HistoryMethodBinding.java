@@ -19,26 +19,26 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationSystemEnum;
-import ca.uhn.fhir.model.dstu.valueset.RestfulOperationTypeEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -50,8 +50,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private final Integer myIdParamIndex;
 	private String myResourceName;
-	private final RestfulOperationTypeEnum myResourceOperationType;
-	private final RestfulOperationSystemEnum mySystemOperationType;
+	private final RestOperationTypeEnum myResourceOperationType;
 
 	public HistoryMethodBinding(Method theMethod, FhirContext theConetxt, Object theProvider) {
 		super(toReturnType(theMethod, theProvider), theMethod, theConetxt, theProvider);
@@ -64,22 +63,19 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			if (theProvider instanceof IResourceProvider) {
 				type = ((IResourceProvider) theProvider).getResourceType();
 				if (myIdParamIndex != null) {
-					myResourceOperationType = RestfulOperationTypeEnum.HISTORY_INSTANCE;
+					myResourceOperationType = RestOperationTypeEnum.HISTORY_INSTANCE;
 				} else {
-					myResourceOperationType = RestfulOperationTypeEnum.HISTORY_TYPE;
+					myResourceOperationType = RestOperationTypeEnum.HISTORY_TYPE;
 				}
-				mySystemOperationType = null;
 			} else {
-				myResourceOperationType = null;
-				mySystemOperationType = RestfulOperationSystemEnum.HISTORY_SYSTEM;
+				myResourceOperationType = RestOperationTypeEnum.HISTORY_SYSTEM;
 			}
 		} else {
 			if (myIdParamIndex != null) {
-				myResourceOperationType = RestfulOperationTypeEnum.HISTORY_INSTANCE;
+				myResourceOperationType = RestOperationTypeEnum.HISTORY_INSTANCE;
 			} else {
-				myResourceOperationType = RestfulOperationTypeEnum.HISTORY_TYPE;
+				myResourceOperationType = RestOperationTypeEnum.HISTORY_TYPE;
 			}
-			mySystemOperationType = null;
 		}
 
 		if (type != IResource.class) {
@@ -91,7 +87,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	public RestfulOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getResourceOperationType() {
 		return myResourceOperationType;
 	}
 
@@ -105,22 +101,16 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return ReturnTypeEnum.BUNDLE;
 	}
 
-	@Override
-	public RestfulOperationSystemEnum getSystemOperationType() {
-		return mySystemOperationType;
-	}
-
 	// ObjectUtils.equals is replaced by a JDK7 method..
-	@SuppressWarnings("deprecation")
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		if (!Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			return false;
 		}
 		if (theRequest.getResourceName() == null) {
-			return mySystemOperationType == RestfulOperationSystemEnum.HISTORY_SYSTEM;
+			return myResourceOperationType == RestOperationTypeEnum.HISTORY_SYSTEM;
 		}
-		if (!ObjectUtils.equals(theRequest.getResourceName(), myResourceName)) {
+		if (!StringUtils.equals(theRequest.getResourceName(), myResourceName)) {
 			return false;
 		}
 
@@ -131,7 +121,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		if (theRequest.getId() == null) {
-			return myResourceOperationType == RestfulOperationTypeEnum.HISTORY_TYPE;
+			return myResourceOperationType == RestOperationTypeEnum.HISTORY_TYPE;
 		} else if (theRequest.getId().hasVersionIdPart()) {
 			return false;
 		}

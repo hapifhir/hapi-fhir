@@ -19,8 +19,7 @@ package org.hl7.fhir.instance.conf;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +49,6 @@ import org.hl7.fhir.instance.model.Conformance.RestfulConformanceMode;
 import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
 import org.hl7.fhir.instance.model.Conformance.TypeRestfulInteraction;
 import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.instance.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.instance.model.Enumerations.ConformanceResourceStatus;
 import org.hl7.fhir.instance.model.Enumerations.ResourceType;
 import org.hl7.fhir.instance.model.OperationDefinition;
@@ -104,8 +102,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
   private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps,
       BaseMethodBinding<?> nextMethodBinding) {
-    if (nextMethodBinding.getSystemOperationType() != null) {
-      String sysOpCode = nextMethodBinding.getSystemOperationType().getCode();
+    if (nextMethodBinding.getResourceOperationType() != null) {
+      String sysOpCode = nextMethodBinding.getResourceOperationType().getCode();
       if (sysOpCode != null) {
         SystemRestfulInteraction sysOp;
         try {
@@ -114,7 +112,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
           sysOp = null;
         }
         if (sysOp == null) {
-          throw new InternalErrorException("Unknown system-restful-interaction: " + sysOpCode);
+          return;
         }
         if (systemOps.contains(sysOp) == false) {
           systemOps.add(sysOp);
@@ -211,35 +209,34 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
               } catch (Exception e) {
                 resOp = null;
               }
-              if (resOp == null) {
-                throw new InternalErrorException("Unknown type-restful-interaction: " + resOpCode);
-              }
-              if (resourceOps.contains(resOp) == false) {
-                resourceOps.add(resOp);
-                resource.addInteraction().setCode(resOp);
-              }
-              if ("vread".equals(resOpCode)) {
-                // vread implies read
-                resOp = TypeRestfulInteraction.READ;
+              if (resOp != null) {
                 if (resourceOps.contains(resOp) == false) {
                   resourceOps.add(resOp);
                   resource.addInteraction().setCode(resOp);
                 }
-              }
+                if ("vread".equals(resOpCode)) {
+                  // vread implies read
+                  resOp = TypeRestfulInteraction.READ;
+                  if (resourceOps.contains(resOp) == false) {
+                    resourceOps.add(resOp);
+                    resource.addInteraction().setCode(resOp);
+                  }
+                }
 
-              if (nextMethodBinding.isSupportsConditional()) {
-                switch (resOp) {
-                case CREATE:
-                  resource.setConditionalCreate(true);
-                  break;
-                case DELETE:
-                  resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
-                  break;
-                case UPDATE:
-                  resource.setConditionalUpdate(true);
-                  break;
-                default:
-                  break;
+                if (nextMethodBinding.isSupportsConditional()) {
+                  switch (resOp) {
+                  case CREATE:
+                    resource.setConditionalCreate(true);
+                    break;
+                  case DELETE:
+                    resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
+                    break;
+                  case UPDATE:
+                    resource.setConditionalUpdate(true);
+                    break;
+                  default:
+                    break;
+                  }
                 }
               }
             }

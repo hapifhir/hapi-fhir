@@ -442,14 +442,14 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	/**
 	 * Returns the SecurityEventActionEnum corresponding to the specified RestfulOperationTypeEnum
 	 * 
-	 * @param resourceOperationType
+	 * @param theRestfulOperationTypeEnum
 	 *           the type of operation (Read, Create, Delete, etc)
 	 * @return the corresponding SecurityEventActionEnum (Read/View/Print, Create, Delete, etc)
 	 */
-	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(RestfulOperationTypeEnum resourceOperationType) {
-		if (resourceOperationType == null)
+	protected SecurityEventActionEnum mapResourceTypeToSecurityEventAction(ca.uhn.fhir.rest.api.RestOperationTypeEnum theRestfulOperationTypeEnum) {
+		if (theRestfulOperationTypeEnum == null)
 			return null;
-		switch (resourceOperationType) {
+		switch (theRestfulOperationTypeEnum) {
 		case READ:
 			return SecurityEventActionEnum.READ_VIEW_PRINT;
 		case CREATE:
@@ -476,15 +476,15 @@ public class AuditingInterceptor extends InterceptorAdapter {
 	/**
 	 * Returns the SecurityEventObjectLifecycleEnum corresponding to the specified RestfulOperationTypeEnum
 	 * 
-	 * @param resourceOperationType
+	 * @param theRestfulOperationTypeEnum
 	 *           the type of operation (Read, Create, Delete, etc)
 	 * @return the corresponding SecurityEventObjectLifecycleEnum (Access/Use, Origination/Creation, Logical Deletion,
 	 *         etc)
 	 */
-	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(RestfulOperationTypeEnum resourceOperationType) {
-		if (resourceOperationType == null)
+	protected SecurityEventObjectLifecycleEnum mapResourceTypeToSecurityLifecycle(ca.uhn.fhir.rest.api.RestOperationTypeEnum theRestfulOperationTypeEnum) {
+		if (theRestfulOperationTypeEnum == null)
 			return null;
-		switch (resourceOperationType) {
+		switch (theRestfulOperationTypeEnum) {
 		case READ:
 			return SecurityEventObjectLifecycleEnum.ACCESS_OR_USE;
 		case CREATE:

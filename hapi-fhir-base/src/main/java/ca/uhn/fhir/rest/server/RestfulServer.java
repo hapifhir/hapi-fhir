@@ -19,8 +19,8 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -59,9 +59,9 @@ import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.method.OtherOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -501,7 +501,7 @@ public class RestfulServer extends HttpServlet {
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
 		requestDetails.setServletResponse(theResponse);
-		
+
 		try {
 
 			for (IServerInterceptor next : myInterceptors) {
@@ -640,7 +640,7 @@ public class RestfulServer extends HttpServlet {
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-				requestDetails.setOtherOperationType(OtherOperationTypeEnum.GET_PAGE);
+				requestDetails.setResourceOperationType(RestOperationTypeEnum.GET_PAGE);
 				if (theRequestType != RequestTypeEnum.GET) {
 					/*
 					 * We reconstruct the link-self URL using the request parameters, and this would break if the parameters came in using a POST. We could probably work around that but why bother unless
@@ -666,8 +666,6 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
-			requestDetails.setSystemOperationType(resourceMethod.getSystemOperationType());
-			requestDetails.setOtherOperationType(resourceMethod.getOtherOperationType());
 
 			for (IServerInterceptor next : myInterceptors) {
 				boolean continueProcessing = next.incomingRequestPostProcessed(requestDetails, theRequest, theResponse);
