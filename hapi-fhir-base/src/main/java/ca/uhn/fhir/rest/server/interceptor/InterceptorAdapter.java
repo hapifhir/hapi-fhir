@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * Base class for {@link IServerInterceptor} implementations. Provides a No-op implementation
  * of all methods, always returning <code>true</code> 
  */
+@SuppressWarnings("unused")
 public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
