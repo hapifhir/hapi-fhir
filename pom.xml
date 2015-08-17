@@ -194,7 +194,6 @@
 		<maven_antrun_plugin_version>1.8</maven_antrun_plugin_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
-		<maven_cobertura_plugin_version>2.7</maven_cobertura_plugin_version>
 		<maven_failsafe_plugin_version>2.18.1</maven_failsafe_plugin_version>
 		<maven_gpg_plugin_version>1.6</maven_gpg_plugin_version>
 		<maven_javadoc_plugin_version>2.10.1</maven_javadoc_plugin_version>
@@ -222,6 +221,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- Set dependency versions -->
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>1.1.2</version>
+			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
@@ -276,7 +280,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>cobertura-maven-plugin</artifactId>
-					<version>${maven_cobertura_plugin_version}</version>
+					<version>2.7</version>
 					<configuration>
 						<skip>true</skip>
 					</configuration>

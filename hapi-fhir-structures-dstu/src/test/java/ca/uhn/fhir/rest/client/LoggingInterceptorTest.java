@@ -47,9 +47,12 @@ public class LoggingInterceptorTest {
 		/*
 		 * This is a bit funky, but it's useful for verifying that the headers actually get logged
 		 */
-		myLoggerRoot = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 		myMockAppender = mock(Appender.class);
 		when(myMockAppender.getName()).thenReturn("MOCK");
+
+		org.slf4j.Logger logger = LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+		
+		myLoggerRoot = (ch.qos.logback.classic.Logger) logger;
 		myLoggerRoot.addAppender(myMockAppender);
 	}
 
