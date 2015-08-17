@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -640,7 +639,7 @@ public class RestfulServer extends HttpServlet {
 
 			String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
 			if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-				requestDetails.setResourceOperationType(RestOperationTypeEnum.GET_PAGE);
+				requestDetails.setRestOperationType(RestOperationTypeEnum.GET_PAGE);
 				if (theRequestType != RequestTypeEnum.GET) {
 					/*
 					 * We reconstruct the link-self URL using the request parameters, and this would break if the parameters came in using a POST. We could probably work around that but why bother unless
@@ -665,8 +664,9 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			requestDetails.setResourceOperationType(resourceMethod.getResourceOperationType());
+			requestDetails.setRestOperationType(resourceMethod.getRestOperationType());
 
+			// Handle server interceptors
 			for (IServerInterceptor next : myInterceptors) {
 				boolean continueProcessing = next.incomingRequestPostProcessed(requestDetails, theRequest, theResponse);
 				if (!continueProcessing) {
@@ -674,7 +674,15 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-
+			
+			/*
+			 * Actualy invoke the server method. This call is to a HAPI method
+			 * binding, which is an object that wraps a specific implementing (user-supplied)
+			 * method, but handles its input and provides its output back to the client.
+			 * 
+			 * This is basically the end of processing for a successful request,
+			 * since the method binding replies to the client and closes the response.
+			 */
 			resourceMethod.invokeServer(this, requestDetails);
 
 		} catch (NotModifiedException e) {

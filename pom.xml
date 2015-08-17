@@ -171,7 +171,7 @@
 		<siteMainDirectory>${user.home}/sites/hapi-fhir</siteMainDirectory>
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
-		<!-- Plugin Versions -->
+		<!-- Dependency Versions -->
 		<apache_httpclient_version>4.4</apache_httpclient_version>
 		<apache_httpcore_version>4.4</apache_httpcore_version>
 		<commons_io_version>2.4</commons_io_version>
@@ -209,7 +209,6 @@
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.3.6</phloc_commons_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<servlet_api_version>3.1.0</servlet_api_version>
 		<slf4j_version>1.7.10</slf4j_version>
 		<spring_version>4.1.5.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
@@ -219,6 +218,47 @@
 		<xmlunit_version>1.6</xmlunit_version>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Set dependency versions -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-dbcp2</artifactId>
+				<version>2.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derby</artifactId>
+				<version>${derby_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derbynet</artifactId>
+				<version>${derby_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derbyclient</artifactId>
+				<version>${derby_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.arquillian.junit</groupId>
+				<artifactId>arquillian-junit-container</artifactId>
+				<version>1.1.8.Final</version>
+			</dependency>		
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.10.19</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<pluginManagement>

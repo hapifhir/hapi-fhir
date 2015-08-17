@@ -31,6 +31,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -71,8 +72,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		IBaseResource conf = (IBaseResource) invokeServerMethod(theMethodParams);
+	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+		IBaseResource conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
 		return new SimpleBundleProvider(conf);
 	}
 
@@ -90,7 +91,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.METADATA;
 	}
 

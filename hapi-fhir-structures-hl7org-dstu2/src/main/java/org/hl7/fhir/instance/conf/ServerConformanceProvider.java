@@ -102,8 +102,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
   private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps,
       BaseMethodBinding<?> nextMethodBinding) {
-    if (nextMethodBinding.getResourceOperationType() != null) {
-      String sysOpCode = nextMethodBinding.getResourceOperationType().getCode();
+    if (nextMethodBinding.getRestOperationType() != null) {
+      String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
       if (sysOpCode != null) {
         SystemRestfulInteraction sysOp;
         try {
@@ -200,8 +200,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
         // Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
         // Conformance.RestResourceSearchParam>();
         for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
-          if (nextMethodBinding.getResourceOperationType() != null) {
-            String resOpCode = nextMethodBinding.getResourceOperationType().getCode();
+          if (nextMethodBinding.getRestOperationType() != null) {
+            String resOpCode = nextMethodBinding.getRestOperationType().getCode();
             if (resOpCode != null) {
               TypeRestfulInteraction resOp;
               try {

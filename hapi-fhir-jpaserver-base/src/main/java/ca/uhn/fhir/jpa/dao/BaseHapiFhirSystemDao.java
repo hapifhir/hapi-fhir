@@ -41,8 +41,10 @@ import ca.uhn.fhir.jpa.util.StopWatch;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao implements IFhirSystemDao<T> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
@@ -50,6 +52,10 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao implement
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public void deleteAllTagsOnServer() {
+		// Notify interceptors
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
+
 		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
 	}
 
@@ -77,6 +83,10 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao implement
 
 	@Override
 	public IBundleProvider history(Date theSince) {
+		// Notify interceptors
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
+
 		StopWatch w = new StopWatch();
 		IBundleProvider retVal = super.history(null, null, theSince);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
@@ -85,6 +95,10 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao implement
 
 	@Override
 	public TagList getAllTags() {
+		// Notify interceptors
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
+
 		StopWatch w = new StopWatch();
 		TagList retVal = super.getTags(null, null);
 		ourLog.info("Processed getAllTags in {}ms", w.getMillisAndRestart());

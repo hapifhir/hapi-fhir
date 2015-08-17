@@ -152,7 +152,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		HttpServletResponse servletResponse = theRequest.getServletResponse();
 		MethodOutcome response;
 		try {
-			response = (MethodOutcome) invokeServerMethod(params);
+			response = (MethodOutcome) invokeServerMethod(theServer, theRequest, params);
 		} catch (InternalErrorException e) {
 			ourLog.error("Internal error during method invocation", e);
 			EncodingEnum encodingNotNull = RestfulServerUtils.determineResponseEncodingWithDefault(theServer, theRequest.getServletRequest());
@@ -182,7 +182,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		}
 
 		boolean allowPrefer = false;
-		switch (getResourceOperationType()) {
+		switch (getRestOperationType()) {
 		case CREATE:
 			if (response == null) {
 				throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName()

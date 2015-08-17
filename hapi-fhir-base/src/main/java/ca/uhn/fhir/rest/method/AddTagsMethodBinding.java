@@ -38,7 +38,7 @@ class AddTagsMethodBinding extends BaseAddOrDeleteTagsMethodBinding {
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.ADD_TAGS;
 	}
 

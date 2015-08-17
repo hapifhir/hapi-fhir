@@ -86,7 +86,7 @@ public class DeleteMethodBinding extends BaseOutcomeReturningMethodBinding {
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.DELETE;
 	}
 

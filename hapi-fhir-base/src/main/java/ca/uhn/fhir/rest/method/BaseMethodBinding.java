@@ -19,7 +19,7 @@ package ca.uhn.fhir.rest.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +79,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 
 public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> {
@@ -102,7 +104,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		myMethod = theMethod;
 		myContext = theContext;
 		myProvider = theProvider;
-		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getResourceOperationType());
+		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getRestOperationType());
 
 		for (IParameter next : myParameters) {
 			if (next instanceof ConditionalParamBinder) {
@@ -232,7 +234,17 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	 */
 	public abstract String getResourceName();
 
-	public abstract RestOperationTypeEnum getResourceOperationType();
+	public abstract RestOperationTypeEnum getRestOperationType();
+
+	/**
+	 * Determine which operation is being fired for a specific request
+	 * 
+	 * @param theRequestDetails
+	 *           The request
+	 */
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		return getRestOperationType();
+	}
 
 	public abstract boolean incomingServerRequestMatchesMethod(RequestDetails theRequest);
 
@@ -240,7 +252,17 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	public abstract void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException;
 
-	protected Object invokeServerMethod(Object[] theMethodParams) {
+	protected final Object invokeServerMethod(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) {
+		// Handle server action interceptors
+		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
+		if (operationType != null) {
+			for (IServerInterceptor next : theServer.getInterceptors()) {
+				ActionRequestDetails details = new ActionRequestDetails(theRequest);
+				next.incomingRequestPreHandled(operationType, details);
+			}
+		}
+
+		// Actuall invoke the method
 		try {
 			Method method = getMethod();
 			return method.invoke(getProvider(), theMethodParams);
@@ -448,12 +470,12 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type " + returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName()
-							+ " (or a subclass of it) per IResourceProvider contract");
+					throw new ConfigurationException(
+							"Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type " + returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " claims to return type " + returnTypeFromAnnotation.getCanonicalName() + " per method annotation - Must return "
-							+ returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
+					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " claims to return type " + returnTypeFromAnnotation.getCanonicalName() + " per method annotation - Must return " + returnTypeFromRp.getCanonicalName()
+							+ " (or a subclass of it) per IResourceProvider contract");
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {
@@ -462,8 +484,8 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		} else {
 			if (!isResourceInterface(returnTypeFromAnnotation)) {
 				if (!verifyIsValidResourceReturnType(returnTypeFromAnnotation)) {
-					throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromAnnotation)
-							+ " according to annotation - Must return a resource type");
+					throw new ConfigurationException(
+							"Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returns " + toLogString(returnTypeFromAnnotation) + " according to annotation - Must return a resource type");
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {

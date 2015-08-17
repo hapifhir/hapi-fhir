@@ -145,8 +145,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 			// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 			// Conformance.RestResourceSearchParam>();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
-				if (nextMethodBinding.getResourceOperationType() != null) {
-					RestfulOperationTypeEnum resOp = RestfulOperationTypeEnum.VALUESET_BINDER.fromCodeString(nextMethodBinding.getResourceOperationType().getCode());
+				if (nextMethodBinding.getRestOperationType() != null) {
+					RestfulOperationTypeEnum resOp = RestfulOperationTypeEnum.VALUESET_BINDER.fromCodeString(nextMethodBinding.getRestOperationType().getCode());
 					if (resOp != null) {
 						if (resourceOps.contains(resOp) == false) {
 							resourceOps.add(resOp);
@@ -154,7 +154,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 						}
 					}
 	
-					RestfulOperationSystemEnum sysOp = RestfulOperationSystemEnum.VALUESET_BINDER.fromCodeString(nextMethodBinding.getResourceOperationType().getCode());
+					RestfulOperationSystemEnum sysOp = RestfulOperationSystemEnum.VALUESET_BINDER.fromCodeString(nextMethodBinding.getRestOperationType().getCode());
 					if (sysOp != null) {
 						if (systemOps.contains(sysOp) == false) {
 							systemOps.add(sysOp);

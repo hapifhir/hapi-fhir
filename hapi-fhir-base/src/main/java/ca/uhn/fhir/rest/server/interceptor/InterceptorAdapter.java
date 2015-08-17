@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -38,8 +39,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * Base class for {@link IServerInterceptor} implementations. Provides a No-op implementation
  * of all methods, always returning <code>true</code> 
  */
-@SuppressWarnings("unused")
-public class InterceptorAdapter implements IServerInterceptor, IServerActionInterceptor {
+public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
 	public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse) {
@@ -83,7 +83,7 @@ public class InterceptorAdapter implements IServerInterceptor, IServerActionInte
 	}
 
 	@Override
-	public void preAction(HttpServletRequest theServletRequest, ActionOperationEnum theOperation, ActionRequestDetails theRequestDetails) {
+	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails) {
 		// nothing
 	}
 

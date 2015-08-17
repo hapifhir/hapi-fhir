@@ -27,12 +27,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -44,8 +46,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
  * <b>See:</b> See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server
  * interceptor documentation</a> for more information on how to use this class.
  * </p>
- * 
- * @see 
  */
 public interface IServerInterceptor {
 
@@ -83,7 +83,7 @@ public interface IServerInterceptor {
 	 * @throws IOException
 	 *            If this exception is thrown, it will be re-thrown up to the container for handling.
 	 */
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException;
+	boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException;
 
 	/**
 	 * This method is called just before the actual implementing server method is invoked.
@@ -109,7 +109,7 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException;
+	boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException;
 
 	/**
 	 * This method is called before any other processing takes place for each incoming request. It may be used to provide
@@ -129,7 +129,7 @@ public interface IServerInterceptor {
 	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
 	 *         will be called.
 	 */
-	public boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse);
+	boolean incomingRequestPreProcessed(HttpServletRequest theRequest, HttpServletResponse theResponse);
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -153,7 +153,7 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	public boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, Bundle theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -177,33 +177,7 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	public boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
-
-	/**
-	 * This method is called after the server implementation method has been called, but before any attempt to stream the
-	 * response back to the client
-	 * 
-	 * @param theRequestDetails
-	 *           A bean containing details about the request that is about to be processed, including details such as the
-	 *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-	 *           pulled out of the {@link HttpServletRequest servlet request}.
-	 * @param theResponseObject
-	 *           The actual object which is being streamed to the client as a response
-	 * @param theServletRequest
-	 *           The incoming request
-	 * @param theServletResponse
-	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
-	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
-	 *           to indicate that the server itself should not also provide a response.
-	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
-	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
-	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
-	 *         will be called.
-	 * @throws AuthenticationException
-	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
-	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
-	 */
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
 	 * This method is called after the server implementation method has been called, but before any attempt to stream the
@@ -229,20 +203,59 @@ public interface IServerInterceptor {
 	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
 	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
 	 */
-	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+
+	/**
+	 * This method is called after the server implementation method has been called, but before any attempt to stream the
+	 * response back to the client
+	 * 
+	 * @param theRequestDetails
+	 *           A bean containing details about the request that is about to be processed, including details such as the
+	 *           resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 *           pulled out of the {@link HttpServletRequest servlet request}.
+	 * @param theResponseObject
+	 *           The actual object which is being streamed to the client as a response
+	 * @param theServletRequest
+	 *           The incoming request
+	 * @param theServletResponse
+	 *           The response. Note that interceptors may choose to provide a response (i.e. by calling
+	 *           {@link HttpServletResponse#getWriter()}) but in that case it is important to return <code>false</code>
+	 *           to indicate that the server itself should not also provide a response.
+	 * @return Return <code>true</code> if processing should continue normally. This is generally the right thing to do.
+	 *         If your interceptor is providing a response rather than letting HAPI handle the response normally, you
+	 *         must return <code>false</code>. In this case, no further processing will occur and no further interceptors
+	 *         will be called.
+	 * @throws AuthenticationException
+	 *            This exception may be thrown to indicate that the interceptor has detected an unauthorized access
+	 *            attempt. If thrown, processing will stop and an HTTP 401 will be returned to the client.
+	 */
+	boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
+
+	/**
+	 * Invoked before an incoming request is processed
+	 * 
+	 * @param theServletRequest
+	 *           The incoming servlet request as provided by the servlet container
+	 * @param theOperation
+	 *           The type of operation that the FHIR server has determined that the client is trying to invoke
+	 * @param theRequestDetails
+	 *           An object which will be populated with any relevant details about the incoming request (this includes
+	 *           the HttpServletRequest)
+	 */
+	void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theRequestDetails);
 
 	/**
 	 * This method is called upon any exception being thrown within the server's request processing code. This includes
 	 * any exceptions thrown within resource provider methods (e.g. {@link Search} and {@link Read} methods) as well as
 	 * any runtime exceptions thrown by the server itself. This method is invoked for each interceptor (until one of them
 	 * returns a non-<code>null</code> response or the end of the list is reached), after which
-	 * {@link #handleException(RequestDetails, BaseServerResponseException, HttpServletRequest, HttpServletResponse)} is called for each
-	 * interceptor.
+	 * {@link #handleException(RequestDetails, BaseServerResponseException, HttpServletRequest, HttpServletResponse)} is
+	 * called for each interceptor.
 	 * <p>
 	 * This may be used to add an OperationOutcome to a response, or to convert between exception types for any reason.
 	 * </p>
 	 * <p>
-	 * Implementations of this method may choose to ignore/log/count/etc exceptions, and return <code>true</code>. In
+	 * Implementations of this method may choose to ignore/log/count/etc exceptions, and return <code>null</code>. In
 	 * this case, processing will continue, and the server will automatically generate an {@link BaseOperationOutcome
 	 * OperationOutcome}. Implementations may also choose to provide their own response to the client. In this case, they
 	 * should return a non-<code>null</code>, to indicate that they have handled the request and processing should stop.
@@ -254,5 +267,35 @@ public interface IServerInterceptor {
 	 *         should return an exception.
 	 */
 	BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException;
+
+	public static class ActionRequestDetails {
+		private final IIdType myId;
+		private final String myResourceType;
+
+		public ActionRequestDetails(IIdType theId, String theResourceType) {
+			myId = theId;
+			myResourceType = theResourceType;
+		}
+
+		public ActionRequestDetails(RequestDetails theRequestDetails) {
+			myId = theRequestDetails.getId();
+			myResourceType = theRequestDetails.getResourceName();
+		}
+
+		/**
+		 * Returns the ID of the incoming request (typically this is from the request URL)
+		 */
+		public IIdType getId() {
+			return myId;
+		}
+
+		/**
+		 * Returns the resource type this request pertains to, or <code>null</code> if this request is not type specific
+		 * (e.g. server-history)
+		 */
+		public String getResourceType() {
+			return myResourceType;
+		}
+	}
 
 }

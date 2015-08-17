@@ -87,7 +87,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.GET_TAGS;
 	}
 
@@ -178,7 +178,7 @@ public class GetTagsMethodBinding extends BaseMethodBinding<TagList> {
 			params[myVersionIdParamIndex] = theRequest.getId();
 		}
 
-		TagList resp = (TagList) invokeServerMethod(params);
+		TagList resp = (TagList) invokeServerMethod(theServer, theRequest, params);
 
 		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
 			IServerInterceptor next = theServer.getInterceptors().get(i);

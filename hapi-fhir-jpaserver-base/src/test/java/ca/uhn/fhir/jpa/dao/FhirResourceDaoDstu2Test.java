@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,12 +17,15 @@ import java.util.Set;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -64,6 +70,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -82,6 +89,8 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu2Test extends BaseJpaTest {
@@ -101,22 +110,22 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
 	private static IFhirResourceDao<Practitioner> ourPractitionerDao;
+	private static IServerInterceptor ourInterceptor;
 
 	private List<String> extractNames(IBundleProvider theSearch) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
-			Patient nextPt = (Patient)next;
+			Patient nextPt = (Patient) next;
 			retVal.add(nextPt.getNameFirstRep().getNameAsSingleString());
 		}
 		return retVal;
 	}
-	
+
 	@Test
 	public void testCreateOperationOutcome() {
 		/*
-		 * If any of this ever fails, it means that one of the OperationOutcome
-		 * issue severity codes has changed code value across versions. We store
-		 * the string as a constant, so something will need to be fixed. 
+		 * If any of this ever fails, it means that one of the OperationOutcome issue severity codes has changed code
+		 * value across versions. We store the string as a constant, so something will need to be fixed.
 		 */
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.ERROR.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
 		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.ERROR.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_ERROR);
@@ -127,7 +136,46 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertEquals(org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity.WARNING.toCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
 		assertEquals(ca.uhn.fhir.model.dstu.valueset.IssueSeverityEnum.WARNING.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
 		assertEquals(ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum.WARNING.getCode(), BaseHapiFhirResourceDao.OO_SEVERITY_WARN);
-}
+	}
+
+	@Test
+	public void testRead() {
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("foo").setCode("testRead");
+		IIdType id1 = ourObservationDao.create(o1).getId();
+
+		/*
+		 * READ
+		 */
+		
+		reset(ourInterceptor);
+		Observation obs = ourObservationDao.read(id1.toUnqualifiedVersionless());
+		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
+
+		// Verify interceptor
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertEquals(id1.toUnqualifiedVersionless().getValue(), details.getId().toUnqualifiedVersionless().getValue());
+		assertEquals("Observation", details.getResourceType());
+
+		/*
+		 * VREAD
+		 */
+		assertTrue(id1.hasVersionIdPart()); // just to make sure..
+		reset(ourInterceptor);
+		obs = ourObservationDao.read(id1);
+		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
+
+		// Verify interceptor
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals(id1.toUnqualified().getValue(), details.getId().toUnqualified().getValue());
+		assertEquals("Observation", details.getResourceType());
+
+	}
+	
 	
 	@Test
 	public void testChoiceParamConcept() {
@@ -271,6 +319,15 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		IIdType id = ourPatientDao.create(p).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
+		// Verify interceptor
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertNotNull(details.getId());
+		assertEquals("Patient", details.getResourceType());
+
+		reset(ourInterceptor);
+		
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Hello");
@@ -278,6 +335,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
 		assertFalse(results.getCreated().booleanValue());
 
+		verifyNoMoreInteractions(ourInterceptor);
+		
 		// Now create a second one
 
 		p = new Patient();
@@ -522,7 +581,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().addFamily("Tester_testDeleteThenUndelete").addGiven("Joe");
 		IIdType id = ourPatientDao.create(patient).getId();
-		assertThat(id.getValue(), endsWith("/_history/1"));
+		assertThat(id.getValue(), Matchers.endsWith("/_history/1"));
 
 		// should be ok
 		ourPatientDao.read(id.toUnqualifiedVersionless());
@@ -1476,16 +1535,16 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 			patient.addTelecom().setSystem(ContactPointSystemEnum.EMAIL).setValue("abc");
 			id2 = ourPractitionerDao.create(patient).getId().toUnqualifiedVersionless();
 		}
-		
+
 		Map<String, IQueryParameterType> params;
 		List<IIdType> patients;
-		
+
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Practitioner.SP_FAMILY, new StringDt(methodName));
 		patients = toUnqualifiedVersionlessIds(ourPractitionerDao.search(params));
 		assertEquals(2, patients.size());
 		assertThat(patients, containsInAnyOrder(id1, id2));
-		
+
 		params = new HashMap<String, IQueryParameterType>();
 		params.put(Practitioner.SP_FAMILY, new StringParam(methodName));
 		params.put(Practitioner.SP_EMAIL, new TokenParam(null, "abc"));
@@ -1507,8 +1566,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertThat(patients, containsInAnyOrder(id1));
 
 	}
-	
-	
+
 	@Test
 	public void testSearchNameParam() {
 		IIdType id1;
@@ -1765,7 +1823,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		}
 
 		/*
-		 * TODO: it's kind of weird that we throw a 404 for textual IDs that don't exist, but just return an empty list for numeric IDs that don't exist
+		 * TODO: it's kind of weird that we throw a 404 for textual IDs that don't exist, but just return an empty list
+		 * for numeric IDs that don't exist
 		 */
 
 		result = toList(ourObservationDao.search(Observation.SP_SUBJECT, new ReferenceParam("999999999999999")));
@@ -1773,7 +1832,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	}
 
-	
 	@Test
 	public void testSearchStringParam() {
 		{
@@ -1800,7 +1858,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	}
 
-	
 	@Test
 	public void testSearchStringParamReallyLong() {
 		String methodName = "testSearchStringParamReallyLong";
@@ -1863,8 +1920,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
 		patient.addName().addFamily("Tester").addGiven("testSearchTokenParam1");
-		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
-				.setDisplay("testSearchTokenParamDisplay");
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem").setDisplay("testSearchTokenParamDisplay");
 		ourPatientDao.create(patient);
 
 		patient = new Patient();
@@ -1957,7 +2013,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	@Test
 	public void testSearchWithTagParameter() {
 		String methodName = "testSearchWithTagParameter";
-		
+
 		IIdType tag1id;
 		{
 			Organization org = new Organization();
@@ -2528,7 +2584,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertThat(actual.subList(0, 2), containsInAnyOrder(id2, id4));
 		assertThat(actual.subList(2, 4), containsInAnyOrder(id1, id3));
 	}
-	
+
 	@Test
 	public void testSortByString01() {
 		Patient p = new Patient();
@@ -2599,7 +2655,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		p.addIdentifier().setSystem("urn:system").setValue(string);
 		p.addName().addFamily("Fam2").addGiven("Giv2");
 		ourPatientDao.create(p).getId().toUnqualifiedVersionless();
-		
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(string);
 		p.addName().addFamily("Fam1").addGiven("Giv2");
@@ -2607,7 +2663,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 		SearchParameterMap pm;
 		List<String> names;
-		
+
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY));
@@ -2639,7 +2695,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		ourLog.info("Names: {}", names);
 		assertThat(names.subList(0, 2), contains("Giv2 Fam2", "Giv1 Fam2"));
 		assertThat(names.subList(2, 4), contains("Giv2 Fam1", "Giv1 Fam1"));
-}
+	}
 
 	@Test
 	public void testStoreUnversionedResources() {
@@ -3011,7 +3067,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 			ourOrganizationDao.update(p2);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			// good
+			ourLog.error("Good", e);
 		}
 
 	}
@@ -3063,8 +3119,19 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		ourQuestionnaireDao = ourCtx.getBean("myQuestionnaireDaoDstu2", IFhirResourceDao.class);
 		ourQuestionnaireResponseDao = ourCtx.getBean("myQuestionnaireResponseDaoDstu2", IFhirResourceDao.class);
 		ourFhirCtx = ourCtx.getBean(FhirContext.class);
+
+		ourInterceptor = mock(IServerInterceptor.class);
+
+		DaoConfig daoConfig = ourCtx.getBean(DaoConfig.class);
+		daoConfig.setInterceptors(ourInterceptor);
+
 	}
 
+	@Before
+	public void before() {
+		reset(ourInterceptor);
+	}
+	
 	private static void deleteEverything() {
 		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
 	}

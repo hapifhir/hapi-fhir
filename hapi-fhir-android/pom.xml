@@ -93,7 +93,6 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>${servlet_api_version}</version>
 			<scope>compile</scope>
 		</dependency>
 

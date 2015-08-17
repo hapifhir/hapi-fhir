@@ -19,9 +19,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -58,12 +56,14 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.method.MethodUtil;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
@@ -137,7 +137,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 				Entry nextEntry = resp.addEntry();
 
 				OperationOutcome oo = new OperationOutcome();
-				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDetails(caughtEx.getMessage());
+				oo.addIssue().setSeverity(IssueSeverityEnum.ERROR).setDiagnostics(caughtEx.getMessage());
 				nextEntry.setResource(oo);
 
 				EntryResponse nextEntryResp = nextEntry.getResponse();
@@ -148,13 +148,16 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info("Batch completed in {}ms", new Object[] { delay });
-		ooResp.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Batch completed in " + delay + "ms");
+		ooResp.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Batch completed in " + delay + "ms");
 
 		return resp;
 	}
 
 	@Override
 	public MetaDt metaGetOperation() {
+		// Notify interceptors
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
 
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
@@ -251,7 +254,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		OperationOutcome statusOperationOutcome = new OperationOutcome();
 		if (transactionType == null) {
 			String message = "Transactiion Bundle did not specify valid Bundle.type, assuming " + BundleTypeEnum.TRANSACTION.getCode();
-			statusOperationOutcome.addIssue().setCode(IssueTypeEnum.INVALID_CONTENT).setSeverity(IssueSeverityEnum.WARNING).setDetails(message);
+			statusOperationOutcome.addIssue().setCode(IssueTypeEnum.INVALID_CONTENT).setSeverity(IssueSeverityEnum.WARNING).setDiagnostics(message);
 			ourLog.warn(message);
 			transactionType = BundleTypeEnum.TRANSACTION;
 		}
@@ -405,7 +408,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 					int configuredMax = 100; // this should probably be configurable or something
 					if (bundle.size() > configuredMax) {
 						statusOperationOutcome.addIssue().setSeverity(IssueSeverityEnum.WARNING)
-								.setDetails("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
+								.setDiagnostics("Search nested within transaction found more than " + configuredMax + " matches, but paging is not supported in nested transactions");
 					}
 					List<IBaseResource> resourcesToAdd = bundle.getResources(0, Math.min(bundle.size(), configuredMax));
 					for (IBaseResource next : resourcesToAdd) {
@@ -472,7 +475,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 		long delay = System.currentTimeMillis() - start;
 		ourLog.info(theActionName + " completed in {}ms", new Object[] { delay });
 
-		statusOperationOutcome.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails(theActionName + " completed in " + delay + "ms");
+		statusOperationOutcome.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics(theActionName + " completed in " + delay + "ms");
 
 		for (IdDt next : allIds) {
 			IdDt replacement = idSubstitutions.get(next);
@@ -482,7 +485,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 			if (replacement.equals(next)) {
 				continue;
 			}
-			statusOperationOutcome.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Placeholder resource ID \"" + next + "\" was replaced with permanent ID \"" + replacement + "\"");
+			statusOperationOutcome.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Placeholder resource ID \"" + next + "\" was replaced with permanent ID \"" + replacement + "\"");
 		}
 
 		notifyWriteCompleted();

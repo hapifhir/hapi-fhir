@@ -16,19 +16,14 @@
 	<bean id="myDaoConfig" class="ca.uhn.fhir.jpa.dao.DaoConfig">
 	</bean>
 
-	<bean id="myPersistenceDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="true">
+
+	<bean id="myPersistenceDataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="org.apache.derby.jdbc.EmbeddedDriver"></property>
 		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
+		<property name="username" value=""/>
+		<property name="password" value=""/>
 	</bean>
 
-	<bean id="myPersistenceDataSource2" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
-		<!-- <property name="url" value="jdbc:hsqldb:mem:unit-testing-jpa"/>  -->
-		<!-- <property name="url" value="jdbc:hsqldb:file:svcret.hsqldb" /> -->
-		<property name="url" value="jdbc:derby:memory:myUnitTestDB;create=true" />
-		<!-- 
-		<property name="username" value="sa" />
-		<property name="password" value="" />
-		-->
-	</bean>
 
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myPersistenceDataSource" />

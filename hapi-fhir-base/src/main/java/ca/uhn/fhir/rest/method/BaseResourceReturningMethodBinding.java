@@ -233,7 +233,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		throw new IllegalStateException("Should not get here!");
 	}
 
-	public abstract Object invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
+	public abstract Object invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;
 
 	@Override
 	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
@@ -265,7 +265,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 		}
 
-		Object resultObj = invokeServer(theRequest, params);
+		Object resultObj = invokeServer(theServer, theRequest, params);
 
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest.getServletRequest());
 		boolean respondGzip = theRequest.isRespondGzip();

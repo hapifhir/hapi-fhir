@@ -46,8 +46,8 @@ public class RequestDetails {
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
-	private RestOperationTypeEnum myResourceOperationType;
 	private boolean myRespondGzip;
+	private RestOperationTypeEnum myRestOperationType;
 	private String mySecondaryOperation;
 	private RestfulServer myServer;
 	private HttpServletRequest myServletRequest;
@@ -96,8 +96,8 @@ public class RequestDetails {
 		return myResourceName;
 	}
 
-	public RestOperationTypeEnum getResourceOperationType() {
-		return myResourceOperationType;
+	public RestOperationTypeEnum getRestOperationType() {
+		return myRestOperationType;
 	}
 
 	public String getSecondaryOperation() {
@@ -185,12 +185,12 @@ public class RequestDetails {
 		myResourceName = theResourceName;
 	}
 
-	public void setResourceOperationType(RestOperationTypeEnum theResourceOperationType) {
-		myResourceOperationType = theResourceOperationType;
-	}
-
 	public void setRespondGzip(boolean theRespondGzip) {
 		myRespondGzip = theRespondGzip;
+	}
+
+	public void setRestOperationType(RestOperationTypeEnum theRestOperationType) {
+		myRestOperationType = theRestOperationType;
 	}
 
 	public void setSecondaryOperation(String theSecondaryOperation) {

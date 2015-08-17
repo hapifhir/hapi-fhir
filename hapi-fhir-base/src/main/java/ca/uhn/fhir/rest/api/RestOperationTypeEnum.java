@@ -115,7 +115,22 @@ public enum RestOperationTypeEnum {
 	/**
 	 * Load the server's metadata
 	 */
-	METADATA("metadata"),
+	METADATA("metadata"), 
+	
+	/**
+	 * $meta-add extended operation
+	 */
+	META_ADD("$meta-add"),
+
+	/**
+	 * $meta-add extended operation
+	 */
+	META("$meta"),
+
+	/**
+	 * $meta-delete extended operation
+	 */
+	META_DELETE("$meta-delete"),
 
 	;
 

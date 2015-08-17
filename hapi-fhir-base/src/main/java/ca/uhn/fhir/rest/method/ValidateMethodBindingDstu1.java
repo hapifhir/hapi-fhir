@@ -44,7 +44,7 @@ public class ValidateMethodBindingDstu1 extends BaseOutcomeReturningMethodBindin
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.VALIDATE;
 	}
 

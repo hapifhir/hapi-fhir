@@ -47,7 +47,7 @@ class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceP
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.UPDATE;
 	}
 

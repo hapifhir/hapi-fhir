@@ -101,8 +101,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	}
 
 	private void checkBindingForSystemOps(Rest rest, Set<SystemRestfulInteractionEnum> systemOps, BaseMethodBinding<?> nextMethodBinding) {
-		if (nextMethodBinding.getResourceOperationType() != null) {
-			String sysOpCode = nextMethodBinding.getResourceOperationType().getCode();
+		if (nextMethodBinding.getRestOperationType() != null) {
+			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
 			if (sysOpCode != null) {
 				SystemRestfulInteractionEnum sysOp = SystemRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(sysOpCode);
 				if (sysOp == null) {
@@ -193,8 +193,8 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 				// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// Conformance.RestResourceSearchParam>();
 				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
-					if (nextMethodBinding.getResourceOperationType() != null) {
-						String resOpCode = nextMethodBinding.getResourceOperationType().getCode();
+					if (nextMethodBinding.getRestOperationType() != null) {
+						String resOpCode = nextMethodBinding.getRestOperationType().getCode();
 						if (resOpCode != null) {
 							TypeRestfulInteractionEnum resOp = TypeRestfulInteractionEnum.VALUESET_BINDER.fromCodeString(resOpCode);
 							if (resOp != null) {

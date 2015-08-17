@@ -48,6 +48,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -92,6 +93,15 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		if (mySupportsVersion && theRequestDetails.getId().hasVersionIdPart()) {
+			return RestOperationTypeEnum.VREAD;
+		} else {
+			return RestOperationTypeEnum.READ;
+		}
+	}
+
+	@Override
 	public List<Class<?>> getAllowableParamAnnotations() {
 		ArrayList<Class<?>> retVal = new ArrayList<Class<?>>();
 		retVal.add(IdParam.class);
@@ -99,7 +109,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public RestOperationTypeEnum getResourceOperationType() {
+	public RestOperationTypeEnum getRestOperationType() {
 		return isVread() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;
 	}
 
@@ -192,13 +202,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public IBundleProvider invokeServer(RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
+	public IBundleProvider invokeServer(RestfulServer theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException {
 		theMethodParams[myIdIndex] = MethodUtil.convertIdToType(theRequest.getId(), myIdParameterType);
 		if (myVersionIdIndex != null) {
 			theMethodParams[myVersionIdIndex] = new IdDt(theRequest.getId().getVersionIdPart());
 		}
 
-		Object response = invokeServerMethod(theMethodParams);
+		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 
 		if (theRequest.getServer().getETagSupport() == ETagSupportEnum.ENABLED) {

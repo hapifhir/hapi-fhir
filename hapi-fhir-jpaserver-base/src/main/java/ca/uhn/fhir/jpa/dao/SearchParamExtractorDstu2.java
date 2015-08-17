@@ -70,7 +70,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
 
-class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
+public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public SearchParamExtractorDstu2(FhirContext theContext) {
 		super(theContext);

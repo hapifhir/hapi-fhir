@@ -166,7 +166,7 @@ public class ResourceParameter implements IParameter {
 			String ctValue = theRequest.getServletRequest().getHeader(Constants.HEADER_CONTENT_TYPE);
 			if (ctValue != null) {
 				if (ctValue.startsWith("application/x-www-form-urlencoded")) {
-					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getResourceOperationType());
+					String msg = theRequest.getServer().getFhirContext().getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
 					throw new InvalidRequestException(msg);
 				}
 			}
@@ -183,13 +183,13 @@ public class ResourceParameter implements IParameter {
 				}
 				encoding = MethodUtil.detectEncodingNoDefault(body);
 				if (encoding == null) {
-					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", theMethodBinding.getResourceOperationType());
+					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", theMethodBinding.getRestOperationType());
 					throw new InvalidRequestException(msg);
 				} else {
 					requestReader = new InputStreamReader(new ByteArrayInputStream(theRequestContents), charset);
 				}
 			} else {
-				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getResourceOperationType());
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, theMethodBinding.getRestOperationType());
 				throw new InvalidRequestException(msg);
 			}
 		} 
