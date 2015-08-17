@@ -74,13 +74,13 @@ import ca.uhn.fhir.util.VersionUtil;
 
 public class RestfulServer extends HttpServlet {
 
+	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Default setting for {@link #setETagSupport(ETagSupportEnum) ETag Support}: {@link ETagSupportEnum#ENABLED}
 	 */
 	public static final ETagSupportEnum DEFAULT_ETAG_SUPPORT = ETagSupportEnum.ENABLED;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
-
-	private static final long serialVersionUID = 1L;
 	private AddProfileTagEnum myAddProfileTag;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
@@ -714,6 +714,15 @@ public class RestfulServer extends HttpServlet {
 
 		} catch (Throwable e) {
 
+			/*
+			 * We have caught an exception during request processing. This might be
+			 * because a handling method threw something they wanted to throw (e.g.
+			 * UnprocessableEntityException because the request had business requirement
+			 * problems) or it could be due to bugs (e.g. NullPointerException).
+			 * 
+			 * First we let the interceptors have a crack at converting the exception
+			 * into something HAPI can use (BaseServerResponseException) 
+			 */
 			BaseServerResponseException exception = null;
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
@@ -724,12 +733,17 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
+			/*
+			 * If none of the interceptors converted the exception, default behaviour is to
+			 * keep the exception as-is if it extends BaseServerResponseException, otherwise
+			 * wrap it in an InternalErrorException.
+			 */
 			if (exception == null) {
-				exception = new ExceptionHandlingInterceptor().preProcessOutgoingException(requestDetails, e, theRequest);
+				exception = DEFAULT_EXCEPTION_HANDLER.preProcessOutgoingException(requestDetails, e, theRequest);
 			}
 
 			/*
-			 * We have caught an exception while handling an incoming server request. Start by notifying the interceptors..
+			 * Next, interceptors get a shot at handling the exception
 			 */
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
 				IServerInterceptor next = getInterceptors().get(i);
@@ -739,7 +753,11 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 
-			new ExceptionHandlingInterceptor().handleException(requestDetails, exception, theRequest, theResponse);
+			/*
+			 * If nobody handles it, default behaviour is to stream back the 
+			 * OperationOutcome to the client.
+			 */
+			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
 		}
 	}
@@ -832,7 +850,6 @@ public class RestfulServer extends HttpServlet {
 	 *            If the initialization failed. Note that you should consider throwing {@link UnavailableException} (which extends {@link ServletException}), as this is a flag to the servlet container
 	 *            that the servlet is not usable.
 	 */
-	@SuppressWarnings("unused")
 	protected void initialize() throws ServletException {
 		// nothing by default
 	}
