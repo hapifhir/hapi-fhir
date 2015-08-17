@@ -1,8 +1,12 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +31,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -96,6 +101,23 @@ public class ServerActionInterceptorTest {
 
 		ActionRequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient", details.getResourceType());
+		assertEquals(Patient.class, details.getResource().getClass());
+		assertEquals("FAMILY", ((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue());
+	}
+
+	@Test
+	public void testCreateWhereMethodHasNoResourceParam() throws Exception {
+		Observation observation = new Observation();
+		observation.getCode().setText("OBSCODE");
+		ourFhirClient.create().resource(observation).execute();
+
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
+
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertEquals("Observation", details.getResourceType());
+		assertEquals(Observation.class, details.getResource().getClass());
+		assertEquals("OBSCODE", ((Observation) details.getResource()).getCode().getText());
 	}
 
 	@Test
@@ -111,8 +133,11 @@ public class ServerActionInterceptorTest {
 		ActionRequestDetails details = detailsCapt.getValue();
 		assertEquals("Patient", details.getResourceType());
 		assertEquals("Patient/123", details.getId().getValue());
+		assertEquals(Patient.class, details.getResource().getClass());
+		assertEquals("FAMILY", ((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue());
+		assertEquals("Patient/123", ((Patient) details.getResource()).getId().getValue());
 	}
-	
+
 	@Test
 	public void testHistorySystem() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/_history");
@@ -160,7 +185,7 @@ public class ServerActionInterceptorTest {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.registerInterceptor(new ResponseHighlighterInterceptor());
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
+		servlet.setResourceProviders(new DummyPatientResourceProvider(), new DummyObservationResourceProvider());
 		servlet.setPlainProviders(new PlainProvider());
 		servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(servlet);
@@ -175,11 +200,11 @@ public class ServerActionInterceptorTest {
 
 		ourInterceptor = mock(InterceptorAdapter.class);
 		servlet.registerInterceptor(ourInterceptor);
-		
+
+		ourCtx.getRestfulClientFactory().setSocketTimeout(240*1000);
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
-		
-		
+
 	}
 
 	@Before
@@ -246,5 +271,23 @@ public class ServerActionInterceptorTest {
 		}
 
 	}
+
+
+	public static class DummyObservationResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Observation.class;
+		}
+
+
+		@Create()
+		public MethodOutcome create(@ResourceParam String theBody) {
+			Observation retVal = new Observation();
+			retVal.setId("Observation/123/_history/2");
+			return new MethodOutcome(retVal.getId());
+		}
+	}
+	
 
 }

@@ -1271,7 +1271,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theResource.getId(), toResourceName(theResource));
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theResource.getId(), toResourceName(theResource), theResource);
 		notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 
 		updateEntity(theResource, entity, false, null, thePerformIndexing, true);
@@ -2279,7 +2279,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 		
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(resourceId, getResourceName());
+		ActionRequestDetails requestDetails = new ActionRequestDetails(resourceId, getResourceName(), theResource);
 		notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 
 		// Perform update

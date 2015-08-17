@@ -172,7 +172,7 @@ public class OperationParameter implements IParameter {
 			}
 
 			Class<? extends IBaseResource> wantedResourceType = theMethodBinding.getContext().getResourceDefinition("Parameters").getImplementingClass();
-			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theRequestContents, theMethodBinding, wantedResourceType);
+			IBaseResource requestContents = ResourceParameter.loadResourceFromRequest(theRequest, theMethodBinding, wantedResourceType);
 
 			RuntimeResourceDefinition def = ctx.getResourceDefinition(requestContents);
 

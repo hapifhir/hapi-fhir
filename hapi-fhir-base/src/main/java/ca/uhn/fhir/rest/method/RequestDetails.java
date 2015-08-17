@@ -43,6 +43,7 @@ public class RequestDetails {
 	private IdDt myId;
 	private String myOperation;
 	private Map<String, String[]> myParameters;
+	private byte[] myRawRequest;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
@@ -76,6 +77,10 @@ public class RequestDetails {
 
 	public Map<String, String[]> getParameters() {
 		return myParameters;
+	}
+
+	public byte[] getRawRequest() {
+		return myRawRequest;
 	}
 
 	/**
@@ -170,6 +175,10 @@ public class RequestDetails {
 			myUnqualifiedToQualifiedNames = Collections.emptyMap();
 		}
 
+	}
+
+	public void setRawRequest(byte[] theRawRequest) {
+		myRawRequest = theRawRequest;
 	}
 
 	public void setRequestPath(String theRequestPath) {

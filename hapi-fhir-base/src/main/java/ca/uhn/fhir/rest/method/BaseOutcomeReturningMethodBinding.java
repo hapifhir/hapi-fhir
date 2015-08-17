@@ -83,6 +83,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			b.append(response.getVersionId().getValue());
 		}
 		theResponse.addHeader(headerLocation, b.toString());
+		
 	}
 
 	protected abstract void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams);
@@ -140,6 +141,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	@Override
 	public void invokeServer(RestfulServer theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 		byte[] requestContents = loadRequestContents(theRequest);
+		
 //		if (requestContainsResource()) {
 //			requestContents = parseIncomingServerResource(theRequest);
 //		} else {

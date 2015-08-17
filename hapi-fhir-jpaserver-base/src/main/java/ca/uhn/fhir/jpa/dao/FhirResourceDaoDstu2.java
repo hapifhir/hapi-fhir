@@ -79,7 +79,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 	@Override
 	public MethodOutcome validate(T theResource, IdDt theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theId, null, theResource);
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 		
 		final OperationOutcome oo = new OperationOutcome();

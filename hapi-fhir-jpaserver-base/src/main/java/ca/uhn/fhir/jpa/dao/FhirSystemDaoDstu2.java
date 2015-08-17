@@ -240,6 +240,9 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle> {
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Bundle transaction(Bundle theRequest) {
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, "Bundle", theRequest);
+		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
+
 		String theActionName = "Transaction";
 		return transaction(theRequest, theActionName);
 	}

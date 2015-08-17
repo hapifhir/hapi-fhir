@@ -43,8 +43,10 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 
 public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
@@ -59,6 +61,11 @@ public class FhirSystemDaoDstu1 extends BaseHapiFhirSystemDao<List<IResource>> {
 	@Override
 	public List<IResource> transaction(List<IResource> theResources) {
 		ourLog.info("Beginning transaction with {} resources", theResources.size());
+
+		// Notify interceptors
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
+		notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
+
 		long start = System.currentTimeMillis();
 
 		Set<IdDt> allIds = new HashSet<IdDt>();

@@ -2,6 +2,11 @@ package ca.uhn.fhir.jpa.dao;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -12,8 +17,11 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -38,6 +46,7 @@ import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
@@ -45,6 +54,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 
@@ -54,6 +65,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 	private static IFhirResourceDao<Observation> ourObservationDao;
 	private static IFhirResourceDao<Patient> ourPatientDao;
 	private static IFhirSystemDao<Bundle> ourSystemDao;
+	private static IServerInterceptor ourInterceptor;
 
 	private void deleteEverything() {
 		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
@@ -390,6 +402,24 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
 		String patientId = respEntry.getResponse().getLocation();
 		assertThat(patientId, not(containsString("test")));
+
+		/*
+		 * Interceptor should have been called once for the transaction, and once for the
+		 * embedded operation
+		 */
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertEquals("Bundle", details.getResourceType());
+		assertEquals(Bundle.class, details.getResource().getClass());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertNotNull(details.getId());
+		assertEquals("Patient", details.getResourceType());
+		assertEquals(Patient.class, details.getResource().getClass());
+		
 	}
 
 	@Test
@@ -666,6 +696,35 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		assertEquals(Bundle.class, nextEntry.getResource().getClass());
 		Bundle respBundle = (Bundle) nextEntry.getResource();
 		assertEquals(1, respBundle.getTotal().intValue());
+		
+		/*
+		 * Interceptor should have been called once for the transaction, and once for the
+		 * embedded operation
+		 */
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertEquals("Bundle", details.getResourceType());
+		assertEquals(Bundle.class, details.getResource().getClass());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals(idv1.toUnqualifiedVersionless(), details.getId());
+		assertEquals("Patient", details.getResourceType());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals(idv1.toUnqualified(), details.getId());
+		assertEquals("Patient", details.getResourceType());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.SEARCH_TYPE), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals("Patient", details.getResourceType());
+
+		
 	}
 
 	@Test
@@ -1122,6 +1181,16 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 		ourPatientDao = ourCtx.getBean("myPatientDaoDstu2", IFhirResourceDao.class);
 		ourObservationDao = ourCtx.getBean("myObservationDaoDstu2", IFhirResourceDao.class);
 		ourSystemDao = ourCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
+		ourInterceptor = mock(IServerInterceptor.class);
+
+		DaoConfig daoConfig = ourCtx.getBean(DaoConfig.class);
+		daoConfig.setInterceptors(ourInterceptor);
+
+	}
+
+	@Before
+	public void before() {
+		reset(ourInterceptor);
 	}
 
 	static void doDeleteEverything(IFhirSystemDao<Bundle> systemDao) {

@@ -325,6 +325,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		ActionRequestDetails details = detailsCapt.getValue();
 		assertNotNull(details.getId());
 		assertEquals("Patient", details.getResourceType());
+		assertEquals(Patient.class, details.getResource().getClass());
 
 		reset(ourInterceptor);
 		
@@ -2913,12 +2914,20 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 		Thread.sleep(1000);
 
+		reset(ourInterceptor);
 		retrieved.getIdentifierFirstRep().setValue("002");
 		MethodOutcome outcome2 = ourPatientDao.update(retrieved);
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
 		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
-
 		assertEquals("2", outcome2.getId().getVersionIdPart());
+
+		// Verify interceptor
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(ourInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertNotNull(details.getId());
+		assertEquals("Patient", details.getResourceType());
+		assertEquals(Patient.class, details.getResource().getClass());
 
 		Date now2 = new Date();
 
