@@ -3,11 +3,7 @@ package ca.uhn.fhir.parser;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -299,7 +295,6 @@ public class JsonParserDstu2Test {
 
 	}
 
-	
 	/**
 	 * Fixing #89
 	 */
@@ -319,7 +314,6 @@ public class JsonParserDstu2Test {
 		//@formatter:on
 	}
 
-	
 	/**
 	 * #158
 	 */
@@ -328,10 +322,10 @@ public class JsonParserDstu2Test {
 		TagList tagList = new TagList();
 		tagList.addTag(null, null, null);
 		tagList.addTag(null, null, "Label");
-		
+
 		Patient p = new Patient();
 		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
-		
+
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, not(containsString("tag")));
 	}
@@ -344,10 +338,10 @@ public class JsonParserDstu2Test {
 		TagList tagList = new TagList();
 		tagList.addTag("scheme", "code", null);
 		tagList.addTag(null, null, "Label");
-		
+
 		Patient p = new Patient();
 		ResourceMetadataKeyEnum.TAG_LIST.put(p, tagList);
-		
+
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(p);
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
@@ -415,7 +409,7 @@ public class JsonParserDstu2Test {
 		Patient p = new Patient();
 		p.setId("123");
 		p.addName().addFamily("ABC");
-		
+
 		assertThat(ourCtx.newJsonParser().encodeResourceToString(p), stringContainsInOrder("123", "ABC"));
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), containsString("ABC"));
 		assertThat(ourCtx.newJsonParser().setOmitResourceId(true).encodeResourceToString(p), not(containsString("123")));
@@ -444,7 +438,7 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertSame(((ResourceReferenceDt)p.getMedication()).getResource(), m);
+		assertSame(((ResourceReferenceDt) p.getMedication()).getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
@@ -474,9 +468,9 @@ public class JsonParserDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, content);
 
 		MedicationPrescription p = (MedicationPrescription) parsed.getEntry().get(0).getResource();
-		assertEquals("#med", ((ResourceReferenceDt)p.getMedication()).getReference().getValue());
+		assertEquals("#med", ((ResourceReferenceDt) p.getMedication()).getReference().getValue());
 
-		Medication m = (Medication) ((ResourceReferenceDt)p.getMedication()).getResource();
+		Medication m = (Medication) ((ResourceReferenceDt) p.getMedication()).getResource();
 		assertNotNull(m);
 		assertEquals("#med", m.getId().getValue());
 		assertEquals(1, p.getContained().getContainedResources().size());
@@ -514,8 +508,8 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertEquals("Medication/example", ((ResourceReferenceDt)p.getMedication()).getReference().getValue());
-		assertSame(((ResourceReferenceDt)p.getMedication()).getResource(), m);
+		assertEquals("Medication/example", ((ResourceReferenceDt) p.getMedication()).getReference().getValue());
+		assertSame(((ResourceReferenceDt) p.getMedication()).getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(reencoded);
@@ -554,8 +548,8 @@ public class JsonParserDstu2Test {
 
 		Medication m = (Medication) parsed.getEntries().get(1).getResource();
 		assertEquals("http://example.com/base/Medication/example", m.getId().getValue());
-		assertEquals("Medication/example", ((ResourceReferenceDt)p.getMedication()).getReference().getValue());
-		assertSame(((ResourceReferenceDt)p.getMedication()).getResource(), m);
+		assertEquals("Medication/example", ((ResourceReferenceDt) p.getMedication()).getReference().getValue());
+		assertSame(((ResourceReferenceDt) p.getMedication()).getResource(), m);
 
 		String reencoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeBundleToString(parsed);
 		ourLog.info(reencoded);
@@ -665,12 +659,12 @@ public class JsonParserDstu2Test {
 				"    ]" +
 				"}";
 		//@formatter:on
-		
+
 		ca.uhn.fhir.model.dstu2.resource.Bundle parsed = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, input);
-		
+
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parsed);
 		ourLog.info(encoded);
-		
+
 		assertEquals("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getValue());
 		assertEquals("urn:uuid:", parsed.getEntry().get(0).getResource().getId().getBaseUrl());
 		assertEquals("180f219f-97a8-486d-99d9-ed631fe4fc57", parsed.getEntry().get(0).getResource().getId().getIdPart());
@@ -808,6 +802,22 @@ public class JsonParserDstu2Test {
 	}
 
 	/**
+	 * See #207
+	 */
+	@Test
+	public void testParseResourceWithInvalidType() {
+		String input = "{" + "\"resourceType\":\"Patient\"," + "\"contained\":[" + "    {" + "       \"rezType\":\"Organization\"" + "    }" + "  ]" + "}";
+
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		try {
+			jsonParser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
+		}
+	}
+
+	/**
 	 * See #163
 	 */
 	@Test
@@ -829,10 +839,10 @@ public class JsonParserDstu2Test {
 
 		String bundleText = jsonParser.encodeResourceToString(bundle);
 		ourLog.info(bundleText);
-		
-		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = jsonParser.parseResource (ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
-		Patient reincarnatedPatient = (Patient) reincarnatedBundle.getEntry().get(0).getResource(); 
-		
+
+		ca.uhn.fhir.model.dstu2.resource.Bundle reincarnatedBundle = jsonParser.parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, bundleText);
+		Patient reincarnatedPatient = (Patient) reincarnatedBundle.getEntry().get(0).getResource();
+
 		assertEquals("Patient", patient.getId().getResourceType());
 		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());
 	}

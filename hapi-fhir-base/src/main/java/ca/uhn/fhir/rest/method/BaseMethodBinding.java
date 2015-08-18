@@ -328,7 +328,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 	}
 
 	/**
-	 * Subclasses may override this method (but should also call super.{@link #populateActionRequestDetailsForInterceptor(ActionRequestDetails, Object[])) to provide method specifics to the
+	 * Subclasses may override this method (but should also call super.{@link #populateActionRequestDetailsForInterceptor(RequestDetails, ActionRequestDetails, Object[])} to provide method specifics to the
 	 * interceptors.
 	 * 
 	 * @param theRequestDetails

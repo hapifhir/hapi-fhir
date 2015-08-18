@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
+import ca.uhn.fhir.rest.server.IResourceProvider;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -32,6 +34,18 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 /**
  * Base class for RESTful client and server exceptions. RESTful client methods will only throw exceptions which are subclasses of this exception type, and RESTful server methods should also only call
  * subclasses of this exception type.
+ * <p>
+ * HAPI provides a number of subclasses of BaseServerResponseException, and each one corresponds to a specific
+ * HTTP status code. For example, if a {@link IResourceProvider resource provider} method throws 
+ * {@link ResourceNotFoundException}, this is a signal to the server that an <code>HTTP 404</code> should
+ * be returned to the client.
+ * </p>
+ * <p>
+ * <b>See:</b> A complete list of available exceptions is in the <a href="./package-summary.html">package summary</a>.
+ * If an exception doesn't exist for a condition you want to represent, let us know by filing an
+ * <a href="https://github.com/jamesagnew/hapi-fhir/issues">issue in our tracker</a>. You may also
+ * use {@link UnclassifiedServerFailureException} to represent any error code you want.
+ * </p>
  */
 public abstract class BaseServerResponseException extends RuntimeException {
 

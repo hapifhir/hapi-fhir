@@ -1123,9 +1123,9 @@ public class JsonParser extends BaseParser implements IParser {
 			JsonObject nextObject = (JsonObject) theJsonVal;
 			boolean preResource = false;
 			if (theState.isPreResource()) {
-				String resType = nextObject.getString("resourceType");
+				String resType = nextObject.getString("resourceType", null);
 				if (isBlank(resType)) {
-					throw new DataFormatException("Missing 'resourceType' from resource");
+					throw new DataFormatException("Missing required element 'resourceType' from JSON resource object, unable to parse");
 				}
 				theState.enteringNewElement(null, resType);
 				preResource = true;

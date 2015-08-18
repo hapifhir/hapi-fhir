@@ -88,6 +88,11 @@
 				of the appropriate error code for the exception being thrown. Thanks to Nagesh Bashyam 
 				for reporting!
 			</action>
+			<action type="fix" issue="207">
+				Fix issue in JSON parser where invalid contained resources (missing
+				a resourceType element) fail to parse with a confusing NullPointerException.
+				Thanks to GitHub user @hugosoares for reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

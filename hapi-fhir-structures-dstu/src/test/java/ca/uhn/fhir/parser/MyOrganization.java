@@ -6,4 +6,6 @@ import ca.uhn.fhir.model.dstu.resource.Organization;
 @ResourceDef()
 public class MyOrganization extends Organization {
 
+	private static final long serialVersionUID = 1L;
+
 }
