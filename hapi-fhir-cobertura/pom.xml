@@ -75,12 +75,6 @@
 
 		<!-- Test Database -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit_version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
@@ -94,32 +88,27 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlet</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-util</artifactId>
-			<version>${jetty_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
