@@ -15,12 +15,6 @@
 	<name>HAPI FHIR - Minimal Dependency Test - Client</name>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit_version}</version>
-		</dependency>
-		
 		<!-- Use an older version of SLF4j -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -69,13 +63,6 @@
 					<groupId>org.codehaus.woodstox</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>java-hamcrest</artifactId>
-			<version>${hamcrest_version}</version>
-			<scope>test</scope>
 		</dependency>
 		
 	</dependencies>

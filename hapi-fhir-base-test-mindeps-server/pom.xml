@@ -16,14 +16,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit_version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
-			<version>6.1.26</version> <!-- 6.1.26 -->
+			<version>6.1.26</version> <!-- Use an old version -->
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -67,13 +62,6 @@
 					<groupId>org.codehaus.woodstox</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>java-hamcrest</artifactId>
-			<version>${hamcrest_version}</version>
-			<scope>test</scope>
 		</dependency>
 		
 	</dependencies>

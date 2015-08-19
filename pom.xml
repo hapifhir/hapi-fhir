@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
@@ -45,29 +44,47 @@
 	</description>
 
 	<dependencies>
-			<!--
-			Cobertura is here as a 'provided' depdendency just to get the
-			@CoverageIgnore annotation. It would be nice if there was a better way
-			for this.. 
-			-->
-			<dependency>
-				<groupId>net.sourceforge.cobertura</groupId>
-				<artifactId>cobertura</artifactId>
-				<version>2.1.1</version>
-				<scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<artifactId>jetty</artifactId>
-						<groupId>org.mortbay.jetty</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
+		<dependency>
+			<groupId>net.sourceforge.cobertura</groupId>
+			<artifactId>cobertura</artifactId>
+			<version>2.1.1</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>jetty</artifactId>
+					<groupId>org.mortbay.jetty</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>hamcrest-core</artifactId>
+					<groupId>org.hamcrest</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>java-hamcrest</artifactId>
+			<version>2.0.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.10.19</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<prerequisites>
-		<!-- TODO: the version number here should probably be either 3.2 or 3.3. 
-			Check and fix -->
-		<maven>3.0.1</maven>
+		<maven>3.2</maven>
 	</prerequisites>
 
 	<developers>
@@ -171,9 +188,7 @@
 	</licenses>
 
 	<properties>
-		<!-- This property is used in some of the site documentation where the 
-			version is shown, so that we can deploy the site even if the project is on 
-			a snapshot version. -->
+		<!-- This property is used in some of the site documentation where the version is shown, so that we can deploy the site even if the project is on a snapshot version. -->
 		<hapi_stable_version>1.1</hapi_stable_version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -190,17 +205,12 @@
 		<commons_codec_version>1.10</commons_codec_version>
 		<derby_version>10.11.1.1</derby_version>
 		<guava_version>18.0</guava_version>
-		<hamcrest_version>2.0.0.0</hamcrest_version>
-		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is 
-			too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. 
-			Upgrade this version with caution! Also note that if you change this, you 
-			may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's 
-			configuration for that plugin... <hibernate_version>4.3.7.Final</hibernate_version> -->
+		<!-- Note on Hibernate versions: Hibernate 4.3+ uses JPA 2.1, which is too new for a number of platforms including JBoss EAP 6.x and Glassfish 3.0. Upgrade this version with caution! Also note that if 
+			you change this, you may get a failure in hibernate4-maven-plugin. See the note in hapi-fhir-jpaserver-base/pom.xml's configuration for that plugin... <hibernate_version>4.3.7.Final</hibernate_version> -->
 		<hibernate_version>4.2.17.Final</hibernate_version>
 		<hibernate_validator_version>5.1.0.Final</hibernate_validator_version>
 		<jetty_version>9.2.6.v20141205</jetty_version>
 		<jscience_version>4.3.1</jscience_version>
-		<junit_version>4.12</junit_version>
 		<logback_version>1.1.2</logback_version>
 		<maven_antrun_plugin_version>1.8</maven_antrun_plugin_version>
 		<maven_build_helper_plugin_version>1.9.1</maven_build_helper_plugin_version>
@@ -215,7 +225,6 @@
 		<maven_site_plugin_version>3.4</maven_site_plugin_version>
 		<maven_source_plugin_version>2.4</maven_source_plugin_version>
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
-		<mockito_version>1.10.17</mockito_version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.3.6</phloc_commons_version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -243,11 +252,6 @@
 				<version>3.1.0</version>
 			</dependency>
 			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.12</version>
-			</dependency>
-			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
 				<version>2.1.1</version>
@@ -266,6 +270,21 @@
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derbyclient</artifactId>
 				<version>${derby_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>4.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-http</artifactId>
+				<version>9.2.6.v20141205</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -293,9 +312,34 @@
 				<version>9.2.6.v20141205</version>
 			</dependency>
 			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-all</artifactId>
-				<version>1.10.19</version>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+				<version>${spring_version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -333,13 +377,43 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.18.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.18.1</version>
+					<configuration>
+						<redirectTestOutputToFile>true</redirectTestOutputToFile>
+						<runOrder>random</runOrder>
+						<argLine>-Dfile.encoding=UTF-8</argLine>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
 					<version>2.6</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.14</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -347,6 +421,15 @@
 					<version>2.7</version>
 					<configuration>
 						<skip>true</skip>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>1.8</version>
+					<configuration>
+						<verbose>true</verbose>
+						<addSvnKeyWords>false</addSvnKeyWords>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -364,47 +447,7 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>${maven_surefire_plugin_version}</version>
-					<configuration>
-						<redirectTestOutputToFile>true</redirectTestOutputToFile>
-						<runOrder>random</runOrder>
-						<argLine>-Dfile.encoding=UTF-8</argLine>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.14</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>${maven_javadoc_plugin_version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>${maven_source_plugin_version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>${maven_license_plugin_version}</version>
-					<configuration>
-						<verbose>true</verbose>
-						<addSvnKeyWords>false</addSvnKeyWords>
-					</configuration>
-				</plugin>
-				<plugin>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>${maven_site_plugin_version}</version>
 					<configuration>
 						<skip>false</skip>
 						<skipDeploy>true</skipDeploy>
@@ -450,8 +493,7 @@
 						</dependency>
 					</dependencies>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -562,6 +604,11 @@
 					<artifactId>maven-install-plugin</artifactId>
 					<version>2.5.2</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.4</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -596,46 +643,45 @@
 						<configuration>
 							<target>
 								<copy todir="target/site/apidocs">
-									<fileset dir="hapi-fhir-base/target/site/apidocs" />
+									<fileset dir="hapi-fhir-base/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu">
-									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-dstu/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-hl7org-dstu2">
-									<fileset
-										dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-hl7org-dstu2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-dstu2">
-									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs" />
+									<fileset dir="hapi-fhir-structures-dstu2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs" />
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
-									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref" />
+									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
 								<copy todir="target/site/xref-base">
-									<fileset dir="hapi-fhir-base/target/site/xref" />
+									<fileset dir="hapi-fhir-base/target/site/xref"/>
 								</copy>
 								<copy todir="target/site/cobertura">
-									<fileset dir="hapi-fhir-cobertura/target/site/cobertura" />
+									<fileset dir="hapi-fhir-cobertura/target/site/cobertura"/>
 								</copy>
 								<copy todir="target/site">
-									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*" />
+									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
 								</copy>
 								<echo>Fixing Checkstyle Report</echo>
 								<replace dir="target/site" summary="true">
-									<include name="checkstyle.html" />
+									<include name="checkstyle.html"/>
 									<replacetoken>"../../</replacetoken>
 									<replacevalue>"./</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken>http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css</replacetoken>
 									<replacevalue>./css/bootstrap-responsive.min.css</replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="index.html" />
+									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
 									<replacevalue><![CDATA[<div class="jumbotron subhead">
 		<div class="row" id="banner">
@@ -650,8 +696,7 @@
 		</div>
 	</div>]]></replacevalue>
 								</replace>
-								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" 
-									match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
+								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
 							</target>
 						</configuration>
 					</execution>
@@ -665,33 +710,33 @@
 							<target>
 								<echo>Adding Fontawesome</echo>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[<a href="download.html" title="Download">Download</a>]]></replacetoken>
 									<replacevalue><![CDATA[<a href="download.html"  title="Download"><i class="fa fa-download"></i> Download</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
 									<replacevalue><![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Test Servers <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-fire"></i>&nbsp;Test Servers&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Documentation <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-book"></i>&nbsp;Documentation&nbsp;<]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
-									<include name="*.html" />
+									<include name="*.html"/>
 									<replacetoken><![CDATA[data-toggle="dropdown">Get Help <]]></replacetoken>
 									<replacevalue><![CDATA[data-toggle="dropdown"><i class="fa fa-support"></i>&nbsp;Get Help&nbsp;<]]></replacevalue>
 								</replace>
 								<echo>Changing Breadcrumbs</echo>
 								<replace dir="target/site" summary="true">
-									<include name="doc_*.html" />
+									<include name="doc_*.html"/>
 									<replacetoken><![CDATA[<li class="divider">/</li>]]></replacetoken>
 									<replacevalue><![CDATA[<li  class="divider">/</li>
 			<li><a href="docindex.html" title="Documentation">Documentation</a></li>
@@ -742,8 +787,8 @@
 								<echo>Adding Google analytics in target/site for &lt;body&gt;</echo>
 								<replace dir="target/site" summary="true">
 									<include name="**/*.html"></include>
-									<replacefilter token="#build#" value="${label}" />
-									<replacefilter token="#version#" value="${project.version}" />
+									<replacefilter token="#build#" value="${label}"/>
+									<replacefilter token="#version#" value="${project.version}"/>
 									<replacetoken><![CDATA[</body>]]></replacetoken>
 									<replacevalue><![CDATA[
 <script>
@@ -792,7 +837,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
-				<version>1.11</version>
 				<inherited>true</inherited>
 				<configuration>
 					<signature>
@@ -845,11 +889,8 @@
 
 	<reporting>
 		<plugins>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> 
-				<reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> 
-				</reportSet> </reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> 
-				<includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> 
-				</plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-checkstyle-plugin</artifactId> <reportSets> <reportSet> <reports><report>checkstyle-aggregate</report></reports> </reportSet> 
+				</reportSets> <configuration> <configLocation>config/sun_checks.xml</configLocation> <includes> hapi-fhir-base/src/main/java/**/*.java </includes> </configuration> </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changes-plugin</artifactId>
@@ -873,7 +914,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>${maven_surefire_plugin_version}</version>
+				<version>2.18.1</version>
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -906,8 +947,7 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> 
-				<version>1.1</version> </plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
 
@@ -925,10 +965,8 @@
 			</modules>
 			<build>
 				<plugins>
-					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> 
-						<executions> <execution> <phase>package</phase> <goals> <goal>single</goal> 
-						</goals> <configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> 
-						</descriptors> </configuration> </execution> </executions> </plugin> -->
+					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> <goals> <goal>single</goal> </goals> 
+						<configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> </descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
 

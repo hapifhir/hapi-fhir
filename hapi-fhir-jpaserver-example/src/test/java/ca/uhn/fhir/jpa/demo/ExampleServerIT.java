@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.demo;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.jetty.server.Server;
@@ -17,10 +18,12 @@ import ca.uhn.fhir.rest.client.IGenericClient;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 
-public class ResourceProviderDstu2Test {
+public class ExampleServerIT {
 
 	private static IGenericClient ourClient;
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleServerIT.class);
+
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -44,13 +47,23 @@ public class ResourceProviderDstu2Test {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
+		/*
+		 * This runs under maven, and I'm not sure how else to figure out the target directory from code..
+		 */
+		String path = ExampleServerIT.class.getClassLoader().getResource("whereami.txt").getPath();
+		path = new File(path).getParent();
+		path = new File(path).getParent();
+		path = new File(path).getParent();
+
+		ourLog.info("Project base path is: {}", path);
+
 		ourPort = RandomServerPortProvider.findFreePort();
 		ourServer = new Server(ourPort);
 
 		WebAppContext webAppContext = new WebAppContext();
 		webAppContext.setContextPath("/");
-		webAppContext.setDescriptor("src/main/webapp/WEB-INF/web.xml");
-		webAppContext.setResourceBase("target/hapi-fhir-jpaserver-example");
+		webAppContext.setDescriptor(path + "/src/main/webapp/WEB-INF/web.xml");
+		webAppContext.setResourceBase(path + "/target/hapi-fhir-jpaserver-example");
 		webAppContext.setParentLoaderPriority(true);
 
 		ourServer.setHandler(webAppContext);

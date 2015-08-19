@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.demo;
 
 import java.io.IOException;
 import java.net.ServerSocket;
