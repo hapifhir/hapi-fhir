@@ -42,7 +42,7 @@
 		</init-param>
 		<init-param>
 			<param-name>FhirVersion</param-name>
-			<param-value>DSTU1</param-value>
+			<param-value>DSTU2</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

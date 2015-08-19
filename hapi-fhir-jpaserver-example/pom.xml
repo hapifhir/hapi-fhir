@@ -1,21 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- 
-	Note: HAPI projects use the "hapi-fhir" POM as their base to provide
-	easy management.
-	 
-	You do not need to use this in your own projects, so the 
-	"parent" tag and it's contents below may be removed if you
-	are using this file as a basis for your own project.
-	-->
+	<!-- Note: HAPI projects use the "hapi-fhir" POM as their base to provide 
+		easy management. You do not need to use this in your own projects, so the 
+		"parent" tag and it's contents below may be removed if you are using this 
+		file as a basis for your own project. -->
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
 		<version>1.2-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	
+
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-jpaserver-example</artifactId>
 	<packaging>war</packaging>
@@ -40,7 +37,7 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>1.2-SNAPSHOT</version>
 		</dependency>
-		
+
 		<!-- At least one "structures" JAR must also be included -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -53,10 +50,8 @@
 			<version>1.2-SNAPSHOT</version>
 		</dependency>
 
-		<!-- 
-		This dependency includes the JPA server itself, which is packaged
-		separately from the rest of HAPI FHIR 
-		-->
+		<!-- This dependency includes the JPA server itself, which is packaged 
+			separately from the rest of HAPI FHIR -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
@@ -69,19 +64,16 @@
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
 			<version>1.2-SNAPSHOT</version>
 			<type>war</type>
-			<scope>provided</scope>		
+			<scope>provided</scope>
 		</dependency>
 
-		<!-- 
-		HAPI-FHIR uses Logback for logging support. The logback library is included 
-		automatically by Maven as a part of the hapi-fhir-base dependency, but you 
-		also need to include a logging library. Logback is used here, but log4j
-		would also be fine. 
-		-->
+		<!-- HAPI-FHIR uses Logback for logging support. The logback library is 
+			included automatically by Maven as a part of the hapi-fhir-base dependency, 
+			but you also need to include a logging library. Logback is used here, but 
+			log4j would also be fine. -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>${logback_version}</version>
 		</dependency>
 
 		<!-- Needed for JEE/Servlet support -->
@@ -91,10 +83,8 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- 
-		If you are using HAPI narrative generation, you will need to include Thymeleaf
-		as well. Otherwise the following can be omitted.
-		 -->
+		<!-- If you are using HAPI narrative generation, you will need to include 
+			Thymeleaf as well. Otherwise the following can be omitted. -->
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
@@ -113,11 +103,8 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
-		<!-- 
-		Spring Web is used to deploy the server to a
-		web container.
-		-->
+
+		<!-- Spring Web is used to deploy the server to a web container. -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -125,21 +112,17 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!--
-		You may not need this if you are deploying to an application server which
-		provides database connection pools itself.
-		-->
+		<!-- You may not need this if you are deploying to an application server 
+			which provides database connection pools itself. -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 		</dependency>
 
-		<!-- 
-		This example uses Derby embedded database. If you are using another
-		database such as Mysql or Oracle, you may omit the following 
-		dependencies and replace them with an appropriate database client
-		dependency for your database platform. 
-		-->
+		<!-- This example uses Derby embedded database. If you are using another 
+			database such as Mysql or Oracle, you may omit the following dependencies 
+			and replace them with an appropriate database client dependency for your 
+			database platform. -->
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
@@ -153,31 +136,50 @@
 			<artifactId>derbyclient</artifactId>
 		</dependency>
 
-		<!-- 
-		Arquillian is just used for automated tests, you don't neccesarily need it
-		to use this example.
+		<!--
+			The following dependencies are only needed for automated unit tests,
+			you do not neccesarily need them to run the example.
 		-->
 		<dependency>
-			<groupId>org.jboss.arquillian.junit</groupId>
-			<artifactId>arquillian-junit-container</artifactId>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlets</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-servlet</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-util</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
 			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
 
 	<build>
-		
-		<!-- 
-		Tells Maven to name the generated WAR file as
-		hapi-fhir-jpaserver-example.war
-		-->
+
+		<!-- Tells Maven to name the generated WAR file as hapi-fhir-jpaserver-example.war -->
 		<finalName>hapi-fhir-jpaserver-example</finalName>
-		
-		<!-- 
-		The following is not required for the application to build, but
-		allows you to test it by issuing "mvn jetty:run" from the command
-		line. 
-		-->
+
+		<!-- The following is not required for the application to build, but allows 
+			you to test it by issuing "mvn jetty:run" from the command line. -->
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -192,11 +194,9 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-	
+
 		<plugins>
-			<!-- 
-			Tell Maven which Java source version you want to use
-			-->
+			<!-- Tell Maven which Java source version you want to use -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -205,11 +205,9 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			
-			<!-- 
-			The configuration here tells the WAR plugin to include the FHIR Tester
-			overlay. You can omit it if you are not using that feature.
-			-->
+
+			<!-- The configuration here tells the WAR plugin to include the FHIR Tester 
+				overlay. You can omit it if you are not using that feature. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -222,11 +220,9 @@
 					</overlays>
 				</configuration>
 			</plugin>
-			
-			<!-- 
-			This plugin is just a part of the HAPI internal build process, you do not
-			need to incude it in your own projects
-			-->
+
+			<!-- This plugin is just a part of the HAPI internal build process, you 
+				do not need to incude it in your own projects -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
@@ -234,7 +230,7 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-    		
+
 		</plugins>
 	</build>
 

@@ -45,12 +45,6 @@
 	</description>
 
 	<dependencies>
-		<dependency>
-			<groupId>net.sourceforge.cobertura</groupId>
-			<artifactId>cobertura</artifactId>
-			<version>2.1.1</version>
-			<scope>provided</scope>
-		</dependency>
 	</dependencies>
 
 	<prerequisites>
@@ -232,6 +226,16 @@
 				<version>3.1.0</version>
 			</dependency>
 			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.12</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.cobertura</groupId>
+				<artifactId>cobertura</artifactId>
+				<version>2.1.1</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
 				<version>2.1.1</version>
@@ -252,10 +256,30 @@
 				<version>${derby_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.jboss.arquillian.junit</groupId>
-				<artifactId>arquillian-junit-container</artifactId>
-				<version>1.1.8.Final</version>
-			</dependency>		
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlets</artifactId>
+				<version>9.2.6.v20141205</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-servlet</artifactId>
+				<version>9.2.6.v20141205</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-server</artifactId>
+				<version>9.2.6.v20141205</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-util</artifactId>
+				<version>9.2.6.v20141205</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-webapp</artifactId>
+				<version>9.2.6.v20141205</version>
+			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-all</artifactId>
@@ -580,7 +604,7 @@
 									<fileset dir="hapi-fhir-cobertura/target/site/cobertura" />
 								</copy>
 								<copy todir="target/site">
-									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*"/>
+									<fileset dir="hapi-fhir-base/target/site" includes="checkstyle.*" />
 								</copy>
 								<echo>Fixing Checkstyle Report</echo>
 								<replace dir="target/site" summary="true">
@@ -609,7 +633,8 @@
 		</div>
 	</div>]]></replacevalue>
 								</replace>
-								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/>-->
+								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" 
+									match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
 							</target>
 						</configuration>
 					</execution>
