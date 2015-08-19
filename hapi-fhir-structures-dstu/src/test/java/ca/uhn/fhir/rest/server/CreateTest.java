@@ -84,7 +84,7 @@ public class CreateTest {
 
 		assertEquals(201, status.getStatusLine().getStatusCode());
 		assertEquals("http://localhost:" + ourPort + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), StringContains.containsString("UTF-8"));
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toUpperCase(), StringContains.containsString("UTF-8"));
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("<Patient ", "<identifier>","<value value=\"001"));
 		assertEquals(EncodingEnum.XML, ourLastEncoding);
