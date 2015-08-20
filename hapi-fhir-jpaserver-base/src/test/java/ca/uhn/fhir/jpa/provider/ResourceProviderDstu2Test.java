@@ -428,8 +428,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testCreateQuestionnaireResponseWithValidation() throws IOException {
-		String methodName = "testCreateQuestionnaireResponseWithValidation";
-
 		ValueSet options = new ValueSet();
 		options.getCodeSystem().setSystem("urn:system").addConcept().setCode("code0");
 		IIdType optId = ourClient.create().resource(options).execute().getId();
@@ -1508,21 +1506,21 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			// @formatter:off
-			assertThat(
-					resp,
-					stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
-							"<compose>", 
-							"<include>", 
+			assertThat(resp,
+				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">", 
+					"<expansion>", 
+						"<contains>", 
 							"<system value=\"http://loinc.org\"/>",
-							"<concept>", 
 							"<code value=\"11378-7\"/>",
 							"<display value=\"Systolic blood pressure at First encounter\"/>", 
-							"</concept>",
-							"<concept>",
+						"</contains>",
+						"<contains>", 
+							"<system value=\"http://loinc.org\"/>",
 							"<code value=\"8450-9\"/>", 
 							"<display value=\"Systolic blood pressure--expiration\"/>", 
-							"</concept>"
-							));
+						"</contains>",
+					"</expansion>" 
+						));
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());

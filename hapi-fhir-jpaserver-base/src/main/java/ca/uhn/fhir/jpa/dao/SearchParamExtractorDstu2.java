@@ -63,6 +63,7 @@ import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Patient.Communication;
 import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.model.dstu2.valueset.RestfulSecurityServiceEnum;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
@@ -405,6 +406,12 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 	public List<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IResource theResource) {
 		ArrayList<BaseResourceIndexedSearchParam> retVal = new ArrayList<BaseResourceIndexedSearchParam>();
 
+		String useSystem = null;
+		if (theResource instanceof ValueSet) {
+			ValueSet vs = (ValueSet) theResource;
+			useSystem = vs.getCodeSystem().getSystem();
+		}
+		
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		for (RuntimeSearchParam nextSpDef : def.getSearchParams()) {
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
@@ -466,7 +473,11 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					systems.add(null);
+					if ("ValueSet.codeSystem.concept.code".equals(nextPath)) {
+						systems.add(useSystem);
+					} else {
+						systems.add(null);
+					}
 					codes.add(nextValue.getValueAsString());
 				} else if (nextObject instanceof CodingDt) {
 					CodingDt nextValue = (CodingDt) nextObject;

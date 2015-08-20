@@ -59,16 +59,16 @@ public @interface OperationParam {
 	Class<? extends IBase> type() default IBase.class;
 	
 	/**
-	 * The minimum number of repetitions allowed for this child
+	 * The minimum number of repetitions allowed for this child (default is 0)
 	 */
 	int min() default 0;
 
 	/**
 	 * The maximum number of repetitions allowed for this child. Should be
 	 * set to {@link #MAX_UNLIMITED} if there is no limit to the number of
-	 * repetitions.
+	 * repetitions (default is 1)
 	 */
-	int max() default MAX_UNLIMITED;
+	int max() default 1;
 
 	
 }

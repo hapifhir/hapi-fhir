@@ -131,7 +131,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
 
 @Transactional(propagation = Propagation.REQUIRED)
-public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseHapiFhirDao implements IFhirResourceDao<T> {
+public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
 	static final String OO_SEVERITY_WARN = "warning";
 	static final String OO_SEVERITY_INFO = "information";
