@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -319,37 +319,49 @@ public class DocumentReference extends DomainResource {
     @Block()
     public static class DocumentReferenceContextComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * Describes the clinical encounter or type of care that the document content is associated with.
+         */
+        @Child(name = "encounter", type = {Encounter.class}, order=1, min=0, max=1)
+        @Description(shortDefinition="Context of the document  content", formalDefinition="Describes the clinical encounter or type of care that the document content is associated with." )
+        protected Reference encounter;
+
+        /**
+         * The actual object that is the target of the reference (Describes the clinical encounter or type of care that the document content is associated with.)
+         */
+        protected Encounter encounterTarget;
+
+        /**
          * This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.
          */
-        @Child(name = "event", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "event", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
         @Description(shortDefinition="Main Clinical Acts Documented", formalDefinition="This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a 'History and Physical Report' in which the procedure being documented is necessarily a 'History and Physical' act." )
         protected List<CodeableConcept> event;
 
         /**
          * The time period over which the service that is described by the document was provided.
          */
-        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1)
+        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Time of service that is being documented", formalDefinition="The time period over which the service that is described by the document was provided." )
         protected Period period;
 
         /**
          * The kind of facility where the patient was seen.
          */
-        @Child(name = "facilityType", type = {CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "facilityType", type = {CodeableConcept.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Kind of facility where patient was seen", formalDefinition="The kind of facility where the patient was seen." )
         protected CodeableConcept facilityType;
 
         /**
          * This property may convey specifics about the practice setting where the content was created, often reflecting the clinical specialty.
          */
-        @Child(name = "practiceSetting", type = {CodeableConcept.class}, order=4, min=0, max=1)
+        @Child(name = "practiceSetting", type = {CodeableConcept.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Additional details about where the content was created (e.g. clinical specialty)", formalDefinition="This property may convey specifics about the practice setting where the content was created, often reflecting the clinical specialty." )
         protected CodeableConcept practiceSetting;
 
         /**
          * The Patient Information as known when the document was published. May be a reference to a version specific, or contained.
          */
-        @Child(name = "sourcePatientInfo", type = {Patient.class}, order=5, min=0, max=1)
+        @Child(name = "sourcePatientInfo", type = {Patient.class}, order=6, min=0, max=1)
         @Description(shortDefinition="Source patient info", formalDefinition="The Patient Information as known when the document was published. May be a reference to a version specific, or contained." )
         protected Reference sourcePatientInfo;
 
@@ -361,11 +373,11 @@ public class DocumentReference extends DomainResource {
         /**
          * Related identifiers or resources associated with the DocumentReference.
          */
-        @Child(name = "related", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Related things", formalDefinition="Related identifiers or resources associated with the DocumentReference." )
+        @Child(name = "related", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+        @Description(shortDefinition="Related identifiers or resources", formalDefinition="Related identifiers or resources associated with the DocumentReference." )
         protected List<DocumentReferenceContextRelatedComponent> related;
 
-        private static final long serialVersionUID = -225578230L;
+        private static final long serialVersionUID = 994799273L;
 
     /*
      * Constructor
@@ -373,6 +385,50 @@ public class DocumentReference extends DomainResource {
       public DocumentReferenceContextComponent() {
         super();
       }
+
+        /**
+         * @return {@link #encounter} (Describes the clinical encounter or type of care that the document content is associated with.)
+         */
+        public Reference getEncounter() { 
+          if (this.encounter == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DocumentReferenceContextComponent.encounter");
+            else if (Configuration.doAutoCreate())
+              this.encounter = new Reference(); // cc
+          return this.encounter;
+        }
+
+        public boolean hasEncounter() { 
+          return this.encounter != null && !this.encounter.isEmpty();
+        }
+
+        /**
+         * @param value {@link #encounter} (Describes the clinical encounter or type of care that the document content is associated with.)
+         */
+        public DocumentReferenceContextComponent setEncounter(Reference value) { 
+          this.encounter = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Describes the clinical encounter or type of care that the document content is associated with.)
+         */
+        public Encounter getEncounterTarget() { 
+          if (this.encounterTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DocumentReferenceContextComponent.encounter");
+            else if (Configuration.doAutoCreate())
+              this.encounterTarget = new Encounter(); // aa
+          return this.encounterTarget;
+        }
+
+        /**
+         * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Describes the clinical encounter or type of care that the document content is associated with.)
+         */
+        public DocumentReferenceContextComponent setEncounterTarget(Encounter value) { 
+          this.encounterTarget = value;
+          return this;
+        }
 
         /**
          * @return {@link #event} (This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a "History and Physical Report" in which the procedure being documented is necessarily a "History and Physical" act.)
@@ -572,6 +628,7 @@ public class DocumentReference extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
+          childrenList.add(new Property("encounter", "Reference(Encounter)", "Describes the clinical encounter or type of care that the document content is associated with.", 0, java.lang.Integer.MAX_VALUE, encounter));
           childrenList.add(new Property("event", "CodeableConcept", "This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a 'History and Physical Report' in which the procedure being documented is necessarily a 'History and Physical' act.", 0, java.lang.Integer.MAX_VALUE, event));
           childrenList.add(new Property("period", "Period", "The time period over which the service that is described by the document was provided.", 0, java.lang.Integer.MAX_VALUE, period));
           childrenList.add(new Property("facilityType", "CodeableConcept", "The kind of facility where the patient was seen.", 0, java.lang.Integer.MAX_VALUE, facilityType));
@@ -583,6 +640,7 @@ public class DocumentReference extends DomainResource {
       public DocumentReferenceContextComponent copy() {
         DocumentReferenceContextComponent dst = new DocumentReferenceContextComponent();
         copyValues(dst);
+        dst.encounter = encounter == null ? null : encounter.copy();
         if (event != null) {
           dst.event = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : event)
@@ -607,9 +665,10 @@ public class DocumentReference extends DomainResource {
         if (!(other instanceof DocumentReferenceContextComponent))
           return false;
         DocumentReferenceContextComponent o = (DocumentReferenceContextComponent) other;
-        return compareDeep(event, o.event, true) && compareDeep(period, o.period, true) && compareDeep(facilityType, o.facilityType, true)
-           && compareDeep(practiceSetting, o.practiceSetting, true) && compareDeep(sourcePatientInfo, o.sourcePatientInfo, true)
-           && compareDeep(related, o.related, true);
+        return compareDeep(encounter, o.encounter, true) && compareDeep(event, o.event, true) && compareDeep(period, o.period, true)
+           && compareDeep(facilityType, o.facilityType, true) && compareDeep(practiceSetting, o.practiceSetting, true)
+           && compareDeep(sourcePatientInfo, o.sourcePatientInfo, true) && compareDeep(related, o.related, true)
+          ;
       }
 
       @Override
@@ -623,10 +682,10 @@ public class DocumentReference extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (event == null || event.isEmpty()) && (period == null || period.isEmpty())
-           && (facilityType == null || facilityType.isEmpty()) && (practiceSetting == null || practiceSetting.isEmpty())
-           && (sourcePatientInfo == null || sourcePatientInfo.isEmpty()) && (related == null || related.isEmpty())
-          ;
+        return super.isEmpty() && (encounter == null || encounter.isEmpty()) && (event == null || event.isEmpty())
+           && (period == null || period.isEmpty()) && (facilityType == null || facilityType.isEmpty())
+           && (practiceSetting == null || practiceSetting.isEmpty()) && (sourcePatientInfo == null || sourcePatientInfo.isEmpty())
+           && (related == null || related.isEmpty());
       }
 
   }
@@ -808,14 +867,14 @@ public class DocumentReference extends DomainResource {
     /**
      * An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.
      */
-    @Child(name = "format", type = {UriType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "format", type = {Coding.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Format/content rules for the document", formalDefinition="An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType." )
-    protected List<UriType> format;
+    protected List<Coding> format;
 
     /**
      * Identifies who is responsible for adding the information to the document.
      */
-    @Child(name = "author", type = {Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=6, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "author", type = {Practitioner.class, Organization.class, Device.class, Patient.class, RelatedPerson.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Who and/or what authored the document", formalDefinition="Identifies who is responsible for adding the information to the document." )
     protected List<Reference> author;
     /**
@@ -891,11 +950,11 @@ public class DocumentReference extends DomainResource {
     protected StringType description;
 
     /**
-     * A set of Security-Tag codes specifying the level of privacy/security of the Document.
+     * A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to.
      */
-    @Child(name = "confidentiality", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Document security-tags", formalDefinition="A set of Security-Tag codes specifying the level of privacy/security of the Document." )
-    protected List<CodeableConcept> confidentiality;
+    @Child(name = "securityLabel", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="Document security-tags", formalDefinition="A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to." )
+    protected List<CodeableConcept> securityLabel;
 
     /**
      * The document or url to the document along with critical metadata to prove content has integrity.
@@ -911,7 +970,7 @@ public class DocumentReference extends DomainResource {
     @Description(shortDefinition="Clinical context of document", formalDefinition="The clinical context in which the document was prepared." )
     protected DocumentReferenceContextComponent context;
 
-    private static final long serialVersionUID = 1440270142L;
+    private static final long serialVersionUID = 2074994054L;
 
   /*
    * Constructor
@@ -1084,16 +1143,16 @@ public class DocumentReference extends DomainResource {
     /**
      * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
      */
-    public List<UriType> getFormat() { 
+    public List<Coding> getFormat() { 
       if (this.format == null)
-        this.format = new ArrayList<UriType>();
+        this.format = new ArrayList<Coding>();
       return this.format;
     }
 
     public boolean hasFormat() { 
       if (this.format == null)
         return false;
-      for (UriType item : this.format)
+      for (Coding item : this.format)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1103,36 +1162,22 @@ public class DocumentReference extends DomainResource {
      * @return {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
      */
     // syntactic sugar
-    public UriType addFormatElement() {//2 
-      UriType t = new UriType();
+    public Coding addFormat() { //3
+      Coding t = new Coding();
       if (this.format == null)
-        this.format = new ArrayList<UriType>();
+        this.format = new ArrayList<Coding>();
       this.format.add(t);
       return t;
     }
 
-    /**
-     * @param value {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
-     */
-    public DocumentReference addFormat(String value) { //1
-      UriType t = new UriType();
-      t.setValue(value);
+    // syntactic sugar
+    public DocumentReference addFormat(Coding t) { //3
+      if (t == null)
+        return this;
       if (this.format == null)
-        this.format = new ArrayList<UriType>();
+        this.format = new ArrayList<Coding>();
       this.format.add(t);
       return this;
-    }
-
-    /**
-     * @param value {@link #format} (An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.)
-     */
-    public boolean hasFormat(String value) { 
-      if (this.format == null)
-        return false;
-      for (UriType v : this.format)
-        if (v.equals(value)) // uri
-          return true;
-      return false;
     }
 
     /**
@@ -1520,42 +1565,42 @@ public class DocumentReference extends DomainResource {
     }
 
     /**
-     * @return {@link #confidentiality} (A set of Security-Tag codes specifying the level of privacy/security of the Document.)
+     * @return {@link #securityLabel} (A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to.)
      */
-    public List<CodeableConcept> getConfidentiality() { 
-      if (this.confidentiality == null)
-        this.confidentiality = new ArrayList<CodeableConcept>();
-      return this.confidentiality;
+    public List<CodeableConcept> getSecurityLabel() { 
+      if (this.securityLabel == null)
+        this.securityLabel = new ArrayList<CodeableConcept>();
+      return this.securityLabel;
     }
 
-    public boolean hasConfidentiality() { 
-      if (this.confidentiality == null)
+    public boolean hasSecurityLabel() { 
+      if (this.securityLabel == null)
         return false;
-      for (CodeableConcept item : this.confidentiality)
+      for (CodeableConcept item : this.securityLabel)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #confidentiality} (A set of Security-Tag codes specifying the level of privacy/security of the Document.)
+     * @return {@link #securityLabel} (A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to.)
      */
     // syntactic sugar
-    public CodeableConcept addConfidentiality() { //3
+    public CodeableConcept addSecurityLabel() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.confidentiality == null)
-        this.confidentiality = new ArrayList<CodeableConcept>();
-      this.confidentiality.add(t);
+      if (this.securityLabel == null)
+        this.securityLabel = new ArrayList<CodeableConcept>();
+      this.securityLabel.add(t);
       return t;
     }
 
     // syntactic sugar
-    public DocumentReference addConfidentiality(CodeableConcept t) { //3
+    public DocumentReference addSecurityLabel(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.confidentiality == null)
-        this.confidentiality = new ArrayList<CodeableConcept>();
-      this.confidentiality.add(t);
+      if (this.securityLabel == null)
+        this.securityLabel = new ArrayList<CodeableConcept>();
+      this.securityLabel.add(t);
       return this;
     }
 
@@ -1630,7 +1675,7 @@ public class DocumentReference extends DomainResource {
         childrenList.add(new Property("subject", "Reference(Patient|Practitioner|Group|Device)", "Who or what the document is about. The document can be about a person, (patient or healthcare practitioner), a device (I.e. machine) or even a group of subjects (such as a document about a herd of farm animals, or a set of patients that share a common exposure).", 0, java.lang.Integer.MAX_VALUE, subject));
         childrenList.add(new Property("type", "CodeableConcept", "Specifies the particular kind of document. This usually equates to the purpose of making the document. It is recommended that the value Set be drawn from a coding scheme providing a fine level of granularity such as LOINC.  (e.g. Patient Summary, Discharge Summary, Prescription, etc.).", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("class", "CodeableConcept", "A categorization for the type of document - helps for indexing and searching. This may be implied by or derived from the code specified in the Composition Type.", 0, java.lang.Integer.MAX_VALUE, class_));
-        childrenList.add(new Property("format", "uri", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
+        childrenList.add(new Property("format", "Coding", "An identifier of the document encoding, structure, and template that the document conforms to beyond the base format indicated in the mimeType.", 0, java.lang.Integer.MAX_VALUE, format));
         childrenList.add(new Property("author", "Reference(Practitioner|Organization|Device|Patient|RelatedPerson)", "Identifies who is responsible for adding the information to the document.", 0, java.lang.Integer.MAX_VALUE, author));
         childrenList.add(new Property("custodian", "Reference(Organization)", "Identifies the organization or group who is responsible for ongoing maintenance of and access to the document.", 0, java.lang.Integer.MAX_VALUE, custodian));
         childrenList.add(new Property("authenticator", "Reference(Practitioner|Organization)", "Which person or organization authenticates that this document is valid.", 0, java.lang.Integer.MAX_VALUE, authenticator));
@@ -1640,7 +1685,7 @@ public class DocumentReference extends DomainResource {
         childrenList.add(new Property("docStatus", "CodeableConcept", "The status of the underlying document.", 0, java.lang.Integer.MAX_VALUE, docStatus));
         childrenList.add(new Property("relatesTo", "", "Relationships that this document has with other document references that already exist.", 0, java.lang.Integer.MAX_VALUE, relatesTo));
         childrenList.add(new Property("description", "string", "Human-readable description of the source document. This is sometimes known as the 'title'.", 0, java.lang.Integer.MAX_VALUE, description));
-        childrenList.add(new Property("confidentiality", "CodeableConcept", "A set of Security-Tag codes specifying the level of privacy/security of the Document.", 0, java.lang.Integer.MAX_VALUE, confidentiality));
+        childrenList.add(new Property("securityLabel", "CodeableConcept", "A set of Security-Tag codes specifying the level of privacy/security of the Document. Note that DocumentReference.meta.security is the security labels of the reference to the document, while DocumentReference.securityLabel is the security labels on the document it refers to.", 0, java.lang.Integer.MAX_VALUE, securityLabel));
         childrenList.add(new Property("content", "Attachment", "The document or url to the document along with critical metadata to prove content has integrity.", 0, java.lang.Integer.MAX_VALUE, content));
         childrenList.add(new Property("context", "", "The clinical context in which the document was prepared.", 0, java.lang.Integer.MAX_VALUE, context));
       }
@@ -1658,8 +1703,8 @@ public class DocumentReference extends DomainResource {
         dst.type = type == null ? null : type.copy();
         dst.class_ = class_ == null ? null : class_.copy();
         if (format != null) {
-          dst.format = new ArrayList<UriType>();
-          for (UriType i : format)
+          dst.format = new ArrayList<Coding>();
+          for (Coding i : format)
             dst.format.add(i.copy());
         };
         if (author != null) {
@@ -1679,10 +1724,10 @@ public class DocumentReference extends DomainResource {
             dst.relatesTo.add(i.copy());
         };
         dst.description = description == null ? null : description.copy();
-        if (confidentiality != null) {
-          dst.confidentiality = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : confidentiality)
-            dst.confidentiality.add(i.copy());
+        if (securityLabel != null) {
+          dst.securityLabel = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : securityLabel)
+            dst.securityLabel.add(i.copy());
         };
         if (content != null) {
           dst.content = new ArrayList<Attachment>();
@@ -1709,7 +1754,7 @@ public class DocumentReference extends DomainResource {
            && compareDeep(format, o.format, true) && compareDeep(author, o.author, true) && compareDeep(custodian, o.custodian, true)
            && compareDeep(authenticator, o.authenticator, true) && compareDeep(created, o.created, true) && compareDeep(indexed, o.indexed, true)
            && compareDeep(status, o.status, true) && compareDeep(docStatus, o.docStatus, true) && compareDeep(relatesTo, o.relatesTo, true)
-           && compareDeep(description, o.description, true) && compareDeep(confidentiality, o.confidentiality, true)
+           && compareDeep(description, o.description, true) && compareDeep(securityLabel, o.securityLabel, true)
            && compareDeep(content, o.content, true) && compareDeep(context, o.context, true);
       }
 
@@ -1720,8 +1765,8 @@ public class DocumentReference extends DomainResource {
         if (!(other instanceof DocumentReference))
           return false;
         DocumentReference o = (DocumentReference) other;
-        return compareValues(format, o.format, true) && compareValues(created, o.created, true) && compareValues(indexed, o.indexed, true)
-           && compareValues(status, o.status, true) && compareValues(description, o.description, true);
+        return compareValues(created, o.created, true) && compareValues(indexed, o.indexed, true) && compareValues(status, o.status, true)
+           && compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
@@ -1731,7 +1776,7 @@ public class DocumentReference extends DomainResource {
            && (authenticator == null || authenticator.isEmpty()) && (created == null || created.isEmpty())
            && (indexed == null || indexed.isEmpty()) && (status == null || status.isEmpty()) && (docStatus == null || docStatus.isEmpty())
            && (relatesTo == null || relatesTo.isEmpty()) && (description == null || description.isEmpty())
-           && (confidentiality == null || confidentiality.isEmpty()) && (content == null || content.isEmpty())
+           && (securityLabel == null || securityLabel.isEmpty()) && (content == null || content.isEmpty())
            && (context == null || context.isEmpty());
       }
 
@@ -1740,10 +1785,10 @@ public class DocumentReference extends DomainResource {
     return ResourceType.DocumentReference;
    }
 
+  @SearchParamDefinition(name="securitylabel", path="DocumentReference.securityLabel", description="Document security-tags", type="token" )
+  public static final String SP_SECURITYLABEL = "securitylabel";
   @SearchParamDefinition(name="subject", path="DocumentReference.subject", description="Who|what is the subject of the document", type="reference" )
   public static final String SP_SUBJECT = "subject";
-  @SearchParamDefinition(name="confidentiality", path="DocumentReference.confidentiality", description="Document security-tags", type="token" )
-  public static final String SP_CONFIDENTIALITY = "confidentiality";
   @SearchParamDefinition(name="description", path="DocumentReference.description", description="Human-readable description (title)", type="string" )
   public static final String SP_DESCRIPTION = "description";
   @SearchParamDefinition(name="language", path="DocumentReference.content.language", description="Human language of the content (BCP-47)", type="token" )
@@ -1778,10 +1823,12 @@ public class DocumentReference extends DomainResource {
   public static final String SP_AUTHOR = "author";
   @SearchParamDefinition(name="created", path="DocumentReference.created", description="Document creation time", type="date" )
   public static final String SP_CREATED = "created";
-  @SearchParamDefinition(name="format", path="DocumentReference.format", description="Format/content rules for the document", type="uri" )
+  @SearchParamDefinition(name="format", path="DocumentReference.format", description="Format/content rules for the document", type="token" )
   public static final String SP_FORMAT = "format";
   @SearchParamDefinition(name="relatedref", path="DocumentReference.context.related.ref", description="Related Resource", type="reference" )
   public static final String SP_RELATEDREF = "relatedref";
+  @SearchParamDefinition(name="encounter", path="DocumentReference.context.encounter", description="Context of the document  content", type="reference" )
+  public static final String SP_ENCOUNTER = "encounter";
   @SearchParamDefinition(name="location", path="DocumentReference.content.url", description="Uri where the data can be found", type="uri" )
   public static final String SP_LOCATION = "location";
   @SearchParamDefinition(name="relatesto", path="DocumentReference.relatesTo.target", description="Target of the relationship", type="reference" )

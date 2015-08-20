@@ -349,7 +349,7 @@ public class HeirarchicalTableGenerator  {
     tc.setAttribute("class", "heirarchy");
     if (indents != null) {
       tc.addTag("img").setAttribute("src", srcFor(corePrefix, "tbl_spacer.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");
-      tc.setAttribute("style", "vertical-align: top; text-align : left; background-color: "+color+"; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url("+checkExists(indents, hasChildren)+")");
+      tc.setAttribute("style", "vertical-align: top; text-align : left; background-color: "+color+"; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url("+corePrefix+checkExists(indents, hasChildren)+")");
       for (int i = 0; i < indents.size()-1; i++) { 
         if (indents.get(i))
           tc.addTag("img").setAttribute("src", srcFor(corePrefix, "tbl_blank.png")).setAttribute("style", "background-color: inherit").setAttribute("class", "heirarchy").setAttribute("alt", ".");

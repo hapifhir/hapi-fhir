@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -77,9 +77,9 @@ public class Specimen extends DomainResource {
         /**
          * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="The quantity of specimen collected", formalDefinition="The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * A coded value specifying the technique that is used to perform the procedure.
@@ -95,7 +95,7 @@ public class Specimen extends DomainResource {
         @Description(shortDefinition="Anatomical collection site", formalDefinition="Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens." )
         protected CodeableConcept bodySite;
 
-        private static final long serialVersionUID = 139465743L;
+        private static final long serialVersionUID = -1418734687L;
 
     /*
      * Constructor
@@ -250,12 +250,12 @@ public class Specimen extends DomainResource {
         /**
          * @return {@link #quantity} (The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SpecimenCollectionComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -266,7 +266,7 @@ public class Specimen extends DomainResource {
         /**
          * @param value {@link #quantity} (The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.)
          */
-        public SpecimenCollectionComponent setQuantity(Quantity value) { 
+        public SpecimenCollectionComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -324,7 +324,7 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("collector", "Reference(Practitioner)", "Person who collected the specimen.", 0, java.lang.Integer.MAX_VALUE, collector));
           childrenList.add(new Property("comment", "string", "To communicate any details or issues encountered during the specimen collection procedure.", 0, java.lang.Integer.MAX_VALUE, comment));
           childrenList.add(new Property("collected[x]", "dateTime|Period", "Time when specimen was collected from subject - the physiologically relevant time.", 0, java.lang.Integer.MAX_VALUE, collected));
-          childrenList.add(new Property("quantity", "Quantity", "The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value specifying the technique that is used to perform the procedure.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("bodySite", "CodeableConcept", "Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.", 0, java.lang.Integer.MAX_VALUE, bodySite));
         }
@@ -620,16 +620,16 @@ public class Specimen extends DomainResource {
         /**
          * The capacity (volume or other measure) the container may contain.
          */
-        @Child(name = "capacity", type = {Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "capacity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Container volume or size", formalDefinition="The capacity (volume or other measure) the container may contain." )
-        protected Quantity capacity;
+        protected SimpleQuantity capacity;
 
         /**
          * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.
          */
-        @Child(name = "specimenQuantity", type = {Quantity.class}, order=5, min=0, max=1)
+        @Child(name = "specimenQuantity", type = {SimpleQuantity.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Quantity of specimen within container", formalDefinition="The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type." )
-        protected Quantity specimenQuantity;
+        protected SimpleQuantity specimenQuantity;
 
         /**
          * Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.
@@ -638,7 +638,7 @@ public class Specimen extends DomainResource {
         @Description(shortDefinition="Additive associated with container", formalDefinition="Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA." )
         protected Type additive;
 
-        private static final long serialVersionUID = -1608132325L;
+        private static final long serialVersionUID = 187274879L;
 
     /*
      * Constructor
@@ -763,12 +763,12 @@ public class Specimen extends DomainResource {
         /**
          * @return {@link #capacity} (The capacity (volume or other measure) the container may contain.)
          */
-        public Quantity getCapacity() { 
+        public SimpleQuantity getCapacity() { 
           if (this.capacity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SpecimenContainerComponent.capacity");
             else if (Configuration.doAutoCreate())
-              this.capacity = new Quantity(); // cc
+              this.capacity = new SimpleQuantity(); // cc
           return this.capacity;
         }
 
@@ -779,7 +779,7 @@ public class Specimen extends DomainResource {
         /**
          * @param value {@link #capacity} (The capacity (volume or other measure) the container may contain.)
          */
-        public SpecimenContainerComponent setCapacity(Quantity value) { 
+        public SpecimenContainerComponent setCapacity(SimpleQuantity value) { 
           this.capacity = value;
           return this;
         }
@@ -787,12 +787,12 @@ public class Specimen extends DomainResource {
         /**
          * @return {@link #specimenQuantity} (The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.)
          */
-        public Quantity getSpecimenQuantity() { 
+        public SimpleQuantity getSpecimenQuantity() { 
           if (this.specimenQuantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SpecimenContainerComponent.specimenQuantity");
             else if (Configuration.doAutoCreate())
-              this.specimenQuantity = new Quantity(); // cc
+              this.specimenQuantity = new SimpleQuantity(); // cc
           return this.specimenQuantity;
         }
 
@@ -803,7 +803,7 @@ public class Specimen extends DomainResource {
         /**
          * @param value {@link #specimenQuantity} (The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.)
          */
-        public SpecimenContainerComponent setSpecimenQuantity(Quantity value) { 
+        public SpecimenContainerComponent setSpecimenQuantity(SimpleQuantity value) { 
           this.specimenQuantity = value;
           return this;
         }
@@ -858,8 +858,8 @@ public class Specimen extends DomainResource {
           childrenList.add(new Property("identifier", "Identifier", "Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances.", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("description", "string", "Textual description of the container.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("type", "CodeableConcept", "The type of container associated with the specimen (e.g. slide, aliquot, etc).", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("capacity", "Quantity", "The capacity (volume or other measure) the container may contain.", 0, java.lang.Integer.MAX_VALUE, capacity));
-          childrenList.add(new Property("specimenQuantity", "Quantity", "The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.", 0, java.lang.Integer.MAX_VALUE, specimenQuantity));
+          childrenList.add(new Property("capacity", "SimpleQuantity", "The capacity (volume or other measure) the container may contain.", 0, java.lang.Integer.MAX_VALUE, capacity));
+          childrenList.add(new Property("specimenQuantity", "SimpleQuantity", "The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.", 0, java.lang.Integer.MAX_VALUE, specimenQuantity));
           childrenList.add(new Property("additive[x]", "CodeableConcept|Reference(Substance)", "Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive));
         }
 

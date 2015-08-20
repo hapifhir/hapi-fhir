@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -41,12 +41,12 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * An order for both supply of the medication and the instructions for administration of the medicine to a patient.
+ * An order for both supply of the medication and the instructions for administration of the medication to a patient.
  */
-@ResourceDef(name="MedicationPrescription", profile="http://hl7.org/fhir/Profile/MedicationPrescription")
-public class MedicationPrescription extends DomainResource {
+@ResourceDef(name="MedicationOrder", profile="http://hl7.org/fhir/Profile/MedicationOrder")
+public class MedicationOrder extends DomainResource {
 
-    public enum MedicationPrescriptionStatus {
+    public enum MedicationOrderStatus {
         /**
          * The prescription is 'actionable', but not all actions that are implied by it have occurred yet.
          */
@@ -79,7 +79,7 @@ public class MedicationPrescription extends DomainResource {
          * added to help the parsers
          */
         NULL;
-        public static MedicationPrescriptionStatus fromCode(String codeString) throws Exception {
+        public static MedicationOrderStatus fromCode(String codeString) throws Exception {
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
@@ -96,7 +96,7 @@ public class MedicationPrescription extends DomainResource {
           return SUPERSEDED;
         if ("draft".equals(codeString))
           return DRAFT;
-        throw new Exception("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
+        throw new Exception("Unknown MedicationOrderStatus code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
@@ -148,48 +148,48 @@ public class MedicationPrescription extends DomainResource {
         }
     }
 
-  public static class MedicationPrescriptionStatusEnumFactory implements EnumFactory<MedicationPrescriptionStatus> {
-    public MedicationPrescriptionStatus fromCode(String codeString) throws IllegalArgumentException {
+  public static class MedicationOrderStatusEnumFactory implements EnumFactory<MedicationOrderStatus> {
+    public MedicationOrderStatus fromCode(String codeString) throws IllegalArgumentException {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
         if ("active".equals(codeString))
-          return MedicationPrescriptionStatus.ACTIVE;
+          return MedicationOrderStatus.ACTIVE;
         if ("on-hold".equals(codeString))
-          return MedicationPrescriptionStatus.ONHOLD;
+          return MedicationOrderStatus.ONHOLD;
         if ("completed".equals(codeString))
-          return MedicationPrescriptionStatus.COMPLETED;
+          return MedicationOrderStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
-          return MedicationPrescriptionStatus.ENTEREDINERROR;
+          return MedicationOrderStatus.ENTEREDINERROR;
         if ("stopped".equals(codeString))
-          return MedicationPrescriptionStatus.STOPPED;
+          return MedicationOrderStatus.STOPPED;
         if ("superseded".equals(codeString))
-          return MedicationPrescriptionStatus.SUPERSEDED;
+          return MedicationOrderStatus.SUPERSEDED;
         if ("draft".equals(codeString))
-          return MedicationPrescriptionStatus.DRAFT;
-        throw new IllegalArgumentException("Unknown MedicationPrescriptionStatus code '"+codeString+"'");
+          return MedicationOrderStatus.DRAFT;
+        throw new IllegalArgumentException("Unknown MedicationOrderStatus code '"+codeString+"'");
         }
-    public String toCode(MedicationPrescriptionStatus code) {
-      if (code == MedicationPrescriptionStatus.ACTIVE)
+    public String toCode(MedicationOrderStatus code) {
+      if (code == MedicationOrderStatus.ACTIVE)
         return "active";
-      if (code == MedicationPrescriptionStatus.ONHOLD)
+      if (code == MedicationOrderStatus.ONHOLD)
         return "on-hold";
-      if (code == MedicationPrescriptionStatus.COMPLETED)
+      if (code == MedicationOrderStatus.COMPLETED)
         return "completed";
-      if (code == MedicationPrescriptionStatus.ENTEREDINERROR)
+      if (code == MedicationOrderStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == MedicationPrescriptionStatus.STOPPED)
+      if (code == MedicationOrderStatus.STOPPED)
         return "stopped";
-      if (code == MedicationPrescriptionStatus.SUPERSEDED)
+      if (code == MedicationOrderStatus.SUPERSEDED)
         return "superseded";
-      if (code == MedicationPrescriptionStatus.DRAFT)
+      if (code == MedicationOrderStatus.DRAFT)
         return "draft";
       return "?";
       }
     }
 
     @Block()
-    public static class MedicationPrescriptionDosageInstructionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class MedicationOrderDosageInstructionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.
          */
@@ -207,15 +207,15 @@ public class MedicationPrescription extends DomainResource {
         /**
          * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
          */
-        @Child(name = "scheduled", type = {DateTimeType.class, Period.class, Timing.class}, order=3, min=0, max=1)
+        @Child(name = "timing", type = {Timing.class}, order=3, min=0, max=1)
         @Description(shortDefinition="When medication should be administered", formalDefinition="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'." )
-        protected Type scheduled;
+        protected Timing timing;
 
         /**
          * If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.
          */
         @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Take 'as needed' f(or x)", formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication." )
+        @Description(shortDefinition="Take 'as needed' (for x)", formalDefinition="If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication." )
         protected Type asNeeded;
 
         /**
@@ -233,27 +233,25 @@ public class MedicationPrescription extends DomainResource {
         protected CodeableConcept route;
 
         /**
-         * A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
-
-Terminologies used often pre-coordinate this term with the route and or form of administration.
+         * A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.
          */
         @Child(name = "method", type = {CodeableConcept.class}, order=7, min=0, max=1)
-        @Description(shortDefinition="Technique for administering medication", formalDefinition="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.\n\nTerminologies used often pre-coordinate this term with the route and or form of administration." )
+        @Description(shortDefinition="Technique for administering medication", formalDefinition="A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration." )
         protected CodeableConcept method;
 
         /**
          * The amount of therapeutic or other substance given at one administration event.
          */
-        @Child(name = "dose", type = {Range.class, Quantity.class}, order=8, min=0, max=1)
+        @Child(name = "dose", type = {Range.class, SimpleQuantity.class}, order=8, min=0, max=1)
         @Description(shortDefinition="Amount of medication per dose", formalDefinition="The amount of therapeutic or other substance given at one administration event." )
         protected Type dose;
 
         /**
          * Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.
          */
-        @Child(name = "rate", type = {Ratio.class}, order=9, min=0, max=1)
+        @Child(name = "rate", type = {Ratio.class, Range.class}, order=9, min=0, max=1)
         @Description(shortDefinition="Amount of medication per unit of time", formalDefinition="Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours." )
-        protected Ratio rate;
+        protected Type rate;
 
         /**
          * The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours.
@@ -262,12 +260,12 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         @Description(shortDefinition="Upper limit on medication per unit of time", formalDefinition="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours." )
         protected Ratio maxDosePerPeriod;
 
-        private static final long serialVersionUID = -1144367815L;
+        private static final long serialVersionUID = -422348215L;
 
     /*
      * Constructor
      */
-      public MedicationPrescriptionDosageInstructionComponent() {
+      public MedicationOrderDosageInstructionComponent() {
         super();
       }
 
@@ -277,7 +275,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         public StringType getTextElement() { 
           if (this.text == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.text");
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.text");
             else if (Configuration.doAutoCreate())
               this.text = new StringType(); // bb
           return this.text;
@@ -294,7 +292,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #text} (Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
-        public MedicationPrescriptionDosageInstructionComponent setTextElement(StringType value) { 
+        public MedicationOrderDosageInstructionComponent setTextElement(StringType value) { 
           this.text = value;
           return this;
         }
@@ -309,7 +307,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.
          */
-        public MedicationPrescriptionDosageInstructionComponent setText(String value) { 
+        public MedicationOrderDosageInstructionComponent setText(String value) { 
           if (Utilities.noString(value))
             this.text = null;
           else {
@@ -326,7 +324,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         public CodeableConcept getAdditionalInstructions() { 
           if (this.additionalInstructions == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.additionalInstructions");
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.additionalInstructions");
             else if (Configuration.doAutoCreate())
               this.additionalInstructions = new CodeableConcept(); // cc
           return this.additionalInstructions;
@@ -339,66 +337,32 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #additionalInstructions} (Additional instructions such as "Swallow with plenty of water" which may or may not be coded.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setAdditionalInstructions(CodeableConcept value) { 
+        public MedicationOrderDosageInstructionComponent setAdditionalInstructions(CodeableConcept value) { 
           this.additionalInstructions = value;
           return this;
         }
 
         /**
-         * @return {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+         * @return {@link #timing} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
-        public Type getScheduled() { 
-          return this.scheduled;
+        public Timing getTiming() { 
+          if (this.timing == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.timing");
+            else if (Configuration.doAutoCreate())
+              this.timing = new Timing(); // cc
+          return this.timing;
+        }
+
+        public boolean hasTiming() { 
+          return this.timing != null && !this.timing.isEmpty();
         }
 
         /**
-         * @return {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+         * @param value {@link #timing} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
-        public DateTimeType getScheduledDateTimeType() throws Exception { 
-          if (!(this.scheduled instanceof DateTimeType))
-            throw new Exception("Type mismatch: the type DateTimeType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
-          return (DateTimeType) this.scheduled;
-        }
-
-        public boolean hasScheduledDateTimeType() throws Exception { 
-          return this.scheduled instanceof DateTimeType;
-        }
-
-        /**
-         * @return {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
-         */
-        public Period getScheduledPeriod() throws Exception { 
-          if (!(this.scheduled instanceof Period))
-            throw new Exception("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
-          return (Period) this.scheduled;
-        }
-
-        public boolean hasScheduledPeriod() throws Exception { 
-          return this.scheduled instanceof Period;
-        }
-
-        /**
-         * @return {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
-         */
-        public Timing getScheduledTiming() throws Exception { 
-          if (!(this.scheduled instanceof Timing))
-            throw new Exception("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
-          return (Timing) this.scheduled;
-        }
-
-        public boolean hasScheduledTiming() throws Exception { 
-          return this.scheduled instanceof Timing;
-        }
-
-        public boolean hasScheduled() { 
-          return this.scheduled != null && !this.scheduled.isEmpty();
-        }
-
-        /**
-         * @param value {@link #scheduled} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
-         */
-        public MedicationPrescriptionDosageInstructionComponent setScheduled(Type value) { 
-          this.scheduled = value;
+        public MedicationOrderDosageInstructionComponent setTiming(Timing value) { 
+          this.timing = value;
           return this;
         }
 
@@ -442,7 +406,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #asNeeded} (If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setAsNeeded(Type value) { 
+        public MedicationOrderDosageInstructionComponent setAsNeeded(Type value) { 
           this.asNeeded = value;
           return this;
         }
@@ -453,7 +417,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         public CodeableConcept getSite() { 
           if (this.site == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.site");
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.site");
             else if (Configuration.doAutoCreate())
               this.site = new CodeableConcept(); // cc
           return this.site;
@@ -466,7 +430,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #site} (A coded specification of the anatomic site where the medication first enters the body.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setSite(CodeableConcept value) { 
+        public MedicationOrderDosageInstructionComponent setSite(CodeableConcept value) { 
           this.site = value;
           return this;
         }
@@ -477,7 +441,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         public CodeableConcept getRoute() { 
           if (this.route == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.route");
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.route");
             else if (Configuration.doAutoCreate())
               this.route = new CodeableConcept(); // cc
           return this.route;
@@ -490,20 +454,18 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #route} (A code specifying the route or physiological path of administration of a therapeutic agent into or onto a patient.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setRoute(CodeableConcept value) { 
+        public MedicationOrderDosageInstructionComponent setRoute(CodeableConcept value) { 
           this.route = value;
           return this;
         }
 
         /**
-         * @return {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
-
-Terminologies used often pre-coordinate this term with the route and or form of administration.)
+         * @return {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.)
          */
         public CodeableConcept getMethod() { 
           if (this.method == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.method");
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.method");
             else if (Configuration.doAutoCreate())
               this.method = new CodeableConcept(); // cc
           return this.method;
@@ -514,11 +476,9 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         }
 
         /**
-         * @param value {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.
-
-Terminologies used often pre-coordinate this term with the route and or form of administration.)
+         * @param value {@link #method} (A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setMethod(CodeableConcept value) { 
+        public MedicationOrderDosageInstructionComponent setMethod(CodeableConcept value) { 
           this.method = value;
           return this;
         }
@@ -546,14 +506,14 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @return {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
          */
-        public Quantity getDoseQuantity() throws Exception { 
-          if (!(this.dose instanceof Quantity))
-            throw new Exception("Type mismatch: the type Quantity was expected, but "+this.dose.getClass().getName()+" was encountered");
-          return (Quantity) this.dose;
+        public SimpleQuantity getDoseSimpleQuantity() throws Exception { 
+          if (!(this.dose instanceof SimpleQuantity))
+            throw new Exception("Type mismatch: the type SimpleQuantity was expected, but "+this.dose.getClass().getName()+" was encountered");
+          return (SimpleQuantity) this.dose;
         }
 
-        public boolean hasDoseQuantity() throws Exception { 
-          return this.dose instanceof Quantity;
+        public boolean hasDoseSimpleQuantity() throws Exception { 
+          return this.dose instanceof SimpleQuantity;
         }
 
         public boolean hasDose() { 
@@ -563,7 +523,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #dose} (The amount of therapeutic or other substance given at one administration event.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setDose(Type value) { 
+        public MedicationOrderDosageInstructionComponent setDose(Type value) { 
           this.dose = value;
           return this;
         }
@@ -571,13 +531,34 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @return {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
          */
-        public Ratio getRate() { 
-          if (this.rate == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.rate");
-            else if (Configuration.doAutoCreate())
-              this.rate = new Ratio(); // cc
+        public Type getRate() { 
           return this.rate;
+        }
+
+        /**
+         * @return {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
+         */
+        public Ratio getRateRatio() throws Exception { 
+          if (!(this.rate instanceof Ratio))
+            throw new Exception("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
+          return (Ratio) this.rate;
+        }
+
+        public boolean hasRateRatio() throws Exception { 
+          return this.rate instanceof Ratio;
+        }
+
+        /**
+         * @return {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
+         */
+        public Range getRateRange() throws Exception { 
+          if (!(this.rate instanceof Range))
+            throw new Exception("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
+          return (Range) this.rate;
+        }
+
+        public boolean hasRateRange() throws Exception { 
+          return this.rate instanceof Range;
         }
 
         public boolean hasRate() { 
@@ -587,7 +568,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setRate(Ratio value) { 
+        public MedicationOrderDosageInstructionComponent setRate(Type value) { 
           this.rate = value;
           return this;
         }
@@ -598,7 +579,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         public Ratio getMaxDosePerPeriod() { 
           if (this.maxDosePerPeriod == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDosageInstructionComponent.maxDosePerPeriod");
+              throw new Error("Attempt to auto-create MedicationOrderDosageInstructionComponent.maxDosePerPeriod");
             else if (Configuration.doAutoCreate())
               this.maxDosePerPeriod = new Ratio(); // cc
           return this.maxDosePerPeriod;
@@ -611,7 +592,7 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         /**
          * @param value {@link #maxDosePerPeriod} (The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours.)
          */
-        public MedicationPrescriptionDosageInstructionComponent setMaxDosePerPeriod(Ratio value) { 
+        public MedicationOrderDosageInstructionComponent setMaxDosePerPeriod(Ratio value) { 
           this.maxDosePerPeriod = value;
           return this;
         }
@@ -620,22 +601,22 @@ Terminologies used often pre-coordinate this term with the route and or form of 
           super.listChildren(childrenList);
           childrenList.add(new Property("text", "string", "Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.", 0, java.lang.Integer.MAX_VALUE, text));
           childrenList.add(new Property("additionalInstructions", "CodeableConcept", "Additional instructions such as 'Swallow with plenty of water' which may or may not be coded.", 0, java.lang.Integer.MAX_VALUE, additionalInstructions));
-          childrenList.add(new Property("scheduled[x]", "dateTime|Period|Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, scheduled));
+          childrenList.add(new Property("timing", "Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, timing));
           childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the pre-condition for taking the Medication.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
           childrenList.add(new Property("site", "CodeableConcept", "A coded specification of the anatomic site where the medication first enters the body.", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto a patient.", 0, java.lang.Integer.MAX_VALUE, route));
-          childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.\n\nTerminologies used often pre-coordinate this term with the route and or form of administration.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("dose[x]", "Range|Quantity", "The amount of therapeutic or other substance given at one administration event.", 0, java.lang.Integer.MAX_VALUE, dose));
-          childrenList.add(new Property("rate", "Ratio", "Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.", 0, java.lang.Integer.MAX_VALUE, rate));
+          childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.", 0, java.lang.Integer.MAX_VALUE, method));
+          childrenList.add(new Property("dose[x]", "Range|SimpleQuantity", "The amount of therapeutic or other substance given at one administration event.", 0, java.lang.Integer.MAX_VALUE, dose));
+          childrenList.add(new Property("rate[x]", "Ratio|Range", "Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.", 0, java.lang.Integer.MAX_VALUE, rate));
           childrenList.add(new Property("maxDosePerPeriod", "Ratio", "The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours.", 0, java.lang.Integer.MAX_VALUE, maxDosePerPeriod));
         }
 
-      public MedicationPrescriptionDosageInstructionComponent copy() {
-        MedicationPrescriptionDosageInstructionComponent dst = new MedicationPrescriptionDosageInstructionComponent();
+      public MedicationOrderDosageInstructionComponent copy() {
+        MedicationOrderDosageInstructionComponent dst = new MedicationOrderDosageInstructionComponent();
         copyValues(dst);
         dst.text = text == null ? null : text.copy();
         dst.additionalInstructions = additionalInstructions == null ? null : additionalInstructions.copy();
-        dst.scheduled = scheduled == null ? null : scheduled.copy();
+        dst.timing = timing == null ? null : timing.copy();
         dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
         dst.site = site == null ? null : site.copy();
         dst.route = route == null ? null : route.copy();
@@ -650,11 +631,11 @@ Terminologies used often pre-coordinate this term with the route and or form of 
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof MedicationPrescriptionDosageInstructionComponent))
+        if (!(other instanceof MedicationOrderDosageInstructionComponent))
           return false;
-        MedicationPrescriptionDosageInstructionComponent o = (MedicationPrescriptionDosageInstructionComponent) other;
+        MedicationOrderDosageInstructionComponent o = (MedicationOrderDosageInstructionComponent) other;
         return compareDeep(text, o.text, true) && compareDeep(additionalInstructions, o.additionalInstructions, true)
-           && compareDeep(scheduled, o.scheduled, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(site, o.site, true)
+           && compareDeep(timing, o.timing, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(site, o.site, true)
            && compareDeep(route, o.route, true) && compareDeep(method, o.method, true) && compareDeep(dose, o.dose, true)
            && compareDeep(rate, o.rate, true) && compareDeep(maxDosePerPeriod, o.maxDosePerPeriod, true);
       }
@@ -663,24 +644,24 @@ Terminologies used often pre-coordinate this term with the route and or form of 
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof MedicationPrescriptionDosageInstructionComponent))
+        if (!(other instanceof MedicationOrderDosageInstructionComponent))
           return false;
-        MedicationPrescriptionDosageInstructionComponent o = (MedicationPrescriptionDosageInstructionComponent) other;
+        MedicationOrderDosageInstructionComponent o = (MedicationOrderDosageInstructionComponent) other;
         return compareValues(text, o.text, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (text == null || text.isEmpty()) && (additionalInstructions == null || additionalInstructions.isEmpty())
-           && (scheduled == null || scheduled.isEmpty()) && (asNeeded == null || asNeeded.isEmpty())
-           && (site == null || site.isEmpty()) && (route == null || route.isEmpty()) && (method == null || method.isEmpty())
-           && (dose == null || dose.isEmpty()) && (rate == null || rate.isEmpty()) && (maxDosePerPeriod == null || maxDosePerPeriod.isEmpty())
+           && (timing == null || timing.isEmpty()) && (asNeeded == null || asNeeded.isEmpty()) && (site == null || site.isEmpty())
+           && (route == null || route.isEmpty()) && (method == null || method.isEmpty()) && (dose == null || dose.isEmpty())
+           && (rate == null || rate.isEmpty()) && (maxDosePerPeriod == null || maxDosePerPeriod.isEmpty())
           ;
       }
 
   }
 
     @Block()
-    public static class MedicationPrescriptionDispenseComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class MedicationOrderDispenseComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.
          */
@@ -689,43 +670,39 @@ Terminologies used often pre-coordinate this term with the route and or form of 
         protected Type medication;
 
         /**
-         * Design Comments: This indicates the validity period of a prescription (stale dating the Prescription) 
-It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations. 
-Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.
+         * Design Comments: This indicates the validity period of a prescription (stale dating the Prescription)  It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations.  Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.
          */
         @Child(name = "validityPeriod", type = {Period.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Time period supply is authorized for", formalDefinition="Design Comments: This indicates the validity period of a prescription (stale dating the Prescription) \nIt reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations. \nRationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription." )
+        @Description(shortDefinition="Time period supply is authorized for", formalDefinition="Design Comments: This indicates the validity period of a prescription (stale dating the Prescription)  It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations.  Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription." )
         protected Period validityPeriod;
 
         /**
-         * An integer indicating the number of repeats of the Dispense. 
-UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.
+         * An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.
          */
         @Child(name = "numberOfRepeatsAllowed", type = {PositiveIntType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="# of refills authorized", formalDefinition="An integer indicating the number of repeats of the Dispense. \nUsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill." )
+        @Description(shortDefinition="# of refills authorized", formalDefinition="An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill." )
         protected PositiveIntType numberOfRepeatsAllowed;
 
         /**
          * The amount that is to be dispensed for one fill.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Amount of medication to supply per dispense", formalDefinition="The amount that is to be dispensed for one fill." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
-         * Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last. 
-In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.
+         * Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last.  In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.
          */
         @Child(name = "expectedSupplyDuration", type = {Duration.class}, order=5, min=0, max=1)
-        @Description(shortDefinition="Days supply per dispense", formalDefinition="Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last. \nIn some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors." )
+        @Description(shortDefinition="Days supply per dispense", formalDefinition="Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last.  In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors." )
         protected Duration expectedSupplyDuration;
 
-        private static final long serialVersionUID = 312252966L;
+        private static final long serialVersionUID = -1690502728L;
 
     /*
      * Constructor
      */
-      public MedicationPrescriptionDispenseComponent() {
+      public MedicationOrderDispenseComponent() {
         super();
       }
 
@@ -769,20 +746,18 @@ In some situations, this attribute may be used instead of quantity to identify t
         /**
          * @param value {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
          */
-        public MedicationPrescriptionDispenseComponent setMedication(Type value) { 
+        public MedicationOrderDispenseComponent setMedication(Type value) { 
           this.medication = value;
           return this;
         }
 
         /**
-         * @return {@link #validityPeriod} (Design Comments: This indicates the validity period of a prescription (stale dating the Prescription) 
-It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations. 
-Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.)
+         * @return {@link #validityPeriod} (Design Comments: This indicates the validity period of a prescription (stale dating the Prescription)  It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations.  Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.)
          */
         public Period getValidityPeriod() { 
           if (this.validityPeriod == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDispenseComponent.validityPeriod");
+              throw new Error("Attempt to auto-create MedicationOrderDispenseComponent.validityPeriod");
             else if (Configuration.doAutoCreate())
               this.validityPeriod = new Period(); // cc
           return this.validityPeriod;
@@ -793,23 +768,20 @@ Rationale: Indicates when the Prescription becomes valid, and when it ceases to 
         }
 
         /**
-         * @param value {@link #validityPeriod} (Design Comments: This indicates the validity period of a prescription (stale dating the Prescription) 
-It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations. 
-Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.)
+         * @param value {@link #validityPeriod} (Design Comments: This indicates the validity period of a prescription (stale dating the Prescription)  It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations.  Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.)
          */
-        public MedicationPrescriptionDispenseComponent setValidityPeriod(Period value) { 
+        public MedicationOrderDispenseComponent setValidityPeriod(Period value) { 
           this.validityPeriod = value;
           return this;
         }
 
         /**
-         * @return {@link #numberOfRepeatsAllowed} (An integer indicating the number of repeats of the Dispense. 
-UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
+         * @return {@link #numberOfRepeatsAllowed} (An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
          */
         public PositiveIntType getNumberOfRepeatsAllowedElement() { 
           if (this.numberOfRepeatsAllowed == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDispenseComponent.numberOfRepeatsAllowed");
+              throw new Error("Attempt to auto-create MedicationOrderDispenseComponent.numberOfRepeatsAllowed");
             else if (Configuration.doAutoCreate())
               this.numberOfRepeatsAllowed = new PositiveIntType(); // bb
           return this.numberOfRepeatsAllowed;
@@ -824,27 +796,24 @@ UsageNotes: For example, the number of times the prescribed quantity is to be su
         }
 
         /**
-         * @param value {@link #numberOfRepeatsAllowed} (An integer indicating the number of repeats of the Dispense. 
-UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
+         * @param value {@link #numberOfRepeatsAllowed} (An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.). This is the underlying object with id, value and extensions. The accessor "getNumberOfRepeatsAllowed" gives direct access to the value
          */
-        public MedicationPrescriptionDispenseComponent setNumberOfRepeatsAllowedElement(PositiveIntType value) { 
+        public MedicationOrderDispenseComponent setNumberOfRepeatsAllowedElement(PositiveIntType value) { 
           this.numberOfRepeatsAllowed = value;
           return this;
         }
 
         /**
-         * @return An integer indicating the number of repeats of the Dispense. 
-UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.
+         * @return An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.
          */
         public int getNumberOfRepeatsAllowed() { 
           return this.numberOfRepeatsAllowed == null || this.numberOfRepeatsAllowed.isEmpty() ? 0 : this.numberOfRepeatsAllowed.getValue();
         }
 
         /**
-         * @param value An integer indicating the number of repeats of the Dispense. 
-UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.
+         * @param value An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.
          */
-        public MedicationPrescriptionDispenseComponent setNumberOfRepeatsAllowed(int value) { 
+        public MedicationOrderDispenseComponent setNumberOfRepeatsAllowed(int value) { 
             if (this.numberOfRepeatsAllowed == null)
               this.numberOfRepeatsAllowed = new PositiveIntType();
             this.numberOfRepeatsAllowed.setValue(value);
@@ -854,12 +823,12 @@ UsageNotes: For example, the number of times the prescribed quantity is to be su
         /**
          * @return {@link #quantity} (The amount that is to be dispensed for one fill.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDispenseComponent.quantity");
+              throw new Error("Attempt to auto-create MedicationOrderDispenseComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -870,19 +839,18 @@ UsageNotes: For example, the number of times the prescribed quantity is to be su
         /**
          * @param value {@link #quantity} (The amount that is to be dispensed for one fill.)
          */
-        public MedicationPrescriptionDispenseComponent setQuantity(Quantity value) { 
+        public MedicationOrderDispenseComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
 
         /**
-         * @return {@link #expectedSupplyDuration} (Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last. 
-In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.)
+         * @return {@link #expectedSupplyDuration} (Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last.  In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.)
          */
         public Duration getExpectedSupplyDuration() { 
           if (this.expectedSupplyDuration == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionDispenseComponent.expectedSupplyDuration");
+              throw new Error("Attempt to auto-create MedicationOrderDispenseComponent.expectedSupplyDuration");
             else if (Configuration.doAutoCreate())
               this.expectedSupplyDuration = new Duration(); // cc
           return this.expectedSupplyDuration;
@@ -893,10 +861,9 @@ In some situations, this attribute may be used instead of quantity to identify t
         }
 
         /**
-         * @param value {@link #expectedSupplyDuration} (Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last. 
-In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.)
+         * @param value {@link #expectedSupplyDuration} (Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last.  In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.)
          */
-        public MedicationPrescriptionDispenseComponent setExpectedSupplyDuration(Duration value) { 
+        public MedicationOrderDispenseComponent setExpectedSupplyDuration(Duration value) { 
           this.expectedSupplyDuration = value;
           return this;
         }
@@ -904,14 +871,14 @@ In some situations, this attribute may be used instead of quantity to identify t
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.", 0, java.lang.Integer.MAX_VALUE, medication));
-          childrenList.add(new Property("validityPeriod", "Period", "Design Comments: This indicates the validity period of a prescription (stale dating the Prescription) \nIt reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations. \nRationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.", 0, java.lang.Integer.MAX_VALUE, validityPeriod));
-          childrenList.add(new Property("numberOfRepeatsAllowed", "positiveInt", "An integer indicating the number of repeats of the Dispense. \nUsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.", 0, java.lang.Integer.MAX_VALUE, numberOfRepeatsAllowed));
-          childrenList.add(new Property("quantity", "Quantity", "The amount that is to be dispensed for one fill.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("expectedSupplyDuration", "Duration", "Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last. \nIn some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.", 0, java.lang.Integer.MAX_VALUE, expectedSupplyDuration));
+          childrenList.add(new Property("validityPeriod", "Period", "Design Comments: This indicates the validity period of a prescription (stale dating the Prescription)  It reflects the prescriber perspective for the validity of the prescription. Dispenses must not be made against the prescription outside of this period. The lower-bound of the Dispensing Window signifies the earliest date that the prescription can be filled for the first time. If an upper-bound is not specified then the Prescription is open-ended or will default to a stale-date based on regulations.  Rationale: Indicates when the Prescription becomes valid, and when it ceases to be a dispensable Prescription.", 0, java.lang.Integer.MAX_VALUE, validityPeriod));
+          childrenList.add(new Property("numberOfRepeatsAllowed", "positiveInt", "An integer indicating the number of repeats of the Dispense.  UsageNotes: For example, the number of times the prescribed quantity is to be supplied including the initial standard fill.", 0, java.lang.Integer.MAX_VALUE, numberOfRepeatsAllowed));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The amount that is to be dispensed for one fill.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("expectedSupplyDuration", "Duration", "Identifies the period time over which the supplied product is expected to be used, or the length of time the dispense is expected to last.  In some situations, this attribute may be used instead of quantity to identify the amount supplied by how long it is expected to last, rather than the physical quantity issued, e.g. 90 days supply of medication (based on an ordered dosage) When possible, it is always better to specify quantity, as this tends to be more precise. expectedSupplyDuration will always be an estimate that can be influenced by external factors.", 0, java.lang.Integer.MAX_VALUE, expectedSupplyDuration));
         }
 
-      public MedicationPrescriptionDispenseComponent copy() {
-        MedicationPrescriptionDispenseComponent dst = new MedicationPrescriptionDispenseComponent();
+      public MedicationOrderDispenseComponent copy() {
+        MedicationOrderDispenseComponent dst = new MedicationOrderDispenseComponent();
         copyValues(dst);
         dst.medication = medication == null ? null : medication.copy();
         dst.validityPeriod = validityPeriod == null ? null : validityPeriod.copy();
@@ -925,9 +892,9 @@ In some situations, this attribute may be used instead of quantity to identify t
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof MedicationPrescriptionDispenseComponent))
+        if (!(other instanceof MedicationOrderDispenseComponent))
           return false;
-        MedicationPrescriptionDispenseComponent o = (MedicationPrescriptionDispenseComponent) other;
+        MedicationOrderDispenseComponent o = (MedicationOrderDispenseComponent) other;
         return compareDeep(medication, o.medication, true) && compareDeep(validityPeriod, o.validityPeriod, true)
            && compareDeep(numberOfRepeatsAllowed, o.numberOfRepeatsAllowed, true) && compareDeep(quantity, o.quantity, true)
            && compareDeep(expectedSupplyDuration, o.expectedSupplyDuration, true);
@@ -937,9 +904,9 @@ In some situations, this attribute may be used instead of quantity to identify t
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof MedicationPrescriptionDispenseComponent))
+        if (!(other instanceof MedicationOrderDispenseComponent))
           return false;
-        MedicationPrescriptionDispenseComponent o = (MedicationPrescriptionDispenseComponent) other;
+        MedicationOrderDispenseComponent o = (MedicationOrderDispenseComponent) other;
         return compareValues(numberOfRepeatsAllowed, o.numberOfRepeatsAllowed, true);
       }
 
@@ -952,7 +919,7 @@ In some situations, this attribute may be used instead of quantity to identify t
   }
 
     @Block()
-    public static class MedicationPrescriptionSubstitutionComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class MedicationOrderSubstitutionComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * A code signifying whether a different drug should be dispensed from what was prescribed.
          */
@@ -972,14 +939,14 @@ In some situations, this attribute may be used instead of quantity to identify t
     /*
      * Constructor
      */
-      public MedicationPrescriptionSubstitutionComponent() {
+      public MedicationOrderSubstitutionComponent() {
         super();
       }
 
     /*
      * Constructor
      */
-      public MedicationPrescriptionSubstitutionComponent(CodeableConcept type) {
+      public MedicationOrderSubstitutionComponent(CodeableConcept type) {
         super();
         this.type = type;
       }
@@ -990,7 +957,7 @@ In some situations, this attribute may be used instead of quantity to identify t
         public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionSubstitutionComponent.type");
+              throw new Error("Attempt to auto-create MedicationOrderSubstitutionComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new CodeableConcept(); // cc
           return this.type;
@@ -1003,7 +970,7 @@ In some situations, this attribute may be used instead of quantity to identify t
         /**
          * @param value {@link #type} (A code signifying whether a different drug should be dispensed from what was prescribed.)
          */
-        public MedicationPrescriptionSubstitutionComponent setType(CodeableConcept value) { 
+        public MedicationOrderSubstitutionComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -1014,7 +981,7 @@ In some situations, this attribute may be used instead of quantity to identify t
         public CodeableConcept getReason() { 
           if (this.reason == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationPrescriptionSubstitutionComponent.reason");
+              throw new Error("Attempt to auto-create MedicationOrderSubstitutionComponent.reason");
             else if (Configuration.doAutoCreate())
               this.reason = new CodeableConcept(); // cc
           return this.reason;
@@ -1027,7 +994,7 @@ In some situations, this attribute may be used instead of quantity to identify t
         /**
          * @param value {@link #reason} (Indicates the reason for the substitution, or why substitution must or must not be performed.)
          */
-        public MedicationPrescriptionSubstitutionComponent setReason(CodeableConcept value) { 
+        public MedicationOrderSubstitutionComponent setReason(CodeableConcept value) { 
           this.reason = value;
           return this;
         }
@@ -1038,8 +1005,8 @@ In some situations, this attribute may be used instead of quantity to identify t
           childrenList.add(new Property("reason", "CodeableConcept", "Indicates the reason for the substitution, or why substitution must or must not be performed.", 0, java.lang.Integer.MAX_VALUE, reason));
         }
 
-      public MedicationPrescriptionSubstitutionComponent copy() {
-        MedicationPrescriptionSubstitutionComponent dst = new MedicationPrescriptionSubstitutionComponent();
+      public MedicationOrderSubstitutionComponent copy() {
+        MedicationOrderSubstitutionComponent dst = new MedicationOrderSubstitutionComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.reason = reason == null ? null : reason.copy();
@@ -1050,9 +1017,9 @@ In some situations, this attribute may be used instead of quantity to identify t
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof MedicationPrescriptionSubstitutionComponent))
+        if (!(other instanceof MedicationOrderSubstitutionComponent))
           return false;
-        MedicationPrescriptionSubstitutionComponent o = (MedicationPrescriptionSubstitutionComponent) other;
+        MedicationOrderSubstitutionComponent o = (MedicationOrderSubstitutionComponent) other;
         return compareDeep(type, o.type, true) && compareDeep(reason, o.reason, true);
       }
 
@@ -1060,9 +1027,9 @@ In some situations, this attribute may be used instead of quantity to identify t
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof MedicationPrescriptionSubstitutionComponent))
+        if (!(other instanceof MedicationOrderSubstitutionComponent))
           return false;
-        MedicationPrescriptionSubstitutionComponent o = (MedicationPrescriptionSubstitutionComponent) other;
+        MedicationOrderSubstitutionComponent o = (MedicationOrderSubstitutionComponent) other;
         return true;
       }
 
@@ -1092,12 +1059,26 @@ In some situations, this attribute may be used instead of quantity to identify t
      */
     @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
     @Description(shortDefinition="active | on-hold | completed | entered-in-error | stopped | superseded | draft", formalDefinition="A code specifying the state of the order.  Generally this will be active or completed state." )
-    protected Enumeration<MedicationPrescriptionStatus> status;
+    protected Enumeration<MedicationOrderStatus> status;
+
+    /**
+     * The date (and perhaps time) when the prescription was stopped.
+     */
+    @Child(name = "dateEnded", type = {DateTimeType.class}, order=3, min=0, max=1)
+    @Description(shortDefinition="When prescription was stopped", formalDefinition="The date (and perhaps time) when the prescription was stopped." )
+    protected DateTimeType dateEnded;
+
+    /**
+     * The reason why the prescription was stopped, if it was.
+     */
+    @Child(name = "reasonEnded", type = {CodeableConcept.class}, order=4, min=0, max=1)
+    @Description(shortDefinition="Why prescription was stopped", formalDefinition="The reason why the prescription was stopped, if it was." )
+    protected CodeableConcept reasonEnded;
 
     /**
      * A link to a resource representing the person to whom the medication will be given.
      */
-    @Child(name = "patient", type = {Patient.class}, order=3, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=5, min=0, max=1)
     @Description(shortDefinition="Who prescription is for", formalDefinition="A link to a resource representing the person to whom the medication will be given." )
     protected Reference patient;
 
@@ -1109,7 +1090,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * The healthcare professional responsible for authorizing the prescription.
      */
-    @Child(name = "prescriber", type = {Practitioner.class}, order=4, min=0, max=1)
+    @Child(name = "prescriber", type = {Practitioner.class}, order=6, min=0, max=1)
     @Description(shortDefinition="Who ordered the medication(s)", formalDefinition="The healthcare professional responsible for authorizing the prescription." )
     protected Reference prescriber;
 
@@ -1121,7 +1102,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * A link to a resource that identifies the particular occurrence of contact between patient and health care provider.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1)
     @Description(shortDefinition="Created during encounter / admission / stay", formalDefinition="A link to a resource that identifies the particular occurrence of contact between patient and health care provider." )
     protected Reference encounter;
 
@@ -1133,58 +1114,70 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * Can be the reason or the indication for writing the prescription.
      */
-    @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=6, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class, Condition.class}, order=8, min=0, max=1)
     @Description(shortDefinition="Reason or indication for writing the prescription", formalDefinition="Can be the reason or the indication for writing the prescription." )
     protected Type reason;
 
     /**
      * Extra information about the prescription that could not be conveyed by the other attributes.
      */
-    @Child(name = "note", type = {StringType.class}, order=7, min=0, max=1)
+    @Child(name = "note", type = {StringType.class}, order=9, min=0, max=1)
     @Description(shortDefinition="Information about the prescription", formalDefinition="Extra information about the prescription that could not be conveyed by the other attributes." )
     protected StringType note;
 
     /**
      * Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.
      */
-    @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=8, min=1, max=1)
+    @Child(name = "medication", type = {CodeableConcept.class, Medication.class}, order=10, min=1, max=1)
     @Description(shortDefinition="Medication to be taken", formalDefinition="Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications." )
     protected Type medication;
 
     /**
      * Indicates how the medication is to be used by the patient.
      */
-    @Child(name = "dosageInstruction", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "dosageInstruction", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="How medication should be taken", formalDefinition="Indicates how the medication is to be used by the patient." )
-    protected List<MedicationPrescriptionDosageInstructionComponent> dosageInstruction;
+    protected List<MedicationOrderDosageInstructionComponent> dosageInstruction;
 
     /**
      * Deals with details of the dispense part of the order.
      */
-    @Child(name = "dispense", type = {}, order=10, min=0, max=1)
+    @Child(name = "dispense", type = {}, order=12, min=0, max=1)
     @Description(shortDefinition="Medication supply authorization", formalDefinition="Deals with details of the dispense part of the order." )
-    protected MedicationPrescriptionDispenseComponent dispense;
+    protected MedicationOrderDispenseComponent dispense;
 
     /**
      * Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.
      */
-    @Child(name = "substitution", type = {}, order=11, min=0, max=1)
+    @Child(name = "substitution", type = {}, order=13, min=0, max=1)
     @Description(shortDefinition="Any restrictions on medication substitution?", formalDefinition="Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done." )
-    protected MedicationPrescriptionSubstitutionComponent substitution;
+    protected MedicationOrderSubstitutionComponent substitution;
 
-    private static final long serialVersionUID = 1219917448L;
+    /**
+     * A link to a resource representing an earlier order or prescription that this order supersedes.
+     */
+    @Child(name = "priorPrescription", type = {MedicationOrder.class}, order=14, min=0, max=1)
+    @Description(shortDefinition="An order/prescription that this supersedes", formalDefinition="A link to a resource representing an earlier order or prescription that this order supersedes." )
+    protected Reference priorPrescription;
+
+    /**
+     * The actual object that is the target of the reference (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     */
+    protected MedicationOrder priorPrescriptionTarget;
+
+    private static final long serialVersionUID = 244755395L;
 
   /*
    * Constructor
    */
-    public MedicationPrescription() {
+    public MedicationOrder() {
       super();
     }
 
   /*
    * Constructor
    */
-    public MedicationPrescription(Type medication) {
+    public MedicationOrder(Type medication) {
       super();
       this.medication = medication;
     }
@@ -1220,7 +1213,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     }
 
     // syntactic sugar
-    public MedicationPrescription addIdentifier(Identifier t) { //3
+    public MedicationOrder addIdentifier(Identifier t) { //3
       if (t == null)
         return this;
       if (this.identifier == null)
@@ -1235,7 +1228,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public DateTimeType getDateWrittenElement() { 
       if (this.dateWritten == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.dateWritten");
+          throw new Error("Attempt to auto-create MedicationOrder.dateWritten");
         else if (Configuration.doAutoCreate())
           this.dateWritten = new DateTimeType(); // bb
       return this.dateWritten;
@@ -1252,7 +1245,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #dateWritten} (The date (and perhaps time) when the prescription was written.). This is the underlying object with id, value and extensions. The accessor "getDateWritten" gives direct access to the value
      */
-    public MedicationPrescription setDateWrittenElement(DateTimeType value) { 
+    public MedicationOrder setDateWrittenElement(DateTimeType value) { 
       this.dateWritten = value;
       return this;
     }
@@ -1267,7 +1260,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value The date (and perhaps time) when the prescription was written.
      */
-    public MedicationPrescription setDateWritten(Date value) { 
+    public MedicationOrder setDateWritten(Date value) { 
       if (value == null)
         this.dateWritten = null;
       else {
@@ -1281,12 +1274,12 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @return {@link #status} (A code specifying the state of the order.  Generally this will be active or completed state.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public Enumeration<MedicationPrescriptionStatus> getStatusElement() { 
+    public Enumeration<MedicationOrderStatus> getStatusElement() { 
       if (this.status == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.status");
+          throw new Error("Attempt to auto-create MedicationOrder.status");
         else if (Configuration.doAutoCreate())
-          this.status = new Enumeration<MedicationPrescriptionStatus>(new MedicationPrescriptionStatusEnumFactory()); // bb
+          this.status = new Enumeration<MedicationOrderStatus>(new MedicationOrderStatusEnumFactory()); // bb
       return this.status;
     }
 
@@ -1301,7 +1294,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #status} (A code specifying the state of the order.  Generally this will be active or completed state.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
      */
-    public MedicationPrescription setStatusElement(Enumeration<MedicationPrescriptionStatus> value) { 
+    public MedicationOrder setStatusElement(Enumeration<MedicationOrderStatus> value) { 
       this.status = value;
       return this;
     }
@@ -1309,21 +1302,94 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @return A code specifying the state of the order.  Generally this will be active or completed state.
      */
-    public MedicationPrescriptionStatus getStatus() { 
+    public MedicationOrderStatus getStatus() { 
       return this.status == null ? null : this.status.getValue();
     }
 
     /**
      * @param value A code specifying the state of the order.  Generally this will be active or completed state.
      */
-    public MedicationPrescription setStatus(MedicationPrescriptionStatus value) { 
+    public MedicationOrder setStatus(MedicationOrderStatus value) { 
       if (value == null)
         this.status = null;
       else {
         if (this.status == null)
-          this.status = new Enumeration<MedicationPrescriptionStatus>(new MedicationPrescriptionStatusEnumFactory());
+          this.status = new Enumeration<MedicationOrderStatus>(new MedicationOrderStatusEnumFactory());
         this.status.setValue(value);
       }
+      return this;
+    }
+
+    /**
+     * @return {@link #dateEnded} (The date (and perhaps time) when the prescription was stopped.). This is the underlying object with id, value and extensions. The accessor "getDateEnded" gives direct access to the value
+     */
+    public DateTimeType getDateEndedElement() { 
+      if (this.dateEnded == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicationOrder.dateEnded");
+        else if (Configuration.doAutoCreate())
+          this.dateEnded = new DateTimeType(); // bb
+      return this.dateEnded;
+    }
+
+    public boolean hasDateEndedElement() { 
+      return this.dateEnded != null && !this.dateEnded.isEmpty();
+    }
+
+    public boolean hasDateEnded() { 
+      return this.dateEnded != null && !this.dateEnded.isEmpty();
+    }
+
+    /**
+     * @param value {@link #dateEnded} (The date (and perhaps time) when the prescription was stopped.). This is the underlying object with id, value and extensions. The accessor "getDateEnded" gives direct access to the value
+     */
+    public MedicationOrder setDateEndedElement(DateTimeType value) { 
+      this.dateEnded = value;
+      return this;
+    }
+
+    /**
+     * @return The date (and perhaps time) when the prescription was stopped.
+     */
+    public Date getDateEnded() { 
+      return this.dateEnded == null ? null : this.dateEnded.getValue();
+    }
+
+    /**
+     * @param value The date (and perhaps time) when the prescription was stopped.
+     */
+    public MedicationOrder setDateEnded(Date value) { 
+      if (value == null)
+        this.dateEnded = null;
+      else {
+        if (this.dateEnded == null)
+          this.dateEnded = new DateTimeType();
+        this.dateEnded.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #reasonEnded} (The reason why the prescription was stopped, if it was.)
+     */
+    public CodeableConcept getReasonEnded() { 
+      if (this.reasonEnded == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicationOrder.reasonEnded");
+        else if (Configuration.doAutoCreate())
+          this.reasonEnded = new CodeableConcept(); // cc
+      return this.reasonEnded;
+    }
+
+    public boolean hasReasonEnded() { 
+      return this.reasonEnded != null && !this.reasonEnded.isEmpty();
+    }
+
+    /**
+     * @param value {@link #reasonEnded} (The reason why the prescription was stopped, if it was.)
+     */
+    public MedicationOrder setReasonEnded(CodeableConcept value) { 
+      this.reasonEnded = value;
       return this;
     }
 
@@ -1333,7 +1399,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public Reference getPatient() { 
       if (this.patient == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.patient");
+          throw new Error("Attempt to auto-create MedicationOrder.patient");
         else if (Configuration.doAutoCreate())
           this.patient = new Reference(); // cc
       return this.patient;
@@ -1346,7 +1412,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #patient} (A link to a resource representing the person to whom the medication will be given.)
      */
-    public MedicationPrescription setPatient(Reference value) { 
+    public MedicationOrder setPatient(Reference value) { 
       this.patient = value;
       return this;
     }
@@ -1357,7 +1423,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public Patient getPatientTarget() { 
       if (this.patientTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.patient");
+          throw new Error("Attempt to auto-create MedicationOrder.patient");
         else if (Configuration.doAutoCreate())
           this.patientTarget = new Patient(); // aa
       return this.patientTarget;
@@ -1366,7 +1432,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #patient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource representing the person to whom the medication will be given.)
      */
-    public MedicationPrescription setPatientTarget(Patient value) { 
+    public MedicationOrder setPatientTarget(Patient value) { 
       this.patientTarget = value;
       return this;
     }
@@ -1377,7 +1443,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public Reference getPrescriber() { 
       if (this.prescriber == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.prescriber");
+          throw new Error("Attempt to auto-create MedicationOrder.prescriber");
         else if (Configuration.doAutoCreate())
           this.prescriber = new Reference(); // cc
       return this.prescriber;
@@ -1390,7 +1456,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #prescriber} (The healthcare professional responsible for authorizing the prescription.)
      */
-    public MedicationPrescription setPrescriber(Reference value) { 
+    public MedicationOrder setPrescriber(Reference value) { 
       this.prescriber = value;
       return this;
     }
@@ -1401,7 +1467,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public Practitioner getPrescriberTarget() { 
       if (this.prescriberTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.prescriber");
+          throw new Error("Attempt to auto-create MedicationOrder.prescriber");
         else if (Configuration.doAutoCreate())
           this.prescriberTarget = new Practitioner(); // aa
       return this.prescriberTarget;
@@ -1410,7 +1476,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #prescriber} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare professional responsible for authorizing the prescription.)
      */
-    public MedicationPrescription setPrescriberTarget(Practitioner value) { 
+    public MedicationOrder setPrescriberTarget(Practitioner value) { 
       this.prescriberTarget = value;
       return this;
     }
@@ -1421,7 +1487,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public Reference getEncounter() { 
       if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.encounter");
+          throw new Error("Attempt to auto-create MedicationOrder.encounter");
         else if (Configuration.doAutoCreate())
           this.encounter = new Reference(); // cc
       return this.encounter;
@@ -1434,7 +1500,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #encounter} (A link to a resource that identifies the particular occurrence of contact between patient and health care provider.)
      */
-    public MedicationPrescription setEncounter(Reference value) { 
+    public MedicationOrder setEncounter(Reference value) { 
       this.encounter = value;
       return this;
     }
@@ -1445,7 +1511,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public Encounter getEncounterTarget() { 
       if (this.encounterTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.encounter");
+          throw new Error("Attempt to auto-create MedicationOrder.encounter");
         else if (Configuration.doAutoCreate())
           this.encounterTarget = new Encounter(); // aa
       return this.encounterTarget;
@@ -1454,7 +1520,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource that identifies the particular occurrence of contact between patient and health care provider.)
      */
-    public MedicationPrescription setEncounterTarget(Encounter value) { 
+    public MedicationOrder setEncounterTarget(Encounter value) { 
       this.encounterTarget = value;
       return this;
     }
@@ -1499,7 +1565,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #reason} (Can be the reason or the indication for writing the prescription.)
      */
-    public MedicationPrescription setReason(Type value) { 
+    public MedicationOrder setReason(Type value) { 
       this.reason = value;
       return this;
     }
@@ -1510,7 +1576,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     public StringType getNoteElement() { 
       if (this.note == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.note");
+          throw new Error("Attempt to auto-create MedicationOrder.note");
         else if (Configuration.doAutoCreate())
           this.note = new StringType(); // bb
       return this.note;
@@ -1527,7 +1593,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #note} (Extra information about the prescription that could not be conveyed by the other attributes.). This is the underlying object with id, value and extensions. The accessor "getNote" gives direct access to the value
      */
-    public MedicationPrescription setNoteElement(StringType value) { 
+    public MedicationOrder setNoteElement(StringType value) { 
       this.note = value;
       return this;
     }
@@ -1542,7 +1608,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value Extra information about the prescription that could not be conveyed by the other attributes.
      */
-    public MedicationPrescription setNote(String value) { 
+    public MedicationOrder setNote(String value) { 
       if (Utilities.noString(value))
         this.note = null;
       else {
@@ -1593,7 +1659,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #medication} (Identifies the medication being administered. This is a link to a resource that represents the medication which may be the details of the medication or simply an attribute carrying a code that identifies the medication from a known list of medications.)
      */
-    public MedicationPrescription setMedication(Type value) { 
+    public MedicationOrder setMedication(Type value) { 
       this.medication = value;
       return this;
     }
@@ -1601,16 +1667,16 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @return {@link #dosageInstruction} (Indicates how the medication is to be used by the patient.)
      */
-    public List<MedicationPrescriptionDosageInstructionComponent> getDosageInstruction() { 
+    public List<MedicationOrderDosageInstructionComponent> getDosageInstruction() { 
       if (this.dosageInstruction == null)
-        this.dosageInstruction = new ArrayList<MedicationPrescriptionDosageInstructionComponent>();
+        this.dosageInstruction = new ArrayList<MedicationOrderDosageInstructionComponent>();
       return this.dosageInstruction;
     }
 
     public boolean hasDosageInstruction() { 
       if (this.dosageInstruction == null)
         return false;
-      for (MedicationPrescriptionDosageInstructionComponent item : this.dosageInstruction)
+      for (MedicationOrderDosageInstructionComponent item : this.dosageInstruction)
         if (!item.isEmpty())
           return true;
       return false;
@@ -1620,20 +1686,20 @@ In some situations, this attribute may be used instead of quantity to identify t
      * @return {@link #dosageInstruction} (Indicates how the medication is to be used by the patient.)
      */
     // syntactic sugar
-    public MedicationPrescriptionDosageInstructionComponent addDosageInstruction() { //3
-      MedicationPrescriptionDosageInstructionComponent t = new MedicationPrescriptionDosageInstructionComponent();
+    public MedicationOrderDosageInstructionComponent addDosageInstruction() { //3
+      MedicationOrderDosageInstructionComponent t = new MedicationOrderDosageInstructionComponent();
       if (this.dosageInstruction == null)
-        this.dosageInstruction = new ArrayList<MedicationPrescriptionDosageInstructionComponent>();
+        this.dosageInstruction = new ArrayList<MedicationOrderDosageInstructionComponent>();
       this.dosageInstruction.add(t);
       return t;
     }
 
     // syntactic sugar
-    public MedicationPrescription addDosageInstruction(MedicationPrescriptionDosageInstructionComponent t) { //3
+    public MedicationOrder addDosageInstruction(MedicationOrderDosageInstructionComponent t) { //3
       if (t == null)
         return this;
       if (this.dosageInstruction == null)
-        this.dosageInstruction = new ArrayList<MedicationPrescriptionDosageInstructionComponent>();
+        this.dosageInstruction = new ArrayList<MedicationOrderDosageInstructionComponent>();
       this.dosageInstruction.add(t);
       return this;
     }
@@ -1641,12 +1707,12 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @return {@link #dispense} (Deals with details of the dispense part of the order.)
      */
-    public MedicationPrescriptionDispenseComponent getDispense() { 
+    public MedicationOrderDispenseComponent getDispense() { 
       if (this.dispense == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.dispense");
+          throw new Error("Attempt to auto-create MedicationOrder.dispense");
         else if (Configuration.doAutoCreate())
-          this.dispense = new MedicationPrescriptionDispenseComponent(); // cc
+          this.dispense = new MedicationOrderDispenseComponent(); // cc
       return this.dispense;
     }
 
@@ -1657,7 +1723,7 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #dispense} (Deals with details of the dispense part of the order.)
      */
-    public MedicationPrescription setDispense(MedicationPrescriptionDispenseComponent value) { 
+    public MedicationOrder setDispense(MedicationOrderDispenseComponent value) { 
       this.dispense = value;
       return this;
     }
@@ -1665,12 +1731,12 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @return {@link #substitution} (Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.)
      */
-    public MedicationPrescriptionSubstitutionComponent getSubstitution() { 
+    public MedicationOrderSubstitutionComponent getSubstitution() { 
       if (this.substitution == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicationPrescription.substitution");
+          throw new Error("Attempt to auto-create MedicationOrder.substitution");
         else if (Configuration.doAutoCreate())
-          this.substitution = new MedicationPrescriptionSubstitutionComponent(); // cc
+          this.substitution = new MedicationOrderSubstitutionComponent(); // cc
       return this.substitution;
     }
 
@@ -1681,8 +1747,52 @@ In some situations, this attribute may be used instead of quantity to identify t
     /**
      * @param value {@link #substitution} (Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.)
      */
-    public MedicationPrescription setSubstitution(MedicationPrescriptionSubstitutionComponent value) { 
+    public MedicationOrder setSubstitution(MedicationOrderSubstitutionComponent value) { 
       this.substitution = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #priorPrescription} (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     */
+    public Reference getPriorPrescription() { 
+      if (this.priorPrescription == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicationOrder.priorPrescription");
+        else if (Configuration.doAutoCreate())
+          this.priorPrescription = new Reference(); // cc
+      return this.priorPrescription;
+    }
+
+    public boolean hasPriorPrescription() { 
+      return this.priorPrescription != null && !this.priorPrescription.isEmpty();
+    }
+
+    /**
+     * @param value {@link #priorPrescription} (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     */
+    public MedicationOrder setPriorPrescription(Reference value) { 
+      this.priorPrescription = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #priorPrescription} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     */
+    public MedicationOrder getPriorPrescriptionTarget() { 
+      if (this.priorPrescriptionTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicationOrder.priorPrescription");
+        else if (Configuration.doAutoCreate())
+          this.priorPrescriptionTarget = new MedicationOrder(); // aa
+      return this.priorPrescriptionTarget;
+    }
+
+    /**
+     * @param value {@link #priorPrescription} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A link to a resource representing an earlier order or prescription that this order supersedes.)
+     */
+    public MedicationOrder setPriorPrescriptionTarget(MedicationOrder value) { 
+      this.priorPrescriptionTarget = value;
       return this;
     }
 
@@ -1691,6 +1801,8 @@ In some situations, this attribute may be used instead of quantity to identify t
         childrenList.add(new Property("identifier", "Identifier", "External identifier - one that would be used by another non-FHIR system - for example a re-imbursement system might issue its own id for each prescription that is created.  This is particularly important where FHIR only provides part of an erntire workflow process where records have to be tracked through an entire system.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("dateWritten", "dateTime", "The date (and perhaps time) when the prescription was written.", 0, java.lang.Integer.MAX_VALUE, dateWritten));
         childrenList.add(new Property("status", "code", "A code specifying the state of the order.  Generally this will be active or completed state.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("dateEnded", "dateTime", "The date (and perhaps time) when the prescription was stopped.", 0, java.lang.Integer.MAX_VALUE, dateEnded));
+        childrenList.add(new Property("reasonEnded", "CodeableConcept", "The reason why the prescription was stopped, if it was.", 0, java.lang.Integer.MAX_VALUE, reasonEnded));
         childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person to whom the medication will be given.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("prescriber", "Reference(Practitioner)", "The healthcare professional responsible for authorizing the prescription.", 0, java.lang.Integer.MAX_VALUE, prescriber));
         childrenList.add(new Property("encounter", "Reference(Encounter)", "A link to a resource that identifies the particular occurrence of contact between patient and health care provider.", 0, java.lang.Integer.MAX_VALUE, encounter));
@@ -1700,10 +1812,11 @@ In some situations, this attribute may be used instead of quantity to identify t
         childrenList.add(new Property("dosageInstruction", "", "Indicates how the medication is to be used by the patient.", 0, java.lang.Integer.MAX_VALUE, dosageInstruction));
         childrenList.add(new Property("dispense", "", "Deals with details of the dispense part of the order.", 0, java.lang.Integer.MAX_VALUE, dispense));
         childrenList.add(new Property("substitution", "", "Indicates whether or not substitution can or should be part of the dispense. In some cases substitution must happen, in other cases substitution must not happen, and in others it does not matter. This block explains the prescriber's intent. If nothing is specified substitution may be done.", 0, java.lang.Integer.MAX_VALUE, substitution));
+        childrenList.add(new Property("priorPrescription", "Reference(MedicationOrder)", "A link to a resource representing an earlier order or prescription that this order supersedes.", 0, java.lang.Integer.MAX_VALUE, priorPrescription));
       }
 
-      public MedicationPrescription copy() {
-        MedicationPrescription dst = new MedicationPrescription();
+      public MedicationOrder copy() {
+        MedicationOrder dst = new MedicationOrder();
         copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
@@ -1712,6 +1825,8 @@ In some situations, this attribute may be used instead of quantity to identify t
         };
         dst.dateWritten = dateWritten == null ? null : dateWritten.copy();
         dst.status = status == null ? null : status.copy();
+        dst.dateEnded = dateEnded == null ? null : dateEnded.copy();
+        dst.reasonEnded = reasonEnded == null ? null : reasonEnded.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.prescriber = prescriber == null ? null : prescriber.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
@@ -1719,16 +1834,17 @@ In some situations, this attribute may be used instead of quantity to identify t
         dst.note = note == null ? null : note.copy();
         dst.medication = medication == null ? null : medication.copy();
         if (dosageInstruction != null) {
-          dst.dosageInstruction = new ArrayList<MedicationPrescriptionDosageInstructionComponent>();
-          for (MedicationPrescriptionDosageInstructionComponent i : dosageInstruction)
+          dst.dosageInstruction = new ArrayList<MedicationOrderDosageInstructionComponent>();
+          for (MedicationOrderDosageInstructionComponent i : dosageInstruction)
             dst.dosageInstruction.add(i.copy());
         };
         dst.dispense = dispense == null ? null : dispense.copy();
         dst.substitution = substitution == null ? null : substitution.copy();
+        dst.priorPrescription = priorPrescription == null ? null : priorPrescription.copy();
         return dst;
       }
 
-      protected MedicationPrescription typedCopy() {
+      protected MedicationOrder typedCopy() {
         return copy();
       }
 
@@ -1736,54 +1852,59 @@ In some situations, this attribute may be used instead of quantity to identify t
       public boolean equalsDeep(Base other) {
         if (!super.equalsDeep(other))
           return false;
-        if (!(other instanceof MedicationPrescription))
+        if (!(other instanceof MedicationOrder))
           return false;
-        MedicationPrescription o = (MedicationPrescription) other;
+        MedicationOrder o = (MedicationOrder) other;
         return compareDeep(identifier, o.identifier, true) && compareDeep(dateWritten, o.dateWritten, true)
-           && compareDeep(status, o.status, true) && compareDeep(patient, o.patient, true) && compareDeep(prescriber, o.prescriber, true)
-           && compareDeep(encounter, o.encounter, true) && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true)
-           && compareDeep(medication, o.medication, true) && compareDeep(dosageInstruction, o.dosageInstruction, true)
-           && compareDeep(dispense, o.dispense, true) && compareDeep(substitution, o.substitution, true);
+           && compareDeep(status, o.status, true) && compareDeep(dateEnded, o.dateEnded, true) && compareDeep(reasonEnded, o.reasonEnded, true)
+           && compareDeep(patient, o.patient, true) && compareDeep(prescriber, o.prescriber, true) && compareDeep(encounter, o.encounter, true)
+           && compareDeep(reason, o.reason, true) && compareDeep(note, o.note, true) && compareDeep(medication, o.medication, true)
+           && compareDeep(dosageInstruction, o.dosageInstruction, true) && compareDeep(dispense, o.dispense, true)
+           && compareDeep(substitution, o.substitution, true) && compareDeep(priorPrescription, o.priorPrescription, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other) {
         if (!super.equalsShallow(other))
           return false;
-        if (!(other instanceof MedicationPrescription))
+        if (!(other instanceof MedicationOrder))
           return false;
-        MedicationPrescription o = (MedicationPrescription) other;
-        return compareValues(dateWritten, o.dateWritten, true) && compareValues(status, o.status, true) && compareValues(note, o.note, true)
-          ;
+        MedicationOrder o = (MedicationOrder) other;
+        return compareValues(dateWritten, o.dateWritten, true) && compareValues(status, o.status, true) && compareValues(dateEnded, o.dateEnded, true)
+           && compareValues(note, o.note, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (dateWritten == null || dateWritten.isEmpty())
-           && (status == null || status.isEmpty()) && (patient == null || patient.isEmpty()) && (prescriber == null || prescriber.isEmpty())
+           && (status == null || status.isEmpty()) && (dateEnded == null || dateEnded.isEmpty()) && (reasonEnded == null || reasonEnded.isEmpty())
+           && (patient == null || patient.isEmpty()) && (prescriber == null || prescriber.isEmpty())
            && (encounter == null || encounter.isEmpty()) && (reason == null || reason.isEmpty()) && (note == null || note.isEmpty())
            && (medication == null || medication.isEmpty()) && (dosageInstruction == null || dosageInstruction.isEmpty())
            && (dispense == null || dispense.isEmpty()) && (substitution == null || substitution.isEmpty())
-          ;
+           && (priorPrescription == null || priorPrescription.isEmpty());
       }
 
   @Override
   public ResourceType getResourceType() {
-    return ResourceType.MedicationPrescription;
+    return ResourceType.MedicationOrder;
    }
 
-  @SearchParamDefinition(name="prescriber", path="MedicationPrescription.prescriber", description="Who ordered the medication(s)", type="reference" )
+  @SearchParamDefinition(name="prescriber", path="MedicationOrder.prescriber", description="Who ordered the medication(s)", type="reference" )
   public static final String SP_PRESCRIBER = "prescriber";
-  @SearchParamDefinition(name="identifier", path="MedicationPrescription.identifier", description="Return prescriptions with this external identity", type="token" )
+  @SearchParamDefinition(name="identifier", path="MedicationOrder.identifier", description="Return prescriptions with this external identity", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="patient", path="MedicationPrescription.patient", description="The identity of a patient to list dispenses  for", type="reference" )
+  @SearchParamDefinition(name="code", path="MedicationOrder.medicationCodeableConcept", description="Return administrations of this medication code", type="token" )
+  public static final String SP_CODE = "code";
+  @SearchParamDefinition(name="patient", path="MedicationOrder.patient", description="The identity of a patient to list dispenses  for", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="datewritten", path="MedicationPrescription.dateWritten", description="Return prescriptions written on this date", type="date" )
+  @SearchParamDefinition(name="datewritten", path="MedicationOrder.dateWritten", description="Return prescriptions written on this date", type="date" )
   public static final String SP_DATEWRITTEN = "datewritten";
-  @SearchParamDefinition(name="medication", path="MedicationPrescription.medicationReference", description="Code for medicine or text in medicine name", type="reference" )
+  @SearchParamDefinition(name="medication", path="MedicationOrder.medicationReference", description="Return administrations of this medication reference", type="reference" )
   public static final String SP_MEDICATION = "medication";
-  @SearchParamDefinition(name="encounter", path="MedicationPrescription.encounter", description="Return prescriptions with this encounter identity", type="reference" )
+  @SearchParamDefinition(name="encounter", path="MedicationOrder.encounter", description="Return prescriptions with this encounter identity", type="reference" )
   public static final String SP_ENCOUNTER = "encounter";
-  @SearchParamDefinition(name="status", path="MedicationPrescription.status", description="Status of the prescription", type="token" )
+  @SearchParamDefinition(name="status", path="MedicationOrder.status", description="Status of the prescription", type="token" )
   public static final String SP_STATUS = "status";
 
 }

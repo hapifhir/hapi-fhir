@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Provenance"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -413,7 +413,7 @@
   <url value="http://hl7.org/fhir/StructureDefinition/Provenance"/>
   <name value="Provenance"/>
   <status value="draft"/>
-  <publisher value="Health Level Seven International (FHIR Infrastructure)"/>
+  <publisher value="Health Level Seven International (Security)"/>
   <contact>
     <telecom>
       <system value="other"/>
@@ -423,10 +423,10 @@
   <contact>
     <telecom>
       <system value="other"/>
-      <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
+      <value value="http://www.hl7.org/Special/committees/secure/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Provenance Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -440,6 +440,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Provenance"/>

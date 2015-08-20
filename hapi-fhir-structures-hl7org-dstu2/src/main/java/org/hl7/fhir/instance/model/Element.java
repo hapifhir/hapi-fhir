@@ -29,38 +29,20 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
-import org.apache.commons.lang3.Validate;
+import java.util.*;
+
+import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.instance.model.annotations.Child;
 import org.hl7.fhir.instance.model.annotations.Description;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.instance.model.annotations.DatatypeDef;
+import org.hl7.fhir.instance.model.annotations.Block;
+import org.hl7.fhir.instance.model.api.*;
 /**
  * Base definition for all elements in a resource.
  */
 public abstract class Element extends Base implements IBaseHasExtensions {
-   /**
-    * Returns an unmodifiable list containing all extensions on this element which 
-    * match the given URL.
-    * 
-    * @param theUrl The URL. Must not be blank or null.
-    * @return an unmodifiable list containing all extensions on this element which 
-    * match the given URL
-    */
-   public List<Extension> getExtensionsByUrl(String theUrl) {
-     Validate.notBlank(theUrl, "theUrl must not be blank or null");
-     ArrayList<Extension> retVal = new ArrayList<Extension>();
-     for (Extension next : getExtension()) {
-       if (theUrl.equals(next.getUrl())) {
-         retVal.add(next);
-       }
-     }
-     return Collections.unmodifiableList(retVal);
-   }
 
     /**
      * unique id for the element within a resource (for internal references).
@@ -174,6 +156,24 @@ public abstract class Element extends Base implements IBaseHasExtensions {
       return this;
     }
 
+   /**
+    * Returns an unmodifiable list containing all extensions on this element which 
+    * match the given URL.
+    * 
+    * @param theUrl The URL. Must not be blank or null.
+    * @return an unmodifiable list containing all extensions on this element which 
+    * match the given URL
+    */
+   public List<Extension> getExtensionsByUrl(String theUrl) {
+     org.apache.commons.lang3.Validate.notBlank(theUrl, "theUrl must not be blank or null");
+     ArrayList<Extension> retVal = new ArrayList<Extension>();
+     for (Extension next : getExtension()) {
+       if (theUrl.equals(next.getUrl())) {
+         retVal.add(next);
+       }
+     }
+     return java.util.Collections.unmodifiableList(retVal);
+   }
       protected void listChildren(List<Property> childrenList) {
         childrenList.add(new Property("id", "id", "unique id for the element within a resource (for internal references).", 0, java.lang.Integer.MAX_VALUE, id));
         childrenList.add(new Property("extension", "Extension", "May be used to represent additional information that is not part of the basic definition of the element. In order to make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.", 0, java.lang.Integer.MAX_VALUE, extension));

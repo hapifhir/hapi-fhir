@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="StructureDefinition"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -57,7 +57,7 @@
             <br/>
             <span style="font-style: italic" title="sdf-13">element.base must appear if theres&#39;s a base on the structure definition</span>
             <br/>
-            <span style="font-style: italic" title="sdf-10">If the struture is not abstract, or there&#39;s a constrained type, then there SHALL be a base</span>
+            <span style="font-style: italic" title="sdf-10">If the structure is not abstract, or there&#39;s a constrained type, then there SHALL be a base</span>
             <br/>
             <span style="font-style: italic" title="sdf-7">If the type is Resource or Type, the url has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the name</span>
             <br/>
@@ -720,7 +720,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for StructureDefinition Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -739,6 +739,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="StructureDefinition"/>
@@ -776,45 +777,45 @@
         <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
         <severity value="error"/>
         <human value="If there&#39;s a constrained type, it&#39;s content must match the path name in the first element of a snapshot"/>
-        <xpath value="not(exists(f:constrainedType)) and (not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value))"/>
+        <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
       </constraint>
       <constraint>
         <key value="sdf-13"/>
-        <requirements value="Ensure that element.base appears if there&#39;s a base on the structure definition"/>
+        <requirements value="Ensure that element.base appears if there&#39;s a constrained type on the structure definition"/>
         <severity value="error"/>
         <human value="element.base must appear if theres&#39;s a base on the structure definition"/>
-        <xpath value="not(f:base) or not(f:snapshot/f:element[not(f:base)])"/>
+        <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
       </constraint>
       <constraint>
         <key value="sdf-10"/>
         <requirements value="Ensure that there&#39;s a base unless the type is abstract and there&#39;s no constrainedType"/>
         <severity value="error"/>
-        <human value="If the struture is not abstract, or there&#39;s a constrained type, then there SHALL be a base"/>
-        <xpath value="(not(exists(f:constrainedType)) and not(exists(f:abstract/@value=&#39;true&#39;))) or exists(f:base)"/>
+        <human value="If the structure is not abstract, or there&#39;s a constrained type, then there SHALL be a base"/>
+        <xpath value="(f:abstract/@value=&#39;true&#39;) or not(exists(f:constrainedType)) or exists(f:base)"/>
       </constraint>
       <constraint>
         <key value="sdf-7"/>
         <severity value="error"/>
         <human value="If the type is Resource or Type, the url has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the name"/>
-        <xpath value="not(f:type/@value=(&#39;Resource&#39;, &#39;Type&#39;)) or f:url/@value=concat(&#39;http://hl7.org/fhir/StructureDefinition/&#39;, f:name/@value)"/>
+        <xpath value="not(exists(constrainedType)) or f:url/@value=concat(&#39;http://hl7.org/fhir/StructureDefinition/&#39;, f:name/@value)"/>
       </constraint>
       <constraint>
         <key value="sdf-6"/>
         <severity value="error"/>
         <human value="A structure must have either a differential, or a snapshot (or both)"/>
-        <xpath value="f:snapshot or f:differential"/>
+        <xpath value="exists(f:snapshot) or exists(f:differential)"/>
       </constraint>
       <constraint>
         <key value="sdf-5"/>
         <severity value="error"/>
         <human value="If the type is &#39;extension&#39; then the structure must have context information"/>
-        <xpath value="not(f:type/@value = &#39;extension&#39;) or (f:context and f:contextType)"/>
+        <xpath value="not(f:constrainedType/@value = &#39;extension&#39;) or (exists(f:context) and exists(f:contextType))"/>
       </constraint>
       <constraint>
         <key value="sdf-4"/>
         <severity value="error"/>
         <human value="A structure must have a base unless it’s type is &#39;abstract&#39;"/>
-        <xpath value="(f:type/@value = &#39;abstract&#39;) or f:base"/>
+        <xpath value="(f:abstract/@value = &#39;true&#39;) or exists(f:base)"/>
       </constraint>
       <mapping>
         <identity value="rim"/>
@@ -1682,45 +1683,45 @@
         <requirements value="Ensure that the constrainedType is not inconsistent with the other information in the structure"/>
         <severity value="error"/>
         <human value="If there&#39;s a constrained type, it&#39;s content must match the path name in the first element of a snapshot"/>
-        <xpath value="not(exists(f:constrainedType)) and (not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value))"/>
+        <xpath value="not(exists(f:constrainedType)) or not(exists(f:snapshot)) or (f:constrainedType/@value = f:snapshot/f:element[1]/f:path/@value)"/>
       </constraint>
       <constraint>
         <key value="sdf-13"/>
-        <requirements value="Ensure that element.base appears if there&#39;s a base on the structure definition"/>
+        <requirements value="Ensure that element.base appears if there&#39;s a constrained type on the structure definition"/>
         <severity value="error"/>
         <human value="element.base must appear if theres&#39;s a base on the structure definition"/>
-        <xpath value="not(f:base) or not(f:snapshot/f:element[not(f:base)])"/>
+        <xpath value="not(f:constrainedType) or not(f:snapshot/f:element[not(f:base)])"/>
       </constraint>
       <constraint>
         <key value="sdf-10"/>
         <requirements value="Ensure that there&#39;s a base unless the type is abstract and there&#39;s no constrainedType"/>
         <severity value="error"/>
-        <human value="If the struture is not abstract, or there&#39;s a constrained type, then there SHALL be a base"/>
-        <xpath value="(not(exists(f:constrainedType)) and not(exists(f:abstract/@value=&#39;true&#39;))) or exists(f:base)"/>
+        <human value="If the structure is not abstract, or there&#39;s a constrained type, then there SHALL be a base"/>
+        <xpath value="(f:abstract/@value=&#39;true&#39;) or not(exists(f:constrainedType)) or exists(f:base)"/>
       </constraint>
       <constraint>
         <key value="sdf-7"/>
         <severity value="error"/>
         <human value="If the type is Resource or Type, the url has to start with &quot;http://hl7.org/fhir/StructureDefinition/&quot; and the tail must match the name"/>
-        <xpath value="not(f:type/@value=(&#39;Resource&#39;, &#39;Type&#39;)) or f:url/@value=concat(&#39;http://hl7.org/fhir/StructureDefinition/&#39;, f:name/@value)"/>
+        <xpath value="not(exists(constrainedType)) or f:url/@value=concat(&#39;http://hl7.org/fhir/StructureDefinition/&#39;, f:name/@value)"/>
       </constraint>
       <constraint>
         <key value="sdf-6"/>
         <severity value="error"/>
         <human value="A structure must have either a differential, or a snapshot (or both)"/>
-        <xpath value="f:snapshot or f:differential"/>
+        <xpath value="exists(f:snapshot) or exists(f:differential)"/>
       </constraint>
       <constraint>
         <key value="sdf-5"/>
         <severity value="error"/>
         <human value="If the type is &#39;extension&#39; then the structure must have context information"/>
-        <xpath value="not(f:type/@value = &#39;extension&#39;) or (f:context and f:contextType)"/>
+        <xpath value="not(f:constrainedType/@value = &#39;extension&#39;) or (exists(f:context) and exists(f:contextType))"/>
       </constraint>
       <constraint>
         <key value="sdf-4"/>
         <severity value="error"/>
         <human value="A structure must have a base unless it’s type is &#39;abstract&#39;"/>
-        <xpath value="(f:type/@value = &#39;abstract&#39;) or f:base"/>
+        <xpath value="(f:abstract/@value = &#39;true&#39;) or exists(f:base)"/>
       </constraint>
       <mapping>
         <identity value="rim"/>

@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="DiagnosticReport"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -260,13 +260,15 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
-            <span title="DiagnosticReport.requestDetail : Details concerning a test requested.">requestDetail</span>
-            <a name="DiagnosticReport.requestDetail"> </a>
+            <span title="DiagnosticReport.request : Details concerning a test or procedure requested.">request</span>
+            <a name="DiagnosticReport.request"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="diagnosticorder.html">DiagnosticOrder</a>
+            <a href="diagnosticorder.html">DiagnosticOrder</a> | 
+            <a href="procedurerequest.html">ProcedureRequest</a> | 
+            <a href="referralrequest.html">ReferralRequest</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">What was requested</td>
         </tr>
@@ -448,8 +450,9 @@
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for DiagnosticReport Resource"/>
+  <requirements value="To support reporting for any diagnostic report into a clinical data repository."/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -467,12 +470,12 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="DiagnosticReport"/>
       <short value="A Diagnostic report - a combination of request information, atomic results, images, interpretation, as well as formatted reports"/>
       <definition value="The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretation, and formatted representation of diagnostic reports."/>
-      <requirements value="To support reporting for any diagnostic report into a clinical data repository."/>
       <alias value="Report"/>
       <alias value="Test"/>
       <alias value="Result"/>
@@ -881,15 +884,23 @@
       </mapping>
     </element>
     <element>
-      <path value="DiagnosticReport.requestDetail"/>
+      <path value="DiagnosticReport.request"/>
       <short value="What was requested"/>
-      <definition value="Details concerning a test requested."/>
+      <definition value="Details concerning a test or procedure requested."/>
       <requirements value="Need to be able to track completion of requests based on reports issued and also to report what diagnostic tests were requested (not always the same as what is delivered)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticOrder"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/ProcedureRequest"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/ReferralRequest"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -1133,7 +1144,6 @@
       <path value="DiagnosticReport"/>
       <short value="A Diagnostic report - a combination of request information, atomic results, images, interpretation, as well as formatted reports"/>
       <definition value="The findings and interpretation of diagnostic  tests performed on patients, groups of patients, devices, and locations, and/or specimens derived from these. The report includes clinical context such as requesting and provider information, and some mix of atomic results, images, textual and coded interpretation, and formatted representation of diagnostic reports."/>
-      <requirements value="To support reporting for any diagnostic report into a clinical data repository."/>
       <alias value="Report"/>
       <alias value="Test"/>
       <alias value="Result"/>
@@ -1424,15 +1434,23 @@
       </mapping>
     </element>
     <element>
-      <path value="DiagnosticReport.requestDetail"/>
+      <path value="DiagnosticReport.request"/>
       <short value="What was requested"/>
-      <definition value="Details concerning a test requested."/>
+      <definition value="Details concerning a test or procedure requested."/>
       <requirements value="Need to be able to track completion of requests based on reports issued and also to report what diagnostic tests were requested (not always the same as what is delivered)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/DiagnosticOrder"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/ProcedureRequest"/>
+      </type>
+      <type>
+        <code value="Reference"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/ReferralRequest"/>
       </type>
       <mapping>
         <identity value="rim"/>

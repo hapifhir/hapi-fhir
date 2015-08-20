@@ -1,8 +1,10 @@
 package ca.uhn.fhir.validation;
 
+import static org.apache.commons.lang3.StringUtils.getJaroWinklerDistance;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,18 +74,31 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
   private StructureDefinition loadProfileOrReturnNull(List<ValidationMessage> theMessages, FhirContext theCtx,
       String theResourceName) {
     if (isBlank(theResourceName)) {
-      theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
-          .setMessage("Could not determine resource type from request. Content appears invalid."));
+      if (theMessages != null) {
+        theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
+            .setMessage("Could not determine resource type from request. Content appears invalid."));
+      }
       return null;
     }
 
     String profileCpName = "/org/hl7/fhir/instance/model/profile/" + theResourceName.toLowerCase() + ".profile.xml";
     String profileText;
     try {
-      profileText = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream(profileCpName), "UTF-8");
+      InputStream inputStream = FhirInstanceValidator.class.getResourceAsStream(profileCpName);
+      if (inputStream == null) {
+        if (theMessages != null) {
+          theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
+              .setMessage("No profile found for resource type " + theResourceName));
+        } else {
+          return null;
+        }
+      }
+      profileText = IOUtils.toString(inputStream, "UTF-8");
     } catch (IOException e1) {
-      theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
-          .setMessage("No profile found for resource type " + theResourceName));
+      if (theMessages != null) {
+        theMessages.add(new ValidationMessage().setLevel(IssueSeverity.FATAL)
+            .setMessage("No profile found for resource type " + theResourceName));
+      }
       return null;
     }
     StructureDefinition profile = getHl7OrgDstu2Ctx(theCtx).newXmlParser().parseResource(StructureDefinition.class,
@@ -91,8 +106,22 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
     return profile;
   }
 
-  protected List<ValidationMessage> validate(FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
-    WorkerContext workerContext = new WorkerContext();
+  protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
+    WorkerContext workerContext = new WorkerContext() {
+      @Override
+      public StructureDefinition getProfile(String theId) {
+        StructureDefinition retVal = super.getProfile(theId);
+        if (retVal == null) {
+          if (theId.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+            retVal = loadProfileOrReturnNull(null, getHl7OrgDstu2Ctx(theCtx), theId.substring("http://hl7.org/fhir/StructureDefinition/".length()));
+            if (retVal != null) {
+              seeProfile(theId, retVal);
+            }
+          }
+        }
+        return retVal;
+      }};
+      
     org.hl7.fhir.instance.validation.InstanceValidator v;
     try {
       v = new org.hl7.fhir.instance.validation.InstanceValidator(workerContext);

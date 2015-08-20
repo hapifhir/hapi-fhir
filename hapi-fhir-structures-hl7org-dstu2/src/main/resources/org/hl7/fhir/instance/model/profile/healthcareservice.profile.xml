@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="HealthcareService"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -592,7 +592,7 @@
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for HealthcareService Resource"/>
   <mapping>
     <identity value="w5"/>
@@ -606,6 +606,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="HealthcareService"/>
@@ -802,6 +803,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ServiceType"/>
+      </extension>
       <path value="HealthcareService.serviceType"/>
       <short value="A specific type of service that may be delivered or performed"/>
       <definition value="A specific type of service that may be delivered or performed."/>
@@ -1322,6 +1326,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ServiceType"/>
+      </extension>
       <path value="HealthcareService.serviceType"/>
       <short value="A specific type of service that may be delivered or performed"/>
       <definition value="A specific type of service that may be delivered or performed."/>

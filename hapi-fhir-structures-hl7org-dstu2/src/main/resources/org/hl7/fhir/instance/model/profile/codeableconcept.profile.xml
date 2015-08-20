@@ -94,8 +94,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for CodeableConcept Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for CodeableConcept Type"/>
   <requirements value="This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept."/>
   <mapping>
     <identity value="orim"/>
@@ -114,12 +114,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="CodeableConcept"/>
       <short value="Concept - reference to a terminology or just  text"/>
       <definition value="A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text."/>
-      <requirements value="This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -224,7 +224,6 @@
       <path value="CodeableConcept"/>
       <short value="Concept - reference to a terminology or just  text"/>
       <definition value="A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text."/>
-      <requirements value="This is a common pattern in healthcare - a concept that may be defined by one or more codes from formal definitions including LOINC and SNOMED CT, and/or defined by the provision of text that captures a human sense of the concept."/>
       <min value="0"/>
       <max value="*"/>
       <type>

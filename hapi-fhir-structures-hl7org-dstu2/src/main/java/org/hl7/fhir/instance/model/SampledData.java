@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,9 +49,9 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.
      */
-    @Child(name = "origin", type = {Quantity.class}, order=0, min=1, max=1)
+    @Child(name = "origin", type = {SimpleQuantity.class}, order=0, min=1, max=1)
     @Description(shortDefinition="Zero value and units", formalDefinition="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series." )
-    protected Quantity origin;
+    protected SimpleQuantity origin;
 
     /**
      * The length of time between sampling times, measured in milliseconds.
@@ -95,7 +95,7 @@ public class SampledData extends Type implements ICompositeType {
     @Description(shortDefinition="Decimal values with spaces, or 'E' | 'U' | 'L'", formalDefinition="A series of data points which are decimal values separated by a single space (character u20). The special values 'E' (error), 'L' (below detection limit) and 'U' (above detection limit) can also be used in place of a decimal value." )
     protected StringType data;
 
-    private static final long serialVersionUID = -1984181262L;
+    private static final long serialVersionUID = -1763278368L;
 
   /*
    * Constructor
@@ -107,7 +107,7 @@ public class SampledData extends Type implements ICompositeType {
   /*
    * Constructor
    */
-    public SampledData(Quantity origin, DecimalType period, PositiveIntType dimensions, StringType data) {
+    public SampledData(SimpleQuantity origin, DecimalType period, PositiveIntType dimensions, StringType data) {
       super();
       this.origin = origin;
       this.period = period;
@@ -118,12 +118,12 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * @return {@link #origin} (The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.)
      */
-    public Quantity getOrigin() { 
+    public SimpleQuantity getOrigin() { 
       if (this.origin == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create SampledData.origin");
         else if (Configuration.doAutoCreate())
-          this.origin = new Quantity(); // cc
+          this.origin = new SimpleQuantity(); // cc
       return this.origin;
     }
 
@@ -134,7 +134,7 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * @param value {@link #origin} (The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.)
      */
-    public SampledData setOrigin(Quantity value) { 
+    public SampledData setOrigin(SimpleQuantity value) { 
       this.origin = value;
       return this;
     }
@@ -423,7 +423,7 @@ public class SampledData extends Type implements ICompositeType {
 
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
-        childrenList.add(new Property("origin", "Quantity", "The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.", 0, java.lang.Integer.MAX_VALUE, origin));
+        childrenList.add(new Property("origin", "SimpleQuantity", "The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.", 0, java.lang.Integer.MAX_VALUE, origin));
         childrenList.add(new Property("period", "decimal", "The length of time between sampling times, measured in milliseconds.", 0, java.lang.Integer.MAX_VALUE, period));
         childrenList.add(new Property("factor", "decimal", "A correction factor that is applied to the sampled data points before they are added to the origin.", 0, java.lang.Integer.MAX_VALUE, factor));
         childrenList.add(new Property("lowerLimit", "decimal", "The lower limit of detection of the measured points. This is needed if any of the data points have the value 'L' (lower than detection limit).", 0, java.lang.Integer.MAX_VALUE, lowerLimit));

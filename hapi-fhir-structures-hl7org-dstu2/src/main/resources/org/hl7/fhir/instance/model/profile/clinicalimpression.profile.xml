@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ClinicalImpression"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -474,7 +474,7 @@
             <a href="communicationrequest.html">CommunicationRequest</a> | 
             <a href="deviceuserequest.html">DeviceUseRequest</a> | 
             <a href="diagnosticorder.html">DiagnosticOrder</a> | 
-            <a href="medicationprescription.html">MedicationPrescription</a> | 
+            <a href="medicationorder.html">MedicationOrder</a> | 
             <a href="nutritionorder.html">NutritionOrder</a> | 
             <a href="order.html">Order</a> | 
             <a href="procedurerequest.html">ProcedureRequest</a> | 
@@ -500,7 +500,7 @@
             <a href="referralrequest.html">ReferralRequest</a> | 
             <a href="procedurerequest.html">ProcedureRequest</a> | 
             <a href="procedure.html">Procedure</a> | 
-            <a href="medicationprescription.html">MedicationPrescription</a> | 
+            <a href="medicationorder.html">MedicationOrder</a> | 
             <a href="diagnosticorder.html">DiagnosticOrder</a> | 
             <a href="nutritionorder.html">NutritionOrder</a> | 
             <a href="supplyrequest.html">SupplyRequest</a> | 
@@ -531,7 +531,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for ClinicalImpression Resource"/>
   <mapping>
     <identity value="w5"/>
@@ -545,6 +545,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="ClinicalImpression"/>
@@ -1153,7 +1154,7 @@
       </type>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>
@@ -1204,7 +1205,7 @@
       </type>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>
@@ -1558,7 +1559,7 @@
       </type>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>
@@ -1609,7 +1610,7 @@
       </type>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>

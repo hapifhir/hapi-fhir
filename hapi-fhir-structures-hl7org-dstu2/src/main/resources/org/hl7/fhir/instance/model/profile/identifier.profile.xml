@@ -175,8 +175,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Identifier Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Identifier Type"/>
   <requirements value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
   <mapping>
     <identity value="v2"/>
@@ -195,12 +195,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Identifier"/>
       <short value="An identifier intended for computation"/>
       <definition value="A technical identifier - identifies some entity uniquely and unambiguously."/>
-      <requirements value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -408,7 +408,6 @@
       <path value="Identifier"/>
       <short value="An identifier intended for computation"/>
       <definition value="A technical identifier - identifies some entity uniquely and unambiguously."/>
-      <requirements value="Need to be able to identify things with confidence and be sure that the identification is not subject to misinterpretation."/>
       <min value="0"/>
       <max value="*"/>
       <type>

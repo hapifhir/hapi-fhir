@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -104,9 +104,9 @@ public class RelatedPerson extends DomainResource {
     /**
      * Address where the related person can be contacted or visited.
      */
-    @Child(name = "address", type = {Address.class}, order=7, min=0, max=1)
+    @Child(name = "address", type = {Address.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Address where the related person can be contacted or visited", formalDefinition="Address where the related person can be contacted or visited." )
-    protected Address address;
+    protected List<Address> address;
 
     /**
      * Image of the person.
@@ -122,7 +122,7 @@ public class RelatedPerson extends DomainResource {
     @Description(shortDefinition="Period of time that this relationship is considered valid", formalDefinition="The period of time that this relationship is considered to be valid. If there are no dates defined, then the interval is unknown." )
     protected Period period;
 
-    private static final long serialVersionUID = 1434295859L;
+    private static final long serialVersionUID = 7777543L;
 
   /*
    * Constructor
@@ -412,24 +412,40 @@ public class RelatedPerson extends DomainResource {
     /**
      * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public Address getAddress() { 
+    public List<Address> getAddress() { 
       if (this.address == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RelatedPerson.address");
-        else if (Configuration.doAutoCreate())
-          this.address = new Address(); // cc
+        this.address = new ArrayList<Address>();
       return this.address;
     }
 
     public boolean hasAddress() { 
-      return this.address != null && !this.address.isEmpty();
+      if (this.address == null)
+        return false;
+      for (Address item : this.address)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #address} (Address where the related person can be contacted or visited.)
+     * @return {@link #address} (Address where the related person can be contacted or visited.)
      */
-    public RelatedPerson setAddress(Address value) { 
-      this.address = value;
+    // syntactic sugar
+    public Address addAddress() { //3
+      Address t = new Address();
+      if (this.address == null)
+        this.address = new ArrayList<Address>();
+      this.address.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public RelatedPerson addAddress(Address t) { //3
+      if (t == null)
+        return this;
+      if (this.address == null)
+        this.address = new ArrayList<Address>();
+      this.address.add(t);
       return this;
     }
 
@@ -529,7 +545,11 @@ public class RelatedPerson extends DomainResource {
         };
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
-        dst.address = address == null ? null : address.copy();
+        if (address != null) {
+          dst.address = new ArrayList<Address>();
+          for (Address i : address)
+            dst.address.add(i.copy());
+        };
         if (photo != null) {
           dst.photo = new ArrayList<Attachment>();
           for (Attachment i : photo)

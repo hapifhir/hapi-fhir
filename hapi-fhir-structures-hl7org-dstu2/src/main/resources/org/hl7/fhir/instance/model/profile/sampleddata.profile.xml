@@ -58,7 +58,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Zero value and units</td>
         </tr>
@@ -184,8 +184,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for SampledData Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for SampledData Type"/>
   <requirements value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
   <mapping>
     <identity value="v2"/>
@@ -199,12 +199,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="SampledData"/>
       <short value="A series of measurements taken by a device"/>
       <definition value="A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."/>
-      <requirements value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -259,6 +259,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -363,7 +364,6 @@
       <path value="SampledData"/>
       <short value="A series of measurements taken by a device"/>
       <definition value="A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."/>
-      <requirements value="There is a need for a concise way to handle the data produced by devices that sample a physical state at a high frequency."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -387,6 +387,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
       <mapping>

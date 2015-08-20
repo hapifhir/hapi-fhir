@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import org.hl7.fhir.instance.model.QuestionnaireResponse;
+import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,4 +71,17 @@ public class FhirInstanceValidatorTest {
 		assertEquals(output.toString(), 1, output.getMessages().size());
 		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
 	}
+	
+	
+	
+	 @Test
+	  public void testValidateResourceWithReference() {
+	   QuestionnaireResponse resp = new QuestionnaireResponse();
+	   resp.setStatus(QuestionnaireResponseStatus.COMPLETED);
+	   resp.getQuestionnaire().setReference("Questionnaire/1234");
+	    
+	    ValidationResult output = val.validateWithResult(resp);
+	    assertEquals(output.toString(), 0, output.getMessages().size());
+	  }
+
 }

@@ -16,9 +16,10 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for markdown type: A string that may contain markdown syntax for optional processing by a mark down presentation engine"/>
   <kind value="datatype"/>
+  <constrainedType value="string"/>
   <abstract value="false"/>
   <base value="http://hl7.org/fhir/StructureDefinition/string"/>
   <snapshot>
@@ -56,6 +57,10 @@
         <code value="Extension"/>
       </type>
     </element>
+  <!-- Note: not have an assigned type
+        The actual value domain is assumed to be known by magic by
+        reading the spec and from the name of the primitive type -->
+  <!-- Schema Type: xs:string -->
     <element>
       <path value="string.value"/>
       <representation value="xmlAttr"/>
@@ -68,9 +73,6 @@
         <min value="0"/>
         <max value="1"/>
       </base>
-      <type>
-        <code value="xs:string"/>
-      </type>
     </element>
   </snapshot>
   <differential>
@@ -85,6 +87,10 @@
         <code value="Element"/>
       </type>
     </element>
+  <!-- Note: not have an assigned type
+        The actual value domain is assumed to be known by magic by
+        reading the spec and from the name of the primitive type -->
+  <!-- Schema Type: xs:string -->
     <element>
       <path value="string.value"/>
       <representation value="xmlAttr"/>
@@ -92,9 +98,6 @@
       <definition value="Primitive value for markdown"/>
       <min value="0"/>
       <max value="1"/>
-      <type>
-        <code value="xs:string"/>
-      </type>
     </element>
   </differential>
 </StructureDefinition>

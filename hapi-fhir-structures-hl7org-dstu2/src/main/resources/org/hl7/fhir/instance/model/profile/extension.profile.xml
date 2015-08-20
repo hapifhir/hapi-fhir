@@ -88,8 +88,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Extension Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Extension Type"/>
   <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
   <mapping>
     <identity value="rim"/>
@@ -98,11 +98,11 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Extension"/>
       <definition value="Optional Extensions Element - found in all resources."/>
-      <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -178,7 +178,6 @@
     <element>
       <path value="Extension"/>
       <definition value="Optional Extensions Element - found in all resources."/>
-      <requirements value="The ability to add extensions in a structured way is what keeps FHIR resources simple."/>
       <min value="0"/>
       <max value="*"/>
       <type>

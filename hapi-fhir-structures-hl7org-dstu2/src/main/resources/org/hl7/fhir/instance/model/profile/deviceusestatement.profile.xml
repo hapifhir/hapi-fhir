@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="DeviceUseStatement"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -293,7 +293,7 @@
   <url value="http://hl7.org/fhir/StructureDefinition/DeviceUseStatement"/>
   <name value="DeviceUseStatement"/>
   <status value="draft"/>
-  <publisher value="Health Level Seven International (Health Care Devices)"/>
+  <publisher value="Health Level Seven International (Clinical Decision Support)"/>
   <contact>
     <telecom>
       <system value="other"/>
@@ -303,10 +303,10 @@
   <contact>
     <telecom>
       <system value="other"/>
-      <value value="http://www.hl7.org/Special/committees/healthcaredevices/index.cfm"/>
+      <value value="http://www.hl7.org/Special/committees/dss/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for DeviceUseStatement Resource"/>
   <mapping>
     <identity value="quick"/>
@@ -325,6 +325,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="DeviceUseStatement"/>

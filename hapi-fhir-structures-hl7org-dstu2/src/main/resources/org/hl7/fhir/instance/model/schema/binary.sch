@@ -10,13 +10,13 @@
     fhir-invariants.sch (the contents are identical; only include those 
     resources relevant to your implementation).
   -->
-    <sch:pattern>
-      <sch:title>Global</sch:title>
-      <sch:rule context="f:*">
-        <sch:assert test="@value|f:*|h:div">global-1: All FHIR elements must have a @value or children</sch:assert>
-      </sch:rule>
-    </sch:pattern>
+  <sch:pattern>
+    <sch:title>Global</sch:title>
+    <sch:rule context="//f:*">
+      <sch:assert test="@value|f:*|h:div">global-1: All FHIR elements must have a @value or children</sch:assert>
+    </sch:rule>
+  </sch:pattern>
   <sch:pattern>
     <sch:title>Binary</sch:title>
-    </sch:pattern>
+  </sch:pattern>
 </sch:schema>

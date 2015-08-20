@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -65,11 +65,11 @@ public class Substance extends DomainResource {
         /**
          * The amount of the substance.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=3, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Amount of substance in the package", formalDefinition="The amount of the substance." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
-        private static final long serialVersionUID = -1474380480L;
+        private static final long serialVersionUID = -794314734L;
 
     /*
      * Constructor
@@ -154,12 +154,12 @@ public class Substance extends DomainResource {
         /**
          * @return {@link #quantity} (The amount of the substance.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SubstanceInstanceComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -170,7 +170,7 @@ public class Substance extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of the substance.)
          */
-        public SubstanceInstanceComponent setQuantity(Quantity value) { 
+        public SubstanceInstanceComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -179,7 +179,7 @@ public class Substance extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("identifier", "Identifier", "Identifier associated with the package/container (usually a label affixed directly).", 0, java.lang.Integer.MAX_VALUE, identifier));
           childrenList.add(new Property("expiry", "dateTime", "When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.", 0, java.lang.Integer.MAX_VALUE, expiry));
-          childrenList.add(new Property("quantity", "Quantity", "The amount of the substance.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of the substance.", 0, java.lang.Integer.MAX_VALUE, quantity));
         }
 
       public SubstanceInstanceComponent copy() {
@@ -374,34 +374,41 @@ public class Substance extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
+     * A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.
+     */
+    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="What class/type of substance this is", formalDefinition="A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes." )
+    protected List<CodeableConcept> category;
+
+    /**
      * A code (or set of codes) that identify this substance.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1)
-    @Description(shortDefinition="What kind of substance this is", formalDefinition="A code (or set of codes) that identify this substance." )
-    protected CodeableConcept type;
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=1, max=1)
+    @Description(shortDefinition="What substance this is", formalDefinition="A code (or set of codes) that identify this substance." )
+    protected CodeableConcept code;
 
     /**
      * A description of the substance - its appearance, handling requirements, and other usage notes.
      */
-    @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1)
     @Description(shortDefinition="Textual description of the substance, comments", formalDefinition="A description of the substance - its appearance, handling requirements, and other usage notes." )
     protected StringType description;
 
     /**
      * Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.
      */
-    @Child(name = "instance", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "instance", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="If this describes a specific package/container of the substance", formalDefinition="Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance." )
     protected List<SubstanceInstanceComponent> instance;
 
     /**
      * A substance can be composed of other substances.
      */
-    @Child(name = "ingredient", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "ingredient", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
     @Description(shortDefinition="Composition information about the substance", formalDefinition="A substance can be composed of other substances." )
     protected List<SubstanceIngredientComponent> ingredient;
 
-    private static final long serialVersionUID = 373963428L;
+    private static final long serialVersionUID = -1653977206L;
 
   /*
    * Constructor
@@ -413,9 +420,9 @@ public class Substance extends DomainResource {
   /*
    * Constructor
    */
-    public Substance(CodeableConcept type) {
+    public Substance(CodeableConcept code) {
       super();
-      this.type = type;
+      this.code = code;
     }
 
     /**
@@ -459,26 +466,66 @@ public class Substance extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (A code (or set of codes) that identify this substance.)
+     * @return {@link #category} (A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.)
      */
-    public CodeableConcept getType() { 
-      if (this.type == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Substance.type");
-        else if (Configuration.doAutoCreate())
-          this.type = new CodeableConcept(); // cc
-      return this.type;
+    public List<CodeableConcept> getCategory() { 
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      return this.category;
     }
 
-    public boolean hasType() { 
-      return this.type != null && !this.type.isEmpty();
+    public boolean hasCategory() { 
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
     /**
-     * @param value {@link #type} (A code (or set of codes) that identify this substance.)
+     * @return {@link #category} (A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.)
      */
-    public Substance setType(CodeableConcept value) { 
-      this.type = value;
+    // syntactic sugar
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    // syntactic sugar
+    public Substance addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return this;
+    }
+
+    /**
+     * @return {@link #code} (A code (or set of codes) that identify this substance.)
+     */
+    public CodeableConcept getCode() { 
+      if (this.code == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create Substance.code");
+        else if (Configuration.doAutoCreate())
+          this.code = new CodeableConcept(); // cc
+      return this.code;
+    }
+
+    public boolean hasCode() { 
+      return this.code != null && !this.code.isEmpty();
+    }
+
+    /**
+     * @param value {@link #code} (A code (or set of codes) that identify this substance.)
+     */
+    public Substance setCode(CodeableConcept value) { 
+      this.code = value;
       return this;
     }
 
@@ -614,7 +661,8 @@ public class Substance extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("identifier", "Identifier", "Unique identifier for the substance.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        childrenList.add(new Property("type", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, java.lang.Integer.MAX_VALUE, type));
+        childrenList.add(new Property("category", "CodeableConcept", "A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
+        childrenList.add(new Property("code", "CodeableConcept", "A code (or set of codes) that identify this substance.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("description", "string", "A description of the substance - its appearance, handling requirements, and other usage notes.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("instance", "", "Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.", 0, java.lang.Integer.MAX_VALUE, instance));
         childrenList.add(new Property("ingredient", "", "A substance can be composed of other substances.", 0, java.lang.Integer.MAX_VALUE, ingredient));
@@ -628,7 +676,12 @@ public class Substance extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        dst.type = type == null ? null : type.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
+        dst.code = code == null ? null : code.copy();
         dst.description = description == null ? null : description.copy();
         if (instance != null) {
           dst.instance = new ArrayList<SubstanceInstanceComponent>();
@@ -654,8 +707,9 @@ public class Substance extends DomainResource {
         if (!(other instanceof Substance))
           return false;
         Substance o = (Substance) other;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(description, o.description, true)
-           && compareDeep(instance, o.instance, true) && compareDeep(ingredient, o.ingredient, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(category, o.category, true) && compareDeep(code, o.code, true)
+           && compareDeep(description, o.description, true) && compareDeep(instance, o.instance, true) && compareDeep(ingredient, o.ingredient, true)
+          ;
       }
 
       @Override
@@ -669,8 +723,8 @@ public class Substance extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (type == null || type.isEmpty())
-           && (description == null || description.isEmpty()) && (instance == null || instance.isEmpty())
+        return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (category == null || category.isEmpty())
+           && (code == null || code.isEmpty()) && (description == null || description.isEmpty()) && (instance == null || instance.isEmpty())
            && (ingredient == null || ingredient.isEmpty());
       }
 
@@ -683,14 +737,16 @@ public class Substance extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="container-identifier", path="Substance.instance.identifier", description="Identifier of the package/container", type="token" )
   public static final String SP_CONTAINERIDENTIFIER = "container-identifier";
+  @SearchParamDefinition(name="code", path="Substance.code", description="The code of the substance", type="token" )
+  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="quantity", path="Substance.instance.quantity", description="Amount of substance in the package", type="number" )
   public static final String SP_QUANTITY = "quantity";
   @SearchParamDefinition(name="substance", path="Substance.ingredient.substance", description="A component of the substance", type="reference" )
   public static final String SP_SUBSTANCE = "substance";
   @SearchParamDefinition(name="expiry", path="Substance.instance.expiry", description="Expiry date of package or container of substance", type="date" )
   public static final String SP_EXPIRY = "expiry";
-  @SearchParamDefinition(name="type", path="Substance.type", description="The type of the substance", type="token" )
-  public static final String SP_TYPE = "type";
+  @SearchParamDefinition(name="category", path="Substance.category", description="The category of the substance", type="token" )
+  public static final String SP_CATEGORY = "category";
 
 }
 

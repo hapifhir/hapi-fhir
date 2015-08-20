@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Conformance"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -1709,7 +1709,7 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Conformance Resource"/>
   <mapping>
     <identity value="w5"/>
@@ -1723,6 +1723,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Conformance"/>
@@ -2753,6 +2754,9 @@
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ResourceInteraction"/>
+      </extension>
       <path value="Conformance.rest.resource.interaction"/>
       <short value="What operations are supported?"/>
       <definition value="Identifies a restful operation supported by the solution."/>
@@ -3090,6 +3094,9 @@
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SystemInteraction"/>
+      </extension>
       <path value="Conformance.rest.interaction"/>
       <short value="What operations are supported?"/>
       <definition value="A specification of restful operations supported by the system."/>
@@ -4272,6 +4279,9 @@
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ResourceInteraction"/>
+      </extension>
       <path value="Conformance.rest.resource.interaction"/>
       <short value="What operations are supported?"/>
       <definition value="Identifies a restful operation supported by the solution."/>
@@ -4505,6 +4515,9 @@
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SystemInteraction"/>
+      </extension>
       <path value="Conformance.rest.interaction"/>
       <short value="What operations are supported?"/>
       <definition value="A specification of restful operations supported by the system."/>

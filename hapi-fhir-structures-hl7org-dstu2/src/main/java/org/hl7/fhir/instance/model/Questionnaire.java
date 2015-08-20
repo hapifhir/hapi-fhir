@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -191,7 +191,7 @@ public class Questionnaire extends DomainResource {
          */
         REFERENCE, 
         /**
-         * Answer is a combination of a numeric value and unit
+         * Answer is a combination of a numeric value and unit, potentially with a comparator (<, >, etc)
          */
         QUANTITY, 
         /**
@@ -289,7 +289,7 @@ public class Questionnaire extends DomainResource {
             case OPENCHOICE: return "Answer is a Coding drawn from a list of options or a free-text entry.";
             case ATTACHMENT: return "Answer is binary content such as a image, PDF, etc.";
             case REFERENCE: return "Answer is a reference to another resource (practitioner, organization, etc.)";
-            case QUANTITY: return "Answer is a combination of a numeric value and unit";
+            case QUANTITY: return "Answer is a combination of a numeric value and unit, potentially with a comparator (<, >, etc)";
             default: return "?";
           }
         }

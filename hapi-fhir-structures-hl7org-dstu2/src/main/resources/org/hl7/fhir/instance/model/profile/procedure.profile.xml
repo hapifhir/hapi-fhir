@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Procedure"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -510,7 +510,7 @@
             <a href="immunizationrecommendation.html">ImmunizationRecommendation</a> | 
             <a href="medicationadministration.html">MedicationAdministration</a> | 
             <a href="medicationdispense.html">MedicationDispense</a> | 
-            <a href="medicationprescription.html">MedicationPrescription</a> | 
+            <a href="medicationorder.html">MedicationOrder</a> | 
             <a href="medicationstatement.html">MedicationStatement</a> | 
             <a href="observation.html">Observation</a> | 
             <a href="procedure.html">Procedure</a>
@@ -631,7 +631,7 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Procedure Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -645,6 +645,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Procedure"/>
@@ -1352,7 +1353,7 @@
       </type>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>
@@ -1926,7 +1927,7 @@
       </type>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>

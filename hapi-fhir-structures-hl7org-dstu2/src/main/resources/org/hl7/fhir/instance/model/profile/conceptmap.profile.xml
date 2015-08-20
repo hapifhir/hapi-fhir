@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ConceptMap"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -686,7 +686,7 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for ConceptMap Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -700,6 +700,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="ConceptMap"/>
@@ -1165,6 +1166,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SourceElement"/>
+      </extension>
       <path value="ConceptMap.element"/>
       <short value="Mappings for a concept from the source set"/>
       <definition value="Mappings for an individual concept in the source to one or more concepts in the target."/>
@@ -1247,6 +1251,9 @@
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TargetElement"/>
+      </extension>
       <path value="ConceptMap.element.target"/>
       <short value="Concept in target system for element"/>
       <definition value="A concept from the target value set that this concept maps to."/>
@@ -1361,6 +1368,9 @@
       <condition value="cmd-1"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="OtherElement"/>
+      </extension>
       <path value="ConceptMap.element.target.dependsOn"/>
       <name value="dependsOn"/>
       <short value="Other elements required for this mapping (from context)"/>
@@ -1754,6 +1764,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SourceElement"/>
+      </extension>
       <path value="ConceptMap.element"/>
       <short value="Mappings for a concept from the source set"/>
       <definition value="Mappings for an individual concept in the source to one or more concepts in the target."/>
@@ -1784,6 +1797,9 @@
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TargetElement"/>
+      </extension>
       <path value="ConceptMap.element.target"/>
       <short value="Concept in target system for element"/>
       <definition value="A concept from the target value set that this concept maps to."/>
@@ -1846,6 +1862,9 @@
       <condition value="cmd-1"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="OtherElement"/>
+      </extension>
       <path value="ConceptMap.element.target.dependsOn"/>
       <name value="dependsOn"/>
       <short value="Other elements required for this mapping (from context)"/>
