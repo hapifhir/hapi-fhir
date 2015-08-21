@@ -45,6 +45,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		ourLog.info("Starting resource minimizer");
+		
 		if ("DSTU".equals(fhirVersion)) {
 			myCtx = FhirContext.forDstu1();
 		} else if ("DSTU2".equals(fhirVersion)) {

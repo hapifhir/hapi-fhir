@@ -12,9 +12,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.Validate;
 import org.hl7.fhir.instance.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.instance.model.StructureDefinition;
 import org.hl7.fhir.instance.utils.WorkerContext;
+import org.hl7.fhir.instance.validation.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.instance.validation.IResourceValidator.CheckDisplayOption;
 import org.hl7.fhir.instance.validation.ValidationMessage;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,6 +38,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 
 	private DocumentBuilderFactory myDocBuilderFactory;
+
+	private BestPracticeWarningLevel myBestPracticeWarningLevel = BestPracticeWarningLevel.Hint;
 
 	public FhirInstanceValidator() {
 		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -82,6 +87,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			throw new ConfigurationException(e);
 		}
 
+		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
+
 		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 
 		if (theEncoding == EncodingEnum.XML) {
@@ -125,6 +132,27 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		return messages;
+	}
+
+	/**
+	 * Returns the "best practice" warning level (default is {@link BestPracticeWarningLevel#Hint})
+	 * 
+	 * @see #setBestPracticeWarningLevel(BestPracticeWarningLevel) for more information on this value
+	 */
+	public BestPracticeWarningLevel getBestPracticeWarningLevel() {
+		return myBestPracticeWarningLevel;
+	}
+
+	/**
+	 * Sets the "best practice warning level". When validating, any deviations from best practices
+	 * will be reported at this level. {@link BestPracticeWarningLevel#Ignore} means that best practice
+	 * deviations will not be reported, {@link BestPracticeWarningLevel#Warning} means that best
+	 * practice deviations will be reported as warnings, etc.
+	 * @param theBestPracticeWarningLevel The level, must not be <code>null</code>
+	 */
+	public void setBestPracticeWarningLevel(BestPracticeWarningLevel theBestPracticeWarningLevel) {
+		Validate.notNull(theBestPracticeWarningLevel);
+		myBestPracticeWarningLevel = theBestPracticeWarningLevel;
 	}
 
 	@Override

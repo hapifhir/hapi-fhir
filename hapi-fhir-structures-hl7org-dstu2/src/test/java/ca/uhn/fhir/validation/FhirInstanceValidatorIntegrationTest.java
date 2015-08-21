@@ -1,70 +1,105 @@
 package ca.uhn.fhir.validation;
 
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-import java.util.List;
-
-import org.hl7.fhir.instance.validation.ValidationMessage;
+import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.instance.model.Observation;
+import org.junit.Before;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.EncodingEnum;
 
 public class FhirInstanceValidatorIntegrationTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorIntegrationTest.class);
+	private FhirInstanceValidator myInstanceVal;
 	
+	private FhirValidator myVal;
+	
+	@Before
+	public void before() {
+		myVal = ourCtx.newValidator();
+		myVal.setValidateAgainstStandardSchema(false);
+		myVal.setValidateAgainstStandardSchematron(false);
+		
+		myInstanceVal = new FhirInstanceValidator();
+		myVal.registerValidatorModule(myInstanceVal);
+	}
+
 	@Test
 	public void testValidateJsonResource() {
+		//@formatter:on
 		String input = "{"
 				+ "\"resourceType\":\"Patient\","
 				+ "\"id\":\"123\""
 				+ "}";
-		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.JSON);
-		assertEquals(output.toString(), 0, output.size());
+		//@formatter:off
+
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 0, output.getMessages().size());
 	}
 
 	@Test
+	public void testValidateResourceFailingInvariant() {
+		Observation input = new Observation();
+		
+		input.setValue(new StringType("AAA"));
+		
+		ValidationResult output = myVal.validateWithResult(input);
+		assertThat(output.getMessages().size(), greaterThan(0));
+		assertEquals("Element '/f:Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+		
+	}
+	
+	@Test
 	public void testValidateJsonResourceBadAttributes() {
+		//@formatter:on
 		String input = "{"
 				+ "\"resourceType\":\"Patient\","
 				+ "\"id\":\"123\","
 				+ "\"foo\":\"123\""
 				+ "}";
-		
-		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.JSON);
-		assertEquals(output.toString(), 1, output.size());
-		assertThat(output.get(0).toXML(), stringContainsInOrder("/foo", "Element is unknown"));
+		//@formatter:off
+
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+		ourLog.info(output.getMessages().get(0).getLocationString());
+		ourLog.info(output.getMessages().get(0).getMessage());
+		assertEquals("/foo", output.getMessages().get(0).getLocationString());
+		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
 	}
+
 
 	@Test
 	public void testValidateXmlResource() {
+		//@formatter:on
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"123\"/>"
 				+ "</Patient>";
+		//@formatter:off
 		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.XML);
-		assertEquals(output.toString(), 0, output.size());
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 0, output.getMessages().size());
 	}
-
-
+	
 	@Test
 	public void testValidateXmlResourceBadAttributes() {
+		//@formatter:on
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"123\"/>"
 				+ "<foo value=\"222\"/>"
 				+ "</Patient>";
+		//@formatter:off
 		
-		FhirInstanceValidator val = new FhirInstanceValidator();
-		List<ValidationMessage> output = val.validate(ourCtx, input, EncodingEnum.XML);
-		assertEquals(output.toString(), 1, output.size());
-		assertThat(output.get(0).toXML(), stringContainsInOrder("/f:Patient/f:foo", "Element is unknown"));
+		ValidationResult output = myVal.validateWithResult(input);
+		assertEquals(output.toString(), 1, output.getMessages().size());
+		ourLog.info(output.getMessages().get(0).getLocationString());
+		ourLog.info(output.getMessages().get(0).getMessage());
+		assertEquals("/f:Patient/f:foo", output.getMessages().get(0).getLocationString());
+		assertEquals("Element is unknown or does not match any slice", output.getMessages().get(0).getMessage());
 	}
 }
