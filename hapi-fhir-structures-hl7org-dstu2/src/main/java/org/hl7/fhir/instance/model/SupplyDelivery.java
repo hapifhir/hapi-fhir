@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -168,9 +168,9 @@ public class SupplyDelivery extends DomainResource {
     /**
      * The amount of supply that has been dispensed. Includes unit of measure.
      */
-    @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
+    @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
     @Description(shortDefinition="Amount dispensed", formalDefinition="The amount of supply that has been dispensed. Includes unit of measure." )
-    protected Quantity quantity;
+    protected SimpleQuantity quantity;
 
     /**
      * Identifies the medication or substance or device being dispensed. This is either a link to a resource representing the details of the item or a simple attribute carrying a code that identifies the item from a known list.
@@ -234,7 +234,7 @@ public class SupplyDelivery extends DomainResource {
     protected List<Practitioner> receiverTarget;
 
 
-    private static final long serialVersionUID = 1938067331L;
+    private static final long serialVersionUID = -1520129707L;
 
   /*
    * Constructor
@@ -387,12 +387,12 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @return {@link #quantity} (The amount of supply that has been dispensed. Includes unit of measure.)
      */
-    public Quantity getQuantity() { 
+    public SimpleQuantity getQuantity() { 
       if (this.quantity == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create SupplyDelivery.quantity");
         else if (Configuration.doAutoCreate())
-          this.quantity = new Quantity(); // cc
+          this.quantity = new SimpleQuantity(); // cc
       return this.quantity;
     }
 
@@ -403,7 +403,7 @@ public class SupplyDelivery extends DomainResource {
     /**
      * @param value {@link #quantity} (The amount of supply that has been dispensed. Includes unit of measure.)
      */
-    public SupplyDelivery setQuantity(Quantity value) { 
+    public SupplyDelivery setQuantity(SimpleQuantity value) { 
       this.quantity = value;
       return this;
     }
@@ -675,7 +675,7 @@ public class SupplyDelivery extends DomainResource {
         childrenList.add(new Property("status", "code", "A code specifying the state of the dispense event.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("patient", "Reference(Patient)", "A link to a resource representing the person whom the delivered item is for.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("type", "CodeableConcept", "Indicates the type of dispensing event that is performed. Examples include: Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc.", 0, java.lang.Integer.MAX_VALUE, type));
-        childrenList.add(new Property("quantity", "Quantity", "The amount of supply that has been dispensed. Includes unit of measure.", 0, java.lang.Integer.MAX_VALUE, quantity));
+        childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of supply that has been dispensed. Includes unit of measure.", 0, java.lang.Integer.MAX_VALUE, quantity));
         childrenList.add(new Property("suppliedItem", "Reference(Medication|Substance|Device)", "Identifies the medication or substance or device being dispensed. This is either a link to a resource representing the details of the item or a simple attribute carrying a code that identifies the item from a known list.", 0, java.lang.Integer.MAX_VALUE, suppliedItem));
         childrenList.add(new Property("supplier", "Reference(Practitioner)", "The individual responsible for dispensing the medication, supplier or device.", 0, java.lang.Integer.MAX_VALUE, supplier));
         childrenList.add(new Property("whenPrepared", "Period", "The time the dispense event occurred.", 0, java.lang.Integer.MAX_VALUE, whenPrepared));

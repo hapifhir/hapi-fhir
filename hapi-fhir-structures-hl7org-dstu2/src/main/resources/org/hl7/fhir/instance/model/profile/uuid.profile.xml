@@ -16,9 +16,10 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for uuid type: A UUID, represented as a URI"/>
   <kind value="datatype"/>
+  <constrainedType value="uri"/>
   <abstract value="false"/>
   <base value="http://hl7.org/fhir/StructureDefinition/uri"/>
   <snapshot>
@@ -56,6 +57,11 @@
         <code value="Extension"/>
       </type>
     </element>
+  <!-- Note: not have an assigned type
+        The actual value domain is assumed to be known by magic by
+        reading the spec and from the name of the primitive type -->
+  <!-- Schema Type: xs:anyURI+ -->
+  <!-- Regex: urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} -->
     <element>
       <path value="uri.value"/>
       <representation value="xmlAttr"/>
@@ -68,9 +74,6 @@
         <min value="0"/>
         <max value="1"/>
       </base>
-      <type>
-        <code value="xs:anyURI+"/>
-      </type>
     </element>
   </snapshot>
   <differential>
@@ -85,6 +88,11 @@
         <code value="Element"/>
       </type>
     </element>
+  <!-- Note: not have an assigned type
+        The actual value domain is assumed to be known by magic by
+        reading the spec and from the name of the primitive type -->
+  <!-- Schema Type: xs:anyURI+ -->
+  <!-- Regex: urn:uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12} -->
     <element>
       <path value="uri.value"/>
       <representation value="xmlAttr"/>
@@ -92,9 +100,6 @@
       <definition value="Primitive value for uuid"/>
       <min value="0"/>
       <max value="1"/>
-      <type>
-        <code value="xs:anyURI+"/>
-      </type>
     </element>
   </differential>
 </StructureDefinition>

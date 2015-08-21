@@ -101,8 +101,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Narrative Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Narrative Type"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
@@ -110,6 +110,7 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Narrative"/>

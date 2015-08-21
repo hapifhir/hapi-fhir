@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Contract"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -406,7 +406,7 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Count of Contract Valued Items</td>
         </tr>
@@ -926,7 +926,7 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Contract Term Valued Item Count</td>
         </tr>
@@ -1285,7 +1285,7 @@
       <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Contract Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -1294,6 +1294,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Contract"/>
@@ -1603,6 +1604,9 @@ jurisdication"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Actor"/>
+      </extension>
       <path value="Contract.actor"/>
       <short value="Contract Actor"/>
       <definition value="List of Contract actors."/>
@@ -1722,6 +1726,9 @@ jurisdication"/>
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ValuedItem"/>
+      </extension>
       <path value="Contract.valuedItem"/>
       <short value="Contract Valued Item"/>
       <definition value="Contract Valued Item List."/>
@@ -1840,6 +1847,7 @@ jurisdication"/>
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -1853,7 +1861,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -1895,7 +1904,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -1903,6 +1913,9 @@ jurisdication"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Signatory"/>
+      </extension>
       <path value="Contract.signer"/>
       <short value="Contract Signer"/>
       <definition value="Party signing this Contract."/>
@@ -2012,6 +2025,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Term"/>
+      </extension>
       <path value="Contract.term"/>
       <name value="term"/>
       <short value="Contract Term List"/>
@@ -2184,6 +2200,9 @@ jurisdication"/>
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TermActor"/>
+      </extension>
       <path value="Contract.term.actor"/>
       <short value="Contract Term Actor List"/>
       <definition value="List of actors participating in this Contract Provision."/>
@@ -2313,6 +2332,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TermValuedItem"/>
+      </extension>
       <path value="Contract.term.valuedItem"/>
       <short value="Contract Term Valued Item"/>
       <definition value="Contract Provision Valued Item List."/>
@@ -2429,6 +2451,7 @@ jurisdication"/>
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -2442,7 +2465,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -2484,7 +2508,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
     </element>
     <element>
@@ -2518,6 +2543,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="FriendlyLanguage"/>
+      </extension>
       <path value="Contract.friendly"/>
       <short value="Contract Friendly Language"/>
       <definition value="The &quot;patient friendly language&quot; versionof the Contract in whole or in parts. &quot;Patient friendly language&quot; means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement."/>
@@ -2599,6 +2627,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="LegalLanguage"/>
+      </extension>
       <path value="Contract.legal"/>
       <short value="Contract Legal Language"/>
       <definition value="List of Legal expressions or representations of this Contract."/>
@@ -2680,6 +2711,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ComputableLanguage"/>
+      </extension>
       <path value="Contract.rule"/>
       <short value="Computable Contract Language"/>
       <definition value="List of Computable Policy Rule Language Representations of this Contract."/>
@@ -2944,6 +2978,9 @@ jurisdication"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Actor"/>
+      </extension>
       <path value="Contract.actor"/>
       <short value="Contract Actor"/>
       <definition value="List of Contract actors."/>
@@ -3011,6 +3048,9 @@ jurisdication"/>
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ValuedItem"/>
+      </extension>
       <path value="Contract.valuedItem"/>
       <short value="Contract Valued Item"/>
       <definition value="Contract Valued Item List."/>
@@ -3077,6 +3117,7 @@ jurisdication"/>
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -3090,7 +3131,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -3132,7 +3174,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -3140,6 +3183,9 @@ jurisdication"/>
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Signatory"/>
+      </extension>
       <path value="Contract.signer"/>
       <short value="Contract Signer"/>
       <definition value="Party signing this Contract."/>
@@ -3197,6 +3243,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Term"/>
+      </extension>
       <path value="Contract.term"/>
       <name value="term"/>
       <short value="Contract Term List"/>
@@ -3317,6 +3366,9 @@ jurisdication"/>
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TermActor"/>
+      </extension>
       <path value="Contract.term.actor"/>
       <short value="Contract Term Actor List"/>
       <definition value="List of actors participating in this Contract Provision."/>
@@ -3394,6 +3446,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TermValuedItem"/>
+      </extension>
       <path value="Contract.term.valuedItem"/>
       <short value="Contract Term Valued Item"/>
       <definition value="Contract Provision Valued Item List."/>
@@ -3458,6 +3513,7 @@ jurisdication"/>
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -3471,7 +3527,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <mapping>
         <identity value="rim"/>
@@ -3513,7 +3570,8 @@ jurisdication"/>
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
     </element>
     <element>
@@ -3547,6 +3605,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="FriendlyLanguage"/>
+      </extension>
       <path value="Contract.friendly"/>
       <short value="Contract Friendly Language"/>
       <definition value="The &quot;patient friendly language&quot; versionof the Contract in whole or in parts. &quot;Patient friendly language&quot; means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement."/>
@@ -3576,6 +3637,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="LegalLanguage"/>
+      </extension>
       <path value="Contract.legal"/>
       <short value="Contract Legal Language"/>
       <definition value="List of Legal expressions or representations of this Contract."/>
@@ -3605,6 +3669,9 @@ jurisdication"/>
       </type>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ComputableLanguage"/>
+      </extension>
       <path value="Contract.rule"/>
       <short value="Computable Contract Language"/>
       <definition value="List of Computable Policy Rule Language Representations of this Contract."/>

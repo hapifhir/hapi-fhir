@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="MessageHeader"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -512,8 +512,9 @@
       <value value="http://www.hl7.org/Special/committees/fiwg/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for MessageHeader Resource"/>
+  <requirements value="Many implementations are not prepared to use REST and need a messaging based infrastructure."/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -531,12 +532,12 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="MessageHeader"/>
       <short value="A resource that describes a message that is exchanged between systems"/>
       <definition value="The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle."/>
-      <requirements value="Many implementations are not prepared to use REST and need a messaging based infrastructure."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -892,6 +893,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="MessageSource"/>
+      </extension>
       <path value="MessageHeader.source"/>
       <short value="Message Source Application"/>
       <definition value="The source application from which this message originated."/>
@@ -1061,6 +1065,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="MessageDestination"/>
+      </extension>
       <path value="MessageHeader.destination"/>
       <short value="Message Destination Application(s)"/>
       <definition value="The destination application which the message is intended for."/>
@@ -1351,7 +1358,6 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
       <path value="MessageHeader"/>
       <short value="A resource that describes a message that is exchanged between systems"/>
       <definition value="The header for a message exchange that is either requesting or responding to an action.  The Reference(s) that are the subject of the action as well as other Information related to the action are typically transmitted in a bundle in which the MessageHeader resource instance is the first resource in the bundle."/>
-      <requirements value="Many implementations are not prepared to use REST and need a messaging based infrastructure."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1537,6 +1543,9 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="MessageSource"/>
+      </extension>
       <path value="MessageHeader.source"/>
       <short value="Message Source Application"/>
       <definition value="The source application from which this message originated."/>
@@ -1654,6 +1663,9 @@ PRT-8-Participation Organization:PRT-4-Participation=&#39;OP&#39;
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="MessageDestination"/>
+      </extension>
       <path value="MessageHeader.destination"/>
       <short value="Message Destination Application(s)"/>
       <definition value="The destination application which the message is intended for."/>

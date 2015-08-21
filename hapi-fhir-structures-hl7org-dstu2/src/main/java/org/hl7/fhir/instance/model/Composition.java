@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -41,7 +41,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement.
+ * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
  */
 @ResourceDef(name="Composition", profile="http://hl7.org/fhir/Profile/Composition")
 public class Composition extends DomainResource {
@@ -56,11 +56,7 @@ public class Composition extends DomainResource {
          */
         FINAL, 
         /**
-         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content
-         */
-        APPENDED, 
-        /**
-         * The composition or document has been modified subsequent to being released as "final", and is complete and verified by an authorized person
+         * The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as "final" and the composition is complete and verified by an authorized person
          */
         AMENDED, 
         /**
@@ -78,8 +74,6 @@ public class Composition extends DomainResource {
           return PRELIMINARY;
         if ("final".equals(codeString))
           return FINAL;
-        if ("appended".equals(codeString))
-          return APPENDED;
         if ("amended".equals(codeString))
           return AMENDED;
         if ("entered-in-error".equals(codeString))
@@ -90,7 +84,6 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "preliminary";
             case FINAL: return "final";
-            case APPENDED: return "appended";
             case AMENDED: return "amended";
             case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
@@ -100,7 +93,6 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "http://hl7.org/fhir/composition-status";
             case FINAL: return "http://hl7.org/fhir/composition-status";
-            case APPENDED: return "http://hl7.org/fhir/composition-status";
             case AMENDED: return "http://hl7.org/fhir/composition-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/composition-status";
             default: return "?";
@@ -110,8 +102,7 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified";
             case FINAL: return "This version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition.";
-            case APPENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person. The modifications added new information to the composition or document, but did not revise existing content";
-            case AMENDED: return "The composition or document has been modified subsequent to being released as 'final', and is complete and verified by an authorized person";
+            case AMENDED: return "The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as 'final' and the composition is complete and verified by an authorized person";
             case ENTEREDINERROR: return "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid";
             default: return "?";
           }
@@ -120,7 +111,6 @@ public class Composition extends DomainResource {
           switch (this) {
             case PRELIMINARY: return "Preliminary";
             case FINAL: return "Final";
-            case APPENDED: return "Appended ap Appended";
             case AMENDED: return "Amended";
             case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
@@ -137,8 +127,6 @@ public class Composition extends DomainResource {
           return CompositionStatus.PRELIMINARY;
         if ("final".equals(codeString))
           return CompositionStatus.FINAL;
-        if ("appended".equals(codeString))
-          return CompositionStatus.APPENDED;
         if ("amended".equals(codeString))
           return CompositionStatus.AMENDED;
         if ("entered-in-error".equals(codeString))
@@ -150,8 +138,6 @@ public class Composition extends DomainResource {
         return "preliminary";
       if (code == CompositionStatus.FINAL)
         return "final";
-      if (code == CompositionStatus.APPENDED)
-        return "appended";
       if (code == CompositionStatus.AMENDED)
         return "amended";
       if (code == CompositionStatus.ENTEREDINERROR)
@@ -504,13 +490,13 @@ public class Composition extends DomainResource {
         protected Period period;
 
         /**
-         * Full details for the event(s) the composition/documentation consents.
+         * The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.
          */
         @Child(name = "detail", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="Full details for the event(s) the composition consents", formalDefinition="Full details for the event(s) the composition/documentation consents." )
+        @Description(shortDefinition="The event(s) being documented", formalDefinition="The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy." )
         protected List<Reference> detail;
         /**
-         * The actual objects that are the target of the reference (Full details for the event(s) the composition/documentation consents.)
+         * The actual objects that are the target of the reference (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
         protected List<Resource> detailTarget;
 
@@ -589,7 +575,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (Full details for the event(s) the composition/documentation consents.)
+         * @return {@link #detail} (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
         public List<Reference> getDetail() { 
           if (this.detail == null)
@@ -607,7 +593,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (Full details for the event(s) the composition/documentation consents.)
+         * @return {@link #detail} (The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
     // syntactic sugar
         public Reference addDetail() { //3
@@ -629,7 +615,7 @@ public class Composition extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Full details for the event(s) the composition/documentation consents.)
+         * @return {@link #detail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.)
          */
         public List<Resource> getDetailTarget() { 
           if (this.detailTarget == null)
@@ -641,7 +627,7 @@ public class Composition extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("code", "CodeableConcept", "This list of codes represents the main clinical acts, such as a colonoscopy or an appendectomy, being documented. In some cases, the event is inherent in the typeCode, such as a 'History and Physical Report' in which the procedure being documented is necessarily a 'History and Physical' act.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("period", "Period", "The period of time covered by the documentation. There is no assertion that the documentation is a complete representation for this period, only that it documents events during this time.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("detail", "Reference(Any)", "Full details for the event(s) the composition/documentation consents.", 0, java.lang.Integer.MAX_VALUE, detail));
+          childrenList.add(new Property("detail", "Reference(Any)", "The description and/or reference of the event(s) being documented. For example, this could be used to document such a colonoscopy or an appendectomy.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
       public CompositionEventComponent copy() {
@@ -1140,7 +1126,7 @@ public class Composition extends DomainResource {
     /**
      * Official human-readable label for the composition.
      */
-    @Child(name = "title", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "title", type = {StringType.class}, order=4, min=1, max=1)
     @Description(shortDefinition="Human Readable name/title", formalDefinition="Official human-readable label for the composition." )
     protected StringType title;
 
@@ -1148,7 +1134,7 @@ public class Composition extends DomainResource {
      * The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document.
      */
     @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1)
-    @Description(shortDefinition="preliminary | final | appended | amended | entered-in-error", formalDefinition="The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document." )
+    @Description(shortDefinition="preliminary | final | amended | entered-in-error", formalDefinition="The workflow/clinical status of this composition. The status is a marker for the clinical standing of the document." )
     protected Enumeration<CompositionStatus> status;
 
     /**
@@ -1239,10 +1225,11 @@ public class Composition extends DomainResource {
   /*
    * Constructor
    */
-    public Composition(DateTimeType date, CodeableConcept type, Enumeration<CompositionStatus> status, Reference subject) {
+    public Composition(DateTimeType date, CodeableConcept type, StringType title, Enumeration<CompositionStatus> status, Reference subject) {
       super();
       this.date = date;
       this.type = type;
+      this.title = title;
       this.status = status;
       this.subject = subject;
     }
@@ -1403,13 +1390,9 @@ public class Composition extends DomainResource {
      * @param value Official human-readable label for the composition.
      */
     public Composition setTitle(String value) { 
-      if (Utilities.noString(value))
-        this.title = null;
-      else {
         if (this.title == null)
           this.title = new StringType();
         this.title.setValue(value);
-      }
       return this;
     }
 
@@ -1931,7 +1914,7 @@ public class Composition extends DomainResource {
   public static final String SP_CONTEXT = "context";
   @SearchParamDefinition(name="class", path="Composition.class", description="Categorization of Composition", type="token" )
   public static final String SP_CLASS = "class";
-  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | appended | amended | entered-in-error", type="token" )
+  @SearchParamDefinition(name="status", path="Composition.status", description="preliminary | final | amended | entered-in-error", type="token" )
   public static final String SP_STATUS = "status";
 
 }

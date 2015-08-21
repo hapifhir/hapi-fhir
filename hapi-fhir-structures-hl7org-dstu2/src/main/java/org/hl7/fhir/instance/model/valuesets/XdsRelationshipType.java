@@ -29,14 +29,13 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 
 public enum XdsRelationshipType {
 
         /**
-         * A separate XDS Document that references a prior document, and may extend or 
-alter the observations in the prior document
+         * A separate XDS Document that references a prior document, and may extend or  alter the observations in the prior document
          */
         APND, 
         /**
@@ -89,7 +88,7 @@ alter the observations in the prior document
         }
         public String getDefinition() {
           switch (this) {
-            case APND: return "A separate XDS Document that references a prior document, and may extend or \nalter the observations in the prior document";
+            case APND: return "A separate XDS Document that references a prior document, and may extend or  alter the observations in the prior document";
             case RPLC: return "A new version of an existing document";
             case XFRM: return "A transformed document is derived by a machine translation from some other format";
             case XFRMRPLC: return "Both a XFRM and a RPLC relationship";

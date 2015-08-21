@@ -1126,8 +1126,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for ElementDefinition Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for ElementDefinition Type"/>
   <mapping>
     <identity value="dex"/>
     <uri value="http://wiki.ihe.net/index.php?title=Data_Element_Exchange"/>
@@ -1150,6 +1150,7 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="ElementDefinition"/>
@@ -1164,7 +1165,7 @@
         <key value="eld-2"/>
         <severity value="error"/>
         <human value="Min &lt;= Max"/>
-        <xpath value="(not(f:max/@value) and not(f:min/@value)) or (f:max/@value = &#39;*&#39;) or (f:max/@value &gt;= f:min/@value)"/>
+        <xpath value="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = &#39;*&#39;) or (f:max/@value &gt;= f:min/@value)"/>
       </constraint>
       <constraint>
         <key value="eld-5"/>
@@ -1727,6 +1728,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TypeRef"/>
+      </extension>
       <path value="ElementDefinition.type"/>
       <short value="Data type and Profile for this element"/>
       <definition value="The data type or resource that the value of this element is permitted to be."/>
@@ -2433,7 +2437,7 @@
         <key value="eld-2"/>
         <severity value="error"/>
         <human value="Min &lt;= Max"/>
-        <xpath value="(not(f:max/@value) and not(f:min/@value)) or (f:max/@value = &#39;*&#39;) or (f:max/@value &gt;= f:min/@value)"/>
+        <xpath value="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = &#39;*&#39;) or (f:max/@value &gt;= f:min/@value)"/>
       </constraint>
       <constraint>
         <key value="eld-5"/>
@@ -2897,6 +2901,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="TypeRef"/>
+      </extension>
       <path value="ElementDefinition.type"/>
       <short value="Data type and Profile for this element"/>
       <definition value="The data type or resource that the value of this element is permitted to be."/>

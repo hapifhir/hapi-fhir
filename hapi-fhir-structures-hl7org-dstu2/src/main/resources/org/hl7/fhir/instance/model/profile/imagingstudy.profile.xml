@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ImagingStudy"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -707,7 +707,7 @@
       <value value="http://www.hl7.org/Special/committees/imagemgt/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for ImagingStudy Resource"/>
   <mapping>
     <identity value="dicom"/>
@@ -726,6 +726,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="ImagingStudy"/>
@@ -937,7 +938,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045"/>
+      <exampleUri value="urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -1352,7 +1353,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:2.16.124.113543.6003.2588828330.45298.17418.2723805630"/>
+      <exampleUri value="urn:oid:2.16.124.113543.6003.2588828330.45298.17418.2723805630"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -1603,7 +1604,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:2.16.124.113543.6003.189642796.63084.16748.2599092903"/>
+      <exampleUri value="urn:oid:2.16.124.113543.6003.189642796.63084.16748.2599092903"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -1624,7 +1625,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:1.2.840.10008.5.1.4.1.1.2"/>
+      <exampleUri value="urn:oid:1.2.840.10008.5.1.4.1.1.2"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -1782,7 +1783,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045"/>
+      <exampleUri value="urn:oid:2.16.124.113543.6003.1154777499.30246.19789.3503430045"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -2145,7 +2146,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:2.16.124.113543.6003.2588828330.45298.17418.2723805630"/>
+      <exampleUri value="urn:oid:2.16.124.113543.6003.2588828330.45298.17418.2723805630"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -2344,7 +2345,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:2.16.124.113543.6003.189642796.63084.16748.2599092903"/>
+      <exampleUri value="urn:oid:2.16.124.113543.6003.189642796.63084.16748.2599092903"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>
@@ -2365,7 +2366,7 @@
       <type>
         <code value="oid"/>
       </type>
-      <exampleOid value="urn:oid:1.2.840.10008.5.1.4.1.1.2"/>
+      <exampleUri value="urn:oid:1.2.840.10008.5.1.4.1.1.2"/>
       <isSummary value="true"/>
       <mapping>
         <identity value="dicom"/>

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -439,15 +439,15 @@ public class DiagnosticReport extends DomainResource {
     protected Resource performerTarget;
 
     /**
-     * Details concerning a test requested.
+     * Details concerning a test or procedure requested.
      */
-    @Child(name = "requestDetail", type = {DiagnosticOrder.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="What was requested", formalDefinition="Details concerning a test requested." )
-    protected List<Reference> requestDetail;
+    @Child(name = "request", type = {DiagnosticOrder.class, ProcedureRequest.class, ReferralRequest.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Description(shortDefinition="What was requested", formalDefinition="Details concerning a test or procedure requested." )
+    protected List<Reference> request;
     /**
-     * The actual objects that are the target of the reference (Details concerning a test requested.)
+     * The actual objects that are the target of the reference (Details concerning a test or procedure requested.)
      */
-    protected List<DiagnosticOrder> requestDetailTarget;
+    protected List<Resource> requestTarget;
 
 
     /**
@@ -514,7 +514,7 @@ public class DiagnosticReport extends DomainResource {
     @Description(shortDefinition="Entire Report as issued", formalDefinition="Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent." )
     protected List<Attachment> presentedForm;
 
-    private static final long serialVersionUID = 488621746L;
+    private static final long serialVersionUID = 920334551L;
 
   /*
    * Constructor
@@ -882,64 +882,52 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #requestDetail} (Details concerning a test requested.)
+     * @return {@link #request} (Details concerning a test or procedure requested.)
      */
-    public List<Reference> getRequestDetail() { 
-      if (this.requestDetail == null)
-        this.requestDetail = new ArrayList<Reference>();
-      return this.requestDetail;
+    public List<Reference> getRequest() { 
+      if (this.request == null)
+        this.request = new ArrayList<Reference>();
+      return this.request;
     }
 
-    public boolean hasRequestDetail() { 
-      if (this.requestDetail == null)
+    public boolean hasRequest() { 
+      if (this.request == null)
         return false;
-      for (Reference item : this.requestDetail)
+      for (Reference item : this.request)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #requestDetail} (Details concerning a test requested.)
+     * @return {@link #request} (Details concerning a test or procedure requested.)
      */
     // syntactic sugar
-    public Reference addRequestDetail() { //3
+    public Reference addRequest() { //3
       Reference t = new Reference();
-      if (this.requestDetail == null)
-        this.requestDetail = new ArrayList<Reference>();
-      this.requestDetail.add(t);
+      if (this.request == null)
+        this.request = new ArrayList<Reference>();
+      this.request.add(t);
       return t;
     }
 
     // syntactic sugar
-    public DiagnosticReport addRequestDetail(Reference t) { //3
+    public DiagnosticReport addRequest(Reference t) { //3
       if (t == null)
         return this;
-      if (this.requestDetail == null)
-        this.requestDetail = new ArrayList<Reference>();
-      this.requestDetail.add(t);
+      if (this.request == null)
+        this.request = new ArrayList<Reference>();
+      this.request.add(t);
       return this;
     }
 
     /**
-     * @return {@link #requestDetail} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Details concerning a test requested.)
+     * @return {@link #request} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Details concerning a test or procedure requested.)
      */
-    public List<DiagnosticOrder> getRequestDetailTarget() { 
-      if (this.requestDetailTarget == null)
-        this.requestDetailTarget = new ArrayList<DiagnosticOrder>();
-      return this.requestDetailTarget;
-    }
-
-    // syntactic sugar
-    /**
-     * @return {@link #requestDetail} (Add an actual object that is the target of the reference. The reference library doesn't use these, but you can use this to hold the resources if you resolvethemt. Details concerning a test requested.)
-     */
-    public DiagnosticOrder addRequestDetailTarget() { 
-      DiagnosticOrder r = new DiagnosticOrder();
-      if (this.requestDetailTarget == null)
-        this.requestDetailTarget = new ArrayList<DiagnosticOrder>();
-      this.requestDetailTarget.add(r);
-      return r;
+    public List<Resource> getRequestTarget() { 
+      if (this.requestTarget == null)
+        this.requestTarget = new ArrayList<Resource>();
+      return this.requestTarget;
     }
 
     /**
@@ -1293,7 +1281,7 @@ public class DiagnosticReport extends DomainResource {
         childrenList.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, java.lang.Integer.MAX_VALUE, effective));
         childrenList.add(new Property("issued", "instant", "The date and time that this version of the report was released from the source diagnostic service.", 0, java.lang.Integer.MAX_VALUE, issued));
         childrenList.add(new Property("performer", "Reference(Practitioner|Organization)", "The diagnostic service that is responsible for issuing the report.", 0, java.lang.Integer.MAX_VALUE, performer));
-        childrenList.add(new Property("requestDetail", "Reference(DiagnosticOrder)", "Details concerning a test requested.", 0, java.lang.Integer.MAX_VALUE, requestDetail));
+        childrenList.add(new Property("request", "Reference(DiagnosticOrder|ProcedureRequest|ReferralRequest)", "Details concerning a test or procedure requested.", 0, java.lang.Integer.MAX_VALUE, request));
         childrenList.add(new Property("specimen", "Reference(Specimen)", "Details about the specimens on which this diagnostic report is based.", 0, java.lang.Integer.MAX_VALUE, specimen));
         childrenList.add(new Property("result", "Reference(Observation)", "Observations that are part of this diagnostic report. Observations can be simple name/value pairs (e.g. 'atomic' results), or they can be grouping observations that include references to other members of the group (e.g. 'panels').", 0, java.lang.Integer.MAX_VALUE, result));
         childrenList.add(new Property("imagingStudy", "Reference(ImagingStudy|ImagingObjectSelection)", "One or more links to full details of any imaging performed during the diagnostic investigation. Typically, this is imaging performed by DICOM enabled modalities, but this is not required. A fully enabled PACS viewer can use this information to provide views of the source images.", 0, java.lang.Integer.MAX_VALUE, imagingStudy));
@@ -1319,10 +1307,10 @@ public class DiagnosticReport extends DomainResource {
         dst.effective = effective == null ? null : effective.copy();
         dst.issued = issued == null ? null : issued.copy();
         dst.performer = performer == null ? null : performer.copy();
-        if (requestDetail != null) {
-          dst.requestDetail = new ArrayList<Reference>();
-          for (Reference i : requestDetail)
-            dst.requestDetail.add(i.copy());
+        if (request != null) {
+          dst.request = new ArrayList<Reference>();
+          for (Reference i : request)
+            dst.request.add(i.copy());
         };
         if (specimen != null) {
           dst.specimen = new ArrayList<Reference>();
@@ -1372,10 +1360,10 @@ public class DiagnosticReport extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(category, o.category, true)
            && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true) && compareDeep(performer, o.performer, true)
-           && compareDeep(requestDetail, o.requestDetail, true) && compareDeep(specimen, o.specimen, true)
-           && compareDeep(result, o.result, true) && compareDeep(imagingStudy, o.imagingStudy, true) && compareDeep(image, o.image, true)
-           && compareDeep(conclusion, o.conclusion, true) && compareDeep(codedDiagnosis, o.codedDiagnosis, true)
-           && compareDeep(presentedForm, o.presentedForm, true);
+           && compareDeep(request, o.request, true) && compareDeep(specimen, o.specimen, true) && compareDeep(result, o.result, true)
+           && compareDeep(imagingStudy, o.imagingStudy, true) && compareDeep(image, o.image, true) && compareDeep(conclusion, o.conclusion, true)
+           && compareDeep(codedDiagnosis, o.codedDiagnosis, true) && compareDeep(presentedForm, o.presentedForm, true)
+          ;
       }
 
       @Override
@@ -1393,7 +1381,7 @@ public class DiagnosticReport extends DomainResource {
         return super.isEmpty() && (identifier == null || identifier.isEmpty()) && (status == null || status.isEmpty())
            && (category == null || category.isEmpty()) && (code == null || code.isEmpty()) && (subject == null || subject.isEmpty())
            && (encounter == null || encounter.isEmpty()) && (effective == null || effective.isEmpty())
-           && (issued == null || issued.isEmpty()) && (performer == null || performer.isEmpty()) && (requestDetail == null || requestDetail.isEmpty())
+           && (issued == null || issued.isEmpty()) && (performer == null || performer.isEmpty()) && (request == null || request.isEmpty())
            && (specimen == null || specimen.isEmpty()) && (result == null || result.isEmpty()) && (imagingStudy == null || imagingStudy.isEmpty())
            && (image == null || image.isEmpty()) && (conclusion == null || conclusion.isEmpty()) && (codedDiagnosis == null || codedDiagnosis.isEmpty())
            && (presentedForm == null || presentedForm.isEmpty());
@@ -1408,9 +1396,9 @@ public class DiagnosticReport extends DomainResource {
   public static final String SP_DATE = "date";
   @SearchParamDefinition(name="identifier", path="DiagnosticReport.identifier", description="An identifier for the report", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
-  @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="Reference to the image source", type="reference" )
+  @SearchParamDefinition(name="image", path="DiagnosticReport.image.link", description="A reference to the image source.", type="reference" )
   public static final String SP_IMAGE = "image";
-  @SearchParamDefinition(name="request", path="DiagnosticReport.requestDetail", description="What was requested", type="reference" )
+  @SearchParamDefinition(name="request", path="DiagnosticReport.request", description="Reference to the test or procedure request.", type="reference" )
   public static final String SP_REQUEST = "request";
   @SearchParamDefinition(name="performer", path="DiagnosticReport.performer", description="Who was the source of the report (organization)", type="reference" )
   public static final String SP_PERFORMER = "performer";

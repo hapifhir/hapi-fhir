@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Practitioner"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -436,8 +436,9 @@
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Practitioner Resource"/>
+  <requirements value="Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc."/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -460,12 +461,12 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Practitioner"/>
       <short value="A person with a  formal responsibility in the provisioning of healthcare or related services"/>
       <definition value="A person who is directly or indirectly involved in the provisioning of healthcare."/>
-      <requirements value="Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1164,7 +1165,6 @@
       <path value="Practitioner"/>
       <short value="A person with a  formal responsibility in the provisioning of healthcare or related services"/>
       <definition value="A person who is directly or indirectly involved in the provisioning of healthcare."/>
-      <requirements value="Need to track doctors, staff, locums etc. for both healthcare practitioners, funders, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>

@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="DiagnosticOrder"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -476,7 +476,7 @@
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for DiagnosticOrder Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -495,6 +495,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="DiagnosticOrder"/>
@@ -748,6 +749,8 @@
       <path value="DiagnosticOrder.supportingInformation"/>
       <short value="Additional clinical information"/>
       <definition value="Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order."/>
+      <alias value="Ask at order entry question"/>
+      <alias value="AOE"/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1292,6 +1295,8 @@
       <path value="DiagnosticOrder.supportingInformation"/>
       <short value="Additional clinical information"/>
       <definition value="Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order."/>
+      <alias value="Ask at order entry question"/>
+      <alias value="AOE"/>
       <min value="0"/>
       <max value="*"/>
       <type>

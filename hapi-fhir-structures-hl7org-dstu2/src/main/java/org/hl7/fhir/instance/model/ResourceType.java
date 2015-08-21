@@ -1,6 +1,6 @@
 package org.hl7.fhir.instance.model;
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 public enum ResourceType {
     Account,
@@ -58,7 +58,7 @@ public enum ResourceType {
     Medication,
     MedicationAdministration,
     MedicationDispense,
-    MedicationPrescription,
+    MedicationOrder,
     MedicationStatement,
     MessageHeader,
     NamingSystem,
@@ -211,8 +211,8 @@ public enum ResourceType {
       return "medicationadministration";
     case MedicationDispense:
       return "medicationdispense";
-    case MedicationPrescription:
-      return "medicationprescription";
+    case MedicationOrder:
+      return "medicationorder";
     case MedicationStatement:
       return "medicationstatement";
     case MessageHeader:

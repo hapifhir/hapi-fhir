@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -568,7 +568,7 @@ public class CarePlan extends DomainResource {
         /**
          * The details of the proposed activity represented in a specific resource.
          */
-        @Child(name = "reference", type = {Appointment.class, CommunicationRequest.class, DeviceUseRequest.class, DiagnosticOrder.class, MedicationPrescription.class, NutritionOrder.class, Order.class, ProcedureRequest.class, ProcessRequest.class, ReferralRequest.class, SupplyRequest.class, VisionPrescription.class}, order=3, min=0, max=1)
+        @Child(name = "reference", type = {Appointment.class, CommunicationRequest.class, DeviceUseRequest.class, DiagnosticOrder.class, MedicationOrder.class, NutritionOrder.class, Order.class, ProcedureRequest.class, ProcessRequest.class, ReferralRequest.class, SupplyRequest.class, VisionPrescription.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Activity details defined in specific resource", formalDefinition="The details of the proposed activity represented in a specific resource." )
         protected Reference reference;
 
@@ -758,7 +758,7 @@ public class CarePlan extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("actionResulting", "Reference(Any)", "Resources that describe follow-on actions resulting from the plan, such as drug prescriptions, encounter records, appointments, etc.", 0, java.lang.Integer.MAX_VALUE, actionResulting));
           childrenList.add(new Property("notes", "string", "Notes about the execution of the activity.", 0, java.lang.Integer.MAX_VALUE, notes));
-          childrenList.add(new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceUseRequest|DiagnosticOrder|MedicationPrescription|NutritionOrder|Order|ProcedureRequest|ProcessRequest|ReferralRequest|SupplyRequest|VisionPrescription)", "The details of the proposed activity represented in a specific resource.", 0, java.lang.Integer.MAX_VALUE, reference));
+          childrenList.add(new Property("reference", "Reference(Appointment|CommunicationRequest|DeviceUseRequest|DiagnosticOrder|MedicationOrder|NutritionOrder|Order|ProcedureRequest|ProcessRequest|ReferralRequest|SupplyRequest|VisionPrescription)", "The details of the proposed activity represented in a specific resource.", 0, java.lang.Integer.MAX_VALUE, reference));
           childrenList.add(new Property("detail", "", "A simple summary of a planned activity suitable for a general care plan system (e.g. form driven) that doesn't know about specific resources such as procedure etc.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
@@ -906,16 +906,16 @@ public class CarePlan extends DomainResource {
         /**
          * Identifies the quantity expected to be consumed in a given day.
          */
-        @Child(name = "dailyAmount", type = {Quantity.class}, order=12, min=0, max=1)
+        @Child(name = "dailyAmount", type = {SimpleQuantity.class}, order=12, min=0, max=1)
         @Description(shortDefinition="How to consume/day?", formalDefinition="Identifies the quantity expected to be consumed in a given day." )
-        protected Quantity dailyAmount;
+        protected SimpleQuantity dailyAmount;
 
         /**
          * Identifies the quantity expected to be supplied, addministered or consumed by the subject.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=13, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=13, min=0, max=1)
         @Description(shortDefinition="How much to administer/supply/consume", formalDefinition="Identifies the quantity expected to be supplied, addministered or consumed by the subject." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.
@@ -924,7 +924,7 @@ public class CarePlan extends DomainResource {
         @Description(shortDefinition="Extra info on activity occurrence", formalDefinition="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc." )
         protected StringType note;
 
-        private static final long serialVersionUID = -1276666801L;
+        private static final long serialVersionUID = -369716593L;
 
     /*
      * Constructor
@@ -1428,12 +1428,12 @@ public class CarePlan extends DomainResource {
         /**
          * @return {@link #dailyAmount} (Identifies the quantity expected to be consumed in a given day.)
          */
-        public Quantity getDailyAmount() { 
+        public SimpleQuantity getDailyAmount() { 
           if (this.dailyAmount == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.dailyAmount");
             else if (Configuration.doAutoCreate())
-              this.dailyAmount = new Quantity(); // cc
+              this.dailyAmount = new SimpleQuantity(); // cc
           return this.dailyAmount;
         }
 
@@ -1444,7 +1444,7 @@ public class CarePlan extends DomainResource {
         /**
          * @param value {@link #dailyAmount} (Identifies the quantity expected to be consumed in a given day.)
          */
-        public CarePlanActivityDetailComponent setDailyAmount(Quantity value) { 
+        public CarePlanActivityDetailComponent setDailyAmount(SimpleQuantity value) { 
           this.dailyAmount = value;
           return this;
         }
@@ -1452,12 +1452,12 @@ public class CarePlan extends DomainResource {
         /**
          * @return {@link #quantity} (Identifies the quantity expected to be supplied, addministered or consumed by the subject.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -1468,7 +1468,7 @@ public class CarePlan extends DomainResource {
         /**
          * @param value {@link #quantity} (Identifies the quantity expected to be supplied, addministered or consumed by the subject.)
          */
-        public CarePlanActivityDetailComponent setQuantity(Quantity value) { 
+        public CarePlanActivityDetailComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -1535,8 +1535,8 @@ public class CarePlan extends DomainResource {
           childrenList.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur.  E.g. home, hospital, specific clinic, etc.", 0, java.lang.Integer.MAX_VALUE, location));
           childrenList.add(new Property("performer", "Reference(Practitioner|Organization|RelatedPerson|Patient)", "Identifies who's expected to be involved in the activity.", 0, java.lang.Integer.MAX_VALUE, performer));
           childrenList.add(new Property("product", "Reference(Medication|Substance)", "Identifies the food, drug or other product to be consumed or supplied in the activity.", 0, java.lang.Integer.MAX_VALUE, product));
-          childrenList.add(new Property("dailyAmount", "Quantity", "Identifies the quantity expected to be consumed in a given day.", 0, java.lang.Integer.MAX_VALUE, dailyAmount));
-          childrenList.add(new Property("quantity", "Quantity", "Identifies the quantity expected to be supplied, addministered or consumed by the subject.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("dailyAmount", "SimpleQuantity", "Identifies the quantity expected to be consumed in a given day.", 0, java.lang.Integer.MAX_VALUE, dailyAmount));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "Identifies the quantity expected to be supplied, addministered or consumed by the subject.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("note", "string", "This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.", 0, java.lang.Integer.MAX_VALUE, note));
         }
 

@@ -187,8 +187,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Signature Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Signature Type"/>
   <requirements value="There are a number of places where content must be signed in healthcare."/>
   <mapping>
     <identity value="rim"/>
@@ -197,12 +197,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Signature"/>
       <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc"/>
       <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities."/>
-      <requirements value="There are a number of places where content must be signed in healthcare."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -326,7 +326,6 @@
       <path value="Signature"/>
       <short value="A digital Signature - XML DigSig, JWT, Graphical image of signature, etc"/>
       <definition value="A digital signature along with supporting context. The signature may be electronic/cryptographic in nature, or a graphical image representing a hand-written signature, or a signature process. Different Signature approaches have different utilities."/>
-      <requirements value="There are a number of places where content must be signed in healthcare."/>
       <min value="0"/>
       <max value="*"/>
       <type>

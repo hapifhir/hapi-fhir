@@ -19,8 +19,8 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -115,7 +115,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 
-public abstract class BaseHapiFhirDao implements IDao {
+public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 
 	public static final String NS_JPA_PROFILE = "https://github.com/jamesagnew/hapi-fhir/ns/jpa/profile";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirDao.class);
@@ -344,7 +344,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T extends IBaseResource> IFhirResourceDao<T> getDao(Class<T> theType) {
+	protected <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		if (myResourceTypeToDao == null) {
 			myResourceTypeToDao = new HashMap<Class<? extends IBaseResource>, IFhirResourceDao<?>>();
 			for (IFhirResourceDao<?> next : myResourceDaos) {
@@ -358,7 +358,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 
 		}
 
-		return (IFhirResourceDao<T>) myResourceTypeToDao.get(theType);
+		return (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
 	}
 
 	protected TagDefinition getTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -644,12 +644,12 @@ public abstract class BaseHapiFhirDao implements IDao {
 
 	}
 
-	protected <T extends IResource> Set<Long> processMatchUrl(String theMatchUrl, Class<T> theResourceType) {
+	protected <R extends IResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
 
-		IFhirResourceDao<T> dao = getDao(theResourceType);
+		IFhirResourceDao<R> dao = getDao(theResourceType);
 		Set<Long> ids = dao.searchForIdsWithAndOr(paramMap);
 
 		return ids;
@@ -899,6 +899,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 		case DSTU1:
 			mySearchParamExtractor = new SearchParamExtractorDstu1(theContext);
 			break;
+		case DSTU2_HL7ORG:
 		case DEV:
 			throw new IllegalStateException("Don't know how to handle version: " + myContext.getVersion().getVersion());
 		}
@@ -917,7 +918,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 		return toResource(type.getImplementingClass(), theEntity);
 	}
 
-	protected <T extends IBaseResource> T toResource(Class<T> theResourceType, BaseHasResource theEntity) {
+	protected <R extends IBaseResource> R toResource(Class<R> theResourceType, BaseHasResource theEntity) {
 		String resourceText = null;
 		switch (theEntity.getEncoding()) {
 		case JSON:
@@ -933,7 +934,7 @@ public abstract class BaseHapiFhirDao implements IDao {
 		}
 
 		IParser parser = theEntity.getEncoding().newParser(getContext(theEntity.getFhirVersion()));
-		T retVal;
+		R retVal;
 		try {
 			retVal = parser.parseResource(theResourceType, resourceText);
 		} catch (Exception e) {
@@ -955,9 +956,9 @@ public abstract class BaseHapiFhirDao implements IDao {
 		IResource res = (IResource) retVal;
 		res.setId(theEntity.getIdDt());
 
-		res.getResourceMetadata().put(ResourceMetadataKeyEnum.VERSION_ID, theEntity.getVersion());
-		res.getResourceMetadata().put(ResourceMetadataKeyEnum.PUBLISHED, theEntity.getPublished());
-		res.getResourceMetadata().put(ResourceMetadataKeyEnum.UPDATED, theEntity.getUpdated());
+		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
+		ResourceMetadataKeyEnum.PUBLISHED.put(res, theEntity.getPublished());
+		ResourceMetadataKeyEnum.UPDATED.put(res, theEntity.getUpdated());
 
 		if (theEntity.getTitle() != null) {
 			ResourceMetadataKeyEnum.TITLE.put(res, theEntity.getTitle());
@@ -1038,9 +1039,10 @@ public abstract class BaseHapiFhirDao implements IDao {
 		return updateEntity(theResource, entity, theUpdateHistory, theDeletedTimestampOrNull, true, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
 
-		validateResourceForStorage(theResource);
+		validateResourceForStorage((T) theResource);
 
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
@@ -1216,12 +1218,15 @@ public abstract class BaseHapiFhirDao implements IDao {
 	}
 
 	/**
-	 * Subclasses may override to provide specific behaviour
+	 * This method is invoked immediately before storing a new resource, or an 
+	 * update to an existing resource to allow the DAO to ensure that it is valid
+	 * for persistence. By default, no validation is performed, but subclasses 
+	 * may override to provide specific behaviour.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
 	 */
-	protected void validateResourceForStorage(IResource theResource) {
+	protected void validateResourceForStorage(T theResource) {
 		// nothing
 	}
 

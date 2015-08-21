@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -301,9 +301,9 @@ public class VisionPrescription extends DomainResource {
         /**
          * The recommended maximum wear period for the lens.
          */
-        @Child(name = "duration", type = {Quantity.class}, order=12, min=0, max=1)
+        @Child(name = "duration", type = {SimpleQuantity.class}, order=12, min=0, max=1)
         @Description(shortDefinition="Lens wear duration", formalDefinition="The recommended maximum wear period for the lens." )
-        protected Quantity duration;
+        protected SimpleQuantity duration;
 
         /**
          * Special color or pattern.
@@ -326,7 +326,7 @@ public class VisionPrescription extends DomainResource {
         @Description(shortDefinition="Notes for coatings", formalDefinition="Notes for special requirements such as coatings and lens materials." )
         protected StringType notes;
 
-        private static final long serialVersionUID = -946795088L;
+        private static final long serialVersionUID = -1586392610L;
 
     /*
      * Constructor
@@ -856,12 +856,12 @@ public class VisionPrescription extends DomainResource {
         /**
          * @return {@link #duration} (The recommended maximum wear period for the lens.)
          */
-        public Quantity getDuration() { 
+        public SimpleQuantity getDuration() { 
           if (this.duration == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create VisionPrescriptionDispenseComponent.duration");
             else if (Configuration.doAutoCreate())
-              this.duration = new Quantity(); // cc
+              this.duration = new SimpleQuantity(); // cc
           return this.duration;
         }
 
@@ -872,7 +872,7 @@ public class VisionPrescription extends DomainResource {
         /**
          * @param value {@link #duration} (The recommended maximum wear period for the lens.)
          */
-        public VisionPrescriptionDispenseComponent setDuration(Quantity value) { 
+        public VisionPrescriptionDispenseComponent setDuration(SimpleQuantity value) { 
           this.duration = value;
           return this;
         }
@@ -1037,7 +1037,7 @@ public class VisionPrescription extends DomainResource {
           childrenList.add(new Property("power", "decimal", "Contact lens power measured in diopters (0.25 units).", 0, java.lang.Integer.MAX_VALUE, power));
           childrenList.add(new Property("backCurve", "decimal", "Back Curvature measured in millimeters.", 0, java.lang.Integer.MAX_VALUE, backCurve));
           childrenList.add(new Property("diameter", "decimal", "Contact lens diameter measured in millimeters.", 0, java.lang.Integer.MAX_VALUE, diameter));
-          childrenList.add(new Property("duration", "Quantity", "The recommended maximum wear period for the lens.", 0, java.lang.Integer.MAX_VALUE, duration));
+          childrenList.add(new Property("duration", "SimpleQuantity", "The recommended maximum wear period for the lens.", 0, java.lang.Integer.MAX_VALUE, duration));
           childrenList.add(new Property("color", "string", "Special color or pattern.", 0, java.lang.Integer.MAX_VALUE, color));
           childrenList.add(new Property("brand", "string", "Brand recommendations or restrictions.", 0, java.lang.Integer.MAX_VALUE, brand));
           childrenList.add(new Property("notes", "string", "Notes for special requirements such as coatings and lens materials.", 0, java.lang.Integer.MAX_VALUE, notes));

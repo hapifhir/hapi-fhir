@@ -158,8 +158,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Quantity Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Quantity Type"/>
   <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
   <mapping>
     <identity value="v2"/>
@@ -173,12 +173,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Quantity"/>
       <short value="A measured or measurable amount"/>
       <definition value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."/>
-      <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -347,7 +347,6 @@
       <path value="Quantity"/>
       <short value="A measured or measurable amount"/>
       <definition value="A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."/>
-      <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
       <min value="0"/>
       <max value="*"/>
       <type>

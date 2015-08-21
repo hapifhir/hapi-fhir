@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Encounter"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -208,9 +208,7 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
-            <span title="Encounter.episodeOfCare : Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
-
-The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).">episodeOfCare</span>
+            <span title="Encounter.episodeOfCare : Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).">episodeOfCare</span>
             <a name="Encounter.episodeOfCare"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
@@ -394,8 +392,7 @@ The association is recorded on the encounter as these are typically created afte
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
-            <span title="Encounter.indication : Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
-The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.">indication</span>
+            <span title="Encounter.indication : Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.">indication</span>
             <a name="Encounter.indication"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
@@ -774,7 +771,7 @@ The indication will typically be a Condition (with other resources referenced in
       <value value="http://www.hl7.org/Special/committees/pafm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Encounter Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -793,6 +790,7 @@ The indication will typically be a Condition (with other resources referenced in
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Encounter"/>
@@ -1159,9 +1157,7 @@ The indication will typically be a Condition (with other resources referenced in
     <element>
       <path value="Encounter.episodeOfCare"/>
       <short value="Episode(s) of care that this encounter should be recorded against"/>
-      <definition value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
-
-The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
+      <definition value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -1360,8 +1356,7 @@ The association is recorded on the encounter as these are typically created afte
       </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value=".effectiveTime
-(low &amp; high)"/>
+        <map value=".effectiveTime (low &amp; high)"/>
       </mapping>
       <mapping>
         <identity value="w5"/>
@@ -1375,7 +1370,8 @@ The association is recorded on the encounter as these are typically created afte
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Duration"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Duration"/>
       </type>
       <mapping>
         <identity value="v2"/>
@@ -1405,8 +1401,7 @@ The association is recorded on the encounter as these are typically created afte
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="EVN-4-event reason code / PV2-3-admit reason (note: PV2-3 is nominally constrained to inpatient admissions; V2.x makes no vocabulary suggestions for PV2-3; would not expect PV2 segment or PV2-3 to be in use in all implementations
-)"/>
+        <map value="EVN-4-event reason code / PV2-3-admit reason (note: PV2-3 is nominally constrained to inpatient admissions; V2.x makes no vocabulary suggestions for PV2-3; would not expect PV2 segment or PV2-3 to be in use in all implementations )"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -1420,8 +1415,7 @@ The association is recorded on the encounter as these are typically created afte
     <element>
       <path value="Encounter.indication"/>
       <short value="Reason the encounter takes place (resource)"/>
-      <definition value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
-The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
+      <definition value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
       <alias value="Admission diagnosis"/>
       <min value="0"/>
       <max value="*"/>
@@ -2104,9 +2098,7 @@ The indication will typically be a Condition (with other resources referenced in
     <element>
       <path value="Encounter.episodeOfCare"/>
       <short value="Episode(s) of care that this encounter should be recorded against"/>
-      <definition value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.
-
-The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
+      <definition value="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -2253,8 +2245,7 @@ The association is recorded on the encounter as these are typically created afte
       </mapping>
       <mapping>
         <identity value="rim"/>
-        <map value=".effectiveTime
-(low &amp; high)"/>
+        <map value=".effectiveTime (low &amp; high)"/>
       </mapping>
       <mapping>
         <identity value="w5"/>
@@ -2268,7 +2259,8 @@ The association is recorded on the encounter as these are typically created afte
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Duration"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Duration"/>
       </type>
       <mapping>
         <identity value="v2"/>
@@ -2298,8 +2290,7 @@ The association is recorded on the encounter as these are typically created afte
       </binding>
       <mapping>
         <identity value="v2"/>
-        <map value="EVN-4-event reason code / PV2-3-admit reason (note: PV2-3 is nominally constrained to inpatient admissions; V2.x makes no vocabulary suggestions for PV2-3; would not expect PV2 segment or PV2-3 to be in use in all implementations
-)"/>
+        <map value="EVN-4-event reason code / PV2-3-admit reason (note: PV2-3 is nominally constrained to inpatient admissions; V2.x makes no vocabulary suggestions for PV2-3; would not expect PV2 segment or PV2-3 to be in use in all implementations )"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -2313,8 +2304,7 @@ The association is recorded on the encounter as these are typically created afte
     <element>
       <path value="Encounter.indication"/>
       <short value="Reason the encounter takes place (resource)"/>
-      <definition value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis.
-The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
+      <definition value="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure."/>
       <alias value="Admission diagnosis"/>
       <min value="0"/>
       <max value="*"/>

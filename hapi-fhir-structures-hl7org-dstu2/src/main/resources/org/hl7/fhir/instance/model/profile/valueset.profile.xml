@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ValueSet"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -49,9 +49,9 @@
             <br/>
             <span style="font-style: italic" title="vsd-7">A defined code system (if present) SHALL have a different identifier to the value set itself</span>
             <br/>
-            <span style="font-style: italic" title="vsd-2">A value set with only one import SHALL also have an include and/or an exclude unless the value set defines its own codes</span>
+            <span style="font-style: italic" title="vsd-2">A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system</span>
             <br/>
-            <span style="font-style: italic" title="vsd-5">Value set SHALL contain at least one of a define, a compose, or an expansion element</span>
+            <span style="font-style: italic" title="vsd-5">Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element</span>
           </td>
         </tr>
 
@@ -1343,7 +1343,7 @@
       <value value="http://www.hl7.org/Special/committees/Vocab/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for ValueSet Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -1362,6 +1362,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="ValueSet"/>
@@ -1376,19 +1377,19 @@
         <key value="vsd-7"/>
         <severity value="error"/>
         <human value="A defined code system (if present) SHALL have a different identifier to the value set itself"/>
-        <xpath value="not(f:define/f:system/@value = f:identifier/@value)"/>
+        <xpath value="not(f:codeSystem/f:system/@value = f:identifier/@value)"/>
       </constraint>
       <constraint>
         <key value="vsd-2"/>
         <severity value="error"/>
-        <human value="A value set with only one import SHALL also have an include and/or an exclude unless the value set defines its own codes"/>
-        <xpath value="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:define))"/>
+        <human value="A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system"/>
+        <xpath value="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))"/>
       </constraint>
       <constraint>
         <key value="vsd-5"/>
         <severity value="error"/>
-        <human value="Value set SHALL contain at least one of a define, a compose, or an expansion element"/>
-        <xpath value="exists(f:define) or exists(f:compose) or exists(f:expansion)"/>
+        <human value="Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element"/>
+        <xpath value="exists(f:codeSystem) or exists(f:compose) or exists(f:expansion)"/>
       </constraint>
       <mapping>
         <identity value="rim"/>
@@ -1959,6 +1960,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ConceptDefinition"/>
+      </extension>
       <path value="ValueSet.codeSystem.concept"/>
       <name value="concept"/>
       <short value="Concepts in the code system"/>
@@ -2253,6 +2257,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ConceptSet"/>
+      </extension>
       <path value="ValueSet.compose.include"/>
       <name value="include"/>
       <short value="Include one or more codes from a code system"/>
@@ -2363,6 +2370,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ConceptReference"/>
+      </extension>
       <path value="ValueSet.compose.include.concept"/>
       <short value="A concept defined in the system"/>
       <definition value="Specifies a concept to be included or excluded."/>
@@ -2936,19 +2946,19 @@
         <key value="vsd-7"/>
         <severity value="error"/>
         <human value="A defined code system (if present) SHALL have a different identifier to the value set itself"/>
-        <xpath value="not(f:define/f:system/@value = f:identifier/@value)"/>
+        <xpath value="not(f:codeSystem/f:system/@value = f:identifier/@value)"/>
       </constraint>
       <constraint>
         <key value="vsd-2"/>
         <severity value="error"/>
-        <human value="A value set with only one import SHALL also have an include and/or an exclude unless the value set defines its own codes"/>
-        <xpath value="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:define))"/>
+        <human value="A value set with only one import SHALL also have an include and/or an exclude unless the value set includes and inline code system"/>
+        <xpath value="not(exists(f:compose)) or (count(f:compose/f:import)!=1 or exists(f:compose/f:include) or exists(f:compose/f:exclude) or exists(f:codeSystem))"/>
       </constraint>
       <constraint>
         <key value="vsd-5"/>
         <severity value="error"/>
-        <human value="Value set SHALL contain at least one of a define, a compose, or an expansion element"/>
-        <xpath value="exists(f:define) or exists(f:compose) or exists(f:expansion)"/>
+        <human value="Value set SHALL contain at least one of a codeSystem, a compose, or an expansion element"/>
+        <xpath value="exists(f:codeSystem) or exists(f:compose) or exists(f:expansion)"/>
       </constraint>
       <mapping>
         <identity value="rim"/>
@@ -3297,6 +3307,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ConceptDefinition"/>
+      </extension>
       <path value="ValueSet.codeSystem.concept"/>
       <name value="concept"/>
       <short value="Concepts in the code system"/>
@@ -3435,6 +3448,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ConceptSet"/>
+      </extension>
       <path value="ValueSet.compose.include"/>
       <name value="include"/>
       <short value="Include one or more codes from a code system"/>
@@ -3493,6 +3509,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ConceptReference"/>
+      </extension>
       <path value="ValueSet.compose.include.concept"/>
       <short value="A concept defined in the system"/>
       <definition value="Specifies a concept to be included or excluded."/>

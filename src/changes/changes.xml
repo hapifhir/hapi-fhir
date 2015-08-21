@@ -93,6 +93,9 @@
 				a resourceType element) fail to parse with a confusing NullPointerException.
 				Thanks to GitHub user @hugosoares for reporting!
 			</action>
+			<action type="add">
+				JPA server now implements the $validate-code operation
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

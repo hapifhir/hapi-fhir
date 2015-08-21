@@ -46,6 +46,7 @@ import org.hl7.fhir.instance.model.ExtensionHelper;
 import org.hl7.fhir.instance.model.Factory;
 import org.hl7.fhir.instance.model.Identifier;
 import org.hl7.fhir.instance.model.IntegerType;
+import org.hl7.fhir.instance.model.MarkdownType;
 import org.hl7.fhir.instance.model.PrimitiveType;
 import org.hl7.fhir.instance.model.Questionnaire.GroupComponent;
 import org.hl7.fhir.instance.model.Questionnaire.QuestionComponent;
@@ -119,6 +120,16 @@ public class ToolingExtensions {
     }
   }
 
+  public static void addStringExtension(Element e, String url, String content) throws Exception {
+    if (!Utilities.noString(content)) {
+      Extension ex = getExtension(e, url);
+      if (ex != null)
+        ex.setValue(new StringType(content));
+      else
+        e.getExtension().add(Factory.newExtension(url, new StringType(content), true));   
+    }
+  }
+
   public static void addIntegerExtension(DomainResource dr, String url, int value) throws Exception {
     Extension ex = getExtension(dr, url);
     if (ex != null)
@@ -173,6 +184,8 @@ public class ToolingExtensions {
       return ((StringType) ex.getValue()).getValue();
     if ((ex.getValue() instanceof UriType))
       return ((UriType) ex.getValue()).getValue();
+    if ((ex.getValue() instanceof MarkdownType))
+      return ((MarkdownType) ex.getValue()).getValue();
     return null;
   }
 

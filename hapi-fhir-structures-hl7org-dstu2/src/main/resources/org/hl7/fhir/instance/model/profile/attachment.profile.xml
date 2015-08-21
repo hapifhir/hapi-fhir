@@ -214,8 +214,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Attachment Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Attachment Type"/>
   <requirements value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
   <mapping>
     <identity value="v2"/>
@@ -229,12 +229,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Attachment"/>
       <short value="Content in a format defined elsewhere"/>
       <definition value="For referring to data content defined in other formats."/>
-      <requirements value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -447,7 +447,6 @@
       <path value="Attachment"/>
       <short value="Content in a format defined elsewhere"/>
       <definition value="For referring to data content defined in other formats."/>
-      <requirements value="Many models need to include data defined in other specifications that is complex and opaque to the healthcare model. This includes documents, media recordings, structured data, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>

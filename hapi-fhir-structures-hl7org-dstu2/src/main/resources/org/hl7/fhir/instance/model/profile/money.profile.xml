@@ -6,7 +6,7 @@
     <status value="generated"/>
     <div xmlns="http://www.w3.org/1999/xhtml">
       <h2>Data type Money</h2>
-      <p>An amount of money. With regard to precision, see [[X]]</p>
+      <p>An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)</p>
       <h3>Rule</h3>
       <p>There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency).</p>
       <p>XPath:</p>
@@ -25,8 +25,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="An amount of money. With regard to precision, see [[X]]"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
   <kind value="datatype"/>
   <constrainedType value="Quantity"/>
   <abstract value="false"/>
@@ -35,9 +35,8 @@
     <element>
       <path value="Quantity"/>
       <name value="Money"/>
-      <short value="An amount of money. With regard to precision, see [[X]]"/>
+      <short value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
       <definition value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
-      <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
       <min value="1"/>
       <max value="1"/>
       <base>
@@ -251,7 +250,7 @@
     <element>
       <path value="Quantity"/>
       <name value="Money"/>
-      <short value="An amount of money. With regard to precision, see [[X]]"/>
+      <short value="An amount of money. With regard to precision, see [Decimal Precision](datatypes.html#precision)"/>
       <definition value="There SHALL be a code if there is a value and it SHALL be an expression of currency.  If system is present, it SHALL be ISO 4217 (system = &quot;urn:iso:std:iso:4217&quot; - currency)."/>
       <min value="1"/>
       <max value="1"/>

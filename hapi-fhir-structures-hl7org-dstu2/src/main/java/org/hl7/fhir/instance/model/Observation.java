@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -321,16 +321,16 @@ public class Observation extends DomainResource {
         /**
          * The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.
          */
-        @Child(name = "low", type = {Quantity.class}, order=1, min=0, max=1)
+        @Child(name = "low", type = {SimpleQuantity.class}, order=1, min=0, max=1)
         @Description(shortDefinition="Low Range, if relevant", formalDefinition="The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'." )
-        protected Quantity low;
+        protected SimpleQuantity low;
 
         /**
          * The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.
          */
-        @Child(name = "high", type = {Quantity.class}, order=2, min=0, max=1)
+        @Child(name = "high", type = {SimpleQuantity.class}, order=2, min=0, max=1)
         @Description(shortDefinition="High Range, if relevant", formalDefinition="The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'." )
-        protected Quantity high;
+        protected SimpleQuantity high;
 
         /**
          * Code for the meaning of the reference range.
@@ -353,7 +353,7 @@ public class Observation extends DomainResource {
         @Description(shortDefinition="Text based reference range in an observation", formalDefinition="Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of 'Negative' or a list or table of 'normals'." )
         protected StringType text;
 
-        private static final long serialVersionUID = 230621180L;
+        private static final long serialVersionUID = -238694788L;
 
     /*
      * Constructor
@@ -365,12 +365,12 @@ public class Observation extends DomainResource {
         /**
          * @return {@link #low} (The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.)
          */
-        public Quantity getLow() { 
+        public SimpleQuantity getLow() { 
           if (this.low == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ObservationReferenceRangeComponent.low");
             else if (Configuration.doAutoCreate())
-              this.low = new Quantity(); // cc
+              this.low = new SimpleQuantity(); // cc
           return this.low;
         }
 
@@ -381,7 +381,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #low} (The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.)
          */
-        public ObservationReferenceRangeComponent setLow(Quantity value) { 
+        public ObservationReferenceRangeComponent setLow(SimpleQuantity value) { 
           this.low = value;
           return this;
         }
@@ -389,12 +389,12 @@ public class Observation extends DomainResource {
         /**
          * @return {@link #high} (The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.)
          */
-        public Quantity getHigh() { 
+        public SimpleQuantity getHigh() { 
           if (this.high == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create ObservationReferenceRangeComponent.high");
             else if (Configuration.doAutoCreate())
-              this.high = new Quantity(); // cc
+              this.high = new SimpleQuantity(); // cc
           return this.high;
         }
 
@@ -405,7 +405,7 @@ public class Observation extends DomainResource {
         /**
          * @param value {@link #high} (The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.)
          */
-        public ObservationReferenceRangeComponent setHigh(Quantity value) { 
+        public ObservationReferenceRangeComponent setHigh(SimpleQuantity value) { 
           this.high = value;
           return this;
         }
@@ -509,8 +509,8 @@ public class Observation extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("low", "Quantity", "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.", 0, java.lang.Integer.MAX_VALUE, low));
-          childrenList.add(new Property("high", "Quantity", "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.", 0, java.lang.Integer.MAX_VALUE, high));
+          childrenList.add(new Property("low", "SimpleQuantity", "The value of the low bound of the reference range. If this element is omitted, the low bound of the reference range is assumed to be meaningless. (e.g. reference range is <2.3)  If the low.comparator element is missing, it is assumed to be '>'.", 0, java.lang.Integer.MAX_VALUE, low));
+          childrenList.add(new Property("high", "SimpleQuantity", "The value of the high bound of the reference range. If this element is omitted, the high bound of the reference range is assumed to be meaningless. (e.g. reference range is > 5)  If the low.comparator element is missing , it is assumed to be '<'.", 0, java.lang.Integer.MAX_VALUE, high));
           childrenList.add(new Property("meaning", "CodeableConcept", "Code for the meaning of the reference range.", 0, java.lang.Integer.MAX_VALUE, meaning));
           childrenList.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, java.lang.Integer.MAX_VALUE, age));
           childrenList.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of 'Negative' or a list or table of 'normals'.", 0, java.lang.Integer.MAX_VALUE, text));

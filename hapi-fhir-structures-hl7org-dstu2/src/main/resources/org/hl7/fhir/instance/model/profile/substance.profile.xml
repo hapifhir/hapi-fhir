@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Substance"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -69,8 +69,30 @@
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="heirarchy"/> 
-            <span title="Substance.type : A code (or set of codes) that identify this substance.">type</span>
-            <a name="Substance.type"> </a>
+            <span title="Substance.category : A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.">category</span>
+            <a name="Substance.category"> </a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
+            <span title="This element is included in summaries">Σ</span>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
+            <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
+          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">What class/type of substance this is
+            <br/>
+            <a href="valueset-substance-category.html" title="Category or classification of substance">Substance Category Codes</a> (
+            <a href="terminologies.html#extensible" title="To be conformant, instances of this element SHALL include a code from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the valueset does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.">Extensible</a>)
+          </td>
+        </tr>
+
+        <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="heirarchy"/> 
+            <span title="Substance.code : A code (or set of codes) that identify this substance.">code</span>
+            <a name="Substance.code"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <span title="This element is included in summaries">Σ</span>
@@ -79,9 +101,9 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="datatypes.html#CodeableConcept">CodeableConcept</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">What kind of substance this is
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">What substance this is
             <br/>
-            <a href="valueset-substance-type.html" title="Type of the substance">Substance Type</a> (
+            <a href="valueset-substance-code.html" title="Substance codes">Substance Code</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -174,7 +196,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Amount of substance in the package</td>
         </tr>
@@ -257,7 +279,7 @@
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Substance Resource"/>
   <mapping>
     <identity value="orim"/>
@@ -276,6 +298,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Substance"/>
@@ -288,12 +311,7 @@
       </type>
       <mapping>
         <identity value="orim"/>
-        <map value="fhir:Substance rdfs:subClassOf
-  rim:Entity, [ 
-    a owl:Restriction;
-    owl:onProperty  rim:Act.classCode;
-    owl:allValuesFrom  cs:EntityClass\#MAT
-  ]."/>
+        <map value="fhir:Substance rdfs:subClassOf   rim:Entity, [      a owl:Restriction;     owl:onProperty  rim:Act.classCode;     owl:allValuesFrom  cs:EntityClass\#MAT   ]."/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -438,8 +456,30 @@
       </mapping>
     </element>
     <element>
-      <path value="Substance.type"/>
-      <short value="What kind of substance this is"/>
+      <path value="Substance.category"/>
+      <short value="What class/type of substance this is"/>
+      <definition value="A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="extensible"/>
+        <description value="Category or classification of substance"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-category"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="w5"/>
+        <map value="class"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Substance.code"/>
+      <short value="What substance this is"/>
       <definition value="A code (or set of codes) that identify this substance."/>
       <min value="1"/>
       <max value="1"/>
@@ -449,14 +489,14 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Type of the substance"/>
+        <description value="Substance codes"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/substance-type"/>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="orim"/>
-        <map value="fhir:Substance.type rdfs:subPropertyOf rim:Entity.code"/>
+        <map value="fhir:Substance.code rdfs:subPropertyOf rim:Entity.code"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -464,7 +504,7 @@
       </mapping>
       <mapping>
         <identity value="w5"/>
-        <map value="class"/>
+        <map value="what"/>
       </mapping>
     </element>
     <element>
@@ -589,6 +629,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
       <mapping>
@@ -704,12 +745,7 @@
       </type>
       <mapping>
         <identity value="orim"/>
-        <map value="fhir:Substance rdfs:subClassOf
-  rim:Entity, [ 
-    a owl:Restriction;
-    owl:onProperty  rim:Act.classCode;
-    owl:allValuesFrom  cs:EntityClass\#MAT
-  ]."/>
+        <map value="fhir:Substance rdfs:subClassOf   rim:Entity, [      a owl:Restriction;     owl:onProperty  rim:Act.classCode;     owl:allValuesFrom  cs:EntityClass\#MAT   ]."/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -736,8 +772,30 @@
       </mapping>
     </element>
     <element>
-      <path value="Substance.type"/>
-      <short value="What kind of substance this is"/>
+      <path value="Substance.category"/>
+      <short value="What class/type of substance this is"/>
+      <definition value="A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes."/>
+      <min value="0"/>
+      <max value="*"/>
+      <type>
+        <code value="CodeableConcept"/>
+      </type>
+      <isSummary value="true"/>
+      <binding>
+        <strength value="extensible"/>
+        <description value="Category or classification of substance"/>
+        <valueSetReference>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-category"/>
+        </valueSetReference>
+      </binding>
+      <mapping>
+        <identity value="w5"/>
+        <map value="class"/>
+      </mapping>
+    </element>
+    <element>
+      <path value="Substance.code"/>
+      <short value="What substance this is"/>
       <definition value="A code (or set of codes) that identify this substance."/>
       <min value="1"/>
       <max value="1"/>
@@ -747,14 +805,14 @@
       <isSummary value="true"/>
       <binding>
         <strength value="example"/>
-        <description value="Type of the substance"/>
+        <description value="Substance codes"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/substance-type"/>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
         </valueSetReference>
       </binding>
       <mapping>
         <identity value="orim"/>
-        <map value="fhir:Substance.type rdfs:subPropertyOf rim:Entity.code"/>
+        <map value="fhir:Substance.code rdfs:subPropertyOf rim:Entity.code"/>
       </mapping>
       <mapping>
         <identity value="rim"/>
@@ -762,7 +820,7 @@
       </mapping>
       <mapping>
         <identity value="w5"/>
-        <map value="class"/>
+        <map value="what"/>
       </mapping>
     </element>
     <element>
@@ -835,6 +893,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
       <mapping>

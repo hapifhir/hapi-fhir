@@ -189,8 +189,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for HumanName Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for HumanName Type"/>
   <requirements value="Need to be able to record names, along with notes about their use."/>
   <mapping>
     <identity value="v2"/>
@@ -209,12 +209,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Structure"/>
   <snapshot>
     <element>
       <path value="HumanName"/>
       <short value="Name of a human - parts and usage"/>
       <definition value="A human&#39;s name with the ability to identify parts and usage."/>
-      <requirements value="Need to be able to record names, along with notes about their use."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -438,7 +438,6 @@
       <path value="HumanName"/>
       <short value="Name of a human - parts and usage"/>
       <definition value="A human&#39;s name with the ability to identify parts and usage."/>
-      <requirements value="Need to be able to record names, along with notes about their use."/>
       <min value="0"/>
       <max value="*"/>
       <type>

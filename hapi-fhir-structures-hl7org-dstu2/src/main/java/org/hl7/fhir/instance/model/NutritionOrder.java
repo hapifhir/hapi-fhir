@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -588,11 +588,11 @@ public class NutritionOrder extends DomainResource {
         /**
          * The quantity of the specified nutrient to include in diet.
          */
-        @Child(name = "amount", type = {Quantity.class}, order=2, min=0, max=1)
+        @Child(name = "amount", type = {SimpleQuantity.class}, order=2, min=0, max=1)
         @Description(shortDefinition="Quantity of the specified nutrient", formalDefinition="The quantity of the specified nutrient to include in diet." )
-        protected Quantity amount;
+        protected SimpleQuantity amount;
 
-        private static final long serialVersionUID = 1042462093L;
+        private static final long serialVersionUID = 465107295L;
 
     /*
      * Constructor
@@ -628,12 +628,12 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #amount} (The quantity of the specified nutrient to include in diet.)
          */
-        public Quantity getAmount() { 
+        public SimpleQuantity getAmount() { 
           if (this.amount == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NutritionOrderOralDietNutrientComponent.amount");
             else if (Configuration.doAutoCreate())
-              this.amount = new Quantity(); // cc
+              this.amount = new SimpleQuantity(); // cc
           return this.amount;
         }
 
@@ -644,7 +644,7 @@ public class NutritionOrder extends DomainResource {
         /**
          * @param value {@link #amount} (The quantity of the specified nutrient to include in diet.)
          */
-        public NutritionOrderOralDietNutrientComponent setAmount(Quantity value) { 
+        public NutritionOrderOralDietNutrientComponent setAmount(SimpleQuantity value) { 
           this.amount = value;
           return this;
         }
@@ -652,7 +652,7 @@ public class NutritionOrder extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("modifier", "CodeableConcept", "The nutrient that is being modified such as carbohydrate or sodium.", 0, java.lang.Integer.MAX_VALUE, modifier));
-          childrenList.add(new Property("amount", "Quantity", "The quantity of the specified nutrient to include in diet.", 0, java.lang.Integer.MAX_VALUE, amount));
+          childrenList.add(new Property("amount", "SimpleQuantity", "The quantity of the specified nutrient to include in diet.", 0, java.lang.Integer.MAX_VALUE, amount));
         }
 
       public NutritionOrderOralDietNutrientComponent copy() {
@@ -830,9 +830,9 @@ public class NutritionOrder extends DomainResource {
         /**
          * The amount of the nutritional supplement to be given.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
         @Description(shortDefinition="Amount of the nutritional supplement", formalDefinition="The amount of the nutritional supplement to be given." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * Free text or additional instructions or information pertaining to the oral supplement.
@@ -841,7 +841,7 @@ public class NutritionOrder extends DomainResource {
         @Description(shortDefinition="Instructions or additional information about the oral supplement", formalDefinition="Free text or additional instructions or information pertaining to the oral supplement." )
         protected StringType instruction;
 
-        private static final long serialVersionUID = -37646618L;
+        private static final long serialVersionUID = 297545236L;
 
     /*
      * Constructor
@@ -966,12 +966,12 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #quantity} (The amount of the nutritional supplement to be given.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NutritionOrderSupplementComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -982,7 +982,7 @@ public class NutritionOrder extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of the nutritional supplement to be given.)
          */
-        public NutritionOrderSupplementComponent setQuantity(Quantity value) { 
+        public NutritionOrderSupplementComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -1041,7 +1041,7 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("type", "CodeableConcept", "The kind of nutritional supplement product required such as a high protein or pediatric clear liquid supplement.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("productName", "string", "The product or brand name of the nutritional supplement such as 'Acme Protein Shake'.", 0, java.lang.Integer.MAX_VALUE, productName));
           childrenList.add(new Property("schedule", "Timing", "The time period and frequency at which the supplement(s) should be given.", 0, java.lang.Integer.MAX_VALUE, schedule));
-          childrenList.add(new Property("quantity", "Quantity", "The amount of the nutritional supplement to be given.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of the nutritional supplement to be given.", 0, java.lang.Integer.MAX_VALUE, quantity));
           childrenList.add(new Property("instruction", "string", "Free text or additional instructions or information pertaining to the oral supplement.", 0, java.lang.Integer.MAX_VALUE, instruction));
         }
 
@@ -1123,9 +1123,9 @@ public class NutritionOrder extends DomainResource {
         /**
          * The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL.
          */
-        @Child(name = "caloricDensity", type = {Quantity.class}, order=5, min=0, max=1)
+        @Child(name = "caloricDensity", type = {SimpleQuantity.class}, order=5, min=0, max=1)
         @Description(shortDefinition="Amount of energy per specified volume that is required", formalDefinition="The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL." )
-        protected Quantity caloricDensity;
+        protected SimpleQuantity caloricDensity;
 
         /**
          * The route or physiological path of administration into the patient 's gastrointestinal  tract for purposes of providing the formula feeding, e.g., nasogastric tube.
@@ -1144,9 +1144,9 @@ public class NutritionOrder extends DomainResource {
         /**
          * The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours.
          */
-        @Child(name = "maxVolumeToDeliver", type = {Quantity.class}, order=8, min=0, max=1)
+        @Child(name = "maxVolumeToDeliver", type = {SimpleQuantity.class}, order=8, min=0, max=1)
         @Description(shortDefinition="Upper limit on formula volume per unit of time", formalDefinition="The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours." )
-        protected Quantity maxVolumeToDeliver;
+        protected SimpleQuantity maxVolumeToDeliver;
 
         /**
          * Free text formula administration, feeding instructions or additional instructions or information.
@@ -1155,7 +1155,7 @@ public class NutritionOrder extends DomainResource {
         @Description(shortDefinition="Formula feeding instructions expressed as text", formalDefinition="Free text formula administration, feeding instructions or additional instructions or information." )
         protected StringType administrationInstruction;
 
-        private static final long serialVersionUID = -124511395L;
+        private static final long serialVersionUID = 292116061L;
 
     /*
      * Constructor
@@ -1313,12 +1313,12 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #caloricDensity} (The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL.)
          */
-        public Quantity getCaloricDensity() { 
+        public SimpleQuantity getCaloricDensity() { 
           if (this.caloricDensity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NutritionOrderEnteralFormulaComponent.caloricDensity");
             else if (Configuration.doAutoCreate())
-              this.caloricDensity = new Quantity(); // cc
+              this.caloricDensity = new SimpleQuantity(); // cc
           return this.caloricDensity;
         }
 
@@ -1329,7 +1329,7 @@ public class NutritionOrder extends DomainResource {
         /**
          * @param value {@link #caloricDensity} (The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL.)
          */
-        public NutritionOrderEnteralFormulaComponent setCaloricDensity(Quantity value) { 
+        public NutritionOrderEnteralFormulaComponent setCaloricDensity(SimpleQuantity value) { 
           this.caloricDensity = value;
           return this;
         }
@@ -1401,12 +1401,12 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #maxVolumeToDeliver} (The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours.)
          */
-        public Quantity getMaxVolumeToDeliver() { 
+        public SimpleQuantity getMaxVolumeToDeliver() { 
           if (this.maxVolumeToDeliver == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NutritionOrderEnteralFormulaComponent.maxVolumeToDeliver");
             else if (Configuration.doAutoCreate())
-              this.maxVolumeToDeliver = new Quantity(); // cc
+              this.maxVolumeToDeliver = new SimpleQuantity(); // cc
           return this.maxVolumeToDeliver;
         }
 
@@ -1417,7 +1417,7 @@ public class NutritionOrder extends DomainResource {
         /**
          * @param value {@link #maxVolumeToDeliver} (The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours.)
          */
-        public NutritionOrderEnteralFormulaComponent setMaxVolumeToDeliver(Quantity value) { 
+        public NutritionOrderEnteralFormulaComponent setMaxVolumeToDeliver(SimpleQuantity value) { 
           this.maxVolumeToDeliver = value;
           return this;
         }
@@ -1477,10 +1477,10 @@ public class NutritionOrder extends DomainResource {
           childrenList.add(new Property("baseFormulaProductName", "string", "The product or brand name of the enteral or infant formula product such as 'ACME Adult Standard Formula'.", 0, java.lang.Integer.MAX_VALUE, baseFormulaProductName));
           childrenList.add(new Property("additiveType", "CodeableConcept", "Indicates the type of modular component such as protein, carbohydrate, fat or fiber to be provided in addition to or mixed with the base formula.", 0, java.lang.Integer.MAX_VALUE, additiveType));
           childrenList.add(new Property("additiveProductName", "string", "The product or brand name of the type of modular component to be added to the formula.", 0, java.lang.Integer.MAX_VALUE, additiveProductName));
-          childrenList.add(new Property("caloricDensity", "Quantity", "The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL.", 0, java.lang.Integer.MAX_VALUE, caloricDensity));
+          childrenList.add(new Property("caloricDensity", "SimpleQuantity", "The amount of energy (Calories) that the formula should provide per specified volume, typically per mL or fluid oz.  For example, an infant may require a formula the provides 24 Calories per fluid ounce or an adult may require an enteral formula that provides 1.5 Calorie/mL.", 0, java.lang.Integer.MAX_VALUE, caloricDensity));
           childrenList.add(new Property("routeofAdministration", "CodeableConcept", "The route or physiological path of administration into the patient 's gastrointestinal  tract for purposes of providing the formula feeding, e.g., nasogastric tube.", 0, java.lang.Integer.MAX_VALUE, routeofAdministration));
           childrenList.add(new Property("administration", "", "Formula administration instructions as structured data.  This repeating structure allows for changing the administration rate or volume over time for both bolus and continuous feeding.  An example of this would be an instruction to increase the rate of continuous feeding every 2 hours.", 0, java.lang.Integer.MAX_VALUE, administration));
-          childrenList.add(new Property("maxVolumeToDeliver", "Quantity", "The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours.", 0, java.lang.Integer.MAX_VALUE, maxVolumeToDeliver));
+          childrenList.add(new Property("maxVolumeToDeliver", "SimpleQuantity", "The maximum total quantity of formula that may be administered to a subject over the period of time, e.g., 1440 mL over 24 hours.", 0, java.lang.Integer.MAX_VALUE, maxVolumeToDeliver));
           childrenList.add(new Property("administrationInstruction", "string", "Free text formula administration, feeding instructions or additional instructions or information.", 0, java.lang.Integer.MAX_VALUE, administrationInstruction));
         }
 
@@ -1550,18 +1550,18 @@ public class NutritionOrder extends DomainResource {
         /**
          * The volume of formula to provide to the patient per the specified administration schedule.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=2, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=2, min=0, max=1)
         @Description(shortDefinition="The volume of formula to provide", formalDefinition="The volume of formula to provide to the patient per the specified administration schedule." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule.
          */
-        @Child(name = "rate", type = {Quantity.class, Ratio.class}, order=3, min=0, max=1)
+        @Child(name = "rate", type = {SimpleQuantity.class, Ratio.class}, order=3, min=0, max=1)
         @Description(shortDefinition="Speed with which the formula is provided per period of time", formalDefinition="The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule." )
         protected Type rate;
 
-        private static final long serialVersionUID = 673093291L;
+        private static final long serialVersionUID = 1895031997L;
 
     /*
      * Constructor
@@ -1597,12 +1597,12 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #quantity} (The volume of formula to provide to the patient per the specified administration schedule.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create NutritionOrderEnteralFormulaAdministrationComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -1613,7 +1613,7 @@ public class NutritionOrder extends DomainResource {
         /**
          * @param value {@link #quantity} (The volume of formula to provide to the patient per the specified administration schedule.)
          */
-        public NutritionOrderEnteralFormulaAdministrationComponent setQuantity(Quantity value) { 
+        public NutritionOrderEnteralFormulaAdministrationComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -1628,14 +1628,14 @@ public class NutritionOrder extends DomainResource {
         /**
          * @return {@link #rate} (The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule.)
          */
-        public Quantity getRateQuantity() throws Exception { 
-          if (!(this.rate instanceof Quantity))
-            throw new Exception("Type mismatch: the type Quantity was expected, but "+this.rate.getClass().getName()+" was encountered");
-          return (Quantity) this.rate;
+        public SimpleQuantity getRateSimpleQuantity() throws Exception { 
+          if (!(this.rate instanceof SimpleQuantity))
+            throw new Exception("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
+          return (SimpleQuantity) this.rate;
         }
 
-        public boolean hasRateQuantity() throws Exception { 
-          return this.rate instanceof Quantity;
+        public boolean hasRateSimpleQuantity() throws Exception { 
+          return this.rate instanceof SimpleQuantity;
         }
 
         /**
@@ -1666,8 +1666,8 @@ public class NutritionOrder extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("schedule", "Timing", "The time period and frequency at which the enteral formula should be delivered to the patient.", 0, java.lang.Integer.MAX_VALUE, schedule));
-          childrenList.add(new Property("quantity", "Quantity", "The volume of formula to provide to the patient per the specified administration schedule.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("rate[x]", "Quantity|Ratio", "The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule.", 0, java.lang.Integer.MAX_VALUE, rate));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The volume of formula to provide to the patient per the specified administration schedule.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("rate[x]", "SimpleQuantity|Ratio", "The rate of administration of formula via a feeding pump, e.g., 60 mL per hour, according to the specified schedule.", 0, java.lang.Integer.MAX_VALUE, rate));
         }
 
       public NutritionOrderEnteralFormulaAdministrationComponent copy() {

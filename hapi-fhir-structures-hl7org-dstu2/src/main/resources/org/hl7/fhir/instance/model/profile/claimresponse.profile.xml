@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="ClaimResponse"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -1559,7 +1559,7 @@
       <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for ClaimResponse Resource"/>
   <mapping>
     <identity value="cdanetv4"/>
@@ -1573,6 +1573,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="ClaimResponse"/>
@@ -1867,6 +1868,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Items"/>
+      </extension>
       <path value="ClaimResponse.item"/>
       <short value="Line items"/>
       <definition value="The first tier service adjudications for submitted services."/>
@@ -1953,6 +1957,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ItemAdjudication"/>
+      </extension>
       <path value="ClaimResponse.item.adjudication"/>
       <short value="Adjudication details"/>
       <definition value="The adjudications results."/>
@@ -2037,7 +2044,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2053,6 +2061,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ItemDetail"/>
+      </extension>
       <path value="ClaimResponse.item.detail"/>
       <short value="Detail line items"/>
       <definition value="The second tier service adjudications for submitted services."/>
@@ -2128,6 +2139,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DetailAdjudication"/>
+      </extension>
       <path value="ClaimResponse.item.detail.adjudication"/>
       <short value="Detail adjudication"/>
       <definition value="The adjudications results."/>
@@ -2212,7 +2226,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2228,6 +2243,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SubDetail"/>
+      </extension>
       <path value="ClaimResponse.item.detail.subDetail"/>
       <short value="Subdetail line items"/>
       <definition value="The third tier service adjudications for submitted services."/>
@@ -2303,6 +2321,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SubdetailAdjudication"/>
+      </extension>
       <path value="ClaimResponse.item.detail.subDetail.adjudication"/>
       <short value="Subdetail adjudication"/>
       <definition value="The adjudications results."/>
@@ -2387,7 +2408,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2403,6 +2425,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItem"/>
+      </extension>
       <path value="ClaimResponse.addItem"/>
       <short value="Insurer added line items"/>
       <definition value="The first tier service adjudications for payor added services."/>
@@ -2498,7 +2523,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2514,6 +2540,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItemAdjudication"/>
+      </extension>
       <path value="ClaimResponse.addItem.adjudication"/>
       <short value="Added items adjudication"/>
       <definition value="The adjudications results."/>
@@ -2598,7 +2627,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2614,6 +2644,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItemsDetail"/>
+      </extension>
       <path value="ClaimResponse.addItem.detail"/>
       <short value="Added items details"/>
       <definition value="The second tier service adjudications for payor added services."/>
@@ -2698,11 +2731,15 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItemDetailAdjudication"/>
+      </extension>
       <path value="ClaimResponse.addItem.detail.adjudication"/>
       <short value="Added items detail adjudication"/>
       <definition value="The adjudications results."/>
@@ -2787,7 +2824,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2803,6 +2841,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Errors"/>
+      </extension>
       <path value="ClaimResponse.error"/>
       <short value="Processing errors"/>
       <definition value="Mutually exclusive with Services Provided (Item)."/>
@@ -2921,7 +2962,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2932,7 +2974,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2943,7 +2986,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2954,7 +2998,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2994,7 +3039,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3050,6 +3096,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Notes"/>
+      </extension>
       <path value="ClaimResponse.note"/>
       <short value="Processing notes"/>
       <definition value="Note text."/>
@@ -3154,6 +3203,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Coverage"/>
+      </extension>
       <path value="ClaimResponse.coverage"/>
       <short value="Insurance or medical plan"/>
       <definition value="Financial instrument by which payment information for health care."/>
@@ -3518,6 +3570,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Items"/>
+      </extension>
       <path value="ClaimResponse.item"/>
       <short value="Line items"/>
       <definition value="The first tier service adjudications for submitted services."/>
@@ -3552,6 +3607,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ItemAdjudication"/>
+      </extension>
       <path value="ClaimResponse.item.adjudication"/>
       <short value="Adjudication details"/>
       <definition value="The adjudications results."/>
@@ -3584,7 +3642,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3600,6 +3659,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="ItemDetail"/>
+      </extension>
       <path value="ClaimResponse.item.detail"/>
       <short value="Detail line items"/>
       <definition value="The second tier service adjudications for submitted services."/>
@@ -3623,6 +3685,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="DetailAdjudication"/>
+      </extension>
       <path value="ClaimResponse.item.detail.adjudication"/>
       <short value="Detail adjudication"/>
       <definition value="The adjudications results."/>
@@ -3655,7 +3720,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3671,6 +3737,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SubDetail"/>
+      </extension>
       <path value="ClaimResponse.item.detail.subDetail"/>
       <short value="Subdetail line items"/>
       <definition value="The third tier service adjudications for submitted services."/>
@@ -3694,6 +3763,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SubdetailAdjudication"/>
+      </extension>
       <path value="ClaimResponse.item.detail.subDetail.adjudication"/>
       <short value="Subdetail adjudication"/>
       <definition value="The adjudications results."/>
@@ -3726,7 +3798,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3742,6 +3815,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItem"/>
+      </extension>
       <path value="ClaimResponse.addItem"/>
       <short value="Insurer added line items"/>
       <definition value="The first tier service adjudications for payor added services."/>
@@ -3785,7 +3861,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3801,6 +3878,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItemAdjudication"/>
+      </extension>
       <path value="ClaimResponse.addItem.adjudication"/>
       <short value="Added items adjudication"/>
       <definition value="The adjudications results."/>
@@ -3833,7 +3913,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3849,6 +3930,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItemsDetail"/>
+      </extension>
       <path value="ClaimResponse.addItem.detail"/>
       <short value="Added items details"/>
       <definition value="The second tier service adjudications for payor added services."/>
@@ -3881,11 +3965,15 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="AddedItemDetailAdjudication"/>
+      </extension>
       <path value="ClaimResponse.addItem.detail.adjudication"/>
       <short value="Added items detail adjudication"/>
       <definition value="The adjudications results."/>
@@ -3918,7 +4006,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3934,6 +4023,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Errors"/>
+      </extension>
       <path value="ClaimResponse.error"/>
       <short value="Processing errors"/>
       <definition value="Mutually exclusive with Services Provided (Item)."/>
@@ -4000,7 +4092,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4011,7 +4104,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4022,7 +4116,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4033,7 +4128,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4073,7 +4169,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4129,6 +4226,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Notes"/>
+      </extension>
       <path value="ClaimResponse.note"/>
       <short value="Processing notes"/>
       <definition value="Note text."/>
@@ -4181,6 +4281,9 @@
       </mapping>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Coverage"/>
+      </extension>
       <path value="ClaimResponse.coverage"/>
       <short value="Insurance or medical plan"/>
       <definition value="Financial instrument by which payment information for health care."/>

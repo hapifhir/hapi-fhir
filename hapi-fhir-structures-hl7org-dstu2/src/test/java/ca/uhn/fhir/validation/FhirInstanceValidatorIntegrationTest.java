@@ -3,10 +3,8 @@ package ca.uhn.fhir.validation;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Observation;
+import org.hl7.fhir.instance.model.StringType;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +15,6 @@ public class FhirInstanceValidatorIntegrationTest {
 	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorIntegrationTest.class);
 	private FhirInstanceValidator myInstanceVal;
-	
 	private FhirValidator myVal;
 	
 	@Before
@@ -32,12 +29,12 @@ public class FhirInstanceValidatorIntegrationTest {
 
 	@Test
 	public void testValidateJsonResource() {
-		//@formatter:on
+		//@formatter:off
 		String input = "{"
 				+ "\"resourceType\":\"Patient\","
 				+ "\"id\":\"123\""
 				+ "}";
-		//@formatter:off
+		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 0, output.getMessages().size());
@@ -47,6 +44,7 @@ public class FhirInstanceValidatorIntegrationTest {
 	public void testValidateResourceFailingInvariant() {
 		Observation input = new Observation();
 		
+		// Has a value, but not a status (which is required)
 		input.setValue(new StringType("AAA"));
 		
 		ValidationResult output = myVal.validateWithResult(input);
@@ -57,13 +55,13 @@ public class FhirInstanceValidatorIntegrationTest {
 	
 	@Test
 	public void testValidateJsonResourceBadAttributes() {
-		//@formatter:on
+		//@formatter:off
 		String input = "{"
 				+ "\"resourceType\":\"Patient\","
 				+ "\"id\":\"123\","
 				+ "\"foo\":\"123\""
 				+ "}";
-		//@formatter:off
+		//@formatter:on
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());
@@ -76,11 +74,11 @@ public class FhirInstanceValidatorIntegrationTest {
 
 	@Test
 	public void testValidateXmlResource() {
-		//@formatter:on
+		//@formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"123\"/>"
 				+ "</Patient>";
-		//@formatter:off
+		//@formatter:on
 		
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 0, output.getMessages().size());
@@ -88,12 +86,12 @@ public class FhirInstanceValidatorIntegrationTest {
 	
 	@Test
 	public void testValidateXmlResourceBadAttributes() {
-		//@formatter:on
+		//@formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\">"
 				+ "<id value=\"123\"/>"
 				+ "<foo value=\"222\"/>"
 				+ "</Patient>";
-		//@formatter:off
+		//@formatter:on
 		
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(output.toString(), 1, output.getMessages().size());

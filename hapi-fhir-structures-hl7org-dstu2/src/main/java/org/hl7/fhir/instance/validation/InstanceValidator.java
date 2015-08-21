@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.Coding;
 import org.hl7.fhir.instance.model.ContactPoint;
 import org.hl7.fhir.instance.model.ElementDefinition;
 import org.hl7.fhir.instance.model.Enumerations.BindingStrength;
+import org.hl7.fhir.instance.model.Enumerations.ResourceType;
 import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionConstraintComponent;
 import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
@@ -213,7 +214,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
   @Override
   public void validate(List<ValidationMessage> errors, Element element, String profile) throws Exception {
-    StructureDefinition p = context.getProfiles().get(profile);
+    StructureDefinition p = context.getProfile(profile);
     if (p == null)
       throw new Exception("StructureDefinition '"+profile+"' not found");
     validateResource(errors, new DOMWrapperElement(element), p, requiresResourceId, null);
@@ -230,7 +231,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   
   @Override
   public void validate(List<ValidationMessage> errors, JsonObject object, String profile) throws Exception {
-    StructureDefinition p = context.getProfiles().get(profile);
+    StructureDefinition p = context.getProfile(profile);
     if (p == null)
       throw new Exception("StructureDefinition '"+profile+"' not found");
     validateResource(errors, new JsonWrapperElement(object), p, requiresResourceId, null);
@@ -244,7 +245,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   @Override
   public void validate(List<ValidationMessage> errors, Document document, String profile) throws Exception {
   	checkForProcessingInstruction(errors, document);
-    StructureDefinition p = context.getProfiles().get(profile);
+    StructureDefinition p = context.getProfile(profile);
     if (p == null)
       throw new Exception("StructureDefinition '"+profile+"' not found");
     validateResource(errors, new DOMWrapperElement(document.getDocumentElement()), p, requiresResourceId, null);
@@ -1007,7 +1008,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
   
   private StructureDefinition getProfileForType(String type) throws Exception {
-    return context.getProfiles().get("http://hl7.org/fhir/StructureDefinition/"+type);
+    return context.getProfile("http://hl7.org/fhir/StructureDefinition/"+type);
   }
 
   private void validateObservation(List<ValidationMessage> errors, WrapperElement element, NodeStack stack) {
@@ -1019,12 +1020,14 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private void bpCheck(List<ValidationMessage> errors, IssueType invalid, int line, int col, String literalPath, boolean test, String message) {
-    switch (bpWarnings) {
-    case Error: rule(errors, invalid, line, col, literalPath, test, message);
-    case Warning: warning(errors, invalid, line, col, literalPath, test, message);
-    case Hint: hint(errors, invalid, line, col, literalPath, test, message);
-    default: // do nothing
-    }
+  	if (bpWarnings != null) {
+  		switch (bpWarnings) {
+  		case Error: rule(errors, invalid, line, col, literalPath, test, message);
+  		case Warning: warning(errors, invalid, line, col, literalPath, test, message);
+  		case Hint: hint(errors, invalid, line, col, literalPath, test, message);
+  		default: // do nothing
+  		}
+  	}
   }
   
   private void validateElement(List<ValidationMessage> errors, StructureDefinition profile, ElementDefinition definition, StructureDefinition cprofile, ElementDefinition context, WrapperElement element, String actualType, NodeStack stack) throws Exception {
@@ -1264,7 +1267,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   
   private ElementDefinition resolveType(String type) {
     String url = "http://hl7.org/fhir/StructureDefinition/"+type;
-    StructureDefinition sd = context.getProfiles().get(url);
+    StructureDefinition sd = context.getProfile(url);
     if (sd == null || !sd.hasSnapshot())
       return null;
     else
@@ -1419,11 +1422,14 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
   
   private String checkResourceType(String type) {
-    if (context.getProfiles().containsKey("http://hl7.org/fhir/StructureDefinition/"+type))
+    try {
+      org.hl7.fhir.instance.model.ResourceType.valueOf(type);
       return type;
-    else
+    } catch (IllegalArgumentException e) {
       return null;
+    }
   }
+  
   private String getBaseType(StructureDefinition profile, String pr) {
 //    if (pr.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
 //      // this just has to be a base type
@@ -1448,7 +1454,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return null;
     }
     else
-      return context.getProfiles().get(pr);
+      return context.getProfile(pr);
   }
   
   private StructureDefinition checkExtension(List<ValidationMessage> errors, String path, WrapperElement element, ElementDefinition def, StructureDefinition profile, NodeStack stack) throws Exception {
@@ -1490,7 +1496,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
   
   private boolean isKnownType(String code) {
-    return context.getProfiles().get(code.toLowerCase()) != null; 
+    return context.getProfile(code.toLowerCase()) != null; 
   }
 
   private ElementDefinition getElementByPath(StructureDefinition definition, String path) {
@@ -1610,7 +1616,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   private void validateContains(List<ValidationMessage> errors, String path, ElementDefinition child, ElementDefinition context, WrapperElement element, NodeStack stack, boolean needsId) throws Exception {
   	WrapperElement e = element.isXml() ? element.getFirstChild() : element;
   	String resourceName = e.getResourceType();
-    StructureDefinition profile = this.context.getProfiles().get("http://hl7.org/fhir/StructureDefinition/"+resourceName);
+    StructureDefinition profile = this.context.getProfile("http://hl7.org/fhir/StructureDefinition/"+resourceName);
     if (rule(errors, IssueType.INVALID, element.line(), element.col(), stack.addToLiteralPath(resourceName), profile != null, "No profile found for contained resource of type '"+resourceName+"'"))
       validateResource(errors, e, profile, needsId, stack);    
   }

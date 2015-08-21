@@ -98,8 +98,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for Ratio Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for Ratio Type"/>
   <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
   <mapping>
     <identity value="v2"/>
@@ -113,12 +113,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Type"/>
   <snapshot>
     <element>
       <path value="Ratio"/>
       <short value="A ratio of two Quantity values - a numerator and a denominator"/>
       <definition value="A relationship of two Quantity values - expressed as a numerator and a denominator."/>
-      <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -207,7 +207,6 @@
       <path value="Ratio"/>
       <short value="A ratio of two Quantity values - a numerator and a denominator"/>
       <definition value="A relationship of two Quantity values - expressed as a numerator and a denominator."/>
-      <requirements value="Need to able to capture ratios for some measurements (titers) and some rates (costs)."/>
       <min value="0"/>
       <max value="*"/>
       <type>

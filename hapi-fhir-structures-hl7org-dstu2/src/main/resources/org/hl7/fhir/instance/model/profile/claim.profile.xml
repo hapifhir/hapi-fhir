@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Claim"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -319,7 +319,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="medicationprescription.html">MedicationPrescription</a> | 
+            <a href="medicationorder.html">MedicationOrder</a> | 
             <a href="visionprescription.html">VisionPrescription</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Prescription</td>
@@ -338,7 +338,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="medicationprescription.html">MedicationPrescription</a>
+            <a href="medicationorder.html">MedicationOrder</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Original Prescription</td>
         </tr>
@@ -993,7 +993,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Count of Products or Services</td>
         </tr>
@@ -1268,7 +1268,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Count of Products or Services</td>
         </tr>
@@ -1484,7 +1484,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Count of Products or Services</td>
         </tr>
@@ -1808,7 +1808,7 @@
       <value value="http://www.hl7.org/Special/committees/fm/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Claim Resource"/>
   <mapping>
     <identity value="rim"/>
@@ -1817,6 +1817,7 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Claim"/>
@@ -2148,7 +2149,7 @@
       <max value="1"/>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>
@@ -2164,11 +2165,14 @@
       <max value="1"/>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Payee"/>
+      </extension>
       <path value="Claim.payee"/>
       <short value="Payee"/>
       <definition value="The party to be reimbursed for the services."/>
@@ -2295,6 +2299,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Diagnosis"/>
+      </extension>
       <path value="Claim.diagnosis"/>
       <short value="Diagnosis"/>
       <definition value="Ordered list of patient diagnosis for which care is sought."/>
@@ -2416,6 +2423,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Coverage"/>
+      </extension>
       <path value="Claim.coverage"/>
       <short value="Insurance or medical plan"/>
       <definition value="Financial instrument by which payment information for health care."/>
@@ -2673,6 +2683,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Items"/>
+      </extension>
       <path value="Claim.item"/>
       <short value="Goods and Services"/>
       <definition value="First tier of goods and services."/>
@@ -2821,6 +2834,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2831,7 +2845,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2867,7 +2882,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -2946,6 +2962,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Detail"/>
+      </extension>
       <path value="Claim.item.detail"/>
       <short value="Additional items"/>
       <definition value="Second tier of goods and services."/>
@@ -3060,6 +3079,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3071,7 +3091,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3107,7 +3128,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3131,6 +3153,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SubDetail"/>
+      </extension>
       <path value="Claim.item.detail.subDetail"/>
       <short value="Additional items"/>
       <definition value="Third tier of goods and services."/>
@@ -3245,6 +3270,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3256,7 +3282,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3292,7 +3319,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -3316,6 +3344,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Prosthesis"/>
+      </extension>
       <path value="Claim.item.prosthesis"/>
       <short value="Prosthetic details"/>
       <definition value="The materials and placement date of prior fixed prosthesis."/>
@@ -3437,6 +3468,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="MissingTeeth"/>
+      </extension>
       <path value="Claim.missingTeeth"/>
       <short value="Only if type = oral"/>
       <definition value="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons."/>
@@ -3761,7 +3795,7 @@
       <max value="1"/>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <type>
         <code value="Reference"/>
@@ -3777,11 +3811,14 @@
       <max value="1"/>
       <type>
         <code value="Reference"/>
-        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationPrescription"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/MedicationOrder"/>
       </type>
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Payee"/>
+      </extension>
       <path value="Claim.payee"/>
       <short value="Payee"/>
       <definition value="The party to be reimbursed for the services."/>
@@ -3856,6 +3893,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Diagnosis"/>
+      </extension>
       <path value="Claim.diagnosis"/>
       <short value="Diagnosis"/>
       <definition value="Ordered list of patient diagnosis for which care is sought."/>
@@ -3925,6 +3965,9 @@
       <isSummary value="true"/>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Coverage"/>
+      </extension>
       <path value="Claim.coverage"/>
       <short value="Insurance or medical plan"/>
       <definition value="Financial instrument by which payment information for health care."/>
@@ -4130,6 +4173,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Items"/>
+      </extension>
       <path value="Claim.item"/>
       <short value="Goods and Services"/>
       <definition value="First tier of goods and services."/>
@@ -4226,6 +4272,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4236,7 +4283,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4272,7 +4320,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4351,6 +4400,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Detail"/>
+      </extension>
       <path value="Claim.item.detail"/>
       <short value="Additional items"/>
       <definition value="Second tier of goods and services."/>
@@ -4413,6 +4465,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4424,7 +4477,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4460,7 +4514,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4484,6 +4539,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="SubDetail"/>
+      </extension>
       <path value="Claim.item.detail.subDetail"/>
       <short value="Additional items"/>
       <definition value="Third tier of goods and services."/>
@@ -4546,6 +4604,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4557,7 +4616,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4593,7 +4653,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Money"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Money"/>
       </type>
       <isSummary value="true"/>
     </element>
@@ -4617,6 +4678,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="Prosthesis"/>
+      </extension>
       <path value="Claim.item.prosthesis"/>
       <short value="Prosthetic details"/>
       <definition value="The materials and placement date of prior fixed prosthesis."/>
@@ -4686,6 +4750,9 @@
       </binding>
     </element>
     <element>
+      <extension url="http://hl7.org/fhir/StructureDefinition/structuredefinition-explicit-type-name">
+        <valueString value="MissingTeeth"/>
+      </extension>
       <path value="Claim.missingTeeth"/>
       <short value="Only if type = oral"/>
       <definition value="A list of teeth which would be expected but are not found due to having been previously  extracted or for other reasons."/>

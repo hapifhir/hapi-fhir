@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="Observation"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -600,7 +600,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Low Range, if relevant
             <br/>
@@ -622,7 +622,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <a href="datatypes.html#Quantity">Quantity</a>
+            <a href="datatypes.html#SimpleQuantity">SimpleQuantity</a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">High Range, if relevant
             <br/>
@@ -1033,8 +1033,9 @@
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for Observation Resource"/>
+  <requirements value="Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms."/>
   <mapping>
     <identity value="v2"/>
     <uri value="http://hl7.org/v2"/>
@@ -1052,12 +1053,12 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="Observation"/>
       <short value="Measurements and simple assertions"/>
       <definition value="Measurements and simple assertions made about a patient, device or other subject."/>
-      <requirements value="Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms."/>
       <alias value="Vital Signs"/>
       <alias value="Measurement"/>
       <alias value="Results"/>
@@ -1071,7 +1072,7 @@
         <key value="obs-7"/>
         <severity value="error"/>
         <human value="Component code Shall not be same as observation code"/>
-        <xpath value="f:code/@value !=  f:component.code/@value"/>
+        <xpath value="not(exists(f:component.code/@value)) or (f:code/@value !=  f:component/f:code/@value)"/>
       </constraint>
       <constraint>
         <key value="obs-6"/>
@@ -1769,6 +1770,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <condition value="obs-3"/>
       <condition value="obs-4"/>
@@ -1795,6 +1797,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <condition value="obs-3"/>
       <condition value="obs-5"/>
@@ -2180,7 +2183,6 @@
       <path value="Observation"/>
       <short value="Measurements and simple assertions"/>
       <definition value="Measurements and simple assertions made about a patient, device or other subject."/>
-      <requirements value="Observations are a key aspect of healthcare.  This resource is used to capture those that do not require more sophisticated mechanisms."/>
       <alias value="Vital Signs"/>
       <alias value="Measurement"/>
       <alias value="Results"/>
@@ -2194,7 +2196,7 @@
         <key value="obs-7"/>
         <severity value="error"/>
         <human value="Component code Shall not be same as observation code"/>
-        <xpath value="f:code/@value !=  f:component.code/@value"/>
+        <xpath value="not(exists(f:component.code/@value)) or (f:code/@value !=  f:component/f:code/@value)"/>
       </constraint>
       <constraint>
         <key value="obs-6"/>
@@ -2722,6 +2724,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <condition value="obs-3"/>
       <condition value="obs-4"/>
@@ -2748,6 +2751,7 @@
       <max value="1"/>
       <type>
         <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/SimpleQuantity"/>
       </type>
       <condition value="obs-3"/>
       <condition value="obs-5"/>

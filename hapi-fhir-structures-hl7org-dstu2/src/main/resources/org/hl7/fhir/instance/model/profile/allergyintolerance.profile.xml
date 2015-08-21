@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="AllergyIntolerance"/>
   <meta>
-    <lastUpdated value="2015-08-07T07:14:05.856-04:00"/>
+    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -156,7 +156,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Substance, (or class) considered to be responsible for risk
             <br/>
-            <a href="valueset-substance-type.html" title="Type of the substance">Substance Type</a> (
+            <a href="valueset-substance-code.html" title="Type of the substance">Substance Code</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -243,7 +243,7 @@
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="datatypes.html#code">code</a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">food | medication | environment - Category of Substance
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">food | medication | environment | other - Category of Substance
             <br/>
             <a href="valueset-allergy-intolerance-category.html" title="Category of an identified Substance">AllergyIntoleranceCategory</a> (
             <a href="terminologies.html#required" title="To be conformant, instances of this element SHALL include a code from the specified value set">Required</a>)
@@ -318,7 +318,7 @@
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">Specific substance considered to be responsible for event
             <br/>
-            <a href="valueset-substance-type.html" title="Type of the substance">Substance Type</a> (
+            <a href="valueset-substance-code.html" title="Type of the substance">Substance Code</a> (
             <a href="terminologies.html#example" title="Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included">Example</a>)
           </td>
         </tr>
@@ -507,8 +507,9 @@
       <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for AllergyIntolerance Resource"/>
+  <requirements value="To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance."/>
   <mapping>
     <identity value="w5"/>
     <uri value="http://hl7.org/fhir/w5"/>
@@ -521,12 +522,12 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="AllergyIntolerance"/>
       <short value="Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)"/>
       <definition value="Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance."/>
-      <requirements value="To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance."/>
       <alias value="Allergy"/>
       <alias value="Intolerance"/>
       <alias value="Adverse Reaction"/>
@@ -783,7 +784,7 @@
         <strength value="example"/>
         <description value="Type of the substance"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/substance-type"/>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
         </valueSetReference>
       </binding>
       <mapping>
@@ -867,7 +868,7 @@
     </element>
     <element>
       <path value="AllergyIntolerance.category"/>
-      <short value="food | medication | environment - Category of Substance"/>
+      <short value="food | medication | environment | other - Category of Substance"/>
       <definition value="Category of the identified Substance."/>
       <alias value="Category"/>
       <alias value="Type"/>
@@ -985,7 +986,7 @@
         <strength value="example"/>
         <description value="Type of the substance"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/substance-type"/>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
         </valueSetReference>
       </binding>
     </element>
@@ -1058,7 +1059,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Duration"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Duration"/>
       </type>
     </element>
     <element>
@@ -1113,7 +1115,6 @@
       <path value="AllergyIntolerance"/>
       <short value="Allergy or Intolerance (generally: Risk Of Adverse reaction to a substance)"/>
       <definition value="Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance."/>
-      <requirements value="To record a clinical assessment of a propensity, or potential risk to an individual, of an adverse reaction upon future exposure to the specified substance, or class of substance."/>
       <alias value="Allergy"/>
       <alias value="Intolerance"/>
       <alias value="Adverse Reaction"/>
@@ -1252,7 +1253,7 @@
         <strength value="example"/>
         <description value="Type of the substance"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/substance-type"/>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
         </valueSetReference>
       </binding>
       <mapping>
@@ -1336,7 +1337,7 @@
     </element>
     <element>
       <path value="AllergyIntolerance.category"/>
-      <short value="food | medication | environment - Category of Substance"/>
+      <short value="food | medication | environment | other - Category of Substance"/>
       <definition value="Category of the identified Substance."/>
       <alias value="Category"/>
       <alias value="Type"/>
@@ -1402,7 +1403,7 @@
         <strength value="example"/>
         <description value="Type of the substance"/>
         <valueSetReference>
-          <reference value="http://hl7.org/fhir/ValueSet/substance-type"/>
+          <reference value="http://hl7.org/fhir/ValueSet/substance-code"/>
         </valueSetReference>
       </binding>
     </element>
@@ -1475,7 +1476,8 @@
       <min value="0"/>
       <max value="1"/>
       <type>
-        <code value="Duration"/>
+        <code value="Quantity"/>
+        <profile value="http://hl7.org/fhir/StructureDefinition/Duration"/>
       </type>
     </element>
     <element>

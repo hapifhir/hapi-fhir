@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -144,9 +144,9 @@ public class MedicationStatement extends DomainResource {
         /**
          * The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
          */
-        @Child(name = "schedule", type = {Timing.class}, order=2, min=0, max=1)
+        @Child(name = "timing", type = {Timing.class}, order=2, min=0, max=1)
         @Description(shortDefinition="When/how often was medication taken?", formalDefinition="The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'." )
-        protected Timing schedule;
+        protected Timing timing;
 
         /**
          * If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.
@@ -179,16 +179,16 @@ public class MedicationStatement extends DomainResource {
         /**
          * The amount of therapeutic or other substance given at one administration event.
          */
-        @Child(name = "quantity", type = {Quantity.class}, order=7, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=7, min=0, max=1)
         @Description(shortDefinition="Amount administered in one dose", formalDefinition="The amount of therapeutic or other substance given at one administration event." )
-        protected Quantity quantity;
+        protected SimpleQuantity quantity;
 
         /**
          * Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.
          */
-        @Child(name = "rate", type = {Ratio.class}, order=8, min=0, max=1)
+        @Child(name = "rate", type = {Ratio.class, Range.class}, order=8, min=0, max=1)
         @Description(shortDefinition="Dose quantity per unit of time", formalDefinition="Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours." )
-        protected Ratio rate;
+        protected Type rate;
 
         /**
          * The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours.
@@ -197,7 +197,7 @@ public class MedicationStatement extends DomainResource {
         @Description(shortDefinition="Maximum dose that was consumed per unit of time", formalDefinition="The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours." )
         protected Ratio maxDosePerPeriod;
 
-        private static final long serialVersionUID = 1729854997L;
+        private static final long serialVersionUID = -2038870561L;
 
     /*
      * Constructor
@@ -256,26 +256,26 @@ public class MedicationStatement extends DomainResource {
         }
 
         /**
-         * @return {@link #schedule} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+         * @return {@link #timing} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
-        public Timing getSchedule() { 
-          if (this.schedule == null)
+        public Timing getTiming() { 
+          if (this.timing == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.schedule");
+              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.timing");
             else if (Configuration.doAutoCreate())
-              this.schedule = new Timing(); // cc
-          return this.schedule;
+              this.timing = new Timing(); // cc
+          return this.timing;
         }
 
-        public boolean hasSchedule() { 
-          return this.schedule != null && !this.schedule.isEmpty();
+        public boolean hasTiming() { 
+          return this.timing != null && !this.timing.isEmpty();
         }
 
         /**
-         * @param value {@link #schedule} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
+         * @param value {@link #timing} (The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  "Every  8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:";  "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".)
          */
-        public MedicationStatementDosageComponent setSchedule(Timing value) { 
-          this.schedule = value;
+        public MedicationStatementDosageComponent setTiming(Timing value) { 
+          this.timing = value;
           return this;
         }
 
@@ -399,12 +399,12 @@ public class MedicationStatement extends DomainResource {
         /**
          * @return {@link #quantity} (The amount of therapeutic or other substance given at one administration event.)
          */
-        public Quantity getQuantity() { 
+        public SimpleQuantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create MedicationStatementDosageComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new Quantity(); // cc
+              this.quantity = new SimpleQuantity(); // cc
           return this.quantity;
         }
 
@@ -415,7 +415,7 @@ public class MedicationStatement extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of therapeutic or other substance given at one administration event.)
          */
-        public MedicationStatementDosageComponent setQuantity(Quantity value) { 
+        public MedicationStatementDosageComponent setQuantity(SimpleQuantity value) { 
           this.quantity = value;
           return this;
         }
@@ -423,13 +423,34 @@ public class MedicationStatement extends DomainResource {
         /**
          * @return {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
          */
-        public Ratio getRate() { 
-          if (this.rate == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicationStatementDosageComponent.rate");
-            else if (Configuration.doAutoCreate())
-              this.rate = new Ratio(); // cc
+        public Type getRate() { 
           return this.rate;
+        }
+
+        /**
+         * @return {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
+         */
+        public Ratio getRateRatio() throws Exception { 
+          if (!(this.rate instanceof Ratio))
+            throw new Exception("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
+          return (Ratio) this.rate;
+        }
+
+        public boolean hasRateRatio() throws Exception { 
+          return this.rate instanceof Ratio;
+        }
+
+        /**
+         * @return {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
+         */
+        public Range getRateRange() throws Exception { 
+          if (!(this.rate instanceof Range))
+            throw new Exception("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
+          return (Range) this.rate;
+        }
+
+        public boolean hasRateRange() throws Exception { 
+          return this.rate instanceof Range;
         }
 
         public boolean hasRate() { 
@@ -439,7 +460,7 @@ public class MedicationStatement extends DomainResource {
         /**
          * @param value {@link #rate} (Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.)
          */
-        public MedicationStatementDosageComponent setRate(Ratio value) { 
+        public MedicationStatementDosageComponent setRate(Type value) { 
           this.rate = value;
           return this;
         }
@@ -471,13 +492,13 @@ public class MedicationStatement extends DomainResource {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("text", "string", "Free text dosage instructions can be used for cases where the instructions are too complex to code. When coded instructions are present, the free text instructions may still be present for display to humans taking or administering the medication.", 0, java.lang.Integer.MAX_VALUE, text));
-          childrenList.add(new Property("schedule", "Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, schedule));
+          childrenList.add(new Property("timing", "Timing", "The timing schedule for giving the medication to the patient.  The Schedule data type allows many different expressions, for example.  'Every  8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:';  '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, timing));
           childrenList.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If set to true or if specified as a CodeableConcept, indicates that the medication is only taken when needed within the specified schedule rather than at every scheduled dose.  If a CodeableConcept is present, it indicates the precondition for taking the Medication.", 0, java.lang.Integer.MAX_VALUE, asNeeded));
           childrenList.add(new Property("site", "CodeableConcept", "A coded specification of the anatomic site where the medication first enters the body.", 0, java.lang.Integer.MAX_VALUE, site));
           childrenList.add(new Property("route", "CodeableConcept", "A code specifying the route or physiological path of administration of a therapeutic agent into or onto a subject.", 0, java.lang.Integer.MAX_VALUE, route));
           childrenList.add(new Property("method", "CodeableConcept", "A coded value indicating the method by which the medication is introduced into or onto the body. Most commonly used for injections.  Examples:  Slow Push; Deep IV.  Terminologies used often pre-coordinate this term with the route and or form of administration.", 0, java.lang.Integer.MAX_VALUE, method));
-          childrenList.add(new Property("quantity", "Quantity", "The amount of therapeutic or other substance given at one administration event.", 0, java.lang.Integer.MAX_VALUE, quantity));
-          childrenList.add(new Property("rate", "Ratio", "Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.", 0, java.lang.Integer.MAX_VALUE, rate));
+          childrenList.add(new Property("quantity", "SimpleQuantity", "The amount of therapeutic or other substance given at one administration event.", 0, java.lang.Integer.MAX_VALUE, quantity));
+          childrenList.add(new Property("rate[x]", "Ratio|Range", "Identifies the speed with which the substance is introduced into the subject. Typically the rate for an infusion. 200ml in 2 hours.", 0, java.lang.Integer.MAX_VALUE, rate));
           childrenList.add(new Property("maxDosePerPeriod", "Ratio", "The maximum total quantity of a therapeutic substance that may be administered to a subject over the period of time. E.g. 1000mg in 24 hours.", 0, java.lang.Integer.MAX_VALUE, maxDosePerPeriod));
         }
 
@@ -485,7 +506,7 @@ public class MedicationStatement extends DomainResource {
         MedicationStatementDosageComponent dst = new MedicationStatementDosageComponent();
         copyValues(dst);
         dst.text = text == null ? null : text.copy();
-        dst.schedule = schedule == null ? null : schedule.copy();
+        dst.timing = timing == null ? null : timing.copy();
         dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
         dst.site = site == null ? null : site.copy();
         dst.route = route == null ? null : route.copy();
@@ -503,7 +524,7 @@ public class MedicationStatement extends DomainResource {
         if (!(other instanceof MedicationStatementDosageComponent))
           return false;
         MedicationStatementDosageComponent o = (MedicationStatementDosageComponent) other;
-        return compareDeep(text, o.text, true) && compareDeep(schedule, o.schedule, true) && compareDeep(asNeeded, o.asNeeded, true)
+        return compareDeep(text, o.text, true) && compareDeep(timing, o.timing, true) && compareDeep(asNeeded, o.asNeeded, true)
            && compareDeep(site, o.site, true) && compareDeep(route, o.route, true) && compareDeep(method, o.method, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(rate, o.rate, true) && compareDeep(maxDosePerPeriod, o.maxDosePerPeriod, true)
           ;
@@ -520,7 +541,7 @@ public class MedicationStatement extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && (text == null || text.isEmpty()) && (schedule == null || schedule.isEmpty())
+        return super.isEmpty() && (text == null || text.isEmpty()) && (timing == null || timing.isEmpty())
            && (asNeeded == null || asNeeded.isEmpty()) && (site == null || site.isEmpty()) && (route == null || route.isEmpty())
            && (method == null || method.isEmpty()) && (quantity == null || quantity.isEmpty()) && (rate == null || rate.isEmpty())
            && (maxDosePerPeriod == null || maxDosePerPeriod.isEmpty());
@@ -538,7 +559,7 @@ public class MedicationStatement extends DomainResource {
     /**
      * The person or animal who is /was taking the medication.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
     @Description(shortDefinition="Who was/is taking medication", formalDefinition="The person or animal who is /was taking the medication." )
     protected Reference patient;
 
@@ -634,8 +655,9 @@ public class MedicationStatement extends DomainResource {
   /*
    * Constructor
    */
-    public MedicationStatement(Enumeration<MedicationStatementStatus> status, Type medication) {
+    public MedicationStatement(Reference patient, Enumeration<MedicationStatementStatus> status, Type medication) {
       super();
+      this.patient = patient;
       this.status = status;
       this.medication = medication;
     }
@@ -1257,9 +1279,11 @@ public class MedicationStatement extends DomainResource {
 
   @SearchParamDefinition(name="identifier", path="MedicationStatement.identifier", description="Return statements with this external identity", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
+  @SearchParamDefinition(name="code", path="MedicationStatement.medicationCodeableConcept", description="Return administrations of this medication code", type="token" )
+  public static final String SP_CODE = "code";
   @SearchParamDefinition(name="patient", path="MedicationStatement.patient", description="The identity of a patient to list statements  for", type="reference" )
   public static final String SP_PATIENT = "patient";
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medicationReference", description="Code for medicine or text in medicine name", type="reference" )
+  @SearchParamDefinition(name="medication", path="MedicationStatement.medicationReference", description="Return administrations of this medication reference", type="reference" )
   public static final String SP_MEDICATION = "medication";
   @SearchParamDefinition(name="source", path="MedicationStatement.informationSource", description="Who the information in the statement came from", type="reference" )
   public static final String SP_SOURCE = "source";

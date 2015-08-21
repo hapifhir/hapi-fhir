@@ -162,8 +162,8 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-07T07:14:05-04:00"/>
-  <description value="Base StructureDefinition for ContactPoint Resource"/>
+  <date value="2015-08-13T16:43:28-04:00"/>
+  <description value="Base StructureDefinition for ContactPoint Type"/>
   <requirements value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
   <mapping>
     <identity value="v2"/>
@@ -182,12 +182,12 @@
   </mapping>
   <kind value="datatype"/>
   <abstract value="false"/>
+  <base value="http://hl7.org/fhir/StructureDefinition/Structure"/>
   <snapshot>
     <element>
       <path value="ContactPoint"/>
       <short value="Details of a Technology mediated contact point (phone, fax, email, etc)"/>
       <definition value="Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc."/>
-      <requirements value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -379,7 +379,6 @@
       <path value="ContactPoint"/>
       <short value="Details of a Technology mediated contact point (phone, fax, email, etc)"/>
       <definition value="Details for All kinds of technology mediated contact points for a person or organization, including telephone, email, etc."/>
-      <requirements value="Need to track phone, fax, mobile, sms numbers, email addresses, twitter tags, etc."/>
       <min value="0"/>
       <max value="*"/>
       <type>

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Fri, Aug 7, 2015 07:14-0400 for FHIR v0.5.0
+// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -1003,9 +1003,9 @@ public class Immunization extends DomainResource {
     /**
      * The quantity of vaccine product that was administered.
      */
-    @Child(name = "doseQuantity", type = {Quantity.class}, order=15, min=0, max=1)
+    @Child(name = "doseQuantity", type = {SimpleQuantity.class}, order=15, min=0, max=1)
     @Description(shortDefinition="Amount of vaccine administered", formalDefinition="The quantity of vaccine product that was administered." )
-    protected Quantity doseQuantity;
+    protected SimpleQuantity doseQuantity;
 
     /**
      * Reasons why a vaccine was or was not administered.
@@ -1028,7 +1028,7 @@ public class Immunization extends DomainResource {
     @Description(shortDefinition="What protocol was followed", formalDefinition="Contains information about the protocol(s) under which the vaccine was administered." )
     protected List<ImmunizationVaccinationProtocolComponent> vaccinationProtocol;
 
-    private static final long serialVersionUID = -1610924217L;
+    private static final long serialVersionUID = -224069771L;
 
   /*
    * Constructor
@@ -1661,12 +1661,12 @@ public class Immunization extends DomainResource {
     /**
      * @return {@link #doseQuantity} (The quantity of vaccine product that was administered.)
      */
-    public Quantity getDoseQuantity() { 
+    public SimpleQuantity getDoseQuantity() { 
       if (this.doseQuantity == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Immunization.doseQuantity");
         else if (Configuration.doAutoCreate())
-          this.doseQuantity = new Quantity(); // cc
+          this.doseQuantity = new SimpleQuantity(); // cc
       return this.doseQuantity;
     }
 
@@ -1677,7 +1677,7 @@ public class Immunization extends DomainResource {
     /**
      * @param value {@link #doseQuantity} (The quantity of vaccine product that was administered.)
      */
-    public Immunization setDoseQuantity(Quantity value) { 
+    public Immunization setDoseQuantity(SimpleQuantity value) { 
       this.doseQuantity = value;
       return this;
     }
@@ -1803,7 +1803,7 @@ public class Immunization extends DomainResource {
         childrenList.add(new Property("expirationDate", "date", "Date vaccine batch expires.", 0, java.lang.Integer.MAX_VALUE, expirationDate));
         childrenList.add(new Property("site", "CodeableConcept", "Body site where vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, site));
         childrenList.add(new Property("route", "CodeableConcept", "The path by which the vaccine product is taken into the body.", 0, java.lang.Integer.MAX_VALUE, route));
-        childrenList.add(new Property("doseQuantity", "Quantity", "The quantity of vaccine product that was administered.", 0, java.lang.Integer.MAX_VALUE, doseQuantity));
+        childrenList.add(new Property("doseQuantity", "SimpleQuantity", "The quantity of vaccine product that was administered.", 0, java.lang.Integer.MAX_VALUE, doseQuantity));
         childrenList.add(new Property("explanation", "", "Reasons why a vaccine was or was not administered.", 0, java.lang.Integer.MAX_VALUE, explanation));
         childrenList.add(new Property("reaction", "", "Categorical data indicating that an adverse event is associated in time to an immunization.", 0, java.lang.Integer.MAX_VALUE, reaction));
         childrenList.add(new Property("vaccinationProtocol", "", "Contains information about the protocol(s) under which the vaccine was administered.", 0, java.lang.Integer.MAX_VALUE, vaccinationProtocol));
