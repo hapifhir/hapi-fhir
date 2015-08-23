@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,28 +49,28 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     /**
      * The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes.
      */
-    @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1)
+    @Child(name = "id", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id of this artifact", formalDefinition="The logical id of the resource, as used in the url for the resource. Once assigned, this value never changes." )
     protected IdType id;
 
     /**
      * The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource.
      */
-    @Child(name = "meta", type = {Meta.class}, order=1, min=0, max=1)
+    @Child(name = "meta", type = {Meta.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Metadata about the resource", formalDefinition="The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content may not always be associated with version changes to the resource." )
     protected Meta meta;
 
     /**
      * A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content.
      */
-    @Child(name = "implicitRules", type = {UriType.class}, order=2, min=0, max=1)
+    @Child(name = "implicitRules", type = {UriType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="A set of rules under which this content was created", formalDefinition="A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content." )
     protected UriType implicitRules;
 
     /**
      * The base language in which the resource is written.
      */
-    @Child(name = "language", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "language", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Language of the resource content", formalDefinition="The base language in which the resource is written." )
     protected CodeType language;
 

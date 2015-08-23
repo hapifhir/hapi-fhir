@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -119,7 +119,7 @@ public class DataElement extends DomainResource {
           switch (this) {
             case COMPARABLE: return "The data element is sufficiently well-constrained that multiple pieces of data captured according to the constraints of the data element will be comparable (though in some cases, a degree of automated conversion/normalization may be required).";
             case FULLYSPECIFIED: return "The data element is fully specified down to a single value set, single unit of measure, single data type, etc.  Multiple pieces of data associated with this data element are fully compareable";
-            case EQUIVALENT: return "The data element allows multiple units of measure having equivalent meaning.  E.g. 'cc' (cubic centimeter) and 'mL'.";
+            case EQUIVALENT: return "The data element allows multiple units of measure having equivalent meaning.  E.g. \"cc\" (cubic centimeter) and \"mL\".";
             case CONVERTABLE: return "The data element allows multiple units of measure that are convertable between each other (e.g. Inches and centimeters) and/or allows data to be captured in multiple value sets for which a known mapping exists allowing conversion of meaning";
             case SCALEABLE: return "A convertable data element where unit conversions are different only by a power of 10.  E.g. g, mg, kg";
             case FLEXIBLE: return "The data element is unconstrained in units, choice of data types and/or choice of vocabulary such that automated comparison of data captured using the data element is not possible.";
@@ -180,14 +180,14 @@ public class DataElement extends DomainResource {
         /**
          * The name of an individual to contact regarding the data element.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the data element." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -339,28 +339,28 @@ public class DataElement extends DomainResource {
         /**
          * An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis.
          */
-        @Child(name = "identity", type = {IdType.class}, order=1, min=1, max=1)
+        @Child(name = "identity", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Internal id when this mapping is used", formalDefinition="An Internal id that is used to identify this mapping set when specific mappings are made on a per-element basis." )
         protected IdType identity;
 
         /**
          * An absolute URI that identifies the specification that this mapping is expressed to.
          */
-        @Child(name = "uri", type = {UriType.class}, order=2, min=0, max=1)
+        @Child(name = "uri", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifies what this mapping refers to", formalDefinition="An absolute URI that identifies the specification that this mapping is expressed to." )
         protected UriType uri;
 
         /**
          * A name for the specification that is being mapped to.
          */
-        @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Names what this mapping refers to", formalDefinition="A name for the specification that is being mapped to." )
         protected StringType name;
 
         /**
          * Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage.
          */
-        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Versions, Issues, Scope limitations etc", formalDefinition="Comments about this mapping, including version notes, issues, scope limitations, and other important notes for usage." )
         protected StringType comments;
 
@@ -623,98 +623,98 @@ public class DataElement extends DomainResource {
     /**
      * An absolute URL that is used to identify this data element when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this data element is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Globally unique logical id for data element", formalDefinition="An absolute URL that is used to identify this data element when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this data element is (or will be) published." )
     protected UriType url;
 
     /**
      * Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Logical id to reference this data element", formalDefinition="Formal identifier that is used to identify this data element when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected List<Identifier> identifier;
 
     /**
      * The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually.
      */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id for this version of the data element", formalDefinition="The identifier that is used to identify this version of the data element when it is referenced in a StructureDefinition, Questionnaire or instance. This is an arbitrary value managed by the definition author manually." )
     protected StringType version;
 
     /**
      * The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used.
      */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Descriptive label for this element definition", formalDefinition="The term used by humans to refer to the data element.  Should ideally be unique within the context in which the data element is expected to be used." )
     protected StringType name;
 
     /**
      * The status of the data element.
      */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the data element." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * A flag to indicate that this search data elemnt definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="A flag to indicate that this search data elemnt definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the data element.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the data element." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<DataElementContactComponent> contact;
 
     /**
      * The date that this version of the Data Element was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the data element  changes.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date for this version of the data element", formalDefinition="The date that this version of the Data Element was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the data element  changes." )
     protected DateTimeType date;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of data element definitions.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of data element definitions." )
     protected List<CodeableConcept> useContext;
 
     /**
      * A copyright statement relating to the definition of the data element. Copyright statements are generally legal restrictions on the use and publishing of the details of the definition of the data element.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the definition of the data element. Copyright statements are generally legal restrictions on the use and publishing of the details of the definition of the data element." )
     protected StringType copyright;
 
     /**
      * Identifies how precise the data element is in its definition.
      */
-    @Child(name = "stringency", type = {CodeType.class}, order=11, min=0, max=1)
+    @Child(name = "stringency", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="comparable | fully-specified | equivalent | convertable | scaleable | flexible", formalDefinition="Identifies how precise the data element is in its definition." )
     protected Enumeration<DataElementStringency> stringency;
 
     /**
      * Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with.
      */
-    @Child(name = "mapping", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "mapping", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="External specification mapped to", formalDefinition="Identifies a specification (other than a terminology) that the elements that make up the DataElement hav some correspondance with." )
     protected List<DataElementMappingComponent> mapping;
 
     /**
      * Defines the structure, type, allowed values and other constraining characteristics of the data element.
      */
-    @Child(name = "element", type = {ElementDefinition.class}, order=13, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "element", type = {ElementDefinition.class}, order=13, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Definition of element", formalDefinition="Defines the structure, type, allowed values and other constraining characteristics of the data element." )
     protected List<ElementDefinition> element;
 

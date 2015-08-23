@@ -44,8 +44,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 	private final String myFormalDefinition;
 	private final int myMax;
 	private final int myMin;
+	private boolean myModifier;
 	private final IMutator myMutator;
 	private final String myShortDefinition;
+	private boolean mySummary;
 	private Boolean ourUseMethodAccessors;
 
 	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) throws ConfigurationException {
@@ -66,6 +68,8 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		myField = theField;
 		myMin = theChildAnnotation.min();
 		myMax = theChildAnnotation.max();
+		mySummary = theChildAnnotation.summary();
+		myModifier = theChildAnnotation.modifier();
 		myElementName = theElementName;
 		if (theDescriptionAnnotation != null) {
 			myShortDefinition = theDescriptionAnnotation.shortDefinition();
@@ -184,6 +188,14 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 			throw new IllegalStateException("This child has " + getValidChildNames().size() + " children, expected 1. This is a HAPI bug. Found: " + getValidChildNames());
 		}
 		return getChildByName(getValidChildNames().iterator().next());
+	}
+
+	public boolean isModifier() {
+		return myModifier;
+	}
+
+	public boolean isSummary() {
+		return mySummary;
 	}
 
 	private static Method findMutator(Class<?> theDeclaringClass, Class<?> theTargetReturnType, String theElementName) {

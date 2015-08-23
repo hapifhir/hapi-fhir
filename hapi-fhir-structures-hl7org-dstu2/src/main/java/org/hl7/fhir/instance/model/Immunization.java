@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -51,14 +51,14 @@ public class Immunization extends DomainResource {
         /**
          * Reasons why a vaccine was administered.
          */
-        @Child(name = "reason", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "reason", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Why immunization occurred", formalDefinition="Reasons why a vaccine was administered." )
         protected List<CodeableConcept> reason;
 
         /**
          * Reason why a vaccine was not administered.
          */
-        @Child(name = "reasonNotGiven", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "reasonNotGiven", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Why immunization did not occur", formalDefinition="Reason why a vaccine was not administered." )
         protected List<CodeableConcept> reasonNotGiven;
 
@@ -206,14 +206,14 @@ public class Immunization extends DomainResource {
         /**
          * Date of reaction to the immunization.
          */
-        @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1)
+        @Child(name = "date", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="When did reaction start?", formalDefinition="Date of reaction to the immunization." )
         protected DateTimeType date;
 
         /**
          * Details of the reaction.
          */
-        @Child(name = "detail", type = {Observation.class}, order=2, min=0, max=1)
+        @Child(name = "detail", type = {Observation.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional information on reaction", formalDefinition="Details of the reaction." )
         protected Reference detail;
 
@@ -225,7 +225,7 @@ public class Immunization extends DomainResource {
         /**
          * Self-reported indicator.
          */
-        @Child(name = "reported", type = {BooleanType.class}, order=3, min=0, max=1)
+        @Child(name = "reported", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Was reaction self-reported?", formalDefinition="Self-reported indicator." )
         protected BooleanType reported;
 
@@ -425,21 +425,21 @@ public class Immunization extends DomainResource {
         /**
          * Nominal position in a series.
          */
-        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=1, max=1)
+        @Child(name = "doseSequence", type = {PositiveIntType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="What dose number within series?", formalDefinition="Nominal position in a series." )
         protected PositiveIntType doseSequence;
 
         /**
          * Contains the description about the protocol under which the vaccine was administered.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Details of vaccine protocol", formalDefinition="Contains the description about the protocol under which the vaccine was administered." )
         protected StringType description;
 
         /**
          * Indicates the authority who published the protocol?  E.g. ACIP.
          */
-        @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1)
+        @Child(name = "authority", type = {Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Who is responsible for protocol", formalDefinition="Indicates the authority who published the protocol?  E.g. ACIP." )
         protected Reference authority;
 
@@ -451,35 +451,35 @@ public class Immunization extends DomainResource {
         /**
          * One possible path to achieve presumed immunity against a disease - within the context of an authority.
          */
-        @Child(name = "series", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "series", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of vaccine series", formalDefinition="One possible path to achieve presumed immunity against a disease - within the context of an authority." )
         protected StringType series;
 
         /**
          * The recommended number of doses to achieve immunity.
          */
-        @Child(name = "seriesDoses", type = {PositiveIntType.class}, order=5, min=0, max=1)
+        @Child(name = "seriesDoses", type = {PositiveIntType.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Recommended number of doses for immunity", formalDefinition="The recommended number of doses to achieve immunity." )
         protected PositiveIntType seriesDoses;
 
         /**
          * The targeted disease.
          */
-        @Child(name = "doseTarget", type = {CodeableConcept.class}, order=6, min=1, max=1)
+        @Child(name = "doseTarget", type = {CodeableConcept.class}, order=6, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Disease immunized against", formalDefinition="The targeted disease." )
         protected CodeableConcept doseTarget;
 
         /**
          * Indicates if the immunization event should "count" against  the protocol.
          */
-        @Child(name = "doseStatus", type = {CodeableConcept.class}, order=7, min=1, max=1)
-        @Description(shortDefinition="Does dose count towards immunity?", formalDefinition="Indicates if the immunization event should 'count' against  the protocol." )
+        @Child(name = "doseStatus", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Does dose count towards immunity?", formalDefinition="Indicates if the immunization event should \"count\" against  the protocol." )
         protected CodeableConcept doseStatus;
 
         /**
          * Provides an explanation as to why a immunization event should or should not count against the protocol.
          */
-        @Child(name = "doseStatusReason", type = {CodeableConcept.class}, order=8, min=0, max=1)
+        @Child(name = "doseStatusReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Why does does count/not count?", formalDefinition="Provides an explanation as to why a immunization event should or should not count against the protocol." )
         protected CodeableConcept doseStatusReason;
 
@@ -814,7 +814,7 @@ public class Immunization extends DomainResource {
           childrenList.add(new Property("series", "string", "One possible path to achieve presumed immunity against a disease - within the context of an authority.", 0, java.lang.Integer.MAX_VALUE, series));
           childrenList.add(new Property("seriesDoses", "positiveInt", "The recommended number of doses to achieve immunity.", 0, java.lang.Integer.MAX_VALUE, seriesDoses));
           childrenList.add(new Property("doseTarget", "CodeableConcept", "The targeted disease.", 0, java.lang.Integer.MAX_VALUE, doseTarget));
-          childrenList.add(new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should 'count' against  the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatus));
+          childrenList.add(new Property("doseStatus", "CodeableConcept", "Indicates if the immunization event should \"count\" against  the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatus));
           childrenList.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why a immunization event should or should not count against the protocol.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason));
         }
 
@@ -868,28 +868,28 @@ public class Immunization extends DomainResource {
     /**
      * A unique identifier assigned to this immunization record.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Business identifier", formalDefinition="A unique identifier assigned to this immunization record." )
     protected List<Identifier> identifier;
 
     /**
      * Date vaccine administered or was to be administered.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=1, min=1, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Vaccination administration date", formalDefinition="Date vaccine administered or was to be administered." )
     protected DateTimeType date;
 
     /**
      * Vaccine that was administered or was to be administered.
      */
-    @Child(name = "vaccineType", type = {CodeableConcept.class}, order=2, min=1, max=1)
+    @Child(name = "vaccineType", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Vaccine product administered", formalDefinition="Vaccine that was administered or was to be administered." )
     protected CodeableConcept vaccineType;
 
     /**
      * The patient who either received or did not receive the immunization.
      */
-    @Child(name = "patient", type = {Patient.class}, order=3, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who was immunized?", formalDefinition="The patient who either received or did not receive the immunization." )
     protected Reference patient;
 
@@ -901,21 +901,21 @@ public class Immunization extends DomainResource {
     /**
      * Indicates if the vaccination was or was not given.
      */
-    @Child(name = "wasNotGiven", type = {BooleanType.class}, order=4, min=1, max=1)
+    @Child(name = "wasNotGiven", type = {BooleanType.class}, order=4, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="Flag for whether immunization was given", formalDefinition="Indicates if the vaccination was or was not given." )
     protected BooleanType wasNotGiven;
 
     /**
      * True if this administration was reported rather than directly administered.
      */
-    @Child(name = "reported", type = {BooleanType.class}, order=5, min=1, max=1)
+    @Child(name = "reported", type = {BooleanType.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Is this a self-reported record?", formalDefinition="True if this administration was reported rather than directly administered." )
     protected BooleanType reported;
 
     /**
      * Clinician who administered the vaccine.
      */
-    @Child(name = "performer", type = {Practitioner.class}, order=6, min=0, max=1)
+    @Child(name = "performer", type = {Practitioner.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who administered vaccine?", formalDefinition="Clinician who administered the vaccine." )
     protected Reference performer;
 
@@ -927,7 +927,7 @@ public class Immunization extends DomainResource {
     /**
      * Clinician who ordered the vaccination.
      */
-    @Child(name = "requester", type = {Practitioner.class}, order=7, min=0, max=1)
+    @Child(name = "requester", type = {Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who ordered vaccination?", formalDefinition="Clinician who ordered the vaccination." )
     protected Reference requester;
 
@@ -939,7 +939,7 @@ public class Immunization extends DomainResource {
     /**
      * The visit or admission or other contact between patient and health care provider the immunization was performed as part of.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=8, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter administered as part of", formalDefinition="The visit or admission or other contact between patient and health care provider the immunization was performed as part of." )
     protected Reference encounter;
 
@@ -951,7 +951,7 @@ public class Immunization extends DomainResource {
     /**
      * Name of vaccine manufacturer.
      */
-    @Child(name = "manufacturer", type = {Organization.class}, order=9, min=0, max=1)
+    @Child(name = "manufacturer", type = {Organization.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Vaccine manufacturer", formalDefinition="Name of vaccine manufacturer." )
     protected Reference manufacturer;
 
@@ -963,7 +963,7 @@ public class Immunization extends DomainResource {
     /**
      * The service delivery location where the vaccine administration occurred.
      */
-    @Child(name = "location", type = {Location.class}, order=10, min=0, max=1)
+    @Child(name = "location", type = {Location.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Where did vaccination occur?", formalDefinition="The service delivery location where the vaccine administration occurred." )
     protected Reference location;
 
@@ -975,56 +975,56 @@ public class Immunization extends DomainResource {
     /**
      * Lot number of the  vaccine product.
      */
-    @Child(name = "lotNumber", type = {StringType.class}, order=11, min=0, max=1)
+    @Child(name = "lotNumber", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Vaccine lot number", formalDefinition="Lot number of the  vaccine product." )
     protected StringType lotNumber;
 
     /**
      * Date vaccine batch expires.
      */
-    @Child(name = "expirationDate", type = {DateType.class}, order=12, min=0, max=1)
+    @Child(name = "expirationDate", type = {DateType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Vaccine expiration date", formalDefinition="Date vaccine batch expires." )
     protected DateType expirationDate;
 
     /**
      * Body site where vaccine was administered.
      */
-    @Child(name = "site", type = {CodeableConcept.class}, order=13, min=0, max=1)
+    @Child(name = "site", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Body site vaccine  was administered", formalDefinition="Body site where vaccine was administered." )
     protected CodeableConcept site;
 
     /**
      * The path by which the vaccine product is taken into the body.
      */
-    @Child(name = "route", type = {CodeableConcept.class}, order=14, min=0, max=1)
+    @Child(name = "route", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="How vaccine entered body", formalDefinition="The path by which the vaccine product is taken into the body." )
     protected CodeableConcept route;
 
     /**
      * The quantity of vaccine product that was administered.
      */
-    @Child(name = "doseQuantity", type = {SimpleQuantity.class}, order=15, min=0, max=1)
+    @Child(name = "doseQuantity", type = {SimpleQuantity.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Amount of vaccine administered", formalDefinition="The quantity of vaccine product that was administered." )
     protected SimpleQuantity doseQuantity;
 
     /**
      * Reasons why a vaccine was or was not administered.
      */
-    @Child(name = "explanation", type = {}, order=16, min=0, max=1)
+    @Child(name = "explanation", type = {}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Administration / non-administration reasons", formalDefinition="Reasons why a vaccine was or was not administered." )
     protected ImmunizationExplanationComponent explanation;
 
     /**
      * Categorical data indicating that an adverse event is associated in time to an immunization.
      */
-    @Child(name = "reaction", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reaction", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Details of a reaction that follows immunization", formalDefinition="Categorical data indicating that an adverse event is associated in time to an immunization." )
     protected List<ImmunizationReactionComponent> reaction;
 
     /**
      * Contains information about the protocol(s) under which the vaccine was administered.
      */
-    @Child(name = "vaccinationProtocol", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "vaccinationProtocol", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What protocol was followed", formalDefinition="Contains information about the protocol(s) under which the vaccine was administered." )
     protected List<ImmunizationVaccinationProtocolComponent> vaccinationProtocol;
 

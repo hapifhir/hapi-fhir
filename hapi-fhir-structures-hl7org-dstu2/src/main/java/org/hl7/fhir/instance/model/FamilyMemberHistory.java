@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,28 +52,28 @@ public class FamilyMemberHistory extends DomainResource {
         /**
          * The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Condition suffered by relation", formalDefinition="The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system." )
         protected CodeableConcept type;
 
         /**
          * Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation.
          */
-        @Child(name = "outcome", type = {CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "outcome", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="deceased | permanent disability | etc.", formalDefinition="Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation." )
         protected CodeableConcept outcome;
 
         /**
          * Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.
          */
-        @Child(name = "onset", type = {Age.class, Range.class, StringType.class}, order=3, min=0, max=1)
+        @Child(name = "onset", type = {Age.class, Range.class, StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When condition first manifested", formalDefinition="Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence." )
         protected Type onset;
 
         /**
          * An area where general notes can be placed about this specific condition.
          */
-        @Child(name = "note", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "note", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Extra information about condition", formalDefinition="An area where general notes can be placed about this specific condition." )
         protected StringType note;
 
@@ -298,14 +298,14 @@ public class FamilyMemberHistory extends DomainResource {
     /**
      * This records identifiers associated with this family member history record that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="External Id(s) for this record", formalDefinition="This records identifiers associated with this family member history record that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The person who this history concerns.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Patient history is about", formalDefinition="The person who this history concerns." )
     protected Reference patient;
 
@@ -317,63 +317,63 @@ public class FamilyMemberHistory extends DomainResource {
     /**
      * The date (and possibly time) when the family member history was taken.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When history was captured/updated", formalDefinition="The date (and possibly time) when the family member history was taken." )
     protected DateTimeType date;
 
     /**
      * This will either be a name or a description.  E.g. "Aunt Susan", "my cousin with the red hair".
      */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1)
-    @Description(shortDefinition="The family member described", formalDefinition="This will either be a name or a description.  E.g. 'Aunt Susan', 'my cousin with the red hair'." )
+    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The family member described", formalDefinition="This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\"." )
     protected StringType name;
 
     /**
      * The type of relationship this person has to the patient (father, mother, brother etc.).
      */
-    @Child(name = "relationship", type = {CodeableConcept.class}, order=4, min=1, max=1)
+    @Child(name = "relationship", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Relationship to the subject", formalDefinition="The type of relationship this person has to the patient (father, mother, brother etc.)." )
     protected CodeableConcept relationship;
 
     /**
      * Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes.
      */
-    @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * The actual or approximate date of birth of the relative.
      */
-    @Child(name = "born", type = {Period.class, DateType.class, StringType.class}, order=6, min=0, max=1)
+    @Child(name = "born", type = {Period.class, DateType.class, StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="(approximate) date of birth", formalDefinition="The actual or approximate date of birth of the relative." )
     protected Type born;
 
     /**
      * The actual or approximate age of the relative at the time the family member history is recorded.
      */
-    @Child(name = "age", type = {Age.class, Range.class, StringType.class}, order=7, min=0, max=1)
+    @Child(name = "age", type = {Age.class, Range.class, StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="(approximate) age", formalDefinition="The actual or approximate age of the relative at the time the family member history is recorded." )
     protected Type age;
 
     /**
      * The actual or approximate age of the relative at the time the family member history is recorded.
      */
-    @Child(name = "deceased", type = {BooleanType.class, Age.class, Range.class, DateType.class, StringType.class}, order=8, min=0, max=1)
+    @Child(name = "deceased", type = {BooleanType.class, Age.class, Range.class, DateType.class, StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Dead? How old/when?", formalDefinition="The actual or approximate age of the relative at the time the family member history is recorded." )
     protected Type deceased;
 
     /**
      * This property allows a non condition-specific note to the made about the related person. Ideally, the note would be in the condition property, but this is not always possible.
      */
-    @Child(name = "note", type = {StringType.class}, order=9, min=0, max=1)
+    @Child(name = "note", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="General note about related person", formalDefinition="This property allows a non condition-specific note to the made about the related person. Ideally, the note would be in the condition property, but this is not always possible." )
     protected StringType note;
 
     /**
      * The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition.
      */
-    @Child(name = "condition", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "condition", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Condition that the related person had", formalDefinition="The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition." )
     protected List<FamilyMemberHistoryConditionComponent> condition;
 
@@ -944,7 +944,7 @@ public class FamilyMemberHistory extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "This records identifiers associated with this family member history record that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("patient", "Reference(Patient)", "The person who this history concerns.", 0, java.lang.Integer.MAX_VALUE, patient));
         childrenList.add(new Property("date", "dateTime", "The date (and possibly time) when the family member history was taken.", 0, java.lang.Integer.MAX_VALUE, date));
-        childrenList.add(new Property("name", "string", "This will either be a name or a description.  E.g. 'Aunt Susan', 'my cousin with the red hair'.", 0, java.lang.Integer.MAX_VALUE, name));
+        childrenList.add(new Property("name", "string", "This will either be a name or a description.  E.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("relationship", "CodeableConcept", "The type of relationship this person has to the patient (father, mother, brother etc.).", 0, java.lang.Integer.MAX_VALUE, relationship));
         childrenList.add(new Property("gender", "code", "Administrative Gender - the gender that the relative is considered to have for administration and record keeping purposes.", 0, java.lang.Integer.MAX_VALUE, gender));
         childrenList.add(new Property("born[x]", "Period|date|string", "The actual or approximate date of birth of the relative.", 0, java.lang.Integer.MAX_VALUE, born));

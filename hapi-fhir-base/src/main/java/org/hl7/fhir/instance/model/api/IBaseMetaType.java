@@ -31,5 +31,7 @@ public interface IBaseMetaType extends ICompositeType {
 	Date getLastUpdated();
 
 	String getVersionId();
+	
+	IBaseMetaType copy();
 
 }

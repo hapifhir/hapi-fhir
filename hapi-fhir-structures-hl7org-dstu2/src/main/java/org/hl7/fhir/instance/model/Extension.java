@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -48,14 +48,14 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
     /**
      * Source of the definition for the extension code - a logical name or a URL.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="identifies the meaning of the extension", formalDefinition="Source of the definition for the extension code - a logical name or a URL." )
     protected UriType url;
 
     /**
      * Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list).
      */
-    @Child(name = "value", type = {}, order=1, min=0, max=1)
+    @Child(name = "value", type = {}, order=1, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Value of extension", formalDefinition="Value of extension - may be a resource or one of a constrained set of the data types (see Extensibility in the spec for list)." )
     protected org.hl7.fhir.instance.model.Type value;
 

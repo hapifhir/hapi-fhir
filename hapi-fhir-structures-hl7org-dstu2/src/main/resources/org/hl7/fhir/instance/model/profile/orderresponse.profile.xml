@@ -3,7 +3,7 @@
 <StructureDefinition xmlns="http://hl7.org/fhir">
   <id value="OrderResponse"/>
   <meta>
-    <lastUpdated value="2015-08-13T16:43:28.935-04:00"/>
+    <lastUpdated value="2015-07-23T16:50:38.106-04:00"/>
   </meta>
   <text>
     <status value="generated"/>
@@ -33,14 +33,12 @@
         </tr>
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
             <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJBSURBVDjLhdKxa5NBGMfx713yvkmbJnaoFiSF4mJTh06Kg4OgiyCCRXCof4YIdXdxFhQVHPo3OFSoUx0FySQttaVKYq2NbdO8ed/L3fM4JG3tYPvAcfBw9+HHPWdUlf/V0tLSqKo+EpEHInJFRIohhDUR+RBCeDM7O7ua55QSkRfVanVufHyckZERrLV0Op2Zra2tmXq9fg+YsmcAdyYnJykUCke9OI6ZmJgghHAZ4KwE3ntPs9mkVCohIjQaDWq1GiEEAM5KoHEcY62lVCrRarUoFotUKpUjIL/y/uqXYmV62ph/LSVrr30P4bEFcM4B0Ov1jk547/uAUTs1ceNdZIwB7V/GGHz6+9LXxY96eDiEgHMOY8xJAK8p4grZz5cElwNbwZgyxYu3EFM01lriOCZJEqIoIooiALIsGwA9Y1UcwcWoKNLdpLu9zvbnBWqNBhuvn5EDUmB0EH/1E2TZw5U+YLQovkun+Ytsaw1xCbnCOap334LC7s4Oe/ttvA+ICLmhMXRxDufczUECS37oAuevPwUEVFFp4/eXkXSdYc2IopSepnjtUh5/wg9gfn6+OQBUNaRIUkfDHhraSLoBKqikIF3yHJDLHaAkFOLciVHnyVAVj/S2Ub/XRyQD9aAZKgkaOohvo6ENgykcA07VEFDfQv1uf4W9Y8y30bCPhg4qKZJtMnjTPqBO/vhkZ7h3EJeRslWNQMqgY2jIAIfa/m5sIKSpqpPsGEiz599e3b+GchtD+bSvjQJm2SG6cNj6C+QmaxAek5tyAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Resource" class="heirarchy"/> 
             <span title="OrderResponse : A response to an order.">OrderResponse</span>
             <a name="OrderResponse"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="domainresource.html">DomainResource</a>
@@ -50,15 +48,13 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,R0lGODlhEAAQAOZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///////yH5BAEAAH8ALAAAAAAQABAAAAfNgH+Cg36FfoOIhH4JBxBghYl/hQkNAV0IVT5GkJKLCwtQaSsSdx9aR26Gcwt2IkQaNRI6dBERIzCFDSgWSW8WCDkbBnoOQ3uFARc/JQJfCAZlT0x4ZFyFBxdNQT9ZCBNWKQoKUQ+FEDgcdTIAV14YDmg2CgSFA0hmQC5TLE4VRTdrKJAoxOeFCzZSwsw4U6BCizwUQhQyEaAPiAwCVNCY0FCNnA6GPAwYoETIFgY9loiRA4dToTYnsOxg8CBGHE6ICvEYQ4AKzkidfgoKBAA7" alt="." style="background-color: white; background-color: inherit" title="Data Type" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Data Type" class="heirarchy"/> 
             <span title="OrderResponse.identifier : Identifiers assigned to this order. The identifiers are usually assigned by the system responding to the order, but they may be provided or added to by other systems.">identifier</span>
             <a name="OrderResponse.identifier"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="datatypes.html#Identifier">Identifier</a>
@@ -68,15 +64,13 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
             <span title="OrderResponse.request : A reference to the order that this is in response to.">request</span>
             <a name="OrderResponse.request"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="order.html">Order</a>
@@ -86,15 +80,13 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
             <span title="OrderResponse.date : The date and time at which this order response was made (created/posted).">date</span>
             <a name="OrderResponse.date"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="datatypes.html#dateTime">dateTime</a>
@@ -104,15 +96,13 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
             <span title="OrderResponse.who : The person, organization, or device credited with making the response.">who</span>
             <a name="OrderResponse.who"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="practitioner.html">Practitioner</a> | 
@@ -124,15 +114,14 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
             <span title="OrderResponse.orderStatus : What this response says about the status of the original order.">orderStatus</span>
             <a name="OrderResponse.orderStatus"> </a>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is a modifier element">?! </span>
-            <span title="This element is included in summaries">Σ</span>
+            <span title="This element is a modifier element">?!</span>
           </td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">1..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
@@ -147,15 +136,13 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gYBFzI0BrFQCwAAAERJREFUOMtj/P//PwMlgImBQjDwBrCcOnWKokBgYWBgYDCU+06W5i8MUggvnH/EOVJjAW4AuQHJ+O75LYqikXE0LzAAALePEntTkEoSAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Primitive Data Type" class="heirarchy"/> 
             <span title="OrderResponse.description : Additional description about the response - e.g. a text description provided by a human user when making decisions about the order.">description</span>
             <a name="OrderResponse.description"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..1</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="datatypes.html#string">string</a>
@@ -165,15 +152,13 @@
 
         <tr style="border: 0px; padding:0px; vertical-align: top; background-color: white;">
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII=)" class="heirarchy">
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg==" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC" alt="." style="background-color: inherit" class="heirarchy"/>
-            <img src="data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC" alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: inherit" class="heirarchy"/>
+            <img src="data: image/png;base64," alt="." style="background-color: white; background-color: inherit" title="Reference to another Resource" class="heirarchy"/> 
             <span title="OrderResponse.fulfillment : Links to resources that provide details of the outcome of performing the order. E.g. Diagnostic Reports in a response that is made to an order that referenced a diagnostic order.">fulfillment</span>
             <a name="OrderResponse.fulfillment"> </a>
           </td>
-          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
-            <span title="This element is included in summaries">Σ</span>
-          </td>
+          <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy"/>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">0..*</td>
           <td style="vertical-align: top; text-align : left; background-color: white; padding:0px 4px 0px 4px" class="heirarchy">
             <a href="resourcelist.html">Any</a>
@@ -189,7 +174,6 @@
   </extension>
   <url value="http://hl7.org/fhir/StructureDefinition/OrderResponse"/>
   <name value="OrderResponse"/>
-  <status value="draft"/>
   <publisher value="Health Level Seven International (Orders and Observations)"/>
   <contact>
     <telecom>
@@ -203,17 +187,13 @@
       <value value="http://www.hl7.org/Special/committees/orders/index.cfm"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for OrderResponse Resource"/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <mapping>
     <identity value="rim"/>
     <uri value="http://hl7.org/v3"/>
     <name value="RIM"/>
-  </mapping>
-  <mapping>
-    <identity value="w5"/>
-    <uri value="http://hl7.org/fhir/w5"/>
-    <name value="W5 Mapping"/>
   </mapping>
   <mapping>
     <identity value="v2"/>
@@ -222,7 +202,6 @@
   </mapping>
   <kind value="resource"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/DomainResource"/>
   <snapshot>
     <element>
       <path value="OrderResponse"/>
@@ -233,14 +212,9 @@
       <type>
         <code value="DomainResource"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="ControlAct[classCode=ACTN, moodCode=EVN]"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="infrastructure"/>
       </mapping>
     </element>
     <element>
@@ -252,7 +226,6 @@
       <type>
         <code value="id"/>
       </type>
-      <isSummary value="true"/>
     </element>
     <element>
       <path value="OrderResponse.meta"/>
@@ -263,7 +236,6 @@
       <type>
         <code value="Meta"/>
       </type>
-      <isSummary value="true"/>
     </element>
     <element>
       <path value="OrderResponse.implicitRules"/>
@@ -275,7 +247,6 @@
         <code value="uri"/>
       </type>
       <isModifier value="true"/>
-      <isSummary value="true"/>
     </element>
     <element>
       <path value="OrderResponse.language"/>
@@ -370,14 +341,9 @@
       <type>
         <code value="Identifier"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value=".id"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="id"/>
       </mapping>
     </element>
     <element>
@@ -390,7 +356,6 @@
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Order"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="ORC-2 / ORC-3, or OBR-2 | OBR-3"/>
@@ -409,7 +374,6 @@
       <type>
         <code value="dateTime"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="ORC-9"/>
@@ -417,10 +381,6 @@
       <mapping>
         <identity value="rim"/>
         <map value=".participation[typeCode=AUT].time"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="when.recorded"/>
       </mapping>
     </element>
     <element>
@@ -441,7 +401,6 @@
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="Practitioner: ORC-19 | PRT / Organization: PRT"/>
@@ -449,10 +408,6 @@
       <mapping>
         <identity value="rim"/>
         <map value=".participation[typeCode=AUT].role"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="who.actor"/>
       </mapping>
     </element>
     <element>
@@ -465,7 +420,6 @@
         <code value="code"/>
       </type>
       <isModifier value="true"/>
-      <isSummary value="true"/>
       <binding>
         <strength value="required"/>
         <description value="The status of the response to an order"/>
@@ -491,7 +445,6 @@
       <type>
         <code value="string"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="ORC-16.2-order control code reason.text"/>
@@ -511,7 +464,6 @@
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="OBR+OBX[n] / RXE / RXD / RXG / RXA / BPX / BTX"/>
@@ -532,14 +484,9 @@
       <type>
         <code value="DomainResource"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value="ControlAct[classCode=ACTN, moodCode=EVN]"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="infrastructure"/>
       </mapping>
     </element>
     <element>
@@ -551,14 +498,9 @@
       <type>
         <code value="Identifier"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="rim"/>
         <map value=".id"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="id"/>
       </mapping>
     </element>
     <element>
@@ -571,7 +513,6 @@
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Order"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="ORC-2 / ORC-3, or OBR-2 | OBR-3"/>
@@ -590,7 +531,6 @@
       <type>
         <code value="dateTime"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="ORC-9"/>
@@ -598,10 +538,6 @@
       <mapping>
         <identity value="rim"/>
         <map value=".participation[typeCode=AUT].time"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="when.recorded"/>
       </mapping>
     </element>
     <element>
@@ -622,7 +558,6 @@
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Device"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="Practitioner: ORC-19 | PRT / Organization: PRT"/>
@@ -630,10 +565,6 @@
       <mapping>
         <identity value="rim"/>
         <map value=".participation[typeCode=AUT].role"/>
-      </mapping>
-      <mapping>
-        <identity value="w5"/>
-        <map value="who.actor"/>
       </mapping>
     </element>
     <element>
@@ -646,7 +577,6 @@
         <code value="code"/>
       </type>
       <isModifier value="true"/>
-      <isSummary value="true"/>
       <binding>
         <strength value="required"/>
         <description value="The status of the response to an order"/>
@@ -672,7 +602,6 @@
       <type>
         <code value="string"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="ORC-16.2-order control code reason.text"/>
@@ -692,7 +621,6 @@
         <code value="Reference"/>
         <profile value="http://hl7.org/fhir/StructureDefinition/Resource"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="OBR+OBX[n] / RXE / RXD / RXG / RXA / BPX / BTX"/>

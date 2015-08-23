@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -34,9 +35,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -74,7 +75,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
 		String fhirServerBase = theRequestDetails.getFhirServerBase();
-		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, NarrativeModeEnum.NORMAL, statusCode, false, fhirServerBase, false);
+		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, Collections.singleton(SummaryEnum.FALSE), statusCode, false, fhirServerBase, false);
 
 		// theResponse.setStatus(statusCode);
 		// theRequestDetails.getServer().addHeadersToResponse(theResponse);

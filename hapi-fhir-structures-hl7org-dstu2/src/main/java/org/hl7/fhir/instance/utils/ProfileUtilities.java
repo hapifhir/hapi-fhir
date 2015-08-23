@@ -673,6 +673,11 @@ public class ProfileUtilities {
         else if (derived.hasRequirementsElement()) 
           derived.getRequirementsElement().setUserData(DERIVATION_EQUALS, true);
       }
+      // sdf-9
+      if (derived.hasRequirements() && !base.getPath().contains("."))
+        derived.setRequirements(null);
+      if (base.hasRequirements() && !base.getPath().contains("."))
+        base.setRequirements(null);
       
       if (derived.hasAlias()) {
         if (!Base.compareDeep(derived.getAlias(), base.getAlias(), false))
@@ -981,8 +986,15 @@ public class ProfileUtilities {
       tl = t;
       if (t.getCode().equals("Reference") || (t.getCode().equals("Resource") && t.hasProfile())) {
         if (t.hasProfile() && t.getProfile().get(0).getValue().startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+          StructureDefinition sd = context.getProfiles().get(t.getProfile().get(0).getValue());
+          if (sd != null) {
+            c.addPiece(checkForNoChange(t, gen.new Piece(corePath+sd.getUserString("path"), sd.getName(), null)));
+          } else {
           String rn = t.getProfile().get(0).getValue().substring(40);
           c.addPiece(checkForNoChange(t, gen.new Piece(corePath+pkp.getLinkFor(rn), rn, null)));
+          }
+        } else if (t.getProfile().size() == 0) {
+          c.addPiece(checkForNoChange(t, gen.new Piece(null, t.getCode(), null)));
         } else if (t.getProfile().get(0).getValue().startsWith("#"))
           c.addPiece(checkForNoChange(t, gen.new Piece(corePath+profileBaseFileName+"."+t.getProfile().get(0).getValue().substring(1).toLowerCase()+".html", t.getProfile().get(0).getValue(), null)));
         else

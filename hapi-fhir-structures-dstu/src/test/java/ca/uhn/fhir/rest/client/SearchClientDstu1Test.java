@@ -56,7 +56,7 @@ public class SearchClientDstu1Test {
 
 		ourHttpClient = mock(HttpClient.class, new ReturnsDeepStubs());
 		ourCtx.getRestfulClientFactory().setHttpClient(ourHttpClient);
-		ourCtx.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ourHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 	}

@@ -1,11 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,8 +17,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -33,6 +28,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.google.common.net.UrlEscapers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
@@ -58,10 +55,7 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.util.PortUtil;
-
-import com.google.common.net.UrlEscapers;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -74,13 +68,11 @@ public class SearchSearchServerDstu1Test {
 	private static int ourPort;
 
 	private static Server ourServer;
-	private static NarrativeModeEnum ourLastNarrativeMode;
 	private static RestfulServer ourServlet;
 	private static IServerAddressStrategy ourDefaultAddressStrategy;
 
 	@Before
 	public void before() {
-		ourLastNarrativeMode=null;
 		ourServlet.setServerAddressStrategy(ourDefaultAddressStrategy);
 	}
 	
@@ -98,35 +90,6 @@ public class SearchSearchServerDstu1Test {
 		assertEquals("Organization/555", ref);
 	}
 
-	@Test
-	public void testNarrativeParamNone() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, ourLastNarrativeMode);
-	}
-
-	@Test
-	public void testNarrativeParamPopulated() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative&_narrative=ONly");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(NarrativeModeEnum.ONLY, ourLastNarrativeMode);
-	}
-
-	@Test
-	public void testNarrativeParamPopulatedInvalid() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithNarrative&_narrative=BLAH");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, ourLastNarrativeMode);
-	}
 
 	@Test
 	public void testOmitEmptyOptionalParam() throws Exception {
@@ -538,13 +501,6 @@ public class SearchSearchServerDstu1Test {
 			return retVal;
 		}
 
-		@Search(queryName="searchWithNarrative")
-		public Patient searchWithNarrative(NarrativeModeEnum theNarrativeMode) {
-			ourLastNarrativeMode = theNarrativeMode;
-			Patient patient = new Patient();
-			patient.setId("Patient/1/_history/1");
-			return patient;
-		}
 
 		@Search(queryName="searchWithRef")
 		public Patient searchWithRef() {

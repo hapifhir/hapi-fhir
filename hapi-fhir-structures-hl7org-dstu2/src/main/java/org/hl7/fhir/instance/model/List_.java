@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -93,7 +93,7 @@ public class List_ extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case CURRENT: return "The list is considered to be an active part of the patient's record.";
-            case RETIRED: return "The list is 'old' and should no longer be considered accurate or relevant.";
+            case RETIRED: return "The list is \"old\" and should no longer be considered accurate or relevant.";
             case ENTEREDINERROR: return "The list was never accurate.  It is retained for medico-legal purposes only.";
             default: return "?";
           }
@@ -223,28 +223,28 @@ public class List_ extends DomainResource {
         /**
          * The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list.
          */
-        @Child(name = "flag", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "flag", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Workflow information about this item", formalDefinition="The flag allows the system constructing the list to make one or more statements about the role and significance of the item in the list." )
         protected List<CodeableConcept> flag;
 
         /**
          * True if this item is marked as deleted in the list.
          */
-        @Child(name = "deleted", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "deleted", type = {BooleanType.class}, order=2, min=0, max=1, modifier=true, summary=false)
         @Description(shortDefinition="If this item is actually marked as deleted", formalDefinition="True if this item is marked as deleted in the list." )
         protected BooleanType deleted;
 
         /**
          * When this item was added to the list.
          */
-        @Child(name = "date", type = {DateTimeType.class}, order=3, min=0, max=1)
+        @Child(name = "date", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When item added to list", formalDefinition="When this item was added to the list." )
         protected DateTimeType date;
 
         /**
          * A reference to the actual resource from which data was derived.
          */
-        @Child(name = "item", type = {}, order=4, min=1, max=1)
+        @Child(name = "item", type = {}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Actual entry", formalDefinition="A reference to the actual resource from which data was derived." )
         protected Reference item;
 
@@ -496,28 +496,28 @@ public class List_ extends DomainResource {
     /**
      * Identifier for the List assigned for business purposes outside the context of FHIR.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Business identifier", formalDefinition="Identifier for the List assigned for business purposes outside the context of FHIR." )
     protected List<Identifier> identifier;
 
     /**
      * A label for the list assigned by the author.
      */
-    @Child(name = "title", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "title", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Descriptive name for the list", formalDefinition="A label for the list assigned by the author." )
     protected StringType title;
 
     /**
      * This code defines the purpose of the list - why it was created.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What the purpose of this list is", formalDefinition="This code defines the purpose of the list - why it was created." )
     protected CodeableConcept code;
 
     /**
      * The common subject (or patient) of the resources that are in the list, if there is one.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=3, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If all resources have the same subject", formalDefinition="The common subject (or patient) of the resources that are in the list, if there is one." )
     protected Reference subject;
 
@@ -529,7 +529,7 @@ public class List_ extends DomainResource {
     /**
      * The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list.
      */
-    @Child(name = "source", type = {Practitioner.class, Patient.class, Device.class}, order=4, min=0, max=1)
+    @Child(name = "source", type = {Practitioner.class, Patient.class, Device.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what defined the list contents (aka Author)", formalDefinition="The entity responsible for deciding what the contents of the list were. Where the list was created by a human, this is the same as the author of the list." )
     protected Reference source;
 
@@ -541,7 +541,7 @@ public class List_ extends DomainResource {
     /**
      * The encounter that is the context in which this list was created.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Context in which list created", formalDefinition="The encounter that is the context in which this list was created." )
     protected Reference encounter;
 
@@ -553,49 +553,49 @@ public class List_ extends DomainResource {
     /**
      * Indicates the current state of this list.
      */
-    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="current | retired | entered-in-error", formalDefinition="Indicates the current state of this list." )
     protected Enumeration<ListStatus> status;
 
     /**
      * The date that the list was prepared.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the list was prepared", formalDefinition="The date that the list was prepared." )
     protected DateTimeType date;
 
     /**
      * What order applies to the items in the list.
      */
-    @Child(name = "orderedBy", type = {CodeableConcept.class}, order=8, min=0, max=1)
+    @Child(name = "orderedBy", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What order the list has", formalDefinition="What order applies to the items in the list." )
     protected CodeableConcept orderedBy;
 
     /**
      * How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
      */
-    @Child(name = "mode", type = {CodeType.class}, order=9, min=1, max=1)
+    @Child(name = "mode", type = {CodeType.class}, order=9, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="working | snapshot | changes", formalDefinition="How this list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
     protected Enumeration<ListMode> mode;
 
     /**
      * Comments that apply to the overall list.
      */
-    @Child(name = "note", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "note", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Comments about the list", formalDefinition="Comments that apply to the overall list." )
     protected StringType note;
 
     /**
      * Entries in this list.
      */
-    @Child(name = "entry", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "entry", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Entries in the list", formalDefinition="Entries in this list." )
     protected List<ListEntryComponent> entry;
 
     /**
      * If the list is empty, why the list is empty.
      */
-    @Child(name = "emptyReason", type = {CodeableConcept.class}, order=12, min=0, max=1)
+    @Child(name = "emptyReason", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why list is empty", formalDefinition="If the list is empty, why the list is empty." )
     protected CodeableConcept emptyReason;
 

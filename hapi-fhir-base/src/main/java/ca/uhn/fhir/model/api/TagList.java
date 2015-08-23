@@ -31,7 +31,8 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
 
 /**
- * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of added tags will be consistent, but duplicates will not be preserved.
+ * A collection of tags present on a single resource. TagList is backed by a {@link LinkedHashSet}, so the order of
+ * added tags will be consistent, but duplicates will not be preserved.
  * 
  * <p>
  * <b>Thread safety:</b> This class is not thread safe
@@ -52,6 +53,17 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	 */
 	public TagList() {
 		super();
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public TagList(TagList theTags) {
+		if (theTags != null) {
+			for (Tag next : theTags) {
+				add(next);
+			}
+		}
 	}
 
 	@Override
@@ -77,7 +89,8 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	}
 
 	/**
-	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addTag(String, String, String)} should be used instead
+	 * @deprecated Tags wil become immutable in a future release of HAPI, so {@link #addTag(String, String, String)}
+	 *             should be used instead
 	 */
 	@Deprecated
 	public Tag addTag() {
@@ -89,10 +102,11 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	 * Add a new tag instance
 	 * 
 	 * @param theScheme
-	 *            The tag scheme
+	 *           The tag scheme
 	 * @param theTerm
-	 *            The tag term
-	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you generally do not need to interact directly with the added tag.
+	 *           The tag term
+	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you
+	 *         generally do not need to interact directly with the added tag.
 	 */
 	public Tag addTag(String theScheme, String theTerm) {
 		Tag retVal = new Tag(theScheme, theTerm);
@@ -105,12 +119,13 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	 * Add a new tag instance
 	 * 
 	 * @param theScheme
-	 *            The tag scheme
+	 *           The tag scheme
 	 * @param theTerm
-	 *            The tag term
+	 *           The tag term
 	 * @param theLabel
-	 *            The tag label
-	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you generally do not need to interact directly with the added tag.
+	 *           The tag label
+	 * @return Returns the newly created tag instance. Note that the tag is added to the list by this method, so you
+	 *         generally do not need to interact directly with the added tag.
 	 */
 	public Tag addTag(String theScheme, String theTerm, String theLabel) {
 		Tag retVal = new Tag(theScheme, theTerm, theLabel);
@@ -153,7 +168,8 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 	}
 
 	/**
-	 * Returns the tag at a given index - Note that the TagList is backed by a {@link LinkedHashSet}, so the order of added tags will be consistent, but duplicates will not be preserved.
+	 * Returns the tag at a given index - Note that the TagList is backed by a {@link LinkedHashSet}, so the order of
+	 * added tags will be consistent, but duplicates will not be preserved.
 	 */
 	public Tag get(int theIndex) {
 		if (myOrderedTags == null) {

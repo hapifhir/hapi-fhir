@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,14 +47,14 @@ public class Period extends Type implements ICompositeType {
     /**
      * The start of the period. The boundary is inclusive.
      */
-    @Child(name = "start", type = {DateTimeType.class}, order=0, min=0, max=1)
+    @Child(name = "start", type = {DateTimeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Starting time with inclusive boundary", formalDefinition="The start of the period. The boundary is inclusive." )
     protected DateTimeType start;
 
     /**
      * The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time.
      */
-    @Child(name = "end", type = {DateTimeType.class}, order=1, min=0, max=1)
+    @Child(name = "end", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="End time with inclusive boundary, if not ongoing", formalDefinition="The end of the period. If the end of the period is missing, it means that the period is ongoing. The start mey be in the past, and the end date in the future, which means that period is expected/planned to end at that time." )
     protected DateTimeType end;
 

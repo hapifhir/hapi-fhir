@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum V3HtmlLinkType {
@@ -162,16 +162,16 @@ public enum V3HtmlLinkType {
             case APPENDIX: return "Refers to a document serving as an appendix in a collection of documents.";
             case BOOKMARK: return "Refers to a bookmark. A bookmark is a link to a key entry point within an extended document. The title attribute may be used, for example, to label the bookmark. Note that several bookmarks may be defined in each document.";
             case CHAPTER: return "Refers to a document serving as a chapter in a collection of documents.";
-            case CONTENTS: return "Refers to a document serving as a table of contents. Some user agents also support the synonym ToC (from 'Table of Contents').";
+            case CONTENTS: return "Refers to a document serving as a table of contents. Some user agents also support the synonym ToC (from \"Table of Contents\").";
             case COPYRIGHT: return "Refers to a copyright statement for the current document.";
             case GLOSSARY: return "Refers to a document providing a glossary of terms that pertain to the current document.";
             case HELP: return "Refers to a document offering help (more information, links to other sources of information, etc.).";
             case INDEX: return "Refers to a document providing an index for the current document.";
-            case NEXT: return "Refers to the next document in a linear sequence of documents. User agents may choose to preload the 'next' document, to reduce the perceived load time.";
-            case PREV: return "Refers to the previous document in an ordered series of documents. Some user agents also support the synonym 'Previous'.";
+            case NEXT: return "Refers to the next document in a linear sequence of documents. User agents may choose to preload the \"next\" document, to reduce the perceived load time.";
+            case PREV: return "Refers to the previous document in an ordered series of documents. Some user agents also support the synonym \"Previous\".";
             case SECTION: return "Refers to a document serving as a section in a collection of documents.";
             case START: return "Refers to the first document in a collection of documents. This link type tells search engines which document is considered by the author to be the starting point of the collection.";
-            case STYLESHEET: return "Refers to an external style sheet. See the section on external style sheets for details. This is used together with the link type 'Alternate' for user-selectable alternate style sheets.";
+            case STYLESHEET: return "Refers to an external style sheet. See the section on external style sheets for details. This is used together with the link type \"Alternate\" for user-selectable alternate style sheets.";
             case SUBSECTION: return "Refers to a document serving as a subsection in a collection of documents.";
             default: return "?";
           }

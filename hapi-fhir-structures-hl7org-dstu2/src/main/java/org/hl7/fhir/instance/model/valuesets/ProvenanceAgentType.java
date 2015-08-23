@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum ProvenanceAgentType {
@@ -102,7 +102,7 @@ public enum ProvenanceAgentType {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "The participant is a person acting on their on behalf or on behalf of the patient rather than as an practitioner for an organization.  I.e. 'not a healthcare provider'";
+            case PERSON: return "The participant is a person acting on their on behalf or on behalf of the patient rather than as an practitioner for an organization.  I.e. \"not a healthcare provider\"";
             case PRACTITIONER: return "The participant is a practitioner, a person (provider) who is directly or indirectly involved in the provisioning of healthcare.";
             case ORGANIZATION: return "The participant is an organization";
             case SOFTWARE: return "The participant is a software application including services, algorithms, etc.";

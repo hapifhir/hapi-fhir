@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -116,8 +116,8 @@ public class Group extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "Group contains 'person' Patient resources";
-            case ANIMAL: return "Group contains 'animal' Patient resources";
+            case PERSON: return "Group contains \"person\" Patient resources";
+            case ANIMAL: return "Group contains \"animal\" Patient resources";
             case PRACTITIONER: return "Group contains healthcare practitioner resources";
             case DEVICE: return "Group contains Device resources";
             case MEDICATION: return "Group contains Medication resources";
@@ -179,28 +179,28 @@ public class Group extends DomainResource {
         /**
          * A code that identifies the kind of trait being asserted.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Kind of characteristic", formalDefinition="A code that identifies the kind of trait being asserted." )
         protected CodeableConcept code;
 
         /**
          * The value of the trait that holds (or does not hold - see 'exclude') for members of the group.
          */
-        @Child(name = "value", type = {CodeableConcept.class, BooleanType.class, Quantity.class, Range.class}, order=2, min=1, max=1)
+        @Child(name = "value", type = {CodeableConcept.class, BooleanType.class, Quantity.class, Range.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Value held by characteristic", formalDefinition="The value of the trait that holds (or does not hold - see 'exclude') for members of the group." )
         protected Type value;
 
         /**
          * If true, indicates the characteristic is one that is NOT held by members of the group.
          */
-        @Child(name = "exclude", type = {BooleanType.class}, order=3, min=1, max=1)
+        @Child(name = "exclude", type = {BooleanType.class}, order=3, min=1, max=1, modifier=true, summary=false)
         @Description(shortDefinition="Group includes or excludes", formalDefinition="If true, indicates the characteristic is one that is NOT held by members of the group." )
         protected BooleanType exclude;
 
         /**
          * The period over which the characteristic is tested. E.g. the patient had an operation during the month of June.
          */
-        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1)
+        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Period over which characteristic is tested", formalDefinition="The period over which the characteristic is tested. E.g. the patient had an operation during the month of June." )
         protected Period period;
 
@@ -438,7 +438,7 @@ public class Group extends DomainResource {
         /**
          * A reference to the entity that is a member of the group. Must be consistent with Group.type.
          */
-        @Child(name = "entity", type = {Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order=1, min=1, max=1)
+        @Child(name = "entity", type = {Patient.class, Practitioner.class, Device.class, Medication.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to the group member", formalDefinition="A reference to the entity that is a member of the group. Must be consistent with Group.type." )
         protected Reference entity;
 
@@ -450,14 +450,14 @@ public class Group extends DomainResource {
         /**
          * The period that the member was in the group, if known.
          */
-        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1)
+        @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Period member belonged to the group", formalDefinition="The period that the member was in the group, if known." )
         protected Period period;
 
         /**
          * A flag to indicate that the member is no longer in the group, but previously may have been a member.
          */
-        @Child(name = "inactive", type = {BooleanType.class}, order=3, min=0, max=1)
+        @Child(name = "inactive", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If member is no longer in group", formalDefinition="A flag to indicate that the member is no longer in the group, but previously may have been a member." )
         protected BooleanType inactive;
 
@@ -633,56 +633,56 @@ public class Group extends DomainResource {
     /**
      * A unique business identifier for this group.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Unique id", formalDefinition="A unique business identifier for this group." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies the broad classification of the kind of resources the group includes.
      */
-    @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="person | animal | practitioner | device | medication | substance", formalDefinition="Identifies the broad classification of the kind of resources the group includes." )
     protected Enumeration<GroupType> type;
 
     /**
      * If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.
      */
-    @Child(name = "actual", type = {BooleanType.class}, order=2, min=1, max=1)
+    @Child(name = "actual", type = {BooleanType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Descriptive or actual", formalDefinition="If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals." )
     protected BooleanType actual;
 
     /**
      * Provides a specific type of resource the group includes.  E.g. "cow", "syringe", etc.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=3, min=0, max=1)
-    @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes.  E.g. 'cow', 'syringe', etc." )
+    @Child(name = "code", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Kind of Group members", formalDefinition="Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc." )
     protected CodeableConcept code;
 
     /**
      * A label assigned to the group for human identification and communication.
      */
-    @Child(name = "name", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Label for Group", formalDefinition="A label assigned to the group for human identification and communication." )
     protected StringType name;
 
     /**
      * A count of the number of resource instances that are part of the group.
      */
-    @Child(name = "quantity", type = {UnsignedIntType.class}, order=5, min=0, max=1)
+    @Child(name = "quantity", type = {UnsignedIntType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Number of members", formalDefinition="A count of the number of resource instances that are part of the group." )
     protected UnsignedIntType quantity;
 
     /**
      * Identifies the traits shared by members of the group.
      */
-    @Child(name = "characteristic", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "characteristic", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Trait of group members", formalDefinition="Identifies the traits shared by members of the group." )
     protected List<GroupCharacteristicComponent> characteristic;
 
     /**
      * Identifies the resource instances that are members of the group.
      */
-    @Child(name = "member", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "member", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Who or what is in group", formalDefinition="Identifies the resource instances that are members of the group." )
     protected List<GroupMemberComponent> member;
 
@@ -1037,7 +1037,7 @@ public class Group extends DomainResource {
         childrenList.add(new Property("identifier", "Identifier", "A unique business identifier for this group.", 0, java.lang.Integer.MAX_VALUE, identifier));
         childrenList.add(new Property("type", "code", "Identifies the broad classification of the kind of resources the group includes.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("actual", "boolean", "If true, indicates that the resource refers to a specific group of real individuals.  If false, the group defines a set of intended individuals.", 0, java.lang.Integer.MAX_VALUE, actual));
-        childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes.  E.g. 'cow', 'syringe', etc.", 0, java.lang.Integer.MAX_VALUE, code));
+        childrenList.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes.  E.g. \"cow\", \"syringe\", etc.", 0, java.lang.Integer.MAX_VALUE, code));
         childrenList.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, java.lang.Integer.MAX_VALUE, name));
         childrenList.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, java.lang.Integer.MAX_VALUE, quantity));
         childrenList.add(new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));

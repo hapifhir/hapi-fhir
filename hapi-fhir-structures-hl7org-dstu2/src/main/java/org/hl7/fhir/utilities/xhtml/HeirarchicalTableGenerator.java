@@ -314,6 +314,17 @@ public class HeirarchicalTableGenerator  {
     for (Row r : model.getRows()) {
       renderRow(table, r, 0, new ArrayList<Boolean>(), corePrefix);
     }
+    if (model.getDocoRef() != null) {
+      tr = table.addTag("tr");
+      tc = tr.addTag("td");
+      tc.setAttribute("class", "heirarchy");
+      tc.setAttribute("colspan", Integer.toString(model.getTitles().size()));
+      tc.addTag("br");
+      XhtmlNode a = tc.addTag("a").setAttribute("title", "Legend for this format").setAttribute("href", model.getDocoRef());
+      if (model.getDocoImg() != null)
+        a.addTag("img").setAttribute("alt", "doco").setAttribute("style", "background-color: inherit").setAttribute("src", model.getDocoImg());
+      a.addText(" Documentation for this format");
+    }
     return table;
   }
 

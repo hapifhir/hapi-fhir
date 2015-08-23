@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum V3Hl7Realm {
@@ -369,7 +369,7 @@ public enum V3Hl7Realm {
         public String getDefinition() {
           switch (this) {
             case BINDINGREALMS: return "Description: Concepts that can be used as Binding Realms when creating Binding Statements.  These codes are permitted to appear in the InfrastructureRoot.realmCode attribute.";
-            case AFFILIATEREALMS: return "Description: Realm codes for official HL7 organizational bodies.  This includes both the HL7 International organization as well as all recognized international affiliates (past and present).  These groups have the ability to bind vocabulary and develop artifacts.  As well, they have the ability to have 'ownership' over other binding realms and namespace realms via the owningAffiliate property of those other realm codes.";
+            case AFFILIATEREALMS: return "Description: Realm codes for official HL7 organizational bodies.  This includes both the HL7 International organization as well as all recognized international affiliates (past and present).  These groups have the ability to bind vocabulary and develop artifacts.  As well, they have the ability to have \"ownership\" over other binding realms and namespace realms via the owningAffiliate property of those other realm codes.";
             case AR: return "Description: Realm code for use of Argentina";
             case AT: return "Description: Realm code for use of Austria";
             case AU: return "Description: Realm code for use of Australia";
@@ -411,7 +411,7 @@ public enum V3Hl7Realm {
             case GB: return "Description: Realm code for use of Great Britain";
             case R1: return "Description: Realm code for use of Representative Realm";
             case X1: return "Description: Realm code for use of Example Realm";
-            case NAMESPACEREALMS: return "Description: Codes that can be used in the 'realm' portion of HL7 v3 artifact identifiers.";
+            case NAMESPACEREALMS: return "Description: Codes that can be used in the \"realm\" portion of HL7 v3 artifact identifiers.";
             case ZZ: return "Description: An artifact created for local use only.  This realm namespace has no owning affiliate.  Its use is uncontrolled, i.e. anyone can create artifacts using this realm namespace.  Because of this, there is a significant likelihood of artifact identifier collisions.  Implementers are encouraged to register their artifacts under an affiliate owned and controlled namespace to avoid such collision problems where possible.";
             default: return "?";
           }

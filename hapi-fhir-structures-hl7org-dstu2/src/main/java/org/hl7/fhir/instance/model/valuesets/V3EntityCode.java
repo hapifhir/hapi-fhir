@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum V3EntityCode {
@@ -1062,7 +1062,7 @@ public enum V3EntityCode {
         }
         public String getDefinition() {
           switch (this) {
-            case _MATERIALENTITYCLASSTYPE: return "Types of Material for EntityClass 'MAT'";
+            case _MATERIALENTITYCLASSTYPE: return "Types of Material for EntityClass \"MAT\"";
             case _CONTAINERENTITYTYPE: return "Material intended to hold another material for purpose of storage or transport.";
             case PKG: return "A material intended to hold other materials for purposes of storage or transportation";
             case _NONRIGIDCONTAINERENTITYTYPE: return "A container having dimensions that adjust somewhat based on the amount and shape of the material placed within it.";
@@ -1102,7 +1102,7 @@ public enum V3EntityCode {
             case STRIP: return "A continuous strip of plastic sectioned into individual pouches, each one containing the quantity of 1 or more medications intended to be administered at a specific time";
             case KIT: return "A container for a diverse collection of products intended to be used together for some purpose (e.g. Medicinal kits often contain a syringe, a needle and the injectable medication).";
             case SYSTM: return "A kit in which the components are interconnected.";
-            case _MEDICALDEVICE: return "A device with direct or indirect therapeutic purpose.  Values for EntityCode when EntityClass = 'DEV'";
+            case _MEDICALDEVICE: return "A device with direct or indirect therapeutic purpose.  Values for EntityCode when EntityClass = \"DEV\"";
             case _ACCESSMEDICALDEVICE: return "A device used to allow access to a part of a body";
             case LINE: return "A hollow tube used to administer a substance into a vein, artery or body cavity";
             case IALINE: return "A line used to administer a substance into an artery";
@@ -1197,7 +1197,7 @@ public enum V3EntityCode {
             case HHOLD: return "The group of persons who occupy a single housing unit.";
             case NAT: return "Codes identifying nation states.  Allows for finer grained specification of Entity with classcode <= NAT\r\n\n                        \n                           Example:ISO3166 country codes.";
             case RELIG: return "An organization that provides religious rites of worship.";
-            case _PLACEENTITYTYPE: return "Types of places for EntityClass 'PLC'";
+            case _PLACEENTITYTYPE: return "Types of places for EntityClass \"PLC\"";
             case BED: return "The location of a bed";
             case BLDG: return "The location of a building";
             case FLOOR: return "The location of a floor of a building";

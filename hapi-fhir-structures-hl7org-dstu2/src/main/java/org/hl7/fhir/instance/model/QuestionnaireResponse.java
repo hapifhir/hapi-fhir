@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -137,28 +137,28 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource.
          */
-        @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Corresponding group within Questionnaire", formalDefinition="Identifies the group from the Questionnaire that corresponds to this group in the QuestionnaireResponse resource." )
         protected StringType linkId;
 
         /**
          * Text that is displayed above the contents of the group.
          */
-        @Child(name = "title", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "title", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name for this group", formalDefinition="Text that is displayed above the contents of the group." )
         protected StringType title;
 
         /**
          * Additional text for the group, used for display purposes.
          */
-        @Child(name = "text", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "text", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Additional text for the group", formalDefinition="Additional text for the group, used for display purposes." )
         protected StringType text;
 
         /**
          * More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.
          */
-        @Child(name = "subject", type = {}, order=4, min=0, max=1)
+        @Child(name = "subject", type = {}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The subject this group's answers are about", formalDefinition="More specific subject this section's answers are about, details the subject given in QuestionnaireResponse." )
         protected Reference subject;
 
@@ -170,14 +170,14 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * A sub-group within a group. The ordering of groups within this group is relevant.
          */
-        @Child(name = "group", type = {GroupComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "group", type = {GroupComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested questionnaire response group", formalDefinition="A sub-group within a group. The ordering of groups within this group is relevant." )
         protected List<GroupComponent> group;
 
         /**
          * Set of questions within this group. The order of questions within the group is relevant.
          */
-        @Child(name = "question", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "question", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Questions in this group", formalDefinition="Set of questions within this group. The order of questions within the group is relevant." )
         protected List<QuestionComponent> question;
 
@@ -522,21 +522,21 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource.
          */
-        @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "linkId", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Corresponding question within Questionnaire", formalDefinition="Identifies the question from the Questionnaire that corresponds to this question in the QuestionnaireResponse resource." )
         protected StringType linkId;
 
         /**
          * The actual question as shown to the user to prompt them for an answer.
          */
-        @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Text of the question as it is shown to the user", formalDefinition="The actual question as shown to the user to prompt them for an answer." )
         protected StringType text;
 
         /**
          * The respondent's answer(s) to the question.
          */
-        @Child(name = "answer", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "answer", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The response(s) to the question", formalDefinition="The respondent's answer(s) to the question." )
         protected List<QuestionAnswerComponent> answer;
 
@@ -740,14 +740,14 @@ public class QuestionnaireResponse extends DomainResource {
         /**
          * The answer (or one of the answers) provided by the respondant to the question.
          */
-        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=1, min=0, max=1)
+        @Child(name = "value", type = {BooleanType.class, DecimalType.class, IntegerType.class, DateType.class, DateTimeType.class, InstantType.class, TimeType.class, StringType.class, UriType.class, Attachment.class, Coding.class, Quantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Single-valued answer to the question", formalDefinition="The answer (or one of the answers) provided by the respondant to the question." )
         protected Type value;
 
         /**
          * Nested group, containing nested question for this question. The order of groups within the question is relevant.
          */
-        @Child(name = "group", type = {GroupComponent.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "group", type = {GroupComponent.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested questionnaire group", formalDefinition="Nested group, containing nested question for this question. The order of groups within the question is relevant." )
         protected List<GroupComponent> group;
 
@@ -1036,14 +1036,14 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * A business identifier assigned to a particular completed (or partially completed) questionnaire.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unique id for this set of answers", formalDefinition="A business identifier assigned to a particular completed (or partially completed) questionnaire." )
     protected Identifier identifier;
 
     /**
      * Indicates the Questionnaire resource that defines the form for which answers are being provided.
      */
-    @Child(name = "questionnaire", type = {Questionnaire.class}, order=1, min=0, max=1)
+    @Child(name = "questionnaire", type = {Questionnaire.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Form being answered", formalDefinition="Indicates the Questionnaire resource that defines the form for which answers are being provided." )
     protected Reference questionnaire;
 
@@ -1055,14 +1055,14 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * The lifecycle status of the questionnaire response as a whole.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | completed | amended", formalDefinition="The lifecycle status of the questionnaire response as a whole." )
     protected Enumeration<QuestionnaireResponseStatus> status;
 
     /**
      * The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.
      */
-    @Child(name = "subject", type = {}, order=3, min=0, max=1)
+    @Child(name = "subject", type = {}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The subject of the questions", formalDefinition="The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information." )
     protected Reference subject;
 
@@ -1074,7 +1074,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.
      */
-    @Child(name = "author", type = {Device.class, Practitioner.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=1)
+    @Child(name = "author", type = {Device.class, Practitioner.class, Patient.class, RelatedPerson.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system." )
     protected Reference author;
 
@@ -1086,14 +1086,14 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * The date and/or time that this version of the questionnaire response was authored.
      */
-    @Child(name = "authored", type = {DateTimeType.class}, order=5, min=0, max=1)
+    @Child(name = "authored", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date this version was authored", formalDefinition="The date and/or time that this version of the questionnaire response was authored." )
     protected DateTimeType authored;
 
     /**
      * The person who answered the questions about the subject.
      */
-    @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1)
+    @Child(name = "source", type = {Patient.class, Practitioner.class, RelatedPerson.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The person who answered the questions", formalDefinition="The person who answered the questions about the subject." )
     protected Reference source;
 
@@ -1105,7 +1105,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Primary encounter during which the answers were collected", formalDefinition="Encounter during which this set of questionnaire response were collected. When there were multiple encounters, this is the one considered most relevant to the context of the answers." )
     protected Reference encounter;
 
@@ -1117,7 +1117,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * A group of questions to a possibly similarly grouped set of questions in the questionnaire response.
      */
-    @Child(name = "group", type = {}, order=8, min=0, max=1)
+    @Child(name = "group", type = {}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Grouped questions", formalDefinition="A group of questions to a possibly similarly grouped set of questions in the questionnaire response." )
     protected GroupComponent group;
 

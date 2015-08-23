@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,35 +49,35 @@ public class Signature extends Type implements ICompositeType {
     /**
      * An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.
      */
-    @Child(name = "type", type = {Coding.class}, order=0, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "type", type = {Coding.class}, order=0, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Indication of the reason the entity signed the object(s)", formalDefinition="An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document." )
     protected List<Coding> type;
 
     /**
      * When the digital signature was signed.
      */
-    @Child(name = "when", type = {InstantType.class}, order=1, min=1, max=1)
+    @Child(name = "when", type = {InstantType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the signature was created", formalDefinition="When the digital signature was signed." )
     protected InstantType when;
 
     /**
      * A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).
      */
-    @Child(name = "who", type = {UriType.class, Practitioner.class, RelatedPerson.class, Patient.class}, order=2, min=1, max=1)
+    @Child(name = "who", type = {UriType.class, Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who signed the signature", formalDefinition="A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key)." )
     protected Type who;
 
     /**
      * A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.
      */
-    @Child(name = "contentType", type = {CodeType.class}, order=3, min=1, max=1)
+    @Child(name = "contentType", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The technical format of the signature", formalDefinition="A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature." )
     protected CodeType contentType;
 
     /**
      * The base64 encoding of the Signature content.
      */
-    @Child(name = "blob", type = {Base64BinaryType.class}, order=4, min=1, max=1)
+    @Child(name = "blob", type = {Base64BinaryType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The actual signature content (XML DigSig. JWT, picture, etc)", formalDefinition="The base64 encoding of the Signature content." )
     protected Base64BinaryType blob;
 
@@ -325,7 +325,7 @@ public class Signature extends Type implements ICompositeType {
         super.listChildren(childrenList);
         childrenList.add(new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type));
         childrenList.add(new Property("when", "instant", "When the digital signature was signed.", 0, java.lang.Integer.MAX_VALUE, when));
-        childrenList.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient)", "A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).", 0, java.lang.Integer.MAX_VALUE, who));
+        childrenList.add(new Property("who[x]", "uri|Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the person that signed the certificate (e.g. the signature used their private key).", 0, java.lang.Integer.MAX_VALUE, who));
         childrenList.add(new Property("contentType", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jwt for JWT, and image/* for a graphical image of a signature.", 0, java.lang.Integer.MAX_VALUE, contentType));
         childrenList.add(new Property("blob", "base64Binary", "The base64 encoding of the Signature content.", 0, java.lang.Integer.MAX_VALUE, blob));
       }

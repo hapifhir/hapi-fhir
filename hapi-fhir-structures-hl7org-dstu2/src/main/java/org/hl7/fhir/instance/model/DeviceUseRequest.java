@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -333,21 +333,21 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * Indicates the site on the subject's body where the device should be used ( i.e. the target site).
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=0, min=0, max=1)
+    @Child(name = "bodySite", type = {CodeableConcept.class, BodySite.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Target body site", formalDefinition="Indicates the site on the subject's body where the device should be used ( i.e. the target site)." )
     protected Type bodySite;
 
     /**
      * The status of the request.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | planned | requested | received | accepted | in-progress | completed | suspended | rejected | aborted", formalDefinition="The status of the request." )
     protected Enumeration<DeviceUseRequestStatus> status;
 
     /**
      * The details of the device  to be used.
      */
-    @Child(name = "device", type = {Device.class}, order=2, min=1, max=1)
+    @Child(name = "device", type = {Device.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Device requested", formalDefinition="The details of the device  to be used." )
     protected Reference device;
 
@@ -359,7 +359,7 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * An encounter that provides additional context in which this request is made.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter motivating request", formalDefinition="An encounter that provides additional context in which this request is made." )
     protected Reference encounter;
 
@@ -371,49 +371,49 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * Identifiers assigned to this order by the orderer or by the receiver.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Request identifier", formalDefinition="Identifiers assigned to this order by the orderer or by the receiver." )
     protected List<Identifier> identifier;
 
     /**
      * Reason or justification for the use of this device.
      */
-    @Child(name = "indication", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "indication", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Reason for request", formalDefinition="Reason or justification for the use of this device." )
     protected List<CodeableConcept> indication;
 
     /**
      * Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.
      */
-    @Child(name = "notes", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "notes", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Notes or comments", formalDefinition="Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
     protected List<StringType> notes;
 
     /**
      * The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.
      */
-    @Child(name = "prnReason", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "prnReason", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="PRN", formalDefinition="The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%." )
     protected List<CodeableConcept> prnReason;
 
     /**
      * The time when the request was made.
      */
-    @Child(name = "orderedOn", type = {DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "orderedOn", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When ordered", formalDefinition="The time when the request was made." )
     protected DateTimeType orderedOn;
 
     /**
      * The time at which the request was made/recorded.
      */
-    @Child(name = "recordedOn", type = {DateTimeType.class}, order=9, min=0, max=1)
+    @Child(name = "recordedOn", type = {DateTimeType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When recorded", formalDefinition="The time at which the request was made/recorded." )
     protected DateTimeType recordedOn;
 
     /**
      * The patient who will use the device.
      */
-    @Child(name = "subject", type = {Patient.class}, order=10, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class}, order=10, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Focus of request", formalDefinition="The patient who will use the device." )
     protected Reference subject;
 
@@ -425,14 +425,14 @@ public class DeviceUseRequest extends DomainResource {
     /**
      * The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
      */
-    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=11, min=0, max=1)
-    @Description(shortDefinition="Schedule for use", formalDefinition="The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. 'Every 8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:'; '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'." )
+    @Child(name = "timing", type = {Timing.class, Period.class, DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Schedule for use", formalDefinition="The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"." )
     protected Type timing;
 
     /**
      * Characterizes how quickly the  use of device must be initiated. Includes concepts such as stat, urgent, routine.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=12, min=0, max=1)
+    @Child(name = "priority", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="Characterizes how quickly the  use of device must be initiated. Includes concepts such as stat, urgent, routine." )
     protected Enumeration<DeviceUseRequestPriority> priority;
 
@@ -1072,7 +1072,7 @@ public class DeviceUseRequest extends DomainResource {
         childrenList.add(new Property("orderedOn", "dateTime", "The time when the request was made.", 0, java.lang.Integer.MAX_VALUE, orderedOn));
         childrenList.add(new Property("recordedOn", "dateTime", "The time at which the request was made/recorded.", 0, java.lang.Integer.MAX_VALUE, recordedOn));
         childrenList.add(new Property("subject", "Reference(Patient)", "The patient who will use the device.", 0, java.lang.Integer.MAX_VALUE, subject));
-        childrenList.add(new Property("timing[x]", "Timing|Period|dateTime", "The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. 'Every 8 hours'; 'Three times a day'; '1/2 an hour before breakfast for 10 days from 23-Dec 2011:'; '15 Oct 2013, 17 Oct 2013 and 1 Nov 2013'.", 0, java.lang.Integer.MAX_VALUE, timing));
+        childrenList.add(new Property("timing[x]", "Timing|Period|dateTime", "The timing schedule for the use of the device The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\".", 0, java.lang.Integer.MAX_VALUE, timing));
         childrenList.add(new Property("priority", "code", "Characterizes how quickly the  use of device must be initiated. Includes concepts such as stat, urgent, routine.", 0, java.lang.Integer.MAX_VALUE, priority));
       }
 

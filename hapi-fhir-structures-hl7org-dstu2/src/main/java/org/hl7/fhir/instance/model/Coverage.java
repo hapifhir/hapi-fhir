@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -49,7 +49,7 @@ public class Coverage extends DomainResource {
     /**
      * The program or plan underwriter or payor.
      */
-    @Child(name = "issuer", type = {Organization.class}, order=0, min=0, max=1)
+    @Child(name = "issuer", type = {Organization.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the plan issuer", formalDefinition="The program or plan underwriter or payor." )
     protected Reference issuer;
 
@@ -61,77 +61,77 @@ public class Coverage extends DomainResource {
     /**
      * Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business.
      */
-    @Child(name = "bin", type = {Identifier.class}, order=1, min=0, max=1)
+    @Child(name = "bin", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="BIN Number", formalDefinition="Business Identification Number (BIN number) used to identify the routing  of eclaims if the insurer themselves don't have a BIN number for all of their business." )
     protected Identifier bin;
 
     /**
      * Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.
      */
-    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Coverage start and end dates", formalDefinition="Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force." )
     protected Period period;
 
     /**
      * The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health.
      */
-    @Child(name = "type", type = {Coding.class}, order=3, min=0, max=1)
+    @Child(name = "type", type = {Coding.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of coverage", formalDefinition="The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health." )
     protected Coding type;
 
     /**
      * The id issued to the subscriber.
      */
-    @Child(name = "subscriberId", type = {Identifier.class}, order=4, min=0, max=1)
+    @Child(name = "subscriberId", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Subscriber ID", formalDefinition="The id issued to the subscriber." )
     protected Identifier subscriberId;
 
     /**
      * The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Subscriber Id, Certificate number or Personal Health Number or Case ID." )
     protected List<Identifier> identifier;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name = "group", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "group", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the group", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType group;
 
     /**
      * Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID.
      */
-    @Child(name = "plan", type = {StringType.class}, order=7, min=0, max=1)
+    @Child(name = "plan", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the plan", formalDefinition="Identifies a style or collective of coverage issues by the underwriter, for example may be used to identify a class of coverage or employer group. May also be referred to as a Policy or Group ID." )
     protected StringType plan;
 
     /**
      * Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID.
      */
-    @Child(name = "subPlan", type = {StringType.class}, order=8, min=0, max=1)
+    @Child(name = "subPlan", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An identifier for the subsection of the plan", formalDefinition="Identifies a sub-style or sub-collective of coverage issues by the underwriter, for example may be used to identify a specific employer group within a class of employers. May be referred to as a Section or Division ID." )
     protected StringType subPlan;
 
     /**
      * A unique identifier for a dependent under the coverage.
      */
-    @Child(name = "dependent", type = {PositiveIntType.class}, order=9, min=0, max=1)
+    @Child(name = "dependent", type = {PositiveIntType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The dependent number", formalDefinition="A unique identifier for a dependent under the coverage." )
     protected PositiveIntType dependent;
 
     /**
      * An optional counter for a particular instance of the identified coverage which increments upon each renewal.
      */
-    @Child(name = "sequence", type = {PositiveIntType.class}, order=10, min=0, max=1)
+    @Child(name = "sequence", type = {PositiveIntType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The plan instance or sequence counter", formalDefinition="An optional counter for a particular instance of the identified coverage which increments upon each renewal." )
     protected PositiveIntType sequence;
 
     /**
      * The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due.
      */
-    @Child(name = "subscriber", type = {Patient.class}, order=11, min=0, max=1)
+    @Child(name = "subscriber", type = {Patient.class}, order=11, min=0, max=1, modifier=true, summary=false)
     @Description(shortDefinition="Plan holder information", formalDefinition="The party who 'owns' the insurance contractual relationship to the policy or to whom the benefit of the policy is due." )
     protected Reference subscriber;
 
@@ -143,14 +143,14 @@ public class Coverage extends DomainResource {
     /**
      * The identifier for a community of providers.
      */
-    @Child(name = "network", type = {Identifier.class}, order=12, min=0, max=1)
+    @Child(name = "network", type = {Identifier.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Insurer network", formalDefinition="The identifier for a community of providers." )
     protected Identifier network;
 
     /**
      * The policy(s) which constitute this insurance coverage.
      */
-    @Child(name = "contract", type = {Contract.class}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contract", type = {Contract.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract details", formalDefinition="The policy(s) which constitute this insurance coverage." )
     protected List<Reference> contract;
     /**

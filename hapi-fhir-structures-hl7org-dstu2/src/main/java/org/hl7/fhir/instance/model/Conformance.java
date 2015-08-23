@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ import org.hl7.fhir.instance.model.annotations.Description;
 import org.hl7.fhir.instance.model.annotations.Block;
 import org.hl7.fhir.instance.model.api.*;
 /**
- * A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.
+ * A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
  */
 @ResourceDef(name="Conformance", profile="http://hl7.org/fhir/Profile/Conformance")
 public class Conformance extends DomainResource implements IBaseConformance {
@@ -1252,14 +1252,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * The name of an individual to contact regarding the conformance.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the conformance." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -1411,21 +1411,21 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Name software is known by.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A name the software is known by", formalDefinition="Name software is known by." )
         protected StringType name;
 
         /**
          * The version identifier for the software covered by this statement.
          */
-        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Version covered by this statement", formalDefinition="The version identifier for the software covered by this statement." )
         protected StringType version;
 
         /**
          * Date this version of the software released.
          */
-        @Child(name = "releaseDate", type = {DateTimeType.class}, order=3, min=0, max=1)
+        @Child(name = "releaseDate", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Date this version released", formalDefinition="Date this version of the software released." )
         protected DateTimeType releaseDate;
 
@@ -1639,14 +1639,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Information about the specific installation that this conformance statement relates to.
          */
-        @Child(name = "description", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "description", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Describes this specific instance", formalDefinition="Information about the specific installation that this conformance statement relates to." )
         protected StringType description;
 
         /**
          * An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces.
          */
-        @Child(name = "url", type = {UriType.class}, order=2, min=0, max=1)
+        @Child(name = "url", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Base URL for the installation", formalDefinition="An absolute base URL for the implementation.  This forms the base for REST interfaces as well as the mailbox and document interfaces." )
         protected UriType url;
 
@@ -1807,67 +1807,74 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Identifies whether this portion of the statement is describing ability to initiate or receive restful operations.
          */
-        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="client | server", formalDefinition="Identifies whether this portion of the statement is describing ability to initiate or receive restful operations." )
         protected Enumeration<RestfulConformanceMode> mode;
 
         /**
          * Information about the system's restful capabilities that apply across all applications, such as security.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="General description of implementation", formalDefinition="Information about the system's restful capabilities that apply across all applications, such as security." )
         protected StringType documentation;
 
         /**
          * Information about security implementation from an interface perspective - what a client needs to know.
          */
-        @Child(name = "security", type = {}, order=3, min=0, max=1)
+        @Child(name = "security", type = {}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Information about security of implementation", formalDefinition="Information about security implementation from an interface perspective - what a client needs to know." )
         protected ConformanceRestSecurityComponent security;
 
         /**
          * A specification of the restful capabilities of the solution for a specific resource type.
          */
-        @Child(name = "resource", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "resource", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Resource served on the REST interface", formalDefinition="A specification of the restful capabilities of the solution for a specific resource type." )
         protected List<ConformanceRestResourceComponent> resource;
 
         /**
          * A specification of restful operations supported by the system.
          */
-        @Child(name = "interaction", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "interaction", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="What operations are supported?", formalDefinition="A specification of restful operations supported by the system." )
         protected List<SystemInteractionComponent> interaction;
 
         /**
          * A code that indicates how transactions are supported.
          */
-        @Child(name = "transactionMode", type = {CodeType.class}, order=6, min=0, max=1)
+        @Child(name = "transactionMode", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="not-supported | batch | transaction | both", formalDefinition="A code that indicates how transactions are supported." )
         protected Enumeration<TransactionMode> transactionMode;
 
         /**
+         * Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.
+         */
+        @Child(name = "searchParam", type = {ConformanceRestResourceSearchParamComponent.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Search params for searching all resources", formalDefinition="Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation." )
+        protected List<ConformanceRestResourceSearchParamComponent> searchParam;
+
+        /**
          * Definition of an operation or a named query and with its parameters and their meaning and type.
          */
-        @Child(name = "operation", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "operation", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Definition of an operation or a custom query", formalDefinition="Definition of an operation or a named query and with its parameters and their meaning and type." )
         protected List<ConformanceRestOperationComponent> operation;
 
         /**
          * A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier "http://hl7.org/fhir/documents/mailbox". Other specifications can declare their own identifier for this purpose.
          */
-        @Child(name = "documentMailbox", type = {UriType.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
-        @Description(shortDefinition="How documents are accepted in /Mailbox", formalDefinition="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier 'http://hl7.org/fhir/documents/mailbox'. Other specifications can declare their own identifier for this purpose." )
+        @Child(name = "documentMailbox", type = {UriType.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="How documents are accepted in /Mailbox", formalDefinition="A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose." )
         protected List<UriType> documentMailbox;
 
         /**
          * An absolute URI which is a reference to the definition of a compartment hosted by the system.
          */
-        @Child(name = "compartment", type = {UriType.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "compartment", type = {UriType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Compartments served/used by system", formalDefinition="An absolute URI which is a reference to the definition of a compartment hosted by the system." )
         protected List<UriType> compartment;
 
-        private static final long serialVersionUID = 471286912L;
+        private static final long serialVersionUID = -881838536L;
 
     /*
      * Constructor
@@ -2132,6 +2139,46 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
+         * @return {@link #searchParam} (Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.)
+         */
+        public List<ConformanceRestResourceSearchParamComponent> getSearchParam() { 
+          if (this.searchParam == null)
+            this.searchParam = new ArrayList<ConformanceRestResourceSearchParamComponent>();
+          return this.searchParam;
+        }
+
+        public boolean hasSearchParam() { 
+          if (this.searchParam == null)
+            return false;
+          for (ConformanceRestResourceSearchParamComponent item : this.searchParam)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #searchParam} (Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.)
+         */
+    // syntactic sugar
+        public ConformanceRestResourceSearchParamComponent addSearchParam() { //3
+          ConformanceRestResourceSearchParamComponent t = new ConformanceRestResourceSearchParamComponent();
+          if (this.searchParam == null)
+            this.searchParam = new ArrayList<ConformanceRestResourceSearchParamComponent>();
+          this.searchParam.add(t);
+          return t;
+        }
+
+    // syntactic sugar
+        public ConformanceRestComponent addSearchParam(ConformanceRestResourceSearchParamComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.searchParam == null)
+            this.searchParam = new ArrayList<ConformanceRestResourceSearchParamComponent>();
+          this.searchParam.add(t);
+          return this;
+        }
+
+        /**
          * @return {@link #operation} (Definition of an operation or a named query and with its parameters and their meaning and type.)
          */
         public List<ConformanceRestOperationComponent> getOperation() { 
@@ -2287,8 +2334,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
           childrenList.add(new Property("resource", "", "A specification of the restful capabilities of the solution for a specific resource type.", 0, java.lang.Integer.MAX_VALUE, resource));
           childrenList.add(new Property("interaction", "", "A specification of restful operations supported by the system.", 0, java.lang.Integer.MAX_VALUE, interaction));
           childrenList.add(new Property("transactionMode", "code", "A code that indicates how transactions are supported.", 0, java.lang.Integer.MAX_VALUE, transactionMode));
+          childrenList.add(new Property("searchParam", "@Conformance.rest.resource.searchParam", "Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.", 0, java.lang.Integer.MAX_VALUE, searchParam));
           childrenList.add(new Property("operation", "", "Definition of an operation or a named query and with its parameters and their meaning and type.", 0, java.lang.Integer.MAX_VALUE, operation));
-          childrenList.add(new Property("documentMailbox", "uri", "A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier 'http://hl7.org/fhir/documents/mailbox'. Other specifications can declare their own identifier for this purpose.", 0, java.lang.Integer.MAX_VALUE, documentMailbox));
+          childrenList.add(new Property("documentMailbox", "uri", "A list of absolute URIs that identify profiles that this server implements for accepting documents in the mailbox. If this list is empty, then documents are not accepted. The base specification has the profile identifier \"http://hl7.org/fhir/documents/mailbox\". Other specifications can declare their own identifier for this purpose.", 0, java.lang.Integer.MAX_VALUE, documentMailbox));
           childrenList.add(new Property("compartment", "uri", "An absolute URI which is a reference to the definition of a compartment hosted by the system.", 0, java.lang.Integer.MAX_VALUE, compartment));
         }
 
@@ -2309,6 +2357,11 @@ public class Conformance extends DomainResource implements IBaseConformance {
             dst.interaction.add(i.copy());
         };
         dst.transactionMode = transactionMode == null ? null : transactionMode.copy();
+        if (searchParam != null) {
+          dst.searchParam = new ArrayList<ConformanceRestResourceSearchParamComponent>();
+          for (ConformanceRestResourceSearchParamComponent i : searchParam)
+            dst.searchParam.add(i.copy());
+        };
         if (operation != null) {
           dst.operation = new ArrayList<ConformanceRestOperationComponent>();
           for (ConformanceRestOperationComponent i : operation)
@@ -2336,7 +2389,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         ConformanceRestComponent o = (ConformanceRestComponent) other;
         return compareDeep(mode, o.mode, true) && compareDeep(documentation, o.documentation, true) && compareDeep(security, o.security, true)
            && compareDeep(resource, o.resource, true) && compareDeep(interaction, o.interaction, true) && compareDeep(transactionMode, o.transactionMode, true)
-           && compareDeep(operation, o.operation, true) && compareDeep(documentMailbox, o.documentMailbox, true)
+           && compareDeep(searchParam, o.searchParam, true) && compareDeep(operation, o.operation, true) && compareDeep(documentMailbox, o.documentMailbox, true)
            && compareDeep(compartment, o.compartment, true);
       }
 
@@ -2355,9 +2408,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
       public boolean isEmpty() {
         return super.isEmpty() && (mode == null || mode.isEmpty()) && (documentation == null || documentation.isEmpty())
            && (security == null || security.isEmpty()) && (resource == null || resource.isEmpty()) && (interaction == null || interaction.isEmpty())
-           && (transactionMode == null || transactionMode.isEmpty()) && (operation == null || operation.isEmpty())
-           && (documentMailbox == null || documentMailbox.isEmpty()) && (compartment == null || compartment.isEmpty())
-          ;
+           && (transactionMode == null || transactionMode.isEmpty()) && (searchParam == null || searchParam.isEmpty())
+           && (operation == null || operation.isEmpty()) && (documentMailbox == null || documentMailbox.isEmpty())
+           && (compartment == null || compartment.isEmpty());
       }
 
   }
@@ -2367,28 +2420,28 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Server adds CORS headers when responding to requests - this enables javascript applications to use the server.
          */
-        @Child(name = "cors", type = {BooleanType.class}, order=1, min=0, max=1)
+        @Child(name = "cors", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Adds CORS Headers (http://enable-cors.org/)", formalDefinition="Server adds CORS headers when responding to requests - this enables javascript applications to use the server." )
         protected BooleanType cors;
 
         /**
          * Types of security services are supported/required by the system.
          */
-        @Child(name = "service", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "service", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="OAuth | SMART-on-FHIR | NTLM | Basic | Kerberos | Certificates", formalDefinition="Types of security services are supported/required by the system." )
         protected List<CodeableConcept> service;
 
         /**
          * General description of how security works.
          */
-        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="General description of how security works", formalDefinition="General description of how security works." )
         protected StringType description;
 
         /**
          * Certificates associated with security profiles.
          */
-        @Child(name = "certificate", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "certificate", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Certificates associated with security profiles", formalDefinition="Certificates associated with security profiles." )
         protected List<ConformanceRestSecurityCertificateComponent> certificate;
 
@@ -2635,14 +2688,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Mime type for certificate.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Mime type for certificate", formalDefinition="Mime type for certificate." )
         protected CodeType type;
 
         /**
          * Actual certificate.
          */
-        @Child(name = "blob", type = {Base64BinaryType.class}, order=2, min=0, max=1)
+        @Child(name = "blob", type = {Base64BinaryType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Actual certificate", formalDefinition="Actual certificate." )
         protected Base64BinaryType blob;
 
@@ -2799,89 +2852,89 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * A type of resource exposed via the restful interface.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A resource type that is supported", formalDefinition="A type of resource exposed via the restful interface." )
         protected CodeType type;
 
         /**
-         * A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.
+         * A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.
          */
-        @Child(name = "profile", type = {StructureDefinition.class}, order=2, min=0, max=1)
-        @Description(shortDefinition="Base System profile for all uses of resource", formalDefinition="A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses." )
+        @Child(name = "profile", type = {StructureDefinition.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Base System profile for all uses of resource", formalDefinition="A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}." )
         protected Reference profile;
 
         /**
-         * The actual object that is the target of the reference (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.)
+         * The actual object that is the target of the reference (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.)
          */
         protected StructureDefinition profileTarget;
 
         /**
          * Identifies a restful operation supported by the solution.
          */
-        @Child(name = "interaction", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "interaction", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="What operations are supported?", formalDefinition="Identifies a restful operation supported by the solution." )
         protected List<ResourceInteractionComponent> interaction;
 
         /**
-         * Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.
+         * This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.
          */
-        @Child(name = "versioning", type = {CodeType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="no-version | versioned | versioned-update", formalDefinition="Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources." )
+        @Child(name = "versioning", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="no-version | versioned | versioned-update", formalDefinition="This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources." )
         protected Enumeration<ResourceVersionPolicy> versioning;
 
         /**
          * A flag for whether the server is able to return past versions as part of the vRead operation.
          */
-        @Child(name = "readHistory", type = {BooleanType.class}, order=5, min=0, max=1)
+        @Child(name = "readHistory", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether vRead can return past versions", formalDefinition="A flag for whether the server is able to return past versions as part of the vRead operation." )
         protected BooleanType readHistory;
 
         /**
          * A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.
          */
-        @Child(name = "updateCreate", type = {BooleanType.class}, order=6, min=0, max=1)
+        @Child(name = "updateCreate", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If update can commit to a new identity", formalDefinition="A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server." )
         protected BooleanType updateCreate;
 
         /**
          * A flag that indicates that the server supports conditional create.
          */
-        @Child(name = "conditionalCreate", type = {BooleanType.class}, order=7, min=0, max=1)
+        @Child(name = "conditionalCreate", type = {BooleanType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If allows/uses conditional create", formalDefinition="A flag that indicates that the server supports conditional create." )
         protected BooleanType conditionalCreate;
 
         /**
          * A flag that indicates that the server supports conditional update.
          */
-        @Child(name = "conditionalUpdate", type = {BooleanType.class}, order=8, min=0, max=1)
+        @Child(name = "conditionalUpdate", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If allows/uses conditional update", formalDefinition="A flag that indicates that the server supports conditional update." )
         protected BooleanType conditionalUpdate;
 
         /**
          * A code that indicates how the server supports conditional delete.
          */
-        @Child(name = "conditionalDelete", type = {CodeType.class}, order=9, min=0, max=1)
+        @Child(name = "conditionalDelete", type = {CodeType.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="not-supported | single | multiple - how conditional delete is supported", formalDefinition="A code that indicates how the server supports conditional delete." )
         protected Enumeration<ConditionalDeleteStatus> conditionalDelete;
 
         /**
          * A list of _include values supported by the server.
          */
-        @Child(name = "searchInclude", type = {StringType.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "searchInclude", type = {StringType.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="_include values supported by the server", formalDefinition="A list of _include values supported by the server." )
         protected List<StringType> searchInclude;
 
         /**
          * A list of _revinclude (reverse include) values supported by the server.
          */
-        @Child(name = "searchRevInclude", type = {StringType.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "searchRevInclude", type = {StringType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="_revinclude values supported by the server", formalDefinition="A list of _revinclude (reverse include) values supported by the server." )
         protected List<StringType> searchRevInclude;
 
         /**
          * Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.
          */
-        @Child(name = "searchParam", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "searchParam", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Search params supported by implementation", formalDefinition="Search parameters for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation." )
         protected List<ConformanceRestResourceSearchParamComponent> searchParam;
 
@@ -2948,7 +3001,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #profile} (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.)
+         * @return {@link #profile} (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.)
          */
         public Reference getProfile() { 
           if (this.profile == null)
@@ -2964,7 +3017,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @param value {@link #profile} (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.)
+         * @param value {@link #profile} (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.)
          */
         public ConformanceRestResourceComponent setProfile(Reference value) { 
           this.profile = value;
@@ -2972,7 +3025,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.)
+         * @return {@link #profile} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.)
          */
         public StructureDefinition getProfileTarget() { 
           if (this.profileTarget == null)
@@ -2984,7 +3037,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.)
+         * @param value {@link #profile} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.)
          */
         public ConformanceRestResourceComponent setProfileTarget(StructureDefinition value) { 
           this.profileTarget = value;
@@ -3032,7 +3085,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return {@link #versioning} (Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         * @return {@link #versioning} (This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
         public Enumeration<ResourceVersionPolicy> getVersioningElement() { 
           if (this.versioning == null)
@@ -3052,7 +3105,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @param value {@link #versioning} (Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
+         * @param value {@link #versioning} (This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.). This is the underlying object with id, value and extensions. The accessor "getVersioning" gives direct access to the value
          */
         public ConformanceRestResourceComponent setVersioningElement(Enumeration<ResourceVersionPolicy> value) { 
           this.versioning = value;
@@ -3060,14 +3113,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         }
 
         /**
-         * @return Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.
+         * @return This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.
          */
         public ResourceVersionPolicy getVersioning() { 
           return this.versioning == null ? null : this.versioning.getValue();
         }
 
         /**
-         * @param value Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.
+         * @param value This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.
          */
         public ConformanceRestResourceComponent setVersioning(ResourceVersionPolicy value) { 
           if (value == null)
@@ -3460,9 +3513,9 @@ public class Conformance extends DomainResource implements IBaseConformance {
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "A type of resource exposed via the restful interface.", 0, java.lang.Integer.MAX_VALUE, type));
-          childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.", 0, java.lang.Integer.MAX_VALUE, profile));
+          childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.", 0, java.lang.Integer.MAX_VALUE, profile));
           childrenList.add(new Property("interaction", "", "Identifies a restful operation supported by the solution.", 0, java.lang.Integer.MAX_VALUE, interaction));
-          childrenList.add(new Property("versioning", "code", "Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.", 0, java.lang.Integer.MAX_VALUE, versioning));
+          childrenList.add(new Property("versioning", "code", "This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.", 0, java.lang.Integer.MAX_VALUE, versioning));
           childrenList.add(new Property("readHistory", "boolean", "A flag for whether the server is able to return past versions as part of the vRead operation.", 0, java.lang.Integer.MAX_VALUE, readHistory));
           childrenList.add(new Property("updateCreate", "boolean", "A flag to indicate that the server allows or needs to allow the client to create new identities on the server (e.g. that is, the client PUTs to a location where there is no existing resource). Allowing this operation means that the server allows the client to create new identities on the server.", 0, java.lang.Integer.MAX_VALUE, updateCreate));
           childrenList.add(new Property("conditionalCreate", "boolean", "A flag that indicates that the server supports conditional create.", 0, java.lang.Integer.MAX_VALUE, conditionalCreate));
@@ -3553,14 +3606,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Coded identifier of the operation, supported by the system resource.
          */
-        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="read | vread | update | delete | history-instance | validate | history-type | create | search-type", formalDefinition="Coded identifier of the operation, supported by the system resource." )
         protected Enumeration<TypeRestfulInteraction> code;
 
         /**
          * Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Anything special about operation behavior", formalDefinition="Guidance specific to the implementation of this operation, such as 'delete is a logical delete' or 'updates are only allowed with version id' or 'creates permitted from pre-authorized certificates only'." )
         protected StringType documentation;
 
@@ -3721,49 +3774,49 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * The name of the search parameter used in the interface.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name of search parameter", formalDefinition="The name of the search parameter used in the interface." )
         protected StringType name;
 
         /**
          * An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]]).
          */
-        @Child(name = "definition", type = {UriType.class}, order=2, min=0, max=1)
+        @Child(name = "definition", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Source of definition for parameter", formalDefinition="An absolute URI that is a formal reference to where this parameter was first defined, so that a client can be confident of the meaning of the search parameter (a reference to [[[SearchParameter.url]]])." )
         protected UriType definition;
 
         /**
          * The type of value a search parameter refers to, and how the content is interpreted.
          */
-        @Child(name = "type", type = {CodeType.class}, order=3, min=1, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
         protected Enumeration<SearchParamType> type;
 
         /**
          * This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Server-specific usage", formalDefinition="This allows documentation of any distinct behaviors about how the search parameter is used.  For example, text matching algorithms." )
         protected StringType documentation;
 
         /**
          * Types of resource (if a resource is referenced).
          */
-        @Child(name = "target", type = {CodeType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "target", type = {CodeType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Types of resource (if a resource reference)", formalDefinition="Types of resource (if a resource is referenced)." )
         protected List<CodeType> target;
 
         /**
          * A modifier supported for the search parameter.
          */
-        @Child(name = "modifier", type = {CodeType.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "modifier", type = {CodeType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="missing | exact | contains | not | text | in | not-in | below | above | type", formalDefinition="A modifier supported for the search parameter." )
         protected List<Enumeration<SearchModifierCode>> modifier;
 
         /**
          * Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from Conformance.rest.resource.searchParam.name on the target resource type.
          */
-        @Child(name = "chain", type = {StringType.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "chain", type = {StringType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Chained names supported", formalDefinition="Contains the names of any search parameters which may be chained to the containing search parameter. Chained parameters may be added to search parameters of type reference, and specify that resources will only be returned if they contain a reference to a resource which matches the chained parameter value. Values for this field should be drawn from Conformance.rest.resource.searchParam.name on the target resource type." )
         protected List<StringType> chain;
 
@@ -4209,14 +4262,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * A coded identifier of the operation, supported by the system.
          */
-        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="transaction | search-system | history-system", formalDefinition="A coded identifier of the operation, supported by the system." )
         protected Enumeration<SystemRestfulInteraction> code;
 
         /**
          * Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Anything special about operation behavior", formalDefinition="Guidance specific to the implementation of this operation, such as limitations on the kind of transactions allowed, or information about system wide search is implemented." )
         protected StringType documentation;
 
@@ -4377,14 +4430,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * The name of a query, which is used in the _query parameter when the query is called.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name by which the operation/query is invoked", formalDefinition="The name of a query, which is used in the _query parameter when the query is called." )
         protected StringType name;
 
         /**
          * Where the formal definition can be found.
          */
-        @Child(name = "definition", type = {OperationDefinition.class}, order=2, min=1, max=1)
+        @Child(name = "definition", type = {OperationDefinition.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The defined operation/query", formalDefinition="Where the formal definition can be found." )
         protected Reference definition;
 
@@ -4546,28 +4599,28 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * An endpoint (network accessible address) to which messages and/or replies are to be sent.
          */
-        @Child(name = "endpoint", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "endpoint", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A messaging service end point", formalDefinition="An endpoint (network accessible address) to which messages and/or replies are to be sent." )
         protected List<ConformanceMessagingEndpointComponent> endpoint;
 
         /**
          * Length if the receiver's reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender).
          */
-        @Child(name = "reliableCache", type = {UnsignedIntType.class}, order=2, min=0, max=1)
+        @Child(name = "reliableCache", type = {UnsignedIntType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reliable Message Cache Length (min)", formalDefinition="Length if the receiver's reliable messaging cache in minutes (if a receiver) or how long the cache length on the receiver should be (if a sender)." )
         protected UnsignedIntType reliableCache;
 
         /**
          * Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Messaging interface behavior details", formalDefinition="Documentation about the system's messaging capabilities for this endpoint not otherwise documented by the conformance statement.  For example, process for becoming an authorized messaging exchange partner." )
         protected StringType documentation;
 
         /**
          * A description of the solution's support for an event at this end point.
          */
-        @Child(name = "event", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "event", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Declare support for this event", formalDefinition="A description of the solution's support for an event at this end point." )
         protected List<ConformanceMessagingEventComponent> event;
 
@@ -4815,14 +4868,14 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * A list of the messaging transport protocol(s) identifiers, supported by this endpoint.
          */
-        @Child(name = "protocol", type = {Coding.class}, order=1, min=1, max=1)
+        @Child(name = "protocol", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="http | ftp | mllp +", formalDefinition="A list of the messaging transport protocol(s) identifiers, supported by this endpoint." )
         protected Coding protocol;
 
         /**
          * The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier.
          */
-        @Child(name = "address", type = {UriType.class}, order=2, min=1, max=1)
+        @Child(name = "address", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Address of end point", formalDefinition="The network address of the end-point. For solutions that do not use network addresses for routing, it can be just an identifier." )
         protected UriType address;
 
@@ -4959,35 +5012,35 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * A coded identifier of a supported messaging event.
          */
-        @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Event type", formalDefinition="A coded identifier of a supported messaging event." )
         protected Coding code;
 
         /**
          * The impact of the content of the message.
          */
-        @Child(name = "category", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "category", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Consequence | Currency | Notification", formalDefinition="The impact of the content of the message." )
         protected Enumeration<MessageSignificanceCategory> category;
 
         /**
          * The mode of this event declaration - whether application is sender or receiver.
          */
-        @Child(name = "mode", type = {CodeType.class}, order=3, min=1, max=1)
+        @Child(name = "mode", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="sender | receiver", formalDefinition="The mode of this event declaration - whether application is sender or receiver." )
         protected Enumeration<ConformanceEventMode> mode;
 
         /**
          * A resource associated with the event.  This is the resource that defines the event.
          */
-        @Child(name = "focus", type = {CodeType.class}, order=4, min=1, max=1)
+        @Child(name = "focus", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Resource that's focus of message", formalDefinition="A resource associated with the event.  This is the resource that defines the event." )
         protected CodeType focus;
 
         /**
          * Information about the request for this event.
          */
-        @Child(name = "request", type = {StructureDefinition.class}, order=5, min=1, max=1)
+        @Child(name = "request", type = {StructureDefinition.class}, order=5, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Profile that describes the request", formalDefinition="Information about the request for this event." )
         protected Reference request;
 
@@ -4999,7 +5052,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Information about the response for this event.
          */
-        @Child(name = "response", type = {StructureDefinition.class}, order=6, min=1, max=1)
+        @Child(name = "response", type = {StructureDefinition.class}, order=6, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Profile that describes the response", formalDefinition="Information about the response for this event." )
         protected Reference response;
 
@@ -5011,7 +5064,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Guidance on how this event is handled, such as internal system trigger points, business rules, etc.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=7, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Endpoint-specific event documentation", formalDefinition="Guidance on how this event is handled, such as internal system trigger points, business rules, etc." )
         protected StringType documentation;
 
@@ -5397,21 +5450,21 @@ public class Conformance extends DomainResource implements IBaseConformance {
         /**
          * Mode of this document declaration - whether application is producer or consumer.
          */
-        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="producer | consumer", formalDefinition="Mode of this document declaration - whether application is producer or consumer." )
         protected Enumeration<DocumentMode> mode;
 
         /**
          * A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc.
          */
-        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "documentation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of document support", formalDefinition="A description of how the application supports or uses the specified document profile.  For example, when are documents created, what action is taken with consumed documents, etc." )
         protected StringType documentation;
 
         /**
          * A constraint on a resource used in the document.
          */
-        @Child(name = "profile", type = {StructureDefinition.class}, order=3, min=1, max=1)
+        @Child(name = "profile", type = {StructureDefinition.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Constraint on a resource used in the document", formalDefinition="A constraint on a resource used in the document." )
         protected Reference profile;
 
@@ -5623,127 +5676,127 @@ public class Conformance extends DomainResource implements IBaseConformance {
     /**
      * An absolute URL that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this conformance statement is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical uri to reference this statement", formalDefinition="An absolute URL that is used to identify this conformance statement when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this conformance statement is (or will be) published." )
     protected UriType url;
 
     /**
      * The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
-    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id for this version of the statement", formalDefinition="The identifier that is used to identify this version of the conformance statement when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
     protected StringType version;
 
     /**
      * A free text natural language name identifying the conformance statement.
      */
-    @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Informal name for this conformance statement", formalDefinition="A free text natural language name identifying the conformance statement." )
     protected StringType name;
 
     /**
      * The status of this conformance statement.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of this conformance statement." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="A flag to indicate that this conformance statement is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the conformance.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the conformance." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<ConformanceContactComponent> contact;
 
     /**
      * The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=7, min=1, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the conformance statement was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the conformance statement changes." )
     protected DateTimeType date;
 
     /**
      * A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.
      */
-    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human description of the conformance statement", formalDefinition="A free text natural language description of the conformance statement and its use. Typically, this is used when the conformance statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP." )
     protected StringType description;
 
     /**
      * Explains why this conformance statement is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=9, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why is this needed?", formalDefinition="Explains why this conformance statement is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the conformamce statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the system described by the conformance statement." )
     protected StringType copyright;
 
     /**
      * The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase).
      */
-    @Child(name = "kind", type = {CodeType.class}, order=11, min=1, max=1)
+    @Child(name = "kind", type = {CodeType.class}, order=11, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="instance | capability | requirements", formalDefinition="The way that this statement is intended to be used, to describe an actual running instance of software, a particular product (kind not instance of software) or a class of implementation (e.g. a desired purchase)." )
     protected Enumeration<ConformanceStatementKind> kind;
 
     /**
      * Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation.
      */
-    @Child(name = "software", type = {}, order=12, min=0, max=1)
+    @Child(name = "software", type = {}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Software that is covered by this conformance statement", formalDefinition="Software that is covered by this conformance statement.  It is used when the conformance statement describes the capabilities of a particular software version, independent of an installation." )
     protected ConformanceSoftwareComponent software;
 
     /**
      * Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program.
      */
-    @Child(name = "implementation", type = {}, order=13, min=0, max=1)
+    @Child(name = "implementation", type = {}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If this describes a specific instance", formalDefinition="Identifies a specific implementation instance that is described by the conformance statement - i.e. a particular installation, rather than the capabilities of a software program." )
     protected ConformanceImplementationComponent implementation;
 
     /**
      * The version of the FHIR specification on which this conformance statement is based.
      */
-    @Child(name = "fhirVersion", type = {IdType.class}, order=14, min=1, max=1)
+    @Child(name = "fhirVersion", type = {IdType.class}, order=14, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="FHIR Version", formalDefinition="The version of the FHIR specification on which this conformance statement is based." )
     protected IdType fhirVersion;
 
     /**
      * A code that indicates whether the application accepts unknown elements or extensions when reading resources.
      */
-    @Child(name = "acceptUnknown", type = {CodeType.class}, order=15, min=1, max=1)
+    @Child(name = "acceptUnknown", type = {CodeType.class}, order=15, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="no | extensions | elements | both", formalDefinition="A code that indicates whether the application accepts unknown elements or extensions when reading resources." )
     protected Enumeration<UnknownContentCode> acceptUnknown;
 
     /**
      * A list of the formats supported by this implementation using their content types.
      */
-    @Child(name = "format", type = {CodeType.class}, order=16, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "format", type = {CodeType.class}, order=16, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="formats supported (xml | json | mime type)", formalDefinition="A list of the formats supported by this implementation using their content types." )
     protected List<CodeType> format;
 
     /**
      * A list of profiles that represent different use cases supported by the system. For a server, "supported by the system" means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}.
      */
-    @Child(name = "profile", type = {StructureDefinition.class}, order=17, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Profiles for use cases supported", formalDefinition="A list of profiles that represent different use cases supported by the system. For a server, 'supported by the system' means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}." )
+    @Child(name = "profile", type = {StructureDefinition.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Profiles for use cases supported", formalDefinition="A list of profiles that represent different use cases supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}." )
     protected List<Reference> profile;
     /**
      * The actual objects that are the target of the reference (A list of profiles that represent different use cases supported by the system. For a server, "supported by the system" means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}.)
@@ -5754,21 +5807,21 @@ public class Conformance extends DomainResource implements IBaseConformance {
     /**
      * A definition of the restful capabilities of the solution, if any.
      */
-    @Child(name = "rest", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "rest", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="If the endpoint is a RESTful one", formalDefinition="A definition of the restful capabilities of the solution, if any." )
     protected List<ConformanceRestComponent> rest;
 
     /**
      * A description of the messaging capabilities of the solution.
      */
-    @Child(name = "messaging", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "messaging", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="If messaging is supported", formalDefinition="A description of the messaging capabilities of the solution." )
     protected List<ConformanceMessagingComponent> messaging;
 
     /**
      * A document definition.
      */
-    @Child(name = "document", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "document", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Document definition", formalDefinition="A document definition." )
     protected List<ConformanceDocumentComponent> document;
 
@@ -6751,7 +6804,7 @@ public class Conformance extends DomainResource implements IBaseConformance {
         childrenList.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this conformance statement is based.", 0, java.lang.Integer.MAX_VALUE, fhirVersion));
         childrenList.add(new Property("acceptUnknown", "code", "A code that indicates whether the application accepts unknown elements or extensions when reading resources.", 0, java.lang.Integer.MAX_VALUE, acceptUnknown));
         childrenList.add(new Property("format", "code", "A list of the formats supported by this implementation using their content types.", 0, java.lang.Integer.MAX_VALUE, format));
-        childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A list of profiles that represent different use cases supported by the system. For a server, 'supported by the system' means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}.", 0, java.lang.Integer.MAX_VALUE, profile));
+        childrenList.add(new Property("profile", "Reference(StructureDefinition)", "A list of profiles that represent different use cases supported by the system. For a server, \"supported by the system\" means the system hosts/produces a set of resources that are conformant to a particular profile, and allows clients that use its services to search using this profile and to find appropriate data. For a client, it means the system will search by this profile and process data according to the guidance implicit in the profile. See further discussion in [Using Profiles]{profiling.html#profile-uses}.", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("rest", "", "A definition of the restful capabilities of the solution, if any.", 0, java.lang.Integer.MAX_VALUE, rest));
         childrenList.add(new Property("messaging", "", "A description of the messaging capabilities of the solution.", 0, java.lang.Integer.MAX_VALUE, messaging));
         childrenList.add(new Property("document", "", "A document definition.", 0, java.lang.Integer.MAX_VALUE, document));

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum V3EntityNameUseR2 {
@@ -192,7 +192,7 @@ public enum V3EntityNameUseR2 {
             case IDE: return "Description:Ideographic representation of name (e.g., Japanese kanji, Chinese characters)";
             case SYL: return "Description:Syllabic transcription of name (e.g., Japanese kana, Korean hangul)";
             case OLD: return "Description:This name is no longer in use (note: Names may also carry valid time ranges .  This code is used to cover the situations where it is known that the name is no longer valid, but no particular time range for its use is known)";
-            case DN: return "Description:This name should no longer be used when interacting with the person (i.e .  in addition to no longer being used, the name should not be even mentioned when interacting with the person)Note: applications are not required to compare names labeled 'Do Not Use' and other names in order to eliminate name parts that are common between the other name and a name labeled 'Do Not Use'.";
+            case DN: return "Description:This name should no longer be used when interacting with the person (i.e .  in addition to no longer being used, the name should not be even mentioned when interacting with the person)Note: applications are not required to compare names labeled \"Do Not Use\" and other names in order to eliminate name parts that are common between the other name and a name labeled \"Do Not Use\".";
             case OR: return "Description:The formal name as registered in an official (government) registry, but which name might not be commonly used .  May correspond to the concept of legal name";
             case PHON: return "Description:The name as understood by the data enterer, i.e. a close approximation of a phonetic spelling of the name, not based on a phonetic algorithm.";
             case SRCH: return "Description:A name intended for use in searching or matching.  This is used when the name is incomplete and contains enough details for search matching, but not enough for other uses.";

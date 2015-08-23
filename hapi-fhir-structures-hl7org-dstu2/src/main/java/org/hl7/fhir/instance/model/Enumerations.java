@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 import org.hl7.fhir.instance.model.api.*;
@@ -1317,7 +1317,7 @@ public class Enumerations {
             case NUMBER: return "Search parameter SHALL be a number (a whole number, or a decimal)";
             case DATE: return "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported";
             case STRING: return "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces";
-            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a '|', depending on the modifier used";
+            case TOKEN: return "Search parameter on a coded element or identifier. May be used to search through the text, displayname, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used";
             case REFERENCE: return "A reference to another resource";
             case COMPOSITE: return "A composite search parameter that combines a search on two values together";
             case QUANTITY: return "A search parameter that searches on a quantity";

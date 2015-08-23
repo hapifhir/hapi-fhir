@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -152,7 +152,7 @@ public class Person extends DomainResource {
         /**
          * The resource to which this actual person is associated.
          */
-        @Child(name = "target", type = {Patient.class, Practitioner.class, RelatedPerson.class, Person.class}, order=1, min=1, max=1)
+        @Child(name = "target", type = {Patient.class, Practitioner.class, RelatedPerson.class, Person.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The resource to which this actual person is associated", formalDefinition="The resource to which this actual person is associated." )
         protected Reference target;
 
@@ -164,7 +164,7 @@ public class Person extends DomainResource {
         /**
          * Level of assurance that this link is actually associated with the target resource.
          */
-        @Child(name = "assurance", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "assurance", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="level1 | level2 | level3 | level4", formalDefinition="Level of assurance that this link is actually associated with the target resource." )
         protected Enumeration<IdentityAssuranceLevel> assurance;
 
@@ -317,56 +317,56 @@ public class Person extends DomainResource {
     /**
      * Identifier for a person within a particular scope.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A Human identifier for this person", formalDefinition="Identifier for a person within a particular scope." )
     protected List<Identifier> identifier;
 
     /**
      * A name associated with the person.
      */
-    @Child(name = "name", type = {HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "name", type = {HumanName.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A name associated with the person", formalDefinition="A name associated with the person." )
     protected List<HumanName> name;
 
     /**
      * A contact detail for the person, e.g. a telephone number or an email address.
      */
-    @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A contact detail for the person", formalDefinition="A contact detail for the person, e.g. a telephone number or an email address." )
     protected List<ContactPoint> telecom;
 
     /**
      * Administrative Gender.
      */
-    @Child(name = "gender", type = {CodeType.class}, order=3, min=0, max=1)
+    @Child(name = "gender", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="male | female | other | unknown", formalDefinition="Administrative Gender." )
     protected Enumeration<AdministrativeGender> gender;
 
     /**
      * The birth date for the person.
      */
-    @Child(name = "birthDate", type = {DateType.class}, order=4, min=0, max=1)
+    @Child(name = "birthDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date on which the person was born", formalDefinition="The birth date for the person." )
     protected DateType birthDate;
 
     /**
      * One or more addresses for the person.
      */
-    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "address", type = {Address.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="One or more addresses for the person", formalDefinition="One or more addresses for the person." )
     protected List<Address> address;
 
     /**
      * An image that can be displayed as a thumbnail of the person to enhance the identification of the individual.
      */
-    @Child(name = "photo", type = {Attachment.class}, order=6, min=0, max=1)
+    @Child(name = "photo", type = {Attachment.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Image of the Person", formalDefinition="An image that can be displayed as a thumbnail of the person to enhance the identification of the individual." )
     protected Attachment photo;
 
     /**
      * The Organization that is the custodian of the person record.
      */
-    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=1)
+    @Child(name = "managingOrganization", type = {Organization.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The Organization that is the custodian of the person record", formalDefinition="The Organization that is the custodian of the person record." )
     protected Reference managingOrganization;
 
@@ -378,14 +378,14 @@ public class Person extends DomainResource {
     /**
      * Whether this person's record is in active use.
      */
-    @Child(name = "active", type = {BooleanType.class}, order=8, min=0, max=1)
+    @Child(name = "active", type = {BooleanType.class}, order=8, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="This person's record is in active use", formalDefinition="Whether this person's record is in active use." )
     protected BooleanType active;
 
     /**
      * Link to a resource that concerns the same actual person.
      */
-    @Child(name = "link", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "link", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Link to a resource that concerns the same actual person", formalDefinition="Link to a resource that concerns the same actual person." )
     protected List<PersonLinkComponent> link;
 

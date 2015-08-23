@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -238,14 +238,14 @@ public class NamingSystem extends DomainResource {
         /**
          * The name of an individual to contact regarding the naming system.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the naming system." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -397,28 +397,28 @@ public class NamingSystem extends DomainResource {
         /**
          * Identifies the unique identifier scheme used for this particular identifier.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="oid | uuid | uri | other", formalDefinition="Identifies the unique identifier scheme used for this particular identifier." )
         protected Enumeration<NamingSystemIdentifierType> type;
 
         /**
          * The string that should be sent over the wire to identify the code system or identifier system.
          */
-        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1)
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The unique identifier", formalDefinition="The string that should be sent over the wire to identify the code system or identifier system." )
         protected StringType value;
 
         /**
          * Indicates whether this identifier is the "preferred" identifier of this type.
          */
-        @Child(name = "preferred", type = {BooleanType.class}, order=3, min=0, max=1)
-        @Description(shortDefinition="Is this the id that should be used for this type", formalDefinition="Indicates whether this identifier is the 'preferred' identifier of this type." )
+        @Child(name = "preferred", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Is this the id that should be used for this type", formalDefinition="Indicates whether this identifier is the \"preferred\" identifier of this type." )
         protected BooleanType preferred;
 
         /**
          * Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.
          */
-        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1)
+        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When is identifier valid?", formalDefinition="Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic." )
         protected Period period;
 
@@ -603,7 +603,7 @@ public class NamingSystem extends DomainResource {
           super.listChildren(childrenList);
           childrenList.add(new Property("type", "code", "Identifies the unique identifier scheme used for this particular identifier.", 0, java.lang.Integer.MAX_VALUE, type));
           childrenList.add(new Property("value", "string", "The string that should be sent over the wire to identify the code system or identifier system.", 0, java.lang.Integer.MAX_VALUE, value));
-          childrenList.add(new Property("preferred", "boolean", "Indicates whether this identifier is the 'preferred' identifier of this type.", 0, java.lang.Integer.MAX_VALUE, preferred));
+          childrenList.add(new Property("preferred", "boolean", "Indicates whether this identifier is the \"preferred\" identifier of this type.", 0, java.lang.Integer.MAX_VALUE, preferred));
           childrenList.add(new Property("period", "Period", "Identifies the period of time over which this identifier is considered appropriate to refer to the namingsystem.  Outside of this window, the identifier might be non-deterministic.", 0, java.lang.Integer.MAX_VALUE, period));
         }
 
@@ -649,91 +649,91 @@ public class NamingSystem extends DomainResource {
     /**
      * The descriptive name of this particular identifier type or code system.
      */
-    @Child(name = "name", type = {StringType.class}, order=0, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Human-readable label", formalDefinition="The descriptive name of this particular identifier type or code system." )
     protected StringType name;
 
     /**
      * Indicates whether the namingsystem is "ready for use" or not.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
-    @Description(shortDefinition="draft | active | retired", formalDefinition="Indicates whether the namingsystem is 'ready for use' or not." )
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=false)
+    @Description(shortDefinition="draft | active | retired", formalDefinition="Indicates whether the namingsystem is \"ready for use\" or not." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * Indicates the purpose for the namingsystem - what kinds of things does it make unique?
      */
-    @Child(name = "kind", type = {CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "kind", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="codesystem | identifier | root", formalDefinition="Indicates the purpose for the namingsystem - what kinds of things does it make unique?" )
     protected Enumeration<NamingSystemType> kind;
 
     /**
      * The name of the individual or organization that published the naming system.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=3, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the naming system." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<NamingSystemContactComponent> contact;
 
     /**
      * The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision.
      */
-    @Child(name = "responsible", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "responsible", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Who maintains system namespace?", formalDefinition="The name of the organization that is responsible for issuing identifiers or codes for this namespace and ensuring their non-collision." )
     protected StringType responsible;
 
     /**
      * The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=6, min=1, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the system was registered or published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the registration changes." )
     protected DateTimeType date;
 
     /**
      * Categorizes a namingsystem for easier search by grouping related namingsystems.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="e.g. driver,  provider,  patient, bank etc", formalDefinition="Categorizes a namingsystem for easier search by grouping related namingsystems." )
     protected CodeableConcept type;
 
     /**
      * Details about what the namespace identifies including scope, granularity, version labeling, etc.
      */
-    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="What does namingsystem identify?", formalDefinition="Details about what the namespace identifies including scope, granularity, version labeling, etc." )
     protected StringType description;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of naming systems." )
     protected List<CodeableConcept> useContext;
 
     /**
      * Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc.
      */
-    @Child(name = "usage", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "usage", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="How/where is it used", formalDefinition="Provides guidance on the use of the namespace, including the handling of formatting characters, use of upper vs. lower case, etc." )
     protected StringType usage;
 
     /**
      * Indicates how the system may be identified when referenced in electronic exchange.
      */
-    @Child(name = "uniqueId", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "uniqueId", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Unique identifiers used for system", formalDefinition="Indicates how the system may be identified when referenced in electronic exchange." )
     protected List<NamingSystemUniqueIdComponent> uniqueId;
 
     /**
      * For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any).
      */
-    @Child(name = "replacedBy", type = {NamingSystem.class}, order=12, min=0, max=1)
+    @Child(name = "replacedBy", type = {NamingSystem.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use this instead", formalDefinition="For namingsystems that are retired, indicates the namingsystem that should be used in their place (if any)." )
     protected Reference replacedBy;
 
@@ -1329,7 +1329,7 @@ public class NamingSystem extends DomainResource {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("name", "string", "The descriptive name of this particular identifier type or code system.", 0, java.lang.Integer.MAX_VALUE, name));
-        childrenList.add(new Property("status", "code", "Indicates whether the namingsystem is 'ready for use' or not.", 0, java.lang.Integer.MAX_VALUE, status));
+        childrenList.add(new Property("status", "code", "Indicates whether the namingsystem is \"ready for use\" or not.", 0, java.lang.Integer.MAX_VALUE, status));
         childrenList.add(new Property("kind", "code", "Indicates the purpose for the namingsystem - what kinds of things does it make unique?", 0, java.lang.Integer.MAX_VALUE, kind));
         childrenList.add(new Property("publisher", "string", "The name of the individual or organization that published the naming system.", 0, java.lang.Integer.MAX_VALUE, publisher));
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));

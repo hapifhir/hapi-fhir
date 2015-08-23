@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -234,70 +234,70 @@ public class Address extends Type implements ICompositeType {
     /**
      * The purpose of this address.
      */
-    @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1)
+    @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="home | work | temp | old - purpose of this address", formalDefinition="The purpose of this address." )
     protected Enumeration<AddressUse> use;
 
     /**
      * Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both.
      */
-    @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
+    @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="postal | physical | both", formalDefinition="Distinguishes between physical addresses (those you can visit) and mailing addresses (e.g. PO Boxes and care-of addresses). Most addresses are both." )
     protected Enumeration<AddressType> type;
 
     /**
      * A full text representation of the address.
      */
-    @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Text representation of the address", formalDefinition="A full text representation of the address." )
     protected StringType text;
 
     /**
      * This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information.
      */
-    @Child(name = "line", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "line", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Street name, number, direction & P.O. Box etc", formalDefinition="This component contains the house number, apartment number, street name, street direction,  P.O. Box number, delivery hints, and similar address information." )
     protected List<StringType> line;
 
     /**
      * The name of the city, town, village or other community or delivery center.
      */
-    @Child(name = "city", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "city", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of city, town etc.", formalDefinition="The name of the city, town, village or other community or delivery center." )
     protected StringType city;
 
     /**
      * The name of the administrative area (county).
      */
-    @Child(name = "district", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "district", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="District name (aka county)", formalDefinition="The name of the administrative area (county)." )
     protected StringType district;
 
     /**
      * Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes).
      */
-    @Child(name = "state", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "state", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Sub-unit of country (abreviations ok)", formalDefinition="Sub-unit of a country with limited sovereignty in a federally organized country. A code may be used if codes are in common use (i.e. US 2 letter state codes)." )
     protected StringType state;
 
     /**
      * A postal code designating a region defined by the postal service.
      */
-    @Child(name = "postalCode", type = {StringType.class}, order=7, min=0, max=1)
+    @Child(name = "postalCode", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Postal code for area", formalDefinition="A postal code designating a region defined by the postal service." )
     protected StringType postalCode;
 
     /**
      * Country - a nation as commonly understood or generally accepted.
      */
-    @Child(name = "country", type = {StringType.class}, order=8, min=0, max=1)
+    @Child(name = "country", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Country (can be ISO 3166 3 letter code)", formalDefinition="Country - a nation as commonly understood or generally accepted." )
     protected StringType country;
 
     /**
      * Time period when address was/is in use.
      */
-    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Time period when address was/is in use", formalDefinition="Time period when address was/is in use." )
     protected Period period;
 

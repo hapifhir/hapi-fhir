@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE.
   
 
-  Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0 
+  Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0 
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xml="http://www.w3.org/XML/1998/namespace" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="0.5.0">
   <!-- Note: When using this schema with some tools, it may also be necessary to declare xmlns:xml="http://www.w3.org/XML/1998/namespace", however this causes performance issues with other tools and thus is not in the base schemas. -->
@@ -1917,7 +1917,7 @@
           </xs:element>
           <xs:element name="short" type="string" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation xml:lang="en">A concise definition that  is shown in the generated XML format that summarizes profiles (used throughout the specification).</xs:documentation>
+              <xs:documentation xml:lang="en">A concise description of what this element means (e.g. for use in auto-generated summaries).</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="definition" type="markdown" minOccurs="0" maxOccurs="1">
@@ -1967,7 +1967,7 @@
           </xs:element>
         <xs:choice minOccurs="0" maxOccurs="1">
            <xs:annotation>
-             <xs:documentation xml:lang="en">The value that should be used if there is no value stated in the instance.</xs:documentation>
+             <xs:documentation xml:lang="en">The value that should be used if there is no value stated in the instance (e.g. 'if not otherwise specified, the abstract is false').</xs:documentation>
            </xs:annotation>
            <xs:element name="defaultValueBoolean" type="boolean"/>
            <xs:element name="defaultValueInteger" type="integer"/>
@@ -2006,7 +2006,7 @@
          </xs:choice>
           <xs:element name="meaningWhenMissing" type="markdown" minOccurs="0" maxOccurs="1">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The Implicit meaning that is to be understood when this element is missing.</xs:documentation>
+              <xs:documentation xml:lang="en">The Implicit meaning that is to be understood when this element is missing (e.g. 'when this element is missing, the period is ongoing'.</xs:documentation>
             </xs:annotation>
           </xs:element>
         <xs:choice minOccurs="0" maxOccurs="1">
@@ -2748,51 +2748,6 @@
        </xs:extension>
      </xs:complexContent>
   </xs:complexType>
-  <xs:simpleType name="AgeUnits-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="min">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Minute</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="h">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Hour</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="d">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Day</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="wk">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Week</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="mo">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Month</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="a">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Year</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="AgeUnits">
-    <xs:annotation>
-      <xs:documentation xml:lang="en"></xs:documentation>
-      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-       <xs:extension base="Element">
-         <xs:attribute name="value" type="AgeUnits-list" use="optional"/>
-       </xs:extension>
-     </xs:complexContent>
-  </xs:complexType>
   <xs:simpleType name="SearchParamType-list">
     <xs:restriction base="xs:string">
       <xs:enumeration value="number">
@@ -3143,6 +3098,11 @@
               <xs:documentation xml:lang="en">This records identifiers associated with this allergy/intolerance concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="onset" minOccurs="0" maxOccurs="1" type="dateTime">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Record of the date and/or time of the onset of the Allergy or Intolerance.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="recordedDate" minOccurs="0" maxOccurs="1" type="dateTime">
             <xs:annotation>
               <xs:documentation xml:lang="en">Date when the sensitivity was recorded.</xs:documentation>
@@ -3193,12 +3153,12 @@
               <xs:documentation xml:lang="en">Represents the date and/or time of the last known occurence of a reaction event.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="comment" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="notes" minOccurs="0" maxOccurs="1" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Additional narrative about the propensity for the Adverse Reaction, not captured in other fields.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="event" type="AllergyIntolerance.Event" minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="reaction" type="AllergyIntolerance.Reaction" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">Details about each Adverse Reaction Event linked to exposure to the identified Substance.</xs:documentation>
            </xs:annotation>
@@ -3207,7 +3167,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="AllergyIntolerance.Event">
+  <xs:complexType name="AllergyIntolerance.Reaction">
     <xs:annotation>
       <xs:documentation xml:lang="en">Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.</xs:documentation>
     </xs:annotation>
@@ -3239,11 +3199,6 @@
               <xs:documentation xml:lang="en">Record of the date and/or time of the onset of the Reaction.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="duration" minOccurs="0" maxOccurs="1" type="Duration">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The amount of time that the Adverse Reaction persisted.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="severity" minOccurs="0" maxOccurs="1" type="AllergyIntoleranceSeverity">
             <xs:annotation>
               <xs:documentation xml:lang="en">Clinical assessment of the severity of the reaction event as a whole, potentially considering multiple different manifestations.</xs:documentation>
@@ -3254,7 +3209,7 @@
               <xs:documentation xml:lang="en">Identification of the route by which the subject was exposed to the substance.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="comment" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="notes" minOccurs="0" maxOccurs="1" type="Annotation">
             <xs:annotation>
               <xs:documentation xml:lang="en">Additional text about the Adverse Reaction event not captured in other fields.</xs:documentation>
            </xs:annotation>
@@ -3265,17 +3220,17 @@
   </xs:complexType>
   <xs:simpleType name="AllergyIntoleranceCriticality-list">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="low">
+      <xs:enumeration value="CRITL">
         <xs:annotation>
           <xs:documentation xml:lang="en">The potential clinical impact of a future reaction is estimated as low risk: exposure to substance is unlikely to result in a life threatening or organ system threatening outcome. Future exposure to the Substance is considered a relative contra-indication.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="high">
+      <xs:enumeration value="CRITH">
         <xs:annotation>
           <xs:documentation xml:lang="en">The potential clinical impact of a future reaction is estimated as high risk: exposure to substance may result in a life threatening or organ system threatening outcome. Future exposure to the Substance may be considered an absolute contra-indication.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
-      <xs:enumeration value="unassessible">
+      <xs:enumeration value="CRITU">
         <xs:annotation>
           <xs:documentation xml:lang="en">Unable to assess the potential clinical impact with the information available</xs:documentation>
         </xs:annotation>
@@ -3295,6 +3250,11 @@
   </xs:complexType>
   <xs:simpleType name="AllergyIntoleranceStatus-list">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="active">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">An active record of a reaction to the identified Substance.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
       <xs:enumeration value="unconfirmed">
         <xs:annotation>
           <xs:documentation xml:lang="en">A low level of certainty about the propensity for a reaction to the identified Substance.</xs:documentation>
@@ -3303,6 +3263,11 @@
       <xs:enumeration value="confirmed">
         <xs:annotation>
           <xs:documentation xml:lang="en">A high level of certainty about the propensity for a reaction to the identified Substance, which may include clinical evidence by testing or rechallenge.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="inactive">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">An inactive record of a reaction to the identified Substance.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="resolved">
@@ -3817,12 +3782,12 @@
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="type" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+          <xs:element name="type" minOccurs="1" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifier for a family of the event.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="subtype" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+          <xs:element name="subtype" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifier for the category of event.</xs:documentation>
            </xs:annotation>
@@ -3873,7 +3838,7 @@
               <xs:documentation xml:lang="en">Direct reference to a resource that identifies the participant.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="userId" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="userId" minOccurs="0" maxOccurs="1" type="Identifier">
             <xs:annotation>
               <xs:documentation xml:lang="en">Unique identifier for the user actively participating in the event.</xs:documentation>
            </xs:annotation>
@@ -3915,7 +3880,7 @@
           </xs:element>
           <xs:element name="purposeOfUse" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The purposeOfUse (reason) specific to this participant that was used during the event being recorded.</xs:documentation>
+              <xs:documentation xml:lang="en">The reason (purpose of use), specific to this participant, that was used during the event being recorded.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -3929,7 +3894,7 @@
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="identifier" minOccurs="0" maxOccurs="1" type="string">
+          <xs:element name="address" minOccurs="0" maxOccurs="1" type="string">
             <xs:annotation>
               <xs:documentation xml:lang="en">An identifier for the network access point of the user device for the audit event.</xs:documentation>
            </xs:annotation>
@@ -3955,9 +3920,9 @@
               <xs:documentation xml:lang="en">Logical source location within the healthcare enterprise network.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="identifier" minOccurs="1" maxOccurs="1" type="string">
+          <xs:element name="identifier" minOccurs="1" maxOccurs="1" type="Identifier">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Identifier of the source where the event originated.</xs:documentation>
+              <xs:documentation xml:lang="en">Identifier of the source where the event was detected.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="type" minOccurs="0" maxOccurs="unbounded" type="Coding">
@@ -3986,24 +3951,24 @@
               <xs:documentation xml:lang="en">Identifies a specific instance of the participant object. The reference should always be version specific.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="type" minOccurs="0" maxOccurs="1" type="AuditEventObjectType">
+          <xs:element name="type" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">The type of the object that was involved in this audit event.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="role" minOccurs="0" maxOccurs="1" type="AuditEventObjectRole">
+          <xs:element name="role" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">Code representing the functional application role of Participant Object being audited.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="lifecycle" minOccurs="0" maxOccurs="1" type="AuditEventObjectLifecycle">
+          <xs:element name="lifecycle" minOccurs="0" maxOccurs="1" type="Coding">
             <xs:annotation>
               <xs:documentation xml:lang="en">Identifier for the data life-cycle stage for the participant object.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="sensitivity" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+          <xs:element name="securityLabel" minOccurs="0" maxOccurs="unbounded" type="Coding">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Denotes policy-defined sensitivity for the Participant Object ID such as VIP, HIV status, mental health status or similar topics.</xs:documentation>
+              <xs:documentation xml:lang="en">Denotes security labels for the identified object.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="name" minOccurs="0" maxOccurs="1" type="string">
@@ -4048,141 +4013,6 @@
            </xs:annotation>
           </xs:element>
         </xs:sequence>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="AuditEventObjectRole-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="1">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="2">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">This is a location identified as related to the event.  This is usually the location where the event took place.  Note that for shipping, the usual events are arrival at a location or departure from a location.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="3">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">This object is any kind of persistent document created as a result of the event.  This could be a paper report, film, electronic report, DICOM Study, etc.  Issues related to medical records life cycle management are conveyed elsewhere.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="4">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A logical object related to a health record event.  This is any healthcare  specific resource (object) not restricted to FHIR defined Resources.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="5">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">This is any configurable file used to control creation of documents.  Examples include the objects maintained by the HL7 Master File transactions, Value Sets, etc.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="6">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A human participant not otherwise identified by some other category</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="7">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">(deprecated)</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="8">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Typically a licensed person who is providing or performing care related to the event, generally a physician.   The key distinction between doctor and practitioner is with regards to their role, not the licensing.  The doctor is the human who actually performed the work.  The practitioner is the human or organization that is responsible for the work.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="9">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A person or system that is being notified as part of the event.  This is relevant in situations where automated systems provide notifications to other parties when an event took place.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="10">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Insurance company, or any other organization who accepts responsibility for paying for the healthcare event.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="11">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A person or active system object involved in the event with a security role.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="12">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A person or system object involved in the event with the authority to modify security roles of other objects.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="13">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A passive object, such as a role table, that is relevant to the event.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="14">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">(deprecated)  Relevant to certain RBAC security methodologies.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="15">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note, the distinction between practitioners and the doctor that actually provided the care to the patient.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="16">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">The source or destination for data transfer, when it does not match some other role.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="17">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A source or destination for data transfer, that acts as an archive, database, or similar role.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="18">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">An object that holds schedule information.  This could be an appointment book, availability information, etc.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="19">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">An organization or person that is the recipient of services.  This could be an organization that is buying services for a patient, or a person that is buying services for an animal.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="20">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">An order, task, work item, procedure step, or other description of work to be performed.  E.g., a particular instance of an MPPS.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="21">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">A list of jobs or a system that provides lists of jobs.  E.g., an MWL SCP.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="22">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">(Deprecated)</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="23">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">An object that specifies or controls the routing or delivery of items.  For example, a distribution list is the routing criteria for mail.  The items delivered may be documents, jobs, or other objects.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="24">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">The contents of a query.  This is used to capture the contents of any kind of query.  For security surveillance purposes knowing the queries being made is very important.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="AuditEventObjectRole">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">Code representing the role the Object played in the event</xs:documentation>
-      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="AuditEventObjectRole-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -4298,131 +4128,6 @@
     <xs:complexContent>
       <xs:extension base="Element">
         <xs:attribute name="value" type="AuditEventParticipantNetworkType-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="AuditEventObjectLifecycle-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="1">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Origination / Creation</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="2">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Import / Copy from original</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="3">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Amendment</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="4">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Verification</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="5">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Translation</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="6">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Access / Use</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="7">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">De-identification</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="8">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Aggregation, summarization, derivation</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="9">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Report</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="10">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Export / Copy to target</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="11">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Disclosure</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="12">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Receipt of disclosure</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="13">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Archiving</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="14">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Logical deletion</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="15">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Permanent erasure / Physical destruction</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="AuditEventObjectLifecycle">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">Identifier for the data life-cycle stage for the object</xs:documentation>
-      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="AuditEventObjectLifecycle-list" use="optional"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="AuditEventObjectType-list">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="1">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Person</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="2">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">System Object</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="3">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Organization</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="4">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">Other</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:complexType name="AuditEventObjectType">
-    <xs:annotation>
-      <xs:documentation xml:lang="en">Code for the object type involved audited</xs:documentation>
-      <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="Element">
-        <xs:attribute name="value" type="AuditEventObjectType-list" use="optional"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -7520,12 +7225,12 @@
   </xs:complexType>
   <xs:element name="Conformance" type="Conformance">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
   </xs:element>
   <xs:complexType name="Conformance">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -7642,7 +7347,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Contact">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7663,7 +7368,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Software">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7689,7 +7394,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Implementation">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7710,7 +7415,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Rest">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7745,6 +7450,11 @@
               <xs:documentation xml:lang="en">A code that indicates how transactions are supported.</xs:documentation>
            </xs:annotation>
           </xs:element>
+          <xs:element name="searchParam" type="Conformance.SearchParam" minOccurs="0" maxOccurs="unbounded">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">Search parameters that are supported for searching all resources for implementations to support and/or make use of - either references to ones defined in the specification, or additional ones defined for/by the implementation.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
           <xs:element name="operation" type="Conformance.Operation" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation xml:lang="en">Definition of an operation or a named query and with its parameters and their meaning and type.</xs:documentation>
@@ -7766,7 +7476,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Security">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7797,7 +7507,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Certificate">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7818,7 +7528,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Resource">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7830,7 +7540,7 @@
           </xs:element>
           <xs:element name="profile" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
-              <xs:documentation xml:lang="en">A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses.</xs:documentation>
+              <xs:documentation xml:lang="en">A specification of the profile that describes the solution's overall support for the resource, including any constraints on cardinality, bindings, lengths or other limitations. See further discussion in [Using Profiles]{profiling.html#profile-uses}.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="interaction" type="Conformance.Interaction" minOccurs="1" maxOccurs="unbounded">
@@ -7840,7 +7550,7 @@
           </xs:element>
           <xs:element name="versioning" minOccurs="0" maxOccurs="1" type="ResourceVersionPolicy">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Thi field is set to true to specify that the system does not support (server) or use (client) versioning for this resource type. If this is not set to true, the server must at least correctly track and populate the versionId meta-property on resources.</xs:documentation>
+              <xs:documentation xml:lang="en">This field is set to no-version to specify that the system does not support (server) or use (client) versioning for this resource type. If this has some other value, the server must at least correctly track and populate the versionId meta-property on resources.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="readHistory" minOccurs="0" maxOccurs="1" type="boolean">
@@ -7889,7 +7599,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Interaction">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7910,7 +7620,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.SearchParam">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7956,7 +7666,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Interaction1">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7977,7 +7687,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Operation">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -7998,7 +7708,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Messaging">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -8029,7 +7739,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Endpoint">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -8050,7 +7760,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Event">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -8096,7 +7806,7 @@
   </xs:complexType>
   <xs:complexType name="Conformance.Document">
     <xs:annotation>
-      <xs:documentation xml:lang="en">A conformance statement is a set of requirements for a desired implementation or a description of how a target application fulfills those requirements in a particular implementation.</xs:documentation>
+      <xs:documentation xml:lang="en">A conformance statement is a set of capabilities of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -11120,17 +10830,17 @@ The update period may be different than the measurement repetition time, if the 
               <xs:documentation xml:lang="en">Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as govt reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="incomingReferralRequest" minOccurs="0" maxOccurs="unbounded" type="Reference">
+          <xs:element name="incomingReferral" minOccurs="0" maxOccurs="unbounded" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The referral request that this encounter satisfies (incoming referral).</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="participant" type="Encounter.Participant" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The main practitioner responsible for providing the service.</xs:documentation>
+              <xs:documentation xml:lang="en">The list of people responsible for providing the service.</xs:documentation>
            </xs:annotation>
           </xs:element>
-          <xs:element name="fulfills" minOccurs="0" maxOccurs="1" type="Reference">
+          <xs:element name="appointment" minOccurs="0" maxOccurs="1" type="Reference">
             <xs:annotation>
               <xs:documentation xml:lang="en">The appointment that scheduled this encounter.</xs:documentation>
            </xs:annotation>
@@ -11692,11 +11402,6 @@ The update period may be different than the measurement repetition time, if the 
     <xs:complexContent>
       <xs:extension base="BackboneElement">
         <xs:sequence>
-          <xs:element name="member" minOccurs="0" maxOccurs="1" type="Reference">
-            <xs:annotation>
-              <xs:documentation xml:lang="en">The practitioner (or Organization) within the team.</xs:documentation>
-           </xs:annotation>
-          </xs:element>
           <xs:element name="role" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
             <xs:annotation>
               <xs:documentation xml:lang="en">The role that this team member is taking within this episode of care.</xs:documentation>
@@ -11705,6 +11410,11 @@ The update period may be different than the measurement repetition time, if the 
           <xs:element name="period" minOccurs="0" maxOccurs="1" type="Period">
             <xs:annotation>
               <xs:documentation xml:lang="en">The period of time that this practitioner is performing some role within the episode of care.</xs:documentation>
+           </xs:annotation>
+          </xs:element>
+          <xs:element name="member" minOccurs="0" maxOccurs="1" type="Reference">
+            <xs:annotation>
+              <xs:documentation xml:lang="en">The practitioner (or Organization) within the team.</xs:documentation>
            </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -13717,6 +13427,11 @@ The update period may be different than the measurement repetition time, if the 
           <xs:documentation xml:lang="en">This is a generated page that contains the table of contents</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="resource">
+        <xs:annotation>
+          <xs:documentation xml:lang="en">This is a page that represents a presented resource. This is typically used for generated conformance resource presentations</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="GuidePageKind">
@@ -14758,12 +14473,12 @@ The update period may be different than the measurement repetition time, if the 
   </xs:complexType>
   <xs:element name="MedicationOrder" type="MedicationOrder">
     <xs:annotation>
-      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient.</xs:documentation>
+      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called &quot;MedicationOrder&quot; rather than &quot;MedicationPrescription&quot; to generalize the use across inpatient and outpatient settings as well as for care plans, etc.</xs:documentation>
     </xs:annotation>
   </xs:element>
   <xs:complexType name="MedicationOrder">
     <xs:annotation>
-      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient.</xs:documentation>
+      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called &quot;MedicationOrder&quot; rather than &quot;MedicationPrescription&quot; to generalize the use across inpatient and outpatient settings as well as for care plans, etc.</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -14854,7 +14569,7 @@ The update period may be different than the measurement repetition time, if the 
   </xs:complexType>
   <xs:complexType name="MedicationOrder.DosageInstruction">
     <xs:annotation>
-      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient.</xs:documentation>
+      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called &quot;MedicationOrder&quot; rather than &quot;MedicationPrescription&quot; to generalize the use across inpatient and outpatient settings as well as for care plans, etc.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -14921,7 +14636,7 @@ The update period may be different than the measurement repetition time, if the 
   </xs:complexType>
   <xs:complexType name="MedicationOrder.Dispense">
     <xs:annotation>
-      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient.</xs:documentation>
+      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called &quot;MedicationOrder&quot; rather than &quot;MedicationPrescription&quot; to generalize the use across inpatient and outpatient settings as well as for care plans, etc.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -14959,7 +14674,7 @@ The update period may be different than the measurement repetition time, if the 
   </xs:complexType>
   <xs:complexType name="MedicationOrder.Substitution">
     <xs:annotation>
-      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient.</xs:documentation>
+      <xs:documentation xml:lang="en">An order for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called &quot;MedicationOrder&quot; rather than &quot;MedicationPrescription&quot; to generalize the use across inpatient and outpatient settings as well as for care plans, etc.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BackboneElement">
@@ -15003,11 +14718,6 @@ The update period may be different than the measurement repetition time, if the 
       <xs:enumeration value="stopped">
         <xs:annotation>
           <xs:documentation xml:lang="en">Actions implied by the prescription have been permanently halted, before all of them occurred.</xs:documentation>
-        </xs:annotation>
-      </xs:enumeration>
-      <xs:enumeration value="superseded">
-        <xs:annotation>
-          <xs:documentation xml:lang="en">The prescription was replaced by a newer one, which encompasses all the information in the previous one.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
       <xs:enumeration value="draft">
@@ -16550,7 +16260,7 @@ The update period may be different than the measurement repetition time, if the 
           </xs:element>
           <xs:element name="code" minOccurs="1" maxOccurs="1" type="IssueType">
             <xs:annotation>
-              <xs:documentation xml:lang="en">Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.</xs:documentation>
+              <xs:documentation xml:lang="en">Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="details" minOccurs="0" maxOccurs="1" type="CodeableConcept">
@@ -19638,7 +19348,7 @@ The update period may be different than the measurement repetition time, if the 
   </xs:simpleType>
   <xs:complexType name="XPathUsageType">
     <xs:annotation>
-      <xs:documentation xml:lang="en">How a search parameter relates to the set of elements returned by evaluating the it's xpath query</xs:documentation>
+      <xs:documentation xml:lang="en">How a search parameter relates to the set of elements returned by evaluating the its xpath query</xs:documentation>
       <xs:documentation xml:lang="en">If the element is present, it must have either a @value, an @id, or extensions</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -20018,7 +19728,7 @@ The update period may be different than the measurement repetition time, if the 
           </xs:element>
           <xs:element name="constrainedType" minOccurs="0" maxOccurs="1" type="code">
             <xs:annotation>
-              <xs:documentation xml:lang="en">The type of type that is being constrained - a data type, a resource, including abstract ones. If this field is present, it indicates that the structure definition is a constraint. If it is not present, then the structure definition is the definition of a base structure.</xs:documentation>
+              <xs:documentation xml:lang="en">The type of type that is being constrained - a data type, an extension, a resource, including abstract ones. If this field is present, it indicates that the structure definition is a constraint. If it is not present, then the structure definition is the definition of a base structure.</xs:documentation>
            </xs:annotation>
           </xs:element>
           <xs:element name="abstract" minOccurs="1" maxOccurs="1" type="boolean">
@@ -20188,7 +19898,7 @@ The update period may be different than the measurement repetition time, if the 
       </xs:enumeration>
       <xs:enumeration value="extension">
         <xs:annotation>
-          <xs:documentation xml:lang="en">The context is a particular extension from a particular profile.  Expressed as uri#name, where uri identifies the profile and #name identifies the extension code</xs:documentation>
+          <xs:documentation xml:lang="en">The context is a particular extension from a particular profile, a uri that identifies the extension definition</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>

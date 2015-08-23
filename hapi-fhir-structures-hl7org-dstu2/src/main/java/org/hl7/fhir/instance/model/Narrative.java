@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -103,7 +103,7 @@ public class Narrative extends BaseNarrative implements INarrative {
             case GENERATED: return "The contents of the narrative are entirely generated from the structured data in the content.";
             case EXTENSIONS: return "The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions";
             case ADDITIONAL: return "The contents of the narrative contain additional information not found in the structured data";
-            case EMPTY: return "The contents of the narrative are some equivalent of 'No human-readable text provided in this case'";
+            case EMPTY: return "The contents of the narrative are some equivalent of \"No human-readable text provided in this case\"";
             default: return "?";
           }
         }
@@ -149,14 +149,14 @@ public class Narrative extends BaseNarrative implements INarrative {
     /**
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data.
      */
-    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="generated | extensions | additional | empty", formalDefinition="The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data." )
     protected Enumeration<NarrativeStatus> status;
 
     /**
      * The actual narrative content, a stripped down version of XHTML.
      */
-    @Child(name = "div", type = {}, order=1, min=1, max=1)
+    @Child(name = "div", type = {}, order=1, min=1, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Limited xhtml content", formalDefinition="The actual narrative content, a stripped down version of XHTML." )
     protected XhtmlNode div;
 

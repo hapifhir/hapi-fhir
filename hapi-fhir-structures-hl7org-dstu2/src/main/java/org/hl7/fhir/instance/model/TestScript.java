@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -592,14 +592,14 @@ public class TestScript extends DomainResource {
         /**
          * The name of an individual to contact regarding the Test Script.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the Test Script." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -751,14 +751,14 @@ public class TestScript extends DomainResource {
         /**
          * A link to the FHIR specification that this test is covering.
          */
-        @Child(name = "link", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "link", type = {}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Links to the FHIR specification", formalDefinition="A link to the FHIR specification that this test is covering." )
         protected List<TestScriptMetadataLinkComponent> link;
 
         /**
          * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
          */
-        @Child(name = "capabilities", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "capabilities", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
         protected List<TestScriptMetadataCapabilitiesComponent> capabilities;
 
@@ -905,14 +905,14 @@ public class TestScript extends DomainResource {
         /**
          * URL to a particular requirement or feature within the FHIR specification.
          */
-        @Child(name = "url", type = {UriType.class}, order=1, min=1, max=1)
+        @Child(name = "url", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="URL to the specification", formalDefinition="URL to a particular requirement or feature within the FHIR specification." )
         protected UriType url;
 
         /**
          * Short description of the link.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Short description", formalDefinition="Short description of the link." )
         protected StringType description;
 
@@ -1073,42 +1073,42 @@ public class TestScript extends DomainResource {
         /**
          * The capabilities required of the server in order for this test script to execute.
          */
-        @Child(name = "required", type = {BooleanType.class}, order=1, min=0, max=1)
+        @Child(name = "required", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Required capabilities", formalDefinition="The capabilities required of the server in order for this test script to execute." )
         protected BooleanType required;
 
         /**
          * Whether or not the capabilities are primarily getting validated by this test script.
          */
-        @Child(name = "validated", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "validated", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Validated capabilities", formalDefinition="Whether or not the capabilities are primarily getting validated by this test script." )
         protected BooleanType validated;
 
         /**
          * Description of the capabilities that this test script is requiring the server to support.
          */
-        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The description of the capabilities", formalDefinition="Description of the capabilities that this test script is requiring the server to support." )
         protected StringType description;
 
         /**
          * Which server these requirements apply to.
          */
-        @Child(name = "destination", type = {IntegerType.class}, order=4, min=0, max=1)
+        @Child(name = "destination", type = {IntegerType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Which server these requirements apply to", formalDefinition="Which server these requirements apply to." )
         protected IntegerType destination;
 
         /**
          * Links to the FHIR specification that describes this interaction and the resources involved in more detail.
          */
-        @Child(name = "link", type = {UriType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "link", type = {UriType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Links to the FHIR specification", formalDefinition="Links to the FHIR specification that describes this interaction and the resources involved in more detail." )
         protected List<UriType> link;
 
         /**
          * Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped.
          */
-        @Child(name = "conformance", type = {Conformance.class}, order=6, min=1, max=1)
+        @Child(name = "conformance", type = {Conformance.class}, order=6, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Required Conformance", formalDefinition="Minimum conformance required of server for test script to execute successfully.   If server does not meet at a minimum the reference conformance definition, then all tests in this script are skipped." )
         protected Reference conformance;
 
@@ -1478,25 +1478,30 @@ public class TestScript extends DomainResource {
         /**
          * Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.
          */
-        @Child(name = "autocreate", type = {BooleanType.class}, order=1, min=0, max=1)
+        @Child(name = "autocreate", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to implicitly create the fixture during setup", formalDefinition="Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section." )
         protected BooleanType autocreate;
 
         /**
          * Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.
          */
-        @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "autodelete", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to implicitly delete the fixture during teardown", formalDefinition="Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section." )
         protected BooleanType autodelete;
 
         /**
          * Reference to the resource (containing the contents of the resource needed for operations).
          */
-        @Child(name = "resource", type = {Reference.class}, order=3, min=0, max=1)
+        @Child(name = "resource", type = {}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference of the resource", formalDefinition="Reference to the resource (containing the contents of the resource needed for operations)." )
         protected Reference resource;
 
-        private static final long serialVersionUID = 672117234L;
+        /**
+         * The actual object that is the target of the reference (Reference to the resource (containing the contents of the resource needed for operations).)
+         */
+        protected Resource resourceTarget;
+
+        private static final long serialVersionUID = 1110683307L;
 
     /*
      * Constructor
@@ -1619,11 +1624,26 @@ public class TestScript extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the resource needed for operations).)
+         */
+        public Resource getResourceTarget() { 
+          return this.resourceTarget;
+        }
+
+        /**
+         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the resource needed for operations).)
+         */
+        public TestScriptFixtureComponent setResourceTarget(Resource value) { 
+          this.resourceTarget = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("autocreate", "boolean", "Whether or not to implicitly create the fixture during setup. If true, the fixture is automatically created on each server being tested during setup, therefore no create operation is required for this fixture in the TestScript.setup section.", 0, java.lang.Integer.MAX_VALUE, autocreate));
           childrenList.add(new Property("autodelete", "boolean", "Whether or not to implicitly delete the fixture during teardown If true, the fixture is automatically deleted on each server being tested during teardown, therefore no delete operation is required for this fixture in the TestScript.teardown section.", 0, java.lang.Integer.MAX_VALUE, autodelete));
-          childrenList.add(new Property("resource", "Reference", "Reference to the resource (containing the contents of the resource needed for operations).", 0, java.lang.Integer.MAX_VALUE, resource));
+          childrenList.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the resource needed for operations).", 0, java.lang.Integer.MAX_VALUE, resource));
         }
 
       public TestScriptFixtureComponent copy() {
@@ -1669,28 +1689,28 @@ public class TestScript extends DomainResource {
         /**
          * Variable name.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Variable name", formalDefinition="Variable name." )
         protected StringType name;
 
         /**
          * Will be used to grab the header field value from the headers that sourceId is pointing to.
          */
-        @Child(name = "headerField", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "headerField", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Header field name", formalDefinition="Will be used to grab the header field value from the headers that sourceId is pointing to." )
         protected StringType headerField;
 
         /**
          * XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both.
          */
-        @Child(name = "path", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "path", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="XPath or JSONPath against the fixture body", formalDefinition="XPath or JSONPath against the fixture body.  When variables are defined, either headerField must be specified or path, but not both." )
         protected StringType path;
 
         /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=4, min=0, max=1)
+        @Child(name = "sourceId", type = {IdType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
         protected IdType sourceId;
 
@@ -1955,14 +1975,14 @@ public class TestScript extends DomainResource {
         /**
          * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
          */
-        @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=1, min=0, max=1)
+        @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
         protected TestScriptMetadataComponent metadata;
 
         /**
          * Action would contain either an operation or an assertion.
          */
-        @Child(name = "action", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "action", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Action", formalDefinition="Action would contain either an operation or an assertion." )
         protected List<TestScriptSetupActionComponent> action;
 
@@ -2089,14 +2109,14 @@ public class TestScript extends DomainResource {
         /**
          * An operation.
          */
-        @Child(name = "operation", type = {}, order=1, min=0, max=1)
+        @Child(name = "operation", type = {}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="An operation", formalDefinition="An operation." )
         protected TestScriptSetupActionOperationComponent operation;
 
         /**
          * Evaluates the results of previous operations to determine if the server under test behaves appropriately.
          */
-        @Child(name = "assert", type = {}, order=2, min=0, max=1)
+        @Child(name = "assert", type = {}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Assertion", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
         protected TestScriptSetupActionAssertComponent assert_;
 
@@ -2203,98 +2223,98 @@ public class TestScript extends DomainResource {
         /**
          * Server interaction or operation type.
          */
-        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The operation type that will be executed", formalDefinition="Server interaction or operation type." )
         protected Coding type;
 
         /**
          * The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
          */
-        @Child(name = "resource", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "resource", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html." )
         protected CodeType resource;
 
         /**
          * The label would be used for tracking/logging purposes by test engines.
          */
-        @Child(name = "label", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "label", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Operation label", formalDefinition="The label would be used for tracking/logging purposes by test engines." )
         protected StringType label;
 
         /**
          * The description would be used by test engines for tracking and reporting purposes.
          */
-        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Operation description", formalDefinition="The description would be used by test engines for tracking and reporting purposes." )
         protected StringType description;
 
         /**
          * The content-type or mime-type to use for RESTful operation in the 'Accept' header.
          */
-        @Child(name = "accept", type = {CodeType.class}, order=5, min=0, max=1)
+        @Child(name = "accept", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Accept' header." )
         protected Enumeration<ContentType> accept;
 
         /**
          * The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        @Child(name = "contentType", type = {CodeType.class}, order=6, min=0, max=1)
+        @Child(name = "contentType", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header." )
         protected Enumeration<ContentType> contentType;
 
         /**
          * Which server to perform the operation on.
          */
-        @Child(name = "destination", type = {IntegerType.class}, order=7, min=0, max=1)
+        @Child(name = "destination", type = {IntegerType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Which server to perform the operation on", formalDefinition="Which server to perform the operation on." )
         protected IntegerType destination;
 
         /**
          * Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.
          */
-        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=0, max=1)
+        @Child(name = "encodeRequestUrl", type = {BooleanType.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not to send the request url in encoded format", formalDefinition="Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths." )
         protected BooleanType encodeRequestUrl;
 
         /**
          * Path plus parameters after [type].  Used to set parts of the request URL explicitly.
          */
-        @Child(name = "params", type = {StringType.class}, order=9, min=0, max=1)
+        @Child(name = "params", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Params", formalDefinition="Path plus parameters after [type].  Used to set parts of the request URL explicitly." )
         protected StringType params;
 
         /**
          * Header elements would be used to set HTTP headers.
          */
-        @Child(name = "requestHeader", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "requestHeader", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Each operation can have one ore more header elements", formalDefinition="Header elements would be used to set HTTP headers." )
         protected List<TestScriptSetupActionOperationRequestHeaderComponent> requestHeader;
 
         /**
          * The fixture id (maybe new) to map to the response.
          */
-        @Child(name = "responseId", type = {IdType.class}, order=11, min=0, max=1)
+        @Child(name = "responseId", type = {IdType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Response Id", formalDefinition="The fixture id (maybe new) to map to the response." )
         protected IdType responseId;
 
         /**
          * The id of the fixture used as the body of a PUT or POST request.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=12, min=0, max=1)
+        @Child(name = "sourceId", type = {IdType.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of body for PUT and POST requests", formalDefinition="The id of the fixture used as the body of a PUT or POST request." )
         protected IdType sourceId;
 
         /**
          * Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.
          */
-        @Child(name = "targetId", type = {IdType.class}, order=13, min=0, max=1)
+        @Child(name = "targetId", type = {IdType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests", formalDefinition="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests." )
         protected IdType targetId;
 
         /**
          * Complete request URL.
          */
-        @Child(name = "url", type = {StringType.class}, order=14, min=0, max=1)
+        @Child(name = "url", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Request URL", formalDefinition="Complete request URL." )
         protected StringType url;
 
@@ -3039,15 +3059,15 @@ public class TestScript extends DomainResource {
         /**
          * The HTTP header field e.g. "Accept".
          */
-        @Child(name = "field", type = {StringType.class}, order=1, min=1, max=1)
-        @Description(shortDefinition="Header field name", formalDefinition="The HTTP header field e.g. 'Accept'." )
+        @Child(name = "field", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Header field name", formalDefinition="The HTTP header field e.g. \"Accept\"." )
         protected StringType field;
 
         /**
          * The value of the header e.g. "application/xml".
          */
-        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="Header value", formalDefinition="The value of the header e.g. 'application/xml'." )
+        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Header value", formalDefinition="The value of the header e.g. \"application/xml\"." )
         protected StringType value;
 
         private static final long serialVersionUID = 274395337L;
@@ -3160,8 +3180,8 @@ public class TestScript extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("field", "string", "The HTTP header field e.g. 'Accept'.", 0, java.lang.Integer.MAX_VALUE, field));
-          childrenList.add(new Property("value", "string", "The value of the header e.g. 'application/xml'.", 0, java.lang.Integer.MAX_VALUE, value));
+          childrenList.add(new Property("field", "string", "The HTTP header field e.g. \"Accept\".", 0, java.lang.Integer.MAX_VALUE, field));
+          childrenList.add(new Property("value", "string", "The value of the header e.g. \"application/xml\".", 0, java.lang.Integer.MAX_VALUE, value));
         }
 
       public TestScriptSetupActionOperationRequestHeaderComponent copy() {
@@ -3204,126 +3224,126 @@ public class TestScript extends DomainResource {
         /**
          * The label would be used for tracking/logging purposes by test engines.
          */
-        @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Assertion label", formalDefinition="The label would be used for tracking/logging purposes by test engines." )
         protected StringType label;
 
         /**
          * The description would be used by test engines for tracking and reporting purposes.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Assertion description", formalDefinition="The description would be used by test engines for tracking and reporting purposes." )
         protected StringType description;
 
         /**
          * The direction to use for the assertion.
          */
-        @Child(name = "direction", type = {CodeType.class}, order=3, min=0, max=1)
+        @Child(name = "direction", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="response | request", formalDefinition="The direction to use for the assertion." )
         protected Enumeration<AssertionDirectionType> direction;
 
         /**
          * Id of fixture used to compare the "sourceId/path" evaluations to.
          */
-        @Child(name = "compareToSourceId", type = {StringType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="Id of fixture used to compare the 'sourceId/path' evaluations to", formalDefinition="Id of fixture used to compare the 'sourceId/path' evaluations to." )
+        @Child(name = "compareToSourceId", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Id of fixture used to compare the \"sourceId/path\" evaluations to", formalDefinition="Id of fixture used to compare the \"sourceId/path\" evaluations to." )
         protected StringType compareToSourceId;
 
         /**
          * XPath or JSONPath expression against fixture used to compare the "sourceId/path" evaluations to.
          */
-        @Child(name = "compareToSourcePath", type = {StringType.class}, order=5, min=0, max=1)
-        @Description(shortDefinition="XPath or JSONPath expression against fixture used to compare the 'sourceId/path' evaluations to", formalDefinition="XPath or JSONPath expression against fixture used to compare the 'sourceId/path' evaluations to." )
+        @Child(name = "compareToSourcePath", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="XPath or JSONPath expression against fixture used to compare the \"sourceId/path\" evaluations to", formalDefinition="XPath or JSONPath expression against fixture used to compare the \"sourceId/path\" evaluations to." )
         protected StringType compareToSourcePath;
 
         /**
          * The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.
          */
-        @Child(name = "contentType", type = {CodeType.class}, order=6, min=0, max=1)
+        @Child(name = "contentType", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="xml | json", formalDefinition="The content-type or mime-type to use for RESTful operation in the 'Content-Type' header." )
         protected Enumeration<ContentType> contentType;
 
         /**
          * The header field e.g. 'Content-Location'.
          */
-        @Child(name = "headerField", type = {StringType.class}, order=7, min=0, max=1)
+        @Child(name = "headerField", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The header field", formalDefinition="The header field e.g. 'Content-Location'." )
         protected StringType headerField;
 
         /**
          * The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.
          */
-        @Child(name = "minimumId", type = {StringType.class}, order=8, min=0, max=1)
+        @Child(name = "minimumId", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="MinimumId", formalDefinition="The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId." )
         protected StringType minimumId;
 
         /**
          * Navigation Links.
          */
-        @Child(name = "navigationLinks", type = {BooleanType.class}, order=9, min=0, max=1)
+        @Child(name = "navigationLinks", type = {BooleanType.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Navigation Links", formalDefinition="Navigation Links." )
         protected BooleanType navigationLinks;
 
         /**
          * The operator type.
          */
-        @Child(name = "operator", type = {CodeType.class}, order=10, min=0, max=1)
+        @Child(name = "operator", type = {CodeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="equals | notEquals | in | notIn | greaterThan | lessThan | empty | notEmpty | contains | notContains", formalDefinition="The operator type." )
         protected Enumeration<AssertionOperatorType> operator;
 
         /**
          * The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server.
          */
-        @Child(name = "path", type = {StringType.class}, order=11, min=0, max=1)
+        @Child(name = "path", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="XPath or JSONPath expression", formalDefinition="The XPath or JSONPath expression to be evaluated against the fixture representing the response received from server." )
         protected StringType path;
 
         /**
          * The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html.
          */
-        @Child(name = "resource", type = {CodeType.class}, order=12, min=0, max=1)
+        @Child(name = "resource", type = {CodeType.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Resource type", formalDefinition="The type of the resource.  See http://hl7-fhir.github.io/resourcelist.html." )
         protected CodeType resource;
 
         /**
          * okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.
          */
-        @Child(name = "response", type = {CodeType.class}, order=13, min=0, max=1)
+        @Child(name = "response", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable", formalDefinition="okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable." )
         protected Enumeration<AssertionResponseTypes> response;
 
         /**
          * HTTP Response Code.
          */
-        @Child(name = "responseCode", type = {StringType.class}, order=14, min=0, max=1)
+        @Child(name = "responseCode", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Response Code", formalDefinition="HTTP Response Code." )
         protected StringType responseCode;
 
         /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=15, min=0, max=1)
+        @Child(name = "sourceId", type = {IdType.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
         protected IdType sourceId;
 
         /**
          * The ID of the Profile to validate against.
          */
-        @Child(name = "validateProfileId", type = {IdType.class}, order=16, min=0, max=1)
+        @Child(name = "validateProfileId", type = {IdType.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Validate Profile Id", formalDefinition="The ID of the Profile to validate against." )
         protected IdType validateProfileId;
 
         /**
          * The value to compare to.
          */
-        @Child(name = "value", type = {StringType.class}, order=17, min=0, max=1)
+        @Child(name = "value", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The value to compare to", formalDefinition="The value to compare to." )
         protected StringType value;
 
         /**
          * Warning Only.
          */
-        @Child(name = "warningOnly", type = {BooleanType.class}, order=18, min=0, max=1)
+        @Child(name = "warningOnly", type = {BooleanType.class}, order=18, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Warning Only", formalDefinition="Warning Only." )
         protected BooleanType warningOnly;
 
@@ -4215,8 +4235,8 @@ public class TestScript extends DomainResource {
           childrenList.add(new Property("label", "string", "The label would be used for tracking/logging purposes by test engines.", 0, java.lang.Integer.MAX_VALUE, label));
           childrenList.add(new Property("description", "string", "The description would be used by test engines for tracking and reporting purposes.", 0, java.lang.Integer.MAX_VALUE, description));
           childrenList.add(new Property("direction", "code", "The direction to use for the assertion.", 0, java.lang.Integer.MAX_VALUE, direction));
-          childrenList.add(new Property("compareToSourceId", "string", "Id of fixture used to compare the 'sourceId/path' evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourceId));
-          childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression against fixture used to compare the 'sourceId/path' evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
+          childrenList.add(new Property("compareToSourceId", "string", "Id of fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourceId));
+          childrenList.add(new Property("compareToSourcePath", "string", "XPath or JSONPath expression against fixture used to compare the \"sourceId/path\" evaluations to.", 0, java.lang.Integer.MAX_VALUE, compareToSourcePath));
           childrenList.add(new Property("contentType", "code", "The content-type or mime-type to use for RESTful operation in the 'Content-Type' header.", 0, java.lang.Integer.MAX_VALUE, contentType));
           childrenList.add(new Property("headerField", "string", "The header field e.g. 'Content-Location'.", 0, java.lang.Integer.MAX_VALUE, headerField));
           childrenList.add(new Property("minimumId", "string", "The ID of a fixture.  Asserts that the response contains at a minimumId the fixture specified by minimumId.", 0, java.lang.Integer.MAX_VALUE, minimumId));
@@ -4309,28 +4329,28 @@ public class TestScript extends DomainResource {
         /**
          * The name of this test.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The name of this test", formalDefinition="The name of this test." )
         protected StringType name;
 
         /**
          * A short description of the test.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Short description of the test", formalDefinition="A short description of the test." )
         protected StringType description;
 
         /**
          * Capabilties that must exist and is assumed to function correctly on the FHIR server being tested.
          */
-        @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=3, min=0, max=1)
+        @Child(name = "metadata", type = {TestScriptMetadataComponent.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Capabiltities that are assumed to function correctly on the FHIR server being tested", formalDefinition="Capabilties that must exist and is assumed to function correctly on the FHIR server being tested." )
         protected TestScriptMetadataComponent metadata;
 
         /**
          * Action would contain either an operation or an assertion.
          */
-        @Child(name = "action", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "action", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Action", formalDefinition="Action would contain either an operation or an assertion." )
         protected List<TestScriptTestActionComponent> action;
 
@@ -4560,14 +4580,14 @@ public class TestScript extends DomainResource {
         /**
          * An operation would involve a REST request to a server.
          */
-        @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1)
+        @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Operation", formalDefinition="An operation would involve a REST request to a server." )
         protected TestScriptSetupActionOperationComponent operation;
 
         /**
          * Evaluates the results of previous operations to determine if the server under test behaves appropriately.
          */
-        @Child(name = "assert", type = {TestScriptSetupActionAssertComponent.class}, order=2, min=0, max=1)
+        @Child(name = "assert", type = {TestScriptSetupActionAssertComponent.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Assertion", formalDefinition="Evaluates the results of previous operations to determine if the server under test behaves appropriately." )
         protected TestScriptSetupActionAssertComponent assert_;
 
@@ -4674,7 +4694,7 @@ public class TestScript extends DomainResource {
         /**
          * Action would contain either an operation or an assertion.
          */
-        @Child(name = "action", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "action", type = {}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Action", formalDefinition="Action would contain either an operation or an assertion." )
         protected List<TestScriptTeardownActionComponent> action;
 
@@ -4774,7 +4794,7 @@ public class TestScript extends DomainResource {
         /**
          * An operation would involve a REST request to a server.
          */
-        @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1)
+        @Child(name = "operation", type = {TestScriptSetupActionOperationComponent.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Operation", formalDefinition="An operation would involve a REST request to a server." )
         protected TestScriptSetupActionOperationComponent operation;
 
@@ -4852,144 +4872,149 @@ public class TestScript extends DomainResource {
     /**
      * An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Literal URL used to reference this TestScript", formalDefinition="An absolute URL that is used to identify this Test Script. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this Test Script is (or will be) published." )
     protected UriType url;
 
     /**
      * The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually.
      */
-    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id for this version of the TestScript", formalDefinition="The identifier that is used to identify this version of the TestScript. This is an arbitrary value managed by the TestScript author manually." )
     protected StringType version;
 
     /**
      * A free text natural language name identifying the TestScript.
      */
-    @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Informal name for this TestScript", formalDefinition="A free text natural language name identifying the TestScript." )
     protected StringType name;
 
     /**
      * The status of the TestScript.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the TestScript." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This TestScript was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the Test Script.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the Test Script." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<TestScriptContactComponent> contact;
 
     /**
      * The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date for this version of the TestScript", formalDefinition="The date that this version of the TestScript was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the test cases change." )
     protected DateTimeType date;
 
     /**
      * A free text natural language description of the TestScript and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the TestScript", formalDefinition="A free text natural language description of the TestScript and its use." )
     protected StringType description;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of Test Scripts." )
     protected List<CodeableConcept> useContext;
 
     /**
      * Explains why this Test Script is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Scope and Usage this Test Script is for", formalDefinition="Explains why this Test Script is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=11, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the Test Script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
      * The required capability must exist and is assumed to function correctly on the FHIR server being tested.
      */
-    @Child(name = "metadata", type = {}, order=12, min=0, max=1)
+    @Child(name = "metadata", type = {}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Required capability that is assumed to function correctly on the FHIR server being tested", formalDefinition="The required capability must exist and is assumed to function correctly on the FHIR server being tested." )
     protected TestScriptMetadataComponent metadata;
 
     /**
      * If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.
      */
-    @Child(name = "multiserver", type = {BooleanType.class}, order=13, min=0, max=1)
+    @Child(name = "multiserver", type = {BooleanType.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Whether or not the tests apply to more than one FHIR server", formalDefinition="If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified." )
     protected BooleanType multiserver;
 
     /**
      * Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.
      */
-    @Child(name = "fixture", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "fixture", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Fixture in the test script - by reference (uri)", formalDefinition="Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute." )
     protected List<TestScriptFixtureComponent> fixture;
 
     /**
      * Reference to the profile to be used for validation.
      */
-    @Child(name = "profile", type = {Reference.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "profile", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reference of the validation profile", formalDefinition="Reference to the profile to be used for validation." )
     protected List<Reference> profile;
+    /**
+     * The actual objects that are the target of the reference (Reference to the profile to be used for validation.)
+     */
+    protected List<Resource> profileTarget;
+
 
     /**
      * Variable is set based either on element value in response body or on header field value in the response headers.
      */
-    @Child(name = "variable", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "variable", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Variable", formalDefinition="Variable is set based either on element value in response body or on header field value in the response headers." )
     protected List<TestScriptVariableComponent> variable;
 
     /**
      * A series of required setup operations before tests are executed.
      */
-    @Child(name = "setup", type = {}, order=17, min=0, max=1)
+    @Child(name = "setup", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required setup operations before tests are executed", formalDefinition="A series of required setup operations before tests are executed." )
     protected TestScriptSetupComponent setup;
 
     /**
      * A test in this script.
      */
-    @Child(name = "test", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "test", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A test in this script", formalDefinition="A test in this script." )
     protected List<TestScriptTestComponent> test;
 
     /**
      * A series of operations required to clean up after the all the tests are executed (successfully or otherwise).
      */
-    @Child(name = "teardown", type = {}, order=19, min=0, max=1)
+    @Child(name = "teardown", type = {}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after the all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
-    private static final long serialVersionUID = 1220428481L;
+    private static final long serialVersionUID = -77088763L;
 
   /*
    * Constructor
@@ -5712,6 +5737,15 @@ public class TestScript extends DomainResource {
     }
 
     /**
+     * @return {@link #profile} (The actual objects that are the target of the reference. The reference library doesn't populate this, but you can use this to hold the resources if you resolvethemt. Reference to the profile to be used for validation.)
+     */
+    public List<Resource> getProfileTarget() { 
+      if (this.profileTarget == null)
+        this.profileTarget = new ArrayList<Resource>();
+      return this.profileTarget;
+    }
+
+    /**
      * @return {@link #variable} (Variable is set based either on element value in response body or on header field value in the response headers.)
      */
     public List<TestScriptVariableComponent> getVariable() { 
@@ -5856,7 +5890,7 @@ public class TestScript extends DomainResource {
         childrenList.add(new Property("metadata", "", "The required capability must exist and is assumed to function correctly on the FHIR server being tested.", 0, java.lang.Integer.MAX_VALUE, metadata));
         childrenList.add(new Property("multiserver", "boolean", "If the tests apply to more than one FHIR server (e.g. cross-server interoperability tests) then multiserver=true. Defaults to false if value is unspecified.", 0, java.lang.Integer.MAX_VALUE, multiserver));
         childrenList.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
-        childrenList.add(new Property("profile", "Reference", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
+        childrenList.add(new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
         childrenList.add(new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable));
         childrenList.add(new Property("setup", "", "A series of required setup operations before tests are executed.", 0, java.lang.Integer.MAX_VALUE, setup));
         childrenList.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));

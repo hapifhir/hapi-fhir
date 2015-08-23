@@ -8,7 +8,6 @@
   </text>
   <url value="http://hl7.org/fhir/StructureDefinition/instant"/>
   <name value="instant"/>
-  <status value="draft"/>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
@@ -16,17 +15,17 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for instant Type: An instant in time - known at least to the second"/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="instant"/>
       <short value="Primitive Type instant"/>
       <definition value="An instant in time - known at least to the second"/>
-      <comments value="Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
+      <comments value="Note: For system observed times, not human-reported times (see date and dateTime below). Time zone is always required"/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -62,10 +61,6 @@
         <code value="Extension"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: dateTime -->
     <element>
       <path value="instant.value"/>
       <representation value="xmlAttr"/>
@@ -73,6 +68,9 @@
       <definition value="The actual value"/>
       <min value="0"/>
       <max value="1"/>
+      <type>
+        <code value="xs:dateTime"/>
+      </type>
     </element>
   </snapshot>
   <differential>
@@ -80,17 +78,13 @@
       <path value="instant"/>
       <short value="Primitive Type instant"/>
       <definition value="An instant in time - known at least to the second"/>
-      <comments value="Note: This is intended for precisely observed times, typically system logs etc, and not human-reported times - for them, see date and dateTime below. Time zone is always required"/>
+      <comments value="Note: For system observed times, not human-reported times (see date and dateTime below). Time zone is always required"/>
       <min value="0"/>
       <max value="*"/>
       <type>
         <code value="Element"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-      The actual value domain is assumed to be known by magic by
-      reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: dateTime -->
     <element>
       <path value="instant.value"/>
       <representation value="xmlAttr"/>
@@ -98,6 +92,9 @@
       <definition value="Primitive value for instant"/>
       <min value="0"/>
       <max value="1"/>
+      <type>
+        <code value="xs:dateTime"/>
+      </type>
     </element>
   </differential>
 </StructureDefinition>

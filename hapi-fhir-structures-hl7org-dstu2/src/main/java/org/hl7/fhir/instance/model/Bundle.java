@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -408,14 +408,14 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]].
          */
-        @Child(name = "relation", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "relation", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="http://www.iana.org/assignments/link-relations/link-relations.xhtml", formalDefinition="A name which details the functional use for this link - see [[http://www.iana.org/assignments/link-relations/link-relations.xhtml]]." )
         protected StringType relation;
 
         /**
          * The reference details for the link.
          */
-        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1)
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Reference details for the link", formalDefinition="The reference details for the link." )
         protected UriType url;
 
@@ -573,42 +573,42 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * A series of links that provide context to this entry.
          */
-        @Child(name = "link", type = {BundleLinkComponent.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "link", type = {BundleLinkComponent.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Links related to this entry", formalDefinition="A series of links that provide context to this entry." )
         protected List<BundleLinkComponent> link;
 
         /**
          * The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource.
          */
-        @Child(name = "fullUrl", type = {UriType.class}, order=2, min=0, max=1)
+        @Child(name = "fullUrl", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Absolute URL for resource (server address, or UUID/OID)", formalDefinition="The Absolute URL for the resource. This must be provided for all resources. The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource." )
         protected UriType fullUrl;
 
         /**
          * The Resources for the entry.
          */
-        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1)
+        @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A resource in the bundle", formalDefinition="The Resources for the entry." )
         protected Resource resource;
 
         /**
          * Information about the search process that lead to the creation of this entry.
          */
-        @Child(name = "search", type = {}, order=4, min=0, max=1)
+        @Child(name = "search", type = {}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Search related information", formalDefinition="Information about the search process that lead to the creation of this entry." )
         protected BundleEntrySearchComponent search;
 
         /**
          * Additional information about how this entry should be processed as part of a transaction.
          */
-        @Child(name = "request", type = {}, order=5, min=0, max=1)
+        @Child(name = "request", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Transaction Related Information", formalDefinition="Additional information about how this entry should be processed as part of a transaction." )
         protected BundleEntryRequestComponent request;
 
         /**
          * Additional information about how this entry should be processed as part of a transaction.
          */
-        @Child(name = "response", type = {}, order=6, min=0, max=1)
+        @Child(name = "response", type = {}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Transaction Related Information", formalDefinition="Additional information about how this entry should be processed as part of a transaction." )
         protected BundleEntryResponseComponent response;
 
@@ -862,14 +862,14 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
          */
-        @Child(name = "mode", type = {CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "mode", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="match | include | outcome - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement." )
         protected Enumeration<SearchEntryMode> mode;
 
         /**
          * When searching, the server's search ranking score for the entry.
          */
-        @Child(name = "score", type = {DecimalType.class}, order=2, min=0, max=1)
+        @Child(name = "score", type = {DecimalType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Search ranking (between 0 and 1)", formalDefinition="When searching, the server's search ranking score for the entry." )
         protected DecimalType score;
 
@@ -1026,43 +1026,43 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * The HTTP verb for this entry in either a update history, or a transaction/ transaction response.
          */
-        @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="GET | POST | PUT | DELETE", formalDefinition="The HTTP verb for this entry in either a update history, or a transaction/ transaction response." )
         protected Enumeration<HTTPVerb> method;
 
         /**
          * The URL for this entry, relative to the root (the address to which the request is posted).
          */
-        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1)
+        @Child(name = "url", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="URL for HTTP equivalent of this entry", formalDefinition="The URL for this entry, relative to the root (the address to which the request is posted)." )
         protected UriType url;
 
         /**
          * If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation.
          */
-        @Child(name = "ifNoneMatch", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "ifNoneMatch", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="For managing cache currency", formalDefinition="If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation." )
         protected StringType ifNoneMatch;
 
         /**
          * Only perform the operation if the Etag value matches. For more information, see the API section "Managing Resource Contention".
          */
-        @Child(name = "ifMatch", type = {StringType.class}, order=4, min=0, max=1)
-        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the Etag value matches. For more information, see the API section 'Managing Resource Contention'." )
+        @Child(name = "ifMatch", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the Etag value matches. For more information, see the API section \"Managing Resource Contention\"." )
         protected StringType ifMatch;
 
         /**
          * Only perform the operation if the last updated date matches. For more information, see the API section "Managing Resource Contention".
          */
-        @Child(name = "ifModifiedSince", type = {InstantType.class}, order=5, min=0, max=1)
-        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the last updated date matches. For more information, see the API section 'Managing Resource Contention'." )
+        @Child(name = "ifModifiedSince", type = {InstantType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the last updated date matches. For more information, see the API section \"Managing Resource Contention\"." )
         protected InstantType ifModifiedSince;
 
         /**
          * Instruct the server not to perform the create if a specified resource already exists. For further information, see "Conditional Create". This is just the query portion of the URL - what follows the "?" (not including the "?").
          */
-        @Child(name = "ifNoneExist", type = {StringType.class}, order=6, min=0, max=1)
-        @Description(shortDefinition="For conditional creates", formalDefinition="Instruct the server not to perform the create if a specified resource already exists. For further information, see 'Conditional Create'. This is just the query portion of the URL - what follows the '?' (not including the '?')." )
+        @Child(name = "ifNoneExist", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="For conditional creates", formalDefinition="Instruct the server not to perform the create if a specified resource already exists. For further information, see \"Conditional Create\". This is just the query portion of the URL - what follows the \"?\" (not including the \"?\")." )
         protected StringType ifNoneExist;
 
         private static final long serialVersionUID = 1355750298L;
@@ -1374,9 +1374,9 @@ public class Bundle extends Resource implements IBaseBundle {
           childrenList.add(new Property("method", "code", "The HTTP verb for this entry in either a update history, or a transaction/ transaction response.", 0, java.lang.Integer.MAX_VALUE, method));
           childrenList.add(new Property("url", "uri", "The URL for this entry, relative to the root (the address to which the request is posted).", 0, java.lang.Integer.MAX_VALUE, url));
           childrenList.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not modified status. See the read/vread interaction documentation.", 0, java.lang.Integer.MAX_VALUE, ifNoneMatch));
-          childrenList.add(new Property("ifMatch", "string", "Only perform the operation if the Etag value matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifMatch));
-          childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. For more information, see the API section 'Managing Resource Contention'.", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
-          childrenList.add(new Property("ifNoneExist", "string", "Instruct the server not to perform the create if a specified resource already exists. For further information, see 'Conditional Create'. This is just the query portion of the URL - what follows the '?' (not including the '?').", 0, java.lang.Integer.MAX_VALUE, ifNoneExist));
+          childrenList.add(new Property("ifMatch", "string", "Only perform the operation if the Etag value matches. For more information, see the API section \"Managing Resource Contention\".", 0, java.lang.Integer.MAX_VALUE, ifMatch));
+          childrenList.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. For more information, see the API section \"Managing Resource Contention\".", 0, java.lang.Integer.MAX_VALUE, ifModifiedSince));
+          childrenList.add(new Property("ifNoneExist", "string", "Instruct the server not to perform the create if a specified resource already exists. For further information, see \"Conditional Create\". This is just the query portion of the URL - what follows the \"?\" (not including the \"?\").", 0, java.lang.Integer.MAX_VALUE, ifNoneExist));
         }
 
       public BundleEntryRequestComponent copy() {
@@ -1429,28 +1429,28 @@ public class Bundle extends Resource implements IBaseBundle {
         /**
          * The status code returned by processing this entry.
          */
-        @Child(name = "status", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "status", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Status return code for entry", formalDefinition="The status code returned by processing this entry." )
         protected StringType status;
 
         /**
          * The location header created by processing this operation.
          */
-        @Child(name = "location", type = {UriType.class}, order=2, min=0, max=1)
+        @Child(name = "location", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The location, if the operation returns a location", formalDefinition="The location header created by processing this operation." )
         protected UriType location;
 
         /**
          * The etag for the resource, it the operation for the entry produced a versioned resource.
          */
-        @Child(name = "etag", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "etag", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The etag for the resource (if relevant)", formalDefinition="The etag for the resource, it the operation for the entry produced a versioned resource." )
         protected StringType etag;
 
         /**
          * The date/time that the resource was modified on the server.
          */
-        @Child(name = "lastModified", type = {InstantType.class}, order=4, min=0, max=1)
+        @Child(name = "lastModified", type = {InstantType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Server's date time modified", formalDefinition="The date/time that the resource was modified on the server." )
         protected InstantType lastModified;
 
@@ -1713,35 +1713,35 @@ public class Bundle extends Resource implements IBaseBundle {
     /**
      * Indicates the purpose of this bundle- how it was intended to be used.
      */
-    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle- how it was intended to be used." )
     protected Enumeration<BundleType> type;
 
     /**
      * If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
      */
-    @Child(name = "total", type = {UnsignedIntType.class}, order=1, min=0, max=1)
+    @Child(name = "total", type = {UnsignedIntType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If search, the total number of matches", formalDefinition="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)." )
     protected UnsignedIntType total;
 
     /**
      * A series of links that provide context to this bundle.
      */
-    @Child(name = "link", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "link", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Links related to this Bundle", formalDefinition="A series of links that provide context to this bundle." )
     protected List<BundleLinkComponent> link;
 
     /**
      * An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).
      */
-    @Child(name = "entry", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "entry", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Entry in the bundle - will have a resource, or information", formalDefinition="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)." )
     protected List<BundleEntryComponent> entry;
 
     /**
      * Digital Signature - base64 encoded. XML DigSIg or a JWT.
      */
-    @Child(name = "signature", type = {Signature.class}, order=4, min=0, max=1)
+    @Child(name = "signature", type = {Signature.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Digital Signature", formalDefinition="Digital Signature - base64 encoded. XML DigSIg or a JWT." )
     protected Signature signature;
 
@@ -2067,11 +2067,11 @@ public class Bundle extends Resource implements IBaseBundle {
     return ResourceType.Bundle;
    }
 
-  @SearchParamDefinition(name="composition", path="Bundle.entry.resource(0)", description="The first resource in the bundle, if the bundle type is 'document' - this is a composition, and this parameter provides access to searches its contents", type="reference" )
+  @SearchParamDefinition(name="composition", path="Bundle.entry.resource(0)", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference" )
   public static final String SP_COMPOSITION = "composition";
   @SearchParamDefinition(name="type", path="Bundle.type", description="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="message", path="Bundle.entry.resource(0)", description="The first resource in the bundle, if the bundle type is 'message' - this is a message header, and this parameter provides access to search its contents", type="reference" )
+  @SearchParamDefinition(name="message", path="Bundle.entry.resource(0)", description="The first resource in the bundle, if the bundle type is \"message\" - this is a message header, and this parameter provides access to search its contents", type="reference" )
   public static final String SP_MESSAGE = "message";
 
 }

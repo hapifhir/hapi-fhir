@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -277,6 +277,10 @@ public class ImplementationGuide extends DomainResource {
          */
         TOC, 
         /**
+         * This is a page that represents a presented resource. This is typically used for generated conformance resource presentations
+         */
+        RESOURCE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -297,6 +301,8 @@ public class ImplementationGuide extends DomainResource {
           return DICTIONARY;
         if ("toc".equals(codeString))
           return TOC;
+        if ("resource".equals(codeString))
+          return RESOURCE;
         throw new Exception("Unknown GuidePageKind code '"+codeString+"'");
         }
         public String toCode() {
@@ -308,6 +314,7 @@ public class ImplementationGuide extends DomainResource {
             case DIRECTORY: return "directory";
             case DICTIONARY: return "dictionary";
             case TOC: return "toc";
+            case RESOURCE: return "resource";
             default: return "?";
           }
         }
@@ -320,6 +327,7 @@ public class ImplementationGuide extends DomainResource {
             case DIRECTORY: return "http://hl7.org/fhir/guide-page-kind";
             case DICTIONARY: return "http://hl7.org/fhir/guide-page-kind";
             case TOC: return "http://hl7.org/fhir/guide-page-kind";
+            case RESOURCE: return "http://hl7.org/fhir/guide-page-kind";
             default: return "?";
           }
         }
@@ -332,6 +340,7 @@ public class ImplementationGuide extends DomainResource {
             case DIRECTORY: return "This is a page that lists the resources of a given type, and also creates pages for all the listed types as other pages in the section";
             case DICTIONARY: return "This is a page that creates the listed resources as a dictionary";
             case TOC: return "This is a generated page that contains the table of contents";
+            case RESOURCE: return "This is a page that represents a presented resource. This is typically used for generated conformance resource presentations";
             default: return "?";
           }
         }
@@ -344,6 +353,7 @@ public class ImplementationGuide extends DomainResource {
             case DIRECTORY: return "Directory";
             case DICTIONARY: return "Dictionary";
             case TOC: return "Table Of Contents";
+            case RESOURCE: return "Resource";
             default: return "?";
           }
         }
@@ -368,6 +378,8 @@ public class ImplementationGuide extends DomainResource {
           return GuidePageKind.DICTIONARY;
         if ("toc".equals(codeString))
           return GuidePageKind.TOC;
+        if ("resource".equals(codeString))
+          return GuidePageKind.RESOURCE;
         throw new IllegalArgumentException("Unknown GuidePageKind code '"+codeString+"'");
         }
     public String toCode(GuidePageKind code) {
@@ -385,6 +397,8 @@ public class ImplementationGuide extends DomainResource {
         return "dictionary";
       if (code == GuidePageKind.TOC)
         return "toc";
+      if (code == GuidePageKind.RESOURCE)
+        return "resource";
       return "?";
       }
     }
@@ -394,14 +408,14 @@ public class ImplementationGuide extends DomainResource {
         /**
          * The name of an individual to contact regarding the implementation guide.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the implementation guide." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -553,14 +567,14 @@ public class ImplementationGuide extends DomainResource {
         /**
          * How the dependency is represented when the guide is published.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="reference | inclusion", formalDefinition="How the dependency is represented when the guide is published." )
         protected Enumeration<GuideDependencyType> type;
 
         /**
          * Where the dependncy is located.
          */
-        @Child(name = "uri", type = {UriType.class}, order=2, min=1, max=1)
+        @Child(name = "uri", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Where to find dependency", formalDefinition="Where the dependncy is located." )
         protected UriType uri;
 
@@ -718,21 +732,21 @@ public class ImplementationGuide extends DomainResource {
         /**
          * The name for the group, as used in page.package.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name used .page.package", formalDefinition="The name for the group, as used in page.package." )
         protected StringType name;
 
         /**
          * Human readable text describing the package.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Human readable text describing the package", formalDefinition="Human readable text describing the package." )
         protected StringType description;
 
         /**
          * A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource.
          */
-        @Child(name = "resource", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "resource", type = {}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Resource in the implementation guide", formalDefinition="A resource that is part of the implementation guide. Conformance resources (value set, structure definition, conformance statements etc) are obvious candidates for inclusion, but any kind of resource can be included as an example resource." )
         protected List<ImplementationGuidePackageResourceComponent> resource;
 
@@ -940,42 +954,42 @@ public class ImplementationGuide extends DomainResource {
         /**
          * Why the resource is included in the guide.
          */
-        @Child(name = "purpose", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "purpose", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="example | terminology | profile | extension | dictionary | logical", formalDefinition="Why the resource is included in the guide." )
         protected Enumeration<GuideResourcePurpose> purpose;
 
         /**
          * A human assigned name for the resource. All resources SHOULD have a name, but the name may be extracted from the resource (e.g. ValueSet.name).
          */
-        @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Human Name for the resource", formalDefinition="A human assigned name for the resource. All resources SHOULD have a name, but the name may be extracted from the resource (e.g. ValueSet.name)." )
         protected StringType name;
 
         /**
          * A description of the reason that a resource has been included in the implementation guide.
          */
-        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reason why included in guide", formalDefinition="A description of the reason that a resource has been included in the implementation guide." )
         protected StringType description;
 
         /**
          * A short code that may be used to identify the resource throughout the implementation guide.
          */
-        @Child(name = "acronym", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "acronym", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Short code to identify the resource", formalDefinition="A short code that may be used to identify the resource throughout the implementation guide." )
         protected StringType acronym;
 
         /**
          * Where this resource is found.
          */
-        @Child(name = "source", type = {UriType.class}, order=5, min=1, max=1)
+        @Child(name = "source", type = {UriType.class}, order=5, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Location of the resource", formalDefinition="Where this resource is found." )
         protected Type source;
 
         /**
          * Another resource that this resource is an example for. This is mostly used for resources that are included as examples of StructureDefinitions.
          */
-        @Child(name = "exampleFor", type = {StructureDefinition.class}, order=6, min=0, max=1)
+        @Child(name = "exampleFor", type = {StructureDefinition.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Resource this is an example of (if applicable)", formalDefinition="Another resource that this resource is an example for. This is mostly used for resources that are included as examples of StructureDefinitions." )
         protected Reference exampleFor;
 
@@ -1341,14 +1355,14 @@ public class ImplementationGuide extends DomainResource {
         /**
          * The type of resource that all instances must conform to.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Type this profiles applies to", formalDefinition="The type of resource that all instances must conform to." )
         protected CodeType type;
 
         /**
          * A reference to the profile that all instances must conform to.
          */
-        @Child(name = "profile", type = {StructureDefinition.class}, order=2, min=1, max=1)
+        @Child(name = "profile", type = {StructureDefinition.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Profile that all resources must conform to", formalDefinition="A reference to the profile that all instances must conform to." )
         protected Reference profile;
 
@@ -1510,49 +1524,49 @@ public class ImplementationGuide extends DomainResource {
         /**
          * The source address for the page.
          */
-        @Child(name = "source", type = {UriType.class}, order=1, min=1, max=1)
+        @Child(name = "source", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Where to find that page", formalDefinition="The source address for the page." )
         protected UriType source;
 
         /**
          * A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc.
          */
-        @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Short name shown for navigational assistance", formalDefinition="A short name used to represent this page in navigational sturctures such as table of contents, bread crumbs, etc." )
         protected StringType name;
 
         /**
          * The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest.
          */
-        @Child(name = "kind", type = {CodeType.class}, order=3, min=1, max=1)
-        @Description(shortDefinition="page | example | list | include | directory | dictionary | toc", formalDefinition="The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest." )
+        @Child(name = "kind", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="page | example | list | include | directory | dictionary | toc | resource", formalDefinition="The kind of page that this is. Some pages are autogenerated (list, example), and othe kinds are of interest so that tools can navigate the user to the page of interest." )
         protected Enumeration<GuidePageKind> kind;
 
         /**
          * For constructed pages, what kind of resources to include in the list.
          */
-        @Child(name = "type", type = {CodeType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "type", type = {CodeType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Kind of resource to include in the list", formalDefinition="For constructed pages, what kind of resources to include in the list." )
         protected List<CodeType> type;
 
         /**
          * For constructed pages, a list of packages to include in the page (or else empty for everything).
          */
-        @Child(name = "package", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "package", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Name of package to include", formalDefinition="For constructed pages, a list of packages to include in the page (or else empty for everything)." )
         protected List<StringType> package_;
 
         /**
          * The format of the page.
          */
-        @Child(name = "format", type = {CodeType.class}, order=6, min=0, max=1)
+        @Child(name = "format", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Format of the page (e.g. html, markdown etc)", formalDefinition="The format of the page." )
         protected CodeType format;
 
         /**
          * Nested Pages/Sections under this page.
          */
-        @Child(name = "page", type = {ImplementationGuidePageComponent.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "page", type = {ImplementationGuidePageComponent.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested Pages / Sections", formalDefinition="Nested Pages/Sections under this page." )
         protected List<ImplementationGuidePageComponent> page;
 
@@ -1978,119 +1992,119 @@ public class ImplementationGuide extends DomainResource {
     /**
      * An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Literal URL used to reference this Implementation Guide", formalDefinition="An absolute URL that is used to identify this implementation guide when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this implementation guide is (or will be) published." )
     protected UriType url;
 
     /**
      * The identifier that is used to identify this version of the Implementation Guide when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the Implementation Guide author manually.
      */
-    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id for this version of the Implementation Guide", formalDefinition="The identifier that is used to identify this version of the Implementation Guide when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the Implementation Guide author manually." )
     protected StringType version;
 
     /**
      * A free text natural language name identifying the Implementation Guide.
      */
-    @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Informal name for this Implementation Guide", formalDefinition="A free text natural language name identifying the Implementation Guide." )
     protected StringType name;
 
     /**
      * The status of the Implementation Guide.
      */
-    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the Implementation Guide." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * This Implementation Guide was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This Implementation Guide was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the implementation guide.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the implementation guide." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<ImplementationGuideContactComponent> contact;
 
     /**
      * The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date for this version of the Implementation Guide", formalDefinition="The date that this version of the Implementation Guide was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes." )
     protected DateTimeType date;
 
     /**
      * A free text natural language description of the Implementation Guide and its use.
      */
-    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Natural language description of the Implementation Guide", formalDefinition="A free text natural language description of the Implementation Guide and its use." )
     protected StringType description;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The implementation guide is intended to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of implementation guides. The most common use of this element is to represent the country / jurisdication for which this implementation guide was defined." )
     protected List<CodeableConcept> useContext;
 
     /**
      * A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the implementation guide and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the details of the constraints and mappings." )
     protected StringType copyright;
 
     /**
      * The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version.
      */
-    @Child(name = "fhirVersion", type = {IdType.class}, order=11, min=0, max=1)
+    @Child(name = "fhirVersion", type = {IdType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="FHIR Version this Implementation Guide targets", formalDefinition="The version of the FHIR specification on which this ImplementationGuide is based - this is the formal version of the specification, without the revision number, e.g. [publication].[major].[minor], which is 0.5.0 for this version." )
     protected IdType fhirVersion;
 
     /**
      * Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides.
      */
-    @Child(name = "dependency", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "dependency", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Another Implementation guide this depends on", formalDefinition="Another implementation guide that this implementation depends on. Typically, an implementation guide uses value sets, profiles etc defined in other implementation guides." )
     protected List<ImplementationGuideDependencyComponent> dependency;
 
     /**
      * A logial group of resources. Logical groups can be used when building pages.
      */
-    @Child(name = "package", type = {}, order=13, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "package", type = {}, order=13, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Group of resources as used in .page.package", formalDefinition="A logial group of resources. Logical groups can be used when building pages." )
     protected List<ImplementationGuidePackageComponent> package_;
 
     /**
      * A set of profiles that all resources covered by this implementation guide must conform to.
      */
-    @Child(name = "global", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "global", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Profiles that apply globally", formalDefinition="A set of profiles that all resources covered by this implementation guide must conform to." )
     protected List<ImplementationGuideGlobalComponent> global;
 
     /**
      * A binary file that is included in the  implementation guide when it is published.
      */
-    @Child(name = "binary", type = {UriType.class}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "binary", type = {UriType.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Image, css, script, etc", formalDefinition="A binary file that is included in the  implementation guide when it is published." )
     protected List<UriType> binary;
 
     /**
      * A page / section in the implementation guide. The root page is the implementation guide home page.
      */
-    @Child(name = "page", type = {}, order=16, min=1, max=1)
+    @Child(name = "page", type = {}, order=16, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Page/Section in the Guide", formalDefinition="A page / section in the implementation guide. The root page is the implementation guide home page." )
     protected ImplementationGuidePageComponent page;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -593,21 +593,21 @@ public class DeviceMetric extends DomainResource {
         /**
          * Describes the type of the calibration method.
          */
-        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="unspecified | offset | gain | two-point", formalDefinition="Describes the type of the calibration method." )
         protected Enumeration<DeviceMetricCalibrationType> type;
 
         /**
          * Describes the state of the calibration.
          */
-        @Child(name = "state", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "state", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="not-calibrated | calibration-required | calibrated | unspecified", formalDefinition="Describes the state of the calibration." )
         protected Enumeration<DeviceMetricCalibrationState> state;
 
         /**
          * Describes the time last calibration has been performed.
          */
-        @Child(name = "time", type = {InstantType.class}, order=3, min=0, max=1)
+        @Child(name = "time", type = {InstantType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Describes the time last calibration has been performed", formalDefinition="Describes the time last calibration has been performed." )
         protected InstantType time;
 
@@ -815,7 +815,7 @@ public class DeviceMetric extends DomainResource {
     /**
      * Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of metric", formalDefinition="Describes the type of the metric. For example: Heart Rate, PEEP Setting, etc." )
     protected CodeableConcept type;
 
@@ -823,21 +823,21 @@ public class DeviceMetric extends DomainResource {
      * Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID. 
 It should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifier of this DeviceMetric", formalDefinition="Describes the unique identification of this metric that has been assigned by the device or gateway software. For example: handle ID. \nIt should be noted that in order to make the identifier unique, the system element of the identifier should be set to the unique identifier of the device." )
     protected Identifier identifier;
 
     /**
      * Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc.
      */
-    @Child(name = "unit", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "unit", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unit of metric", formalDefinition="Describes the unit that an observed value determined for this metric will have. For example: Percent, Seconds, etc." )
     protected CodeableConcept unit;
 
     /**
      * Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc.
      */
-    @Child(name = "source", type = {Device.class}, order=3, min=0, max=1)
+    @Child(name = "source", type = {Device.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Describes the link to the source Device", formalDefinition="Describes the link to the  Device that this DeviceMetric belongs to and that contains administrative device information such as manufacture, serial number, etc." )
     protected Reference source;
 
@@ -850,7 +850,7 @@ It should be noted that in order to make the identifier unique, the system eleme
      * Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.
 An example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location.
      */
-    @Child(name = "parent", type = {DeviceComponent.class}, order=4, min=0, max=1)
+    @Child(name = "parent", type = {DeviceComponent.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Describes the link to the parent DeviceComponent", formalDefinition="Describes the link to the  DeviceComponent that this DeviceMetric belongs to and that provide information about the location of this DeviceMetric in the containment structure of the parent Device.\nAn example would be a DeviceComponent that represents a Channel. This reference can be used by a client application to distinguish DeviceMetrics that have the same type, but should be interpreted based on their containment location." )
     protected Reference parent;
 
@@ -863,21 +863,21 @@ An example would be a DeviceComponent that represents a Channel. This reference 
     /**
      * Indicates current operational state of the device. For example: On, Off, Standby, etc.
      */
-    @Child(name = "operationalStatus", type = {CodeType.class}, order=5, min=0, max=1)
+    @Child(name = "operationalStatus", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="on | off | standby", formalDefinition="Indicates current operational state of the device. For example: On, Off, Standby, etc." )
     protected Enumeration<DeviceMetricOperationalStatus> operationalStatus;
 
     /**
      * Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta.
      */
-    @Child(name = "color", type = {CodeType.class}, order=6, min=0, max=1)
+    @Child(name = "color", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="black | red | green | yellow | blue | magenta | cyan | white", formalDefinition="Describes the color representation for the metric. This is often used to aid clinicians to track and identify parameter types by color. In practice, consider a Patient Monitor that has ECG/HR and Pleth for example; the parameters are displayed in different characteristic colors, such as HR-blue, BP-green, and PR and SpO2- magenta." )
     protected Enumeration<DeviceMetricColor> color;
 
     /**
      * Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation.
      */
-    @Child(name = "category", type = {CodeType.class}, order=7, min=1, max=1)
+    @Child(name = "category", type = {CodeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="measurement | setting | calculation | unspecified", formalDefinition="Indicates the category of the observation generation process. A DeviceMetric can be for example a setting, measurement, or calculation." )
     protected Enumeration<DeviceMetricCategory> category;
 
@@ -886,14 +886,14 @@ An example would be a DeviceComponent that represents a Channel. This reference 
 The measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.
 The update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured.
      */
-    @Child(name = "measurementPeriod", type = {Timing.class}, order=8, min=0, max=1)
+    @Child(name = "measurementPeriod", type = {Timing.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Describes the measurement repetition time", formalDefinition="Describes the measurement repetition time. This is not necessarily the same as the update period.\nThe measurement repetition time can range from milliseconds up to hours. An example for a measurement repetition time in the range of milliseconds is the sampling rate of an ECG. An example for a measurement repetition time in the range of hours is a NIBP that is triggered automatically every hour.\nThe update period may be different than the measurement repetition time, if the device does not update the published observed value with the same frequency as it was measured." )
     protected Timing measurementPeriod;
 
     /**
      * Describes the calibrations that have been performed or that are required to be performed.
      */
-    @Child(name = "calibration", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "calibration", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Describes the calibrations that have been performed or that are required to be performed", formalDefinition="Describes the calibrations that have been performed or that are required to be performed." )
     protected List<DeviceMetricCalibrationComponent> calibration;
 

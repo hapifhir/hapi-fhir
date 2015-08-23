@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -124,12 +124,12 @@ public class HumanName extends Type implements ICompositeType {
         public String getDefinition() {
           switch (this) {
             case USUAL: return "Known as/conventional/the one you normally use";
-            case OFFICIAL: return "The formal name as registered in an official (government) registry, but which name might not be commonly used. May be called 'legal name'.";
+            case OFFICIAL: return "The formal name as registered in an official (government) registry, but which name might not be commonly used. May be called \"legal name\".";
             case TEMP: return "A temporary name. Name.period can provide more detailed information. This may also be used for temporary names assigned at birth or in emergency situations.";
             case NICKNAME: return "A name that is used to address the person in an informal manner, but is not part of their formal or usual name";
             case ANONYMOUS: return "Anonymous assigned name, alias, or pseudonym (used to protect a person's identity for privacy reasons)";
             case OLD: return "This name is no longer in use (or was never correct, but retained for records)";
-            case MAIDEN: return "A name used prior to marriage. Marriage naming customs vary greatly around the world. This name use is for use by applications that collect and store 'maiden' names. Though the concept of maiden name is often gender specific, the use of this term is not gender specific. The use of this term does not imply any particular history for a person's name, nor should the maiden name be determined algorithmically.";
+            case MAIDEN: return "A name used prior to marriage. Marriage naming customs vary greatly around the world. This name use is for use by applications that collect and store \"maiden\" names. Though the concept of maiden name is often gender specific, the use of this term is not gender specific. The use of this term does not imply any particular history for a person's name, nor should the maiden name be determined algorithmically.";
             default: return "?";
           }
         }
@@ -190,49 +190,49 @@ public class HumanName extends Type implements ICompositeType {
     /**
      * Identifies the purpose for this name.
      */
-    @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1)
+    @Child(name = "use", type = {CodeType.class}, order=0, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="usual | official | temp | nickname | anonymous | old | maiden", formalDefinition="Identifies the purpose for this name." )
     protected Enumeration<NameUse> use;
 
     /**
      * A full text representation of the name.
      */
-    @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Text representation of the full name", formalDefinition="A full text representation of the name." )
     protected StringType text;
 
     /**
      * The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father.
      */
-    @Child(name = "family", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "family", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Family name (often called 'Surname')", formalDefinition="The part of a name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father." )
     protected List<StringType> family;
 
     /**
      * Given name.
      */
-    @Child(name = "given", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "given", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Given names (not always 'first'). Includes middle names", formalDefinition="Given name." )
     protected List<StringType> given;
 
     /**
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name.
      */
-    @Child(name = "prefix", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "prefix", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Parts that come before the name", formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the start of the name." )
     protected List<StringType> prefix;
 
     /**
      * Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name.
      */
-    @Child(name = "suffix", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "suffix", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Parts that come after the name", formalDefinition="Part of the name that is acquired as a title due to academic, legal, employment or nobility status, etc. and that appears at the end of the name." )
     protected List<StringType> suffix;
 
     /**
      * Indicates the period of time when this name was valid for the named person.
      */
-    @Child(name = "period", type = {Period.class}, order=6, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Time period when name was/is in use", formalDefinition="Indicates the period of time when this name was valid for the named person." )
     protected Period period;
 

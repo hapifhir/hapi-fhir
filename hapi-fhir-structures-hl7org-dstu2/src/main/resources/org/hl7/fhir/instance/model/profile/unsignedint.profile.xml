@@ -8,7 +8,6 @@
   </text>
   <url value="http://hl7.org/fhir/StructureDefinition/unsignedInt"/>
   <name value="unsignedInt"/>
-  <status value="draft"/>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
@@ -16,10 +15,10 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for unsignedInt type: An integer with a value that is not negative (e.g. &gt;= 0)"/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <kind value="datatype"/>
-  <constrainedType value="integer"/>
   <abstract value="false"/>
   <base value="http://hl7.org/fhir/StructureDefinition/integer"/>
   <snapshot>
@@ -56,11 +55,6 @@
         <code value="Extension"/>
       </type>
     </element>
-  <!-- Note: not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: xs:nonNegativeInteger -->
-  <!-- Regex: [0]|([1-9][0-9]*) -->
     <element>
       <path value="integer.value"/>
       <representation value="xmlAttr"/>
@@ -73,6 +67,9 @@
         <min value="0"/>
         <max value="1"/>
       </base>
+      <type>
+        <code value="xs:nonNegativeInteger"/>
+      </type>
     </element>
   </snapshot>
   <differential>
@@ -86,11 +83,6 @@
         <code value="Element"/>
       </type>
     </element>
-  <!-- Note: not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: xs:nonNegativeInteger -->
-  <!-- Regex: [0]|([1-9][0-9]*) -->
     <element>
       <path value="integer.value"/>
       <representation value="xmlAttr"/>
@@ -98,6 +90,9 @@
       <definition value="Primitive value for unsignedInt"/>
       <min value="0"/>
       <max value="1"/>
+      <type>
+        <code value="xs:nonNegativeInteger"/>
+      </type>
     </element>
   </differential>
 </StructureDefinition>

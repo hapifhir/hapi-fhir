@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -276,35 +276,35 @@ public class ContactPoint extends Type implements ICompositeType {
     /**
      * Telecommunications form for contact point - what communications system is required to make use of the contact.
      */
-    @Child(name = "system", type = {CodeType.class}, order=0, min=0, max=1)
+    @Child(name = "system", type = {CodeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="phone | fax | email | pager | other", formalDefinition="Telecommunications form for contact point - what communications system is required to make use of the contact." )
     protected Enumeration<ContactPointSystem> system;
 
     /**
      * The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).
      */
-    @Child(name = "value", type = {StringType.class}, order=1, min=0, max=1)
+    @Child(name = "value", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The actual contact point details", formalDefinition="The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address)." )
     protected StringType value;
 
     /**
      * Identifies the purpose for the contact point.
      */
-    @Child(name = "use", type = {CodeType.class}, order=2, min=0, max=1)
+    @Child(name = "use", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="home | work | temp | old | mobile - purpose of this contact point", formalDefinition="Identifies the purpose for the contact point." )
     protected Enumeration<ContactPointUse> use;
 
     /**
      * Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
      */
-    @Child(name = "rank", type = {PositiveIntType.class}, order=3, min=0, max=1)
+    @Child(name = "rank", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Specify preferred order of use (1 = highest)", formalDefinition="Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values." )
     protected PositiveIntType rank;
 
     /**
      * Time period when the contact point was/is in use.
      */
-    @Child(name = "period", type = {Period.class}, order=4, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Time period when the contact point was/is in use", formalDefinition="Time period when the contact point was/is in use." )
     protected Period period;
 

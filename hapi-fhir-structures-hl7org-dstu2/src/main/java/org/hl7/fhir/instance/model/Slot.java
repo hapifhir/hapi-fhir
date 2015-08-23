@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -149,21 +149,21 @@ public class Slot extends DomainResource {
     /**
      * External Ids for this item.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External Ids for this item", formalDefinition="External Ids for this item." )
     protected List<Identifier> identifier;
 
     /**
      * The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource", formalDefinition="The type of appointments that can be booked into this slot (ideally this would be an identifiable service - which is at a location, rather than the location itself). If provided then this overrides the value provided on the availability resource." )
     protected CodeableConcept type;
 
     /**
      * The schedule resource that this slot defines an interval of status information.
      */
-    @Child(name = "schedule", type = {Schedule.class}, order=2, min=1, max=1)
+    @Child(name = "schedule", type = {Schedule.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The schedule resource that this slot defines an interval of status information", formalDefinition="The schedule resource that this slot defines an interval of status information." )
     protected Reference schedule;
 
@@ -175,35 +175,35 @@ public class Slot extends DomainResource {
     /**
      * busy | free | busy-unavailable | busy-tentative.
      */
-    @Child(name = "freeBusyType", type = {CodeType.class}, order=3, min=1, max=1)
+    @Child(name = "freeBusyType", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="busy | free | busy-unavailable | busy-tentative", formalDefinition="busy | free | busy-unavailable | busy-tentative." )
     protected Enumeration<SlotStatus> freeBusyType;
 
     /**
      * Date/Time that the slot is to begin.
      */
-    @Child(name = "start", type = {InstantType.class}, order=4, min=1, max=1)
+    @Child(name = "start", type = {InstantType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date/Time that the slot is to begin", formalDefinition="Date/Time that the slot is to begin." )
     protected InstantType start;
 
     /**
      * Date/Time that the slot is to conclude.
      */
-    @Child(name = "end", type = {InstantType.class}, order=5, min=1, max=1)
+    @Child(name = "end", type = {InstantType.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date/Time that the slot is to conclude", formalDefinition="Date/Time that the slot is to conclude." )
     protected InstantType end;
 
     /**
      * This slot has already been overbooked, appointments are unlikely to be accepted for this time.
      */
-    @Child(name = "overbooked", type = {BooleanType.class}, order=6, min=0, max=1)
+    @Child(name = "overbooked", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="This slot has already been overbooked, appointments are unlikely to be accepted for this time", formalDefinition="This slot has already been overbooked, appointments are unlikely to be accepted for this time." )
     protected BooleanType overbooked;
 
     /**
      * Comments on the slot to describe any extended information. Such as custom constraints on the slot.
      */
-    @Child(name = "comment", type = {StringType.class}, order=7, min=0, max=1)
+    @Child(name = "comment", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Comments on the slot to describe any extended information. Such as custom constraints on the slot", formalDefinition="Comments on the slot to describe any extended information. Such as custom constraints on the slot." )
     protected StringType comment;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -165,7 +165,7 @@ public class Communication extends DomainResource {
         /**
          * An individual message part for multi-part messages.
          */
-        @Child(name = "content", type = {StringType.class, Attachment.class}, order=1, min=1, max=1)
+        @Child(name = "content", type = {StringType.class, Attachment.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Message part content", formalDefinition="An individual message part for multi-part messages." )
         protected Type content;
 
@@ -285,21 +285,21 @@ public class Communication extends DomainResource {
     /**
      * Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifier", formalDefinition="Identifiers associated with this Communication that are defined by business processes and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The type of message conveyed such as alert, notification, reminder, instruction, etc.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Message category", formalDefinition="The type of message conveyed such as alert, notification, reminder, instruction, etc." )
     protected CodeableConcept category;
 
     /**
      * The entity (e.g., person, organization, clinical information system, or device) which was the source of the communication.
      */
-    @Child(name = "sender", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=0, max=1)
+    @Child(name = "sender", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Message sender", formalDefinition="The entity (e.g., person, organization, clinical information system, or device) which was the source of the communication." )
     protected Reference sender;
 
@@ -311,7 +311,7 @@ public class Communication extends DomainResource {
     /**
      * The entity (e.g., person, organization, clinical information system, or device) which was the target of the communication.
      */
-    @Child(name = "recipient", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "recipient", type = {Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Message recipient", formalDefinition="The entity (e.g., person, organization, clinical information system, or device) which was the target of the communication." )
     protected List<Reference> recipient;
     /**
@@ -323,28 +323,28 @@ public class Communication extends DomainResource {
     /**
      * Text, attachment(s), or resource(s) that was communicated to the recipient.
      */
-    @Child(name = "payload", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "payload", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Message payload", formalDefinition="Text, attachment(s), or resource(s) that was communicated to the recipient." )
     protected List<CommunicationPayloadComponent> payload;
 
     /**
      * The communication medium, e.g., email, fax.
      */
-    @Child(name = "medium", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "medium", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Communication medium", formalDefinition="The communication medium, e.g., email, fax." )
     protected List<CodeableConcept> medium;
 
     /**
      * The status of the transmission.
      */
-    @Child(name = "status", type = {CodeType.class}, order=6, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="in-progress | completed | suspended | rejected | failed", formalDefinition="The status of the transmission." )
     protected Enumeration<CommunicationStatus> status;
 
     /**
      * The encounter within which the communication was sent.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter leading to message", formalDefinition="The encounter within which the communication was sent." )
     protected Reference encounter;
 
@@ -356,28 +356,28 @@ public class Communication extends DomainResource {
     /**
      * The time when this communication was sent.
      */
-    @Child(name = "sent", type = {DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "sent", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When sent", formalDefinition="The time when this communication was sent." )
     protected DateTimeType sent;
 
     /**
      * The time when this communication arrived at the destination.
      */
-    @Child(name = "received", type = {DateTimeType.class}, order=9, min=0, max=1)
+    @Child(name = "received", type = {DateTimeType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When received", formalDefinition="The time when this communication arrived at the destination." )
     protected DateTimeType received;
 
     /**
      * The reason or justification for the communication.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Indication for message", formalDefinition="The reason or justification for the communication." )
     protected List<CodeableConcept> reason;
 
     /**
      * The patient who was the focus of this communication.
      */
-    @Child(name = "subject", type = {Patient.class}, order=11, min=0, max=1)
+    @Child(name = "subject", type = {Patient.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Focus of message", formalDefinition="The patient who was the focus of this communication." )
     protected Reference subject;
 

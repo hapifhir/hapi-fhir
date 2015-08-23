@@ -572,6 +572,7 @@ public class Controller {
 		theModel.put("resourceName", defaultString(theRequest.getResource()));
 		theModel.put("encoding", theRequest.getEncoding());
 		theModel.put("pretty", theRequest.getPretty());
+		theModel.put("_summary", theRequest.get_summary());
 		theModel.put("serverEntries", myConfig.getIdToServerName());
 
 		return loadAndAddConf(theServletRequest, theRequest, theModel);

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum V3QueryParameterValue {
@@ -173,7 +173,7 @@ public enum V3QueryParameterValue {
             case AO: return "Return all orders.";
             case ONR: return "Return only those orders that do not have results.";
             case OWR: return "Return only those orders that have results.";
-            case _PRESCRIPTIONDISPENSEFILTERCODE: return "A 'helper' vocabulary used to construct complex query filters based on how and whether a prescription has been dispensed.";
+            case _PRESCRIPTIONDISPENSEFILTERCODE: return "A \"helper\" vocabulary used to construct complex query filters based on how and whether a prescription has been dispensed.";
             case C: return "Filter to only include SubstanceAdministration orders which have no remaining quantity authorized to be dispensed.";
             case N: return "Filter to only include SubstanceAdministration orders which have no fulfilling supply events performed.";
             case R: return "Filter to only include SubstanceAdministration orders which have had at least one fulfilling supply event, but which still have outstanding quantity remaining to be authorized.";

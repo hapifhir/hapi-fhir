@@ -1,8 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -39,12 +37,14 @@ import ca.uhn.fhir.model.dstu2.resource.QuestionnaireResponse;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.server.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
@@ -346,6 +346,65 @@ public class JsonParserDstu2Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeNarrativeSuppressed() throws Exception {
+		Patient patient = new Patient();
+		patient.setId("Patient/1/_history/1");
+		patient.getText().setDiv("<div>THE DIV</div>");
+		patient.addName().addFamily("FAMILY");
+		patient.setMaritalStatus(MaritalStatusCodesEnum.D);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded, stringContainsInOrder(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE));
+		assertThat(encoded, not(containsString("text")));
+		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded, containsString("family"));
+		assertThat(encoded, containsString("maritalStatus"));
+	}
+
+	@Test
+	public void testEncodeSummary() {
+		Patient patient = new Patient();
+		patient.setId("Patient/1/_history/1");
+		patient.getText().setDiv("<div>THE DIV</div>");
+		patient.addName().addFamily("FAMILY");
+		patient.setMaritalStatus(MaritalStatusCodesEnum.D);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\","));
+		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded, containsString("family"));
+		assertThat(encoded, not(containsString("maritalStatus")));
+	}
+
+	@Test
+	public void testEncodeSummary2() {
+		Patient patient = new Patient();
+		patient.setId("Patient/1/_history/1");
+		patient.getText().setDiv("<div>THE DIV</div>");
+		patient.addName().addFamily("FAMILY");
+		patient.setMaritalStatus(MaritalStatusCodesEnum.D);
+
+		TagList tl = new TagList();
+		tl.add(new Tag("foo", "bar"));
+		ResourceMetadataKeyEnum.TAG_LIST.put(patient, tl);
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
+		ourLog.info(encoded);
+
+		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded, stringContainsInOrder("\"tag\"", "\"system\":\"foo\",", "\"code\":\"bar\"", "\"system\":\"" + Constants.TAG_SUBSETTED_SYSTEM + "\",", "\"code\":\"" + Constants.TAG_SUBSETTED_CODE + "\","));
+		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded, containsString("family"));
+		assertThat(encoded, not(containsString("maritalStatus")));
 	}
 
 	/**
@@ -802,22 +861,6 @@ public class JsonParserDstu2Test {
 	}
 
 	/**
-	 * See #207
-	 */
-	@Test
-	public void testParseResourceWithInvalidType() {
-		String input = "{" + "\"resourceType\":\"Patient\"," + "\"contained\":[" + "    {" + "       \"rezType\":\"Organization\"" + "    }" + "  ]" + "}";
-
-		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
-		try {
-			jsonParser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
-		}
-	}
-
-	/**
 	 * See #163
 	 */
 	@Test
@@ -845,6 +888,22 @@ public class JsonParserDstu2Test {
 
 		assertEquals("Patient", patient.getId().getResourceType());
 		assertEquals("Patient", reincarnatedPatient.getId().getResourceType());
+	}
+
+	/**
+	 * See #207
+	 */
+	@Test
+	public void testParseResourceWithInvalidType() {
+		String input = "{" + "\"resourceType\":\"Patient\"," + "\"contained\":[" + "    {" + "       \"rezType\":\"Organization\"" + "    }" + "  ]" + "}";
+
+		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
+		try {
+			jsonParser.parseResource(input);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
+		}
 	}
 
 	/**

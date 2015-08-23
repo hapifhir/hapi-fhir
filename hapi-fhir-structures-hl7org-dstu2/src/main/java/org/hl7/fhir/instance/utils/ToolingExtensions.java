@@ -438,4 +438,14 @@ public class ToolingExtensions {
       }
     }
   }
+  
+  public static void removeExtension(Element focus, String url) {
+    Iterator<Extension> i = focus.getExtension().iterator();
+    while (i.hasNext()) {
+      Extension e = i.next(); // must be called before you can call i.remove()
+      if (e.getUrl().equals(url)) {
+        i.remove();
+      }
+    }
+  }
 }

@@ -103,6 +103,16 @@ public @interface Child {
 //	String replaces() default "";
 
 	/**
+	 * Is this element a modifier?
+	 */
+	boolean modifier() default false;	
+
+	/**
+	 * Should this element be included in the summary view
+	 */
+	boolean summary() default false;
+	
+	/**
 	 * For children which accept an {@link Enumeration} as the type, this
 	 * field indicates the type to use for the enum factory
 	 */

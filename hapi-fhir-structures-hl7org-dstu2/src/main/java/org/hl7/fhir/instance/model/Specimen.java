@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -51,7 +51,7 @@ public class Specimen extends DomainResource {
         /**
          * Person who collected the specimen.
          */
-        @Child(name = "collector", type = {Practitioner.class}, order=1, min=0, max=1)
+        @Child(name = "collector", type = {Practitioner.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Who collected the specimen", formalDefinition="Person who collected the specimen." )
         protected Reference collector;
 
@@ -63,35 +63,35 @@ public class Specimen extends DomainResource {
         /**
          * To communicate any details or issues encountered during the specimen collection procedure.
          */
-        @Child(name = "comment", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "comment", type = {StringType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Collector comments", formalDefinition="To communicate any details or issues encountered during the specimen collection procedure." )
         protected List<StringType> comment;
 
         /**
          * Time when specimen was collected from subject - the physiologically relevant time.
          */
-        @Child(name = "collected", type = {DateTimeType.class, Period.class}, order=3, min=0, max=1)
+        @Child(name = "collected", type = {DateTimeType.class, Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Collection time", formalDefinition="Time when specimen was collected from subject - the physiologically relevant time." )
         protected Type collected;
 
         /**
          * The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample.
          */
-        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The quantity of specimen collected", formalDefinition="The quantity of specimen collected; for instance the volume of a blood sample, or the physical measurement of an anatomic pathology sample." )
         protected SimpleQuantity quantity;
 
         /**
          * A coded value specifying the technique that is used to perform the procedure.
          */
-        @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1)
+        @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Technique used to perform collection", formalDefinition="A coded value specifying the technique that is used to perform the procedure." )
         protected CodeableConcept method;
 
         /**
          * Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens.
          */
-        @Child(name = "bodySite", type = {CodeableConcept.class}, order=6, min=0, max=1)
+        @Child(name = "bodySite", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Anatomical collection site", formalDefinition="Anatomical location from which the specimen was collected (if subject is a patient). This is the target site.  This element is not used for environmental specimens." )
         protected CodeableConcept bodySite;
 
@@ -380,21 +380,21 @@ public class Specimen extends DomainResource {
         /**
          * Textual description of procedure.
          */
-        @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Textual description of procedure", formalDefinition="Textual description of procedure." )
         protected StringType description;
 
         /**
          * A coded value specifying the procedure used to process the specimen.
          */
-        @Child(name = "procedure", type = {CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "procedure", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Indicates the treatment or processing step  applied to the specimen", formalDefinition="A coded value specifying the procedure used to process the specimen." )
         protected CodeableConcept procedure;
 
         /**
          * Material used in the processing step.
          */
-        @Child(name = "additive", type = {Substance.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "additive", type = {Substance.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Material used in the processing step", formalDefinition="Material used in the processing step." )
         protected List<Reference> additive;
         /**
@@ -599,42 +599,42 @@ public class Specimen extends DomainResource {
         /**
          * Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Id for the container", formalDefinition="Id for container. There may be multiple; a manufacturer's bar code, lab assigned identifier, etc. The container ID may differ from the specimen id in some circumstances." )
         protected List<Identifier> identifier;
 
         /**
          * Textual description of the container.
          */
-        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Textual description of the container", formalDefinition="Textual description of the container." )
         protected StringType description;
 
         /**
          * The type of container associated with the specimen (e.g. slide, aliquot, etc).
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Kind of container directly associated with specimen", formalDefinition="The type of container associated with the specimen (e.g. slide, aliquot, etc)." )
         protected CodeableConcept type;
 
         /**
          * The capacity (volume or other measure) the container may contain.
          */
-        @Child(name = "capacity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
+        @Child(name = "capacity", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Container volume or size", formalDefinition="The capacity (volume or other measure) the container may contain." )
         protected SimpleQuantity capacity;
 
         /**
          * The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type.
          */
-        @Child(name = "specimenQuantity", type = {SimpleQuantity.class}, order=5, min=0, max=1)
+        @Child(name = "specimenQuantity", type = {SimpleQuantity.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Quantity of specimen within container", formalDefinition="The quantity of specimen in the container; may be volume, dimensions, or other appropriate measurements, depending on the specimen type." )
         protected SimpleQuantity specimenQuantity;
 
         /**
          * Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA.
          */
-        @Child(name = "additive", type = {CodeableConcept.class, Substance.class}, order=6, min=0, max=1)
+        @Child(name = "additive", type = {CodeableConcept.class, Substance.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Additive associated with container", formalDefinition="Introduced substance to preserve, maintain or enhance the specimen. examples: Formalin, Citrate, EDTA." )
         protected Type additive;
 
@@ -912,21 +912,21 @@ public class Specimen extends DomainResource {
     /**
      * Id for specimen.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External Identifier", formalDefinition="Id for specimen." )
     protected List<Identifier> identifier;
 
     /**
      * The kind of material that forms the specimen.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of material that forms the specimen", formalDefinition="The kind of material that forms the specimen." )
     protected CodeableConcept type;
 
     /**
      * Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen.
      */
-    @Child(name = "parent", type = {Specimen.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "parent", type = {Specimen.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Specimen from which this specimen originated", formalDefinition="Reference to the parent (source) specimen which is used when the specimen was either derived from or a component of a another specimen." )
     protected List<Reference> parent;
     /**
@@ -938,7 +938,7 @@ public class Specimen extends DomainResource {
     /**
      * Where the specimen came from. This may be from the patient(s) or from the environment or a device.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order=3, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Substance.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device", formalDefinition="Where the specimen came from. This may be from the patient(s) or from the environment or a device." )
     protected Reference subject;
 
@@ -950,35 +950,35 @@ public class Specimen extends DomainResource {
     /**
      * The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures.
      */
-    @Child(name = "accessionIdentifier", type = {Identifier.class}, order=4, min=0, max=1)
+    @Child(name = "accessionIdentifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifier assigned by the lab", formalDefinition="The identifier assigned by the lab when accessioning specimen(s). This is not necessarily the same as the specimen identifier, depending on local lab procedures." )
     protected Identifier accessionIdentifier;
 
     /**
      * Time when specimen was received for processing or testing.
      */
-    @Child(name = "receivedTime", type = {DateTimeType.class}, order=5, min=0, max=1)
+    @Child(name = "receivedTime", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The time when specimen was received for processing", formalDefinition="Time when specimen was received for processing or testing." )
     protected DateTimeType receivedTime;
 
     /**
      * Details concerning the specimen collection.
      */
-    @Child(name = "collection", type = {}, order=6, min=0, max=1)
+    @Child(name = "collection", type = {}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Collection details", formalDefinition="Details concerning the specimen collection." )
     protected SpecimenCollectionComponent collection;
 
     /**
      * Details concerning treatment and processing steps for the specimen.
      */
-    @Child(name = "treatment", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "treatment", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Treatment and processing step details", formalDefinition="Details concerning treatment and processing steps for the specimen." )
     protected List<SpecimenTreatmentComponent> treatment;
 
     /**
      * The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here.
      */
-    @Child(name = "container", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "container", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Direct container of specimen (tube/slide, etc)", formalDefinition="The container holding the specimen.  The recursive nature of containers; i.e. blood in tube in tray in rack is not addressed here." )
     protected List<SpecimenContainerComponent> container;
 
@@ -1430,6 +1430,8 @@ public class Specimen extends DomainResource {
   public static final String SP_IDENTIFIER = "identifier";
   @SearchParamDefinition(name="parent", path="Specimen.parent", description="The parent of the specimen", type="reference" )
   public static final String SP_PARENT = "parent";
+  @SearchParamDefinition(name="container-id", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
+  public static final String SP_CONTAINERID = "container-id";
   @SearchParamDefinition(name="bodysite", path="Specimen.collection.bodySite", description="The code for the body site from where the specimen originated", type="token" )
   public static final String SP_BODYSITE = "bodysite";
   @SearchParamDefinition(name="subject", path="Specimen.subject", description="The subject of the specimen", type="reference" )
@@ -1442,8 +1444,6 @@ public class Specimen extends DomainResource {
   public static final String SP_ACCESSION = "accession";
   @SearchParamDefinition(name="type", path="Specimen.type", description="The specimen type", type="token" )
   public static final String SP_TYPE = "type";
-  @SearchParamDefinition(name="containerid", path="Specimen.container.identifier", description="The unique identifier associated with the specimen container", type="token" )
-  public static final String SP_CONTAINERID = "containerid";
   @SearchParamDefinition(name="collector", path="Specimen.collection.collector", description="Who collected the specimen", type="reference" )
   public static final String SP_COLLECTOR = "collector";
 

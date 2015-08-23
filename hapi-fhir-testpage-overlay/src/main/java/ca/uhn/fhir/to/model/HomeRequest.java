@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.GenericClient;
 import ca.uhn.fhir.rest.client.IClientInterceptor;
 import ca.uhn.fhir.rest.client.ServerValidationModeEnum;
@@ -25,6 +26,7 @@ public class HomeRequest {
 	private String myPretty;
 	private String myResource;
 	private String myServerId;
+	private String mySummary;
 
 	@ModelAttribute("encoding")
 	public String getEncoding() {
@@ -34,6 +36,11 @@ public class HomeRequest {
 	@ModelAttribute("encoding")
 	public String getPretty() {
 		return myPretty;
+	}
+
+	@ModelAttribute("_summary")
+	public String get_summary() {
+		return mySummary;
 	}
 
 	@ModelAttribute("resource")
@@ -102,6 +109,10 @@ public class HomeRequest {
 		myPretty = thePretty;
 	}
 
+	public void set_summary(String theSummary) {
+		mySummary = theSummary;
+	}
+
 	public void setResource(String theResource) {
 		myResource = theResource;
 	}
@@ -111,7 +122,7 @@ public class HomeRequest {
 	}
 
 	public GenericClient newClient(HttpServletRequest theRequest, FhirContext theContext, TesterConfig theConfig, Controller.CaptureInterceptor theInterceptor) {
-		theContext.getRestfulClientFactory().setServerValidationModeEnum(ServerValidationModeEnum.NEVER);
+		theContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		
 		GenericClient retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
 		retVal.setKeepResponses(true);
@@ -128,6 +139,13 @@ public class HomeRequest {
 			retVal.setEncoding(EncodingEnum.JSON);
 		}
 
+		if (isNotBlank(get_summary())) {
+			SummaryEnum summary = SummaryEnum.fromCode(get_summary());
+			if (summary != null) {
+				retVal.setSummary(summary);
+			}
+		}
+		
 		retVal.registerInterceptor(theInterceptor);
 
 		final String remoteAddr = org.slf4j.MDC.get("req.remoteAddr");

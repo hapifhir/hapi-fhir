@@ -17,7 +17,6 @@
   </text>
   <url value="http://hl7.org/fhir/StructureDefinition/Age"/>
   <name value="Age"/>
-  <status value="draft"/>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
@@ -25,8 +24,9 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="A duration (length of time) with a UCUM code"/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <kind value="datatype"/>
   <constrainedType value="Quantity"/>
   <abstract value="false"/>
@@ -37,6 +37,7 @@
       <name value="Age"/>
       <short value="A duration (length of time) with a UCUM code"/>
       <definition value="There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive."/>
+      <requirements value="Need to able to capture all sorts of measured values, even if the measured value are not precisely quantified. Values include exact measures such as 3.51g, customary units such as 3 tablets, and currencies such as $100.32USD."/>
       <min value="1"/>
       <max value="1"/>
       <base>
@@ -59,7 +60,6 @@
         <human value="There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive."/>
         <xpath value="(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value=&#39;http://unitsofmeasure.org&#39;) and not(contains(f:value/@value, &#39;-&#39;))"/>
       </constraint>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="SN (see also Range) or CQ"/>
@@ -125,7 +125,6 @@
       <type>
         <code value="decimal"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="SN.2  / CQ - N/A"/>
@@ -152,7 +151,6 @@
       </type>
       <meaningWhenMissing value="If there is no comparator, then there is no modification of the value"/>
       <isModifier value="true"/>
-      <isSummary value="true"/>
       <binding>
         <strength value="required"/>
         <description value="How the Quantity should be understood and represented"/>
@@ -170,21 +168,20 @@
       </mapping>
     </element>
     <element>
-      <path value="Quantity.unit"/>
+      <path value="Quantity.units"/>
       <short value="Unit representation"/>
       <definition value="A human-readable form of the units."/>
       <requirements value="There are many representations for units and in many contexts, particular representations are fixed and required. I.e. mcg for micrograms."/>
       <min value="0"/>
       <max value="1"/>
       <base>
-        <path value="Quantity.unit"/>
+        <path value="Quantity.units"/>
         <min value="0"/>
         <max value="1"/>
       </base>
       <type>
         <code value="string"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="(see OBX.6 etc) / CQ.2"/>
@@ -210,7 +207,6 @@
         <code value="uri"/>
       </type>
       <condition value="qty-3"/>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="(see OBX.6 etc) / CQ.2"/>
@@ -235,7 +231,6 @@
       <type>
         <code value="code"/>
       </type>
-      <isSummary value="true"/>
       <mapping>
         <identity value="v2"/>
         <map value="(see OBX.6 etc) / CQ.2"/>

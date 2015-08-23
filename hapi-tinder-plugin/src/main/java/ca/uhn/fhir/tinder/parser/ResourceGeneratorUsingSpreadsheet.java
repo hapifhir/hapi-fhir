@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.maven.plugin.MojoFailureException;
 
+import ca.uhn.fhir.tinder.model.BaseElement;
 import ca.uhn.fhir.tinder.model.BaseRootType;
 import ca.uhn.fhir.tinder.model.Resource;
 
@@ -24,6 +25,22 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	public List<String> getInputStreamNames() {
 		return myInputStreamNames;
+	}
+
+	@Override
+	protected void postProcess(BaseElement theTarget) {
+		super.postProcess(theTarget);
+		
+		if ("Bundle".equals(theTarget.getName())) {
+			addEverythingToSummary(theTarget);
+		}
+	}
+
+	private void addEverythingToSummary(BaseElement theTarget) {
+		theTarget.setSummary("Y");
+		for (BaseElement next : theTarget.getChildren()) {
+			addEverythingToSummary(next);
+		}
 	}
 
 	public void setBaseResourceNames(List<String> theBaseResourceNames) throws MojoFailureException {

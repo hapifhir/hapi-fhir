@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -151,14 +151,14 @@ public class SupplyRequest extends DomainResource {
         /**
          * Fulfilment code.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Fulfilment code", formalDefinition="Fulfilment code." )
         protected CodeableConcept code;
 
         /**
          * Formal fulfillment schedule.
          */
-        @Child(name = "schedule", type = {Timing.class}, order=2, min=0, max=1)
+        @Child(name = "schedule", type = {Timing.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Formal fulfillment schedule", formalDefinition="Formal fulfillment schedule." )
         protected Timing schedule;
 
@@ -263,7 +263,7 @@ public class SupplyRequest extends DomainResource {
     /**
      * A link to a resource representing the person whom the ordered item is for.
      */
-    @Child(name = "patient", type = {Patient.class}, order=0, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Patient for whom the item is supplied", formalDefinition="A link to a resource representing the person whom the ordered item is for." )
     protected Reference patient;
 
@@ -275,7 +275,7 @@ public class SupplyRequest extends DomainResource {
     /**
      * The Practitioner , Organization or Patient who initiated this order for the Supply.
      */
-    @Child(name = "source", type = {Practitioner.class, Organization.class, Patient.class}, order=1, min=0, max=1)
+    @Child(name = "source", type = {Practitioner.class, Organization.class, Patient.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who initiated this order", formalDefinition="The Practitioner , Organization or Patient who initiated this order for the Supply." )
     protected Reference source;
 
@@ -287,35 +287,35 @@ public class SupplyRequest extends DomainResource {
     /**
      * When the request was made.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the request was made", formalDefinition="When the request was made." )
     protected DateTimeType date;
 
     /**
      * Unique identifier for this supply request.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifier", formalDefinition="Unique identifier for this supply request." )
     protected Identifier identifier;
 
     /**
      * Status of the supply request.
      */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="requested | completed | failed | cancelled", formalDefinition="Status of the supply request." )
     protected Enumeration<SupplyRequestStatus> status;
 
     /**
      * Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process.
      */
-    @Child(name = "kind", type = {CodeableConcept.class}, order=5, min=0, max=1)
+    @Child(name = "kind", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The kind of supply (central, non-stock, etc)", formalDefinition="Category of supply, e.g.  central, non-stock, etc. This is used to support work flows associated with the supply process." )
     protected CodeableConcept kind;
 
     /**
      * The item that is requested to be supplied.
      */
-    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order=6, min=0, max=1)
+    @Child(name = "orderedItem", type = {Medication.class, Substance.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Medication, Substance, or Device requested to be supplied", formalDefinition="The item that is requested to be supplied." )
     protected Reference orderedItem;
 
@@ -327,7 +327,7 @@ public class SupplyRequest extends DomainResource {
     /**
      * Who is intended to fulfill the request.
      */
-    @Child(name = "supplier", type = {Organization.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "supplier", type = {Organization.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Who is intended to fulfill the request", formalDefinition="Who is intended to fulfill the request." )
     protected List<Reference> supplier;
     /**
@@ -339,14 +339,14 @@ public class SupplyRequest extends DomainResource {
     /**
      * Why the supply item was requested.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=8, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Why the supply item was requested", formalDefinition="Why the supply item was requested." )
     protected Type reason;
 
     /**
      * When the request should be fulfilled.
      */
-    @Child(name = "when", type = {}, order=9, min=0, max=1)
+    @Child(name = "when", type = {}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the request should be fulfilled", formalDefinition="When the request should be fulfilled." )
     protected SupplyRequestWhenComponent when;
 

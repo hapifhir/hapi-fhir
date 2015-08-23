@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -601,35 +601,35 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         /**
          * Indicates whether the issue indicates a variation from successful processing.
          */
-        @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
         @Description(shortDefinition="fatal | error | warning | information", formalDefinition="Indicates whether the issue indicates a variation from successful processing." )
         protected Enumeration<IssueSeverity> severity;
 
         /**
-         * Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.
+         * Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.
          */
-        @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1)
-        @Description(shortDefinition="Error or warning code", formalDefinition="Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element." )
+        @Child(name = "code", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Error or warning code", formalDefinition="Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element." )
         protected Enumeration<IssueType> code;
 
         /**
          * Additional details about the error. This may be a text description of the error, or a system code that identifies the error.
          */
-        @Child(name = "details", type = {CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "details", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional details about the error", formalDefinition="Additional details about the error. This may be a text description of the error, or a system code that identifies the error." )
         protected CodeableConcept details;
 
         /**
          * Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.
          */
-        @Child(name = "diagnostics", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "diagnostics", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Additional diagnostic information about the issue", formalDefinition="Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue." )
         protected StringType diagnostics;
 
         /**
          * A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.
          */
-        @Child(name = "location", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "location", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="XPath of element(s) related to issue", formalDefinition="A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised." )
         protected List<StringType> location;
 
@@ -697,7 +697,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #code} (Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @return {@link #code} (Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public Enumeration<IssueType> getCodeElement() { 
           if (this.code == null)
@@ -717,7 +717,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #code} (Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @param value {@link #code} (Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public OperationOutcomeIssueComponent setCodeElement(Enumeration<IssueType> value) { 
           this.code = value;
@@ -725,14 +725,14 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.
+         * @return Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.
          */
         public IssueType getCode() { 
           return this.code == null ? null : this.code.getValue();
         }
 
         /**
-         * @param value Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.
+         * @param value Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.
          */
         public OperationOutcomeIssueComponent setCode(IssueType value) { 
             if (this.code == null)
@@ -871,7 +871,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
           childrenList.add(new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, java.lang.Integer.MAX_VALUE, severity));
-          childrenList.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide it's own code for the error in the details element.", 0, java.lang.Integer.MAX_VALUE, code));
+          childrenList.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, java.lang.Integer.MAX_VALUE, code));
           childrenList.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, java.lang.Integer.MAX_VALUE, details));
           childrenList.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, java.lang.Integer.MAX_VALUE, diagnostics));
           childrenList.add(new Property("location", "string", "A simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, location));
@@ -925,7 +925,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
     /**
      * An error, warning or information message that results from a system action.
      */
-    @Child(name = "issue", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "issue", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="A single issue associated with the action", formalDefinition="An error, warning or information message that results from a system action." )
     protected List<OperationOutcomeIssueComponent> issue;
 

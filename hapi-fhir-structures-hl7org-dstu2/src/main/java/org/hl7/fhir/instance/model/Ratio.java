@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -47,14 +47,14 @@ public class Ratio extends Type implements ICompositeType {
     /**
      * The value of the numerator.
      */
-    @Child(name = "numerator", type = {Quantity.class}, order=0, min=0, max=1)
+    @Child(name = "numerator", type = {Quantity.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Numerator value", formalDefinition="The value of the numerator." )
     protected Quantity numerator;
 
     /**
      * The value of the denominator.
      */
-    @Child(name = "denominator", type = {Quantity.class}, order=1, min=0, max=1)
+    @Child(name = "denominator", type = {Quantity.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Denominator value", formalDefinition="The value of the denominator." )
     protected Quantity denominator;
 

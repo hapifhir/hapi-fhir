@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum OperationOutcome {
@@ -435,52 +435,52 @@ public enum OperationOutcome {
         public String getDisplay() {
           switch (this) {
             case MSGAUTHREQUIRED: return "You must authenticate before you can use this service";
-            case MSGBADFORMAT: return "Bad Syntax: '%s' must be a %s'";
+            case MSGBADFORMAT: return "Bad Syntax: \"%s\" must be a %s'";
             case MSGBADSYNTAX: return "Bad Syntax in %s";
-            case MSGCANTPARSECONTENT: return "Unable to parse feed (entry content type = '%s')";
-            case MSGCANTPARSEROOT: return "Unable to parse feed (root element name = '%s')";
+            case MSGCANTPARSECONTENT: return "Unable to parse feed (entry content type = \"%s\")";
+            case MSGCANTPARSEROOT: return "Unable to parse feed (root element name = \"%s\")";
             case MSGCREATED: return "New resource created";
             case MSGDATEFORMAT: return "The Date value %s is not in the correct format (Xml Date Format required)";
             case MSGDELETED: return "This resource has been deleted";
             case MSGDELETEDDONE: return "Resource deleted";
-            case MSGDELETEDID: return "The resource '%s' has been deleted";
+            case MSGDELETEDID: return "The resource \"%s\" has been deleted";
             case MSGDUPLICATEID: return "Duplicate Id %s for resource type %s";
             case MSGERRORPARSING: return "Error parsing resource Xml (%s)";
-            case MSGIDINVALID: return "Id '%s' has an invalid character '%s'";
-            case MSGIDTOOLONG: return "Id '%s' too long (length limit 36)";
+            case MSGIDINVALID: return "Id \"%s\" has an invalid character \"%s\"";
+            case MSGIDTOOLONG: return "Id \"%s\" too long (length limit 36)";
             case MSGINVALIDID: return "Id not accepted";
             case MSGJSONOBJECT: return "Json Source for a resource should start with an object";
             case MSGLOCALFAIL: return "Unable to resolve local reference to resource %s";
-            case MSGNOMATCH: return "No Resource found matching the query '%s'";
-            case MSGNOEXIST: return "Resource Id '%s' does not exist";
-            case MSGNOMODULE: return "No module could be found to handle the request '%s'";
+            case MSGNOMATCH: return "No Resource found matching the query \"%s\"";
+            case MSGNOEXIST: return "Resource Id \"%s\" does not exist";
+            case MSGNOMODULE: return "No module could be found to handle the request \"%s\"";
             case MSGNOSUMMARY: return "No Summary for this resource";
             case MSGOPNOTALLOWED: return "Operation %s not allowed for resource %s (due to local configuration)";
-            case MSGPARAMCHAINED: return "Unknown chained parameter name '%s'";
-            case MSGPARAMNOREPEAT: return "Parameter '%s' is not allowed to repeat";
-            case MSGPARAMUNKNOWN: return "Parameter '%s' not understood";
-            case MSGRESOURCEEXAMPLEPROTECTED: return "Resources with identity 'example' cannot be deleted (for testing/training purposes)";
+            case MSGPARAMCHAINED: return "Unknown chained parameter name \"%s\"";
+            case MSGPARAMNOREPEAT: return "Parameter \"%s\" is not allowed to repeat";
+            case MSGPARAMUNKNOWN: return "Parameter \"%s\" not understood";
+            case MSGRESOURCEEXAMPLEPROTECTED: return "Resources with identity \"example\" cannot be deleted (for testing/training purposes)";
             case MSGRESOURCEIDFAIL: return "unable to allocate resource id";
             case MSGRESOURCENOTALLOWED: return "Not allowed to submit a resource for this operation";
             case MSGRESOURCEREQUIRED: return "A resource is required";
             case MSGRESOURCEIDMISMATCH: return "Resource Id Mismatch";
             case MSGRESOURCEIDMISSING: return "Resource Id Missing";
             case MSGRESOURCETYPEMISMATCH: return "Resource Type Mismatch";
-            case MSGSORTUNKNOWN: return "Unknown sort parameter name '%s'";
+            case MSGSORTUNKNOWN: return "Unknown sort parameter name \"%s\"";
             case MSGTRANSACTIONDUPLICATEID: return "Duplicate Identifier in transaction: %s";
             case MSGTRANSACTIONMISSINGID: return "Missing Identifier in transaction - an entry.id must be provided";
-            case MSGUNHANDLEDNODETYPE: return "Unhandled xml node type '%s'";
+            case MSGUNHANDLEDNODETYPE: return "Unhandled xml node type \"%s\"";
             case MSGUNKNOWNCONTENT: return "Unknown Content (%s) at %s";
             case MSGUNKNOWNOPERATION: return "unknown FHIR http operation";
-            case MSGUNKNOWNTYPE: return "Resource Type '%s' not recognised";
+            case MSGUNKNOWNTYPE: return "Resource Type \"%s\" not recognised";
             case MSGUPDATED: return "existing resource updated";
             case MSGVERSIONAWARE: return "Version aware updates are required for this resource";
-            case MSGVERSIONAWARECONFLICT: return "Update Conflict (server current version = '%s', client version referenced = '%s')";
+            case MSGVERSIONAWARECONFLICT: return "Update Conflict (server current version = \"%s\", client version referenced = \"%s\")";
             case MSGVERSIONAWAREURL: return "Version specific URL not recognised";
-            case MSGWRONGNS: return "This does not appear to be a FHIR element or resource (wrong namespace '%s')";
-            case SEARCHMULTIPLE: return "Error: Multiple matches exist for %s search parameters '%s'";
+            case MSGWRONGNS: return "This does not appear to be a FHIR element or resource (wrong namespace \"%s\")";
+            case SEARCHMULTIPLE: return "Error: Multiple matches exist for %s search parameters \"%s\"";
             case UPDATEMULTIPLEMATCHES: return "Error: Multiple matches exist for the conditional update";
-            case SEARCHNONE: return "Error: no processable search found for %s search parameters '%s'";
+            case SEARCHNONE: return "Error: no processable search found for %s search parameters \"%s\"";
             default: return "?";
           }
     }

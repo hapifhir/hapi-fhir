@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum V3AcknowledgementDetailCode {
@@ -262,7 +262,7 @@ public enum V3AcknowledgementDetailCode {
             case RTUDEST: return "The destination of this message is unknown to the receiving application. The receiving application in the message does not match the application which received the message. The message was neither routed, processed nor stored by the receiving application.";
             case RTWDEST: return "Warning: The destination of this message is known to the receiving application. Messages have been successfully routed to that destination in the past. The link to the destination application or an intermediate application is (temporarily) unavailable. The receiving application will forward the message as soon as the destination can be reached again.";
             case SYN: return "Reflects errors in the syntax or structure of the communication.";
-            case SYN102: return "The attribute contained data of the wrong data type, e.g. a numeric attribute contained 'FOO'.";
+            case SYN102: return "The attribute contained data of the wrong data type, e.g. a numeric attribute contained \"FOO\".";
             case SYN105: return "Description: Required association or attribute missing in message; or the sequence of the classes is different than required by the standard or one of the conformance profiles identified in the message.";
             case SYN100: return "Required association missing in message; or the sequence of the classes is different than required by the standard or one of the conformance profiles identified in the message.";
             case SYN101: return "A required attribute is missing in a class.";

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -135,35 +135,35 @@ public class Flag extends DomainResource {
     /**
      * Identifier assigned to the flag for external use (outside the FHIR environment).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Business identifier", formalDefinition="Identifier assigned to the flag for external use (outside the FHIR environment)." )
     protected List<Identifier> identifier;
 
     /**
      * Allows an flag to be divided into different categories like clinical, administrative etc.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Clinical, administrative, etc.", formalDefinition="Allows an flag to be divided into different categories like clinical, administrative etc." )
     protected CodeableConcept category;
 
     /**
      * Supports basic workflow.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="Supports basic workflow." )
     protected Enumeration<FlagStatus> status;
 
     /**
      * The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.
      */
-    @Child(name = "period", type = {Period.class}, order=3, min=0, max=1)
+    @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Time period when flag is active", formalDefinition="The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified." )
     protected Period period;
 
     /**
      * The patient, location, group , organization , or practitioner this is about record this flag is associated with.
      */
-    @Child(name = "subject", type = {Patient.class, Location.class, Group.class, Organization.class, Practitioner.class}, order=4, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class, Location.class, Group.class, Organization.class, Practitioner.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/What is flag about?", formalDefinition="The patient, location, group , organization , or practitioner this is about record this flag is associated with." )
     protected Reference subject;
 
@@ -175,7 +175,7 @@ public class Flag extends DomainResource {
     /**
      * This alert is only relevant during the encounter.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Alert relevant during encounter", formalDefinition="This alert is only relevant during the encounter." )
     protected Reference encounter;
 
@@ -187,7 +187,7 @@ public class Flag extends DomainResource {
     /**
      * The person or device that created the flag.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order=6, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Flag creator", formalDefinition="The person or device that created the flag." )
     protected Reference author;
 
@@ -199,7 +199,7 @@ public class Flag extends DomainResource {
     /**
      * The coded value or textual component of the flag to display to the user.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=7, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Partially deaf, Requires easy open caps, No permanent address, etc.", formalDefinition="The coded value or textual component of the flag to display to the user." )
     protected CodeableConcept code;
 

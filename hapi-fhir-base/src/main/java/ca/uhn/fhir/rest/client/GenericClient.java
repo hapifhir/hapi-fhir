@@ -19,9 +19,7 @@ package ca.uhn.fhir.rest.client;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -49,6 +47,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -67,6 +66,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.ICreate;
@@ -225,7 +226,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -254,13 +255,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
 		}
 
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id);
+		boolean allowHtmlResponse = (theSummary == SummaryEnum.TEXT) || (theSummary == null && getSummary() == SummaryEnum.TEXT);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary);
 		} else {
 			try {
-				return invokeClient(myContext, binding, invocation, myLogRequestAndResponse);
+				return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary);
 			} catch (NotModifiedException e) {
 				return theNotModifiedHandler.call();
 			}
@@ -411,7 +413,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
 		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
-		return doReadOrVRead(theType, id, false, null, null);
+		return doReadOrVRead(theType, id, false, null, null, false, null, null);
 	}
 
 	@Override
@@ -557,7 +559,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (theId.hasVersionIdPart() == false) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
-		return doReadOrVRead(theType, theId, true, null, null);
+		return doReadOrVRead(theType, theId, true, null, null, false, null, null);
 	}
 
 	/* also deprecated in interface */
@@ -587,9 +589,17 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, ?>, Y> implements IClientExecutable<T, Y> {
-		private EncodingEnum myParamEncoding;
-		private Boolean myPrettyPrint;
+		protected EncodingEnum myParamEncoding;
+		protected Boolean myPrettyPrint;
 		private boolean myQueryLogRequestAndResponse;
+		protected SummaryEnum mySummaryMode;
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T summaryMode(SummaryEnum theSummary) {
+			mySummaryMode = theSummary;
+			return ((T) this);
+		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -629,7 +639,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode);
 			return resp;
 		}
 
@@ -1477,11 +1487,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private RuntimeResourceDefinition myType;
 
 		@Override
-		public Object execute() {
+		public Object execute() {//AAA
 			if (myId.hasVersionIdPart()) {
-				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches);
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding);
 			} else {
-				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches);
+				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding);
 			}
 		}
 
@@ -1626,16 +1636,26 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private IIdType myId;
 		private Class<T> myType;
+		private boolean myAllowHtmlResponse;
 
 		public ResourceResponseHandler(Class<T> theType, IIdType theId) {
 			myType = theType;
 			myId = theId;
 		}
 
+		public ResourceResponseHandler(Class<T> theType, IIdType theId, boolean theAllowHtmlResponse) {
+			myType = theType;
+			myId = theId;
+			myAllowHtmlResponse = theAllowHtmlResponse;
+		}
+
 		@Override
 		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
+				if (myAllowHtmlResponse && theResponseMimeType.toLowerCase().contains(Constants.CT_HTML) && myType != null) {
+					return readHtmlResponse(theResponseReader);
+				}
 				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
 			}
 			IParser parser = respType.newParser(myContext);
@@ -1644,6 +1664,29 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			MethodUtil.parseClientRequestResourceHeaders(myId, theHeaders, retVal);
 
 			return retVal;
+		}
+
+		@SuppressWarnings("unchecked")
+		private T readHtmlResponse(Reader theResponseReader) {
+			RuntimeResourceDefinition resDef = myContext.getResourceDefinition(myType);
+			IBaseResource instance = resDef.newInstance();
+			BaseRuntimeChildDefinition textChild = resDef.getChildByName("text");
+			BaseRuntimeElementCompositeDefinition<?> textElement = (BaseRuntimeElementCompositeDefinition<?>) textChild.getChildByName("text");
+			IBase textInstance = textElement.newInstance();
+			textChild.getMutator().addValue(instance, textInstance);
+			
+			BaseRuntimeChildDefinition divChild = textElement.getChildByName("div");
+			BaseRuntimeElementDefinition<?> divElement = divChild.getChildByName("div");
+			IPrimitiveType<?> divInstance = (IPrimitiveType<?>) divElement.newInstance();
+			try {
+				divInstance.setValueAsString(IOUtils.toString(theResponseReader));
+			} catch (IllegalArgumentException e) {
+				throw new InvalidResponseException(400, "Failed to process HTML response from server", e);
+			} catch (IOException e) {
+				throw new InvalidResponseException(400, "Failed to process HTML response from server", e);
+			}
+			divChild.getMutator().addValue(textInstance, divInstance);
+			return (T) instance;
 		}
 	}
 

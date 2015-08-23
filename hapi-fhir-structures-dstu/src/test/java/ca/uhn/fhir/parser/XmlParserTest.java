@@ -225,11 +225,9 @@ public class XmlParserTest {
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
 		assertThat(enc, containsString("<modifierExtension url=\"http://example.com/extensions#modext\"><valueDate value=\"1995-01-02\"/></modifierExtension>"));
-		assertThat(enc, containsString(
-				"<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
+		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value2\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
-		assertThat(enc, containsString(
-				"<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
+		assertThat(enc, containsString("<given value=\"Shmoe\"><extension url=\"http://examples.com#givenext_parent\"><extension url=\"http://examples.com#givenext_child\"><valueString value=\"CHILD\"/></extension></extension></given>"));
 
 		/*
 		 * Now parse this back
@@ -1234,8 +1232,7 @@ public class XmlParserTest {
 
 		String enc = ourCtx.newXmlParser().encodeResourceToString(patient);
 		assertThat(enc, containsString("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://example.com/extensions#someext\"><valueDateTime value=\"2011-01-02T11:13:15\"/></extension>"));
-		assertThat(enc, containsString(
-				"<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
+		assertThat(enc, containsString("<extension url=\"http://example.com#parent\"><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension><extension url=\"http://example.com#child\"><valueString value=\"value1\"/></extension></extension>"));
 		assertThat(enc, containsString("<given value=\"Joe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"given\"/></extension></given>"));
 	}
 
@@ -1478,8 +1475,7 @@ public class XmlParserTest {
 
 		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
 
-		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>",
-				"<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
+		msg = msg.replace("<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d\" rel=\"self\"/>", "<link href=\"http://hl7.org/implement/standards/fhir/valueset/256a5231-a2bb-49bd-9fea-f349d428b70d/_history/12345\" rel=\"self\"/>");
 		entry = p.parseBundle(msg).getEntries().get(0);
 		resource = (ValueSet) entry.getResource();
 		assertEquals("256a5231-a2bb-49bd-9fea-f349d428b70d", resource.getId().getIdPart());
@@ -1636,8 +1632,8 @@ public class XmlParserTest {
 	}
 
 	/**
-	 * If the XML encoded resource has multiple contained resources in a single <contained></contained> tag, we still want to handle this as best we can, even though it's not technically correct. See
-	 * #84
+	 * If the XML encoded resource has multiple contained resources in a single <contained></contained> tag, we still
+	 * want to handle this as best we can, even though it's not technically correct. See #84
 	 */
 	@Test
 	public void testParseContainedResourcesWithSingleContainedElement() throws IOException {
@@ -1759,10 +1755,9 @@ public class XmlParserTest {
 
 	@Test
 	public void testParseQuery() {
-		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + "  <text>\n" + "    <status value=\"generated\"/>\n" + "    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n"
-				+ "  </text>\n" + "\n" + "  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + "   responder   -->\n"
-				+ "  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + "  <parameter url=\"http://hl7.org/fhir/query#_query\">\n" + "    <valueString value=\"example\"/>\n"
-				+ "  </parameter>\n" + "</Query>";
+		String msg = "<Query xmlns=\"http://hl7.org/fhir\">\n" + "  <text>\n" + "    <status value=\"generated\"/>\n" + "    <div xmlns=\"http://www.w3.org/1999/xhtml\">[Put rendering here]</div>\n" + "  </text>\n" + "\n"
+				+ "  <!--   this is an extermely simple query - a request to execute the query 'example' on the\n" + "   responder   -->\n" + "  <identifier value=\"urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376\"/>\n" + "  <parameter url=\"http://hl7.org/fhir/query#_query\">\n"
+				+ "    <valueString value=\"example\"/>\n" + "  </parameter>\n" + "</Query>";
 		Query query = ourCtx.newXmlParser().parseResource(Query.class, msg);
 
 		assertEquals("urn:uuid:42b253f5-fa17-40d0-8da5-44aeb4230376", query.getIdentifier().getValueAsString());

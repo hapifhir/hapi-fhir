@@ -32,8 +32,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 /**
- * This interface should be considered experimental and will likely change in future releases
- * of HAPI. Use with caution!
+ * This interface should be considered experimental and will likely change in future releases of HAPI. Use with caution!
  */
 public interface IVersionSpecificBundleFactory {
 
@@ -41,8 +40,8 @@ public interface IVersionSpecificBundleFactory {
 
 	void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated);
 
-	void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint,
-			int theOffset, Integer theCount, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes);
+	void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theCount, String theSearchId, BundleTypeEnum theBundleType,
+			Set<Include> theIncludes);
 
 	Bundle getDstu1Bundle();
 

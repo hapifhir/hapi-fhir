@@ -172,7 +172,7 @@ public class WorkerContext implements NameResolver {
     }
   }
 
-  public void seeProfile(String url, StructureDefinition p) throws IllegalArgumentException {
+  public void seeProfile(String url, StructureDefinition p) {
     if (profiles.containsKey(p.getUrl()))
       throw new IllegalArgumentException("Duplicate Profile "+p.getUrl());
     profiles.put(p.getId(), p);

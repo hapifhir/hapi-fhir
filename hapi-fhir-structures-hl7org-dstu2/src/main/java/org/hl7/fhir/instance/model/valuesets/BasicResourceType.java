@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model.valuesets;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 
 public enum BasicResourceType {
@@ -42,10 +42,6 @@ public enum BasicResourceType {
          * A request that care of a particular type be provided to a patient.  Could involve the transfer of care, a consult, etc.
          */
         REFERRAL, 
-        /**
-         * A bounded time-period when a particular set of resources (practioners, devices and/or locations) is available for the delivery of healthcare services.  Used for scheduling.
-         */
-        SLOT, 
         /**
          * An undesired reaction caused by exposure to some agent (e.g., a medication, immunization, food, or environmental agent).
          */
@@ -87,10 +83,6 @@ public enum BasicResourceType {
          */
         ADJUDICAT, 
         /**
-         * A record of a transfer of funds between accounts and/or individuals
-         */
-        PAYMENT, 
-        /**
          * A request for a predication of the cost that would be paid under an insurance plan for a hypothetical claim for goods or services
          */
         PREDETREQ, 
@@ -117,8 +109,6 @@ public enum BasicResourceType {
           return CONSENT;
         if ("referral".equals(codeString))
           return REFERRAL;
-        if ("slot".equals(codeString))
-          return SLOT;
         if ("advevent".equals(codeString))
           return ADVEVENT;
         if ("aptmtreq".equals(codeString))
@@ -139,8 +129,6 @@ public enum BasicResourceType {
           return INVOICE;
         if ("adjudicat".equals(codeString))
           return ADJUDICAT;
-        if ("payment".equals(codeString))
-          return PAYMENT;
         if ("predetreq".equals(codeString))
           return PREDETREQ;
         if ("predetermine".equals(codeString))
@@ -155,7 +143,6 @@ public enum BasicResourceType {
           switch (this) {
             case CONSENT: return "consent";
             case REFERRAL: return "referral";
-            case SLOT: return "slot";
             case ADVEVENT: return "advevent";
             case APTMTREQ: return "aptmtreq";
             case TRANSFER: return "transfer";
@@ -166,7 +153,6 @@ public enum BasicResourceType {
             case ACCOUNT: return "account";
             case INVOICE: return "invoice";
             case ADJUDICAT: return "adjudicat";
-            case PAYMENT: return "payment";
             case PREDETREQ: return "predetreq";
             case PREDETERMINE: return "predetermine";
             case STUDY: return "study";
@@ -181,7 +167,6 @@ public enum BasicResourceType {
           switch (this) {
             case CONSENT: return "An assertion of permission for an activity or set of activities to occur, possibly subject to particular limitations.  E.g. surgical consent, information disclosure consent, etc.";
             case REFERRAL: return "A request that care of a particular type be provided to a patient.  Could involve the transfer of care, a consult, etc.";
-            case SLOT: return "A bounded time-period when a particular set of resources (practioners, devices and/or locations) is available for the delivery of healthcare services.  Used for scheduling.";
             case ADVEVENT: return "An undesired reaction caused by exposure to some agent (e.g., a medication, immunization, food, or environmental agent).";
             case APTMTREQ: return "A request that a time be scheduled for a type of service for a specified patient, potentially subject to other constraints";
             case TRANSFER: return "The transition of a patient or set of material from one location to another";
@@ -192,7 +177,6 @@ public enum BasicResourceType {
             case ACCOUNT: return "A financial instrument used to track costs, charges or other amounts.";
             case INVOICE: return "A request for payment for goods and/or services.  Includes the idea of a healthcare insurance claim.";
             case ADJUDICAT: return "The determination of what will be paid against a particular invoice based on coverage, plan rules, etc.";
-            case PAYMENT: return "A record of a transfer of funds between accounts and/or individuals";
             case PREDETREQ: return "A request for a predication of the cost that would be paid under an insurance plan for a hypothetical claim for goods or services";
             case PREDETERMINE: return "An adjudication of what would be paid under an insurance plan for a hypothetical claim for goods or services";
             case STUDY: return "An investigation to determine information about a particular therapy or product";
@@ -204,7 +188,6 @@ public enum BasicResourceType {
           switch (this) {
             case CONSENT: return "Consent";
             case REFERRAL: return "Referral";
-            case SLOT: return "Resource Slot";
             case ADVEVENT: return "Adverse Event";
             case APTMTREQ: return "Appointment Request";
             case TRANSFER: return "Transfer";
@@ -215,7 +198,6 @@ public enum BasicResourceType {
             case ACCOUNT: return "Account";
             case INVOICE: return "Invoice";
             case ADJUDICAT: return "Invoice Adjudication";
-            case PAYMENT: return "Payment";
             case PREDETREQ: return "Predetermination Request";
             case PREDETERMINE: return "Predetermination";
             case STUDY: return "Study";

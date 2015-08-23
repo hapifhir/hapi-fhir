@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.method;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.io.IOException;
 import java.io.PushbackReader;
@@ -69,6 +68,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.annotation.VersionIdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.method.OperationParameter.IConverter;
@@ -85,7 +85,6 @@ import ca.uhn.fhir.rest.param.TransactionParameter;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.SearchParameterMap;
 import ca.uhn.fhir.util.ReflectionUtil;
 
@@ -386,10 +385,10 @@ public class MethodUtil {
 			}
 			if (parameterType.equals(HttpServletRequest.class) || parameterType.equals(ServletRequest.class)) {
 				param = new ServletRequestParameter();
+			} else if (parameterType.equals(SummaryEnum.class)) {
+				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(HttpServletResponse.class) || parameterType.equals(ServletResponse.class)) {
 				param = new ServletResponseParameter();
-			} else if (parameterType.equals(NarrativeModeEnum.class)) {
-				param = new NarrativeModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];

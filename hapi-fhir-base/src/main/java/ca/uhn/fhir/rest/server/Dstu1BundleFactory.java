@@ -156,6 +156,47 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
     @Override
+	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
+		if (myBundle.getAuthorName().isEmpty()) {
+			myBundle.getAuthorName().setValue(theAuthor);
+		}
+
+		if (myBundle.getUpdated().isEmpty() && isNotBlank(theLastUpdated.getValueAsString())) {
+			myBundle.getUpdated().setValueAsString(theLastUpdated.getValueAsString());
+		}
+		
+		if (myBundle.getBundleId().isEmpty()) {
+			myBundle.getBundleId().setValue(UUID.randomUUID().toString());
+		}
+		
+		if (myBundle.getLinkBase().isEmpty()) {
+			myBundle.getLinkBase().setValue(theServerBase);
+		}
+		
+		if (myBundle.getLinkSelf().isEmpty()) {
+			myBundle.getLinkSelf().setValue(theCompleteUrl);
+		}
+		
+		if (theBundleType != null && myBundle.getType().isEmpty()) {
+			myBundle.getType().setValueAsString(theBundleType.getCode());
+		}
+
+		if (myBundle.getTotalResults().isEmpty() && theTotalResults != null) {
+			myBundle.getTotalResults().setValue(theTotalResults);
+		}
+	}
+	
+	@Override
+	public Bundle getDstu1Bundle() {
+		return myBundle;
+	}
+
+	@Override
+	public IResource getResourceBundle() {
+		return null;
+	}
+
+	@Override
 	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
 		int numToReturn;
 		String searchId = null;
@@ -222,47 +263,6 @@ public class Dstu1BundleFactory implements IVersionSpecificBundleFactory {
 				}
 			}
 		}
-	}
-	
-	@Override
-	public void addRootPropertiesToBundle(String theAuthor, String theServerBase, String theCompleteUrl, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
-		if (myBundle.getAuthorName().isEmpty()) {
-			myBundle.getAuthorName().setValue(theAuthor);
-		}
-
-		if (myBundle.getUpdated().isEmpty() && isNotBlank(theLastUpdated.getValueAsString())) {
-			myBundle.getUpdated().setValueAsString(theLastUpdated.getValueAsString());
-		}
-		
-		if (myBundle.getBundleId().isEmpty()) {
-			myBundle.getBundleId().setValue(UUID.randomUUID().toString());
-		}
-		
-		if (myBundle.getLinkBase().isEmpty()) {
-			myBundle.getLinkBase().setValue(theServerBase);
-		}
-		
-		if (myBundle.getLinkSelf().isEmpty()) {
-			myBundle.getLinkSelf().setValue(theCompleteUrl);
-		}
-		
-		if (theBundleType != null && myBundle.getType().isEmpty()) {
-			myBundle.getType().setValueAsString(theBundleType.getCode());
-		}
-
-		if (myBundle.getTotalResults().isEmpty() && theTotalResults != null) {
-			myBundle.getTotalResults().setValue(theTotalResults);
-		}
-	}
-
-	@Override
-	public Bundle getDstu1Bundle() {
-		return myBundle;
-	}
-
-	@Override
-	public IResource getResourceBundle() {
-		return null;
 	}
 
 	@Override

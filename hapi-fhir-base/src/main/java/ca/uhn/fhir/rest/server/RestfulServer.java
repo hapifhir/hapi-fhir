@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.method.RequestDetails;
@@ -448,7 +449,7 @@ public class RestfulServer extends HttpServlet {
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(this, theRequest);
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
-		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
+		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
 
 		IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
@@ -476,7 +477,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
+			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, summaryMode, respondGzip, requestIsBrowser);
 		} else {
 			IBaseResource resBundle = bundleFactory.getResourceBundle();
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -487,7 +488,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK,
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK,
 					theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false);
 		}
 	}
@@ -1140,11 +1141,4 @@ public class RestfulServer extends HttpServlet {
 		return userAgent != null && userAgent.contains("Mozilla");
 	}
 
-	public enum NarrativeModeEnum {
-		NORMAL, ONLY, SUPPRESS;
-
-		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
-			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
-		}
-	}
 }

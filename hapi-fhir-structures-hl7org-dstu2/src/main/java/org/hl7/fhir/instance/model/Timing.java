@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -433,77 +433,77 @@ public class Timing extends Type implements ICompositeType {
         /**
          * Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.
          */
-        @Child(name = "bounds", type = {Duration.class, Range.class, Period.class}, order=1, min=0, max=1)
+        @Child(name = "bounds", type = {Duration.class, Range.class, Period.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Length/Range of lengths, or (Start and/or end) limits", formalDefinition="Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule." )
         protected Type bounds;
 
         /**
          * A total count of the desired number of repetitions.
          */
-        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1)
+        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Number of times to repeat", formalDefinition="A total count of the desired number of repetitions." )
         protected IntegerType count;
 
         /**
          * How long this thing happens for when it happens.
          */
-        @Child(name = "duration", type = {DecimalType.class}, order=3, min=0, max=1)
+        @Child(name = "duration", type = {DecimalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="How long when it happens", formalDefinition="How long this thing happens for when it happens." )
         protected DecimalType duration;
 
         /**
          * The upper limit of how long this thing happens for when it happens.
          */
-        @Child(name = "durationMax", type = {DecimalType.class}, order=4, min=0, max=1)
+        @Child(name = "durationMax", type = {DecimalType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="How long when it happens (Max)", formalDefinition="The upper limit of how long this thing happens for when it happens." )
         protected DecimalType durationMax;
 
         /**
          * The units of time for the duration, in UCUM units.
          */
-        @Child(name = "durationUnits", type = {CodeType.class}, order=5, min=0, max=1)
+        @Child(name = "durationUnits", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition="The units of time for the duration, in UCUM units." )
         protected Enumeration<UnitsOfTime> durationUnits;
 
         /**
          * The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).
          */
-        @Child(name = "frequency", type = {IntegerType.class}, order=6, min=0, max=1)
+        @Child(name = "frequency", type = {IntegerType.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)." )
         protected IntegerType frequency;
 
         /**
          * If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
-        @Child(name = "frequencyMax", type = {IntegerType.class}, order=7, min=0, max=1)
+        @Child(name = "frequencyMax", type = {IntegerType.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range." )
         protected IntegerType frequencyMax;
 
         /**
          * Indicates the duration of time over which repetitions are to occur.  E.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.
          */
-        @Child(name = "period", type = {DecimalType.class}, order=8, min=0, max=1)
-        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="Indicates the duration of time over which repetitions are to occur.  E.g. to express '3 times per day', 3 would be the frequency and '1 day' would be the period." )
+        @Child(name = "period", type = {DecimalType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="Indicates the duration of time over which repetitions are to occur.  E.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period." )
         protected DecimalType period;
 
         /**
          * If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as "do this once every 3-5 days.
          */
-        @Child(name = "periodMax", type = {DecimalType.class}, order=9, min=0, max=1)
-        @Description(shortDefinition="Upper limit of period (3-4 hours)", formalDefinition="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as 'do this once every 3-5 days." )
+        @Child(name = "periodMax", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Upper limit of period (3-4 hours)", formalDefinition="If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days." )
         protected DecimalType periodMax;
 
         /**
          * The units of time for the period in UCUM units.
          */
-        @Child(name = "periodUnits", type = {CodeType.class}, order=10, min=0, max=1)
+        @Child(name = "periodUnits", type = {CodeType.class}, order=10, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="s | min | h | d | wk | mo | a - unit of time (UCUM)", formalDefinition="The units of time for the period in UCUM units." )
         protected Enumeration<UnitsOfTime> periodUnits;
 
         /**
          * A real world event that the occurrence of the event should be tied to.
          */
-        @Child(name = "when", type = {CodeType.class}, order=11, min=0, max=1)
+        @Child(name = "when", type = {CodeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Regular life events the event is tied to", formalDefinition="A real world event that the occurrence of the event should be tied to." )
         protected Enumeration<EventTiming> when;
 
@@ -1061,8 +1061,8 @@ public class Timing extends Type implements ICompositeType {
           childrenList.add(new Property("durationUnits", "code", "The units of time for the duration, in UCUM units.", 0, java.lang.Integer.MAX_VALUE, durationUnits));
           childrenList.add(new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, java.lang.Integer.MAX_VALUE, frequency));
           childrenList.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, java.lang.Integer.MAX_VALUE, frequencyMax));
-          childrenList.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur.  E.g. to express '3 times per day', 3 would be the frequency and '1 day' would be the period.", 0, java.lang.Integer.MAX_VALUE, period));
-          childrenList.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as 'do this once every 3-5 days.", 0, java.lang.Integer.MAX_VALUE, periodMax));
+          childrenList.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur.  E.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, java.lang.Integer.MAX_VALUE, period));
+          childrenList.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, java.lang.Integer.MAX_VALUE, periodMax));
           childrenList.add(new Property("periodUnits", "code", "The units of time for the period in UCUM units.", 0, java.lang.Integer.MAX_VALUE, periodUnits));
           childrenList.add(new Property("when", "code", "A real world event that the occurrence of the event should be tied to.", 0, java.lang.Integer.MAX_VALUE, when));
         }
@@ -1125,21 +1125,21 @@ public class Timing extends Type implements ICompositeType {
     /**
      * Identifies specific times when the event occurs.
      */
-    @Child(name = "event", type = {DateTimeType.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "event", type = {DateTimeType.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="When the event occurs", formalDefinition="Identifies specific times when the event occurs." )
     protected List<DateTimeType> event;
 
     /**
      * A set of rules that describe when the event should occur.
      */
-    @Child(name = "repeat", type = {}, order=1, min=0, max=1)
+    @Child(name = "repeat", type = {}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the event is to occur", formalDefinition="A set of rules that describe when the event should occur." )
     protected TimingRepeatComponent repeat;
 
     /**
      * A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="QD | QOD | Q4H | Q6H | BID | TID | QID | AM | PM +", formalDefinition="A code for the timing pattern. Some codes such as BID are uniquitious, but many instutions define their own additional codes." )
     protected CodeableConcept code;
 

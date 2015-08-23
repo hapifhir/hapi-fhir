@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -51,21 +51,21 @@ public class Substance extends DomainResource {
         /**
          * Identifier associated with the package/container (usually a label affixed directly).
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Identifier of the package/container", formalDefinition="Identifier associated with the package/container (usually a label affixed directly)." )
         protected Identifier identifier;
 
         /**
          * When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry.
          */
-        @Child(name = "expiry", type = {DateTimeType.class}, order=2, min=0, max=1)
+        @Child(name = "expiry", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="When no longer valid to use", formalDefinition="When the substance is no longer valid to use. For some substances, a single arbitrary date is used for expiry." )
         protected DateTimeType expiry;
 
         /**
          * The amount of the substance.
          */
-        @Child(name = "quantity", type = {SimpleQuantity.class}, order=3, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Amount of substance in the package", formalDefinition="The amount of the substance." )
         protected SimpleQuantity quantity;
 
@@ -224,14 +224,14 @@ public class Substance extends DomainResource {
         /**
          * The amount of the ingredient in the substance - a concentration ratio.
          */
-        @Child(name = "quantity", type = {Ratio.class}, order=1, min=0, max=1)
+        @Child(name = "quantity", type = {Ratio.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Optional amount (concentration)", formalDefinition="The amount of the ingredient in the substance - a concentration ratio." )
         protected Ratio quantity;
 
         /**
          * Another substance that is a component of this substance.
          */
-        @Child(name = "substance", type = {Substance.class}, order=2, min=1, max=1)
+        @Child(name = "substance", type = {Substance.class}, order=2, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A component of the substance", formalDefinition="Another substance that is a component of this substance." )
         protected Reference substance;
 
@@ -369,42 +369,42 @@ public class Substance extends DomainResource {
     /**
      * Unique identifier for the substance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Unique identifier", formalDefinition="Unique identifier for the substance." )
     protected List<Identifier> identifier;
 
     /**
      * A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What class/type of substance this is", formalDefinition="A code that classifies the the general type of substance.  This is used  for searching, sorting and display purposes." )
     protected List<CodeableConcept> category;
 
     /**
      * A code (or set of codes) that identify this substance.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What substance this is", formalDefinition="A code (or set of codes) that identify this substance." )
     protected CodeableConcept code;
 
     /**
      * A description of the substance - its appearance, handling requirements, and other usage notes.
      */
-    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Textual description of the substance, comments", formalDefinition="A description of the substance - its appearance, handling requirements, and other usage notes." )
     protected StringType description;
 
     /**
      * Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance.
      */
-    @Child(name = "instance", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "instance", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="If this describes a specific package/container of the substance", formalDefinition="Substance may be used to describe a kind of substance, or a specific package/container of the substance: an instance." )
     protected List<SubstanceInstanceComponent> instance;
 
     /**
      * A substance can be composed of other substances.
      */
-    @Child(name = "ingredient", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "ingredient", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Composition information about the substance", formalDefinition="A substance can be composed of other substances." )
     protected List<SubstanceIngredientComponent> ingredient;
 

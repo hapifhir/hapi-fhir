@@ -8,7 +8,6 @@
   </text>
   <url value="http://hl7.org/fhir/StructureDefinition/integer"/>
   <name value="integer"/>
-  <status value="draft"/>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
@@ -16,11 +15,11 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for integer Type: A whole number"/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="integer"/>
@@ -62,11 +61,6 @@
         <code value="Extension"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: int -->
-  <!-- Regex: -?([0]|([1-9][0-9]*)) -->
     <element>
       <path value="integer.value"/>
       <representation value="xmlAttr"/>
@@ -74,8 +68,9 @@
       <definition value="The actual value"/>
       <min value="0"/>
       <max value="1"/>
-      <minValueInteger value="-2147483648"/>
-      <maxValueInteger value="2147483647"/>
+      <type>
+        <code value="xs:int"/>
+      </type>
     </element>
   </snapshot>
   <differential>
@@ -90,11 +85,6 @@
         <code value="Element"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-      The actual value domain is assumed to be known by magic by
-      reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: int -->
-  <!-- Regex: -?([0]|([1-9][0-9]*)) -->
     <element>
       <path value="integer.value"/>
       <representation value="xmlAttr"/>
@@ -102,8 +92,9 @@
       <definition value="Primitive value for integer"/>
       <min value="0"/>
       <max value="1"/>
-      <minValueInteger value="-2147483648"/>
-      <maxValueInteger value="2147483647"/>
+      <type>
+        <code value="xs:int"/>
+      </type>
     </element>
   </differential>
 </StructureDefinition>

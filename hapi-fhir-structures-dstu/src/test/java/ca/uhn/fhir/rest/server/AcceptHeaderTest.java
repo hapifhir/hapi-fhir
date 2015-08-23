@@ -1,13 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -22,8 +19,6 @@ import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu.resource.Organization;
 import ca.uhn.fhir.model.dstu.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -46,7 +41,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CTSUFFIX_CHARSET_UTF8, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 	
 	@Test
@@ -56,7 +51,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CTSUFFIX_CHARSET_UTF8, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	@Test
@@ -66,7 +61,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CTSUFFIX_CHARSET_UTF8, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	@Test
@@ -76,7 +71,7 @@ public class AcceptHeaderTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CTSUFFIX_CHARSET_UTF8, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 		// Now with spaces
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
@@ -84,7 +79,7 @@ public class AcceptHeaderTest {
 		status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(Constants.CT_FHIR_XML + Constants.CTSUFFIX_CHARSET_UTF8, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX, status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	@AfterClass

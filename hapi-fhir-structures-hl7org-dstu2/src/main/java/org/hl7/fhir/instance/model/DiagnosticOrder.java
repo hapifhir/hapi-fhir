@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -377,28 +377,28 @@ public class DiagnosticOrder extends DomainResource {
         /**
          * The status for the event.
          */
-        @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", formalDefinition="The status for the event." )
         protected Enumeration<DiagnosticOrderStatus> status;
 
         /**
          * Additional information about the event that occurred - e.g. if the status remained unchanged.
          */
-        @Child(name = "description", type = {CodeableConcept.class}, order=2, min=0, max=1)
+        @Child(name = "description", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="More information about the event and its context", formalDefinition="Additional information about the event that occurred - e.g. if the status remained unchanged." )
         protected CodeableConcept description;
 
         /**
          * The date/time at which the event occurred.
          */
-        @Child(name = "dateTime", type = {DateTimeType.class}, order=3, min=1, max=1)
+        @Child(name = "dateTime", type = {DateTimeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The date at which the event happened", formalDefinition="The date/time at which the event occurred." )
         protected DateTimeType dateTime;
 
         /**
          * The person who was responsible for performing or recording the action.
          */
-        @Child(name = "actor", type = {Practitioner.class, Device.class}, order=4, min=0, max=1)
+        @Child(name = "actor", type = {Practitioner.class, Device.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Who recorded or did this", formalDefinition="The person who was responsible for performing or recording the action." )
         protected Reference actor;
 
@@ -629,14 +629,14 @@ public class DiagnosticOrder extends DomainResource {
         /**
          * A code that identifies a particular diagnostic investigation, or panel of investigations, that have been requested.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Code to indicate the item (test or panel) being ordered", formalDefinition="A code that identifies a particular diagnostic investigation, or panel of investigations, that have been requested." )
         protected CodeableConcept code;
 
         /**
          * If the item is related to a specific specimen.
          */
-        @Child(name = "specimen", type = {Specimen.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "specimen", type = {Specimen.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="If this item relates to specific specimens", formalDefinition="If the item is related to a specific specimen." )
         protected List<Reference> specimen;
         /**
@@ -648,21 +648,21 @@ public class DiagnosticOrder extends DomainResource {
         /**
          * Anatomical location where the request test should be performed.  This is the target site.
          */
-        @Child(name = "bodySite", type = {CodeableConcept.class}, order=3, min=0, max=1)
+        @Child(name = "bodySite", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Location of requested test (if applicable)", formalDefinition="Anatomical location where the request test should be performed.  This is the target site." )
         protected CodeableConcept bodySite;
 
         /**
          * The status of this individual item within the order.
          */
-        @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1)
+        @Child(name = "status", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", formalDefinition="The status of this individual item within the order." )
         protected Enumeration<DiagnosticOrderStatus> status;
 
         /**
          * A summary of the events of interest that have occurred as this item of the request is processed.
          */
-        @Child(name = "event", type = {DiagnosticOrderEventComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "event", type = {DiagnosticOrderEventComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Events specific to this item", formalDefinition="A summary of the events of interest that have occurred as this item of the request is processed." )
         protected List<DiagnosticOrderEventComponent> event;
 
@@ -941,7 +941,7 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=0, min=1, max=1)
+    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who and/or what test is about", formalDefinition="Who or what the investigation is to be performed on. This is usually a human patient, but diagnostic tests can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)." )
     protected Reference subject;
 
@@ -953,7 +953,7 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * The practitioner that holds legal responsibility for ordering the investigation.
      */
-    @Child(name = "orderer", type = {Practitioner.class}, order=1, min=0, max=1)
+    @Child(name = "orderer", type = {Practitioner.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who ordered the test", formalDefinition="The practitioner that holds legal responsibility for ordering the investigation." )
     protected Reference orderer;
 
@@ -965,14 +965,14 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Identifiers assigned to this order", formalDefinition="Identifiers assigned to this order instance by the orderer and/or  the receiver and/or order fulfiller." )
     protected List<Identifier> identifier;
 
     /**
      * An encounter that provides additional information about the healthcare context in which this request is made.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The encounter that this diagnostic order is associated with", formalDefinition="An encounter that provides additional information about the healthcare context in which this request is made." )
     protected Reference encounter;
 
@@ -984,14 +984,14 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * An explanation or justification for why this diagnostic investigation is being requested.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Explanation/Justification for test", formalDefinition="An explanation or justification for why this diagnostic investigation is being requested.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation." )
     protected List<CodeableConcept> reason;
 
     /**
      * Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order.
      */
-    @Child(name = "supportingInformation", type = {Observation.class, Condition.class, DocumentReference.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "supportingInformation", type = {Observation.class, Condition.class, DocumentReference.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional clinical information", formalDefinition="Additional clinical information about the patient or specimen that may influence test interpretations.  This includes observations explicitly requested by the producer(filler) to provide context or supporting information needed to complete the order." )
     protected List<Reference> supportingInformation;
     /**
@@ -1003,7 +1003,7 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * One or more specimens that the diagnostic investigation is about.
      */
-    @Child(name = "specimen", type = {Specimen.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "specimen", type = {Specimen.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="If the whole order relates to specific specimens", formalDefinition="One or more specimens that the diagnostic investigation is about." )
     protected List<Reference> specimen;
     /**
@@ -1015,36 +1015,36 @@ public class DiagnosticOrder extends DomainResource {
     /**
      * The status of the order.
      */
-    @Child(name = "status", type = {CodeType.class}, order=7, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposed | draft | planned | requested | received | accepted | in-progress | review | completed | cancelled | suspended | rejected | failed", formalDefinition="The status of the order." )
     protected Enumeration<DiagnosticOrderStatus> status;
 
     /**
      * The clinical priority associated with this order.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=8, min=0, max=1)
+    @Child(name = "priority", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | stat | asap", formalDefinition="The clinical priority associated with this order." )
     protected Enumeration<DiagnosticOrderPriority> priority;
 
     /**
      * A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed.
      */
-    @Child(name = "event", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "event", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A list of events of interest in the lifecycle", formalDefinition="A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed." )
     protected List<DiagnosticOrderEventComponent> event;
 
     /**
      * The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested.
      */
-    @Child(name = "item", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "item", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The items the orderer requested", formalDefinition="The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested." )
     protected List<DiagnosticOrderItemComponent> item;
 
     /**
      * Any other notes associated with this patient or specimen or order (e.g. "patient hates needles").
      */
-    @Child(name = "note", type = {Annotation.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Other notes and comments", formalDefinition="Any other notes associated with this patient or specimen or order (e.g. 'patient hates needles')." )
+    @Child(name = "note", type = {Annotation.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Other notes and comments", formalDefinition="Any other notes associated with this patient or specimen or order (e.g. \"patient hates needles\")." )
     protected List<Annotation> note;
 
     private static final long serialVersionUID = 700891227L;
@@ -1612,7 +1612,7 @@ public class DiagnosticOrder extends DomainResource {
         childrenList.add(new Property("priority", "code", "The clinical priority associated with this order.", 0, java.lang.Integer.MAX_VALUE, priority));
         childrenList.add(new Property("event", "", "A summary of the events of interest that have occurred as the request is processed. E.g. when the order was made, various processing steps (specimens received), when it was completed.", 0, java.lang.Integer.MAX_VALUE, event));
         childrenList.add(new Property("item", "", "The specific diagnostic investigations that are requested as part of this request. Sometimes, there can only be one item per request, but in most contexts, more than one investigation can be requested.", 0, java.lang.Integer.MAX_VALUE, item));
-        childrenList.add(new Property("note", "Annotation", "Any other notes associated with this patient or specimen or order (e.g. 'patient hates needles').", 0, java.lang.Integer.MAX_VALUE, note));
+        childrenList.add(new Property("note", "Annotation", "Any other notes associated with this patient or specimen or order (e.g. \"patient hates needles\").", 0, java.lang.Integer.MAX_VALUE, note));
       }
 
       public DiagnosticOrder copy() {

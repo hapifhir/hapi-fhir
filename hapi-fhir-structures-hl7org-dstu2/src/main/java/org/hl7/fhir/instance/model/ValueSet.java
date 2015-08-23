@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -180,14 +180,14 @@ public class ValueSet extends DomainResource {
         /**
          * The name of an individual to contact regarding the value set.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the value set." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -339,28 +339,28 @@ public class ValueSet extends DomainResource {
         /**
          * An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system.
          */
-        @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1)
+        @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="URI to identify the code system (e.g. in Coding.system)", formalDefinition="An absolute URI that is used to reference this code system, including in [Coding]{datatypes.html#Coding}.system." )
         protected UriType system;
 
         /**
          * The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked.
          */
-        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Version (for use in Coding.version)", formalDefinition="The version of this code system that defines the codes. Note that the version is optional because a well maintained code system does not suffer from versioning, and therefore the version does not need to be maintained. However many code systems are not well maintained, and the version needs to be defined and tracked." )
         protected StringType version;
 
         /**
          * If code comparison is case sensitive when codes within this system are compared to each other.
          */
-        @Child(name = "caseSensitive", type = {BooleanType.class}, order=3, min=0, max=1)
+        @Child(name = "caseSensitive", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="If code comparison is case sensitive", formalDefinition="If code comparison is case sensitive when codes within this system are compared to each other." )
         protected BooleanType caseSensitive;
 
         /**
          * Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are.
          */
-        @Child(name = "concept", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED)
+        @Child(name = "concept", type = {}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts that are in the code system. The concept definitions are inherently heirarchical, but the definitions must be consulted to determine what the meaning of the heirachical relationships are." )
         protected List<ConceptDefinitionComponent> concept;
 
@@ -617,42 +617,42 @@ public class ValueSet extends DomainResource {
         /**
          * A code - a text symbol - that uniquely identifies the concept within the code system.
          */
-        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code that identifies concept", formalDefinition="A code - a text symbol - that uniquely identifies the concept within the code system." )
         protected CodeType code;
 
         /**
          * If this code is not for use as a real concept.
          */
-        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If this code is not for use as a real concept", formalDefinition="If this code is not for use as a real concept." )
         protected BooleanType abstract_;
 
         /**
          * A human readable string that is the recommended default way to present this concept to a user.
          */
-        @Child(name = "display", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "display", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Text to Display to the user", formalDefinition="A human readable string that is the recommended default way to present this concept to a user." )
         protected StringType display;
 
         /**
          * The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept.
          */
-        @Child(name = "definition", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "definition", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Formal Definition", formalDefinition="The formal definition of the concept. The value set resource does not make formal definitions required, because of the prevalence of legacy systems. However, but they are highly recommended, as without them there is no formal meaning associated with the concept." )
         protected StringType definition;
 
         /**
          * Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc.
          */
-        @Child(name = "designation", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "designation", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Additional representations for the concept", formalDefinition="Additional representations for the concept - other languages, aliases, specialized purposes, used for particular purposes, etc." )
         protected List<ConceptDefinitionDesignationComponent> designation;
 
         /**
          * Child Concepts - a heirarchy of concepts. The nature of the relationships is variable (is-a / contains / categorises) and can only be determined by examining the definitions of the concepts.
          */
-        @Child(name = "concept", type = {ConceptDefinitionComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "concept", type = {ConceptDefinitionComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Child Concepts (is-a / contains / categorises)", formalDefinition="Child Concepts - a heirarchy of concepts. The nature of the relationships is variable (is-a / contains / categorises) and can only be determined by examining the definitions of the concepts." )
         protected List<ConceptDefinitionComponent> concept;
 
@@ -1008,21 +1008,21 @@ public class ValueSet extends DomainResource {
         /**
          * The language this designation is defined for.
          */
-        @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1)
+        @Child(name = "language", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Human language of the designation", formalDefinition="The language this designation is defined for." )
         protected CodeType language;
 
         /**
          * A code that details how this designation would be used.
          */
-        @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1)
+        @Child(name = "use", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Details how this designation would be used", formalDefinition="A code that details how this designation would be used." )
         protected Coding use;
 
         /**
          * The text value for this designation.
          */
-        @Child(name = "value", type = {StringType.class}, order=3, min=1, max=1)
+        @Child(name = "value", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The text value for this designation", formalDefinition="The text value for this designation." )
         protected StringType value;
 
@@ -1210,21 +1210,21 @@ public class ValueSet extends DomainResource {
         /**
          * Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri.
          */
-        @Child(name = "import", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "import", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Import the contents of another value set", formalDefinition="Includes the contents of the referenced value set as a part of the contents of this value set. This is an absolute URI that is a reference to ValueSet.uri." )
         protected List<UriType> import_;
 
         /**
          * Include one or more codes from a code system.
          */
-        @Child(name = "include", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "include", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Include one or more codes from a code system", formalDefinition="Include one or more codes from a code system." )
         protected List<ConceptSetComponent> include;
 
         /**
          * Exclude one or more codes from the value set.
          */
-        @Child(name = "exclude", type = {ConceptSetComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "exclude", type = {ConceptSetComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Explicitly exclude codes", formalDefinition="Exclude one or more codes from the value set." )
         protected List<ConceptSetComponent> exclude;
 
@@ -1432,28 +1432,28 @@ public class ValueSet extends DomainResource {
         /**
          * An absolute URI which is the code system from which the selected codes come from.
          */
-        @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1)
+        @Child(name = "system", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The system the codes come from", formalDefinition="An absolute URI which is the code system from which the selected codes come from." )
         protected UriType system;
 
         /**
          * The version of the code system that the codes are selected from.
          */
-        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Specific version of the code system referred to", formalDefinition="The version of the code system that the codes are selected from." )
         protected StringType version;
 
         /**
          * Specifies a concept to be included or excluded.
          */
-        @Child(name = "concept", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "concept", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A concept defined in the system", formalDefinition="Specifies a concept to be included or excluded." )
         protected List<ConceptReferenceComponent> concept;
 
         /**
          * Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true.
          */
-        @Child(name = "filter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "filter", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Select codes/concepts by their properties (including relationships)", formalDefinition="Select concepts by specify a matching criteria based on the properties (including relationships) defined by the system. If multiple filters are specified, they SHALL all be true." )
         protected List<ConceptSetFilterComponent> filter;
 
@@ -1707,21 +1707,21 @@ public class ValueSet extends DomainResource {
         /**
          * Specifies a code for the concept to be included or excluded.
          */
-        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code or expression from system", formalDefinition="Specifies a code for the concept to be included or excluded." )
         protected CodeType code;
 
         /**
          * The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system.
          */
-        @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1)
+        @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Test to display for this code for this value set", formalDefinition="The text to display to the user for this concept in the context of this valueset. If no display is provided, then applications using the value set use the display specified for the code by the system." )
         protected StringType display;
 
         /**
          * Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc.
          */
-        @Child(name = "designation", type = {ConceptDefinitionDesignationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "designation", type = {ConceptDefinitionDesignationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Additional representations for this valueset", formalDefinition="Additional representations for this concept when used in this value set - other languages, aliases, specialized purposes, used for particular purposes, etc." )
         protected List<ConceptDefinitionDesignationComponent> designation;
 
@@ -1929,21 +1929,21 @@ public class ValueSet extends DomainResource {
         /**
          * A code that identifies a property defined in the code system.
          */
-        @Child(name = "property", type = {CodeType.class}, order=1, min=1, max=1)
+        @Child(name = "property", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="A property defined by the code system", formalDefinition="A code that identifies a property defined in the code system." )
         protected CodeType property;
 
         /**
          * The kind of operation to perform as a part of the filter criteria.
          */
-        @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1)
+        @Child(name = "op", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="= | is-a | is-not-a | regex | in | not-in", formalDefinition="The kind of operation to perform as a part of the filter criteria." )
         protected Enumeration<FilterOperator> op;
 
         /**
          * The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value.
          */
-        @Child(name = "value", type = {CodeType.class}, order=3, min=1, max=1)
+        @Child(name = "value", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code from the system, or regex criteria", formalDefinition="The match value may be either a code defined by the system, or a string value which is used a regex match on the literal string of the property value." )
         protected CodeType value;
 
@@ -2151,42 +2151,42 @@ public class ValueSet extends DomainResource {
         /**
          * An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so.
          */
-        @Child(name = "identifier", type = {UriType.class}, order=1, min=1, max=1)
+        @Child(name = "identifier", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Uniquely identifies this expansion", formalDefinition="An identifier that uniquely identifies this expansion of the valueset. Systems may re-use the same identifier as long as the expansion and the definition remain the same, but are not required to do so." )
         protected UriType identifier;
 
         /**
          * The time at which the expansion was produced by the expanding system.
          */
-        @Child(name = "timestamp", type = {DateTimeType.class}, order=2, min=1, max=1)
+        @Child(name = "timestamp", type = {DateTimeType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Time valueset expansion happened", formalDefinition="The time at which the expansion was produced by the expanding system." )
         protected DateTimeType timestamp;
 
         /**
          * The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter.
          */
-        @Child(name = "total", type = {IntegerType.class}, order=3, min=0, max=1)
+        @Child(name = "total", type = {IntegerType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Total number of codes in the expansion", formalDefinition="The total nober of concepts in the expansion. If the number of concept nodes in this resource is less than the stated number, then the server can return more using the offset parameter." )
         protected IntegerType total;
 
         /**
          * If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present.
          */
-        @Child(name = "offset", type = {IntegerType.class}, order=4, min=0, max=1)
+        @Child(name = "offset", type = {IntegerType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Offset at which this resource starts", formalDefinition="If paging is being used, the offset at which this resource starts - e.g. this resource is a partial view into the expansion. If paging is not being used, this element SHALL not be present." )
         protected IntegerType offset;
 
         /**
          * A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion.
          */
-        @Child(name = "parameter", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "parameter", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Parameter that controlled the expansion process", formalDefinition="A Parameter that controlled the expansion process. These parameters may be used by users of expanded value sets to check whether the expansion is suitable for a particular purpose, or to pick the correct expansion." )
         protected List<ValueSetExpansionParameterComponent> parameter;
 
         /**
          * The codes that are contained in the value set expansion.
          */
-        @Child(name = "contains", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "contains", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Codes in the value set", formalDefinition="The codes that are contained in the value set expansion." )
         protected List<ValueSetExpansionContainsComponent> contains;
 
@@ -2534,14 +2534,14 @@ public class ValueSet extends DomainResource {
         /**
          * The name of the parameter.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Name as assigned by server", formalDefinition="The name of the parameter." )
         protected StringType name;
 
         /**
          * The value of the parameter.
          */
-        @Child(name = "value", type = {StringType.class, BooleanType.class, IntegerType.class, DecimalType.class, UriType.class, CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "value", type = {StringType.class, BooleanType.class, IntegerType.class, DecimalType.class, UriType.class, CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Value of the named parameter", formalDefinition="The value of the parameter." )
         protected Type value;
 
@@ -2750,42 +2750,42 @@ public class ValueSet extends DomainResource {
         /**
          * An absolute URI which is the code system in which the code for this item in the expansion is defined.
          */
-        @Child(name = "system", type = {UriType.class}, order=1, min=0, max=1)
+        @Child(name = "system", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="System value for the code", formalDefinition="An absolute URI which is the code system in which the code for this item in the expansion is defined." )
         protected UriType system;
 
         /**
          * If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value.
          */
-        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1)
+        @Child(name = "abstract", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="If user cannot select this entry", formalDefinition="If true, this entry is included in the expansion for navigational purposes, and the user cannot select the code directly as a proper value." )
         protected BooleanType abstract_;
 
         /**
          * The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence.
          */
-        @Child(name = "version", type = {StringType.class}, order=3, min=0, max=1)
+        @Child(name = "version", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Version in which this code / display is defined", formalDefinition="The version of this code system that defined this code and/or display. This should only be used with code systems that do not enforce concept permanence." )
         protected StringType version;
 
         /**
          * The code for this item in the expansion heirarchy. If this code is missing the entry in the heirarchy is a place holder (abstract) and doesn't represent a valid code in the value set.
          */
-        @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code - if blank, this is not a choosable code", formalDefinition="The code for this item in the expansion heirarchy. If this code is missing the entry in the heirarchy is a place holder (abstract) and doesn't represent a valid code in the value set." )
         protected CodeType code;
 
         /**
          * The recommended display for this item in the expansion.
          */
-        @Child(name = "display", type = {StringType.class}, order=5, min=0, max=1)
+        @Child(name = "display", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="User display for the concept", formalDefinition="The recommended display for this item in the expansion." )
         protected StringType display;
 
         /**
          * Other codes and entries contained under this entry in the heirarchy.
          */
-        @Child(name = "contains", type = {ValueSetExpansionContainsComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "contains", type = {ValueSetExpansionContainsComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Codes contained under this entry", formalDefinition="Other codes and entries contained under this entry in the heirarchy." )
         protected List<ValueSetExpansionContainsComponent> contains;
 
@@ -3139,134 +3139,134 @@ public class ValueSet extends DomainResource {
     /**
      * An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Globally unique logical id for  value set", formalDefinition="An absolute URL that is used to identify this value set when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this value set is (or will be) published." )
     protected UriType url;
 
     /**
      * Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional identifier for the value set (v2 / CDA)", formalDefinition="Formal identifier that is used to identify this value set when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected Identifier identifier;
 
     /**
      * Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id for this version of the value set", formalDefinition="Used to identify this version of the value set when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
     protected StringType version;
 
     /**
      * A free text natural language name describing the value set.
      */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Informal name for this value set", formalDefinition="A free text natural language name describing the value set." )
     protected StringType name;
 
     /**
      * The status of the value set.
      */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the value set." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This valueset was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the value set.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the value set." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<ValueSetContactComponent> contact;
 
     /**
      * The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes (e.g. the 'content logical definition').
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date for given status", formalDefinition="The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes (e.g. the 'content logical definition')." )
     protected DateTimeType date;
 
     /**
      * If a Locked Date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value sets as of the Locked Date.
      */
-    @Child(name = "lockedDate", type = {DateType.class}, order=9, min=0, max=1)
+    @Child(name = "lockedDate", type = {DateType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Fixed date for all referenced code systems and value sets", formalDefinition="If a Locked Date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value sets as of the Locked Date." )
     protected DateType lockedDate;
 
     /**
      * A free text natural language description of the use of the value set - reason for definition, "the semantic space" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.
      */
-    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1)
-    @Description(shortDefinition="Human language description of the value set", formalDefinition="A free text natural language description of the use of the value set - reason for definition, 'the semantic space' to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set." )
+    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Human language description of the value set", formalDefinition="A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set." )
     protected StringType description;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions." )
     protected List<CodeableConcept> useContext;
 
     /**
      * If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.
      */
-    @Child(name = "immutable", type = {BooleanType.class}, order=12, min=0, max=1)
+    @Child(name = "immutable", type = {BooleanType.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Indicates whether or not any change to the content logical definition may occur", formalDefinition="If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change." )
     protected BooleanType immutable;
 
     /**
      * Explains why this value set is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=13, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why is this needed?", formalDefinition="Explains why this value set is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=14, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the value set and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the value set." )
     protected StringType copyright;
 
     /**
      * Whether this is intended to be used with an extensible binding or not.
      */
-    @Child(name = "extensible", type = {BooleanType.class}, order=15, min=0, max=1)
+    @Child(name = "extensible", type = {BooleanType.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Whether this is intended to be used with an extensible binding", formalDefinition="Whether this is intended to be used with an extensible binding or not." )
     protected BooleanType extensible;
 
     /**
      * A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly.
      */
-    @Child(name = "codeSystem", type = {}, order=16, min=0, max=1)
+    @Child(name = "codeSystem", type = {}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="An inline code system - part of this value set", formalDefinition="A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly." )
     protected ValueSetCodeSystemComponent codeSystem;
 
     /**
      * A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.
      */
-    @Child(name = "compose", type = {}, order=17, min=0, max=1)
+    @Child(name = "compose", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="When value set includes codes from elsewhere", formalDefinition="A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set." )
     protected ValueSetComposeComponent compose;
 
     /**
      * A value set can also be "expanded", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.
      */
-    @Child(name = "expansion", type = {}, order=18, min=0, max=1)
-    @Description(shortDefinition="Used when the value set is 'expanded'", formalDefinition="A value set can also be 'expanded', where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
+    @Child(name = "expansion", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Used when the value set is \"expanded\"", formalDefinition="A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed." )
     protected ValueSetExpansionComponent expansion;
 
     private static final long serialVersionUID = -467533312L;
@@ -4095,7 +4095,7 @@ public class ValueSet extends DomainResource {
         childrenList.add(new Property("contact", "", "Contacts to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         childrenList.add(new Property("date", "dateTime", "The date that the value set status was last changed. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the implementation guide changes (e.g. the 'content logical definition').", 0, java.lang.Integer.MAX_VALUE, date));
         childrenList.add(new Property("lockedDate", "date", "If a Locked Date is defined, then the Content Logical Definition must be evaluated using the current version of all referenced code system(s) and value sets as of the Locked Date.", 0, java.lang.Integer.MAX_VALUE, lockedDate));
-        childrenList.add(new Property("description", "string", "A free text natural language description of the use of the value set - reason for definition, 'the semantic space' to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.", 0, java.lang.Integer.MAX_VALUE, description));
+        childrenList.add(new Property("description", "string", "A free text natural language description of the use of the value set - reason for definition, \"the semantic space\" to be included in the value set, conditions of use, etc. The description may include a list of expected usages for the value set and can also describe the approach taken to build the value set.", 0, java.lang.Integer.MAX_VALUE, description));
         childrenList.add(new Property("useContext", "CodeableConcept", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of value set definitions.", 0, java.lang.Integer.MAX_VALUE, useContext));
         childrenList.add(new Property("immutable", "boolean", "If this is set to 'true', then no new versions of the content logical definition can be created.  Note: Other metadata might still change.", 0, java.lang.Integer.MAX_VALUE, immutable));
         childrenList.add(new Property("requirements", "string", "Explains why this value set is needed and why it's been constrained as it has.", 0, java.lang.Integer.MAX_VALUE, requirements));
@@ -4103,7 +4103,7 @@ public class ValueSet extends DomainResource {
         childrenList.add(new Property("extensible", "boolean", "Whether this is intended to be used with an extensible binding or not.", 0, java.lang.Integer.MAX_VALUE, extensible));
         childrenList.add(new Property("codeSystem", "", "A definition of an code system, inlined into the value set (as a packaging convenience). Note that the inline code system may be used from other value sets by referring to it's (codeSystem.system) directly.", 0, java.lang.Integer.MAX_VALUE, codeSystem));
         childrenList.add(new Property("compose", "", "A set of criteria that provide the content logical definition of the value set by including or excluding codes from outside this value set.", 0, java.lang.Integer.MAX_VALUE, compose));
-        childrenList.add(new Property("expansion", "", "A value set can also be 'expanded', where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.", 0, java.lang.Integer.MAX_VALUE, expansion));
+        childrenList.add(new Property("expansion", "", "A value set can also be \"expanded\", where the value set is turned into a simple collection of enumerated codes. This element holds the expansion, if it has been performed.", 0, java.lang.Integer.MAX_VALUE, expansion));
       }
 
       public ValueSet copy() {

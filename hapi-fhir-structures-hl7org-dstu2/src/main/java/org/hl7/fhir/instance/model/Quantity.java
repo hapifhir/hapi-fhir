@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -149,35 +149,35 @@ public class Quantity extends Type implements ICompositeType {
     /**
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value.
      */
-    @Child(name = "value", type = {DecimalType.class}, order=0, min=0, max=1)
+    @Child(name = "value", type = {DecimalType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Numerical value (with implicit precision)", formalDefinition="The value of the measured amount. The value includes an implicit precision in the presentation of the value." )
     protected DecimalType value;
 
     /**
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is "<" , then the real value is < stated value.
      */
-    @Child(name = "comparator", type = {CodeType.class}, order=1, min=0, max=1)
-    @Description(shortDefinition="< | <= | >= | > - how to understand the value", formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is '<' , then the real value is < stated value." )
+    @Child(name = "comparator", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="< | <= | >= | > - how to understand the value", formalDefinition="How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value." )
     protected Enumeration<QuantityComparator> comparator;
 
     /**
      * A human-readable form of the units.
      */
-    @Child(name = "unit", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "unit", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unit representation", formalDefinition="A human-readable form of the units." )
     protected StringType unit;
 
     /**
      * The identification of the system that provides the coded form of the unit.
      */
-    @Child(name = "system", type = {UriType.class}, order=3, min=0, max=1)
+    @Child(name = "system", type = {UriType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="System that defines coded unit form", formalDefinition="The identification of the system that provides the coded form of the unit." )
     protected UriType system;
 
     /**
      * A computer processable form of the units in some unit representation system.
      */
-    @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1)
+    @Child(name = "code", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Coded form of the unit", formalDefinition="A computer processable form of the units in some unit representation system." )
     protected CodeType code;
 
@@ -438,7 +438,7 @@ public class Quantity extends Type implements ICompositeType {
       protected void listChildren(List<Property> childrenList) {
         super.listChildren(childrenList);
         childrenList.add(new Property("value", "decimal", "The value of the measured amount. The value includes an implicit precision in the presentation of the value.", 0, java.lang.Integer.MAX_VALUE, value));
-        childrenList.add(new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is '<' , then the real value is < stated value.", 0, java.lang.Integer.MAX_VALUE, comparator));
+        childrenList.add(new Property("comparator", "code", "How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues. E.g. if the comparator is \"<\" , then the real value is < stated value.", 0, java.lang.Integer.MAX_VALUE, comparator));
         childrenList.add(new Property("unit", "string", "A human-readable form of the units.", 0, java.lang.Integer.MAX_VALUE, unit));
         childrenList.add(new Property("system", "uri", "The identification of the system that provides the coded form of the unit.", 0, java.lang.Integer.MAX_VALUE, system));
         childrenList.add(new Property("code", "code", "A computer processable form of the units in some unit representation system.", 0, java.lang.Integer.MAX_VALUE, code));

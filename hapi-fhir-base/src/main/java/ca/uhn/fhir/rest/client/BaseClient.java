@@ -50,6 +50,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.method.IClientResponseHandler;
@@ -70,8 +71,9 @@ public abstract class BaseClient implements IRestfulClient {
 	private HttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
+	private SummaryEnum mySummary;
 	private final String myUrlBase;
-
+	
 	BaseClient(HttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
 		myClient = theClient;
@@ -149,6 +151,10 @@ public abstract class BaseClient implements IRestfulClient {
 		return myUrlBase;
 	}
 
+	public SummaryEnum getSummary() {
+		return mySummary;
+	}
+
 	public String getUrlBase() {
 		return myUrlBase;
 	}
@@ -158,11 +164,11 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
-		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse);
+		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null);
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-			boolean theLogRequestAndResponse) {
+			boolean theLogRequestAndResponse, SummaryEnum theSummaryMode) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -179,6 +185,12 @@ public abstract class BaseClient implements IRestfulClient {
 				params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
 			} else if (theEncoding == EncodingEnum.JSON) {
 				params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+			}
+			
+			if (theSummaryMode != null) {
+				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
+			} else if (mySummary != null) {
+				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(mySummary.getCode()));
 			}
 
 			if (thePrettyPrint == Boolean.TRUE) {
@@ -373,6 +385,7 @@ public abstract class BaseClient implements IRestfulClient {
 		}
 	}
 
+	@Override
 	public void registerInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.add(theInterceptor);
@@ -390,6 +403,7 @@ public abstract class BaseClient implements IRestfulClient {
 	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not explicitly request an encoding. (This is perfectly acceptable behaviour according
 	 * to the FHIR specification. In this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
 	 */
+	@Override
 	public void setEncoding(EncodingEnum theEncoding) {
 		myEncoding = theEncoding;
 		// return this;
@@ -420,11 +434,18 @@ public abstract class BaseClient implements IRestfulClient {
 	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note that this is currently a non-standard flag (_pretty) which is supported only by
 	 * HAPI based servers (and any other servers which might implement it).
 	 */
+	@Override
 	public void setPrettyPrint(Boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
 		// return this;
 	}
 
+	@Override
+	public void setSummary(SummaryEnum theSummary) {
+		mySummary = theSummary;
+	}
+
+	@Override
 	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.remove(theInterceptor);

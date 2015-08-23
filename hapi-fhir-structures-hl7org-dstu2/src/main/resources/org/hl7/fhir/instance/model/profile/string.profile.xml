@@ -8,7 +8,6 @@
   </text>
   <url value="http://hl7.org/fhir/StructureDefinition/string"/>
   <name value="string"/>
-  <status value="draft"/>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
@@ -16,11 +15,11 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
   <description value="Base StructureDefinition for string Type: A sequence of Unicode characters"/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="string"/>
@@ -62,10 +61,6 @@
         <code value="Extension"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: string -->
     <element>
       <path value="string.value"/>
       <representation value="xmlAttr"/>
@@ -73,7 +68,9 @@
       <definition value="The actual value"/>
       <min value="0"/>
       <max value="1"/>
-      <maxLength value="1048576"/>
+      <type>
+        <code value="xs:string"/>
+      </type>
     </element>
   </snapshot>
   <differential>
@@ -88,10 +85,6 @@
         <code value="Element"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-      The actual value domain is assumed to be known by magic by
-      reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: string -->
     <element>
       <path value="string.value"/>
       <representation value="xmlAttr"/>
@@ -99,7 +92,9 @@
       <definition value="Primitive value for string"/>
       <min value="0"/>
       <max value="1"/>
-      <maxLength value="1048576"/>
+      <type>
+        <code value="xs:string"/>
+      </type>
     </element>
   </differential>
 </StructureDefinition>

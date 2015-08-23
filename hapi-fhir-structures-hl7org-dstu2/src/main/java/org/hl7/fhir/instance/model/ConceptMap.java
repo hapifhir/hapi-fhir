@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,14 +52,14 @@ public class ConceptMap extends DomainResource {
         /**
          * The name of an individual to contact regarding the concept map.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the concept map." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -211,21 +211,21 @@ public class ConceptMap extends DomainResource {
         /**
          * An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system).
          */
-        @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1)
+        @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code System (if value set crosses code systems)", formalDefinition="An absolute URI that identifies the Code System (if the source is a value set that crosses more than one code system)." )
         protected UriType codeSystem;
 
         /**
          * Identity (code or path) or the element/item being mapped.
          */
-        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Identifies element being mapped", formalDefinition="Identity (code or path) or the element/item being mapped." )
         protected CodeType code;
 
         /**
          * A concept from the target value set that this concept maps to.
          */
-        @Child(name = "target", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "target", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Concept in target system for element", formalDefinition="A concept from the target value set that this concept maps to." )
         protected List<TargetElementComponent> target;
 
@@ -429,42 +429,42 @@ public class ConceptMap extends DomainResource {
         /**
          * An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems).
          */
-        @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1)
+        @Child(name = "codeSystem", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="System of the target (if necessary)", formalDefinition="An absolute URI that identifies the code system of the target code (if the target is a value set that cross code systems)." )
         protected UriType codeSystem;
 
         /**
          * Identity (code or path) or the element/item that the map refers to.
          */
-        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1)
+        @Child(name = "code", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code that identifies the target element", formalDefinition="Identity (code or path) or the element/item that the map refers to." )
         protected CodeType code;
 
         /**
          * The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source).
          */
-        @Child(name = "equivalence", type = {CodeType.class}, order=3, min=1, max=1)
+        @Child(name = "equivalence", type = {CodeType.class}, order=3, min=1, max=1, modifier=true, summary=false)
         @Description(shortDefinition="equivalent | equal | wider | subsumes | narrower | specializes | inexact | unmatched | disjoint", formalDefinition="The equivalence between the source and target concepts (counting for the dependencies and products). The equivalence is read from target to source (e.g. the target is 'wider' than the source)." )
         protected Enumeration<ConceptMapEquivalence> equivalence;
 
         /**
          * A description of status/issues in mapping that conveys additional information not represented in  the structured data.
          */
-        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1)
+        @Child(name = "comments", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of status/issues in mapping", formalDefinition="A description of status/issues in mapping that conveys additional information not represented in  the structured data." )
         protected StringType comments;
 
         /**
          * A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value.
          */
-        @Child(name = "dependsOn", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "dependsOn", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Other elements required for this mapping (from context)", formalDefinition="A set of additional dependencies for this mapping to hold. This mapping is only applicable if the specified element can be resolved, and it has the specified value." )
         protected List<OtherElementComponent> dependsOn;
 
         /**
          * A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on.
          */
-        @Child(name = "product", type = {OtherElementComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "product", type = {OtherElementComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Other concepts that this mapping also produces", formalDefinition="A set of additional outcomes from this mapping to other elements. To properly execute this mapping, the specified element must be mapped to some data element or source that is in context. The mapping may still be useful without a place for the additional data elements, but the equivalence cannot be relied on." )
         protected List<OtherElementComponent> product;
 
@@ -823,21 +823,21 @@ public class ConceptMap extends DomainResource {
         /**
          * A reference to a specific concept that holds a coded value. This can be an element in a FHIR resource, or a specific reference to a data element in a different specification (e.g. v2) or a general reference to a kind of data field, or a reference to a value set with an appropriately narrow definition.
          */
-        @Child(name = "element", type = {UriType.class}, order=1, min=1, max=1)
+        @Child(name = "element", type = {UriType.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to element/field/valueset mapping depends on", formalDefinition="A reference to a specific concept that holds a coded value. This can be an element in a FHIR resource, or a specific reference to a data element in a different specification (e.g. v2) or a general reference to a kind of data field, or a reference to a value set with an appropriately narrow definition." )
         protected UriType element;
 
         /**
          * An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems).
          */
-        @Child(name = "codeSystem", type = {UriType.class}, order=2, min=1, max=1)
+        @Child(name = "codeSystem", type = {UriType.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code System (if necessary)", formalDefinition="An absolute URI that identifies the code system of the dependency code (if the source/dependency is a value set that crosses code systems)." )
         protected UriType codeSystem;
 
         /**
          * Identity (code or path) or the element/item that the map depends on / refers to.
          */
-        @Child(name = "code", type = {StringType.class}, order=3, min=1, max=1)
+        @Child(name = "code", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Value of the referenced element", formalDefinition="Identity (code or path) or the element/item that the map depends on / refers to." )
         protected StringType code;
 
@@ -1043,112 +1043,112 @@ public class ConceptMap extends DomainResource {
     /**
      * An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Globally unique logical id for concept map", formalDefinition="An absolute URL that is used to identify this concept map when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this concept map is (or will be) published." )
     protected UriType url;
 
     /**
      * Formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional identifier for the concept map", formalDefinition="Formal identifier that is used to identify this concept map when it is represented in other formats, or referenced in a specification, model, design or an instance." )
     protected Identifier identifier;
 
     /**
      * The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp.
      */
-    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1)
+    @Child(name = "version", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Logical id for this version of the concept map", formalDefinition="The identifier that is used to identify this version of the concept map when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the profile author manually and the value should be a timestamp." )
     protected StringType version;
 
     /**
      * A free text natural language name describing the concept map.
      */
-    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1)
+    @Child(name = "name", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Informal name for this concept map", formalDefinition="A free text natural language name describing the concept map." )
     protected StringType name;
 
     /**
      * The status of the concept map.
      */
-    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of the concept map." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="This ConceptMap was authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the concept map.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the concept map." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<ConceptMapContactComponent> contact;
 
     /**
      * The date that this version of the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the concept map changes.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date for given status", formalDefinition="The date that this version of the concept map was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the concept map changes." )
     protected DateTimeType date;
 
     /**
      * A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc.
      */
-    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human language description of the concept map", formalDefinition="A free text natural language description of the use of the concept map - reason for definition, conditions of use, etc." )
     protected StringType description;
 
     /**
      * The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of concept maps.
      */
-    @Child(name = "useContext", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "useContext", type = {CodeableConcept.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Content intends to support these contexts", formalDefinition="The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of concept maps." )
     protected List<CodeableConcept> useContext;
 
     /**
      * Explains why this concept map is needed and why it's been constrained as it has.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=11, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why is this needed?", formalDefinition="Explains why this concept map is needed and why it's been constrained as it has." )
     protected StringType requirements;
 
     /**
      * A copyright statement relating to the concept map and/or its contents.
      */
-    @Child(name = "copyright", type = {StringType.class}, order=12, min=0, max=1)
+    @Child(name = "copyright", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Use and/or Publishing restrictions", formalDefinition="A copyright statement relating to the concept map and/or its contents." )
     protected StringType copyright;
 
     /**
      * The source value set that specifies the concepts that are being mapped.
      */
-    @Child(name = "source", type = {UriType.class, ValueSet.class, StructureDefinition.class}, order=13, min=1, max=1)
+    @Child(name = "source", type = {UriType.class, ValueSet.class, StructureDefinition.class}, order=13, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifies the source of the concepts which are being mapped", formalDefinition="The source value set that specifies the concepts that are being mapped." )
     protected Type source;
 
     /**
      * The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made.
      */
-    @Child(name = "target", type = {UriType.class, ValueSet.class, StructureDefinition.class}, order=14, min=1, max=1)
+    @Child(name = "target", type = {UriType.class, ValueSet.class, StructureDefinition.class}, order=14, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Provides context to the mappings", formalDefinition="The target value set provides context to the mappings. Note that the mapping is made between concepts, not between value sets, but the value set provides important context about how the concept mapping choices are made." )
     protected Type target;
 
     /**
      * Mappings for an individual concept in the source to one or more concepts in the target.
      */
-    @Child(name = "element", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "element", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Mappings for a concept from the source set", formalDefinition="Mappings for an individual concept in the source to one or more concepts in the target." )
     protected List<SourceElementComponent> element;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -166,14 +166,14 @@ public class SearchParameter extends DomainResource {
         /**
          * The name of an individual to contact regarding the search parameter.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1)
+        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Name of a individual to contact", formalDefinition="The name of an individual to contact regarding the search parameter." )
         protected StringType name;
 
         /**
          * Contact details for individual (if a name was provided) or the publisher.
          */
-        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "telecom", type = {ContactPoint.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Contact details for individual or publisher", formalDefinition="Contact details for individual (if a name was provided) or the publisher." )
         protected List<ContactPoint> telecom;
 
@@ -323,105 +323,105 @@ public class SearchParameter extends DomainResource {
     /**
      * An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published.
      */
-    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1)
+    @Child(name = "url", type = {UriType.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Literal URL used to reference this search parameter", formalDefinition="An absolute URL that is used to identify this search parameter when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this search parameter is (or will be) published." )
     protected UriType url;
 
     /**
      * A free text natural language name identifying the search parameter.
      */
-    @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1)
+    @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Informal name for this search parameter", formalDefinition="A free text natural language name identifying the search parameter." )
     protected StringType name;
 
     /**
      * The status of this search parameter definition.
      */
-    @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | retired", formalDefinition="The status of this search parameter definition." )
     protected Enumeration<ConformanceResourceStatus> status;
 
     /**
      * A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.
      */
-    @Child(name = "experimental", type = {BooleanType.class}, order=3, min=0, max=1)
+    @Child(name = "experimental", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="If for testing purposes, not real usage", formalDefinition="A flag to indicate that this search parameter definition is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage." )
     protected BooleanType experimental;
 
     /**
      * The name of the individual or organization that published the search parameter.
      */
-    @Child(name = "publisher", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "publisher", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Name of the publisher (Organization or individual)", formalDefinition="The name of the individual or organization that published the search parameter." )
     protected StringType publisher;
 
     /**
      * Contacts to assist a user in finding and communicating with the publisher.
      */
-    @Child(name = "contact", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "contact", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contact details of the publisher", formalDefinition="Contacts to assist a user in finding and communicating with the publisher." )
     protected List<SearchParameterContactComponent> contact;
 
     /**
      * The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Publication Date(/time)", formalDefinition="The date  (and optionally time) when the search parameter definition was published. The date must change when the business version changes, if it does, and it must change if the status code changes. in addition, it should change when the substantiative content of the search parameter changes." )
     protected DateTimeType date;
 
     /**
      * The Scope and Usage that this search parameter was created to meet.
      */
-    @Child(name = "requirements", type = {StringType.class}, order=7, min=0, max=1)
+    @Child(name = "requirements", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Why this search parameter is defined", formalDefinition="The Scope and Usage that this search parameter was created to meet." )
     protected StringType requirements;
 
     /**
      * The code used in the URL or the parameter name in a parameters resource for this search parameter.
      */
-    @Child(name = "code", type = {CodeType.class}, order=8, min=1, max=1)
+    @Child(name = "code", type = {CodeType.class}, order=8, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Code used in URL", formalDefinition="The code used in the URL or the parameter name in a parameters resource for this search parameter." )
     protected CodeType code;
 
     /**
      * The base resource type that this search parameter refers to.
      */
-    @Child(name = "base", type = {CodeType.class}, order=9, min=1, max=1)
+    @Child(name = "base", type = {CodeType.class}, order=9, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The resource type this search parameter applies to", formalDefinition="The base resource type that this search parameter refers to." )
     protected CodeType base;
 
     /**
      * The type of value a search parameter refers to, and how the content is interpreted.
      */
-    @Child(name = "type", type = {CodeType.class}, order=10, min=1, max=1)
+    @Child(name = "type", type = {CodeType.class}, order=10, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
     protected Enumeration<SearchParamType> type;
 
     /**
      * A description of the search parameters and how it used.
      */
-    @Child(name = "description", type = {StringType.class}, order=11, min=1, max=1)
+    @Child(name = "description", type = {StringType.class}, order=11, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Documentation for  search parameter", formalDefinition="A description of the search parameters and how it used." )
     protected StringType description;
 
     /**
      * An XPath expression that returns a set of elements for the search parameter.
      */
-    @Child(name = "xpath", type = {StringType.class}, order=12, min=0, max=1)
+    @Child(name = "xpath", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="XPath that extracts the values", formalDefinition="An XPath expression that returns a set of elements for the search parameter." )
     protected StringType xpath;
 
     /**
      * How the search parameter relates to the set of elements returned by evaluating the xpath query.
      */
-    @Child(name = "xpathUsage", type = {CodeType.class}, order=13, min=0, max=1)
+    @Child(name = "xpathUsage", type = {CodeType.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="normal | phonetic | nearby | distance | other", formalDefinition="How the search parameter relates to the set of elements returned by evaluating the xpath query." )
     protected Enumeration<XPathUsageType> xpathUsage;
 
     /**
      * Types of resource (if a resource is referenced).
      */
-    @Child(name = "target", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "target", type = {CodeType.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Types of resource (if a resource reference)", formalDefinition="Types of resource (if a resource is referenced)." )
     protected List<CodeType> target;
 

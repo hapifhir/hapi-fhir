@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -121,7 +121,7 @@ public class Condition extends DomainResource {
             case CONFIRMED: return "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition";
             case REFUTED: return "This condition has been ruled out by diagnostic and clinical evidence";
             case ENTEREDINERROR: return "The statement was entered in error and Is not valid";
-            case UNKNOWN: return "The condition status is unknown.  Note that 'unknown' is a value of last resort and every attempt should be made to provide a meaningful value other than 'unknown'";
+            case UNKNOWN: return "The condition status is unknown.  Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\"";
             default: return "?";
           }
         }
@@ -179,14 +179,14 @@ public class Condition extends DomainResource {
         /**
          * A simple summary of the stage such as "Stage 3". The determination of the stage is disease-specific.
          */
-        @Child(name = "summary", type = {CodeableConcept.class}, order=1, min=0, max=1)
-        @Description(shortDefinition="Simple summary (disease specific)", formalDefinition="A simple summary of the stage such as 'Stage 3'. The determination of the stage is disease-specific." )
+        @Child(name = "summary", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Simple summary (disease specific)", formalDefinition="A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific." )
         protected CodeableConcept summary;
 
         /**
          * Reference to a formal record of the evidence on which the staging assessment is based.
          */
-        @Child(name = "assessment", type = {ClinicalImpression.class, DiagnosticReport.class, Observation.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "assessment", type = {ClinicalImpression.class, DiagnosticReport.class, Observation.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Formal record of assessment", formalDefinition="Reference to a formal record of the evidence on which the staging assessment is based." )
         protected List<Reference> assessment;
         /**
@@ -279,7 +279,7 @@ public class Condition extends DomainResource {
 
         protected void listChildren(List<Property> childrenList) {
           super.listChildren(childrenList);
-          childrenList.add(new Property("summary", "CodeableConcept", "A simple summary of the stage such as 'Stage 3'. The determination of the stage is disease-specific.", 0, java.lang.Integer.MAX_VALUE, summary));
+          childrenList.add(new Property("summary", "CodeableConcept", "A simple summary of the stage such as \"Stage 3\". The determination of the stage is disease-specific.", 0, java.lang.Integer.MAX_VALUE, summary));
           childrenList.add(new Property("assessment", "Reference(ClinicalImpression|DiagnosticReport|Observation)", "Reference to a formal record of the evidence on which the staging assessment is based.", 0, java.lang.Integer.MAX_VALUE, assessment));
         }
 
@@ -327,14 +327,14 @@ public class Condition extends DomainResource {
         /**
          * A manifestation or symptom that led to the recording of this condition.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Manifestation/symptom", formalDefinition="A manifestation or symptom that led to the recording of this condition." )
         protected CodeableConcept code;
 
         /**
          * Links to other relevant information, including pathology reports.
          */
-        @Child(name = "detail", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "detail", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Supporting information found elsewhere", formalDefinition="Links to other relevant information, including pathology reports." )
         protected List<Reference> detail;
         /**
@@ -473,14 +473,14 @@ public class Condition extends DomainResource {
     /**
      * This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External Ids for this condition", formalDefinition="This records identifiers associated with this condition that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * Indicates the patient who the condition record is associated with.
      */
-    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who has the condition?", formalDefinition="Indicates the patient who the condition record is associated with." )
     protected Reference patient;
 
@@ -492,7 +492,7 @@ public class Condition extends DomainResource {
     /**
      * Encounter during which the condition was first asserted.
      */
-    @Child(name = "encounter", type = {Encounter.class}, order=2, min=0, max=1)
+    @Child(name = "encounter", type = {Encounter.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter when condition first asserted", formalDefinition="Encounter during which the condition was first asserted." )
     protected Reference encounter;
 
@@ -504,7 +504,7 @@ public class Condition extends DomainResource {
     /**
      * Individual who is making the condition statement.
      */
-    @Child(name = "asserter", type = {Practitioner.class, Patient.class}, order=3, min=0, max=1)
+    @Child(name = "asserter", type = {Practitioner.class, Patient.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Person who asserts this condition", formalDefinition="Individual who is making the condition statement." )
     protected Reference asserter;
 
@@ -516,84 +516,84 @@ public class Condition extends DomainResource {
     /**
      * A date, when  the Condition statement was documented.
      */
-    @Child(name = "dateRecorded", type = {DateType.class}, order=4, min=0, max=1)
+    @Child(name = "dateRecorded", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When first entered", formalDefinition="A date, when  the Condition statement was documented." )
     protected DateType dateRecorded;
 
     /**
      * Identification of the condition, problem or diagnosis.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=5, min=1, max=1)
+    @Child(name = "code", type = {CodeableConcept.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identification of the condition, problem or diagnosis", formalDefinition="Identification of the condition, problem or diagnosis." )
     protected CodeableConcept code;
 
     /**
      * A category assigned to the condition.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=6, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="complaint | symptom | finding | diagnosis", formalDefinition="A category assigned to the condition." )
     protected CodeableConcept category;
 
     /**
      * The clinical status of the condition.
      */
-    @Child(name = "clinicalStatus", type = {CodeType.class}, order=7, min=0, max=1)
+    @Child(name = "clinicalStatus", type = {CodeType.class}, order=7, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | relapse | remission | resolved", formalDefinition="The clinical status of the condition." )
     protected CodeType clinicalStatus;
 
     /**
      * The verification status to support the clinical status of the condition.
      */
-    @Child(name = "verificationStatus", type = {CodeType.class}, order=8, min=1, max=1)
+    @Child(name = "verificationStatus", type = {CodeType.class}, order=8, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="provisional | differential | confirmed | refuted | entered-in-error | unknown", formalDefinition="The verification status to support the clinical status of the condition." )
     protected Enumeration<ConditionVerificationStatus> verificationStatus;
 
     /**
      * A subjective assessment of the severity of the condition as evaluated by the clinician.
      */
-    @Child(name = "severity", type = {CodeableConcept.class}, order=9, min=0, max=1)
+    @Child(name = "severity", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Subjective severity of condition", formalDefinition="A subjective assessment of the severity of the condition as evaluated by the clinician." )
     protected CodeableConcept severity;
 
     /**
      * Estimated or actual date or date-time  the condition began, in the opinion of the clinician.
      */
-    @Child(name = "onset", type = {DateTimeType.class, Age.class, Period.class, Range.class, StringType.class}, order=10, min=0, max=1)
+    @Child(name = "onset", type = {DateTimeType.class, Age.class, Period.class, Range.class, StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Estimated or actual date,  date-time, or age", formalDefinition="Estimated or actual date or date-time  the condition began, in the opinion of the clinician." )
     protected Type onset;
 
     /**
      * The date or estimated date that the condition resolved or went into remission. This is called "abatement" because of the many overloaded connotations associated with "remission" or "resolution" - Conditions are never really resolved, but they can abate.
      */
-    @Child(name = "abatement", type = {DateTimeType.class, Age.class, BooleanType.class, Period.class, Range.class, StringType.class}, order=11, min=0, max=1)
-    @Description(shortDefinition="If/when in resolution/remission", formalDefinition="The date or estimated date that the condition resolved or went into remission. This is called 'abatement' because of the many overloaded connotations associated with 'remission' or 'resolution' - Conditions are never really resolved, but they can abate." )
+    @Child(name = "abatement", type = {DateTimeType.class, Age.class, BooleanType.class, Period.class, Range.class, StringType.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="If/when in resolution/remission", formalDefinition="The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate." )
     protected Type abatement;
 
     /**
      * Clinical stage or grade of a condition. May include formal severity assessments.
      */
-    @Child(name = "stage", type = {}, order=12, min=0, max=1)
+    @Child(name = "stage", type = {}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Stage/grade, usually assessed formally", formalDefinition="Clinical stage or grade of a condition. May include formal severity assessments." )
     protected ConditionStageComponent stage;
 
     /**
      * Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.
      */
-    @Child(name = "evidence", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "evidence", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Supporting evidence", formalDefinition="Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed." )
     protected List<ConditionEvidenceComponent> evidence;
 
     /**
      * The anatomical location where this condition manifests itself.
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Anatomical location, if relevant", formalDefinition="The anatomical location where this condition manifests itself." )
     protected List<CodeableConcept> bodySite;
 
     /**
      * Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis.
      */
-    @Child(name = "notes", type = {StringType.class}, order=15, min=0, max=1)
+    @Child(name = "notes", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Additional information about the Condition", formalDefinition="Additional information about the Condition. This is a general notes/comments entry  for description of the Condition, its diagnosis and prognosis." )
     protected StringType notes;
 
@@ -1345,7 +1345,7 @@ public class Condition extends DomainResource {
         childrenList.add(new Property("verificationStatus", "code", "The verification status to support the clinical status of the condition.", 0, java.lang.Integer.MAX_VALUE, verificationStatus));
         childrenList.add(new Property("severity", "CodeableConcept", "A subjective assessment of the severity of the condition as evaluated by the clinician.", 0, java.lang.Integer.MAX_VALUE, severity));
         childrenList.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date or date-time  the condition began, in the opinion of the clinician.", 0, java.lang.Integer.MAX_VALUE, onset));
-        childrenList.add(new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called 'abatement' because of the many overloaded connotations associated with 'remission' or 'resolution' - Conditions are never really resolved, but they can abate.", 0, java.lang.Integer.MAX_VALUE, abatement));
+        childrenList.add(new Property("abatement[x]", "dateTime|Age|boolean|Period|Range|string", "The date or estimated date that the condition resolved or went into remission. This is called \"abatement\" because of the many overloaded connotations associated with \"remission\" or \"resolution\" - Conditions are never really resolved, but they can abate.", 0, java.lang.Integer.MAX_VALUE, abatement));
         childrenList.add(new Property("stage", "", "Clinical stage or grade of a condition. May include formal severity assessments.", 0, java.lang.Integer.MAX_VALUE, stage));
         childrenList.add(new Property("evidence", "", "Supporting Evidence / manifestations that are the basis on which this condition is suspected or confirmed.", 0, java.lang.Integer.MAX_VALUE, evidence));
         childrenList.add(new Property("bodySite", "CodeableConcept", "The anatomical location where this condition manifests itself.", 0, java.lang.Integer.MAX_VALUE, bodySite));

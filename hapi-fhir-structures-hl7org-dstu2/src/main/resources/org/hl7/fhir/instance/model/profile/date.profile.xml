@@ -8,7 +8,6 @@
   </text>
   <url value="http://hl7.org/fhir/StructureDefinition/date"/>
   <name value="date"/>
-  <status value="draft"/>
   <publisher value="HL7 FHIR Standard"/>
   <contact>
     <telecom>
@@ -16,16 +15,20 @@
       <value value="http://hl7.org/fhir"/>
     </telecom>
   </contact>
-  <date value="2015-08-13T16:43:28-04:00"/>
-  <description value="Base StructureDefinition for date Type: A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.                 Dates SHALL be valid dates."/>
+  <description value="Base StructureDefinition for date Type: A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  
+						
+							Dates SHALL be valid dates."/>
+  <status value="draft"/>
+  <date value="2015-07-23T16:50:38-04:00"/>
   <kind value="datatype"/>
   <abstract value="false"/>
-  <base value="http://hl7.org/fhir/StructureDefinition/Element"/>
   <snapshot>
     <element>
       <path value="date"/>
       <short value="Primitive Type date"/>
-      <definition value="A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.                 Dates SHALL be valid dates."/>
+      <definition value="A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  
+						
+							Dates SHALL be valid dates."/>
       <min value="0"/>
       <max value="*"/>
       <type>
@@ -61,11 +64,6 @@
         <code value="Extension"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-        The actual value domain is assumed to be known by magic by
-        reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: xs:gYear, xs:gYearMonth, xs:date -->
-  <!-- Regex: -?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)? -->
     <element>
       <path value="date.value"/>
       <representation value="xmlAttr"/>
@@ -73,24 +71,24 @@
       <definition value="The actual value"/>
       <min value="0"/>
       <max value="1"/>
+      <type>
+        <code value="xs:gYear, xs:gYearMonth, xs:date"/>
+      </type>
     </element>
   </snapshot>
   <differential>
     <element>
       <path value="date"/>
       <short value="Primitive Type date"/>
-      <definition value="A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.                 Dates SHALL be valid dates."/>
+      <definition value="A date, or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  
+						
+							Dates SHALL be valid dates."/>
       <min value="0"/>
       <max value="*"/>
       <type>
         <code value="Element"/>
       </type>
     </element>
-  <!-- Note: the primitive value does not have an assigned type
-      The actual value domain is assumed to be known by magic by
-      reading the spec and from the name of the primitive type -->
-  <!-- Schema Type: xs:gYear, xs:gYearMonth, xs:date -->
-  <!-- Regex: -?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1]))?)? -->
     <element>
       <path value="date.value"/>
       <representation value="xmlAttr"/>
@@ -98,6 +96,9 @@
       <definition value="Primitive value for date"/>
       <min value="0"/>
       <max value="1"/>
+      <type>
+        <code value="xs:gYear, xs:gYearMonth, xs:date"/>
+      </type>
     </element>
   </differential>
 </StructureDefinition>

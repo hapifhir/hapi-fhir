@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -52,7 +52,7 @@ public class Contract extends DomainResource {
         /**
          * Who or what actors are assigned roles in this Contract.
          */
-        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1)
+        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Actor Type", formalDefinition="Who or what actors are assigned roles in this Contract." )
         protected Reference entity;
 
@@ -64,7 +64,7 @@ public class Contract extends DomainResource {
         /**
          * Role type of actors assigned roles in this Contract.
          */
-        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract  Actor Role", formalDefinition="Role type of actors assigned roles in this Contract." )
         protected List<CodeableConcept> role;
 
@@ -214,56 +214,56 @@ public class Contract extends DomainResource {
         /**
          * Specific type of Contract Valued Item that may be priced.
          */
-        @Child(name = "entity", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "entity", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Valued Item Type", formalDefinition="Specific type of Contract Valued Item that may be priced." )
         protected Type entity;
 
         /**
          * Identifies a Contract Valued Item instance.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1)
+        @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Valued Item Identifier", formalDefinition="Identifies a Contract Valued Item instance." )
         protected Identifier identifier;
 
         /**
          * Indicates the time during which this Contract ValuedItem information is effective.
          */
-        @Child(name = "effectiveTime", type = {DateTimeType.class}, order=3, min=0, max=1)
+        @Child(name = "effectiveTime", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Valued Item Effective Tiem", formalDefinition="Indicates the time during which this Contract ValuedItem information is effective." )
         protected DateTimeType effectiveTime;
 
         /**
          * Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances.
          */
-        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Count of Contract Valued Items", formalDefinition="Specifies the units by which the Contract Valued Item is measured or counted, and quantifies the countable or measurable Contract Valued Item instances." )
         protected SimpleQuantity quantity;
 
         /**
          * A Contract Valued Item unit valuation measure.
          */
-        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1)
+        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Valued Item fee, charge, or cost", formalDefinition="A Contract Valued Item unit valuation measure." )
         protected Money unitPrice;
 
         /**
          * A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
          */
-        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1)
+        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Valued Item Price Scaling Factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of the Contract Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
         protected DecimalType factor;
 
         /**
          * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point.
          */
-        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1)
+        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Valued Item Difficulty Scaling Factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Valued Item delivered. The concept of Points allows for assignment of point values for a Contract Valued Item, such that a monetary amount can be assigned to each point." )
         protected DecimalType points;
 
         /**
          * Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
-        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1)
+        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Total Contract Valued Item Value", formalDefinition="Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
@@ -627,14 +627,14 @@ public class Contract extends DomainResource {
         /**
          * Role of this Contract signer, e.g., notary, grantee.
          */
-        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1)
+        @Child(name = "type", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Signer Type", formalDefinition="Role of this Contract signer, e.g., notary, grantee." )
         protected Coding type;
 
         /**
          * Party which is a signator to this Contract.
          */
-        @Child(name = "party", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=1, max=1)
+        @Child(name = "party", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Signatory Party", formalDefinition="Party which is a signator to this Contract." )
         protected Reference party;
 
@@ -646,7 +646,7 @@ public class Contract extends DomainResource {
         /**
          * Legally binding Contract DSIG signature contents in Base64.
          */
-        @Child(name = "signature", type = {StringType.class}, order=3, min=1, max=1)
+        @Child(name = "signature", type = {StringType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Documentation Signature", formalDefinition="Legally binding Contract DSIG signature contents in Base64." )
         protected StringType signature;
 
@@ -826,42 +826,42 @@ public class Contract extends DomainResource {
         /**
          * Unique identifier for this particular Contract Provision.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contract Term identifier", formalDefinition="Unique identifier for this particular Contract Provision." )
         protected Identifier identifier;
 
         /**
          * When this Contract Provision was issued.
          */
-        @Child(name = "issued", type = {DateTimeType.class}, order=2, min=0, max=1)
+        @Child(name = "issued", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contract Term Issue Date Time", formalDefinition="When this Contract Provision was issued." )
         protected DateTimeType issued;
 
         /**
          * Relevant time or time-period when this Contract Provision is applicable.
          */
-        @Child(name = "applies", type = {Period.class}, order=3, min=0, max=1)
+        @Child(name = "applies", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Contract Term Effective Time", formalDefinition="Relevant time or time-period when this Contract Provision is applicable." )
         protected Period applies;
 
         /**
          * Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1)
+        @Child(name = "type", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Type", formalDefinition="Type of Contract Provision such as specific requirements, purposes for actions, obligations, prohibitions, e.g., life time maximum benefit." )
         protected CodeableConcept type;
 
         /**
          * Subtype of this Contract Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment.
          */
-        @Child(name = "subType", type = {CodeableConcept.class}, order=5, min=0, max=1)
+        @Child(name = "subType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Subtype", formalDefinition="Subtype of this Contract Provision, e.g., life time maximum payment for a contract term for specific valued item, e.g., disability payment." )
         protected CodeableConcept subType;
 
         /**
          * Who or what this Contract Provision is about.
          */
-        @Child(name = "subject", type = {}, order=6, min=0, max=1)
+        @Child(name = "subject", type = {}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Subject of this Contract Term", formalDefinition="Who or what this Contract Provision is about." )
         protected Reference subject;
 
@@ -873,42 +873,42 @@ public class Contract extends DomainResource {
         /**
          * Action stipulated by this Contract Provision.
          */
-        @Child(name = "action", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "action", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Action", formalDefinition="Action stipulated by this Contract Provision." )
         protected List<CodeableConcept> action;
 
         /**
          * Reason or purpose for the action stipulated by this Contract Provision.
          */
-        @Child(name = "actionReason", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "actionReason", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Action Reason", formalDefinition="Reason or purpose for the action stipulated by this Contract Provision." )
         protected List<CodeableConcept> actionReason;
 
         /**
          * List of actors participating in this Contract Provision.
          */
-        @Child(name = "actor", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "actor", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Actor List", formalDefinition="List of actors participating in this Contract Provision." )
         protected List<TermActorComponent> actor;
 
         /**
          * Human readable form of this Contract Provision.
          */
-        @Child(name = "text", type = {StringType.class}, order=10, min=0, max=1)
+        @Child(name = "text", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Human readable Contract term text", formalDefinition="Human readable form of this Contract Provision." )
         protected StringType text;
 
         /**
          * Contract Provision Valued Item List.
          */
-        @Child(name = "valuedItem", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "valuedItem", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item", formalDefinition="Contract Provision Valued Item List." )
         protected List<TermValuedItemComponent> valuedItem;
 
         /**
          * Nested group of Contract Provisions.
          */
-        @Child(name = "group", type = {TermComponent.class}, order=12, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "group", type = {TermComponent.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested Contract Term Group", formalDefinition="Nested group of Contract Provisions." )
         protected List<TermComponent> group;
 
@@ -1447,7 +1447,7 @@ public class Contract extends DomainResource {
         /**
          * The actor assigned a role in this Contract Provision.
          */
-        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1)
+        @Child(name = "entity", type = {Contract.class, Device.class, Group.class, Location.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Actor", formalDefinition="The actor assigned a role in this Contract Provision." )
         protected Reference entity;
 
@@ -1459,7 +1459,7 @@ public class Contract extends DomainResource {
         /**
          * Role played by the actor assigned this role in this Contract Provision.
          */
-        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Actor Role", formalDefinition="Role played by the actor assigned this role in this Contract Provision." )
         protected List<CodeableConcept> role;
 
@@ -1609,56 +1609,56 @@ public class Contract extends DomainResource {
         /**
          * Specific type of Contract Provision Valued Item that may be priced.
          */
-        @Child(name = "entity", type = {CodeableConcept.class}, order=1, min=0, max=1)
+        @Child(name = "entity", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item Type", formalDefinition="Specific type of Contract Provision Valued Item that may be priced." )
         protected Type entity;
 
         /**
          * Identifies a Contract Provision Valued Item instance.
          */
-        @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1)
+        @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item Identifier", formalDefinition="Identifies a Contract Provision Valued Item instance." )
         protected Identifier identifier;
 
         /**
          * Indicates the time during which this Contract Term ValuedItem information is effective.
          */
-        @Child(name = "effectiveTime", type = {DateTimeType.class}, order=3, min=0, max=1)
+        @Child(name = "effectiveTime", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item Effective Tiem", formalDefinition="Indicates the time during which this Contract Term ValuedItem information is effective." )
         protected DateTimeType effectiveTime;
 
         /**
          * Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances.
          */
-        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1)
+        @Child(name = "quantity", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item Count", formalDefinition="Specifies the units by which the Contract Provision Valued Item is measured or counted, and quantifies the countable or measurable Contract Term Valued Item instances." )
         protected SimpleQuantity quantity;
 
         /**
          * A Contract Provision Valued Item unit valuation measure.
          */
-        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1)
+        @Child(name = "unitPrice", type = {Money.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item fee, charge, or cost", formalDefinition="A Contract Provision Valued Item unit valuation measure." )
         protected Money unitPrice;
 
         /**
          * A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
          */
-        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1)
+        @Child(name = "factor", type = {DecimalType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item Price Scaling Factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of the Contract Provision Valued Item delivered. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
         protected DecimalType factor;
 
         /**
          * An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point.
          */
-        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1)
+        @Child(name = "points", type = {DecimalType.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Term Valued Item Difficulty Scaling Factor", formalDefinition="An amount that expresses the weighting (based on difficulty, cost and/or resource intensiveness) associated with the Contract Provision Valued Item delivered. The concept of Points allows for assignment of point values for a Contract ProvisionValued Item, such that a monetary amount can be assigned to each point." )
         protected DecimalType points;
 
         /**
          * Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
          */
-        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1)
+        @Child(name = "net", type = {Money.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Total Contract Term Valued Item Value", formalDefinition="Expresses the product of the Contract Provision Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
         protected Money net;
 
@@ -2022,7 +2022,7 @@ public class Contract extends DomainResource {
         /**
          * Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability.
          */
-        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=1, min=1, max=1)
+        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Easily comprehended representation of this Contract", formalDefinition="Human readable rendering of this Contract in a format and representation intended to enhance comprehension and ensure understandability." )
         protected Type content;
 
@@ -2131,7 +2131,7 @@ public class Contract extends DomainResource {
         /**
          * Contract legal text in human renderable form.
          */
-        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=1, min=1, max=1)
+        @Child(name = "content", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Legal Text", formalDefinition="Contract legal text in human renderable form." )
         protected Type content;
 
@@ -2240,7 +2240,7 @@ public class Contract extends DomainResource {
         /**
          * Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal).
          */
-        @Child(name = "content", type = {Attachment.class, DocumentReference.class}, order=1, min=1, max=1)
+        @Child(name = "content", type = {Attachment.class, DocumentReference.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Computable Contract Rules", formalDefinition="Computable Contract conveyed using a policy rule language (e.g. XACML, DKAL, SecPal)." )
         protected Type content;
 
@@ -2347,28 +2347,28 @@ public class Contract extends DomainResource {
     /**
      * Unique identifier for this Contract.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Contract identifier", formalDefinition="Unique identifier for this Contract." )
     protected Identifier identifier;
 
     /**
      * When this  Contract was issued.
      */
-    @Child(name = "issued", type = {DateTimeType.class}, order=1, min=0, max=1)
+    @Child(name = "issued", type = {DateTimeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When this Contract was issued", formalDefinition="When this  Contract was issued." )
     protected DateTimeType issued;
 
     /**
      * Relevant time or time-period when this Contract is applicable.
      */
-    @Child(name = "applies", type = {Period.class}, order=2, min=0, max=1)
+    @Child(name = "applies", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Effective time", formalDefinition="Relevant time or time-period when this Contract is applicable." )
     protected Period applies;
 
     /**
      * Who and/or what this Contract is about: typically a Patient, Organization, or valued items such as goods and services.
      */
-    @Child(name = "subject", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "subject", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Subject of this Contract", formalDefinition="Who and/or what this Contract is about: typically a Patient, Organization, or valued items such as goods and services." )
     protected List<Reference> subject;
     /**
@@ -2380,7 +2380,7 @@ public class Contract extends DomainResource {
     /**
      * A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies.
      */
-    @Child(name = "authority", type = {Organization.class}, order=4, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "authority", type = {Organization.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Authority under which this Contract has standing", formalDefinition="A formally or informally recognized grouping of people, principals, organizations, or jurisdictions formed for the purpose of achieving some form of collective action such as the promulgation, administration and enforcement of contracts and policies." )
     protected List<Reference> authority;
     /**
@@ -2392,7 +2392,7 @@ public class Contract extends DomainResource {
     /**
      * Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources.
      */
-    @Child(name = "domain", type = {Location.class}, order=5, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "domain", type = {Location.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Domain in which this Contract applies", formalDefinition="Recognized governance framework or system operating with a circumscribed scope in accordance with specified principles, policies, processes or procedures for managing rights, actions, or behaviors of parties or principals relative to resources." )
     protected List<Reference> domain;
     /**
@@ -2404,84 +2404,84 @@ public class Contract extends DomainResource {
     /**
      * Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=6, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Contract Tyoe", formalDefinition="Type of Contract such as an insurance policy, real estate contract, a will, power of attorny, Privacy or Security policy , trust framework agreement, etc." )
     protected CodeableConcept type;
 
     /**
      * More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent.
      */
-    @Child(name = "subType", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "subType", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contract Subtype", formalDefinition="More specific type or specialization of an overarching or more general contract such as auto insurance, home owner  insurance, prenupial agreement, Advanced-Directive, or privacy consent." )
     protected List<CodeableConcept> subType;
 
     /**
      * Action stipulated by this Contract.
      */
-    @Child(name = "action", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "action", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Action", formalDefinition="Action stipulated by this Contract." )
     protected List<CodeableConcept> action;
 
     /**
      * Reason for action stipulated by this Contract.
      */
-    @Child(name = "actionReason", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "actionReason", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Action Reason", formalDefinition="Reason for action stipulated by this Contract." )
     protected List<CodeableConcept> actionReason;
 
     /**
      * List of Contract actors.
      */
-    @Child(name = "actor", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "actor", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Actor", formalDefinition="List of Contract actors." )
     protected List<ActorComponent> actor;
 
     /**
      * Contract Valued Item List.
      */
-    @Child(name = "valuedItem", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "valuedItem", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Valued Item", formalDefinition="Contract Valued Item List." )
     protected List<ValuedItemComponent> valuedItem;
 
     /**
      * Party signing this Contract.
      */
-    @Child(name = "signer", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "signer", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Signer", formalDefinition="Party signing this Contract." )
     protected List<SignatoryComponent> signer;
 
     /**
      * One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.
      */
-    @Child(name = "term", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "term", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Term List", formalDefinition="One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups." )
     protected List<TermComponent> term;
 
     /**
      * Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the "source of truth" and which would be the basis for legal action related to enforcement of this Contract.
      */
-    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=14, min=0, max=1)
-    @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the 'source of truth' and which would be the basis for legal action related to enforcement of this Contract." )
+    @Child(name = "binding", type = {Attachment.class, Composition.class, DocumentReference.class, QuestionnaireResponse.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Binding Contract", formalDefinition="Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract." )
     protected Type binding;
 
     /**
      * The "patient friendly language" versionof the Contract in whole or in parts. "Patient friendly language" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.
      */
-    @Child(name = "friendly", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED)
-    @Description(shortDefinition="Contract Friendly Language", formalDefinition="The 'patient friendly language' versionof the Contract in whole or in parts. 'Patient friendly language' means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement." )
+    @Child(name = "friendly", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Contract Friendly Language", formalDefinition="The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement." )
     protected List<FriendlyLanguageComponent> friendly;
 
     /**
      * List of Legal expressions or representations of this Contract.
      */
-    @Child(name = "legal", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "legal", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Contract Legal Language", formalDefinition="List of Legal expressions or representations of this Contract." )
     protected List<LegalLanguageComponent> legal;
 
     /**
      * List of Computable Policy Rule Language Representations of this Contract.
      */
-    @Child(name = "rule", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "rule", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Computable Contract Language", formalDefinition="List of Computable Policy Rule Language Representations of this Contract." )
     protected List<ComputableLanguageComponent> rule;
 
@@ -3247,8 +3247,8 @@ public class Contract extends DomainResource {
         childrenList.add(new Property("valuedItem", "", "Contract Valued Item List.", 0, java.lang.Integer.MAX_VALUE, valuedItem));
         childrenList.add(new Property("signer", "", "Party signing this Contract.", 0, java.lang.Integer.MAX_VALUE, signer));
         childrenList.add(new Property("term", "", "One or more Contract Provisions, which may be related and conveyed as a group, and may contain nested groups.", 0, java.lang.Integer.MAX_VALUE, term));
-        childrenList.add(new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the 'source of truth' and which would be the basis for legal action related to enforcement of this Contract.", 0, java.lang.Integer.MAX_VALUE, binding));
-        childrenList.add(new Property("friendly", "", "The 'patient friendly language' versionof the Contract in whole or in parts. 'Patient friendly language' means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.", 0, java.lang.Integer.MAX_VALUE, friendly));
+        childrenList.add(new Property("binding[x]", "Attachment|Reference(Composition|DocumentReference|QuestionnaireResponse)", "Legally binding Contract: This is the signed and legally recognized representation of the Contract, which is considered the \"source of truth\" and which would be the basis for legal action related to enforcement of this Contract.", 0, java.lang.Integer.MAX_VALUE, binding));
+        childrenList.add(new Property("friendly", "", "The \"patient friendly language\" versionof the Contract in whole or in parts. \"Patient friendly language\" means the representation of the Contract and Contract Provisions in a manner that is readily accessible and understandable by a layperson in accordance with best practices for communication styles that ensure that those agreeing to or signing the Contract understand the roles, actions, obligations, responsibilities, and implication of the agreement.", 0, java.lang.Integer.MAX_VALUE, friendly));
         childrenList.add(new Property("legal", "", "List of Legal expressions or representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, legal));
         childrenList.add(new Property("rule", "", "List of Computable Policy Rule Language Representations of this Contract.", 0, java.lang.Integer.MAX_VALUE, rule));
       }

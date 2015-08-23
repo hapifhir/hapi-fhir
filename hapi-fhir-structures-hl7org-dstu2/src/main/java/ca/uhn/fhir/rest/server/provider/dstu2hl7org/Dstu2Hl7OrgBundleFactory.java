@@ -19,9 +19,7 @@ package ca.uhn.fhir.rest.server.provider.dstu2hl7org;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,12 +64,86 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 
 public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
+	private String myBase;
 	private Bundle myBundle;
 	private FhirContext myContext;
-	private String myBase;
 
 	public Dstu2Hl7OrgBundleFactory(FhirContext theContext) {
 		myContext = theContext;
+	}
+
+	private void addResourcesForSearch(List<? extends IBaseResource> theResult) {
+		List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
+		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
+
+		for (IBaseResource next : theResult) {
+			if (next.getIdElement().isEmpty() == false) {
+				addedResourceIds.add(next.getIdElement());
+			}
+		}
+
+		for (IBaseResource nextBaseRes : theResult) {
+			IDomainResource next = (IDomainResource) nextBaseRes;
+			Set<String> containedIds = new HashSet<String>();
+			for (IBaseResource nextContained : next.getContained()) {
+				if (nextContained.getIdElement().isEmpty() == false) {
+					containedIds.add(nextContained.getIdElement().getValue());
+				}
+			}
+
+			List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
+			do {
+				List<IBaseResource> addedResourcesThisPass = new ArrayList<IBaseResource>();
+
+				for (IBaseReference nextRef : references) {
+					IBaseResource nextRes = (IBaseResource) nextRef.getResource();
+					if (nextRes != null) {
+						if (nextRes.getIdElement().hasIdPart()) {
+							if (containedIds.contains(nextRes.getIdElement().getValue())) {
+								// Don't add contained IDs as top level resources
+								continue;
+							}
+
+							IIdType id = nextRes.getIdElement();
+							if (id.hasResourceType() == false) {
+								String resName = myContext.getResourceDefinition(nextRes).getName();
+								id = id.withResourceType(resName);
+							}
+
+							if (!addedResourceIds.contains(id)) {
+								addedResourceIds.add(id);
+								addedResourcesThisPass.add(nextRes);
+							}
+
+						}
+					}
+				}
+
+				// Linked resources may themselves have linked resources
+				references = new ArrayList<IBaseReference>();
+				for (IBaseResource iResource : addedResourcesThisPass) {
+					List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
+					references.addAll(newReferences);
+				}
+
+				includedResources.addAll(addedResourcesThisPass);
+
+			} while (references.isEmpty() == false);
+
+			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
+			IdType nextId = (IdType) next.getIdElement();
+			if (isNotBlank(myBase) && isNotBlank(nextId.getResourceType())) {
+				entry.setFullUrlElement(nextId.withServerBase(myBase, nextId.getResourceType()));
+			}
+
+		}
+
+		/*
+		 * Actually add the resources to the bundle
+		 */
+		for (IBaseResource next : includedResources) {
+			myBundle.addEntry().setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
+		}
 	}
 
 	@Override
@@ -182,7 +254,7 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		myBase = theServerBase;
-		
+
 		if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
 			myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
 		}
@@ -190,6 +262,16 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
 			myBundle.getTotalElement().setValue(theTotalResults);
 		}
+	}
+
+	@Override
+	public ca.uhn.fhir.model.api.Bundle getDstu1Bundle() {
+		return null;
+	}
+
+	@Override
+	public IBaseResource getResourceBundle() {
+		return myBundle;
 	}
 
 	private boolean hasLink(String theLinkType, Bundle theBundle) {
@@ -202,8 +284,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl,
-			boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType, Set<Include> theIncludes) {
+	public void initializeBundleFromBundleProvider(RestfulServer theServer, IBundleProvider theResult, EncodingEnum theResponseEncoding, String theServerBase, String theCompleteUrl, boolean thePrettyPrint, int theOffset, Integer theLimit, String theSearchId, BundleTypeEnum theBundleType,
+			Set<Include> theIncludes) {
 		int numToReturn;
 		String searchId = null;
 		List<IBaseResource> resourceList;
@@ -264,31 +346,18 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
 			if (searchId != null) {
 				if (theOffset + numToReturn < theResult.size()) {
-					myBundle.addLink().setRelation(Constants.LINK_NEXT)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
+					myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, theOffset + numToReturn, numToReturn, theResponseEncoding, thePrettyPrint));
 				}
 				if (theOffset > 0) {
 					int start = Math.max(0, theOffset - limit);
-					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS)
-							.setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
+					myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(RestfulServerUtils.createPagingLink(theIncludes, theServerBase, searchId, start, limit, theResponseEncoding, thePrettyPrint));
 				}
 			}
 		}
 	}
 
 	@Override
-	public ca.uhn.fhir.model.api.Bundle getDstu1Bundle() {
-		return null;
-	}
-
-	@Override
-	public IBaseResource getResourceBundle() {
-		return myBundle;
-	}
-
-	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-			BundleTypeEnum theBundleType) {
+	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
 		myBundle = new Bundle();
 
 		myBundle.setId(UUID.randomUUID().toString());
@@ -322,80 +391,6 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 		}
 
 		myBundle.getTotalElement().setValue(theTotalResults);
-	}
-
-	private void addResourcesForSearch(List<? extends IBaseResource> theResult) {
-		List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
-		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
-
-		for (IBaseResource next : theResult) {
-			if (next.getIdElement().isEmpty() == false) {
-				addedResourceIds.add(next.getIdElement());
-			}
-		}
-
-		for (IBaseResource nextBaseRes : theResult) {
-			IDomainResource next = (IDomainResource) nextBaseRes;
-			Set<String> containedIds = new HashSet<String>();
-			for (IBaseResource nextContained : next.getContained()) {
-				if (nextContained.getIdElement().isEmpty() == false) {
-					containedIds.add(nextContained.getIdElement().getValue());
-				}
-			}
-
-			List<IBaseReference> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, IBaseReference.class);
-			do {
-				List<IBaseResource> addedResourcesThisPass = new ArrayList<IBaseResource>();
-
-				for (IBaseReference nextRef : references) {
-					IBaseResource nextRes = (IBaseResource) nextRef.getResource();
-					if (nextRes != null) {
-						if (nextRes.getIdElement().hasIdPart()) {
-							if (containedIds.contains(nextRes.getIdElement().getValue())) {
-								// Don't add contained IDs as top level resources
-								continue;
-							}
-
-							IIdType id = nextRes.getIdElement();
-							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceDefinition(nextRes).getName();
-								id = id.withResourceType(resName);
-							}
-
-							if (!addedResourceIds.contains(id)) {
-								addedResourceIds.add(id);
-								addedResourcesThisPass.add(nextRes);
-							}
-
-						}
-					}
-				}
-
-				// Linked resources may themselves have linked resources
-				references = new ArrayList<IBaseReference>();
-				for (IBaseResource iResource : addedResourcesThisPass) {
-					List<IBaseReference> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, IBaseReference.class);
-					references.addAll(newReferences);
-				}
-
-				includedResources.addAll(addedResourcesThisPass);
-
-			} while (references.isEmpty() == false);
-
-			BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
-			IdType nextId = (IdType) next.getIdElement();
-			if (isNotBlank(myBase) && isNotBlank(nextId.getResourceType())) {
-				entry.setFullUrlElement(nextId.withServerBase(myBase, nextId.getResourceType()));
-			}
-
-		}
-
-		/*
-		 * Actually add the resources to the bundle
-		 */
-		for (IBaseResource next : includedResources) {
-			myBundle.addEntry().setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
-		}
 	}
 
 	@Override

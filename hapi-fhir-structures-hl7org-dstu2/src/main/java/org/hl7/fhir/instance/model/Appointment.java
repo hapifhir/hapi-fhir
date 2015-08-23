@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -365,14 +365,14 @@ public class Appointment extends DomainResource {
         /**
          * Role of participant in the appointment.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Role of participant in the appointment", formalDefinition="Role of participant in the appointment." )
         protected List<CodeableConcept> type;
 
         /**
          * A Person, Location/HealthcareService or Device that is participating in the appointment.
          */
-        @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=0, max=1)
+        @Child(name = "actor", type = {Patient.class, Practitioner.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment", formalDefinition="A Person, Location/HealthcareService or Device that is participating in the appointment." )
         protected Reference actor;
 
@@ -384,14 +384,14 @@ public class Appointment extends DomainResource {
         /**
          * Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present.
          */
-        @Child(name = "required", type = {CodeType.class}, order=3, min=0, max=1)
+        @Child(name = "required", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="required | optional | information-only", formalDefinition="Is this participant required to be present at the meeting. This covers a use-case where 2 doctors need to meet to discuss the results for a specific patient, and the patient is not required to be present." )
         protected Enumeration<ParticipantRequired> required;
 
         /**
          * Participation status of the Patient.
          */
-        @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1)
+        @Child(name = "status", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="accepted | declined | tentative | needs-action", formalDefinition="Participation status of the Patient." )
         protected Enumeration<ParticipationStatus> status;
 
@@ -638,63 +638,63 @@ public class Appointment extends DomainResource {
     /**
      * This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="External Ids for this item", formalDefinition="This records identifiers associated with this appointment concern that are defined by business processed and/ or used to refer to it when a direct URL reference to the resource itself is not appropriate (e.g. in CDA documents, or in written / printed documentation)." )
     protected List<Identifier> identifier;
 
     /**
      * The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="pending | booked | arrived | fulfilled | cancelled | noshow", formalDefinition="The overall status of the Appointment. Each of the participants has their own participation status which indicates their involvement in the process, however this status indicates the shared status." )
     protected Enumeration<AppointmentStatus> status;
 
     /**
      * The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService).
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1)
+    @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The type of appointment that is being booked", formalDefinition="The type of appointment that is being booked (This may also be associated with participants for location, and/or a HealthcareService)." )
     protected CodeableConcept type;
 
     /**
      * The reason that this appointment is being scheduled, this is more clinical than administrative.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1)
+    @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative", formalDefinition="The reason that this appointment is being scheduled, this is more clinical than administrative." )
     protected CodeableConcept reason;
 
     /**
      * The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority).
      */
-    @Child(name = "priority", type = {UnsignedIntType.class}, order=4, min=0, max=1)
+    @Child(name = "priority", type = {UnsignedIntType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)", formalDefinition="The priority of the appointment. Can be used to make informed decisions if needing to re-prioritize appointments. (The iCal Standard specifies 0 as undefined, 1 as highest, 9 as lowest priority)." )
     protected UnsignedIntType priority;
 
     /**
      * The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field.
      */
-    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1)
+    @Child(name = "description", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field", formalDefinition="The brief description of the appointment as would be shown on a subject line in a meeting request, or appointment list. Detailed or expanded information should be put in the comment field." )
     protected StringType description;
 
     /**
      * Date/Time that the appointment is to take place.
      */
-    @Child(name = "start", type = {InstantType.class}, order=6, min=1, max=1)
+    @Child(name = "start", type = {InstantType.class}, order=6, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date/Time that the appointment is to take place", formalDefinition="Date/Time that the appointment is to take place." )
     protected InstantType start;
 
     /**
      * Date/Time that the appointment is to conclude.
      */
-    @Child(name = "end", type = {InstantType.class}, order=7, min=1, max=1)
+    @Child(name = "end", type = {InstantType.class}, order=7, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date/Time that the appointment is to conclude", formalDefinition="Date/Time that the appointment is to conclude." )
     protected InstantType end;
 
     /**
      * The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot.
      */
-    @Child(name = "slot", type = {Slot.class}, order=8, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "slot", type = {Slot.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot", formalDefinition="The slot that this appointment is filling. If provided then the schedule will not be provided as slots are not recursive, and the start/end values MUST be the same as from the slot." )
     protected List<Reference> slot;
     /**
@@ -706,14 +706,14 @@ public class Appointment extends DomainResource {
     /**
      * Additional comments about the appointment.
      */
-    @Child(name = "comment", type = {StringType.class}, order=9, min=0, max=1)
+    @Child(name = "comment", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Additional comments about the appointment", formalDefinition="Additional comments about the appointment." )
     protected StringType comment;
 
     /**
      * An Order that lead to the creation of this appointment.
      */
-    @Child(name = "order", type = {Order.class}, order=10, min=0, max=1)
+    @Child(name = "order", type = {Order.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="An Order that lead to the creation of this appointment", formalDefinition="An Order that lead to the creation of this appointment." )
     protected Reference order;
 
@@ -725,7 +725,7 @@ public class Appointment extends DomainResource {
     /**
      * List of participants involved in the appointment.
      */
-    @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED)
+    @Child(name = "participant", type = {}, order=11, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="List of participants involved in the appointment", formalDefinition="List of participants involved in the appointment." )
     protected List<AppointmentParticipantComponent> participant;
 

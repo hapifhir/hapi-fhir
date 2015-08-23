@@ -46,21 +46,18 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServer.NarrativeModeEnum;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -83,6 +80,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		set.add(Constants.PARAM_SORT_ASC);
 		set.add(Constants.PARAM_SORT_DESC);
 		set.add(Constants.PARAM_COUNT);
+		set.add(Constants.PARAM_SUMMARY);
+		set.add(Constants.PARAM_ELEMENTS);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
 	}
 
@@ -242,7 +241,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
 
 		// Narrative mode
-		NarrativeModeEnum narrativeMode = RestfulServerUtils.determineNarrativeMode(theRequest);
+		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 
 		// Determine response encoding
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
@@ -331,7 +330,8 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 						return;
 					}
 				}
-				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip,
+				
+				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
 						theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				break;
 			} else {
@@ -355,7 +355,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 							return;
 						}
 					}
-					RestfulServerUtils.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, narrativeMode, respondGzip, requestIsBrowser);
+					RestfulServerUtils.streamResponseAsBundle(theServer, response, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, summaryMode, respondGzip, requestIsBrowser);
 				} else {
 					IBaseResource resBundle = bundleFactory.getResourceBundle();
 					for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
@@ -366,7 +366,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 							return;
 						}
 					}
-					RestfulServerUtils.streamResponseAsResource(theServer, response, resBundle, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode,
+					RestfulServerUtils.streamResponseAsResource(theServer, response, resBundle, responseEncoding, prettyPrint, requestIsBrowser, summaryMode,
 							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader());
 				}
 
@@ -391,11 +391,18 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 			}
 
-			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, narrativeMode, Constants.STATUS_HTTP_200_OK, respondGzip,
+			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
 					theRequest.getFhirServerBase(), isAddContentLocationHeader());
 			break;
 		}
 		}
+	}
+
+	private boolean isOmitEntries(Set<SummaryEnum> theSummaryMode) {
+		if (theSummaryMode == null || !theSummaryMode.contains(SummaryEnum.COUNT)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

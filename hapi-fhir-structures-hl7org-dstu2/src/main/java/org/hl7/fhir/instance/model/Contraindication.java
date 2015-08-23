@@ -29,7 +29,7 @@ package org.hl7.fhir.instance.model;
   
 */
 
-// Generated on Thu, Aug 13, 2015 16:43-0400 for FHIR v0.5.0
+// Generated on Sat, Aug 22, 2015 23:00-0400 for FHIR v0.5.0
 
 import java.util.*;
 
@@ -137,21 +137,21 @@ public class Contraindication extends DomainResource {
         /**
          * Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified contraindication.
          */
-        @Child(name = "action", type = {CodeableConcept.class}, order=1, min=1, max=1)
+        @Child(name = "action", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="What mitigation?", formalDefinition="Describes the action that was taken or the observation that was made that reduces/eliminates the risk associated with the identified contraindication." )
         protected CodeableConcept action;
 
         /**
          * Indicates when the mitigating action was documented.
          */
-        @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1)
+        @Child(name = "date", type = {DateTimeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Date committed", formalDefinition="Indicates when the mitigating action was documented." )
         protected DateTimeType date;
 
         /**
          * Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring.
          */
-        @Child(name = "author", type = {Practitioner.class}, order=3, min=0, max=1)
+        @Child(name = "author", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Who is committing?", formalDefinition="Identifies the practitioner who determined the mitigation and takes responsibility for the mitigation step occurring." )
         protected Reference author;
 
@@ -341,7 +341,7 @@ public class Contraindication extends DomainResource {
     /**
      * Indicates the patient whose record the contraindication is associated with.
      */
-    @Child(name = "patient", type = {Patient.class}, order=0, min=0, max=1)
+    @Child(name = "patient", type = {Patient.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Associated patient", formalDefinition="Indicates the patient whose record the contraindication is associated with." )
     protected Reference patient;
 
@@ -353,21 +353,21 @@ public class Contraindication extends DomainResource {
     /**
      * Identifies the general type of issue identified.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1)
+    @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="E.g. Drug-drug, duplicate therapy, etc.", formalDefinition="Identifies the general type of issue identified." )
     protected CodeableConcept category;
 
     /**
      * Indicates the degree of importance associated with the identified issue based on the potential impact on the patient.
      */
-    @Child(name = "severity", type = {CodeType.class}, order=2, min=0, max=1)
+    @Child(name = "severity", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="high | moderate | low", formalDefinition="Indicates the degree of importance associated with the identified issue based on the potential impact on the patient." )
     protected Enumeration<ContraindicationSeverity> severity;
 
     /**
      * Indicates the resource representing the current activity or proposed activity that.
      */
-    @Child(name = "implicated", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "implicated", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Problem resource", formalDefinition="Indicates the resource representing the current activity or proposed activity that." )
     protected List<Reference> implicated;
     /**
@@ -379,21 +379,21 @@ public class Contraindication extends DomainResource {
     /**
      * A textual explanation of the contraindication.
      */
-    @Child(name = "detail", type = {StringType.class}, order=4, min=0, max=1)
+    @Child(name = "detail", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Description and context", formalDefinition="A textual explanation of the contraindication." )
     protected StringType detail;
 
     /**
      * The date or date-time when the contraindication was initially identified.
      */
-    @Child(name = "date", type = {DateTimeType.class}, order=5, min=0, max=1)
+    @Child(name = "date", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When identified", formalDefinition="The date or date-time when the contraindication was initially identified." )
     protected DateTimeType date;
 
     /**
      * Identifies the provider or software that identified the.
      */
-    @Child(name = "author", type = {Practitioner.class, Device.class}, order=6, min=0, max=1)
+    @Child(name = "author", type = {Practitioner.class, Device.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who found issue?", formalDefinition="Identifies the provider or software that identified the." )
     protected Reference author;
 
@@ -405,21 +405,21 @@ public class Contraindication extends DomainResource {
     /**
      * Business identifier associated with the contraindication record.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=7, min=0, max=1)
+    @Child(name = "identifier", type = {Identifier.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Unique id for the contraindication", formalDefinition="Business identifier associated with the contraindication record." )
     protected Identifier identifier;
 
     /**
      * The literature, knowledge-base or similar reference that describes the propensity for the contraindication identified.
      */
-    @Child(name = "reference", type = {UriType.class}, order=8, min=0, max=1)
+    @Child(name = "reference", type = {UriType.class}, order=8, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Authority for issue", formalDefinition="The literature, knowledge-base or similar reference that describes the propensity for the contraindication identified." )
     protected UriType reference;
 
     /**
      * Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the contraindication from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action.
      */
-    @Child(name = "mitigation", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED)
+    @Child(name = "mitigation", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Step taken to address", formalDefinition="Indicates an action that has been taken or is committed to to reduce or eliminate the likelihood of the risk identified by the contraindication from manifesting.  Can also reflect an observation of known mitigating factors that may reduce/eliminate the need for any action." )
     protected List<ContraindicationMitigationComponent> mitigation;
 
