@@ -62,6 +62,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
+import ca.uhn.fhir.rest.method.ElementsParameter;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -451,7 +452,9 @@ public class RestfulServer extends HttpServlet {
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
-
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequest);
+		Set<String> elementsAppliesTo = null; // TODO: persist this across pages
+		
 		IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
 
 		Set<Include> includes = new HashSet<Include>();
@@ -489,7 +492,7 @@ public class RestfulServer extends HttpServlet {
 				}
 			}
 			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK,
-					theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false);
+					theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false, elements, elementsAppliesTo);
 		}
 	}
 

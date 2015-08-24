@@ -11,7 +11,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -51,6 +53,7 @@ import ca.uhn.fhir.model.dstu.valueset.QuantityCompararatorEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -828,6 +831,51 @@ public class ClientDstu1Test {
 	}
 
 	@Test
+	public void testSearchWithElements() throws Exception {
+
+		final String msg = getPatientFeedWithOneResult();
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+
+		when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(httpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
+		when(httpResponse.getEntity().getContent()).thenAnswer(new Answer<InputStream>() {
+			@Override
+			public InputStream answer(InvocationOnMock theInvocation) throws Throwable {
+				return new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8"));
+			}
+		});
+
+		// httpResponse = new BasicHttpResponse(statusline, catalog, locale)
+		when(httpClient.execute(capt.capture())).thenReturn(httpResponse);
+
+		ITestClientWithElements client = ourCtx.newRestfulClient(ITestClientWithElements.class, "http://foo");
+
+		int idx = 0;
+
+		client.getPatientWithIncludes((String) null);
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes((Set<String>) null);
+		assertEquals("http://foo/Patient", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes("test");
+		assertEquals("http://foo/Patient?_elements=test", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes("test,foo");
+		assertEquals("http://foo/Patient?_elements=test%2Cfoo", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+		client.getPatientWithIncludes(new HashSet<String>(Arrays.asList("test","foo", "")));
+		assertEquals("http://foo/Patient?_elements=test%2Cfoo", capt.getAllValues().get(idx).getURI().toString());
+		idx++;
+
+	}
+
+	@Test
 	public void testSearchByCompartment() throws Exception {
 
 		String msg = getPatientFeedWithOneResult();
@@ -1313,6 +1361,15 @@ public class ClientDstu1Test {
 
 		@Search()
 		public List<Patient> getPatientWithIncludes(List<SummaryEnum> theSummary);
+
+	}
+
+	public interface ITestClientWithElements extends IBasicClient {
+		@Search()
+		public List<Patient> getPatientWithIncludes(@Elements String theElements);
+
+		@Search()
+		public List<Patient> getPatientWithIncludes(@Elements Set<String> theElements);
 
 	}
 

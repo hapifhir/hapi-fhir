@@ -83,6 +83,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -306,6 +307,25 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Can not create resource with ID[ABC], ID must not be supplied"));
+		}
+	}
+
+
+	@Test
+	public void testCreateSummaryFails() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
+		p.addName().addFamily("Hello");
+		
+		TagList tl = new TagList();
+		tl.addTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+		ResourceMetadataKeyEnum.TAG_LIST.put(p, tl);
+		
+		try {
+			ourPatientDao.create(p);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("subsetted"));
 		}
 	}
 

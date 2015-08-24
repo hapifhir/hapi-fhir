@@ -1525,6 +1525,25 @@
 				
 			</subsection>
 			
+		</section>
+
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+		<!-- ****************************************************************** -->
+
+		<section name="_summary and _elements">
+			
+			The <code>_summary</code> and <code>_elements</code> parameters are
+			automatically handled by the server, so no coding is required to make this
+			work. If you wish to add parameters to manually handle these fields however,
+			the following example shows how to access these.
+			
+			<macro name="snippet">
+				<param name="id" value="summaryAndElements" />
+				<param name="file" value="examples/src/main/java/example/RestfulPatientResourceProviderMore.java" />
+			</macro>
+			
+			
 			<a name="compartments" />
 		</section>
 

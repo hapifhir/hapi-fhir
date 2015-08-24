@@ -75,7 +75,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 
 		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
 		String fhirServerBase = theRequestDetails.getFhirServerBase();
-		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, Collections.singleton(SummaryEnum.FALSE), statusCode, false, fhirServerBase, false);
+		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, Collections.singleton(SummaryEnum.FALSE), statusCode, false, fhirServerBase, false, null, null);
 
 		// theResponse.setStatus(statusCode);
 		// theRequestDetails.getServer().addHeadersToResponse(theResponse);
@@ -95,7 +95,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 		} else {
 			retVal = (BaseServerResponseException) theException;
 		}
-		
+
 		if (retVal.getOperationOutcome() == null) {
 			retVal.setOperationOutcome(createOperationOutcome(theException, theRequestDetails.getServer().getFhirContext()));
 		}

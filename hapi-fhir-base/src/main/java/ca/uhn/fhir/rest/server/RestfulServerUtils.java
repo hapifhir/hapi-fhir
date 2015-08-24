@@ -410,7 +410,7 @@ public class RestfulServerUtils {
 	}
 
 	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, Set<SummaryEnum> theNarrativeMode, int stausCode, boolean theRespondGzip,
-			String theServerBase, boolean theAddContentLocationHeader) throws IOException {
+			String theServerBase, boolean theAddContentLocationHeader, Set<String> theElements, Set<String> theElementsAppliesTo) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
 		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(theServerBase)) {
@@ -506,6 +506,14 @@ public class RestfulServerUtils {
 			} else {
 				IParser parser = getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
 				parser.setServerBaseUrl(theServerBase);
+				if (theElements != null && theElements.size() > 0) {
+					Set<String> elements = new HashSet<String>();
+					for (String next : theElements) {
+						elements.add("*." + next);
+					}
+					parser.setEncodeElements(elements);
+					parser.setEncodeElementsAppliesToResourceTypes(theElementsAppliesTo);
+				}
 				parser.encodeResourceToWriter(theResource, writer);
 			}
 		} finally {

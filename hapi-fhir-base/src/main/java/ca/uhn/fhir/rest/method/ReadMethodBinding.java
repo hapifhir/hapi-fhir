@@ -41,6 +41,7 @@ import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -105,6 +106,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	public List<Class<?>> getAllowableParamAnnotations() {
 		ArrayList<Class<?>> retVal = new ArrayList<Class<?>>();
 		retVal.add(IdParam.class);
+		retVal.add(Elements.class);
 		return retVal;
 	}
 

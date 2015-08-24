@@ -1220,14 +1220,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	/**
 	 * This method is invoked immediately before storing a new resource, or an 
 	 * update to an existing resource to allow the DAO to ensure that it is valid
-	 * for persistence. By default, no validation is performed, but subclasses 
-	 * may override to provide specific behaviour.
+	 * for persistence. By default, checks for the "subsetted" tag and rejects
+	 * resources which have it. Subclasses should call the superclass implementation to
+	 * preserve this check.
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be persisted
 	 */
 	protected void validateResourceForStorage(T theResource) {
-		// nothing
+		IResource res = (IResource)theResource;
+		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
+		if (tagList != null) {
+			Tag tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+			if (tag != null) {
+				throw new UnprocessableEntityException("Resource contains the 'subsetted' tag, and must not be stored as it may contain a subset of available data");
+			}
+		}
 	}
 
 	protected static String normalizeString(String theString) {

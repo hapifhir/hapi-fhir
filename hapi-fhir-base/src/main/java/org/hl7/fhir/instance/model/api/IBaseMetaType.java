@@ -32,6 +32,4 @@ public interface IBaseMetaType extends ICompositeType {
 
 	String getVersionId();
 	
-	IBaseMetaType copy();
-
 }

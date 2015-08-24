@@ -51,6 +51,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -444,6 +445,8 @@ public class MethodUtil {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {
 						param = new ServerBaseParamBinder();
+					} else if (nextAnnotation instanceof Elements) {
+						param = new ElementsParameter();
 					} else if (nextAnnotation instanceof Since) {
 						param = new SinceParameter();
 					} else if (nextAnnotation instanceof Count) {

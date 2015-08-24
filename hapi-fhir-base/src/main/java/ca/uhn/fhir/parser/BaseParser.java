@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,6 +69,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public abstract class BaseParser implements IParser {
 
@@ -133,6 +135,10 @@ public abstract class BaseParser implements IParser {
 								myNext = null;
 							} else if (myNext.getDef().getElementName().equals("id")) {
 								myNext = null;
+							} else if (!myNext.shouldBeEncoded()) {
+								myNext = null;
+							} else if (isSummaryMode() && !myNext.getDef().isSummary()) {
+								myNext = null;
 							} else if (myNext.getDef() instanceof RuntimeChildNarrativeDefinition) {
 								if (isSuppressNarratives() || isSummaryMode()) {
 									myNext = null;
@@ -143,10 +149,6 @@ public abstract class BaseParser implements IParser {
 								if (theContainedResource) {
 									myNext = null;
 								}
-							} else if (isSummaryMode() && !myNext.getDef().isSummary()) {
-								myNext = null;
-							} else if (!myNext.shouldBeEncoded()) {
-								myNext = null;
 							}
 
 						} while (myNext == null);
@@ -533,7 +535,11 @@ public abstract class BaseParser implements IParser {
 							IBaseMetaType metaValue;
 							if (theValues != null && theValues.size() >= 1) {
 								metaValue = (IBaseMetaType) theValues.iterator().next();
-								metaValue = metaValue.copy();
+								try {
+									metaValue = (IBaseMetaType) metaValue.getClass().getMethod("copy").invoke(metaValue);
+								} catch (Exception e) {
+									throw new InternalErrorException("Failed to duplicate meta", e);
+								}
 							} else {
 								metaValue = (IBaseMetaType) metaChildUncast1.newInstance();
 							}

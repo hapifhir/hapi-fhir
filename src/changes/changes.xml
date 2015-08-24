@@ -96,6 +96,10 @@
 			<action type="add">
 				JPA server now implements the $validate-code operation
 			</action>
+			<action type="add" fix="125">
+				HAPI-FHIR now has support for _summary and _elements parameters, in server, client,
+				and JPA server.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

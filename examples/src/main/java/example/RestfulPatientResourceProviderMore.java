@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.DeleteTags;
+import ca.uhn.fhir.rest.annotation.Elements;
 import ca.uhn.fhir.rest.annotation.GetTags;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -59,6 +60,7 @@ import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
@@ -101,6 +103,17 @@ public List<Organization> getAllOrganizations() {
    return retVal;
 }
 //END SNIPPET: searchAll
+
+
+//START SNIPPET: summaryAndElements
+@Search
+public List<Patient> search(
+      SummaryEnum theSummary, // will receive the summary (no annotation required)
+      @Elements Set<String> theElements // (requires the @Elements annotation)
+      ) {
+   return null; // todo: populate
+}
+//END SNIPPET: summaryAndElements
 
 //START SNIPPET: searchCompartment
 public class PatientRp implements IResourceProvider {
@@ -705,7 +718,7 @@ public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
   // You can also add an OperationOutcome resource to return
   // This part is optional though:
   OperationOutcome outcome = new OperationOutcome();
-  outcome.addIssue().setDetails("One minor issue detected");
+  outcome.addIssue().setDiagnostics("One minor issue detected");
   retVal.setOperationOutcome(outcome);  
   
   return retVal;
@@ -841,7 +854,7 @@ public MethodOutcome updatePatient(@IdParam IdDt theId, @ResourceParam Patient t
   // You can also add an OperationOutcome resource to return
   // This part is optional though:
   OperationOutcome outcome = new OperationOutcome();
-  outcome.addIssue().setDetails("One minor issue detected");
+  outcome.addIssue().setDiagnostics("One minor issue detected");
   retVal.setOperationOutcome(outcome);
   
   // If your server supports creating resources during an update if they don't already exist
@@ -881,7 +894,7 @@ public MethodOutcome validatePatient(@ResourceParam Patient thePatient,
   // You may also add an OperationOutcome resource to return
   // This part is optional though:
   OperationOutcome outcome = new OperationOutcome();
-  outcome.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDetails("One minor issue detected");
+  outcome.addIssue().setSeverity(IssueSeverityEnum.WARNING).setDiagnostics("One minor issue detected");
   retVal.setOperationOutcome(outcome);  
 
   return retVal;
@@ -1127,7 +1140,7 @@ public List<IResource> transaction(@TransactionParam List<IResource> theResource
    // If wanted, you may optionally also return an OperationOutcome resource
    // If present, the OperationOutcome must come first in the returned list.
    OperationOutcome oo = new OperationOutcome();
-   oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDetails("Completed successfully");
+   oo.addIssue().setSeverity(IssueSeverityEnum.INFORMATION).setDiagnostics("Completed successfully");
    retVal.add(0, oo);
    
    return retVal;

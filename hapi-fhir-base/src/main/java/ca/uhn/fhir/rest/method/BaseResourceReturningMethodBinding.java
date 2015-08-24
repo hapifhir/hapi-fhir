@@ -246,6 +246,16 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 		// Determine response encoding
 		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest.getServletRequest());
 
+		// _elements
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequest);
+		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
+			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
+		}
+		Set<String> elementsAppliesTo = null;
+		if (elements != null && isNotBlank(myResourceName)) {
+			elementsAppliesTo = Collections.singleton(myResourceName);
+		}
+
 		// Is this request coming from a browser
 		String uaHeader = theRequest.getServletRequest().getHeader("user-agent");
 		boolean requestIsBrowser = false;
@@ -332,7 +342,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 				}
 				
 				RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
-						theRequest.getFhirServerBase(), isAddContentLocationHeader());
+						theRequest.getFhirServerBase(), isAddContentLocationHeader(), elements, elementsAppliesTo);
 				break;
 			} else {
 				Set<Include> includes = getRequestIncludesFromParams(params);
@@ -367,7 +377,7 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 						}
 					}
 					RestfulServerUtils.streamResponseAsResource(theServer, response, resBundle, responseEncoding, prettyPrint, requestIsBrowser, summaryMode,
-							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader());
+							Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), theRequest.getFhirServerBase(), isAddContentLocationHeader(), elements, elementsAppliesTo);
 				}
 
 				break;
@@ -392,17 +402,10 @@ abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Obje
 			}
 
 			RestfulServerUtils.streamResponseAsResource(theServer, response, resource, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK, respondGzip,
-					theRequest.getFhirServerBase(), isAddContentLocationHeader());
+					theRequest.getFhirServerBase(), isAddContentLocationHeader(), elements, elementsAppliesTo);
 			break;
 		}
 		}
-	}
-
-	private boolean isOmitEntries(Set<SummaryEnum> theSummaryMode) {
-		if (theSummaryMode == null || !theSummaryMode.contains(SummaryEnum.COUNT)) {
-			return false;
-		}
-		return true;
 	}
 
 	/**
