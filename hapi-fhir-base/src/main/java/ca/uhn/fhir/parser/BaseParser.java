@@ -282,7 +282,7 @@ public abstract class BaseParser implements IParser {
 			}
 			return reference;
 		} else {
-			if (!ref.hasResourceType() && theRef.getResource() != null) {
+			if (!ref.hasResourceType() && !ref.isLocal() && theRef.getResource() != null) {
 				ref = ref.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
 			}
 			if (isNotBlank(myServerBaseUrl) && StringUtils.equals(myServerBaseUrl, ref.getBaseUrl())) {
