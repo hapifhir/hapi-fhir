@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
+import ca.uhn.fhir.util.ITestingUiClientFactory;
 
 public class HomeRequest {
 
@@ -123,8 +124,18 @@ public class HomeRequest {
 
 	public GenericClient newClient(HttpServletRequest theRequest, FhirContext theContext, TesterConfig theConfig, Controller.CaptureInterceptor theInterceptor) {
 		theContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		
-		GenericClient retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
+
+		GenericClient retVal;
+		ITestingUiClientFactory clientFactory = theConfig.getClientFactory();
+		if (clientFactory != null) {
+			retVal = (GenericClient) clientFactory.newClient(
+					theContext,
+					theRequest,
+					getServerBase(theRequest, theConfig));
+		} else {
+			retVal = (GenericClient) theContext.newRestfulGenericClient(getServerBase(theRequest, theConfig));
+		}
+
 		retVal.setKeepResponses(true);
 
 		if ("true".equals(getPretty())) {
