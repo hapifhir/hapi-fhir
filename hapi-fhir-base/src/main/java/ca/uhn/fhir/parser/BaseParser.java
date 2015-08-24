@@ -19,15 +19,14 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -265,11 +264,19 @@ public abstract class BaseParser implements IParser {
 					} else {
 						reference = "#" + containedId.getValue();
 					}
-				} else if (theRef.getResource().getIdElement() != null && theRef.getResource().getIdElement().hasIdPart()) {
-					if (isStripVersionsFromReferences()) {
-						reference = theRef.getResource().getIdElement().toVersionless().getValue();
-					} else {
-						reference = theRef.getResource().getIdElement().getValue();
+				} else {
+					IIdType refId = theRef.getResource().getIdElement();
+					if (refId != null) {
+						if (refId.hasIdPart()) {
+							if (!refId.hasResourceType()) {
+								refId = refId.withResourceType(myContext.getResourceDefinition(theRef.getResource()).getName());
+							}
+							if (isStripVersionsFromReferences()) {
+								reference = refId.toVersionless().getValue();
+							} else {
+								reference = refId.getValue();
+							}
+						}
 					}
 				}
 			}

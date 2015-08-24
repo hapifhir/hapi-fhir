@@ -58,7 +58,10 @@ public class TesterConfig {
 
 		for (String nextRaw : servers) {
 			String[] nextSplit = nextRaw.split(",");
-			if (nextSplit.length == 3) {
+			
+			if (nextSplit.length < 3) {
+				throw new IllegalArgumentException("Invalid serveer line '" + nextRaw + "' - Must be comma separated");
+			} else if (nextSplit.length == 3) {
 				Validate.notBlank(nextSplit[0], "theId can not be blank");
 				Validate.notBlank(nextSplit[1], "theDisplayName can not be blank");
 				Validate.notBlank(nextSplit[2], "theServerBase can not be blank");

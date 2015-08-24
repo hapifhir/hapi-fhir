@@ -76,6 +76,23 @@ public class XmlParserDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParserDstu2Test.class);
 
+	
+	@Test
+	public void testEncodeReferenceUsingUnqualifiedResourceWorksCorrectly() {
+		
+		Organization org = new Organization();
+		org.setId("orgId");
+		
+		Patient pat = new Patient();
+		pat.getManagingOrganization().setResource(org);
+		
+		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pat);
+		ourLog.info(str);
+		
+		assertThat(str, containsString("<reference value=\"Organization/orgId\"/>"));
+	}
+	
+	
 	@Test
 	public void testBundleWithBinary() {
 		//@formatter:off

@@ -104,6 +104,10 @@
 				_revinclude results from JPA server should have a Bundle.entry.search.mode of
 				"include" and not "match". Thanks to Josh Mandel for reporting!
 			</action>
+			<action type="add">
+				Resource references using resource instance objects instead of resource IDs 
+				will correctly qualify the IDs with the resource type if they aren't already qualified   
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">
