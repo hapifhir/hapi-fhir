@@ -386,7 +386,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		updateStringValue();
 	}
 
-	private void setTimeZone(String theValueString, boolean hasMillis) {
+	private BaseDateTimeDt setTimeZone(String theValueString, boolean hasMillis) {
 		clearTimeZone();
 		int timeZoneStart = 19;
 		if (hasMillis)
@@ -398,16 +398,19 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		} else if (theValueString.indexOf('+', timeZoneStart) != -1 || theValueString.indexOf('-', timeZoneStart) != -1) {
 			setTimeZone(TimeZone.getTimeZone("GMT" + theValueString.substring(timeZoneStart)));
 		}
+		return this;
 	}
 
-	public void setTimeZone(TimeZone theTimeZone) {
+	public BaseDateTimeDt setTimeZone(TimeZone theTimeZone) {
 		myTimeZone = theTimeZone;
 		updateStringValue();
+		return this;
 	}
 
-	public void setTimeZoneZulu(boolean theTimeZoneZulu) {
+	public BaseDateTimeDt setTimeZoneZulu(boolean theTimeZoneZulu) {
 		myTimeZoneZulu = theTimeZoneZulu;
 		updateStringValue();
+		return this;
 	}
 
 	/**
