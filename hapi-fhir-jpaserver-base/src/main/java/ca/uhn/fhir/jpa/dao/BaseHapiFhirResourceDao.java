@@ -1446,7 +1446,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return retVal;
 	}
 
-	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, BundleEntrySearchModeEnum theBundleEntryStatus) {
+	private void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids) {
 		if (theIncludePids.isEmpty()) {
 			return;
 		}
@@ -1472,15 +1472,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				continue;
 			}
 
-			ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, theBundleEntryStatus);
+			if (theRevIncludedPids.contains(next.getId())) {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.INCLUDE);
+			} else {
+				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(resource, BundleEntrySearchModeEnum.MATCH);
+			}
 
 			theResourceListToPopulate.set(index, resource);
 		}
 	}
 
-	protected void loadReverseIncludes(List<Long> theMatches, Set<Include> theRevIncludes) {
+	private Set<Long> loadReverseIncludes(List<Long> theMatches, Set<Include> theRevIncludes) {
 		if (theMatches.size() == 0) {
-			return;
+			return Collections.emptySet();
 		}
 
 		HashSet<Long> pidsToInclude = new HashSet<Long>();
@@ -1528,6 +1532,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		theMatches.addAll(pidsToInclude);
+		return pidsToInclude;
 	}
 
 	@Override
@@ -1890,8 +1895,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		// Load _revinclude resources
+		final Set<Long> revIncludedPids;
 		if (theParams.getRevIncludes() != null && theParams.getRevIncludes().isEmpty() == false) {
-			loadReverseIncludes(pids, theParams.getRevIncludes());
+			revIncludedPids = loadReverseIncludes(pids, theParams.getRevIncludes());
+		} else {
+			revIncludedPids = Collections.emptySet();
 		}
 
 		IBundleProvider retVal = new IBundleProvider() {
@@ -1910,8 +1918,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> retVal = new ArrayList<IBaseResource>();
-						loadResourcesByPid(pidsSubList, retVal, BundleEntrySearchModeEnum.MATCH);
-
+						loadResourcesByPid(pidsSubList, retVal, revIncludedPids);
+						
 						/*
 						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as
 						 * they are counted towards the total count and paged, so they are loaded outside the bundle provider

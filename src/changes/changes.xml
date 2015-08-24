@@ -100,6 +100,10 @@
 				HAPI-FHIR now has support for _summary and _elements parameters, in server, client,
 				and JPA server.
 			</action>
+			<action type="fix" fix="209">
+				_revinclude results from JPA server should have a Bundle.entry.search.mode of
+				"include" and not "match". Thanks to Josh Mandel for reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

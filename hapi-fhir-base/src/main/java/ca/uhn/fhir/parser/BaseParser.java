@@ -526,7 +526,7 @@ public abstract class BaseParser implements IParser {
 	@SuppressWarnings("cast")
 	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition metaChildUncast, List<? extends IBase> theValues) {
 		if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2_HL7ORG)) {
-			if (shouldAddSubsettedTag()) {
+			if (shouldAddSubsettedTag() && metaChildUncast.getValidChildNames().contains("meta")) {
 				BaseRuntimeElementDefinition<?> childByName = metaChildUncast.getChildByName("meta");
 				if (childByName instanceof BaseRuntimeElementCompositeDefinition<?>) {
 					BaseRuntimeElementCompositeDefinition<?> metaChildUncast1 = (BaseRuntimeElementCompositeDefinition<?>) childByName;
