@@ -45,6 +45,7 @@ public class FhirInstanceValidatorIntegrationTest {
 		Observation input = new Observation();
 		
 		// Has a value, but not a status (which is required)
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 		input.setValue(new StringType("AAA"));
 		
 		ValidationResult output = myVal.validateWithResult(input);

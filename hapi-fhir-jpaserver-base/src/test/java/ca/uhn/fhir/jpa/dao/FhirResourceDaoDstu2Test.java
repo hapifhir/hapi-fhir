@@ -84,6 +84,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -2109,6 +2110,43 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	}
 
+	@Test
+	public void testSearchWithSecurityAndProfileParams() {
+		String methodName = "testSearchWithSecurityAndProfileParams";
+
+		IIdType tag1id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			List<BaseCodingDt> security = new ArrayList<BaseCodingDt>();
+			security.add(new CodingDt("urn:taglist", methodName + "1a"));
+			ResourceMetadataKeyEnum.SECURITY_LABELS.put(org, security);
+			tag1id = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType tag2id;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue("FOO");
+			List<IdDt> security = new ArrayList<IdDt>();
+			security.add(new IdDt("http://" + methodName));
+			ResourceMetadataKeyEnum.PROFILES.put(org, security);
+			tag2id = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_security", new TokenParam("urn:taglist", methodName + "1a"));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag1id));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_profile", new UriParam("http://" + methodName));
+			List<IIdType> patients = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(patients, containsInAnyOrder(tag2id));
+		}
+	}
+
+	
 	@Test
 	public void testSearchWithIncludes() {
 		IIdType parentOrgId;

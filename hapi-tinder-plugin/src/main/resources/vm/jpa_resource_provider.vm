@@ -51,8 +51,16 @@ public class ${className}ResourceProvider extends
 			StringParam theResourceLanguage, 
 
 			@Description(shortDefinition="Search for resources which have the given tag")
-			@OptionalParam(name="_tag")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_TAG)
 			TokenAndListParam theSearchForTag, 
+
+			@Description(shortDefinition="Search for resources which have the given security labels")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_SECURITY)
+			TokenAndListParam theSearchForSecurity, 
+  
+			@Description(shortDefinition="Search for resources which have the given profile")
+			@OptionalParam(name=ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE)
+			UriAndListParam theSearchForProfile, 
 
 #foreach ( $param in $searchParams ) #{if}(true) #{end} 
 
@@ -120,7 +128,9 @@ public class ${className}ResourceProvider extends
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add("_id", theId);
 			paramMap.add("_language", theResourceLanguage);
-			paramMap.add("_tag", theSearchForTag);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_TAG, theSearchForTag);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_SECURITY, theSearchForSecurity);
+			paramMap.add(ca.uhn.fhir.rest.server.Constants.PARAM_PROFILE, theSearchForProfile);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});
 #end

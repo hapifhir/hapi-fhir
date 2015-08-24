@@ -1042,13 +1042,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao {
 	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(final IResource theResource, ResourceTable entity, boolean theUpdateHistory, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion) {
 
-		validateResourceForStorage((T) theResource);
-
 		if (entity.getPublished() == null) {
 			entity.setPublished(new Date());
 		}
 
 		if (theResource != null) {
+			validateResourceForStorage((T) theResource);
 			String resourceType = myContext.getResourceDefinition(theResource).getName();
 			if (isNotBlank(entity.getResourceType()) && !entity.getResourceType().equals(resourceType)) {
 				throw new UnprocessableEntityException("Existing resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] is of type[" + entity.getResourceType() + "] - Cannot update with [" + resourceType + "]");

@@ -118,6 +118,8 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.Constants;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -131,7 +133,7 @@ import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ObjectUtil;
 
 @Transactional(propagation = Propagation.REQUIRED)
-public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
+public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseHapiFhirDao<T>implements IFhirResourceDao<T> {
 
 	static final String OO_SEVERITY_WARN = "warning";
 	static final String OO_SEVERITY_INFO = "information";
@@ -297,20 +299,38 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return new HashSet<Long>(q.getResultList());
 	}
 
-	private Set<Long> addPredicateTag(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList) {
+	private Set<Long> addPredicateTag(Set<Long> thePids, List<List<? extends IQueryParameterType>> theList, String theParamName) {
 		Set<Long> pids = thePids;
 		if (theList == null || theList.isEmpty()) {
 			return pids;
 		}
 
+		TagTypeEnum tagType;
+		if (Constants.PARAM_TAG.equals(theParamName)) {
+			tagType = TagTypeEnum.TAG;
+		} else if (Constants.PARAM_PROFILE.equals(theParamName)) {
+			tagType = TagTypeEnum.PROFILE;
+		} else if (Constants.PARAM_SECURITY.equals(theParamName)) {
+			tagType = TagTypeEnum.SECURITY_LABEL;
+		} else {
+			throw new IllegalArgumentException("Paramname: " + theParamName); // shouldn't happen
+		}
+
 		for (List<? extends IQueryParameterType> nextAndParams : theList) {
 			boolean haveTags = false;
 			for (IQueryParameterType nextParamUncasted : nextAndParams) {
-				TokenParam nextParam = (TokenParam) nextParamUncasted;
-				if (isNotBlank(nextParam.getValue())) {
-					haveTags = true;
-				} else if (isNotBlank(nextParam.getSystem())) {
-					throw new InvalidRequestException("Invalid _tag parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken());
+				if (nextParamUncasted instanceof TokenParam) {
+					TokenParam nextParam = (TokenParam) nextParamUncasted;
+					if (isNotBlank(nextParam.getValue())) {
+						haveTags = true;
+					} else if (isNotBlank(nextParam.getSystem())) {
+						throw new InvalidRequestException("Invalid " + theParamName + " parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken());
+					}
+				} else {
+					UriParam nextParam = (UriParam) nextParamUncasted;
+					if (isNotBlank(nextParam.getValue())) {
+						haveTags = true;
+					}
 				}
 			}
 			if (!haveTags) {
@@ -327,18 +347,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 			List<Predicate> orPredicates = new ArrayList<Predicate>();
 			for (IQueryParameterType nextOrParams : nextAndParams) {
-				TokenParam nextParam = (TokenParam) nextOrParams;
-
+				String code;
+				String system;
+				if (nextOrParams instanceof TokenParam) {
+					TokenParam nextParam = (TokenParam) nextOrParams;
+					code = nextParam.getValue();
+					system = nextParam.getSystem();
+				} else {
+					UriParam nextParam = (UriParam) nextOrParams;
+					code = nextParam.getValue();
+					system = null;
+				}
 				From<ResourceTag, TagDefinition> defJoin = from.join("myTag");
-				Predicate codePrediate = builder.equal(defJoin.get("myCode"), nextParam.getValue());
-				if (isBlank(nextParam.getValue())) {
+				Predicate typePrediate = builder.equal(defJoin.get("myTagType"), tagType);
+				Predicate codePrediate = builder.equal(defJoin.get("myCode"), code);
+				if (isBlank(code)) {
 					continue;
 				}
-				if (isNotBlank(nextParam.getSystem())) {
-					Predicate systemPrediate = builder.equal(defJoin.get("mySystem"), nextParam.getSystem());
-					orPredicates.add(builder.and(systemPrediate, codePrediate));
+				if (isNotBlank(system)) {
+					Predicate systemPrediate = builder.equal(defJoin.get("mySystem"), system);
+					orPredicates.add(builder.and(typePrediate, systemPrediate, codePrediate));
 				} else {
-					orPredicates.add(codePrediate);
+					orPredicates.add(builder.and(typePrediate, codePrediate));
 				}
 
 			}
@@ -358,7 +388,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			TypedQuery<Long> q = myEntityManager.createQuery(cq);
 			pids = new HashSet<Long>(q.getResultList());
 		}
-		
+
 		return pids;
 	}
 
@@ -367,8 +397,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return processMatchUrl(theMatchUrl, getResourceType());
 	}
 
-	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates,
-			IQueryParameterType nextOr) {
+	private boolean addPredicateMissingFalseIfPresent(CriteriaBuilder theBuilder, String theParamName, Root<? extends BaseResourceIndexedSearchParam> from, List<Predicate> codePredicates, IQueryParameterType nextOr) {
 		boolean missingFalse = false;
 		if (nextOr.getMissing() != null) {
 			if (nextOr.getMissing().booleanValue() == true) {
@@ -1087,12 +1116,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		}
 
 		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
 		}
 		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			throw new InvalidRequestException("Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
 		}
 
 		ArrayList<Predicate> singleCodePredicates = (new ArrayList<Predicate>());
@@ -1252,7 +1279,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 				return toMethodOutcome(entity, theResource).setCreated(false);
 			}
 		}
-		
+
 		if (isNotBlank(theResource.getId().getIdPart())) {
 			if (isValidPid(theResource.getId())) {
 				throw new UnprocessableEntityException("This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
@@ -1290,7 +1317,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	@Override
 	public TagList getAllResourceTags() {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(null,null);
+		ActionRequestDetails requestDetails = new ActionRequestDetails(null, null);
 		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
 
 		StopWatch w = new StopWatch();
@@ -1305,7 +1332,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		return myResourceType;
 	}
 
-	
 	public String getResourceName() {
 		return myResourceName;
 	}
@@ -1726,8 +1752,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
-				TypedQuery<ResourceHistoryTable> q = myEntityManager
-						.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
+				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
 				q.setParameter("RVER", Long.parseLong(theId.getVersionIdPart()));
@@ -1919,7 +1944,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 						// Execute the query and make sure we return distinct results
 						List<IBaseResource> retVal = new ArrayList<IBaseResource>();
 						loadResourcesByPid(pidsSubList, retVal, revIncludedPids);
-						
+
 						/*
 						 * Load _include resources - Note that _revincludes are handled differently than _include ones, as
 						 * they are counted towards the total count and paged, so they are loaded outside the bundle provider
@@ -2074,9 +2099,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 				pids = addPredicateLanguage(pids, nextParamEntry.getValue());
 
-			} else if (nextParamName.equals("_tag")) {
+			} else if (nextParamName.equals(Constants.PARAM_TAG) || nextParamName.equals(Constants.PARAM_PROFILE) || nextParamName.equals(Constants.PARAM_SECURITY)) {
 
-				pids = addPredicateTag(pids, nextParamEntry.getValue());
+				pids = addPredicateTag(pids, nextParamEntry.getValue(), nextParamName);
 
 			} else {
 
@@ -2285,7 +2310,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
 			throw new UnprocessableEntityException("Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
-		
+
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(resourceId, getResourceName(), theResource);
 		notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
@@ -2318,8 +2343,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 	private void validateResourceType(BaseHasResource entity) {
 		if (!myResourceName.equals(entity.getResourceType())) {
-			throw new ResourceNotFoundException(
-					"Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type " + entity.getResourceType());
+			throw new ResourceNotFoundException("Resource with ID " + entity.getIdDt().getIdPart() + " exists but it is not of type " + myResourceName + ", found resource of type " + entity.getResourceType());
 		}
 	}
 

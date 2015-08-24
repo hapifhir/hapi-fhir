@@ -107,9 +107,11 @@ public class Constants {
 	public static final String PARAM_PAGINGOFFSET = "_getpagesoffset";
 	public static final String PARAM_PRETTY = "_pretty";
 	public static final String PARAM_PRETTY_VALUE_TRUE = "true";
+	public static final String PARAM_PROFILE = "_profile";
 	public static final String PARAM_QUERY = "_query";
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_SEARCH = "_search";
+	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
 	public static final String PARAM_SORT = "_sort";
 	public static final String PARAM_SORT_ASC = "_sort:asc";
@@ -138,10 +140,10 @@ public class Constants {
 	public static final int STATUS_HTTP_422_UNPROCESSABLE_ENTITY = 422;
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
+	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
+	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
-	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
-	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
 
 	static {
 		Map<String, EncodingEnum> valToEncoding = new HashMap<String, EncodingEnum>();
