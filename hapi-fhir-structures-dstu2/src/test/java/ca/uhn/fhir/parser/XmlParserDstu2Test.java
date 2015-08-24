@@ -44,6 +44,7 @@ import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt;
 import ca.uhn.fhir.model.dstu2.composite.ElementDefinitionDt.Binding;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.AllergyIntolerance;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -61,9 +62,13 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.AddressUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ContactPointSystemEnum;
 import ca.uhn.fhir.model.dstu2.valueset.DocumentReferenceStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationRelationshipTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -80,17 +85,42 @@ public class XmlParserDstu2Test {
 	@Test
 	public void testEncodeReferenceUsingUnqualifiedResourceWorksCorrectly() {
 		
-		Organization org = new Organization();
-		org.setId("orgId");
+		Patient patient = new Patient();
+		patient.setId("phitcc_pat_normal");
+		patient.addName().addGiven("Patty").setUse(NameUseEnum.NICKNAME);
+		patient.addTelecom().setSystem(ContactPointSystemEnum.EMAIL).setValue("patpain@ehealthinnovation.org");
+		patient.setGender(AdministrativeGenderEnum.FEMALE);
+		patient.setBirthDate(new DateDt("2001-10-13"));
+
+		DateTimeDt obsEffectiveTime = new DateTimeDt("2015-04-11T12:22:01-04:00");
+
+		Observation obsParent = new Observation();
+		obsParent.setId("phitcc_obs_bp_parent");
+		obsParent.getSubject().setResource(patient);
+		obsParent.setStatus(ObservationStatusEnum.FINAL);
+		obsParent.setEffective(obsEffectiveTime);
+
+		Observation obsSystolic = new Observation();
+		obsSystolic.setId("phitcc_obs_bp_dia");
+		obsSystolic.getSubject().setResource(patient);
+		obsSystolic.setEffective(obsEffectiveTime);
+		obsParent.addRelated().setType(ObservationRelationshipTypeEnum.HAS_MEMBER).setTarget(new ResourceReferenceDt(obsSystolic));
+
+		Observation obsDiastolic = new Observation();
+		obsDiastolic.setId("phitcc_obs_bp_dia");
+		obsDiastolic.getSubject().setResource(patient);
+		obsDiastolic.setEffective(obsEffectiveTime);
+		obsParent.addRelated().setType(ObservationRelationshipTypeEnum.HAS_MEMBER).setTarget(new ResourceReferenceDt(obsDiastolic));
 		
-		Patient pat = new Patient();
-		pat.getManagingOrganization().setResource(org);
-		
-		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pat);
+		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obsParent);
 		ourLog.info(str);
 		
-		assertThat(str, containsString("<reference value=\"Organization/orgId\"/>"));
+		assertThat(str, containsString("<reference value=\"Patient/phitcc_pat_normal\"/>"));
+		assertThat(str, containsString("<reference value=\"Observation/phitcc_obs_bp_dia\"/>"));
 	}
+	
+	
+	
 	
 	
 	@Test
