@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -164,11 +165,11 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
-		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null);
+		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null);
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-			boolean theLogRequestAndResponse, SummaryEnum theSummaryMode) {
+			boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -195,6 +196,10 @@ public abstract class BaseClient implements IRestfulClient {
 
 			if (thePrettyPrint == Boolean.TRUE) {
 				params.put(Constants.PARAM_PRETTY, Collections.singletonList(Constants.PARAM_PRETTY_VALUE_TRUE));
+			}
+			
+			if (theSubsetElements != null && theSubsetElements.isEmpty()== false) {
+				params.put(Constants.PARAM_ELEMENTS, Collections.singletonList(StringUtils.join(theSubsetElements, ',')));
 			}
 
 			EncodingEnum encoding = getEncoding();

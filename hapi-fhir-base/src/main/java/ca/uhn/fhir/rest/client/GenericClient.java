@@ -24,12 +24,15 @@ import static org.apache.commons.lang3.StringUtils.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -226,7 +229,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		return delete(theType, new IdDt(theId));
 	}
 
-	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding) {
+	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint, SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -259,10 +262,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
 		} else {
 			try {
-				return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary);
+				return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements);
 			} catch (NotModifiedException e) {
 				return theNotModifiedHandler.call();
 			}
@@ -413,7 +416,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
 		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
-		return doReadOrVRead(theType, id, false, null, null, false, null, null);
+		return doReadOrVRead(theType, id, false, null, null, false, null, null, null);
 	}
 
 	@Override
@@ -559,7 +562,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (theId.hasVersionIdPart() == false) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
-		return doReadOrVRead(theType, theId, true, null, null, false, null, null);
+		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null);
 	}
 
 	/* also deprecated in interface */
@@ -592,14 +595,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		protected EncodingEnum myParamEncoding;
 		protected Boolean myPrettyPrint;
 		private boolean myQueryLogRequestAndResponse;
+		private HashSet<String> mySubsetElements;
 		protected SummaryEnum mySummaryMode;
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public T summaryMode(SummaryEnum theSummary) {
-			mySummaryMode = theSummary;
-			return ((T) this);
-		}
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -626,6 +623,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return myParamEncoding;
 		}
 
+		protected HashSet<String> getSubsetElements() {
+			return mySubsetElements;
+		}
+
 		protected <Z> Z invoke(Map<String, List<String>> theParams, IClientResponseHandler<Z> theHandler, BaseHttpClientInvocation theInvocation) {
 			// if (myParamEncoding != null) {
 			// theParams.put(Constants.PARAM_FORMAT, Collections.singletonList(myParamEncoding.getFormatContentType()));
@@ -639,7 +640,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements);
 			return resp;
 		}
 
@@ -656,6 +657,24 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public T prettyPrint() {
 			myPrettyPrint = true;
 			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T elementsSubset(String... theElements) {
+			if (theElements != null && theElements.length > 0) {
+				mySubsetElements = new HashSet<String>(Arrays.asList(theElements));
+			} else {
+				mySubsetElements = null;
+			}
+			return (T) this;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T summaryMode(SummaryEnum theSummary) {
+			mySummaryMode = theSummary;
+			return ((T) this);
 		}
 
 	}
@@ -1489,9 +1508,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {//AAA
 			if (myId.hasVersionIdPart()) {
-				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding);
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 			} else {
-				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding);
+				return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
 			}
 		}
 
@@ -1634,9 +1653,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
 
+		private boolean myAllowHtmlResponse;
 		private IIdType myId;
 		private Class<T> myType;
-		private boolean myAllowHtmlResponse;
 
 		public ResourceResponseHandler(Class<T> theType, IIdType theId) {
 			myType = theType;
@@ -1698,14 +1717,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private List<Include> myInclude = new ArrayList<Include>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
+		private List<String> myProfile = new ArrayList<String>();
 		private String myResourceId;
 		private String myResourceName;
 		private Class<? extends IBaseResource> myResourceType;
 		private Class<? extends IBaseBundle> myReturnBundleType;
 		private List<Include> myRevInclude = new ArrayList<Include>();
 		private SearchStyleEnum mySearchStyle;
+		private List<TokenParam> mySecurity = new ArrayList<TokenParam>();
 		private List<SortInternal> mySort = new ArrayList<SortInternal>();
-
 		private List<TokenParam> myTags = new ArrayList<TokenParam>();
 
 		public SearchInternal() {
@@ -1732,6 +1752,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (TokenParam next : myTags) {
 				addParam(params, Constants.PARAM_TAG, next.getValueAsQueryToken());
+			}
+
+			for (TokenParam next : mySecurity) {
+				addParam(params, Constants.PARAM_SECURITY, next.getValueAsQueryToken());
+			}
+
+			for (String next : myProfile) {
+				addParam(params, Constants.PARAM_PROFILE, next);
 			}
 
 			for (Include next : myInclude) {
@@ -1864,6 +1892,20 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IQuery withIdAndCompartment(String theResourceId, String theCompartmentName) {
 			myResourceId = theResourceId;
 			myCompartmentName = theCompartmentName;
+			return this;
+		}
+
+		@Override
+		public IQuery<Object> withProfile(String theProfileUri) {
+			Validate.notBlank(theProfileUri, "theProfileUri must not be null or empty");
+			myProfile.add(theProfileUri);
+			return this;
+		}
+
+		@Override
+		public IQuery<Object> withSecurity(String theSystem, String theCode) {
+			Validate.notBlank(theCode, "theCode must not be null or empty");
+			mySecurity.add(new TokenParam(theSystem, theCode));
 			return this;
 		}
 

@@ -19,7 +19,8 @@ package ca.uhn.fhir.rest.server;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -62,7 +63,6 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.method.ConformanceMethodBinding;
-import ca.uhn.fhir.rest.method.ElementsParameter;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -452,9 +452,7 @@ public class RestfulServer extends HttpServlet {
 		boolean requestIsBrowser = requestIsBrowser(theRequest.getServletRequest());
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 		boolean respondGzip = theRequest.isRespondGzip();
-		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequest);
-		Set<String> elementsAppliesTo = null; // TODO: persist this across pages
-		
+
 		IVersionSpecificBundleFactory bundleFactory = getFhirContext().newBundleFactory();
 
 		Set<Include> includes = new HashSet<Include>();
@@ -480,7 +478,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, responseEncoding, theRequest.getFhirServerBase(), prettyPrint, summaryMode, respondGzip, requestIsBrowser);
+			RestfulServerUtils.streamResponseAsBundle(this, theResponse, bundle, theRequest.getFhirServerBase(), summaryMode, respondGzip, requestIsBrowser, theRequest);
 		} else {
 			IBaseResource resBundle = bundleFactory.getResourceBundle();
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -491,8 +489,7 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, responseEncoding, prettyPrint, requestIsBrowser, summaryMode, Constants.STATUS_HTTP_200_OK,
-					theRequest.isRespondGzip(), theRequest.getFhirServerBase(), false, elements, elementsAppliesTo);
+			RestfulServerUtils.streamResponseAsResource(this, theResponse, resBundle, prettyPrint, summaryMode, Constants.STATUS_HTTP_200_OK, theRequest.isRespondGzip(), false, theRequest);
 		}
 	}
 
@@ -678,14 +675,12 @@ public class RestfulServer extends HttpServlet {
 					return;
 				}
 			}
-			
+
 			/*
-			 * Actualy invoke the server method. This call is to a HAPI method
-			 * binding, which is an object that wraps a specific implementing (user-supplied)
-			 * method, but handles its input and provides its output back to the client.
+			 * Actualy invoke the server method. This call is to a HAPI method binding, which is an object that wraps a specific implementing (user-supplied) method, but handles its input and provides
+			 * its output back to the client.
 			 * 
-			 * This is basically the end of processing for a successful request,
-			 * since the method binding replies to the client and closes the response.
+			 * This is basically the end of processing for a successful request, since the method binding replies to the client and closes the response.
 			 */
 			resourceMethod.invokeServer(this, requestDetails);
 
@@ -719,13 +714,10 @@ public class RestfulServer extends HttpServlet {
 		} catch (Throwable e) {
 
 			/*
-			 * We have caught an exception during request processing. This might be
-			 * because a handling method threw something they wanted to throw (e.g.
-			 * UnprocessableEntityException because the request had business requirement
-			 * problems) or it could be due to bugs (e.g. NullPointerException).
+			 * We have caught an exception during request processing. This might be because a handling method threw something they wanted to throw (e.g. UnprocessableEntityException because the request
+			 * had business requirement problems) or it could be due to bugs (e.g. NullPointerException).
 			 * 
-			 * First we let the interceptors have a crack at converting the exception
-			 * into something HAPI can use (BaseServerResponseException) 
+			 * First we let the interceptors have a crack at converting the exception into something HAPI can use (BaseServerResponseException)
 			 */
 			BaseServerResponseException exception = null;
 			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
@@ -738,9 +730,8 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			/*
-			 * If none of the interceptors converted the exception, default behaviour is to
-			 * keep the exception as-is if it extends BaseServerResponseException, otherwise
-			 * wrap it in an InternalErrorException.
+			 * If none of the interceptors converted the exception, default behaviour is to keep the exception as-is if it extends BaseServerResponseException, otherwise wrap it in an
+			 * InternalErrorException.
 			 */
 			if (exception == null) {
 				exception = DEFAULT_EXCEPTION_HANDLER.preProcessOutgoingException(requestDetails, e, theRequest);
@@ -758,8 +749,13 @@ public class RestfulServer extends HttpServlet {
 			}
 
 			/*
-			 * If nobody handles it, default behaviour is to stream back the 
-			 * OperationOutcome to the client.
+			 * If we're handling an exception, no summary mode should be applied
+			 */
+			requestDetails.getParameters().remove(Constants.PARAM_SUMMARY);
+			requestDetails.getParameters().remove(Constants.PARAM_ELEMENTS);
+			
+			/*
+			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 

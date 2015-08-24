@@ -135,6 +135,19 @@ public class ResponseHighlightingInterceptorTest {
 	
 
 	@Test
+	public void testSearchWithSummaryParam() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWithWildcardRetVal&_summary=count");
+		httpGet.addHeader("Accept", "html");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ourLog.info("Resp: {}", responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(responseContent, not(containsString("entry")));
+	}
+
+	@Test
 	public void testGetInvalidResource() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
 		httpGet.addHeader("Accept", "html");

@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 
 /**
  * A parser, which can be used to convert between HAPI FHIR model/structure objects, and their respective String wire
@@ -293,5 +294,10 @@ public interface IParser {
 	 * values.
 	 */
 	IParser setSuppressNarratives(boolean theSuppressNarratives);
+
+	/**
+	 * Which encoding does this parser instance produce?
+	 */
+	EncodingEnum getEncoding();
 
 }

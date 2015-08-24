@@ -60,14 +60,12 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
@@ -100,7 +98,7 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.rest.server.Constants;
+import ca.uhn.fhir.rest.server.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
 
 /**
@@ -923,6 +921,11 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
+	@Override
+	public EncodingEnum getEncoding() {
+		return EncodingEnum.JSON;
+	}
+
 	private void parseAlternates(JsonValue theAlternateVal, ParserState<?> theState, String theElementName) {
 		if (theAlternateVal == null || theAlternateVal.getValueType() == ValueType.NULL) {
 			return;
@@ -1207,25 +1210,6 @@ public class JsonParser extends BaseParser implements IParser {
 		}
 	}
 
-	@Override
-	public TagList parseTagList(Reader theReader) {
-		JsonReader reader = Json.createReader(theReader);
-		JsonObject object = reader.readObject();
-
-		JsonValue resourceTypeObj = object.get("resourceType");
-		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
-		String resourceType = ((JsonString) resourceTypeObj).getString();
-
-		ParserState<TagList> state = ParserState.getPreTagListInstance(myContext, true, getErrorHandler());
-		state.enteringNewElement(null, resourceType);
-
-		parseChildren(object, state);
-
-		state.endingElement();
-
-		return state.getObject();
-	}
-
 	// private void parseExtensionInDstu2Style(boolean theModifier, ParserState<?> theState, String
 	// theParentExtensionUrl, String theExtensionUrl, JsonArray theValues) {
 	// String extUrl = UrlUtil.constructAbsoluteUrl(theParentExtensionUrl, theExtensionUrl);
@@ -1252,6 +1236,25 @@ public class JsonParser extends BaseParser implements IParser {
 	// theState.endingElement();
 	// }
 
+
+	@Override
+	public TagList parseTagList(Reader theReader) {
+		JsonReader reader = Json.createReader(theReader);
+		JsonObject object = reader.readObject();
+
+		JsonValue resourceTypeObj = object.get("resourceType");
+		assertObjectOfType(resourceTypeObj, JsonValue.ValueType.STRING, "resourceType");
+		String resourceType = ((JsonString) resourceTypeObj).getString();
+
+		ParserState<TagList> state = ParserState.getPreTagListInstance(myContext, true, getErrorHandler());
+		state.enteringNewElement(null, resourceType);
+
+		parseChildren(object, state);
+
+		state.endingElement();
+
+		return state.getObject();
+	}
 
 	@Override
 	public IParser setPrettyPrint(boolean thePrettyPrint) {

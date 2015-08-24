@@ -379,8 +379,8 @@
 				<table>
 					<thead>
 						<tr>
-							<td>Parameter</td>
-							<td>Description</td>
+							<td><b>Parameter</b></td>
+							<td><b>Description</b></td>
 						</tr>
 					</thead>
 					<tbody>

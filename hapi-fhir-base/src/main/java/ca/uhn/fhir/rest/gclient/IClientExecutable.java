@@ -34,6 +34,13 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	@Deprecated
 	T andLogRequestAndResponse(boolean theLogRequestAndResponse);
 
+	/**
+	 * Request that the server return subsetted resources, containing only the elements specified in the given parameters. 
+	 * For example: <code>subsetElements("name", "identifier")</code> requests that the server only return
+	 * the "name" and "identifier" fields in the returned resource, and omit any others.  
+	 */
+	T elementsSubset(String... theElements);
+
 	T encodedJson();
 
 	T encodedXml();
@@ -46,5 +53,5 @@ public interface IClientExecutable<T extends IClientExecutable<?,?>, Y> {
 	 * Request that the server modify the response using the <code>_summary</code> param 
 	 */
 	T summaryMode(SummaryEnum theSummary);
-	
+
 }

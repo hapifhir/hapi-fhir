@@ -46,6 +46,22 @@ public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<I
 	IQuery<T> withTag(String theSystem, String theCode);
 
 	/**
+	 * Match only resources where the resource has the given security tag. This parameter corresponds to
+	 * the <code>_security</code> URL parameter.
+	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
+	 * @param theCode The tag code. Must not be <code>null</code> or empty.
+	 */
+	IQuery<T> withSecurity(String theSystem, String theCode);
+
+	/**
+	 * Match only resources where the resource has the given profile declaration. This parameter corresponds to
+	 * the <code>_profile</code> URL parameter.
+	 * @param theSystem The tag code system, or <code>null</code> to match any code system (this may not be supported on all servers)
+	 * @param theCode The tag code. Must not be <code>null</code> or empty.
+	 */
+	IQuery<T> withProfile(String theProfileUri);
+
+	/**
 	 * Forces the query to perform the search using the given method (allowable methods are described in the 
 	 * <a href="http://www.hl7.org/implement/standards/fhir/http.html#search">FHIR Specification Section 2.1.11</a>)
 	 * 

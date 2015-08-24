@@ -657,6 +657,24 @@ public class FhirSystemDaoDstu2Test extends BaseJpaTest {
 	}
 
 	@Test
+	public void testTransactionFromBundleJosh() throws Exception {
+
+		InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/josh-bundle.json");
+		String bundleStr = IOUtils.toString(bundleRes);
+		Bundle bundle = ourFhirContext.newJsonParser().parseResource(Bundle.class, bundleStr);
+
+		Bundle resp = ourSystemDao.transaction(bundle);
+
+		ourLog.info(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		OperationOutcome oo = (OperationOutcome) resp.getEntry().get(0).getResource();
+		assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("Transaction completed"));
+
+		assertEquals("201 Created", resp.getEntry().get(1).getResponse().getStatus());
+		assertEquals("201 Created", resp.getEntry().get(2).getResponse().getStatus());
+	}
+
+	@Test
 	public void testTransactionReadAndSearch() {
 		String methodName = "testTransactionReadAndSearch";
 

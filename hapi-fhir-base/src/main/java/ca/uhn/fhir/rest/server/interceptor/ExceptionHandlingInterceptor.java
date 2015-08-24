@@ -19,8 +19,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -37,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.method.RequestDetails;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -73,9 +71,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 			}
 		}
 
-		boolean requestIsBrowser = RestfulServer.requestIsBrowser(theRequest);
-		String fhirServerBase = theRequestDetails.getFhirServerBase();
-		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, RestfulServerUtils.determineResponseEncodingNoDefault(theRequest), true, requestIsBrowser, Collections.singleton(SummaryEnum.FALSE), statusCode, false, fhirServerBase, false, null, null);
+		RestfulServerUtils.streamResponseAsResource(theRequestDetails.getServer(), theResponse, oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, false, false, theRequestDetails);
 
 		// theResponse.setStatus(statusCode);
 		// theRequestDetails.getServer().addHeadersToResponse(theResponse);

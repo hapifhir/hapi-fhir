@@ -1,16 +1,14 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.security.sasl.AuthorizeCallback;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import junit.framework.AssertionFailedError;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -46,6 +44,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.util.PortUtil;
+import junit.framework.AssertionFailedError;
 
 /**
  * Created by dsotnikov on 2/25/2014.

@@ -63,9 +63,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.method.ElementsParameter;
 import ca.uhn.fhir.rest.method.RequestDetails;
 import ca.uhn.fhir.rest.method.SummaryEnumParameter;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 public class RestfulServerUtils {
 	static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
@@ -285,9 +287,19 @@ public class RestfulServerUtils {
 		return RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_COUNT);
 	}
 
-	public static IParser getNewParser(FhirContext theContext, EncodingEnum theResponseEncoding, boolean thePrettyPrint, Set<SummaryEnum> theSummaryMode) {
+	public static IParser getNewParser(FhirContext theContext, RequestDetails theRequestDetails) {
+		
+		// Pretty print
+		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
+
+		// Determine response encoding
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
+		if (responseEncoding == null) {
+			responseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
+		}
+
 		IParser parser;
-		switch (theResponseEncoding) {
+		switch (responseEncoding) {
 		case JSON:
 			parser = theContext.newJsonParser();
 			break;
@@ -296,17 +308,41 @@ public class RestfulServerUtils {
 			parser = theContext.newXmlParser();
 			break;
 		}
-		parser.setPrettyPrint(thePrettyPrint);
-		if (theSummaryMode != null) {
-			if (theSummaryMode.contains(SummaryEnum.COUNT)) {
+		parser.setPrettyPrint(prettyPrint);
+		parser.setServerBaseUrl(theRequestDetails.getFhirServerBase());
+		
+		// Summary mode
+		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequestDetails);
+
+		// _elements
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails);
+		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
+			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
+		}
+		Set<String> elementsAppliesTo = null;
+		if (elements != null && isNotBlank(theRequestDetails.getResourceName())) {
+			elementsAppliesTo = Collections.singleton(theRequestDetails.getResourceName());
+		}
+		
+		if (summaryMode != null) {
+			if (summaryMode.contains(SummaryEnum.COUNT)) {
 				parser.setEncodeElements(Collections.singleton("Bundle.total"));
-			} else if (theSummaryMode.contains(SummaryEnum.TEXT)) {
+			} else if (summaryMode.contains(SummaryEnum.TEXT)) {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			} else {
-				parser.setSuppressNarratives(theSummaryMode.contains(SummaryEnum.DATA));
-				parser.setSummaryMode(theSummaryMode.contains(SummaryEnum.TRUE));
+				parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
+				parser.setSummaryMode(summaryMode.contains(SummaryEnum.TRUE));
 			}
 		}
+		if (elements != null && elements.size() > 0) {
+			Set<String> newElements = new HashSet<String>();
+			for (String next : elements) {
+				newElements.add("*." + next);
+			}
+			parser.setEncodeElements(newElements);
+			parser.setEncodeElementsAppliesToResourceTypes(elementsAppliesTo);
+		}
+		
 		return parser;
 	}
 
@@ -378,13 +414,15 @@ public class RestfulServerUtils {
 		return prettyPrint;
 	}
 
-	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, Bundle bundle, EncodingEnum theResponseEncoding, String theServerBase, boolean thePrettyPrint, Set<SummaryEnum> theSummaryMode, boolean theRespondGzip, boolean theRequestIsBrowser)
+	public static void streamResponseAsBundle(RestfulServer theServer, HttpServletResponse theHttpResponse, Bundle bundle, String theServerBase, Set<SummaryEnum> theSummaryMode, boolean theRespondGzip, boolean theRequestIsBrowser, RequestDetails theRequestDetails)
 			throws IOException {
 		assert!theServerBase.endsWith("/");
 
 		theHttpResponse.setStatus(200);
 
-		EncodingEnum responseEncoding = theResponseEncoding != null ? theResponseEncoding : theServer.getDefaultResponseEncoding();
+		// Determine response encoding
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
+		responseEncoding = responseEncoding != null ? responseEncoding : theServer.getDefaultResponseEncoding();
 
 		if (theRequestIsBrowser && theServer.isUseBrowserFriendlyContentTypes()) {
 			theHttpResponse.setContentType(responseEncoding.getBrowserFriendlyBundleContentType());
@@ -398,8 +436,7 @@ public class RestfulServerUtils {
 
 		Writer writer = RestfulServerUtils.getWriter(theHttpResponse, theRespondGzip);
 		try {
-			IParser parser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theSummaryMode);
-			parser.setServerBaseUrl(theServerBase);
+			IParser parser = RestfulServerUtils.getNewParser(theServer.getFhirContext(), theRequestDetails);
 			if (theSummaryMode.contains(SummaryEnum.TEXT)) {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			}
@@ -409,13 +446,17 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, EncodingEnum theResponseEncoding, boolean thePrettyPrint, boolean theRequestIsBrowser, Set<SummaryEnum> theNarrativeMode, int stausCode, boolean theRespondGzip,
-			String theServerBase, boolean theAddContentLocationHeader, Set<String> theElements, Set<String> theElementsAppliesTo) throws IOException {
+	public static void streamResponseAsResource(RestfulServer theServer, HttpServletResponse theHttpResponse, IBaseResource theResource, boolean theRequestIsBrowser, Set<SummaryEnum> theSummaryMode, int stausCode, boolean theRespondGzip,
+			boolean theAddContentLocationHeader, RequestDetails theRequestDetails) throws IOException {
 		theHttpResponse.setStatus(stausCode);
 
-		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(theServerBase)) {
+		// Determine response encoding
+		EncodingEnum responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails.getServletRequest());
+
+		String serverBase = theRequestDetails.getFhirServerBase();
+		if (theAddContentLocationHeader && theResource.getIdElement() != null && theResource.getIdElement().hasIdPart() && isNotBlank(serverBase)) {
 			String resName = theServer.getFhirContext().getResourceDefinition(theResource).getName();
-			IIdType fullId = theResource.getIdElement().withServerBase(theServerBase, resName);
+			IIdType fullId = theResource.getIdElement().withServerBase(serverBase, resName);
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_LOCATION, fullId.getValue());
 		}
 
@@ -428,11 +469,11 @@ public class RestfulServerUtils {
 		if (theServer.getAddProfileTag() != AddProfileTagEnum.NEVER) {
 			RuntimeResourceDefinition def = theServer.getFhirContext().getResourceDefinition(theResource);
 			if (theServer.getAddProfileTag() == AddProfileTagEnum.ALWAYS || !def.isStandardProfile()) {
-				addProfileToBundleEntry(theServer.getFhirContext(), theResource, theServerBase);
+				addProfileToBundleEntry(theServer.getFhirContext(), theResource, serverBase);
 			}
 		}
 
-		if (theResource instanceof IBaseBinary && theResponseEncoding == null) {
+		if (theResource instanceof IBaseBinary && responseEncoding == null) {
 			IBaseBinary bin = (IBaseBinary) theResource;
 			if (isNotBlank(bin.getContentType())) {
 				theHttpResponse.setContentType(bin.getContentType());
@@ -454,9 +495,10 @@ public class RestfulServerUtils {
 			return;
 		}
 
-		EncodingEnum responseEncoding = theResponseEncoding != null ? theResponseEncoding : theServer.getDefaultResponseEncoding();
-
-		boolean encodingDomainResourceAsText = theNarrativeMode.contains(SummaryEnum.TEXT);
+		// Ok, we're not serving a binary resource, so apply default encoding
+		responseEncoding = responseEncoding != null ? responseEncoding : theServer.getDefaultResponseEncoding();
+		
+		boolean encodingDomainResourceAsText = theSummaryMode.contains(SummaryEnum.TEXT);
 		if (encodingDomainResourceAsText) {
 			/*
 			 * If the user requests "text" for a bundle, only suppress the non text elements in the Element.entry.resource
@@ -504,16 +546,7 @@ public class RestfulServerUtils {
 			if (encodingDomainResourceAsText && theResource instanceof IResource) {
 				writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
 			} else {
-				IParser parser = getNewParser(theServer.getFhirContext(), responseEncoding, thePrettyPrint, theNarrativeMode);
-				parser.setServerBaseUrl(theServerBase);
-				if (theElements != null && theElements.size() > 0) {
-					Set<String> elements = new HashSet<String>();
-					for (String next : theElements) {
-						elements.add("*." + next);
-					}
-					parser.setEncodeElements(elements);
-					parser.setEncodeElementsAppliesToResourceTypes(theElementsAppliesTo);
-				}
+				IParser parser = getNewParser(theServer.getFhirContext(), theRequestDetails);
 				parser.encodeResourceToWriter(theResource, writer);
 			}
 		} finally {

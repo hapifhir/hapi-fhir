@@ -252,6 +252,11 @@
 				<version>3.1.0</version>
 			</dependency>
 			<dependency>
+				<groupId>lt.velykis.maven.skins</groupId>
+				<artifactId>reflow-velocity-tools</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-dbcp2</artifactId>
 				<version>2.1.1</version>
@@ -280,6 +285,36 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
 				<version>4.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.doxia</groupId>
+				<artifactId>doxia-module-markdown</artifactId>
+				<version>1.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-api</artifactId>
+				<version>1.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-manager-plexus</artifactId>
+				<version>1.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-provider-gitexe</artifactId>
+				<version>1.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-scm</artifactId>
+				<version>2.2</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity</artifactId>
+				<version>1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
@@ -463,38 +498,30 @@
 						<dependency>
 							<groupId>org.apache.maven.wagon</groupId>
 							<artifactId>wagon-scm</artifactId>
-							<version>2.2</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-manager-plexus</artifactId>
-							<version>1.9</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-provider-gitexe</artifactId>
-							<version>1.9</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.maven.scm</groupId>
 							<artifactId>maven-scm-api</artifactId>
-							<version>1.9</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.maven.doxia</groupId>
 							<artifactId>doxia-module-markdown</artifactId>
-							<version>1.6</version>
 						</dependency>
-						<!-- -->
 						<dependency>
 							<groupId>lt.velykis.maven.skins</groupId>
 							<artifactId>reflow-velocity-tools</artifactId>
-							<version>1.1.1</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.velocity</groupId>
 							<artifactId>velocity</artifactId>
-							<version>1.7</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -866,6 +893,43 @@
 						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-scm</artifactId>
+						<version>2.2</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-manager-plexus</artifactId>
+						<version>1.9</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-provider-gitexe</artifactId>
+						<version>1.9</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.scm</groupId>
+						<artifactId>maven-scm-api</artifactId>
+						<version>1.9</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.maven.doxia</groupId>
+						<artifactId>doxia-module-markdown</artifactId>
+						<version>1.6</version>
+					</dependency>
+					<dependency>
+						<groupId>lt.velykis.maven.skins</groupId>
+						<artifactId>reflow-velocity-tools</artifactId>
+						<version>1.1.1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.velocity</groupId>
+						<artifactId>velocity</artifactId>
+						<version>1.7</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
