@@ -108,6 +108,11 @@
 				Resource references using resource instance objects instead of resource IDs 
 				will correctly qualify the IDs with the resource type if they aren't already qualified   
 			</action>
+			<action type="add" issue="211">
+				Testpage Overlay project now properly allows a custom client
+				factory to be used (e.g. for custom authentication, etc.) Thanks
+				to Chin Huang (@pukkaone) for the pull request!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

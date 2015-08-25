@@ -178,6 +178,10 @@
 			<name>Joel Costigliola</name>
 			<organization>JCOS-Technologies</organization>
 		</developer>
+		<developer>
+			<id>pukkaone</id>
+			<name>Chin Huang</name>
+		</developer>
 	</developers>
 
 	<licenses>
