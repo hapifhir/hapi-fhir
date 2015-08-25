@@ -1112,7 +1112,8 @@ public class Controller {
 	}
 
 	private Conformance loadAndAddConfDstu1(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(theServletRequest, myConfig));
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		Conformance conformance;
 		try {
@@ -1171,7 +1172,8 @@ public class Controller {
 	}
 
 	private IResource loadAndAddConfDstu2(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		IGenericClient client = getContext(theRequest).newRestfulGenericClient(theRequest.getServerBase(theServletRequest, myConfig));
+		CaptureInterceptor interceptor = new CaptureInterceptor();
+		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
 		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
 		try {
