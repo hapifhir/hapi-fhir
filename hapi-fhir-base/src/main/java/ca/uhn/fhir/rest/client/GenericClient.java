@@ -1763,7 +1763,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			for (Include next : myInclude) {
-				addParam(params, Constants.PARAM_INCLUDE, next.getValue());
+				if (next.isRecurse()) {
+					addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+				} else {
+					addParam(params, Constants.PARAM_INCLUDE, next.getValue());
+				}
 			}
 
 			for (Include next : myRevInclude) {

@@ -48,10 +48,13 @@ abstract class BaseOrListParam<T extends IQueryParameterType> implements IQueryP
 
 	abstract T newInstance();
 
-	public void add(T theParameter) {
+	public abstract BaseOrListParam<T> addOr(T theParameter);
+	
+	public BaseOrListParam<T> add(T theParameter) {
 		if (theParameter != null) {
 			myList.add(theParameter);
 		}
+		return this;
 	}
 	
 	@Override

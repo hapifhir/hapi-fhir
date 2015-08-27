@@ -187,11 +187,14 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
 						methodParamsTemp.add(name);
 					}
-				} else if (unqualifiedNames.contains(name)) {
+				}
+				if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
-				} else {
+				}
+				if (!qualifiedParamNames.contains(name) && !unqualifiedNames.contains(name))
+				{
 					ourLog.trace("Method {} doesn't match param '{}' is not present", getMethod().getName(), name);
 					return false;
 				}
@@ -202,11 +205,13 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 					if (qualifiers.passes(temp.getQualifierWhitelist(), temp.getQualifierBlacklist())) {
 						methodParamsTemp.add(name);
 					}
-				} else if (unqualifiedNames.contains(name)) {
+				} 
+				if (unqualifiedNames.contains(name)) {
 					List<String> qualifiedNames = theRequest.getUnqualifiedToQualifiedNames().get(name);
 					qualifiedNames = processWhitelistAndBlacklist(qualifiedNames, temp.getQualifierWhitelist(), temp.getQualifierBlacklist());
 					methodParamsTemp.addAll(qualifiedNames);
-				} else {
+				}
+				if (!qualifiedParamNames.contains(name) && !qualifiedParamNames.contains(name)) { 
 					methodParamsTemp.add(name);
 				}
 			}

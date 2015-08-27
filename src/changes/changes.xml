@@ -113,6 +113,16 @@
 				factory to be used (e.g. for custom authentication, etc.) Thanks
 				to Chin Huang (@pukkaone) for the pull request!
 			</action>
+			<action type="fix">
+				Fix issue in client where parameter values containing a comma were
+				sometimes double escaped.
+			</action>
+			<action type="add">
+				_include parameters now support the new <![CDATA[<code>_include:recurse=FOO</code>]]>
+				syntax that has been introduced in DSTU2 in the Client, Server, and JPA Server modules.
+				Non-recursive behaviour is now the default (previously it was recursive) and :recurse
+				needs to be explicitly stated in order to support recursion.
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

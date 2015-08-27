@@ -207,6 +207,7 @@ public class ParameterUtil {
 			case '$':
 			case ',':
 			case '|':
+			case '\\':
 				b.append('\\');
 				break;
 			default:

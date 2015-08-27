@@ -29,7 +29,13 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 public interface IQuery<T> extends IClientExecutable<IQuery<T>, T>, IBaseQuery<IQuery<T>> {
 
 	/**
-	 * Add an "_include" specification
+	 * Add an "_include" specification or an "_include:recurse" specification. If you are using
+	 * a constant from one of the built-in structures you can select whether you want recursive
+	 * behaviour by using the following syntax:
+	 * <ul>
+	 * <li><b>Recurse:</b> <code>.include(Patient.INCLUDE_ORGANIZATION.asRecursive())</code>
+	 * <li><b>No Recurse:</b> <code>.include(Patient.INCLUDE_ORGANIZATION.asNonRecursive())</code>
+	 * </ul>
 	 */
 	IQuery<T> include(Include theInclude);
 

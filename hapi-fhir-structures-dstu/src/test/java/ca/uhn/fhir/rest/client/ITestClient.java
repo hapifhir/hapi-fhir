@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -57,7 +58,10 @@ public interface ITestClient extends IBasicClient {
 
 	@Search(queryName="someQueryOneParam")
 	public Patient getPatientOneParam(@RequiredParam(name="param1") StringParam theParam);
-	
+
+	@Search(type=Patient.class)
+	public Bundle findPatient(@RequiredParam(name = "param") StringAndListParam theStrings);
+
 	@Search()
 	public Patient getPatientWithIncludes(@RequiredParam(name = "withIncludes") StringParam theString, @IncludeParam List<Include> theIncludes);
 	

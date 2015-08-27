@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.Constants;
  * @author james
  *
  */
-public class StringClientParam extends BaseClientParam  implements IParam {
+public class StringClientParam extends BaseClientParam implements IParam {
 
 	private final String myParamName;
 
@@ -45,7 +45,8 @@ public class StringClientParam extends BaseClientParam  implements IParam {
 	}
 
 	/**
-	 * The string matches the given value (servers will often, but are not required to) implement this as a left match, meaning that a value of "smi" would match "smi" and "smith".
+	 * The string matches the given value (servers will often, but are not required to) implement this as a left match,
+	 * meaning that a value of "smi" would match "smi" and "smith".
 	 */
 	public IStringMatch matches() {
 		return new StringMatches();
@@ -66,8 +67,9 @@ public class StringClientParam extends BaseClientParam  implements IParam {
 		ICriterion<StringClientParam> value(String theValue);
 
 		/**
-		 * Requests that resources be returned which match ANY of the given values (this is an OR search). Note that to specify an AND search, simply add a subsequent {@link IQuery#where(ICriterion)
-		 * where} criteria with the same parameter.
+		 * Requests that resources be returned which match ANY of the given values (this is an OR search, not an AND search). Note that to
+		 * specify an AND search, simply add a subsequent {@link IQuery#where(ICriterion) where} criteria with the same
+		 * parameter.
 		 */
 		ICriterion<StringClientParam> values(List<String> theValues);
 
@@ -77,8 +79,9 @@ public class StringClientParam extends BaseClientParam  implements IParam {
 		ICriterion<StringClientParam> value(StringDt theValue);
 
 		/**
-		 * Requests that resources be returned which match ANY of the given values (this is an OR search). Note that to specify an AND search, simply add a subsequent {@link IQuery#where(ICriterion)
-		 * where} criteria with the same parameter.
+		 * Requests that resources be returned which match ANY of the given values (this is an OR search, not an AND search). Note that to
+		 * specify an AND search, simply add a subsequent {@link IQuery#where(ICriterion) where} criteria with the same
+		 * parameter.
 		 */
 		ICriterion<?> values(String... theValues);
 

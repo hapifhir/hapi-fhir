@@ -21,6 +21,7 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -150,7 +151,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		/*
 		 * READ
 		 */
-		
+
 		reset(ourInterceptor);
 		Observation obs = ourObservationDao.read(id1.toUnqualifiedVersionless());
 		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
@@ -178,8 +179,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertEquals("Observation", details.getResourceType());
 
 	}
-	
-	
+
 	@Test
 	public void testChoiceParamConcept() {
 		Observation o1 = new Observation();
@@ -312,17 +312,16 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		}
 	}
 
-
 	@Test
 	public void testCreateSummaryFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
 		p.addName().addFamily("Hello");
-		
+
 		TagList tl = new TagList();
 		tl.addTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
 		ResourceMetadataKeyEnum.TAG_LIST.put(p, tl);
-		
+
 		try {
 			ourPatientDao.create(p);
 			fail();
@@ -350,7 +349,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertEquals(Patient.class, details.getResource().getClass());
 
 		reset(ourInterceptor);
-		
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Hello");
@@ -359,7 +358,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		assertFalse(results.getCreated().booleanValue());
 
 		verifyNoMoreInteractions(ourInterceptor);
-		
+
 		// Now create a second one
 
 		p = new Patient();
@@ -538,7 +537,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 	@Test
 	public void testDeleteResource() {
 		int initialHistory = ourPatientDao.history(null).size();
-
+		assert initialHistory == 0;
+		
 		IIdType id1;
 		IIdType id2;
 		IIdType id2b;
@@ -1053,7 +1053,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testResourceInstanceMetaOperation() {
-		deleteEverything();
 
 		String methodName = "testResourceInstanceMetaOperation";
 		IIdType id1, id2;
@@ -1171,7 +1170,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	@Test
 	public void testResourceMetaOperation() {
-		deleteEverything();
 
 		String methodName = "testResourceMetaOperation";
 		IIdType id1, id2;
@@ -1306,7 +1304,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = ourOrganizationDao.search(map);
 		assertEquals(2, resultsP.size());
-		
+
 		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());
 		assertEquals(Organization.class, results.get(0).getClass());
@@ -2146,46 +2144,209 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		}
 	}
 
-	
 	@Test
-	public void testSearchWithIncludes() {
+	public void testSearchWithIncludesStarNoRecurse() {
+		String methodName = "testSearchWithIncludes";
+		IIdType parentParentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			parentParentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
 		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
-			org.getNameElement().setValue("testSearchWithIncludes_O1Parent");
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			org.setPartOf(new ResourceReferenceDt(parentParentOrgId));
+			parentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType orgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1");
+			org.setPartOf(new ResourceReferenceDt(parentOrgId));
+			orgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType patientId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("Tester_" + methodName + "_P1").addGiven("Joe");
+			patient.getManagingOrganization().setReference(orgId);
+			patientId = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
+			params.addInclude(new Include("*").asNonRecursive());
+			List<IIdType> resources = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(resources, contains(patientId, orgId));
+		}
+	}
+
+	@Test
+	public void testSearchWithIncludesParameterRecurse() {
+		String methodName = "testSearchWithIncludes";
+		IIdType parentParentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			parentParentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType parentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			org.setPartOf(new ResourceReferenceDt(parentParentOrgId));
+			parentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType orgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1");
+			org.setPartOf(new ResourceReferenceDt(parentOrgId));
+			orgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType patientId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("Tester_" + methodName + "_P1").addGiven("Joe");
+			patient.getManagingOrganization().setReference(orgId);
+			patientId = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Organization.SP_RES_ID, new StringDt(orgId.getIdPart()));
+			params.addInclude(Organization.INCLUDE_PARTOF.asRecursive());
+			List<IIdType> resources = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(resources, contains(orgId, parentOrgId, parentParentOrgId));
+		}
+	}
+
+	@Test
+	public void testSearchWithIncludesParameterNoRecurse() {
+		String methodName = "testSearchWithIncludes";
+		IIdType parentParentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			parentParentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType parentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			org.setPartOf(new ResourceReferenceDt(parentParentOrgId));
+			parentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType orgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1");
+			org.setPartOf(new ResourceReferenceDt(parentOrgId));
+			orgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType patientId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("Tester_" + methodName + "_P1").addGiven("Joe");
+			patient.getManagingOrganization().setReference(orgId);
+			patientId = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Organization.SP_RES_ID, new StringDt(orgId.getIdPart()));
+			params.addInclude(Organization.INCLUDE_PARTOF.asNonRecursive());
+			List<IIdType> resources = toUnqualifiedVersionlessIds(ourOrganizationDao.search(params));
+			assertThat(resources, contains(orgId, parentOrgId));
+		}
+	}
+
+	@Test
+	public void testSearchWithIncludesStarRecurse() {
+		String methodName = "testSearchWithIncludes";
+		IIdType parentParentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			parentParentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType parentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
+			org.setPartOf(new ResourceReferenceDt(parentParentOrgId));
+			parentOrgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType orgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1");
+			org.setPartOf(new ResourceReferenceDt(parentOrgId));
+			orgId = ourOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		}
+		IIdType patientId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().addFamily("Tester_" + methodName + "_P1").addGiven("Joe");
+			patient.getManagingOrganization().setReference(orgId);
+			patientId = ourPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
+			params.addInclude(new Include("*").asRecursive());
+			List<IIdType> resources = toUnqualifiedVersionlessIds(ourPatientDao.search(params));
+			assertThat(resources, contains(patientId, orgId, parentOrgId, parentParentOrgId));
+		}
+	}
+	@Test
+	public void testSearchWithIncludes() {
+		String methodName = "testSearchWithIncludes";
+		IIdType parentOrgId;
+		{
+			Organization org = new Organization();
+			org.getNameElement().setValue(methodName + "_O1Parent");
 			parentOrgId = ourOrganizationDao.create(org).getId();
 		}
 		{
 			Organization org = new Organization();
-			org.getNameElement().setValue("testSearchWithIncludes_O1");
+			org.getNameElement().setValue(methodName + "_O1");
 			org.setPartOf(new ResourceReferenceDt(parentOrgId));
 			IIdType orgId = ourOrganizationDao.create(org).getId();
 
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().addFamily("Tester_testSearchWithIncludes_P1").addGiven("Joe");
+			patient.addName().addFamily("Tester_" + methodName + "_P1").addGiven("Joe");
 			patient.getManagingOrganization().setReference(orgId);
 			ourPatientDao.create(patient);
 		}
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
-			patient.addName().addFamily("Tester_testSearchWithIncludes_P2").addGiven("John");
+			patient.addName().addFamily("Tester_" + methodName + "_P2").addGiven("John");
 			ourPatientDao.create(patient);
 		}
 
 		{
 			// No includes
 			SearchParameterMap params = new SearchParameterMap();
-			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
 			List<IResource> patients = toList(ourPatientDao.search(params));
 			assertEquals(1, patients.size());
 		}
 		{
 			// Named include
 			SearchParameterMap params = new SearchParameterMap();
-			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
-			params.addInclude(Patient.INCLUDE_ORGANIZATION);
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
+			params.addInclude(Patient.INCLUDE_ORGANIZATION.asNonRecursive());
 			IBundleProvider search = ourPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertEquals(2, patients.size());
@@ -2195,7 +2356,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		{
 			// Named include with parent
 			SearchParameterMap params = new SearchParameterMap();
-			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
 			params.addInclude(Patient.INCLUDE_ORGANIZATION);
 			params.addInclude(Organization.INCLUDE_PARTOF);
 			IBundleProvider search = ourPatientDao.search(params);
@@ -2208,7 +2369,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		{
 			// * include
 			SearchParameterMap params = new SearchParameterMap();
-			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
 			params.addInclude(new Include("*"));
 			IBundleProvider search = ourPatientDao.search(params);
 			List<IResource> patients = toList(search);
@@ -2220,7 +2381,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 		{
 			// Irrelevant include
 			SearchParameterMap params = new SearchParameterMap();
-			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
+			params.add(Patient.SP_FAMILY, new StringDt("Tester_" + methodName + "_P1"));
 			params.addInclude(Encounter.INCLUDE_INDICATION);
 			IBundleProvider search = ourPatientDao.search(params);
 			List<IResource> patients = toList(search);
@@ -3200,11 +3361,22 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 
 	@Before
 	public void before() {
+		deleteAll(ourPatientDao);
+		deleteAll(ourObservationDao);
+		deleteAll(ourOrganizationDao);
+		deleteAll(ourDiagnosticReportDao);
+		deleteAll(ourEncounterDao);
+		
+		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
 		reset(ourInterceptor);
 	}
-	
-	private static void deleteEverything() {
-		FhirSystemDaoDstu2Test.doDeleteEverything(ourSystemDao);
+
+	private void deleteAll(IFhirResourceDao<?> dao) {
+		IBundleProvider find = dao.search(new SearchParameterMap());
+		List<IBaseResource> res = find.getResources(0, find.size());
+		for (IBaseResource next : res) {
+			dao.delete(next.getIdElement());
+		}
 	}
 
 }

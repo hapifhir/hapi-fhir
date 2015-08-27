@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.rest.method.RestSearchParameterTypeEnum;
+import net.sourceforge.cobertura.CoverageIgnore;
 
 /*
  * #%L
@@ -33,6 +34,13 @@ public class ReferenceAndListParam extends BaseAndListParam<ReferenceOrListParam
 	@Override
 	public RestSearchParameterTypeEnum getSearchParamType() {
 		return RestSearchParameterTypeEnum.REFERENCE;
+	}
+
+	@CoverageIgnore
+	@Override
+	public ReferenceAndListParam addAnd(ReferenceOrListParam theValue) {
+		addValue(theValue);
+		return this;
 	}
 
 	

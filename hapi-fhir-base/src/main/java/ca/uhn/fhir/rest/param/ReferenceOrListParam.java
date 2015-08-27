@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -23,9 +25,17 @@ package ca.uhn.fhir.rest.param;
 
 public class ReferenceOrListParam  extends BaseOrListParam<ReferenceParam> {
 
+	@CoverageIgnore
 	@Override
 	ReferenceParam newInstance() {
 		return new ReferenceParam();
+	}
+
+	@CoverageIgnore
+	@Override
+	public ReferenceOrListParam addOr(ReferenceParam theParameter) {
+		add(theParameter);
+		return this;
 	}
 
 }

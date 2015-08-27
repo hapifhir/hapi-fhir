@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import net.sourceforge.cobertura.CoverageIgnore;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -27,5 +29,14 @@ public class QuantityOrListParam extends BaseOrListParam<QuantityParam> {
 	QuantityParam newInstance() {
 		return new QuantityParam();
 	}
+
+	@CoverageIgnore
+	@Override
+	public QuantityOrListParam addOr(QuantityParam theParameter) {
+		add(theParameter);
+		return this;
+	}
+
+
 
 }

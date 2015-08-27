@@ -720,7 +720,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		}
 		ourLog.info("Created: " + ids.toString());
 
-		IdDt patientId = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
+		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
 		{
@@ -781,7 +781,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		IdDt patientId = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
+		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals("Patient", patientId.getResourceType());
 
 		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();

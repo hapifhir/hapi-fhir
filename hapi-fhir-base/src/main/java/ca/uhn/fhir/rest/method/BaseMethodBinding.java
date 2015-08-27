@@ -207,8 +207,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			}
 			index++;
 		}
-		if (!match)
+		if (!match) {
 			return null;
+		}
 		if (index >= params.length) {
 			ourLog.warn("index out of parameter range (should never happen");
 			return null;

@@ -19,7 +19,8 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -1957,11 +1958,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 
 							Set<IIdType> includePids = new HashSet<IIdType>();
 							List<IBaseResource> resources = retVal;
+							HashSet<Include> includes = new HashSet<Include>(theParams.getIncludes());
 							do {
 								includePids.clear();
 
 								FhirTerser t = getContext().newTerser();
-								for (Include next : theParams.getIncludes()) {
+								for (Include next : new ArrayList<Include>(includes)) {
 									for (IBaseResource nextResource : resources) {
 										RuntimeResourceDefinition def = getContext().getResourceDefinition(nextResource);
 										List<Object> values = getIncludeValues(t, next, nextResource, def);
@@ -1988,10 +1990,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 											}
 										}
 									}
+									
+									// Only process non-recursive includes once
+									if (!next.isRecurse()) {
+										includes.remove(next);
+									}
 								}
 
 								resources = addResourcesAsIncludesById(retVal, includePids, resources);
-							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit());
+							} while (includePids.size() > 0 && previouslyLoadedPids.size() < getConfig().getIncludeLimit() && includes.size() > 0);
 
 							if (previouslyLoadedPids.size() >= getConfig().getIncludeLimit()) {
 								OperationOutcome oo = new OperationOutcome();
