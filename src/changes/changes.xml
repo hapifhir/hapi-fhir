@@ -113,6 +113,15 @@
 				factory to be used (e.g. for custom authentication, etc.) Thanks
 				to Chin Huang (@pukkaone) for the pull request!
 			</action>
+			<action type="fix" issue="212">
+				JPA server should reject IDs containing invalid characters (e.g. "abc:123")
+				but should allow client assigned IDs that contain text but do not start with 
+				text. Thanks to Josh Mandel for reporting! 
+			</action>
+			<action type="fix">
+				:text modifier on server and JPA server did not work correctly. Thanks to
+				Josh Mandel for reporting!
+			</action>
 		</release>
 		<release version="1.1" date="2015-07-13">
 			<action type="add">

@@ -1696,13 +1696,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 	}
 
 	/**
-	 * May be implemented by subclasses to validate resources prior to storage
+	 * May be overridden by subclasses to validate resources prior to storage
 	 * 
 	 * @param theResource
 	 *           The resource that is about to be stored
 	 */
 	protected void preProcessResourceForStorage(T theResource) {
-		// nothing by default
+		if (theResource.getId().hasIdPart()) {
+			if (!theResource.getId().isIdPartValid()) {
+				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getId().getIdPart()));
+			}
+		}
 	}
 
 	@Override
@@ -2296,7 +2300,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IResource> extends BaseH
 			try {
 				entity = readEntityLatestVersion(resourceId);
 			} catch (ResourceNotFoundException e) {
-				if (Character.isDigit(theResource.getId().getIdPart().charAt(0))) {
+				if (resourceId.isIdPartValidLong()) {
 					throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getId().getIdPart()));
 				}
 				return doCreate(theResource, null, thePerformIndexing);

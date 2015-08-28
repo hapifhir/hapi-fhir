@@ -92,6 +92,19 @@ public interface IIdType {
 	 */
 	boolean isAbsolute();
 
+	/**
+	 * Returns <code>true</code> if the {@link #getIdPart() ID part of this object} is valid according to the FHIR rules for valid IDs. 
+	 * <p>
+	 * The FHIR specification states:
+	 * <code>Any combination of upper or lower case ASCII letters ('A'..'Z', and 'a'..'z', numerals ('0'..'9'), '-' and '.', with a length limit of 64 characters. (This might be an integer, an un-prefixed OID, UUID or any other identifier pattern that meets these constraints.) regex: [A-Za-z0-9\-\.]{1,64}</code>
+	 * </p>
+	 */
+	boolean isIdPartValid();
+
+	/**
+	 * Returns <code>true</code> if the {@link #getIdPart() ID part of this object} contains
+	 * only numbers 
+	 */
 	boolean isIdPartValidLong();
 
 	Long getIdPartAsLong();

@@ -2,7 +2,6 @@ package ca.uhn.fhir.exampleuploader;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +9,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -113,10 +111,10 @@ public class Uploader {
 		for (Entry next : bundle.getEntry()) {
 			List<ResourceReferenceInfo> refs = ctx.newTerser().getAllResourceReferences(next.getResource());
 			for (ResourceReferenceInfo nextRef : refs) {
-//				if (nextRef.getResourceReference().getReferenceElement().isAbsolute()) {
-//					ourLog.info("Discarding absolute reference: {}", nextRef.getResourceReference().getReferenceElement().getValue());
-//					nextRef.getResourceReference().getReferenceElement().setValue(null);
-//				}
+				// if (nextRef.getResourceReference().getReferenceElement().isAbsolute()) {
+				// ourLog.info("Discarding absolute reference: {}", nextRef.getResourceReference().getReferenceElement().getValue());
+				// nextRef.getResourceReference().getReferenceElement().setValue(null);
+				// }
 				nextRef.getResourceReference().getReferenceElement().setValue(nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue());
 				String value = nextRef.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue();
 				if (!ids.contains(value) && !nextRef.getResourceReference().getReferenceElement().isLocal()) {
@@ -127,13 +125,13 @@ public class Uploader {
 				}
 			}
 		}
-		
-//		for (Entry next : bundle.getEntry()) {
-//			if (next.getResource().getId().hasIdPart() && Character.isLetter(next.getResource().getId().getIdPart().charAt(0))) {
-//				next.getTransaction().setUrl(next.getResource().getResourceName() + '/' + next.getResource().getId().getIdPart());
-//				next.getTransaction().setMethod(HTTPVerbEnum.PUT);
-//			}
-//		}		
+
+		// for (Entry next : bundle.getEntry()) {
+		// if (next.getResource().getId().hasIdPart() && Character.isLetter(next.getResource().getId().getIdPart().charAt(0))) {
+		// next.getTransaction().setUrl(next.getResource().getResourceName() + '/' + next.getResource().getId().getIdPart());
+		// next.getTransaction().setMethod(HTTPVerbEnum.PUT);
+		// }
+		// }
 
 		ourLog.info("{} good references", goodRefs);
 

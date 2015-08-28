@@ -18,7 +18,6 @@
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-examples-uploader</artifactId>
-	<version>1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Examples Uploader</name>
@@ -36,17 +35,19 @@
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
 			<version>1.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
+			<version>1.1-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
-			<scope>provided</scope>
 		</dependency>
 		
 		
