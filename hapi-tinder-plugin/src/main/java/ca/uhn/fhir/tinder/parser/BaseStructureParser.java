@@ -5,7 +5,6 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -522,7 +521,7 @@ public abstract class BaseStructureParser {
 			
 			try {
 				File versionFile = new File(theResourceOutputDirectory, "fhirversion.properties");
-				FileWriter w = new FileWriter(versionFile, false);
+				OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(versionFile, false), "UTF-8");
 
 				ourLog.debug("Writing file: {}", versionFile.getAbsolutePath());
 

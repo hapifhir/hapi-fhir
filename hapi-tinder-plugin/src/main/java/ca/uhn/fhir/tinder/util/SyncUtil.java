@@ -1,9 +1,9 @@
 package ca.uhn.fhir.tinder.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
@@ -24,7 +24,8 @@ private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger
 			nextRes.setText(new NarrativeDt());
 		}
 		
-		FileWriter fw = new FileWriter(new File(fileName), false);
+		File f = new File(fileName);
+		OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 		ctx.newXmlParser().encodeResourceToWriter(b, fw);
 		fw.close();
 		

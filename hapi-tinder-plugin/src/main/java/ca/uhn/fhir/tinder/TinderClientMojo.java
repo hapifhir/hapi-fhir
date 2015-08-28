@@ -1,10 +1,11 @@
 package ca.uhn.fhir.tinder;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,7 +155,8 @@ public class TinderClientMojo extends AbstractMojo {
 
 	private void write() throws IOException {
 		File file = new File(myDirectoryBase, myClientClassSimpleName + ".java");
-		FileWriter w = new FileWriter(file, false);
+		OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(file, false), "UTF-8");
+
 
 		ourLog.debug("Writing file: {}", file.getAbsolutePath());
 

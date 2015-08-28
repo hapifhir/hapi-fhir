@@ -1,10 +1,11 @@
 package ca.uhn.fhir.tinder;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -157,7 +158,8 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 			InputStreamReader templateReader = new InputStreamReader(templateIs);
 
 			targetResourceDirectory.mkdirs();
-			FileWriter w = new FileWriter(new File(targetResourceDirectory, targetResourceSpringBeansFile));
+			File f = new File(targetResourceDirectory, targetResourceSpringBeansFile);
+			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(f, false), "UTF-8");
 			v.evaluate(ctx, w, "", templateReader);
 
 			w.close();

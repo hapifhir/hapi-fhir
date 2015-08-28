@@ -231,7 +231,6 @@
 		<mitreid-connect-version>1.1.8</mitreid-connect-version>
 		<phloc_schematron_version>2.7.1</phloc_schematron_version>
 		<phloc_commons_version>4.3.6</phloc_commons_version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<slf4j_version>1.7.10</slf4j_version>
 		<spring_version>4.1.5.RELEASE</spring_version>
 		<spring_security_version>3.2.4.RELEASE</spring_security_version>
@@ -400,6 +399,7 @@
 						<target>1.6</target>
 						<compilerId>javac-with-errorprone</compilerId>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<encoding>UTF-8</encoding>
 					</configuration>
 					<dependencies>
 						<dependency>
