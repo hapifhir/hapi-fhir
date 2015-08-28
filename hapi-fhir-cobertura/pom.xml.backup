@@ -58,7 +58,11 @@
 			<version>${thymeleaf-version}</version>
 		</dependency>
 
-		<!-- Use an older version of SLF4j just to make sure we compile correctly against old SLF4j - Some people can't upgrade and we have no real need for recent features. -->
+		<!-- 
+			Use an older version of SLF4j just to make sure we compile correctly
+			against old SLF4j - Some people can't upgrade and we have no real
+			need for recent features.
+		-->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -172,10 +176,36 @@
 						<skipDeploy>true</skipDeploy>
 					</configuration>
 				</plugin>
-
-				<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> <configuration> <skip>false</skip> <formats> <format>html</format> <format>xml</format> </formats> 
-					<maxmem>256m</maxmem> <instrumentation> <ignores> <ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore> </ignores> <excludes> <ignore>**/valueset/*.class</ignore> <ignore>**/exceptions/*.class</ignore> </excludes> 
-					</instrumentation> </configuration> <executions> <execution> <phase>verify</phase> <goals> <goal>check</goal> </goals> </execution> </executions> </plugin> -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<configuration>
+						<skip>false</skip>
+						<formats>
+							<format>html</format>
+							<format>xml</format>
+						</formats>
+						<maxmem>256m</maxmem>
+						<instrumentation>
+							<ignores>
+								<ignore>ca.uhn.fhir.model.dstu.valueset.*</ignore>
+							</ignores>
+							<excludes>
+								<ignore>**/valueset/*.class</ignore>
+								<ignore>**/exceptions/*.class</ignore>
+							</excludes>
+							<!-- <ignoreMethodAnnotations> <ignoreMethodAnnotation>net.sourceforge.cobertura.CoverageIgnore</ignoreMethodAnnotation> </ignoreMethodAnnotations> -->
+						</instrumentation>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>verify</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -184,9 +214,11 @@
 				<artifactId>coveralls-maven-plugin</artifactId>
 				<version>3.1.0</version>
 				<configuration>
-					<jacocoReports>
-						<jacocoReport></jacocoReport>
-					</jacocoReports>
+					<coberturaReports>
+						<coberturaReport>
+							${basedir}/target/coverage.xml
+						</coberturaReport>
+					</coberturaReports>
 					<sourceEncoding>UTF-8</sourceEncoding>
 					<serviceName>travis-ci</serviceName>
 					<serviceJobId>${env.TRAVIS_JOB_ID}</serviceJobId>
@@ -240,7 +272,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>-Xms512m -Xmx1024m ${argLine}</argLine>
+					<argLine>-Xms512m -Xmx1024m</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -259,25 +291,26 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.5.201505241946</version>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<configuration>
+					<check>
+						<haltOnFailure>true</haltOnFailure>
+					</check>
+				</configuration>
 				<executions>
 					<execution>
-						<id>prepare-agent</id>
+						<phase>verify</phase>
 						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>jacoco-site</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>report</goal>
+							<goal>check</goal>
 						</goals>
 					</execution>
 				</executions>
 			</plugin>
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> <version>${maven_cobertura_plugin_version}</version> <configuration> <check> <branchRate>85</branchRate> 
+				<lineRate>85</lineRate> <haltOnFailure>true</haltOnFailure> <totalBranchRate>85</totalBranchRate> <totalLineRate>85</totalLineRate> <packageLineRate>85</packageLineRate> <packageBranchRate>85</packageBranchRate> 
+				<regexes> <regex> <pattern>com.example.reallyimportant.*</pattern> <branchRate>90</branchRate> <lineRate>80</lineRate> </regex> <regex> <pattern>com.example.boringcode.*</pattern> <branchRate>40</branchRate> 
+				<lineRate>30</lineRate> </regex> </regexes> </check> </configuration> <executions> <execution> <goals> <goal>clean</goal> <goal>check</goal> </goals> </execution> </executions> </plugin> -->
 		</plugins>
 		<resources>
 		</resources>
@@ -298,6 +331,22 @@
 	</build>
 	<reporting>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>cobertura</report>
+						</reports>
+						<configuration>
+							<check>
+								<haltOnFailure>true</haltOnFailure>
+							</check>
+						</configuration>
+					</reportSet>
+				</reportSets>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>

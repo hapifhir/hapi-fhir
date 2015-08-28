@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -166,8 +167,8 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * It's not a browser...
 		 */
-		String accept = theServletRequest.getHeader(Constants.HEADER_ACCEPT);
-		if (accept == null || !accept.toLowerCase().contains("html")) {
+		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequestDetails.getServletRequest());
+		if (highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 		
@@ -192,11 +193,15 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource resource) {
-
-		IParser p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), theRequestDetails);
+		IParser p;
+		if (theRequestDetails.getParameters().containsKey(Constants.PARAM_FORMAT)) {
+			p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), theRequestDetails);
+		} else {
+			EncodingEnum defaultResponseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
+			p = defaultResponseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
+		}
 		
 		EncodingEnum encoding = p.getEncoding(); 
-		
 		String encoded = p.encodeResourceToString(resource);
 		
 		theServletResponse.setContentType(Constants.CT_HTML_WITH_UTF8);
@@ -245,8 +250,8 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * It's not a browser...
 		 */
-		String accept = theServletRequest.getHeader(Constants.HEADER_ACCEPT);
-		if (accept == null || !accept.toLowerCase().contains("html")) {
+		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theRequestDetails.getServletRequest());
+		if (!accept.contains(Constants.CT_HTML)) {
 			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 		
