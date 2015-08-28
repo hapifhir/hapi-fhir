@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.naming.InsufficientResourcesException;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
@@ -2117,7 +2119,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaTest {
 			// * include
 			SearchParameterMap params = new SearchParameterMap();
 			params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludes_P1"));
-			params.addInclude(new Include("*"));
+			params.addInclude(IResource.INCLUDE_ALL);
 			IBundleProvider search = ourPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertEquals(3, patients.size());

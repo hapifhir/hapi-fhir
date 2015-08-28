@@ -58,6 +58,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Bundle;
 import ca.uhn.fhir.model.api.BundleEntry;
@@ -123,9 +124,6 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu2Test.class);
 	private static IFhirResourceDao<Organization> ourOrganizationDao;
 	private static int ourPort;
-	// private static IFhirResourceDao<Observation> ourObservationDao;
-	// private static IFhirResourceDao<Patient> ourPatientDao;
-	// private static IFhirResourceDao<Questionnaire> ourQuestionnaireDao;
 	private static Server ourServer;
 	private static String ourServerBase;
 
@@ -1060,7 +1058,7 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ourLog.info(resp);
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = ourCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
 		matches = bundle.getTotal();
-		
+
 		assertThat(matches, greaterThan(0));
 	}
 
@@ -1627,6 +1625,21 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 		ourHttpClient.close();
 	}
 
+	@Test
+	public void testMetadata() throws Exception {
+		HttpGet get = new HttpGet(ourServerBase + "/metadata");
+		CloseableHttpResponse response = ourHttpClient.execute(get);
+		try {
+			String resp = IOUtils.toString(response.getEntity().getContent());
+			ourLog.info(resp);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+		} finally {
+			IOUtils.closeQuietly(response.getEntity().getContent());
+			response.close();
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -1650,6 +1663,11 @@ public class ResourceProviderDstu2Test extends BaseJpaTest {
 
 		JpaSystemProviderDstu2 systemProv = ourAppCtx.getBean(JpaSystemProviderDstu2.class, "mySystemProviderDstu2");
 		restServer.setPlainProviders(systemProv);
+
+		IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle> systemDao = ourAppCtx.getBean(IFhirSystemDao.class);
+		JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(restServer, systemDao);
+		confProvider.setImplementationDescription("THIS IS THE DESC");
+		restServer.setServerConformanceProvider(confProvider);
 
 		restServer.setPagingProvider(new FifoMemoryPagingProvider(10));
 

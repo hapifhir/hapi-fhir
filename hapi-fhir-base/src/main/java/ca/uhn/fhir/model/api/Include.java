@@ -33,9 +33,15 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class Include {
 
 	private String myValue;
+	private boolean myImmutable;
 
 	public Include(String theValue) {
 		myValue = theValue;
+	}
+
+	public Include(String theValue, boolean theImmutable) {
+		myValue = theValue;
+		myImmutable = theImmutable;
 	}
 
 	@Override
@@ -68,6 +74,9 @@ public class Include {
 	}
 
 	public void setValue(String theValue) {
+		if (myImmutable) {
+			throw new IllegalStateException("Can not change the value of this include");
+		}
 		myValue = theValue;
 	}
 
