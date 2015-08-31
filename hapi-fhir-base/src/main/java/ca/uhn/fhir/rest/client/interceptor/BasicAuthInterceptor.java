@@ -36,7 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
  * HTTP interceptor to be used for adding HTTP basic auth username/password tokens
  * to requests
  * <p>
- * See the <a href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html#HTTP_Basic_Authorization">HAPI Documentation</a>
+ * See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client_interceptor.html#Security_HTTP_Basic_Authorization">HAPI Documentation</a>
  * for information on how to use this class.
  * </p>
  */
@@ -44,7 +44,7 @@ public class BasicAuthInterceptor implements IClientInterceptor {
 
 	private String myUsername;
 	private String myPassword;
-	
+
     public BasicAuthInterceptor(String theUsername, String thePassword) {
 		super();
 		myUsername = theUsername;

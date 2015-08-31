@@ -38,7 +38,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * contain a {@link #type()} attribute, and the method should not have an ID or
  * Version ID parameter. On server implementations, the method must be defined
  * in a <a href=
- * "http://hl7api.sourceforge.net/hapi-fhir/doc_rest_server.html#plain_providers"
+ * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#plain_providers"
  * >plain provider</a>.</li>
  * <li>
  * To return a list of all tags on the server <b>for the given resource
@@ -46,7 +46,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * specifying the resource type, and the method should not have an ID or Version
  * ID parameter. Note that for a server implementation, the {@link #type()}
  * annotation is optional if the method is defined in a <a href=
- * "http://hl7api.sourceforge.net/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
  * >resource provider</a>, since the type is implied.</li>
  * <li>
  * To return a list of all tags on the server <b>for the given resource
@@ -55,7 +55,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * {@link IdDt} annotated with the {@link IdParam} annotation. Note that for a
  * server implementation, the {@link #type()} annotation is optional if the
  * method is defined in a <a href=
- * "http://hl7api.sourceforge.net/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
  * >resource provider</a>, since the type is implied.</li>
  * <li>
  * To return a list of all tags on the server <b>for the given version of the
@@ -65,7 +65,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * annotation, <b>and</b> a parameter of type {@link IdDt} annotated with the
  * {@link IdParam} annotation. Note that for a server implementation, the
  * {@link #type()} annotation is optional if the method is defined in a <a href=
- * "http://hl7api.sourceforge.net/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
  * >resource provider</a>, since the type is implied.</li>
  * </ul>
  */
