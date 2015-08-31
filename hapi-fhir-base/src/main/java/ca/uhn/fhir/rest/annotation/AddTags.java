@@ -46,7 +46,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * Note that for a
  * server implementation, the {@link #type()} annotation is optional if the
  * method is defined in a <a href=
- * "http://hl7api.sourceforge.net/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
  * >resource provider</a>, since the type is implied.</li>
  * <li>
  * To add tag(s) on the server <b>to the given version of the
@@ -61,7 +61,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
  * operation.
  * Note that for a server implementation, the
  * {@link #type()} annotation is optional if the method is defined in a <a href=
- * "http://hl7api.sourceforge.net/hapi-fhir/doc_rest_server.html#resource_providers"
+ * "http://jamesagnew.github.io/hapi-fhir/doc_rest_server.html#resource_providers"
  * >resource provider</a>, since the type is implied.</li>
  * </ul>
  */

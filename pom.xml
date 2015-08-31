@@ -182,6 +182,10 @@
 			<id>pukkaone</id>
 			<name>Chin Huang</name>
 		</developer>
+		<developer>
+			<id>SingingTree</id>
+			<name>Bryce Van Dyk</name>
+		</developer>	
 	</developers>
 
 	<licenses>

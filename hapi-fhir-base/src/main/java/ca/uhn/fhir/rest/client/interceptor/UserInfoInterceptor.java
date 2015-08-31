@@ -29,10 +29,6 @@ import ca.uhn.fhir.rest.client.IClientInterceptor;
 
 /**
  * HTTP interceptor to be used for adding HTTP headers containing user identifying info for auditing purposes to the request
- * <p>
- * See the <a href="http://hl7api.sourceforge.net/hapi-fhir/doc_rest_client.html#User_Info">HAPI Documentation</a>
- * for information on how to use this class.
- * </p>
  */
 public class UserInfoInterceptor implements IClientInterceptor {
 	
