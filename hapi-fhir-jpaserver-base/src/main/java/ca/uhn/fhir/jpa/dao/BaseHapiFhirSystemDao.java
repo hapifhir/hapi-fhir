@@ -53,6 +53,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseResource>implements IFhirSystemDao<T> {
@@ -73,6 +74,65 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 		notifyInterceptors(RestOperationTypeEnum.DELETE_TAGS, requestDetails);
 
 		myEntityManager.createQuery("DELETE from ResourceTag t").executeUpdate();
+	}
+
+	private int doPerformReindexingPass(final Integer theCount) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+		return txTemplate.execute(new TransactionCallback<Integer>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public Integer doInTransaction(TransactionStatus theStatus) {
+				TypedQuery<ResourceTable> q = myEntityManager.createQuery("SELECT t FROM " + ResourceTable.class.getSimpleName() + " t WHERE t.myIndexStatus IS null", ResourceTable.class);
+
+				int maxResult = 500;
+				if (theCount != null) {
+					maxResult = Math.min(theCount, 2000);
+				}
+
+				q.setMaxResults(maxResult);
+				List<ResourceTable> resources = q.getResultList();
+
+				ourLog.info("Indexing {} resources", resources.size());
+
+				int count = 0;
+				long start = System.currentTimeMillis();
+
+				for (ResourceTable resourceTable : resources) {
+					final IBaseResource resource;
+					try {
+						resource = toResource(resourceTable);
+					} catch (DataFormatException e) {
+						ourLog.warn("Failure parsing resource: {}", e.toString());
+						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
+					}
+					@SuppressWarnings("rawtypes")
+					final IFhirResourceDao dao = getDao(resource.getClass());
+					if (dao == null) {
+						ourLog.warn("No DAO for type: {}", resource.getClass());
+						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
+					}
+
+					if (resource.getIdElement().isIdPartValid() == false) {
+						ourLog.warn("Not going to try and index an invalid ID: {}", resource.getIdElement());
+						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
+					}
+
+					try {
+						dao.update(resource, null, true);
+					} catch (Exception e) {
+						ourLog.error("Failed to index resource {}: {}", new Object[] { resource.getIdElement(), e.toString() });
+						throw new UnprocessableEntityException(Long.toString(resourceTable.getId()));
+					}
+					count++;
+				}
+
+				long delay = System.currentTimeMillis() - start;
+				ourLog.info("Indexed {} / {} resources in {}ms", new Object[] { count, resources.size(), delay });
+
+				return resources.size();
+			}
+		});
 	}
 
 	@Override
@@ -132,85 +192,31 @@ public abstract class BaseHapiFhirSystemDao<T> extends BaseHapiFhirDao<IBaseReso
 		return myEntityManager.createQuery("UPDATE " + ResourceTable.class.getSimpleName() + " t SET t.myIndexStatus = null").executeUpdate();
 	}
 
-	private void markResourceAsIndexingFailed(final ResourceTable theResourceTable) {
-		ourLog.info("Marking resource with PID {} and ID {} as indexing_failed", new Object[] { theResourceTable.getId(), theResourceTable.getIdDt().getValue() });
+	private void markResourceAsIndexingFailed(final long theId) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(new TransactionCallback<Void>() {
 			@Override
 			public Void doInTransaction(TransactionStatus theStatus) {
+				ourLog.info("Marking resource with PID {} as indexing_failed", new Object[] { theId });
 				Query q = myEntityManager.createQuery("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id");
 				q.setParameter("status", INDEX_STATUS_INDEXING_FAILED);
-				q.setParameter("id", theResourceTable.getId());
+				q.setParameter("id", theId);
 				q.executeUpdate();
 				return null;
 			}
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	@Transactional()
-	public int performReindexingPass(Integer theCount) {
-		TypedQuery<ResourceTable> q = myEntityManager.createQuery("SELECT t FROM " + ResourceTable.class.getSimpleName() + " t WHERE t.myIndexStatus IS null", ResourceTable.class);
-
-		int maxResult = 500;
-		if (theCount != null) {
-			maxResult = Math.min(theCount, 2000);
+	@Transactional(propagation=Propagation.NOT_SUPPORTED)
+	public int performReindexingPass(final Integer theCount) {
+		try {
+			return doPerformReindexingPass(theCount);
+		} catch (UnprocessableEntityException e) {
+			markResourceAsIndexingFailed(Long.parseLong(e.getMessage()));
+			return -1;
 		}
-
-		q.setMaxResults(maxResult);
-		List<ResourceTable> resources = q.getResultList();
-
-		ourLog.info("Indexing {} resources", resources.size());
-
-		int count = 0;
-		long start = System.currentTimeMillis();
-
-		for (ResourceTable resourceTable : resources) {
-			final IBaseResource resource;
-			try {
-				resource = toResource(resourceTable);
-			} catch (DataFormatException e) {
-				ourLog.warn("Failure parsing resource: {}", e.toString());
-				markResourceAsIndexingFailed(resourceTable);
-				continue;
-			}
-			@SuppressWarnings("rawtypes")
-			final IFhirResourceDao dao = getDao(resource.getClass());
-			if (dao == null) {
-				ourLog.warn("No DAO for type: {}", resource.getClass());
-				markResourceAsIndexingFailed(resourceTable);
-				continue;
-			}
-
-			if (resource.getIdElement().isIdPartValid() == false) {
-				ourLog.warn("Not going to try and index an invalid ID: {}", resource.getIdElement());
-				markResourceAsIndexingFailed(resourceTable);
-				continue;
-			}
-
-			try {
-				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-				txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-				txTemplate.execute(new TransactionCallback<Void>() {
-					@Override
-					public Void doInTransaction(TransactionStatus theStatus) {
-						dao.update(resource, null, true);
-						return null;
-					}
-				});
-			} catch (Exception e) {
-				ourLog.error("Failed to index resource {}: {}", new Object[] { resource.getIdElement(), e.toString() });
-				markResourceAsIndexingFailed(resourceTable);
-			}
-			count++;
-		}
-
-		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Indexed {} / {} resources in {}ms", new Object[] { count, resources.size(), delay });
-
-		return resources.size();
 	}
 
 	protected ResourceTable tryToLoadEntity(IdDt nextId) {
